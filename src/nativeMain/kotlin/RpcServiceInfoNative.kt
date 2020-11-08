@@ -13,4 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-rootProject.name = "ksrpc"
+package com.monkopedia.ksrpc
+
+import kotlin.reflect.KClass
+
+internal actual class RpcServiceInfo<T : RpcService> actual constructor(
+    cls: KClass<T>,
+    stubFactory: (RpcServiceChannel) -> T
+) : RpcServiceInfoBase<T>(cls, stubFactory) {
+    override fun createChannelFor(service: T): RpcChannel {
+        throw NotImplementedError("Cannot serve on native platforms")
+    }
+}

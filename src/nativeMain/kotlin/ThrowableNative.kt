@@ -13,4 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-rootProject.name = "ksrpc"
+package com.monkopedia.ksrpc
+
+actual val Throwable.asString: String
+    get() = this.getStackTrace().joinToString("\n")
