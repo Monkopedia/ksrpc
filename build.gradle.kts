@@ -145,9 +145,8 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
 
 publishing {
     repositories {
-        maven {
+        maven(url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
             name = "OSSRH"
-            url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
             credentials {
                 username = System.getenv("MAVEN_USERNAME")
                 password = System.getenv("MAVEN_PASSWORD")
