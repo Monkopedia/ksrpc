@@ -21,7 +21,11 @@ plugins {
     id("com.github.autostyle") version "3.1"
 
     java
+    `maven-publish`
+    `signing`
 }
+
+group = "com.monkopedia"
 
 repositories {
     jcenter()
@@ -136,5 +140,18 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
         jvmTarget = "1.8"
         freeCompilerArgs += "-Xskip-prerelease-check"
         freeCompilerArgs += "-Xno-param-assertions"
+    }
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "OSSRH"
+            url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            credentials {
+                username = System.getenv("MAVEN_USERNAME")
+                password = System.getenv("MAVEN_PASSWORD")
+            }
+        }
     }
 }
