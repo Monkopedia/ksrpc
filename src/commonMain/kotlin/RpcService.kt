@@ -33,6 +33,8 @@ interface RpcService {
         inputSer: KSerializer<I>,
         input: I
     ): O
+
+    suspend fun close()
 }
 
 open class Service : RpcService {
@@ -52,6 +54,10 @@ open class Service : RpcService {
         input: I
     ): O {
         throw NotImplementedError("Service did not implement $endpoint")
+    }
+
+    override suspend fun close() {
+        throw IllegalStateException("Service did not expect close")
     }
 }
 
@@ -84,6 +90,8 @@ class RpcServiceChannel internal constructor(private val channel: RpcChannel) : 
         inputSer: KSerializer<I>,
         input: I
     ): O = channel.callService(endpoint.trim('/'), service, inputSer, input)
+
+    override suspend fun close() = channel.close()
 }
 
 open class RpcObject<T : RpcService>(cls: KClass<T>, stubFactory: (RpcServiceChannel) -> T) {

@@ -21,6 +21,7 @@ import java.net.Socket
 import kotlin.reflect.full.companionObjectInstance
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
@@ -89,6 +90,11 @@ fun <T : RpcService> RpcChannel.serialized(
                 str.toIntOrNull()?.let { serviceId ->
                     serviceMap[serviceId]?.let { channel ->
                         val parsedJson = json.parseToJsonElement(input)
+                        if (parsedJson.jsonObject["close"]?.jsonPrimitive?.booleanOrNull == true) {
+                            channel.close()
+                            serviceMap.remove(serviceId)
+                            return@call Json.encodeToString(Unit.serializer(), Unit)
+                        }
                         val endpoint = parsedJson.jsonObject["endpoint"]?.jsonPrimitive?.content
                             ?: throw IllegalArgumentException("Malformed input $input")
                         val subInput = parsedJson.jsonObject["input"].toString()
@@ -117,6 +123,10 @@ fun <T : RpcService> RpcChannel.serialized(
                 errorListener.onError(t)
                 ERROR_PREFIX + json.encodeToString(RpcFailure.serializer(), RpcFailure(t.asString))
             }
+        }
+
+        override suspend fun close() {
+            rpcChannel.close()
         }
     }
 }

@@ -133,6 +133,11 @@ fun Pair<InputStream, OutputStream>.asChannel(): SerializedChannel {
             }
             return response.await()
         }
+
+        override suspend fun close() {
+            reader.close()
+            writer.close()
+        }
     }
 }
 

@@ -51,5 +51,9 @@ fun HttpClient.asChannel(baseUrl: String): SerializedChannel {
                 body = input
             }
         }
+
+        override suspend fun close() {
+            client.close()
+        }
     }
 }

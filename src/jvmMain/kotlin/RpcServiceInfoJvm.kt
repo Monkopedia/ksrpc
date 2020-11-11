@@ -64,6 +64,9 @@ internal actual class RpcServiceInfo<T : RpcService> actual constructor(
                         ?: endpoint.function?.invoke(service, input)
                     ) as O
             }
+
+            override suspend fun close() {
+            }
         }
     }
 }
@@ -101,6 +104,9 @@ internal class SignatureInfo<T : RpcService>(private val rpcServiceInfo: RpcServ
                 ) as RpcServiceInfoBase.RpcEndpoint<T, Any?, Any?>
             }
             throw NotImplementedError()
+        }
+
+        override suspend fun close() {
         }
     })
 

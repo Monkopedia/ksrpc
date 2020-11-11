@@ -39,10 +39,14 @@ interface RpcChannel {
         inputSer: KSerializer<I>,
         input: I
     ): O
+
+    suspend fun close()
 }
 
 interface SerializedChannel {
     suspend fun call(str: String, input: String): String
+
+    suspend fun close()
 }
 
 expect val Throwable.asString: String
@@ -81,6 +85,10 @@ private class RpcChannelImpl(
         val serviceId = call(endpoint, inputSer, String.serializer(), input)
         return service.wrap(SubserviceChannel(this, serviceId))
     }
+
+    override suspend fun close() {
+        serializedChannel.close()
+    }
 }
 
 private class SubserviceChannel(
@@ -107,12 +115,19 @@ private class SubserviceChannel(
         val serviceId = call(endpoint, inputSer, String.serializer(), input)
         return service.wrap(SubserviceChannel(this, serviceId))
     }
+
+    override suspend fun close() {
+        val wrappedInput = ServiceCall("", "close", true)
+        val wrappedSerializer = ServiceCall.serializer(String.serializer())
+        return baseChannel.call(serviceId, wrappedSerializer, Unit.serializer(), wrappedInput)
+    }
 }
 
 @Serializable
 data class ServiceCall<I>(
     val input: I,
     val endpoint: String,
+    val close: Boolean = false
 )
 
 @Serializable

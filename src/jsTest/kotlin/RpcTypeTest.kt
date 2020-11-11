@@ -76,6 +76,10 @@ class RpcTypeTest {
         ): O {
             error("Not implemented")
         }
+
+        override suspend fun close() {
+            error("Not implemented")
+        }
     }
     val serialized = channel.serialized(TestTypesInterface)
 
