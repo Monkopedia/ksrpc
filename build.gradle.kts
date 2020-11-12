@@ -15,10 +15,16 @@
  */
 import org.jetbrains.kotlin.gradle.targets.js.yarn.yarn
 
+buildscript {
+    repositories {
+        maven(url="https://dl.bintray.com/kotlin/dokka")
+    }
+}
 plugins {
     kotlin("multiplatform") version "1.4.10"
     kotlin("plugin.serialization") version "1.4.10"
     id("com.github.autostyle") version "3.1"
+    id("org.jetbrains.dokka") version "1.4.10.2"
 
     java
     `maven-publish`
@@ -33,6 +39,7 @@ repositories {
     maven(url = "https://dl.bintray.com/kotlin/kotlin-dev/")
     maven(url = "https://dl.bintray.com/kotlin/kotlin-eap/")
     maven(url = "https://kotlinx.bintray.com/kotlinx/")
+    maven(url="https://dl.bintray.com/kotlin/dokka")
 }
 
 autostyle {
@@ -143,7 +150,49 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
     }
 }
 
+val dokkaJavadoc = tasks.create("dokkaJavadocCustom", org.jetbrains.dokka.gradle.DokkaTask::class) {
+    dependencies {
+        plugins("org.jetbrains.dokka:kotlin-as-java-plugin:1.4.10.2")
+    }
+    // outputFormat = "javadoc"
+    outputDirectory.set(File(project.buildDir, "javadoc"))
+    inputs.dir("src/commonMain/kotlin")
+}
+
+val javadocJar = tasks.create("javadocJar",  Jar::class) {
+    dependsOn(dokkaJavadoc)
+    archiveClassifier.set("javadoc")
+    from(File(project.buildDir, "javadoc"))
+}
+
 publishing {
+    publications.all {
+        if (this !is MavenPublication) return@all
+        artifact(javadocJar)
+        pom {
+            name.set("ksrpc")
+            description.set("A simple kotlin rpc library")
+            url.set("http://www.github.com/Monkopedia/ksrpc")
+            licenses {
+                license {
+                    name.set("The Apache License, Version 2.0")
+                    url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                }
+            }
+            developers {
+                developer {
+                    id.set("monkopedia")
+                    name.set("Jason Monk")
+                    email.set("monkopedia@gmail.com")
+                }
+            }
+            scm {
+                connection.set("scm:git:git://github.com/Monkopedia/ksrpc.git")
+                developerConnection.set("scm:git:ssh://github.com/Monkopedia/ksrpc.git")
+                url.set("http://github.com/Monkopedia/ksrpc/")
+            }
+        }
+    }
     repositories {
         maven(url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
             name = "OSSRH"
