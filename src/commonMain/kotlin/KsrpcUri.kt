@@ -39,7 +39,9 @@ data class KsrpcUri(
     }
 }
 
-expect suspend fun KsrpcUri.connect(): SerializedChannel
+expect fun String.toKsrpcUri(): KsrpcUri
+
+expect suspend fun KsrpcUri.connect(clientFactory: () -> HttpClient = { HttpClient {  }}): SerializedChannel
 
 fun HttpClient.asChannel(baseUrl: String): SerializedChannel {
     val baseStripped = baseUrl.trimEnd('/')
@@ -53,7 +55,6 @@ fun HttpClient.asChannel(baseUrl: String): SerializedChannel {
         }
 
         override suspend fun close() {
-            client.close()
         }
     }
 }

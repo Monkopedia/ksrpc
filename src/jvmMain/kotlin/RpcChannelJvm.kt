@@ -25,7 +25,7 @@ import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
-fun String.toKsrpcUri(): KsrpcUri = when {
+actual fun String.toKsrpcUri(): KsrpcUri = when {
     startsWith("http://") -> KsrpcUri(KsrpcType.HTTP, this)
     startsWith("ksrpc://") -> KsrpcUri(KsrpcType.SOCKET, this)
     startsWith("local://") -> KsrpcUri(KsrpcType.LOCAL, this.substring("local://".length))
@@ -38,7 +38,7 @@ fun String.toKsrpcUri(): KsrpcUri = when {
     else -> throw IllegalArgumentException("Unable to parse $this")
 }
 
-actual suspend fun KsrpcUri.connect(): SerializedChannel {
+actual suspend fun KsrpcUri.connect(clientFactory: () -> HttpClient): SerializedChannel {
     return when (type) {
         KsrpcType.EXE -> {
             ProcessBuilder(listOf(path))
@@ -51,7 +51,7 @@ actual suspend fun KsrpcUri.connect(): SerializedChannel {
             (socket.getInputStream() to socket.getOutputStream()).asChannel()
         }
         KsrpcType.HTTP -> {
-            val client = HttpClient()
+            val client = clientFactory()
             client.asChannel(path)
         }
         KsrpcType.LOCAL -> {

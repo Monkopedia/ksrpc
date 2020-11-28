@@ -16,9 +16,15 @@
 package com.monkopedia.ksrpc
 
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.js.Js
 
-actual suspend fun KsrpcUri.connect(): SerializedChannel {
+actual fun String.toKsrpcUri(): KsrpcUri = when {
+    startsWith("http://") -> KsrpcUri(KsrpcType.HTTP, this)
+    startsWith("ksrpc://") -> KsrpcUri(KsrpcType.SOCKET, this)
+    startsWith("local://") -> KsrpcUri(KsrpcType.LOCAL, this.substring("local://".length))
+    else -> throw IllegalArgumentException("Unable to parse $this")
+}
+
+actual suspend fun KsrpcUri.connect(clientFactory: () -> HttpClient): SerializedChannel {
     return when (type) {
         KsrpcType.EXE -> {
             throw NotImplementedError("EXE not supported in JS")
@@ -30,11 +36,7 @@ actual suspend fun KsrpcUri.connect(): SerializedChannel {
             throw NotImplementedError("Local not supported in JS")
         }
         KsrpcType.HTTP -> {
-            val client = HttpClient(Js) {
-                engine {
-                }
-            }
-            client.asChannel(path)
+            clientFactory().asChannel(path)
         }
     }
 }
