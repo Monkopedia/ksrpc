@@ -16,8 +16,8 @@
 package com.monkopedia.ksrpc
 
 import io.ktor.client.HttpClient
-import io.ktor.client.request.accept
-import io.ktor.client.request.post
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.ContentType
 import io.ktor.http.encodeURLPath
 import kotlinx.serialization.Serializable
@@ -39,7 +39,13 @@ data class KsrpcUri(
     }
 }
 
-expect fun String.toKsrpcUri(): KsrpcUri
+fun String.toKsrpcUri(): KsrpcUri = when {
+    startsWith("http://") -> KsrpcUri(KsrpcType.HTTP, this)
+    startsWith("https://") -> KsrpcUri(KsrpcType.HTTP, this)
+    startsWith("ksrpc://") -> KsrpcUri(KsrpcType.SOCKET, this)
+    startsWith("local://") -> KsrpcUri(KsrpcType.LOCAL, this.substring("local://".length))
+    else -> throw IllegalArgumentException("Unable to parse $this")
+}
 
 expect suspend fun KsrpcUri.connect(clientFactory: () -> HttpClient = { HttpClient {  }}): SerializedChannel
 
@@ -54,7 +60,21 @@ fun HttpClient.asChannel(baseUrl: String): SerializedChannel {
             }
         }
 
+        override suspend fun callBinary(endpoint: String, input: String): BinaryData {
+            return client.post<HttpResponse> {
+                accept(ContentType.Application.Json)
+                body = input
+            }.content.asBinaryData()
+        }
+
+        override suspend fun callBinaryInput(endpoint: String, input: BinaryData): String {
+            return client.post("$baseStripped/${endpoint}") {
+                body = input.data
+            }
+        }
+
         override suspend fun close() {
         }
     }
 }
+

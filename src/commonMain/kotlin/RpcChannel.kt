@@ -15,8 +15,8 @@
  */
 package com.monkopedia.ksrpc
 
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.Serializable
+import io.ktor.utils.io.*
+import kotlinx.serialization.*
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 
@@ -40,11 +40,16 @@ interface RpcChannel {
         input: I
     ): O
 
+    suspend fun <I> callBinary(endpoint: String, inputSer: KSerializer<I>, input: I): ByteReadChannel
+    suspend fun <O> callBinaryInput(endpoint: String, outputSer: KSerializer<O>, input: ByteReadChannel): O
+
     suspend fun close()
 }
 
 interface SerializedChannel {
-    suspend fun call(str: String, input: String): String
+    suspend fun call(endpoint: String, input: String): String
+    suspend fun callBinary(endpoint: String, input: String): ByteReadChannel
+    suspend fun callBinaryInput(endpoint: String, input: ByteReadChannel): String
 
     suspend fun close()
 }
@@ -76,6 +81,20 @@ private class RpcChannelImpl(
         return json.decodeFromString(outputSer, outputStr)
     }
 
+    override suspend fun <I> callBinary(trim: String, inputSer: KSerializer<I>, input: I): ByteReadChannel {
+        val inputStr = input?.let { json.encodeToString(inputSer, input) } ?: ""
+        return serializedChannel.callBinary(trim, inputStr)
+    }
+
+    override suspend fun <O> callBinaryInput(trim: String, outputSer: KSerializer<O>, input: ByteReadChannel): O {
+        val outputStr = serializedChannel.callBinaryInput(trim, input)
+        if (outputStr.startsWith(ERROR_PREFIX)) {
+            val errorStr = outputStr.substring(ERROR_PREFIX.length)
+            throw json.decodeFromString(RpcFailure.serializer(), errorStr).toException()
+        }
+        return json.decodeFromString(outputSer, outputStr)
+    }
+
     override suspend fun <I, O : RpcService> callService(
         endpoint: String,
         service: RpcObject<O>,
@@ -83,7 +102,7 @@ private class RpcChannelImpl(
         input: I
     ): O {
         val serviceId = call(endpoint, inputSer, String.serializer(), input)
-        return service.wrap(SubserviceChannel(this, serviceId))
+        return service.wrap(SubserviceChannel(json, this, serviceId))
     }
 
     override suspend fun close() {
@@ -92,6 +111,7 @@ private class RpcChannelImpl(
 }
 
 private class SubserviceChannel(
+        private val json: Json,
     private val baseChannel: RpcChannel,
     private val serviceId: String
 ) : RpcChannel {
@@ -101,9 +121,45 @@ private class SubserviceChannel(
         outputSer: KSerializer<O>,
         input: I
     ): O {
-        val wrappedInput = ServiceCall(input, endpoint)
-        val wrappedSerializer = ServiceCall.serializer(inputSer)
-        return baseChannel.call(serviceId, wrappedSerializer, outputSer, wrappedInput)
+        return call(listOf(endpoint), inputSer, outputSer, input)
+    }
+
+    private suspend fun <I, O> call(
+            target: List<String>,
+            inputSer: KSerializer<I>,
+            outputSer: KSerializer<O>,
+            input: I
+    ): O {
+        if (baseChannel is SubserviceChannel) {
+            return baseChannel.call(target + serviceId, inputSer, outputSer, input)
+        }
+        return baseChannel.call(json.encodedEndpoint(target), inputSer, outputSer, input)
+    }
+
+    override suspend fun <I> callBinary(endpoint: String, inputSer: KSerializer<I>, input: I): ByteReadChannel {
+        return callBinary(listOf(endpoint), inputSer, input)
+    }
+
+    private suspend fun <I> callBinary(
+            target: List<String>,
+            inputSer: KSerializer<I>,
+            input: I
+    ): ByteReadChannel {
+        if (baseChannel is SubserviceChannel) {
+            return baseChannel.callBinary(target + serviceId, inputSer, input)
+        }
+        return baseChannel.callBinary(json.encodedEndpoint(target), inputSer, input)
+    }
+
+    override suspend fun <O> callBinaryInput(endpoint: String, outputSer: KSerializer<O>, input: ByteReadChannel): O {
+        return callBinaryInput(listOf(endpoint), outputSer, input)
+    }
+
+    private suspend fun <O> callBinaryInput(target: List<String>, outputSer: KSerializer<O>, input: ByteReadChannel): O {
+        if (baseChannel is SubserviceChannel) {
+            return baseChannel.callBinaryInput(target + serviceId, outputSer, input)
+        }
+        return baseChannel.callBinaryInput(json.encodedEndpoint(target), outputSer, input)
     }
 
     override suspend fun <I, O : RpcService> callService(
@@ -113,14 +169,28 @@ private class SubserviceChannel(
         input: I
     ): O {
         val serviceId = call(endpoint, inputSer, String.serializer(), input)
-        return service.wrap(SubserviceChannel(this, serviceId))
+        return service.wrap(SubserviceChannel(json, this, serviceId))
     }
 
     override suspend fun close() {
-        val wrappedInput = ServiceCall("", "close", true)
-        val wrappedSerializer = ServiceCall.serializer(String.serializer())
-        return baseChannel.call(serviceId, wrappedSerializer, Unit.serializer(), wrappedInput)
+//        val wrappedInput = ServiceCall("", "close", true)
+//        val wrappedSerializer = ServiceCall.serializer(String.serializer())
+        return baseChannel.call(json.encodedEndpoint(listOf("", "close")), Unit.serializer(), Unit.serializer(), Unit)
     }
+}
+
+private val SPLIT_CHAR = ":"
+
+fun StringFormat.encodedEndpoint(endpoint: List<String>): String {
+    return "${endpoint.first()}$SPLIT_CHAR${encodeToString(endpoint.subList(1, endpoint.size))}"
+}
+
+fun StringFormat.decodedEndpoint(endpoint: String): Pair<String, List<String>?> {
+    val index = endpoint.indexOf(SPLIT_CHAR)
+    if (index < 0) {
+        return endpoint to null
+    }
+    return endpoint.substring(0, index) to decodeFromString(endpoint.substring(index + 1))
 }
 
 @Serializable

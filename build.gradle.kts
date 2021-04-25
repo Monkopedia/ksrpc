@@ -21,8 +21,8 @@ buildscript {
     }
 }
 plugins {
-    kotlin("multiplatform") version "1.4.10"
-    kotlin("plugin.serialization") version "1.4.10"
+    kotlin("multiplatform") version "1.5.0-RC"
+    kotlin("plugin.serialization") version "1.5.0-RC"
     id("com.github.autostyle") version "3.1"
     id("org.jetbrains.dokka") version "1.4.10.2"
 
@@ -36,6 +36,7 @@ group = "com.monkopedia"
 repositories {
     jcenter()
     mavenLocal()
+    mavenCentral()
     maven(url = "https://dl.bintray.com/kotlin/kotlin-dev/")
     maven(url = "https://dl.bintray.com/kotlin/kotlin-eap/")
     maven(url = "https://kotlinx.bintray.com/kotlinx/")
@@ -101,16 +102,16 @@ kotlin {
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.0.0")
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.0")
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9-native-mt")
-        compileOnly("io.ktor:ktor-client-core:1.4.0")
+        compileOnly("io.ktor:ktor-client-core:1.5.3")
     }
     sourceSets["jvmMain"].dependencies {
         implementation(kotlin("stdlib"))
         implementation(kotlin("reflect"))
         implementation("org.slf4j:slf4j-api:1.6.1")
-        compileOnly("io.ktor:ktor-server-core:1.4.0")
-        compileOnly("io.ktor:ktor-server-host-common:1.4.0")
-        compileOnly("io.ktor:ktor-server-netty:1.4.0")
-        compileOnly("io.ktor:ktor-client-core:1.4.0")
+        compileOnly("io.ktor:ktor-server-core:1.5.3")
+        compileOnly("io.ktor:ktor-server-host-common:1.5.3")
+        compileOnly("io.ktor:ktor-server-netty:1.5.3")
+        compileOnly("io.ktor:ktor-client-core:1.5.3")
 
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.0.0")
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.0")
@@ -120,25 +121,25 @@ kotlin {
         implementation(kotlin("test-junit"))
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9")
         implementation("io.mockk:mockk:1.10.2")
-        implementation("io.ktor:ktor-server-core:1.4.0")
-        implementation("io.ktor:ktor-server-netty:1.4.0")
-        implementation("io.ktor:ktor-jackson:1.4.0")
+        implementation("io.ktor:ktor-server-core:1.5.3")
+        implementation("io.ktor:ktor-server-netty:1.5.3")
+        implementation("io.ktor:ktor-jackson:1.5.3")
 
-        implementation("io.ktor:ktor-client-core:1.4.0")
-        implementation("io.ktor:ktor-client-okhttp:1.4.0")
+        implementation("io.ktor:ktor-client-core:1.5.3")
+        implementation("io.ktor:ktor-client-okhttp:1.5.3")
     }
     sourceSets["jsTest"].dependencies {
         implementation(kotlin("test-js"))
-        implementation("io.ktor:ktor-client-core:1.4.0")
-        implementation("io.ktor:ktor-client-js:1.4.0")
+        implementation("io.ktor:ktor-client-core:1.5.3")
+        implementation("io.ktor:ktor-client-js:1.5.3")
     }
     sourceSets["jsMain"].dependencies {
-        compileOnly("io.ktor:ktor-client-core:1.4.0")
-        compileOnly("io.ktor:ktor-client-js:1.4.0")
+        compileOnly("io.ktor:ktor-client-core:1.5.3")
+        compileOnly("io.ktor:ktor-client-js:1.5.3")
     }
     sourceSets["nativeMain"].dependencies {
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9-native-mt")
-        implementation("io.ktor:ktor-client-curl:1.4.0")
+        implementation("io.ktor:ktor-client-curl:1.5.3")
     }
 }
 

@@ -17,13 +17,6 @@ package com.monkopedia.ksrpc
 
 import io.ktor.client.HttpClient
 
-actual fun String.toKsrpcUri(): KsrpcUri = when {
-    startsWith("http://") -> KsrpcUri(KsrpcType.HTTP, this)
-    startsWith("ksrpc://") -> KsrpcUri(KsrpcType.SOCKET, this)
-    startsWith("local://") -> KsrpcUri(KsrpcType.LOCAL, this.substring("local://".length))
-    else -> throw IllegalArgumentException("Unable to parse $this")
-}
-
 actual suspend fun KsrpcUri.connect(clientFactory: () -> HttpClient): SerializedChannel {
     return when (type) {
         KsrpcType.EXE -> {

@@ -25,19 +25,6 @@ import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
-actual fun String.toKsrpcUri(): KsrpcUri = when {
-    startsWith("http://") -> KsrpcUri(KsrpcType.HTTP, this)
-    startsWith("ksrpc://") -> KsrpcUri(KsrpcType.SOCKET, this)
-    startsWith("local://") -> KsrpcUri(KsrpcType.LOCAL, this.substring("local://".length))
-    File(this).exists() -> {
-        require(File(this).canExecute()) {
-            "$this not executable"
-        }
-        KsrpcUri(KsrpcType.EXE, this)
-    }
-    else -> throw IllegalArgumentException("Unable to parse $this")
-}
-
 actual suspend fun KsrpcUri.connect(clientFactory: () -> HttpClient): SerializedChannel {
     return when (type) {
         KsrpcType.EXE -> {
