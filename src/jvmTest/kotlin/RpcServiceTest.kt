@@ -20,6 +20,7 @@ import io.ktor.routing.routing
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.utils.io.ByteReadChannel
 import java.io.InputStream
 import java.io.OutputStream
 import java.io.PipedInputStream
@@ -66,6 +67,18 @@ class RpcServiceTest {
                 error("Not implemented")
             }
 
+            override suspend fun <I> callBinary(endpoint: String, inputSer: KSerializer<I>, input: I): ByteReadChannel {
+                error("Not implemented")
+            }
+
+            override suspend fun <O> callBinaryInput(
+                endpoint: String,
+                outputSer: KSerializer<O>,
+                input: ByteReadChannel
+            ): O {
+                error("Not implemented")
+            }
+
             override suspend fun <I, O : RpcService> callService(
                 endpoint: String,
                 service: RpcObject<O>,
@@ -91,6 +104,18 @@ class RpcServiceTest {
                 if (input is Pair<*, *>) {
                     return "${input.first} ${input.second}" as O
                 }
+                error("Not implemented")
+            }
+
+            override suspend fun <I> callBinary(endpoint: String, inputSer: KSerializer<I>, input: I): ByteReadChannel {
+                error("Not implemented")
+            }
+
+            override suspend fun <O> callBinaryInput(
+                endpoint: String,
+                outputSer: KSerializer<O>,
+                input: ByteReadChannel
+            ): O {
                 error("Not implemented")
             }
 

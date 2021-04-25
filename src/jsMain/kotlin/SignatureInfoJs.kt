@@ -15,6 +15,7 @@
  */
 package com.monkopedia.ksrpc
 
+import io.ktor.utils.io.ByteReadChannel
 import kotlin.coroutines.intrinsics.suspendCoroutineUninterceptedOrReturn
 import kotlin.reflect.KClass
 import kotlinx.serialization.KSerializer
@@ -28,7 +29,7 @@ internal actual class RpcServiceInfo<T : RpcService> actual constructor(
         SignatureInfo(this)
     }
 
-    internal suspend fun findEndpoint(endpoint: String): RpcEndpoint<T, *, *> {
+    override suspend fun findEndpoint(endpoint: String): RpcEndpoint<T, *, *> {
         return endpointLookup[endpoint] ?: signatureInfo.createEndpoint(endpoint).also {
             endpointLookup[endpoint] = it
         }
@@ -43,6 +44,26 @@ internal actual class RpcServiceInfo<T : RpcService> actual constructor(
                 input: I
             ): O {
                 val endpoint = findEndpoint(endpoint) as RpcEndpoint<T, I, O>
+                return (
+                    endpoint.suspendFun?.invoke(service, input)
+                        ?: endpoint.function?.invoke(service, input)
+                    ) as O
+            }
+
+            override suspend fun <I> callBinary(endpoint: String, inputSer: KSerializer<I>, input: I): ByteReadChannel {
+                val endpoint = findEndpoint(endpoint) as RpcEndpoint<T, I, Any>
+                return (
+                    endpoint.suspendFun?.invoke(service, input)
+                        ?: endpoint.function?.invoke(service, input)
+                    ) as ByteReadChannel
+            }
+
+            override suspend fun <O> callBinaryInput(
+                endpoint: String,
+                outputSer: KSerializer<O>,
+                input: ByteReadChannel
+            ): O {
+                val endpoint = findEndpoint(endpoint) as RpcEndpoint<T, Any, O>
                 return (
                     endpoint.suspendFun?.invoke(service, input)
                         ?: endpoint.function?.invoke(service, input)
@@ -73,13 +94,33 @@ internal class SignatureInfo<T : RpcService>(private val rpcServiceInfo: RpcServ
     private var lastCall: RpcServiceInfoBase.RpcEndpoint<T, Any?, Any?>? = null
     private val proxy = rpcServiceInfo.createStubFor(object : RpcChannel {
         override suspend fun <I, O> call(
-            str: String,
+            endpoint: String,
             inputSer: KSerializer<I>,
             outputSer: KSerializer<O>,
             input: I
         ): O {
-            if (str == desiredEndpoint) {
-                lastCall = RpcServiceInfoBase.RpcEndpoint<T, I, O>(str, false, inputSer, outputSer)
+            if (endpoint == desiredEndpoint) {
+                lastCall = RpcServiceInfoBase.RpcEndpoint<T, I, O>(endpoint, false, inputSer, outputSer)
+                    as RpcServiceInfoBase.RpcEndpoint<T, Any?, Any?>
+            }
+            throw NotImplementedError()
+        }
+
+        override suspend fun <I> callBinary(endpoint: String, inputSer: KSerializer<I>, input: I): ByteReadChannel {
+            if (endpoint == desiredEndpoint) {
+                lastCall = RpcServiceInfoBase.RpcEndpoint<T, I, Unit>(endpoint, false, inputSer, Unit.serializer())
+                    as RpcServiceInfoBase.RpcEndpoint<T, Any?, Any?>
+            }
+            throw NotImplementedError()
+        }
+
+        override suspend fun <O> callBinaryInput(
+            endpoint: String,
+            outputSer: KSerializer<O>,
+            input: ByteReadChannel
+        ): O {
+            if (endpoint == desiredEndpoint) {
+                lastCall = RpcServiceInfoBase.RpcEndpoint<T, Unit, O>(endpoint, false, Unit.serializer(), outputSer)
                     as RpcServiceInfoBase.RpcEndpoint<T, Any?, Any?>
             }
             throw NotImplementedError()

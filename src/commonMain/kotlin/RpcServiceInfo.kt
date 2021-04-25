@@ -34,6 +34,7 @@ internal abstract class RpcServiceInfoBase<T : RpcService>(
     }
 
     abstract fun createChannelFor(service: T): RpcChannel
+    abstract suspend fun findEndpoint(str: String): RpcEndpoint<T, *, *>
 
     data class RpcEndpoint<T : RpcService, I, O>(
         val endpoint: String,

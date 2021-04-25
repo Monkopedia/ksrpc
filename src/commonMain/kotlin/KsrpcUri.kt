@@ -20,6 +20,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.ContentType
 import io.ktor.http.encodeURLPath
+import io.ktor.utils.io.ByteReadChannel
 import kotlinx.serialization.Serializable
 
 enum class KsrpcType {
@@ -54,22 +55,23 @@ fun HttpClient.asChannel(baseUrl: String): SerializedChannel {
     val client = this
     return object : SerializedChannel {
         override suspend fun call(str: String, input: String): String {
-            return client.post("$baseStripped/${str.encodeURLPath()}") {
+            return client.post("$baseStripped/call/${str.encodeURLPath()}") {
                 accept(ContentType.Application.Json)
                 body = input
             }
         }
 
-        override suspend fun callBinary(endpoint: String, input: String): BinaryData {
-            return client.post<HttpResponse> {
-                accept(ContentType.Application.Json)
+        override suspend fun callBinary(endpoint: String, input: String): ByteReadChannel {
+            return client.post<HttpResponse>("$baseStripped/binary/${endpoint.encodeURLPath()}") {
+                accept(ContentType.Application.Any)
                 body = input
-            }.content.asBinaryData()
+            }.content
         }
 
-        override suspend fun callBinaryInput(endpoint: String, input: BinaryData): String {
-            return client.post("$baseStripped/${endpoint}") {
-                body = input.data
+        override suspend fun callBinaryInput(endpoint: String, input: ByteReadChannel): String {
+            return client.post("$baseStripped/binaryInput/${endpoint.encodeURLPath()}") {
+                accept(ContentType.Application.Json)
+                body = input
             }
         }
 

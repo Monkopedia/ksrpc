@@ -143,7 +143,7 @@ class RpcSubserviceTest {
         val serializedChannel = channel.serialized(TestRootInterface)
         lateinit var server: ApplicationEngine
         GlobalScope.launch(Dispatchers.IO) {
-            server = embeddedServer(Netty, 8081) {
+            server = embeddedServer(Netty, 8082) {
                 routing {
                     serve(path, serializedChannel)
                 }
@@ -151,7 +151,7 @@ class RpcSubserviceTest {
         }
         val client = HttpClient()
         val stub = TestRootInterface.wrap(
-            client.asChannel("http://localhost:8081$path").deserialized()
+            client.asChannel("http://localhost:8082$path").deserialized()
         )
         assertEquals(
             "oh, Hello world",

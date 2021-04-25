@@ -15,11 +15,9 @@
  */
 package com.monkopedia.ksrpc
 
-import java.io.BufferedReader
-import java.io.BufferedWriter
-import java.io.ByteArrayOutputStream
-import java.io.InputStream
-import java.io.OutputStream
+import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.jvm.javaio.toByteReadChannel
+import io.ktor.utils.io.jvm.javaio.toInputStream
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -36,9 +34,23 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.io.BufferedReader
+import java.io.BufferedWriter
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
+import java.io.OutputStream
+import java.util.Base64
 
 internal const val CONTENT_LENGTH = "Content-Length"
 internal const val METHOD = "Method"
+internal const val TYPE = "Type"
+
+private enum class SendType {
+    NORMAL,
+    BINARY,
+    BINARY_INPUT
+}
 
 suspend fun SerializedChannel.serve(
     input: InputStream,
@@ -59,11 +71,20 @@ suspend fun SerializedChannel.serve(
                         try {
                             val params = reader.readFields()
                             val method = params[METHOD] ?: error("Missing method")
+                            val type = enumValueOf<SendType>(params[TYPE] ?: error("Missing type"))
                             val str = reader.readContent(params)
                             lock.unlock()
                             emit(
                                 async(Dispatchers.IO) {
-                                    channel.call(method, str)
+                                    when (type) {
+                                        SendType.NORMAL -> channel.call(method, str)
+                                        SendType.BINARY -> Base64.getEncoder()
+                                            .encodeToString(channel.callBinary(method, str).toInputStream().readBytes())
+                                        SendType.BINARY_INPUT -> channel.callBinaryInput(
+                                            method,
+                                            ByteArrayInputStream(Base64.getDecoder().decode(str)).toByteReadChannel()
+                                        )
+                                    }
                                 }
                             )
                         } catch (t: Throwable) {
@@ -86,11 +107,17 @@ suspend fun SerializedChannel.serve(
     }
 }
 
+private data class Message(
+    val type: SendType,
+    val endpoint: String,
+    val data: String,
+)
+
 fun Pair<InputStream, OutputStream>.asChannel(): SerializedChannel {
     val reader = first.bufferedReader()
     val writer = second.bufferedWriter()
     val lock = Mutex()
-    val calls = Channel<Pair<String, String>>(5)
+    val calls = Channel<Message>(5)
     val responses = Channel<CompletableDeferred<String>>(5)
     GlobalScope.launch {
         try {
@@ -114,8 +141,9 @@ fun Pair<InputStream, OutputStream>.asChannel(): SerializedChannel {
     GlobalScope.launch {
         try {
             while (true) {
-                val (str, input) = calls.receive()
+                val (type, str, input) = calls.receive()
                 writer.appendLine("$METHOD: $str")
+                writer.appendLine("$TYPE: ${type.name}")
                 writer.writeContent(input)
             }
         } catch (t: Throwable) {
@@ -125,10 +153,35 @@ fun Pair<InputStream, OutputStream>.asChannel(): SerializedChannel {
     }
 
     return object : SerializedChannel {
-        override suspend fun call(str: String, input: String): String {
+        override suspend fun call(endpoint: String, input: String): String {
             val response = CompletableDeferred<String>()
             lock.withLock {
-                calls.send(str to input)
+                calls.send(Message(SendType.NORMAL, endpoint, input))
+                responses.send(response)
+            }
+            return response.await()
+        }
+
+        override suspend fun callBinary(endpoint: String, input: String): ByteReadChannel {
+            val response = CompletableDeferred<String>()
+            lock.withLock {
+                calls.send(Message(SendType.BINARY, endpoint, input))
+                responses.send(response)
+            }
+            val bytes = Base64.getDecoder().decode(response.await())
+            return ByteArrayInputStream(bytes).toByteReadChannel()
+        }
+
+        override suspend fun callBinaryInput(endpoint: String, input: ByteReadChannel): String {
+            val response = CompletableDeferred<String>()
+            lock.withLock {
+                calls.send(
+                    Message(
+                        SendType.BINARY_INPUT,
+                        endpoint,
+                        Base64.getEncoder().encodeToString(input.toInputStream().readBytes())
+                    )
+                )
                 responses.send(response)
             }
             return response.await()
@@ -179,7 +232,13 @@ private fun BufferedReader.readFields(): Map<String, String> {
 
 fun parseParams(fields: List<String>): Map<String, String> {
     return fields.filter { it.contains(":") }.map {
-        val (first, second) = it.split(":")
+        val (first, second) = it.splitSingle(':')
         return@map first.trim() to second.trim()
     }.toMap()
+}
+
+private fun String.splitSingle(s: Char): Pair<String, String> {
+    val index = indexOf(s)
+    if (index < 0) throw IllegalArgumentException("Can't find param")
+    return substring(0, index) to substring(index + 1, length)
 }

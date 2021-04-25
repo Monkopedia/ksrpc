@@ -46,14 +46,6 @@ interface RpcChannel {
     suspend fun close()
 }
 
-interface SerializedChannel {
-    suspend fun call(endpoint: String, input: String): String
-    suspend fun callBinary(endpoint: String, input: String): ByteReadChannel
-    suspend fun callBinaryInput(endpoint: String, input: ByteReadChannel): String
-
-    suspend fun close()
-}
-
 expect val Throwable.asString: String
 
 internal const val ERROR_PREFIX = "ERROR:"
@@ -133,7 +125,7 @@ private class SubserviceChannel(
         if (baseChannel is SubserviceChannel) {
             return baseChannel.call(target + serviceId, inputSer, outputSer, input)
         }
-        return baseChannel.call(json.encodedEndpoint(target), inputSer, outputSer, input)
+        return baseChannel.call(json.encodedEndpoint(target + serviceId), inputSer, outputSer, input)
     }
 
     override suspend fun <I> callBinary(endpoint: String, inputSer: KSerializer<I>, input: I): ByteReadChannel {
@@ -148,7 +140,7 @@ private class SubserviceChannel(
         if (baseChannel is SubserviceChannel) {
             return baseChannel.callBinary(target + serviceId, inputSer, input)
         }
-        return baseChannel.callBinary(json.encodedEndpoint(target), inputSer, input)
+        return baseChannel.callBinary(json.encodedEndpoint(target + serviceId), inputSer, input)
     }
 
     override suspend fun <O> callBinaryInput(endpoint: String, outputSer: KSerializer<O>, input: ByteReadChannel): O {
@@ -159,7 +151,7 @@ private class SubserviceChannel(
         if (baseChannel is SubserviceChannel) {
             return baseChannel.callBinaryInput(target + serviceId, outputSer, input)
         }
-        return baseChannel.callBinaryInput(json.encodedEndpoint(target), outputSer, input)
+        return baseChannel.callBinaryInput(json.encodedEndpoint(target + serviceId), outputSer, input)
     }
 
     override suspend fun <I, O : RpcService> callService(
@@ -173,13 +165,11 @@ private class SubserviceChannel(
     }
 
     override suspend fun close() {
-//        val wrappedInput = ServiceCall("", "close", true)
-//        val wrappedSerializer = ServiceCall.serializer(String.serializer())
-        return baseChannel.call(json.encodedEndpoint(listOf("", "close")), Unit.serializer(), Unit.serializer(), Unit)
+        return call(listOf("", "close"), Unit.serializer(), Unit.serializer(), Unit)
     }
 }
 
-private val SPLIT_CHAR = ":"
+private const val SPLIT_CHAR = ":"
 
 fun StringFormat.encodedEndpoint(endpoint: List<String>): String {
     return "${endpoint.first()}$SPLIT_CHAR${encodeToString(endpoint.subList(1, endpoint.size))}"
@@ -192,13 +182,6 @@ fun StringFormat.decodedEndpoint(endpoint: String): Pair<String, List<String>?> 
     }
     return endpoint.substring(0, index) to decodeFromString(endpoint.substring(index + 1))
 }
-
-@Serializable
-data class ServiceCall<I>(
-    val input: I,
-    val endpoint: String,
-    val close: Boolean = false
-)
 
 @Serializable
 data class RpcFailure(val stack: String) {

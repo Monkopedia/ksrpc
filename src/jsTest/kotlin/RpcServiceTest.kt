@@ -15,6 +15,7 @@
  */
 package com.monkopedia.ksrpc
 
+import io.ktor.utils.io.ByteReadChannel
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -54,6 +55,18 @@ class RpcServiceTest {
                 error("Not implemented")
             }
 
+            override suspend fun <I> callBinary(endpoint: String, inputSer: KSerializer<I>, input: I): ByteReadChannel {
+                error("Not implemented")
+            }
+
+            override suspend fun <O> callBinaryInput(
+                endpoint: String,
+                outputSer: KSerializer<O>,
+                input: ByteReadChannel
+            ): O {
+                error("Not implemented")
+            }
+
             override suspend fun <I, O : RpcService> callService(
                 endpoint: String,
                 service: RpcObject<O>,
@@ -82,6 +95,18 @@ class RpcServiceTest {
                 error("Not implemented")
             }
 
+            override suspend fun <I> callBinary(endpoint: String, inputSer: KSerializer<I>, input: I): ByteReadChannel {
+                error("Not implemented")
+            }
+
+            override suspend fun <O> callBinaryInput(
+                endpoint: String,
+                outputSer: KSerializer<O>,
+                input: ByteReadChannel
+            ): O {
+                error("Not implemented")
+            }
+
             override suspend fun <I, O : RpcService> callService(
                 endpoint: String,
                 service: RpcObject<O>,
@@ -93,6 +118,7 @@ class RpcServiceTest {
         })
         assertEquals("Hello world", stub.rpc("Hello" to "world"))
     }
+
 
     @Test
     fun testCreateChannel() = runBlockingUnit {

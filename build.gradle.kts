@@ -17,7 +17,7 @@ import org.jetbrains.kotlin.gradle.targets.js.yarn.yarn
 
 buildscript {
     repositories {
-        maven(url="https://dl.bintray.com/kotlin/dokka")
+        maven(url = "https://dl.bintray.com/kotlin/dokka")
     }
 }
 plugins {
@@ -40,7 +40,7 @@ repositories {
     maven(url = "https://dl.bintray.com/kotlin/kotlin-dev/")
     maven(url = "https://dl.bintray.com/kotlin/kotlin-eap/")
     maven(url = "https://kotlinx.bintray.com/kotlinx/")
-    maven(url="https://dl.bintray.com/kotlin/dokka")
+    maven(url = "https://dl.bintray.com/kotlin/dokka")
 }
 
 autostyle {
@@ -105,6 +105,8 @@ kotlin {
         compileOnly("io.ktor:ktor-client-core:1.5.3")
     }
     sourceSets["jvmMain"].dependencies {
+        implementation("com.aventrix.jnanoid:jnanoid:2.0.0")
+
         implementation(kotlin("stdlib"))
         implementation(kotlin("reflect"))
         implementation("org.slf4j:slf4j-api:1.6.1")
@@ -134,6 +136,7 @@ kotlin {
         implementation("io.ktor:ktor-client-js:1.5.3")
     }
     sourceSets["jsMain"].dependencies {
+        implementation(npm("nanoid", "3.1.22"))
         compileOnly("io.ktor:ktor-client-core:1.5.3")
         compileOnly("io.ktor:ktor-client-js:1.5.3")
     }
@@ -160,7 +163,7 @@ val dokkaJavadoc = tasks.create("dokkaJavadocCustom", org.jetbrains.dokka.gradle
     inputs.dir("src/commonMain/kotlin")
 }
 
-val javadocJar = tasks.create("javadocJar",  Jar::class) {
+val javadocJar = tasks.create("javadocJar", Jar::class) {
     dependsOn(dokkaJavadoc)
     archiveClassifier.set("javadoc")
     from(File(project.buildDir, "javadoc"))

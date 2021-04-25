@@ -15,6 +15,7 @@
  */
 package com.monkopedia.ksrpc
 
+import io.ktor.utils.io.ByteReadChannel
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.serialization.KSerializer
@@ -56,6 +57,34 @@ class RpcTypeTest {
             inputSer: KSerializer<I>,
             outputSer: KSerializer<O>,
             input: I
+        ): O {
+            try {
+                println("\n\n TEST Call $endpoint\n\n")
+                lastEndpoint = endpoint
+                lastInput = input
+                return nextReturn as O
+            } catch (t: Throwable) {
+                t.printStackTrace()
+                throw t
+            }
+        }
+
+        override suspend fun <I> callBinary(endpoint: String, inputSer: KSerializer<I>, input: I): ByteReadChannel {
+            try {
+                println("\n\n TEST Call $endpoint\n\n")
+                lastEndpoint = endpoint
+                lastInput = input
+                return nextReturn as ByteReadChannel
+            } catch (t: Throwable) {
+                t.printStackTrace()
+                throw t
+            }
+        }
+
+        override suspend fun <O> callBinaryInput(
+            endpoint: String,
+            outputSer: KSerializer<O>,
+            input: ByteReadChannel
         ): O {
             try {
                 println("\n\n TEST Call $endpoint\n\n")

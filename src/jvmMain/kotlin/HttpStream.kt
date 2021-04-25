@@ -16,12 +16,14 @@
 package com.monkopedia.ksrpc
 
 import io.ktor.application.call
+import io.ktor.client.request.HttpRequest
 import io.ktor.client.request.post
 import io.ktor.http.decodeURLPart
 import io.ktor.request.receive
 import io.ktor.response.respond
 import io.ktor.routing.Routing
 import io.ktor.routing.post
+import io.ktor.utils.io.ByteReadChannel
 
 fun Routing.serve(
     basePath: String,
@@ -29,11 +31,33 @@ fun Routing.serve(
     errorListener: ErrorListener = ErrorListener { }
 ) {
     val baseStripped = basePath.trimEnd('/')
-    post("$baseStripped/{method}") {
+    post("$baseStripped/call/{method}") {
         try {
             val method = call.parameters["method"]?.decodeURLPart() ?: error("Missing method")
             val content = call.receive<String>()
             val response = channel.call(method, content)
+            call.respond(response)
+        } catch (t: Throwable) {
+            errorListener.onError(t)
+            throw t
+        }
+    }
+    post("$baseStripped/binary/{method}") {
+        try {
+            val method = call.parameters["method"]?.decodeURLPart() ?: error("Missing method")
+            val content = call.receive<String>()
+            val response = channel.callBinary(method, content)
+            call.respond(response)
+        } catch (t: Throwable) {
+            errorListener.onError(t)
+            throw t
+        }
+    }
+    post("$baseStripped/binaryInput/{method}") {
+        try {
+            val method = call.parameters["method"]?.decodeURLPart() ?: error("Missing method")
+            val content = call.receive<ByteReadChannel>()
+            val response = channel.callBinaryInput(method, content)
             call.respond(response)
         } catch (t: Throwable) {
             errorListener.onError(t)

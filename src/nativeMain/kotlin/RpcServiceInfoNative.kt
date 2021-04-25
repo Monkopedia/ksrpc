@@ -24,4 +24,8 @@ internal actual class RpcServiceInfo<T : RpcService> actual constructor(
     override fun createChannelFor(service: T): RpcChannel {
         throw NotImplementedError("Cannot serve on native platforms")
     }
+
+    override suspend fun findEndpoint(str: String): RpcEndpoint<T, *, *> {
+        throw NotImplementedError("Cannot serve on native platforms")
+    }
 }
