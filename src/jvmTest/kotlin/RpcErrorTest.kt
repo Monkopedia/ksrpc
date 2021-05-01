@@ -16,18 +16,7 @@
 package com.monkopedia.ksrpc
 
 import io.ktor.client.HttpClient
-import io.ktor.routing.routing
-import io.ktor.server.engine.ApplicationEngine
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
-import java.io.InputStream
-import java.io.OutputStream
-import java.io.PipedInputStream
-import java.io.PipedOutputStream
 import junit.framework.Assert.fail
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import org.junit.Test
 
 class RpcErrorTest {
@@ -53,78 +42,56 @@ class RpcErrorTest {
 
     @Test
     fun testPipePassthrough() = runBlockingUnit {
-        val (output, input) = createPipe()
-        val (so, si) = createPipe()
         val info = TestInterface.info
         val channel = info.createChannelFor(object : Service(), TestInterface {
             override suspend fun rpc(u: Pair<String, String>): String {
                 throw IllegalArgumentException("Failure")
             }
         })
-        val serializedChannel = channel.serialized(TestInterface)
-        GlobalScope.launch(Dispatchers.IO) {
-            serializedChannel.serve(si, output)
-        }
-        val stub = TestInterface.wrap((input to so).asChannel().deserialized())
-        try {
-            stub.rpc("Hello" to "world")
-            fail("Expected crash")
-        } catch (t: Throwable) {
-            t.printStackTrace()
-            t as RpcException
+        channel.servePipe(TestInterface) { client ->
+            val stub = TestInterface.wrap(client.asChannel().deserialized())
+            try {
+                stub.rpc("Hello" to "world")
+                fail("Expected crash")
+            } catch (t: Throwable) {
+                t.printStackTrace()
+                t as RpcException
+            }
         }
     }
 
     @Test
     fun testHttpPath() = runBlockingUnit {
-        val info = TestInterface.info
-        val channel = info.createChannelFor(object : Service(), TestInterface {
-            override suspend fun rpc(u: Pair<String, String>): String {
-                throw IllegalArgumentException("Failure")
+        val path = "/rpc/"
+        httpTest(serve = {
+            val info = TestInterface.info
+            val channel = info.createChannelFor(object : Service(), TestInterface {
+                override suspend fun rpc(u: Pair<String, String>): String {
+                    throw IllegalArgumentException("Failure")
+                }
+            })
+            val serializedChannel = channel.serialized(
+                TestInterface,
+                errorListener = {
+                    it.printStackTrace()
+                }
+            )
+            serve(
+                path, serializedChannel,
+                errorListener = {
+                    it.printStackTrace()
+                }
+            )
+        }, test = {
+            val client = HttpClient()
+            val stub = TestInterface.wrap(client.asChannel("http://localhost:8080$path").deserialized())
+            try {
+                stub.rpc("Hello" to "world")
+                fail("Expected crash")
+            } catch (t: Throwable) {
+                t.printStackTrace()
+                t as RpcException
             }
         })
-        val path = "/rpc/"
-        val serializedChannel = channel.serialized(
-            TestInterface,
-            errorListener = {
-                it.printStackTrace()
-            }
-        )
-        lateinit var server: ApplicationEngine
-        GlobalScope.launch(Dispatchers.IO) {
-            server = embeddedServer(Netty, 8080) {
-                routing {
-                    serve(
-                        path, serializedChannel,
-                        errorListener = {
-                            it.printStackTrace()
-                        }
-                    )
-                }
-            }.start()
-        }
-        val client = HttpClient()
-        val stub = TestInterface.wrap(client.asChannel("http://localhost:8080$path").deserialized())
-        try {
-            stub.rpc("Hello" to "world")
-            fail("Expected crash")
-        } catch (t: Throwable) {
-            t.printStackTrace()
-            t as RpcException
-        }
-    }
-
-    fun RpcChannel.servePipe(): Pair<InputStream, OutputStream> {
-        val serializedChannel = serialized(TestTypesInterface)
-        val (output, input) = createPipe()
-        val (so, si) = createPipe()
-        GlobalScope.launch(Dispatchers.IO) {
-            serializedChannel.serve(si, output)
-        }
-        return input to so
-    }
-
-    private fun createPipe(): Pair<OutputStream, InputStream> {
-        return PipedInputStream().let { PipedOutputStream(it) to it }
     }
 }

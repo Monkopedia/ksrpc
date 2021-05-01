@@ -176,8 +176,4 @@ class RpcSubserviceTest {
                 }
             }
         }
-
-    private fun createPipe(): Pair<OutputStream, InputStream> {
-        return PipedInputStream().let { PipedOutputStream(it) to it }
-    }
 }

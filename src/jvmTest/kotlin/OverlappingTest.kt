@@ -49,33 +49,15 @@ class OverlappingTest {
             }
         }
         val channel = info.createChannelFor(service)
-        val client = channel.servePipe()
-        val stub = TestInterface.wrap(client.asChannel().deserialized())
+        channel.servePipe(TestInterface) { client ->
+            val stub = TestInterface.wrap(client.asChannel().deserialized())
 
-        val finish = GlobalScope.async(Dispatchers.IO) {
-            assertEquals("Hello second", stub.rpc("Hello" to "first"))
+            val finish = GlobalScope.async(Dispatchers.IO) {
+                assertEquals("Hello second", stub.rpc("Hello" to "first"))
+            }
+            assertEquals("first", firstCall.await())
+            assertEquals("Hello second", stub.rpc("Hello" to "second"))
+            finish.await()
         }
-        assertEquals("first", firstCall.await())
-        assertEquals("Hello second", stub.rpc("Hello" to "second"))
-        finish.await()
-    }
-
-    fun RpcChannel.servePipe(): Pair<InputStream, OutputStream> {
-        val serializedChannel = serialized(TestTypesInterface)
-        val (output, input) = createPipe()
-        val (so, si) = createPipe()
-        GlobalScope.launch(Dispatchers.IO) {
-            serializedChannel.serve(
-                si, output,
-                errorListener = {
-                    it.printStackTrace()
-                }
-            )
-        }
-        return input to so
-    }
-
-    private fun createPipe(): Pair<OutputStream, InputStream> {
-        return PipedInputStream().let { PipedOutputStream(it) to it }
     }
 }

@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.json.Json
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.ByteArrayInputStream
@@ -76,13 +77,24 @@ suspend fun SerializedChannel.serve(
                             lock.unlock()
                             emit(
                                 async(Dispatchers.IO) {
-                                    when (type) {
-                                        SendType.NORMAL -> channel.call(method, str)
-                                        SendType.BINARY -> Base64.getEncoder()
-                                            .encodeToString(channel.callBinary(method, str).toInputStream().readBytes())
-                                        SendType.BINARY_INPUT -> channel.callBinaryInput(
-                                            method,
-                                            ByteArrayInputStream(Base64.getDecoder().decode(str)).toByteReadChannel()
+                                    try {
+                                        when (type) {
+                                            SendType.NORMAL -> channel.call(method, str)
+                                            SendType.BINARY -> Base64.getEncoder()
+                                                .encodeToString(
+                                                    channel.callBinary(method, str).toInputStream().readBytes()
+                                                )
+                                            SendType.BINARY_INPUT -> channel.callBinaryInput(
+                                                method,
+                                                ByteArrayInputStream(
+                                                    Base64.getDecoder().decode(str)
+                                                ).toByteReadChannel()
+                                            )
+                                        }
+                                    } catch (t: Throwable) {
+                                        ERROR_PREFIX + Json.encodeToString(
+                                            RpcFailure.serializer(),
+                                            RpcFailure(t.asString)
                                         )
                                     }
                                 }
@@ -168,7 +180,12 @@ fun Pair<InputStream, OutputStream>.asChannel(): SerializedChannel {
                 calls.send(Message(SendType.BINARY, endpoint, input))
                 responses.send(response)
             }
-            val bytes = Base64.getDecoder().decode(response.await())
+            val text = response.await()
+            if (text.startsWith(ERROR_PREFIX)) {
+                val errorStr = text.substring(ERROR_PREFIX.length)
+                throw Json.decodeFromString(RpcFailure.serializer(), errorStr).toException()
+            }
+            val bytes = Base64.getDecoder().decode(text)
             return ByteArrayInputStream(bytes).toByteReadChannel()
         }
 

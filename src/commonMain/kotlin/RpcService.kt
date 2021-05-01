@@ -89,6 +89,20 @@ suspend inline fun <reified I, reified O> RpcService.map(
     return map(endpoint, serializer(), serializer(), input)
 }
 
+suspend inline fun <reified I> RpcService.mapBinary(
+    endpoint: String,
+    input: I
+): ByteReadChannel {
+    return mapBinary(endpoint, serializer(), input)
+}
+
+suspend inline fun <reified O> RpcService.mapBinaryInput(
+    endpoint: String,
+    input: ByteReadChannel
+): O {
+    return mapBinaryInput(endpoint, serializer(), input)
+}
+
 suspend inline fun <reified I, reified O : RpcService> RpcService.service(
     endpoint: String,
     service: RpcObject<O>,

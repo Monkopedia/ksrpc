@@ -18,16 +18,9 @@ package com.monkopedia.ksrpc
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import java.io.InputStream
-import java.io.OutputStream
-import java.io.PipedInputStream
-import java.io.PipedOutputStream
-import kotlin.test.assertEquals
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.junit.Test
+import kotlin.test.assertEquals
 
 @Serializable
 data class MyJson(
@@ -55,124 +48,122 @@ interface TestTypesInterface : RpcService {
 
 class RpcTypeTest {
     internal val info = TestTypesInterface.info
+    val service = mockk<TestTypesInterface>(relaxed = true)
+    val channel = info.createChannelFor(service)
 
     @Test
     fun testPairStr() = runBlockingUnit {
-        val service = mockk<TestTypesInterface>(relaxed = true)
-        val channel = info.createChannelFor(service)
-        val client = channel.servePipe()
-        val stub = TestTypesInterface.wrap(client.asChannel().deserialized())
-        coEvery {
-            service.rpc(any())
-        }.returns("")
-        stub.rpc("Hello" to "world")
-        coVerify {
-            service.rpc("Hello" to "world")
+        channel.servePipe(TestTypesInterface) { client ->
+
+            val stub = TestTypesInterface.wrap(client.asChannel().deserialized())
+            coEvery {
+                service.rpc(any())
+            }.returns("")
+            stub.rpc("Hello" to "world")
+            coVerify {
+                service.rpc("Hello" to "world")
+            }
         }
     }
 
     @Test
     fun testMap() = runBlockingUnit {
-        val service = mockk<TestTypesInterface>(relaxed = true)
-        val channel = info.createChannelFor(service)
-        val client = channel.servePipe()
-        val stub = TestTypesInterface.wrap(client.asChannel().deserialized())
-        stub.mapRpc(
-            mutableMapOf(
-                "First" to MyJson("first", 1, null),
-                "Second" to MyJson("second", 2, 1.2f),
-            )
-        )
-        coVerify {
-            service.mapRpc(
+        channel.servePipe(TestTypesInterface) { client ->
+
+            val stub = TestTypesInterface.wrap(client.asChannel().deserialized())
+            stub.mapRpc(
                 mutableMapOf(
                     "First" to MyJson("first", 1, null),
                     "Second" to MyJson("second", 2, 1.2f),
                 )
             )
+            coVerify {
+                service.mapRpc(
+                    mutableMapOf(
+                        "First" to MyJson("first", 1, null),
+                        "Second" to MyJson("second", 2, 1.2f),
+                    )
+                )
+            }
         }
     }
 
     @Test
     fun testInputInt() = runBlockingUnit {
-        val service = mockk<TestTypesInterface>(relaxed = true)
-        val channel = info.createChannelFor(service)
-        val client = channel.servePipe()
-        val stub = TestTypesInterface.wrap(client.asChannel().deserialized())
-        coEvery {
-            service.inputInt(any())
-        }.returns(Unit)
-        stub.inputInt(42)
-        coVerify {
-            service.inputInt(42)
+        channel.servePipe(TestTypesInterface) { client ->
+
+            val stub = TestTypesInterface.wrap(client.asChannel().deserialized())
+            coEvery {
+                service.inputInt(any())
+            }.returns(Unit)
+            stub.inputInt(42)
+            coVerify {
+                service.inputInt(42)
+            }
         }
     }
 
     @Test
     fun testInputIntList() = runBlockingUnit {
-        val service = mockk<TestTypesInterface>(relaxed = true)
-        val channel = info.createChannelFor(service)
-        val client = channel.servePipe()
-        val stub = TestTypesInterface.wrap(client.asChannel().deserialized())
-        coEvery {
-            service.inputIntList(any())
-        }.returns(Unit)
-        stub.inputIntList(listOf(42))
-        coVerify {
-            service.inputIntList(listOf(42))
+        channel.servePipe(TestTypesInterface) { client ->
+            val stub = TestTypesInterface.wrap(client.asChannel().deserialized())
+            coEvery {
+                service.inputIntList(any())
+            }.returns(Unit)
+            stub.inputIntList(listOf(42))
+            coVerify {
+                service.inputIntList(listOf(42))
+            }
         }
     }
 
     @Test
     fun testInputIntNullable() = runBlockingUnit {
-        val service = mockk<TestTypesInterface>(relaxed = true)
-        val channel = info.createChannelFor(service)
-        val client = channel.servePipe()
-        val stub = TestTypesInterface.wrap(client.asChannel().deserialized())
-        coEvery {
-            service.inputIntNullable(any())
-        }.returns(Unit)
-        stub.inputIntNullable(null)
-        coVerify {
-            service.inputIntNullable(null)
+        channel.servePipe(TestTypesInterface) { client ->
+
+            val stub = TestTypesInterface.wrap(client.asChannel().deserialized())
+            coEvery {
+                service.inputIntNullable(any())
+            }.returns(Unit)
+            stub.inputIntNullable(null)
+            coVerify {
+                service.inputIntNullable(null)
+            }
         }
     }
 
     @Test
     fun testOutputInt() = runBlockingUnit {
-        val service = mockk<TestTypesInterface>(relaxed = true)
-        val channel = info.createChannelFor(service)
-        val client = channel.servePipe()
-        val stub = TestTypesInterface.wrap(client.asChannel().deserialized())
-        coEvery {
-            service.outputInt(Unit)
-        }.returns(42)
-        assertEquals(42, stub.outputInt(Unit))
-        coVerify {
-            service.outputInt(Unit)
+        channel.servePipe(TestTypesInterface) { client ->
+            val stub = TestTypesInterface.wrap(client.asChannel().deserialized())
+            coEvery {
+                service.outputInt(Unit)
+            }.returns(42)
+            assertEquals(42, stub.outputInt(Unit))
+            coVerify {
+                service.outputInt(Unit)
+            }
         }
     }
 
     @Test
     fun testOutputIntNullable() = runBlockingUnit {
-        val service = mockk<TestTypesInterface>(relaxed = true)
-        val channel = info.createChannelFor(service)
-        val client = channel.servePipe()
-        val stub = TestTypesInterface.wrap(client.asChannel().deserialized())
-        coEvery {
-            service.outputIntNullable(Unit)
-        }.returns(null)
-        assertEquals(null, stub.outputIntNullable(Unit))
-        coVerify {
-            service.outputIntNullable(Unit)
+        channel.servePipe(TestTypesInterface) { client ->
+            val stub = TestTypesInterface.wrap(client.asChannel().deserialized())
+            coEvery {
+                service.outputIntNullable(Unit)
+            }.returns(null)
+            assertEquals(null, stub.outputIntNullable(Unit))
+            coVerify {
+                service.outputIntNullable(Unit)
+            }
         }
     }
 
     @Test
     fun testReturnType() = runBlockingUnit {
-        val service = mockk<TestTypesInterface>(relaxed = true)
-        val channel = info.createChannelFor(service)
-        val client = channel.servePipe()
+        channel.servePipe(TestTypesInterface) { client ->
+
         val stub = TestTypesInterface.wrap(client.asChannel().deserialized())
         coEvery {
             service.returnType(Unit)
@@ -181,24 +172,6 @@ class RpcTypeTest {
         coVerify {
             service.returnType(Unit)
         }
-    }
-
-    fun RpcChannel.servePipe(): Pair<InputStream, OutputStream> {
-        val serializedChannel = serialized(TestTypesInterface)
-        val (output, input) = createPipe()
-        val (so, si) = createPipe()
-        GlobalScope.launch(Dispatchers.IO) {
-            serializedChannel.serve(
-                si, output,
-                errorListener = {
-                    it.printStackTrace()
-                }
-            )
         }
-        return input to so
-    }
-
-    private fun createPipe(): Pair<OutputStream, InputStream> {
-        return PipedInputStream().let { PipedOutputStream(it) to it }
     }
 }

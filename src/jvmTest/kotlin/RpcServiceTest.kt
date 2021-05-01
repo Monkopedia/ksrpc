@@ -16,19 +16,16 @@
 package com.monkopedia.ksrpc
 
 import io.ktor.client.HttpClient
+import io.ktor.routing.Routing
 import io.ktor.routing.routing
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.utils.io.ByteReadChannel
-import java.io.InputStream
-import java.io.OutputStream
-import java.io.PipedInputStream
-import java.io.PipedOutputStream
-import java.util.concurrent.CountDownLatch
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertNotNull
 import junit.framework.Assert.fail
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -37,6 +34,11 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.PairSerializer
 import kotlinx.serialization.builtins.serializer
 import org.junit.Test
+import java.io.InputStream
+import java.io.OutputStream
+import java.io.PipedInputStream
+import java.io.PipedOutputStream
+import java.util.concurrent.CountDownLatch
 
 interface TestInterface : RpcService {
     suspend fun rpc(u: Pair<String, String>): String = map("/rpc", u)
@@ -248,36 +250,50 @@ class RpcServiceTest {
 
     @Test
     fun testHttpPath() = runBlockingUnit {
-        val info = TestInterface.info
-        val channel = info.createChannelFor(object : Service(), TestInterface {
-            override suspend fun rpc(u: Pair<String, String>): String {
-                return "${u.first} ${u.second}"
-            }
-        })
         val path = "/rpc/"
-        val serializedChannel = channel.serialized(TestInterface)
-        lateinit var server: ApplicationEngine
-        GlobalScope.launch(Dispatchers.IO) {
-            server = embeddedServer(Netty, 8081) {
-                routing {
-                    serve(path, serializedChannel)
+        httpTest(serve = {
+            val info = TestInterface.info
+            val channel = info.createChannelFor(object : Service(), TestInterface {
+                override suspend fun rpc(u: Pair<String, String>): String {
+                    return "${u.first} ${u.second}"
                 }
-            }.start()
-        }
-        val client = HttpClient()
-        val stub = TestInterface.wrap(client.asChannel("http://localhost:8081$path").deserialized())
-        assertEquals(
-            "Hello world",
-            stub.rpc("Hello" to "world")
-        )
-        GlobalScope.launch(Dispatchers.IO) {
-            server.stop(10000, 10000)
-        }
-    }
+            })
+            val serializedChannel = channel.serialized(TestInterface)
 
-    private fun createPipe(): Pair<OutputStream, InputStream> {
-        return PipedInputStream().let { PipedOutputStream(it) to it }
+            serve(path, serializedChannel)
+        }, test = {
+            val client = HttpClient()
+            val stub = TestInterface.wrap(client.asChannel("http://localhost:8081$path").deserialized())
+            assertEquals(
+                "Hello world",
+                stub.rpc("Hello" to "world")
+            )
+        })
     }
+}
+
+suspend inline fun <T : RpcService> RpcChannel.servePipe(obj: RpcObject<T>, test: suspend (Pair<InputStream, OutputStream>) -> Unit) {
+    val serializedChannel = serialized(obj)
+    val (output, input) = createPipe()
+    val (so, si) = createPipe()
+    GlobalScope.launch(Dispatchers.IO) {
+        serializedChannel.serve(
+            si, output,
+            errorListener = {
+                it.printStackTrace()
+            }
+        )
+    }
+    try {
+        test(input to so)
+    } finally {
+        try { input.close() } catch (t: Throwable) {}
+        try { si.close() } catch (t: Throwable) {}
+    }
+}
+
+fun createPipe(): Pair<OutputStream, InputStream> {
+    return PipedInputStream().let { PipedOutputStream(it) to it }
 }
 
 internal fun runBlockingUnit(function: suspend () -> Unit) {
@@ -295,4 +311,25 @@ internal fun runBlockingUnit(function: suspend () -> Unit) {
     }
     block.await()
     exc?.let { throw it }
+}
+
+suspend inline fun httpTest(crossinline serve: Routing.() -> Unit, test: suspend () -> Unit) {
+    val serverCompletion = CompletableDeferred<ApplicationEngine>()
+    GlobalScope.launch(Dispatchers.IO) {
+        try {
+            serverCompletion.complete(embeddedServer(Netty, 8081) {
+                routing {
+                    serve()
+                }
+            }.start())
+        } catch (t: Throwable) {
+            serverCompletion.completeExceptionally(t)
+        }
+    }
+    val server = serverCompletion.await()
+    try {
+        test()
+    } finally {
+        server.stop(10000, 10000)
+    }
 }

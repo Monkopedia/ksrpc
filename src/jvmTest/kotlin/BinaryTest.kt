@@ -20,28 +20,112 @@ import io.ktor.routing.routing
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.jvm.javaio.toByteReadChannel
+import io.ktor.utils.io.jvm.javaio.toInputStream
+import junit.framework.Assert.assertEquals
 import java.io.InputStream
 import java.io.OutputStream
 import java.io.PipedInputStream
 import java.io.PipedOutputStream
 import junit.framework.Assert.fail
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.junit.Test
+import java.io.ByteArrayInputStream
 
-class RpcErrorTest {
+interface BinaryInterface : RpcService {
+    suspend fun rpc(u: Pair<String, String>)  = mapBinary("/rpc", u)
+    suspend fun inputRpc(u: ByteReadChannel): String = mapBinaryInput("/input", u)
+
+    class BinaryInterfaceStub(private val channel: RpcServiceChannel) :
+        BinaryInterface, RpcService by channel
+
+    companion object : RpcObject<BinaryInterface>(BinaryInterface::class, ::BinaryInterfaceStub)
+}
+
+class BinaryTest {
 
     @Test
     fun testSerializePassthrough() = runBlockingUnit {
-        val info = TestInterface.info
-        val channel = info.createChannelFor(object : Service(), TestInterface {
-            override suspend fun rpc(u: Pair<String, String>): String {
-                throw IllegalArgumentException("Failure")
+        val info = BinaryInterface.info
+        val channel = info.createChannelFor(object : Service(), BinaryInterface {
+            override suspend fun rpc(u: Pair<String, String>): ByteReadChannel {
+                val str = "${u.first} ${u.second}"
+                return str.byteInputStream().toByteReadChannel()
             }
         })
-        val serializedChannel = channel.serialized(TestInterface)
-        val stub = TestInterface.wrap(serializedChannel.deserialized())
+        val serializedChannel = channel.serialized(BinaryInterface)
+        val stub = BinaryInterface.wrap(serializedChannel.deserialized())
+            val response = stub.rpc("Hello" to "world")
+        val str = response.toInputStream().readBytes().decodeToString()
+        assertEquals("Hello world", str)
+    }
+
+    @Test
+    fun testPipePassthrough() = runBlockingUnit {
+        val info = BinaryInterface.info
+        val channel = info.createChannelFor(object : Service(), BinaryInterface {
+            override suspend fun rpc(u: Pair<String, String>): ByteReadChannel {
+                val str = "${u.first} ${u.second}"
+                return str.byteInputStream().toByteReadChannel()
+            }
+        })
+        channel.servePipe(BinaryInterface) { client ->
+            val stub = BinaryInterface.wrap(client.asChannel().deserialized())
+            val response = stub.rpc("Hello" to "world")
+            val str = response.toInputStream().readBytes().decodeToString()
+            assertEquals("Hello world", str)
+        }
+    }
+
+    @Test
+    fun testHttpPath() = runBlockingUnit {
+        val path = "/rpc/"
+        httpTest(serve = {
+            val info = BinaryInterface.info
+            val channel = info.createChannelFor(object : Service(), BinaryInterface {
+                override suspend fun rpc(u: Pair<String, String>): ByteReadChannel {
+                    val str = "${u.first} ${u.second}"
+                    return str.byteInputStream().toByteReadChannel()
+                }
+            })
+            val serializedChannel = channel.serialized(
+                BinaryInterface,
+                errorListener = {
+                    it.printStackTrace()
+                }
+            )
+            serve(
+                path, serializedChannel,
+                errorListener = {
+                    it.printStackTrace()
+                }
+            )
+        }, test = {
+            val client = HttpClient()
+            val stub = BinaryInterface.wrap(client.asChannel("http://localhost:8080$path").deserialized())
+            val response = stub.rpc("Hello" to "world")
+            val str = response.toInputStream().readBytes().decodeToString()
+            assertEquals("Hello world", str)
+        })
+    }
+}
+
+class BinaryInputTest {
+
+    @Test
+    fun testSerializePassthrough() = runBlockingUnit {
+        val info = BinaryInterface.info
+        val channel = info.createChannelFor(object : Service(), BinaryInterface {
+            override suspend fun inputRpc(u: ByteReadChannel): String {
+                return super.inputRpc(u)
+            }
+        })
+        val serializedChannel = channel.serialized(BinaryInterface)
+        val stub = BinaryInterface.wrap(serializedChannel.deserialized())
         try {
             stub.rpc("Hello" to "world")
             fail("Expected crash")
@@ -53,78 +137,56 @@ class RpcErrorTest {
 
     @Test
     fun testPipePassthrough() = runBlockingUnit {
-        val (output, input) = createPipe()
-        val (so, si) = createPipe()
-        val info = TestInterface.info
-        val channel = info.createChannelFor(object : Service(), TestInterface {
-            override suspend fun rpc(u: Pair<String, String>): String {
-                throw IllegalArgumentException("Failure")
+        val info = BinaryInterface.info
+        val channel = info.createChannelFor(object : Service(), BinaryInterface {
+            override suspend fun inputRpc(u: ByteReadChannel): String {
+                return super.inputRpc(u)
             }
         })
-        val serializedChannel = channel.serialized(TestInterface)
-        GlobalScope.launch(Dispatchers.IO) {
-            serializedChannel.serve(si, output)
-        }
-        val stub = TestInterface.wrap((input to so).asChannel().deserialized())
-        try {
-            stub.rpc("Hello" to "world")
-            fail("Expected crash")
-        } catch (t: Throwable) {
-            t.printStackTrace()
-            t as RpcException
+        channel.servePipe(BinaryInterface) { client ->
+            val stub = BinaryInterface.wrap(client.asChannel().deserialized())
+            try {
+                stub.rpc("Hello" to "world")
+                fail("Expected crash")
+            } catch (t: Throwable) {
+                t.printStackTrace()
+                t as RpcException
+            }
         }
     }
 
     @Test
     fun testHttpPath() = runBlockingUnit {
-        val info = TestInterface.info
-        val channel = info.createChannelFor(object : Service(), TestInterface {
-            override suspend fun rpc(u: Pair<String, String>): String {
-                throw IllegalArgumentException("Failure")
+        val path = "/rpc/"
+        httpTest(serve = {
+            val info = BinaryInterface.info
+            val channel = info.createChannelFor(object : Service(), BinaryInterface {
+                override suspend fun inputRpc(u: ByteReadChannel): String {
+                    return super.inputRpc(u)
+                }
+            })
+            val serializedChannel = channel.serialized(
+                BinaryInterface,
+                errorListener = {
+                    it.printStackTrace()
+                }
+            )
+            serve(
+                path, serializedChannel,
+                errorListener = {
+                    it.printStackTrace()
+                }
+            )
+        }, test = {
+            val client = HttpClient()
+            val stub = BinaryInterface.wrap(client.asChannel("http://localhost:8080$path").deserialized())
+            try {
+                stub.rpc("Hello" to "world")
+                fail("Expected crash")
+            } catch (t: Throwable) {
+                t.printStackTrace()
+                t as RpcException
             }
         })
-        val path = "/rpc/"
-        val serializedChannel = channel.serialized(
-            TestInterface,
-            errorListener = {
-                it.printStackTrace()
-            }
-        )
-        lateinit var server: ApplicationEngine
-        GlobalScope.launch(Dispatchers.IO) {
-            server = embeddedServer(Netty, 8080) {
-                routing {
-                    serve(
-                        path, serializedChannel,
-                        errorListener = {
-                            it.printStackTrace()
-                        }
-                    )
-                }
-            }.start()
-        }
-        val client = HttpClient()
-        val stub = TestInterface.wrap(client.asChannel("http://localhost:8080$path").deserialized())
-        try {
-            stub.rpc("Hello" to "world")
-            fail("Expected crash")
-        } catch (t: Throwable) {
-            t.printStackTrace()
-            t as RpcException
-        }
-    }
-
-    fun RpcChannel.servePipe(): Pair<InputStream, OutputStream> {
-        val serializedChannel = serialized(TestTypesInterface)
-        val (output, input) = createPipe()
-        val (so, si) = createPipe()
-        GlobalScope.launch(Dispatchers.IO) {
-            serializedChannel.serve(si, output)
-        }
-        return input to so
-    }
-
-    private fun createPipe(): Pair<OutputStream, InputStream> {
-        return PipedInputStream().let { PipedOutputStream(it) to it }
     }
 }
