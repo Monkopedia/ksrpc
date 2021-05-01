@@ -84,7 +84,7 @@ class RpcErrorTest {
             )
         }, test = {
             val client = HttpClient()
-            val stub = TestInterface.wrap(client.asChannel("http://localhost:8080$path").deserialized())
+            val stub = TestInterface.wrap(client.asChannel("http://localhost:8081$path").deserialized())
             try {
                 stub.rpc("Hello" to "world")
                 fail("Expected crash")

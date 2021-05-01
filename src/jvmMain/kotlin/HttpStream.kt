@@ -19,11 +19,11 @@ import io.ktor.application.call
 import io.ktor.client.request.HttpRequest
 import io.ktor.client.request.post
 import io.ktor.http.decodeURLPart
-import io.ktor.request.receive
-import io.ktor.response.respond
+import io.ktor.request.*
+import io.ktor.response.*
 import io.ktor.routing.Routing
 import io.ktor.routing.post
-import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.*
 
 fun Routing.serve(
     basePath: String,
@@ -47,7 +47,9 @@ fun Routing.serve(
             val method = call.parameters["method"]?.decodeURLPart() ?: error("Missing method")
             val content = call.receive<String>()
             val response = channel.callBinary(method, content)
-            call.respond(response)
+            call.respondBytesWriter {
+                response.copyTo(this)
+            }
         } catch (t: Throwable) {
             errorListener.onError(t)
             throw t
@@ -56,7 +58,7 @@ fun Routing.serve(
     post("$baseStripped/binaryInput/{method}") {
         try {
             val method = call.parameters["method"]?.decodeURLPart() ?: error("Missing method")
-            val content = call.receive<ByteReadChannel>()
+            val content = call.receiveChannel()
             val response = channel.callBinaryInput(method, content)
             call.respond(response)
         } catch (t: Throwable) {

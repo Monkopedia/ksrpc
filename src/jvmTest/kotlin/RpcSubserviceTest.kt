@@ -36,7 +36,7 @@ interface TestSubInterface : RpcService {
     suspend fun rpc(u: Pair<String, String>): String = map("/rpc", u)
 
     class TestSubInterfaceStub(private val channel: RpcServiceChannel) :
-        TestSubInterface, RpcService by channel
+            TestSubInterface, RpcService by channel
 
     companion object : RpcObject<TestSubInterface>(TestSubInterface::class, ::TestSubInterfaceStub)
 }
@@ -46,11 +46,11 @@ interface TestRootInterface : RpcService {
     suspend fun subservice(prefix: String) = service("/service", TestSubInterface, prefix)
 
     class TestRootInterfaceStub(private val channel: RpcServiceChannel) :
-        TestRootInterface, RpcService by channel
+            TestRootInterface, RpcService by channel
 
     companion object : RpcObject<TestRootInterface>(
-        TestRootInterface::class,
-        ::TestRootInterfaceStub
+            TestRootInterface::class,
+            ::TestRootInterfaceStub
     )
 }
 
@@ -69,8 +69,8 @@ class RpcSubserviceTest {
         val channel = info.createChannelFor(basicImpl)
         val stub = TestRootInterface.wrap(channel)
         assertEquals(
-            "oh, Hello world",
-            stub.subservice("oh,").rpc("Hello" to "world")
+                "oh, Hello world",
+                stub.subservice("oh,").rpc("Hello" to "world")
         )
     }
 
@@ -80,8 +80,8 @@ class RpcSubserviceTest {
         val serializedChannel = channel.serialized(TestRootInterface)
         val stub = TestRootInterface.wrap(serializedChannel.deserialized())
         assertEquals(
-            "oh, Hello world",
-            stub.subservice("oh,").rpc("Hello" to "world")
+                "oh, Hello world",
+                stub.subservice("oh,").rpc("Hello" to "world")
         )
     }
 
@@ -92,8 +92,8 @@ class RpcSubserviceTest {
         val stub = TestRootInterface.wrap(serializedChannel.deserialized())
         stub.subservice("oh,").rpc("Hello" to "world")
         assertEquals(
-            "oh, Hello world",
-            stub.subservice("oh,").rpc("Hello" to "world")
+                "oh, Hello world",
+                stub.subservice("oh,").rpc("Hello" to "world")
         )
     }
 
@@ -108,8 +108,8 @@ class RpcSubserviceTest {
         }
         val stub = TestRootInterface.wrap((input to so).asChannel().deserialized())
         assertEquals(
-            "oh, Hello world",
-            stub.subservice("oh,").rpc("Hello" to "world")
+                "oh, Hello world",
+                stub.subservice("oh,").rpc("Hello" to "world")
         )
     }
 
@@ -131,35 +131,28 @@ class RpcSubserviceTest {
         val ohService = stub.subservice("oh,")
         stub.subservice("!!!").rpc("Hello" to "world")
         assertEquals(
-            "oh, Hello world",
-            ohService.rpc("Hello" to "world")
+                "oh, Hello world",
+                ohService.rpc("Hello" to "world")
         )
     }
 
     @Test
     fun testHttpPath() = runBlockingUnit {
-        val channel = info.createChannelFor(basicImpl)
         val path = "/rpc/"
-        val serializedChannel = channel.serialized(TestRootInterface)
-        lateinit var server: ApplicationEngine
-        GlobalScope.launch(Dispatchers.IO) {
-            server = embeddedServer(Netty, 8082) {
-                routing {
-                    serve(path, serializedChannel)
-                }
-            }.start()
-        }
-        val client = HttpClient()
-        val stub = TestRootInterface.wrap(
-            client.asChannel("http://localhost:8082$path").deserialized()
-        )
-        assertEquals(
-            "oh, Hello world",
-            stub.subservice("oh,").rpc("Hello" to "world")
-        )
-        GlobalScope.launch(Dispatchers.IO) {
-            server.stop(10000, 10000)
-        }
+        httpTest(serve = {
+            val channel = info.createChannelFor(basicImpl)
+            val serializedChannel = channel.serialized(TestRootInterface)
+            serve(path, serializedChannel)
+        }, test = {
+            val client = HttpClient()
+            val stub = TestRootInterface.wrap(
+                    client.asChannel("http://localhost:8081$path").deserialized()
+            )
+            assertEquals(
+                    "oh, Hello world",
+                    stub.subservice("oh,").rpc("Hello" to "world")
+            )
+        })
     }
 
     val basicImpl: TestRootInterface

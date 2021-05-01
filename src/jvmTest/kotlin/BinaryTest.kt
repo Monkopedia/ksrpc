@@ -20,6 +20,7 @@ import io.ktor.routing.routing
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.util.*
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.jvm.javaio.toByteReadChannel
 import io.ktor.utils.io.jvm.javaio.toInputStream
@@ -37,11 +38,11 @@ import org.junit.Test
 import java.io.ByteArrayInputStream
 
 interface BinaryInterface : RpcService {
-    suspend fun rpc(u: Pair<String, String>)  = mapBinary("/rpc", u)
+    suspend fun rpc(u: Pair<String, String>) = mapBinary("/rpc", u)
     suspend fun inputRpc(u: ByteReadChannel): String = mapBinaryInput("/input", u)
 
     class BinaryInterfaceStub(private val channel: RpcServiceChannel) :
-        BinaryInterface, RpcService by channel
+            BinaryInterface, RpcService by channel
 
     companion object : RpcObject<BinaryInterface>(BinaryInterface::class, ::BinaryInterfaceStub)
 }
@@ -59,7 +60,7 @@ class BinaryTest {
         })
         val serializedChannel = channel.serialized(BinaryInterface)
         val stub = BinaryInterface.wrap(serializedChannel.deserialized())
-            val response = stub.rpc("Hello" to "world")
+        val response = stub.rpc("Hello" to "world")
         val str = response.toInputStream().readBytes().decodeToString()
         assertEquals("Hello world", str)
     }
@@ -93,20 +94,20 @@ class BinaryTest {
                 }
             })
             val serializedChannel = channel.serialized(
-                BinaryInterface,
-                errorListener = {
-                    it.printStackTrace()
-                }
+                    BinaryInterface,
+                    errorListener = {
+                        it.printStackTrace()
+                    }
             )
             serve(
-                path, serializedChannel,
-                errorListener = {
-                    it.printStackTrace()
-                }
+                    path, serializedChannel,
+                    errorListener = {
+                        it.printStackTrace()
+                    }
             )
         }, test = {
             val client = HttpClient()
-            val stub = BinaryInterface.wrap(client.asChannel("http://localhost:8080$path").deserialized())
+            val stub = BinaryInterface.wrap(client.asChannel("http://localhost:8081$path").deserialized())
             val response = stub.rpc("Hello" to "world")
             val str = response.toInputStream().readBytes().decodeToString()
             assertEquals("Hello world", str)
@@ -121,18 +122,13 @@ class BinaryInputTest {
         val info = BinaryInterface.info
         val channel = info.createChannelFor(object : Service(), BinaryInterface {
             override suspend fun inputRpc(u: ByteReadChannel): String {
-                return super.inputRpc(u)
+                return "Input: " + u.toByteArray().decodeToString()
             }
         })
         val serializedChannel = channel.serialized(BinaryInterface)
         val stub = BinaryInterface.wrap(serializedChannel.deserialized())
-        try {
-            stub.rpc("Hello" to "world")
-            fail("Expected crash")
-        } catch (t: Throwable) {
-            t.printStackTrace()
-            t as RpcException
-        }
+        val response = stub.inputRpc("Hello world".byteInputStream().toByteReadChannel())
+        assertEquals("Input: Hello world", response)
     }
 
     @Test
@@ -140,18 +136,13 @@ class BinaryInputTest {
         val info = BinaryInterface.info
         val channel = info.createChannelFor(object : Service(), BinaryInterface {
             override suspend fun inputRpc(u: ByteReadChannel): String {
-                return super.inputRpc(u)
+                return "Input: " + u.toByteArray().decodeToString()
             }
         })
         channel.servePipe(BinaryInterface) { client ->
             val stub = BinaryInterface.wrap(client.asChannel().deserialized())
-            try {
-                stub.rpc("Hello" to "world")
-                fail("Expected crash")
-            } catch (t: Throwable) {
-                t.printStackTrace()
-                t as RpcException
-            }
+            val response = stub.inputRpc("Hello world".byteInputStream().toByteReadChannel())
+            assertEquals("Input: Hello world", response)
         }
     }
 
@@ -162,31 +153,26 @@ class BinaryInputTest {
             val info = BinaryInterface.info
             val channel = info.createChannelFor(object : Service(), BinaryInterface {
                 override suspend fun inputRpc(u: ByteReadChannel): String {
-                    return super.inputRpc(u)
+                    return "Input: " + u.toByteArray().decodeToString()
                 }
             })
             val serializedChannel = channel.serialized(
-                BinaryInterface,
-                errorListener = {
-                    it.printStackTrace()
-                }
+                    BinaryInterface,
+                    errorListener = {
+                        it.printStackTrace()
+                    }
             )
             serve(
-                path, serializedChannel,
-                errorListener = {
-                    it.printStackTrace()
-                }
+                    path, serializedChannel,
+                    errorListener = {
+                        it.printStackTrace()
+                    }
             )
         }, test = {
             val client = HttpClient()
-            val stub = BinaryInterface.wrap(client.asChannel("http://localhost:8080$path").deserialized())
-            try {
-                stub.rpc("Hello" to "world")
-                fail("Expected crash")
-            } catch (t: Throwable) {
-                t.printStackTrace()
-                t as RpcException
-            }
+            val stub = BinaryInterface.wrap(client.asChannel("http://localhost:8081$path").deserialized())
+            val response = stub.inputRpc("Hello world".byteInputStream().toByteReadChannel())
+            assertEquals("Input: Hello world", response)
         })
     }
 }
