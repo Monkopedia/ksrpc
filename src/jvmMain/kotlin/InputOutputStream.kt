@@ -47,12 +47,6 @@ internal const val CONTENT_LENGTH = "Content-Length"
 internal const val METHOD = "Method"
 internal const val TYPE = "Type"
 
-private enum class SendType {
-    NORMAL,
-    BINARY,
-    BINARY_INPUT
-}
-
 suspend fun SerializedChannel.serve(
     input: InputStream,
     output: OutputStream,

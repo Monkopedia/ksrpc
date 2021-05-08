@@ -102,7 +102,8 @@ kotlin {
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.0.0")
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.0")
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9-native-mt")
-        compileOnly("io.ktor:ktor-client-core:1.5.3")
+        compileOnly("io.ktor:ktor-client-core:1.5.4")
+        compileOnly("io.ktor:ktor-client-websockets:1.5.4")
     }
     sourceSets["jvmMain"].dependencies {
         implementation("com.aventrix.jnanoid:jnanoid:2.0.0")
@@ -110,10 +111,11 @@ kotlin {
         implementation(kotlin("stdlib"))
         implementation(kotlin("reflect"))
         implementation("org.slf4j:slf4j-api:1.6.1")
-        compileOnly("io.ktor:ktor-server-core:1.5.3")
-        compileOnly("io.ktor:ktor-server-host-common:1.5.3")
-        compileOnly("io.ktor:ktor-server-netty:1.5.3")
-        compileOnly("io.ktor:ktor-client-core:1.5.3")
+        compileOnly("io.ktor:ktor-server-core:1.5.4")
+        compileOnly("io.ktor:ktor-server-host-common:1.5.4")
+        compileOnly("io.ktor:ktor-server-netty:1.5.4")
+        compileOnly("io.ktor:ktor-websockets:1.5.4")
+        compileOnly("io.ktor:ktor-client-core:1.5.4")
 
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.0.0")
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.0")
@@ -123,26 +125,26 @@ kotlin {
         implementation(kotlin("test-junit"))
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9")
         implementation("io.mockk:mockk:1.10.2")
-        implementation("io.ktor:ktor-server-core:1.5.3")
-        implementation("io.ktor:ktor-server-netty:1.5.3")
-        implementation("io.ktor:ktor-jackson:1.5.3")
+        implementation("io.ktor:ktor-server-core:1.5.4")
+        implementation("io.ktor:ktor-server-netty:1.5.4")
+        implementation("io.ktor:ktor-jackson:1.5.4")
 
-        implementation("io.ktor:ktor-client-core:1.5.3")
-        implementation("io.ktor:ktor-client-okhttp:1.5.3")
+        implementation("io.ktor:ktor-client-core:1.5.4")
+        implementation("io.ktor:ktor-client-okhttp:1.5.4")
     }
     sourceSets["jsTest"].dependencies {
         implementation(kotlin("test-js"))
-        implementation("io.ktor:ktor-client-core:1.5.3")
-        implementation("io.ktor:ktor-client-js:1.5.3")
+        implementation("io.ktor:ktor-client-core:1.5.4")
+        implementation("io.ktor:ktor-client-js:1.5.4")
     }
     sourceSets["jsMain"].dependencies {
         implementation(npm("nanoid", "3.1.22"))
-        compileOnly("io.ktor:ktor-client-core:1.5.3")
-        compileOnly("io.ktor:ktor-client-js:1.5.3")
+        compileOnly("io.ktor:ktor-client-core:1.5.4")
+        compileOnly("io.ktor:ktor-client-js:1.5.4")
     }
     sourceSets["nativeMain"].dependencies {
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9-native-mt")
-        implementation("io.ktor:ktor-client-curl:1.5.3")
+        implementation("io.ktor:ktor-client-curl:1.5.4")
     }
 }
 

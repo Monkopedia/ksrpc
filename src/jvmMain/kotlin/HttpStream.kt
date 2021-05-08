@@ -24,6 +24,7 @@ import io.ktor.response.*
 import io.ktor.routing.Routing
 import io.ktor.routing.post
 import io.ktor.utils.io.*
+import io.ktor.websocket.webSocket
 
 fun Routing.serve(
     basePath: String,
@@ -31,6 +32,53 @@ fun Routing.serve(
     errorListener: ErrorListener = ErrorListener { }
 ) {
     val baseStripped = basePath.trimEnd('/')
+    post("$baseStripped/call/{method}") {
+        try {
+            val method = call.parameters["method"]?.decodeURLPart() ?: error("Missing method")
+            val content = call.receive<String>()
+            val response = channel.call(method, content)
+            call.respond(response)
+        } catch (t: Throwable) {
+            errorListener.onError(t)
+            throw t
+        }
+    }
+    post("$baseStripped/binary/{method}") {
+        try {
+            val method = call.parameters["method"]?.decodeURLPart() ?: error("Missing method")
+            val content = call.receive<String>()
+            val response = channel.callBinary(method, content)
+            call.respondBytesWriter {
+                response.copyTo(this)
+            }
+        } catch (t: Throwable) {
+            errorListener.onError(t)
+            throw t
+        }
+    }
+    post("$baseStripped/binaryInput/{method}") {
+        try {
+            val method = call.parameters["method"]?.decodeURLPart() ?: error("Missing method")
+            val content = call.receiveChannel()
+            val response = channel.callBinaryInput(method, content)
+            call.respond(response)
+        } catch (t: Throwable) {
+            errorListener.onError(t)
+            throw t
+        }
+    }
+}
+
+fun Routing.serveWebsocket(
+    basePath: String,
+    channel: SerializedChannel,
+    errorListener: ErrorListener = ErrorListener { }
+) {
+    val baseStripped = basePath.trimEnd('/')
+    webSocket(baseStripped) {
+        for (frame in incoming) {
+        }
+    }
     post("$baseStripped/call/{method}") {
         try {
             val method = call.parameters["method"]?.decodeURLPart() ?: error("Missing method")
