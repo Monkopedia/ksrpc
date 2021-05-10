@@ -23,7 +23,7 @@ depending on the platform being targeted.
  - Socket (JVM, Native\*)
  - Stdin/out (JVM, Native\*)
  - Local class instantiation (JVM)
- - Web sockets \* (JVM, JS)
+ - Web sockets (JVM, JS)
 
 \* Not implemented but expected soon
 
