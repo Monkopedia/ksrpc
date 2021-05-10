@@ -1,15 +1,28 @@
+/*
+ * Copyright 2020 Jason Monk
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.monkopedia.ksrpc
 
 import io.ktor.utils.io.ByteReadChannel
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 
-interface SerializedChannel {
+interface SerializedChannel : SuspendCloseable {
     suspend fun call(endpoint: String, input: String): String
     suspend fun callBinary(endpoint: String, input: String): ByteReadChannel
     suspend fun callBinaryInput(endpoint: String, input: ByteReadChannel): String
-
-    suspend fun close()
 }
 
 expect fun randomUuid(): String
@@ -17,7 +30,7 @@ expect fun randomUuid(): String
 fun <T : RpcService> RpcChannel.serialized(
     rpcObject: RpcObject<T>,
     errorListener: ErrorListener = ErrorListener { },
-    json: Json = Json { isLenient = true }
+    json: Json = Json { isLenient = true },
 ): SerializedChannel {
     val rpcChannel = this
     return SerializedChannelImpl(rpcChannel, rpcObject, errorListener, json)
@@ -27,7 +40,7 @@ private class SerializedChannelImpl<T : RpcService>(
     private val rpcChannel: RpcChannel,
     private val rpcObject: RpcObject<T>,
     private val errorListener: ErrorListener,
-    private val json: Json
+    private val json: Json,
 ) : SerializedChannel {
     private val serviceMap by lazy {
         mutableMapOf<String, SerializedChannelImpl<*>>()
@@ -68,7 +81,10 @@ private class SerializedChannelImpl<T : RpcService>(
                 val serviceId = randomUuid()
                 val service = rpcEndpoint.subservice as RpcObject<RpcService>
                 serviceMap[serviceId] =
-                    SerializedChannelImpl(service.channel(output as RpcService), service, errorListener, json)
+                    SerializedChannelImpl(
+                        service.channel(output as RpcService), service,
+                        errorListener, json
+                    )
                 json.encodeToString(String.serializer(), serviceId)
             } else {
                 json.encodeToString(outputSer, output)
@@ -110,11 +126,14 @@ private class SerializedChannelImpl<T : RpcService>(
             val rpcEndpoint = rpcObject.info.findEndpoint(endpoint)
                 as RpcServiceInfoBase.RpcEndpoint<T, Any?, Any?>
             val (_, _, _, outputSer) = rpcEndpoint
-            json.encodeToString(outputSer, rpcChannel.callBinaryInput(
-                endpoint,
+            json.encodeToString(
                 outputSer,
-                input
-            ))
+                rpcChannel.callBinaryInput(
+                    endpoint,
+                    outputSer,
+                    input
+                )
+            )
         } catch (t: Throwable) {
             errorListener.onError(t)
             ERROR_PREFIX + json.encodeToString(RpcFailure.serializer(), RpcFailure(t.asString))
@@ -128,7 +147,7 @@ private class SerializedChannelImpl<T : RpcService>(
 
 fun <T : RpcService> RpcObject<T>.serializedChannel(
     service: T,
-    errorListener: ErrorListener = ErrorListener { }
+    errorListener: ErrorListener = ErrorListener { },
 ): SerializedChannel {
     return info.createChannelFor(service).serialized(this, errorListener = errorListener)
 }

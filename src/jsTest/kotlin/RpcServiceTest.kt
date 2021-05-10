@@ -50,19 +50,23 @@ class RpcServiceTest {
                 str: String,
                 inputSer: KSerializer<I>,
                 outputSer: KSerializer<O>,
-                input: I
+                input: I,
             ): O {
                 error("Not implemented")
             }
 
-            override suspend fun <I> callBinary(endpoint: String, inputSer: KSerializer<I>, input: I): ByteReadChannel {
+            override suspend fun <I> callBinary(
+                endpoint: String,
+                inputSer: KSerializer<I>,
+                input: I,
+            ): ByteReadChannel {
                 error("Not implemented")
             }
 
             override suspend fun <O> callBinaryInput(
                 endpoint: String,
                 outputSer: KSerializer<O>,
-                input: ByteReadChannel
+                input: ByteReadChannel,
             ): O {
                 error("Not implemented")
             }
@@ -71,7 +75,7 @@ class RpcServiceTest {
                 endpoint: String,
                 service: RpcObject<O>,
                 inputSer: KSerializer<I>,
-                input: I
+                input: I,
             ): O {
                 error("Not implemented")
             }
@@ -87,7 +91,7 @@ class RpcServiceTest {
                 str: String,
                 inputSer: KSerializer<I>,
                 outputSer: KSerializer<O>,
-                input: I
+                input: I,
             ): O {
                 if (input is Pair<*, *>) {
                     return "${input.first} ${input.second}" as O
@@ -95,14 +99,18 @@ class RpcServiceTest {
                 error("Not implemented")
             }
 
-            override suspend fun <I> callBinary(endpoint: String, inputSer: KSerializer<I>, input: I): ByteReadChannel {
+            override suspend fun <I> callBinary(
+                endpoint: String,
+                inputSer: KSerializer<I>,
+                input: I,
+            ): ByteReadChannel {
                 error("Not implemented")
             }
 
             override suspend fun <O> callBinaryInput(
                 endpoint: String,
                 outputSer: KSerializer<O>,
-                input: ByteReadChannel
+                input: ByteReadChannel,
             ): O {
                 error("Not implemented")
             }
@@ -111,14 +119,13 @@ class RpcServiceTest {
                 endpoint: String,
                 service: RpcObject<O>,
                 inputSer: KSerializer<I>,
-                input: I
+                input: I,
             ): O {
                 error("Not implemented")
             }
         })
         assertEquals("Hello world", stub.rpc("Hello" to "world"))
     }
-
 
     @Test
     fun testCreateChannel() = runBlockingUnit {

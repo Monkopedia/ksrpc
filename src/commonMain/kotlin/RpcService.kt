@@ -15,39 +15,37 @@
  */
 package com.monkopedia.ksrpc
 
-import io.ktor.utils.io.*
+import io.ktor.utils.io.ByteReadChannel
 import kotlin.reflect.KClass
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.serializer
 
-interface RpcService {
+interface RpcService : SuspendCloseable {
     suspend fun <I, O> map(
         endpoint: String,
         inputSer: KSerializer<I>,
         outputSer: KSerializer<O>,
-        input: I
+        input: I,
     ): O
 
     suspend fun <O> mapBinaryInput(
-            endpoint: String,
-            outputSer: KSerializer<O>,
-            input: ByteReadChannel
+        endpoint: String,
+        outputSer: KSerializer<O>,
+        input: ByteReadChannel,
     ): O
 
     suspend fun <I> mapBinary(
-            endpoint: String,
-            inputSer: KSerializer<I>,
-            input: I
+        endpoint: String,
+        inputSer: KSerializer<I>,
+        input: I,
     ): ByteReadChannel
 
     suspend fun <I, O : RpcService> service(
         endpoint: String,
         service: RpcObject<O>,
         inputSer: KSerializer<I>,
-        input: I
+        input: I,
     ): O
-
-    suspend fun close()
 }
 
 open class Service : RpcService {
@@ -55,16 +53,24 @@ open class Service : RpcService {
         endpoint: String,
         inputSer: KSerializer<I>,
         outputSer: KSerializer<O>,
-        input: I
+        input: I,
     ): O {
         throw NotImplementedError("Service did not implement $endpoint")
     }
 
-    override suspend fun <O> mapBinaryInput(endpoint: String, outputSer: KSerializer<O>, input: ByteReadChannel): O {
+    override suspend fun <O> mapBinaryInput(
+        endpoint: String,
+        outputSer: KSerializer<O>,
+        input: ByteReadChannel,
+    ): O {
         throw NotImplementedError("Service did not implement $endpoint")
     }
 
-    override suspend fun <I> mapBinary(endpoint: String, inputSer: KSerializer<I>, input: I): ByteReadChannel {
+    override suspend fun <I> mapBinary(
+        endpoint: String,
+        inputSer: KSerializer<I>,
+        input: I,
+    ): ByteReadChannel {
         throw NotImplementedError("Service did not implement $endpoint")
     }
 
@@ -72,7 +78,7 @@ open class Service : RpcService {
         endpoint: String,
         service: RpcObject<O>,
         inputSer: KSerializer<I>,
-        input: I
+        input: I,
     ): O {
         throw NotImplementedError("Service did not implement $endpoint")
     }
@@ -84,21 +90,21 @@ open class Service : RpcService {
 
 suspend inline fun <reified I, reified O> RpcService.map(
     endpoint: String,
-    input: I
+    input: I,
 ): O {
     return map(endpoint, serializer(), serializer(), input)
 }
 
 suspend inline fun <reified I> RpcService.mapBinary(
     endpoint: String,
-    input: I
+    input: I,
 ): ByteReadChannel {
     return mapBinary(endpoint, serializer(), input)
 }
 
 suspend inline fun <reified O> RpcService.mapBinaryInput(
     endpoint: String,
-    input: ByteReadChannel
+    input: ByteReadChannel,
 ): O {
     return mapBinaryInput(endpoint, serializer(), input)
 }
@@ -106,7 +112,7 @@ suspend inline fun <reified O> RpcService.mapBinaryInput(
 suspend inline fun <reified I, reified O : RpcService> RpcService.service(
     endpoint: String,
     service: RpcObject<O>,
-    input: I
+    input: I,
 ): O {
     return service(endpoint, service, serializer(), input)
 }
@@ -116,26 +122,26 @@ class RpcServiceChannel internal constructor(private val channel: RpcChannel) : 
         endpoint: String,
         inputSer: KSerializer<I>,
         outputSer: KSerializer<O>,
-        input: I
+        input: I,
     ): O = channel.call(endpoint.trim('/'), inputSer, outputSer, input)
 
     override suspend fun <I> mapBinary(
-            endpoint: String,
-            inputSer: KSerializer<I>,
-            input: I
+        endpoint: String,
+        inputSer: KSerializer<I>,
+        input: I,
     ): ByteReadChannel = channel.callBinary(endpoint.trim('/'), inputSer, input)
 
     override suspend fun <O> mapBinaryInput(
-            endpoint: String,
-            outputSer: KSerializer<O>,
-            input: ByteReadChannel
+        endpoint: String,
+        outputSer: KSerializer<O>,
+        input: ByteReadChannel,
     ): O = channel.callBinaryInput(endpoint.trim('/'), outputSer, input)
 
     override suspend fun <I, O : RpcService> service(
         endpoint: String,
         service: RpcObject<O>,
         inputSer: KSerializer<I>,
-        input: I
+        input: I,
     ): O = channel.callService(endpoint.trim('/'), service, inputSer, input)
 
     override suspend fun close() = channel.close()

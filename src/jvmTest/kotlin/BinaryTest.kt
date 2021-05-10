@@ -16,33 +16,22 @@
 package com.monkopedia.ksrpc
 
 import io.ktor.client.HttpClient
-import io.ktor.routing.routing
-import io.ktor.server.engine.ApplicationEngine
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
-import io.ktor.util.*
+import io.ktor.client.features.websocket.WebSockets
+import io.ktor.util.toByteArray
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.jvm.javaio.toByteReadChannel
 import io.ktor.utils.io.jvm.javaio.toInputStream
+import java.io.ByteArrayOutputStream
+import java.nio.ByteBuffer
 import junit.framework.Assert.assertEquals
-import java.io.InputStream
-import java.io.OutputStream
-import java.io.PipedInputStream
-import java.io.PipedOutputStream
-import junit.framework.Assert.fail
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import org.junit.Test
-import java.io.ByteArrayInputStream
 
 interface BinaryInterface : RpcService {
     suspend fun rpc(u: Pair<String, String>) = mapBinary("/rpc", u)
     suspend fun inputRpc(u: ByteReadChannel): String = mapBinaryInput("/input", u)
 
     class BinaryInterfaceStub(private val channel: RpcServiceChannel) :
-            BinaryInterface, RpcService by channel
+        BinaryInterface, RpcService by channel
 
     companion object : RpcObject<BinaryInterface>(BinaryInterface::class, ::BinaryInterfaceStub)
 }
@@ -85,34 +74,102 @@ class BinaryTest {
     @Test
     fun testHttpPath() = runBlockingUnit {
         val path = "/rpc/"
-        httpTest(serve = {
-            val info = BinaryInterface.info
-            val channel = info.createChannelFor(object : Service(), BinaryInterface {
-                override suspend fun rpc(u: Pair<String, String>): ByteReadChannel {
-                    val str = "${u.first} ${u.second}"
-                    return str.byteInputStream().toByteReadChannel()
-                }
-            })
-            val serializedChannel = channel.serialized(
+        httpTest(
+            serve = {
+                val info = BinaryInterface.info
+                val channel = info.createChannelFor(object : Service(), BinaryInterface {
+                    override suspend fun rpc(u: Pair<String, String>): ByteReadChannel {
+                        val str = "${u.first} ${u.second}"
+                        return str.byteInputStream().toByteReadChannel()
+                    }
+                })
+                val serializedChannel = channel.serialized(
                     BinaryInterface,
                     errorListener = {
                         it.printStackTrace()
                     }
-            )
-            serve(
+                )
+                serve(
                     path, serializedChannel,
                     errorListener = {
                         it.printStackTrace()
                     }
-            )
-        }, test = {
-            val client = HttpClient()
-            val stub = BinaryInterface.wrap(client.asChannel("http://localhost:8081$path").deserialized())
-            val response = stub.rpc("Hello" to "world")
-            val str = response.toInputStream().readBytes().decodeToString()
-            assertEquals("Hello world", str)
-        })
+                )
+            },
+            test = {
+                val client = HttpClient()
+                HttpClient().use { client ->
+                }
+                val stub =
+                    BinaryInterface.wrap(
+                        client.asChannel("http://localhost:8081$path")
+                            .deserialized()
+                    )
+                val response = stub.rpc("Hello" to "world")
+                val str = response.toInputStream().readBytes().decodeToString()
+                assertEquals("Hello world", str)
+            }
+        )
     }
+
+    @Test
+    fun testWebsocketPath() = runBlockingUnit {
+        val path = "/rpc/"
+        httpTest(
+            serve = {
+                val info = BinaryInterface.info
+                val channel = info.createChannelFor(object : Service(), BinaryInterface {
+                    override suspend fun rpc(u: Pair<String, String>): ByteReadChannel {
+                        val str = "${u.first} ${u.second}"
+                        return str.byteInputStream().toByteReadChannel()
+                    }
+                })
+                val serializedChannel = channel.serialized(
+                    BinaryInterface,
+                    errorListener = {
+                        it.printStackTrace()
+                    }
+                )
+                serveWebsocket(
+                    path, serializedChannel,
+                    errorListener = {
+                        it.printStackTrace()
+                    }
+                )
+            },
+            test = {
+                HttpClient().use { client ->
+                }
+                val client = HttpClient {
+                    install(WebSockets)
+                }
+                BinaryInterface.wrap(
+                    client.asWebsocketChannel("http://localhost:8081$path").deserialized()
+                )
+                    .use { stub ->
+                        val response = stub.rpc("Hello" to "world")
+                        val str = response.readAllBytes().decodeToString()
+                        assertEquals("Hello world", str)
+                    }
+            }
+        )
+    }
+}
+
+suspend fun ByteReadChannel.readAllBytes(): ByteArray {
+    return ByteArrayOutputStream().apply {
+        while (!isClosedForRead) {
+            read { b ->
+                write(b.toArray())
+            }
+        }
+    }.toByteArray()
+}
+
+private fun ByteBuffer.toArray(): ByteArray {
+    val array = ByteArray(remaining())
+    get(array)
+    return array
 }
 
 class BinaryInputTest {
@@ -149,30 +206,82 @@ class BinaryInputTest {
     @Test
     fun testHttpPath() = runBlockingUnit {
         val path = "/rpc/"
-        httpTest(serve = {
-            val info = BinaryInterface.info
-            val channel = info.createChannelFor(object : Service(), BinaryInterface {
-                override suspend fun inputRpc(u: ByteReadChannel): String {
-                    return "Input: " + u.toByteArray().decodeToString()
-                }
-            })
-            val serializedChannel = channel.serialized(
+        httpTest(
+            serve = {
+                val info = BinaryInterface.info
+                val channel = info.createChannelFor(object : Service(), BinaryInterface {
+                    override suspend fun inputRpc(u: ByteReadChannel): String {
+                        return "Input: " + u.toByteArray().decodeToString()
+                    }
+                })
+                val serializedChannel = channel.serialized(
                     BinaryInterface,
                     errorListener = {
                         it.printStackTrace()
                     }
-            )
-            serve(
+                )
+                serve(
                     path, serializedChannel,
                     errorListener = {
                         it.printStackTrace()
                     }
-            )
-        }, test = {
-            val client = HttpClient()
-            val stub = BinaryInterface.wrap(client.asChannel("http://localhost:8081$path").deserialized())
-            val response = stub.inputRpc("Hello world".byteInputStream().toByteReadChannel())
-            assertEquals("Input: Hello world", response)
-        })
+                )
+            },
+            test = {
+                HttpClient().use { client ->
+                    val stub =
+                        BinaryInterface.wrap(
+                            client.asChannel("http://localhost:8081$path").deserialized()
+                        )
+                    val response =
+                        stub.inputRpc("Hello world".byteInputStream().toByteReadChannel())
+                    assertEquals("Input: Hello world", response)
+                }
+            }
+        )
+    }
+
+    @Test
+    fun testWebsocketPath() = runBlockingUnit {
+        val path = "/rpc/"
+        httpTest(
+            serve = {
+                val info = BinaryInterface.info
+                val channel = info.createChannelFor(
+                    object : Service(), BinaryInterface {
+                        override suspend fun inputRpc(u: ByteReadChannel): String {
+                            return "Input: " + u.toByteArray().decodeToString()
+                        }
+                    }
+                )
+                val serializedChannel = channel.serialized(
+                    BinaryInterface,
+                    errorListener = {
+                        it.printStackTrace()
+                    }
+                )
+                serveWebsocket(
+                    path, serializedChannel,
+                    errorListener = {
+                        it.printStackTrace()
+                    }
+                )
+            },
+            test = {
+                HttpClient {
+                    install(WebSockets)
+                }.use { client ->
+                    BinaryInterface.wrap(
+                        client.asWebsocketChannel("http://localhost:8081$path").deserialized()
+                    )
+                        .use { stub ->
+
+                            val response =
+                                stub.inputRpc("Hello world".byteInputStream().toByteReadChannel())
+                            assertEquals("Input: Hello world", response)
+                        }
+                }
+            }
+        )
     }
 }

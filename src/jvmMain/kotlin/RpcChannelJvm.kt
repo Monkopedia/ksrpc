@@ -19,11 +19,6 @@ import io.ktor.client.HttpClient
 import java.io.File
 import java.net.Socket
 import kotlin.reflect.full.companionObjectInstance
-import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.booleanOrNull
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 
 actual suspend fun KsrpcUri.connect(clientFactory: () -> HttpClient): SerializedChannel {
     return when (type) {
@@ -46,6 +41,10 @@ actual suspend fun KsrpcUri.connect(clientFactory: () -> HttpClient): Serialized
             val companion = cls.findServiceObj() ?: error("Can't find RpcObject")
             val instance = (cls.newInstance() as RpcService)
             companion.channel(instance).serialized(companion)
+        }
+        KsrpcType.WEBSOCKET -> {
+            val client = clientFactory()
+            client.asWebsocketChannel(path)
         }
     }
 }

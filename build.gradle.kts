@@ -21,8 +21,8 @@ buildscript {
     }
 }
 plugins {
-    kotlin("multiplatform") version "1.5.0-RC"
-    kotlin("plugin.serialization") version "1.5.0-RC"
+    kotlin("multiplatform") version "1.5.0"
+    kotlin("plugin.serialization") version "1.5.0"
     id("com.github.autostyle") version "3.1"
     id("org.jetbrains.dokka") version "1.4.10.2"
 
@@ -128,6 +128,8 @@ kotlin {
         implementation("io.ktor:ktor-server-core:1.5.4")
         implementation("io.ktor:ktor-server-netty:1.5.4")
         implementation("io.ktor:ktor-jackson:1.5.4")
+        implementation("io.ktor:ktor-websockets:1.5.4")
+        implementation("io.ktor:ktor-client-websockets:1.5.4")
 
         implementation("io.ktor:ktor-client-core:1.5.4")
         implementation("io.ktor:ktor-client-okhttp:1.5.4")

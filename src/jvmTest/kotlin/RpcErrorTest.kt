@@ -16,6 +16,7 @@
 package com.monkopedia.ksrpc
 
 import io.ktor.client.HttpClient
+import io.ktor.client.features.websocket.WebSockets
 import junit.framework.Assert.fail
 import org.junit.Test
 
@@ -63,35 +64,87 @@ class RpcErrorTest {
     @Test
     fun testHttpPath() = runBlockingUnit {
         val path = "/rpc/"
-        httpTest(serve = {
-            val info = TestInterface.info
-            val channel = info.createChannelFor(object : Service(), TestInterface {
-                override suspend fun rpc(u: Pair<String, String>): String {
-                    throw IllegalArgumentException("Failure")
+        httpTest(
+            serve = {
+                val info = TestInterface.info
+                val channel = info.createChannelFor(object : Service(), TestInterface {
+                    override suspend fun rpc(u: Pair<String, String>): String {
+                        throw IllegalArgumentException("Failure")
+                    }
+                })
+                val serializedChannel = channel.serialized(
+                    TestInterface,
+                    errorListener = {
+                        it.printStackTrace()
+                    }
+                )
+                serve(
+                    path, serializedChannel,
+                    errorListener = {
+                        it.printStackTrace()
+                    }
+                )
+            },
+            test = {
+                HttpClient().use { client ->
+                    val stub =
+                        TestInterface.wrap(
+                            client.asChannel("http://localhost:8081$path").deserialized()
+                        )
+                    try {
+                        stub.rpc("Hello" to "world")
+                        fail("Expected crash")
+                    } catch (t: Throwable) {
+                        t.printStackTrace()
+                        t as RpcException
+                    }
                 }
-            })
-            val serializedChannel = channel.serialized(
-                TestInterface,
-                errorListener = {
-                    it.printStackTrace()
-                }
-            )
-            serve(
-                path, serializedChannel,
-                errorListener = {
-                    it.printStackTrace()
-                }
-            )
-        }, test = {
-            val client = HttpClient()
-            val stub = TestInterface.wrap(client.asChannel("http://localhost:8081$path").deserialized())
-            try {
-                stub.rpc("Hello" to "world")
-                fail("Expected crash")
-            } catch (t: Throwable) {
-                t.printStackTrace()
-                t as RpcException
             }
-        })
+        )
+    }
+
+    @Test
+    fun testWebsocketPath() = runBlockingUnit {
+        val path = "/rpc/"
+        httpTest(
+            serve = {
+                val info = TestInterface.info
+                val channel = info.createChannelFor(object : Service(), TestInterface {
+                    override suspend fun rpc(u: Pair<String, String>): String {
+                        throw IllegalArgumentException("Failure")
+                    }
+                })
+                val serializedChannel = channel.serialized(
+                    TestInterface,
+                    errorListener = {
+                        it.printStackTrace()
+                    }
+                )
+                serveWebsocket(
+                    path, serializedChannel,
+                    errorListener = {
+                        it.printStackTrace()
+                    }
+                )
+            },
+            test = {
+                HttpClient {
+                    install(WebSockets)
+                }.use { client ->
+                    TestInterface.wrap(
+                        client.asWebsocketChannel("http://localhost:8081$path").deserialized()
+                    )
+                        .use { stub ->
+                            try {
+                                stub.rpc("Hello" to "world")
+                                fail("Expected crash")
+                            } catch (t: Throwable) {
+                                t.printStackTrace()
+                                t as RpcException
+                            }
+                        }
+                }
+            }
+        )
     }
 }

@@ -18,15 +18,15 @@ package com.monkopedia.ksrpc
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import kotlin.test.assertEquals
 import kotlinx.serialization.Serializable
 import org.junit.Test
-import kotlin.test.assertEquals
 
 @Serializable
 data class MyJson(
     val str: String,
     val int: Int,
-    val nFloat: Float?
+    val nFloat: Float?,
 )
 
 interface TestTypesInterface : RpcService {
@@ -164,14 +164,14 @@ class RpcTypeTest {
     fun testReturnType() = runBlockingUnit {
         channel.servePipe(TestTypesInterface) { client ->
 
-        val stub = TestTypesInterface.wrap(client.asChannel().deserialized())
-        coEvery {
-            service.returnType(Unit)
-        }.returns(MyJson("second", 2, 1.2f))
-        assertEquals(MyJson("second", 2, 1.2f), stub.returnType(Unit))
-        coVerify {
-            service.returnType(Unit)
-        }
+            val stub = TestTypesInterface.wrap(client.asChannel().deserialized())
+            coEvery {
+                service.returnType(Unit)
+            }.returns(MyJson("second", 2, 1.2f))
+            assertEquals(MyJson("second", 2, 1.2f), stub.returnType(Unit))
+            coVerify {
+                service.returnType(Unit)
+            }
         }
     }
 }

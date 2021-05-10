@@ -16,30 +16,27 @@
 package com.monkopedia.ksrpc
 
 import io.ktor.client.HttpClient
+import io.ktor.client.call.receive
 import io.ktor.client.features.websocket.webSocketSession
 import io.ktor.client.request.accept
-import io.ktor.client.request.port
 import io.ktor.client.request.post
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLProtocol
 import io.ktor.http.cio.websocket.Frame
 import io.ktor.http.cio.websocket.close
-import io.ktor.http.cio.websocket.readBytes
 import io.ktor.http.cio.websocket.readText
 import io.ktor.http.cio.websocket.send
 import io.ktor.http.encodeURLPath
 import io.ktor.http.takeFrom
-import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.ByteReadChannel
-import io.ktor.utils.io.close
-import io.ktor.utils.io.core.readBytes
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 
 enum class KsrpcType {
     EXE,
@@ -52,7 +49,7 @@ enum class KsrpcType {
 @Serializable
 data class KsrpcUri(
     val type: KsrpcType,
-    val path: String
+    val path: String,
 ) {
     override fun toString(): String {
         return path
@@ -68,34 +65,59 @@ fun String.toKsrpcUri(): KsrpcUri = when {
     else -> throw IllegalArgumentException("Unable to parse $this")
 }
 
-expect suspend fun KsrpcUri.connect(clientFactory: () -> HttpClient = { HttpClient { } }): SerializedChannel
+expect suspend fun KsrpcUri.connect(
+    clientFactory: () -> HttpClient = { HttpClient { } },
+): SerializedChannel
 
 fun HttpClient.asChannel(baseUrl: String): SerializedChannel {
     val baseStripped = baseUrl.trimEnd('/')
     val client = this
     return object : SerializedChannel {
         override suspend fun call(endpoint: String, input: String): String {
-            return client.post("$baseStripped/call/${endpoint.encodeURLPath()}") {
-                accept(ContentType.Application.Json)
-                body = input
-            }
+            val response =
+                client.post<HttpResponse>("$baseStripped/call/${endpoint.encodeURLPath()}") {
+                    accept(ContentType.Application.Json)
+                    body = input
+                }
+            response.checkErrors()
+            return response.receive()
         }
 
         override suspend fun callBinary(endpoint: String, input: String): ByteReadChannel {
-            return client.post<HttpResponse>("$baseStripped/binary/${endpoint.encodeURLPath()}") {
-                accept(ContentType.Application.Any)
-                body = input
-            }.content
+            val response =
+                client.post<HttpResponse>("$baseStripped/binary/${endpoint.encodeURLPath()}") {
+                    accept(ContentType.Application.Any)
+                    body = input
+                }
+            response.checkErrors()
+            return response.content
         }
 
         override suspend fun callBinaryInput(endpoint: String, input: ByteReadChannel): String {
-            return client.post("$baseStripped/binaryInput/${endpoint.encodeURLPath()}") {
-                accept(ContentType.Application.Json)
-                body = input
-            }
+            val response =
+                client.post<HttpResponse>("$baseStripped/binaryInput/${endpoint.encodeURLPath()}") {
+                    accept(ContentType.Application.Json)
+                    body = input
+                }
+            response.checkErrors()
+            return response.receive()
         }
 
         override suspend fun close() {
+        }
+    }
+}
+
+private suspend fun HttpResponse.checkErrors() {
+    if (status == HttpStatusCode.InternalServerError) {
+        val text = receive<String>()
+        if (text.startsWith(ERROR_PREFIX)) {
+            throw Json.decodeFromString(
+                RpcFailure.serializer(),
+                text.substring(ERROR_PREFIX.length)
+            ).toException()
+        } else {
+            throw IllegalStateException("Can't parse error $this")
         }
     }
 }
@@ -110,9 +132,8 @@ suspend fun HttpClient.asWebsocketChannel(baseUrl: String): SerializedChannel {
     val baseStripped = baseUrl.trimEnd('/')
     val lock = Mutex()
     val client = webSocketSession {
-        url.protocol = URLProtocol.WS
-        url.port = port
         url.takeFrom(baseStripped)
+        url.protocol = URLProtocol.WS
     }
     return object : SerializedChannel {
         override suspend fun call(endpoint: String, input: String): String {
@@ -169,4 +190,3 @@ suspend fun HttpClient.asWebsocketChannel(baseUrl: String): SerializedChannel {
         }
     }
 }
-

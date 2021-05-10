@@ -18,6 +18,13 @@ package com.monkopedia.ksrpc
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.jvm.javaio.toByteReadChannel
 import io.ktor.utils.io.jvm.javaio.toInputStream
+import java.io.BufferedReader
+import java.io.BufferedWriter
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
+import java.io.OutputStream
+import java.util.Base64
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -35,13 +42,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
-import java.io.BufferedReader
-import java.io.BufferedWriter
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.InputStream
-import java.io.OutputStream
-import java.util.Base64
 
 internal const val CONTENT_LENGTH = "Content-Length"
 internal const val METHOD = "Method"
@@ -50,7 +50,7 @@ internal const val TYPE = "Type"
 suspend fun SerializedChannel.serve(
     input: InputStream,
     output: OutputStream,
-    errorListener: ErrorListener = ErrorListener { }
+    errorListener: ErrorListener = ErrorListener { },
 ) {
     val channel = this
     val lock = Mutex()
@@ -74,10 +74,12 @@ suspend fun SerializedChannel.serve(
                                     try {
                                         when (type) {
                                             SendType.NORMAL -> channel.call(method, str)
-                                            SendType.BINARY -> Base64.getEncoder()
-                                                .encodeToString(
-                                                    channel.callBinary(method, str).toInputStream().readBytes()
-                                                )
+                                            SendType.BINARY ->
+                                                Base64.getEncoder()
+                                                    .encodeToString(
+                                                        channel.callBinary(method, str)
+                                                            .toInputStream().readBytes()
+                                                    )
                                             SendType.BINARY_INPUT -> channel.callBinaryInput(
                                                 method,
                                                 ByteArrayInputStream(
@@ -206,7 +208,7 @@ fun Pair<InputStream, OutputStream>.asChannel(): SerializedChannel {
 }
 
 private fun BufferedWriter.writeContent(
-    content: String
+    content: String,
 ) {
     appendLine("$CONTENT_LENGTH: ${content.length}")
     appendLine()
@@ -215,7 +217,7 @@ private fun BufferedWriter.writeContent(
 }
 
 private fun BufferedReader.readContent(
-    params: Map<String, String>
+    params: Map<String, String>,
 ): String {
     var length = params[CONTENT_LENGTH]?.toIntOrNull() ?: error("Missing content length in $params")
     val buffer = CharArray(length)

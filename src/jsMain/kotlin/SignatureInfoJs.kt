@@ -23,7 +23,7 @@ import kotlinx.serialization.builtins.serializer
 
 internal actual class RpcServiceInfo<T : RpcService> actual constructor(
     internal val cls: KClass<T>,
-    stubFactory: (RpcServiceChannel) -> T
+    stubFactory: (RpcServiceChannel) -> T,
 ) : RpcServiceInfoBase<T>(cls, stubFactory) {
     private val signatureInfo by lazy {
         SignatureInfo(this)
@@ -41,7 +41,7 @@ internal actual class RpcServiceInfo<T : RpcService> actual constructor(
                 endpoint: String,
                 inputSer: KSerializer<I>,
                 outputSer: KSerializer<O>,
-                input: I
+                input: I,
             ): O {
                 val endpoint = findEndpoint(endpoint) as RpcEndpoint<T, I, O>
                 return (
@@ -50,7 +50,11 @@ internal actual class RpcServiceInfo<T : RpcService> actual constructor(
                     ) as O
             }
 
-            override suspend fun <I> callBinary(endpoint: String, inputSer: KSerializer<I>, input: I): ByteReadChannel {
+            override suspend fun <I> callBinary(
+                endpoint: String,
+                inputSer: KSerializer<I>,
+                input: I,
+            ): ByteReadChannel {
                 val endpoint = findEndpoint(endpoint) as RpcEndpoint<T, I, Any>
                 return (
                     endpoint.suspendFun?.invoke(service, input)
@@ -61,7 +65,7 @@ internal actual class RpcServiceInfo<T : RpcService> actual constructor(
             override suspend fun <O> callBinaryInput(
                 endpoint: String,
                 outputSer: KSerializer<O>,
-                input: ByteReadChannel
+                input: ByteReadChannel,
             ): O {
                 val endpoint = findEndpoint(endpoint) as RpcEndpoint<T, Any, O>
                 return (
@@ -74,7 +78,7 @@ internal actual class RpcServiceInfo<T : RpcService> actual constructor(
                 endpoint: String,
                 retService: RpcObject<O>,
                 inputSer: KSerializer<I>,
-                input: I
+                input: I,
             ): O {
                 val endpoint = findEndpoint(endpoint) as RpcEndpoint<T, I, O>
                 return (
@@ -97,18 +101,26 @@ internal class SignatureInfo<T : RpcService>(private val rpcServiceInfo: RpcServ
             endpoint: String,
             inputSer: KSerializer<I>,
             outputSer: KSerializer<O>,
-            input: I
+            input: I,
         ): O {
             if (endpoint == desiredEndpoint) {
-                lastCall = RpcServiceInfoBase.RpcEndpoint<T, I, O>(endpoint, false, inputSer, outputSer)
+                lastCall =
+                    RpcServiceInfoBase.RpcEndpoint<T, I, O>(endpoint, false, inputSer, outputSer)
                     as RpcServiceInfoBase.RpcEndpoint<T, Any?, Any?>
             }
             throw NotImplementedError()
         }
 
-        override suspend fun <I> callBinary(endpoint: String, inputSer: KSerializer<I>, input: I): ByteReadChannel {
+        override suspend fun <I> callBinary(
+            endpoint: String,
+            inputSer: KSerializer<I>,
+            input: I,
+        ): ByteReadChannel {
             if (endpoint == desiredEndpoint) {
-                lastCall = RpcServiceInfoBase.RpcEndpoint<T, I, Unit>(endpoint, false, inputSer, Unit.serializer())
+                lastCall = RpcServiceInfoBase.RpcEndpoint<T, I, Unit>(
+                    endpoint, false, inputSer,
+                    Unit.serializer()
+                )
                     as RpcServiceInfoBase.RpcEndpoint<T, Any?, Any?>
             }
             throw NotImplementedError()
@@ -117,10 +129,14 @@ internal class SignatureInfo<T : RpcService>(private val rpcServiceInfo: RpcServ
         override suspend fun <O> callBinaryInput(
             endpoint: String,
             outputSer: KSerializer<O>,
-            input: ByteReadChannel
+            input: ByteReadChannel,
         ): O {
             if (endpoint == desiredEndpoint) {
-                lastCall = RpcServiceInfoBase.RpcEndpoint<T, Unit, O>(endpoint, false, Unit.serializer(), outputSer)
+                lastCall =
+                    RpcServiceInfoBase.RpcEndpoint<T, Unit, O>(
+                    endpoint, false, Unit.serializer(),
+                    outputSer
+                )
                     as RpcServiceInfoBase.RpcEndpoint<T, Any?, Any?>
             }
             throw NotImplementedError()
@@ -130,7 +146,7 @@ internal class SignatureInfo<T : RpcService>(private val rpcServiceInfo: RpcServ
             str: String,
             service: RpcObject<O>,
             inputSer: KSerializer<I>,
-            input: I
+            input: I,
         ): O {
             if (str == desiredEndpoint) {
                 lastCall = RpcServiceInfoBase.RpcEndpoint<T, I, String>(
@@ -149,7 +165,7 @@ internal class SignatureInfo<T : RpcService>(private val rpcServiceInfo: RpcServ
     })
 
     suspend fun createEndpoint(
-        endpoint: String
+        endpoint: String,
     ): RpcServiceInfoBase.RpcEndpoint<T, *, *> {
         synchronized(this) {
             desiredEndpoint = endpoint

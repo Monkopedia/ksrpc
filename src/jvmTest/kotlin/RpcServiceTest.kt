@@ -15,30 +15,33 @@
  */
 package com.monkopedia.ksrpc
 
+import io.ktor.application.install
 import io.ktor.client.HttpClient
 import io.ktor.routing.Routing
 import io.ktor.routing.routing
-import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.utils.io.ByteReadChannel
-import junit.framework.Assert.assertEquals
-import junit.framework.Assert.assertNotNull
-import junit.framework.Assert.fail
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.newSingleThreadContext
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.builtins.PairSerializer
-import kotlinx.serialization.builtins.serializer
-import org.junit.Test
+import io.ktor.websocket.WebSockets
 import java.io.InputStream
 import java.io.OutputStream
 import java.io.PipedInputStream
 import java.io.PipedOutputStream
 import java.util.concurrent.CountDownLatch
+import junit.framework.Assert.assertEquals
+import junit.framework.Assert.assertNotNull
+import junit.framework.Assert.fail
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.builtins.PairSerializer
+import kotlinx.serialization.builtins.serializer
+import org.junit.Test
 
 interface TestInterface : RpcService {
     suspend fun rpc(u: Pair<String, String>): String = map("/rpc", u)
@@ -64,19 +67,23 @@ class RpcServiceTest {
                 str: String,
                 inputSer: KSerializer<I>,
                 outputSer: KSerializer<O>,
-                input: I
+                input: I,
             ): O {
                 error("Not implemented")
             }
 
-            override suspend fun <I> callBinary(endpoint: String, inputSer: KSerializer<I>, input: I): ByteReadChannel {
+            override suspend fun <I> callBinary(
+                endpoint: String,
+                inputSer: KSerializer<I>,
+                input: I,
+            ): ByteReadChannel {
                 error("Not implemented")
             }
 
             override suspend fun <O> callBinaryInput(
                 endpoint: String,
                 outputSer: KSerializer<O>,
-                input: ByteReadChannel
+                input: ByteReadChannel,
             ): O {
                 error("Not implemented")
             }
@@ -85,7 +92,7 @@ class RpcServiceTest {
                 endpoint: String,
                 service: RpcObject<O>,
                 inputSer: KSerializer<I>,
-                input: I
+                input: I,
             ): O {
                 error("Not implemented")
             }
@@ -101,7 +108,7 @@ class RpcServiceTest {
                 str: String,
                 inputSer: KSerializer<I>,
                 outputSer: KSerializer<O>,
-                input: I
+                input: I,
             ): O {
                 if (input is Pair<*, *>) {
                     return "${input.first} ${input.second}" as O
@@ -109,14 +116,18 @@ class RpcServiceTest {
                 error("Not implemented")
             }
 
-            override suspend fun <I> callBinary(endpoint: String, inputSer: KSerializer<I>, input: I): ByteReadChannel {
+            override suspend fun <I> callBinary(
+                endpoint: String,
+                inputSer: KSerializer<I>,
+                input: I,
+            ): ByteReadChannel {
                 error("Not implemented")
             }
 
             override suspend fun <O> callBinaryInput(
                 endpoint: String,
                 outputSer: KSerializer<O>,
-                input: ByteReadChannel
+                input: ByteReadChannel,
             ): O {
                 error("Not implemented")
             }
@@ -125,7 +136,7 @@ class RpcServiceTest {
                 endpoint: String,
                 service: RpcObject<O>,
                 inputSer: KSerializer<I>,
-                input: I
+                input: I,
             ): O {
                 error("Not implemented")
             }
@@ -251,28 +262,79 @@ class RpcServiceTest {
     @Test
     fun testHttpPath() = runBlockingUnit {
         val path = "/rpc/"
-        httpTest(serve = {
-            val info = TestInterface.info
-            val channel = info.createChannelFor(object : Service(), TestInterface {
-                override suspend fun rpc(u: Pair<String, String>): String {
-                    return "${u.first} ${u.second}"
-                }
-            })
-            val serializedChannel = channel.serialized(TestInterface)
+        httpTest(
+            serve = {
+                val info = TestInterface.info
+                val channel = info.createChannelFor(object : Service(), TestInterface {
+                    override suspend fun rpc(u: Pair<String, String>): String {
+                        return "${u.first} ${u.second}"
+                    }
+                })
+                val serializedChannel = channel.serialized(TestInterface)
 
-            serve(path, serializedChannel)
-        }, test = {
-            val client = HttpClient()
-            val stub = TestInterface.wrap(client.asChannel("http://localhost:8081$path").deserialized())
-            assertEquals(
-                "Hello world",
-                stub.rpc("Hello" to "world")
-            )
-        })
+                serve(path, serializedChannel)
+            },
+            test = {
+                HttpClient().use { client ->
+                    val stub =
+                        TestInterface.wrap(
+                            client.asChannel("http://localhost:8081$path").deserialized()
+                        )
+                    assertEquals(
+                        "Hello world",
+                        stub.rpc("Hello" to "world")
+                    )
+                }
+            }
+        )
+    }
+
+    @Test
+    fun testWebsocketPath() = runBlockingUnit {
+        val path = "/rpc/"
+        httpTest(
+            serve = {
+                val info = TestInterface.info
+                val channel = info.createChannelFor(object : Service(), TestInterface {
+                    override suspend fun rpc(u: Pair<String, String>): String {
+                        return "${u.first} ${u.second}"
+                    }
+                })
+                val serializedChannel = channel.serialized(TestInterface)
+
+                serveWebsocket(path, serializedChannel)
+            },
+            test = {
+                HttpClient {
+                    install(io.ktor.client.features.websocket.WebSockets)
+                }.use { client ->
+                    TestInterface.wrap(
+                        client.asWebsocketChannel("http://localhost:8081$path").deserialized()
+                    )
+                        .use { stub ->
+                            assertEquals(
+                                "Hello world",
+                                stub.rpc("Hello" to "world")
+                            )
+                            assertEquals(
+                                "Goodbye world",
+                                stub.rpc("Goodbye" to "world")
+                            )
+                            assertEquals(
+                                "Last words",
+                                stub.rpc("Last" to "words")
+                            )
+                        }
+                }
+            }
+        )
     }
 }
 
-suspend inline fun <T : RpcService> RpcChannel.servePipe(obj: RpcObject<T>, test: suspend (Pair<InputStream, OutputStream>) -> Unit) {
+suspend inline fun <T : RpcService> RpcChannel.servePipe(
+    obj: RpcObject<T>,
+    test: suspend (Pair<InputStream, OutputStream>) -> Unit,
+) {
     val serializedChannel = serialized(obj)
     val (output, input) = createPipe()
     val (so, si) = createPipe()
@@ -287,8 +349,14 @@ suspend inline fun <T : RpcService> RpcChannel.servePipe(obj: RpcObject<T>, test
     try {
         test(input to so)
     } finally {
-        try { input.close() } catch (t: Throwable) {}
-        try { si.close() } catch (t: Throwable) {}
+        try {
+            input.close()
+        } catch (t: Throwable) {
+        }
+        try {
+            si.close()
+        } catch (t: Throwable) {
+        }
     }
 }
 
@@ -314,22 +382,19 @@ internal fun runBlockingUnit(function: suspend () -> Unit) {
 }
 
 suspend inline fun httpTest(crossinline serve: Routing.() -> Unit, test: suspend () -> Unit) {
-    val serverCompletion = CompletableDeferred<ApplicationEngine>()
-    GlobalScope.launch(Dispatchers.IO) {
-        try {
-            serverCompletion.complete(embeddedServer(Netty, 8081) {
-                routing {
-                    serve()
-                }
-            }.start())
-        } catch (t: Throwable) {
-            serverCompletion.completeExceptionally(t)
-        }
+    val parent = SupervisorJob()
+    val server = withContext(Dispatchers.IO) {
+        embeddedServer(Netty, 8081, parentCoroutineContext = parent) {
+            install(WebSockets)
+            routing {
+                serve()
+            }
+        }.start()
     }
-    val server = serverCompletion.await()
     try {
         test()
     } finally {
-        server.stop(10000, 10000)
+        parent.cancelAndJoin()
+        server.stop(1000, 10000)
     }
 }

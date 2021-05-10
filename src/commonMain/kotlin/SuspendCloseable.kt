@@ -15,17 +15,14 @@
  */
 package com.monkopedia.ksrpc
 
-import kotlin.reflect.KClass
+interface SuspendCloseable {
+    suspend fun close()
+}
 
-internal actual class RpcServiceInfo<T : RpcService> actual constructor(
-    cls: KClass<T>,
-    stubFactory: (RpcServiceChannel) -> T,
-) : RpcServiceInfoBase<T>(cls, stubFactory) {
-    override fun createChannelFor(service: T): RpcChannel {
-        throw NotImplementedError("Cannot serve on native platforms")
-    }
-
-    override suspend fun findEndpoint(str: String): RpcEndpoint<T, *, *> {
-        throw NotImplementedError("Cannot serve on native platforms")
+suspend inline fun <T : SuspendCloseable, R> T.use(usage: (T) -> R): R {
+    try {
+        return usage(this)
+    } finally {
+        close()
     }
 }

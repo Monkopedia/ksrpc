@@ -31,5 +31,8 @@ actual suspend fun KsrpcUri.connect(clientFactory: () -> HttpClient): Serialized
         KsrpcType.HTTP -> {
             clientFactory().asChannel(path)
         }
+        KsrpcType.WEBSOCKET -> {
+            clientFactory().asWebsocketChannel(path)
+        }
     }
 }

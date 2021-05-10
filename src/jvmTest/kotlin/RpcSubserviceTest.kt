@@ -16,14 +16,7 @@
 package com.monkopedia.ksrpc
 
 import io.ktor.client.HttpClient
-import io.ktor.routing.routing
-import io.ktor.server.engine.ApplicationEngine
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
-import java.io.InputStream
-import java.io.OutputStream
-import java.io.PipedInputStream
-import java.io.PipedOutputStream
+import io.ktor.client.features.websocket.WebSockets
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertNotNull
 import junit.framework.Assert.fail
@@ -36,7 +29,7 @@ interface TestSubInterface : RpcService {
     suspend fun rpc(u: Pair<String, String>): String = map("/rpc", u)
 
     class TestSubInterfaceStub(private val channel: RpcServiceChannel) :
-            TestSubInterface, RpcService by channel
+        TestSubInterface, RpcService by channel
 
     companion object : RpcObject<TestSubInterface>(TestSubInterface::class, ::TestSubInterfaceStub)
 }
@@ -46,11 +39,11 @@ interface TestRootInterface : RpcService {
     suspend fun subservice(prefix: String) = service("/service", TestSubInterface, prefix)
 
     class TestRootInterfaceStub(private val channel: RpcServiceChannel) :
-            TestRootInterface, RpcService by channel
+        TestRootInterface, RpcService by channel
 
     companion object : RpcObject<TestRootInterface>(
-            TestRootInterface::class,
-            ::TestRootInterfaceStub
+        TestRootInterface::class,
+        ::TestRootInterfaceStub
     )
 }
 
@@ -69,8 +62,8 @@ class RpcSubserviceTest {
         val channel = info.createChannelFor(basicImpl)
         val stub = TestRootInterface.wrap(channel)
         assertEquals(
-                "oh, Hello world",
-                stub.subservice("oh,").rpc("Hello" to "world")
+            "oh, Hello world",
+            stub.subservice("oh,").rpc("Hello" to "world")
         )
     }
 
@@ -80,8 +73,8 @@ class RpcSubserviceTest {
         val serializedChannel = channel.serialized(TestRootInterface)
         val stub = TestRootInterface.wrap(serializedChannel.deserialized())
         assertEquals(
-                "oh, Hello world",
-                stub.subservice("oh,").rpc("Hello" to "world")
+            "oh, Hello world",
+            stub.subservice("oh,").rpc("Hello" to "world")
         )
     }
 
@@ -92,8 +85,8 @@ class RpcSubserviceTest {
         val stub = TestRootInterface.wrap(serializedChannel.deserialized())
         stub.subservice("oh,").rpc("Hello" to "world")
         assertEquals(
-                "oh, Hello world",
-                stub.subservice("oh,").rpc("Hello" to "world")
+            "oh, Hello world",
+            stub.subservice("oh,").rpc("Hello" to "world")
         )
     }
 
@@ -108,8 +101,8 @@ class RpcSubserviceTest {
         }
         val stub = TestRootInterface.wrap((input to so).asChannel().deserialized())
         assertEquals(
-                "oh, Hello world",
-                stub.subservice("oh,").rpc("Hello" to "world")
+            "oh, Hello world",
+            stub.subservice("oh,").rpc("Hello" to "world")
         )
     }
 
@@ -131,28 +124,58 @@ class RpcSubserviceTest {
         val ohService = stub.subservice("oh,")
         stub.subservice("!!!").rpc("Hello" to "world")
         assertEquals(
-                "oh, Hello world",
-                ohService.rpc("Hello" to "world")
+            "oh, Hello world",
+            ohService.rpc("Hello" to "world")
         )
     }
 
     @Test
     fun testHttpPath() = runBlockingUnit {
         val path = "/rpc/"
-        httpTest(serve = {
-            val channel = info.createChannelFor(basicImpl)
-            val serializedChannel = channel.serialized(TestRootInterface)
-            serve(path, serializedChannel)
-        }, test = {
-            val client = HttpClient()
-            val stub = TestRootInterface.wrap(
-                    client.asChannel("http://localhost:8081$path").deserialized()
-            )
-            assertEquals(
-                    "oh, Hello world",
-                    stub.subservice("oh,").rpc("Hello" to "world")
-            )
-        })
+        httpTest(
+            serve = {
+                val channel = info.createChannelFor(basicImpl)
+                val serializedChannel = channel.serialized(TestRootInterface)
+                serve(path, serializedChannel)
+            },
+            test = {
+                HttpClient().use { client ->
+                    val stub = TestRootInterface.wrap(
+                        client.asChannel("http://localhost:8081$path").deserialized()
+                    )
+                    assertEquals(
+                        "oh, Hello world",
+                        stub.subservice("oh,").rpc("Hello" to "world")
+                    )
+                }
+            }
+        )
+    }
+
+    @Test
+    fun testWebsocketPath() = runBlockingUnit {
+        val path = "/rpc/"
+        httpTest(
+            serve = {
+                val channel = info.createChannelFor(basicImpl)
+                val serializedChannel = channel.serialized(TestRootInterface)
+                serveWebsocket(path, serializedChannel)
+            },
+            test = {
+                HttpClient {
+                    install(WebSockets)
+                }.use { client ->
+                    TestRootInterface.wrap(
+                        client.asWebsocketChannel("http://localhost:8081$path").deserialized()
+                    ).use { stub ->
+                        assertEquals(
+                            "oh, Hello world",
+                            stub.subservice("oh,").rpc("Hello" to "world")
+                        )
+                    }
+                }
+            }
+        )
     }
 
     val basicImpl: TestRootInterface

@@ -20,12 +20,12 @@ import kotlinx.serialization.KSerializer
 
 internal expect class RpcServiceInfo<T : RpcService>(
     cls: KClass<T>,
-    stubFactory: (RpcServiceChannel) -> T
+    stubFactory: (RpcServiceChannel) -> T,
 ) : RpcServiceInfoBase<T>
 
 internal abstract class RpcServiceInfoBase<T : RpcService>(
     cls: KClass<T>,
-    private val stubFactory: (RpcServiceChannel) -> T
+    private val stubFactory: (RpcServiceChannel) -> T,
 ) {
     internal val endpointLookup = mutableMapOf<String, RpcEndpoint<T, *, *>>()
 
@@ -43,7 +43,7 @@ internal abstract class RpcServiceInfoBase<T : RpcService>(
         val outputSerializer: KSerializer<O>,
         val function: (T.(I) -> O)? = null,
         val suspendFun: (suspend T.(I) -> O)? = null,
-        val subservice: RpcObject<*>? = null
+        val subservice: RpcObject<*>? = null,
     ) {
         suspend fun call(channel: RpcChannel, input: Any?): O {
             return channel.call(endpoint, inputSerializer, outputSerializer, input as I)

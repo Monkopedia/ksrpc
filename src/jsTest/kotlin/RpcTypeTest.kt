@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
 data class MyJson(
     val str: String,
     val int: Int,
-    val nFloat: Float?
+    val nFloat: Float?,
 )
 
 interface TestTypesInterface : RpcService {
@@ -56,7 +56,7 @@ class RpcTypeTest {
             endpoint: String,
             inputSer: KSerializer<I>,
             outputSer: KSerializer<O>,
-            input: I
+            input: I,
         ): O {
             try {
                 println("\n\n TEST Call $endpoint\n\n")
@@ -69,7 +69,11 @@ class RpcTypeTest {
             }
         }
 
-        override suspend fun <I> callBinary(endpoint: String, inputSer: KSerializer<I>, input: I): ByteReadChannel {
+        override suspend fun <I> callBinary(
+            endpoint: String,
+            inputSer: KSerializer<I>,
+            input: I,
+        ): ByteReadChannel {
             try {
                 println("\n\n TEST Call $endpoint\n\n")
                 lastEndpoint = endpoint
@@ -84,7 +88,7 @@ class RpcTypeTest {
         override suspend fun <O> callBinaryInput(
             endpoint: String,
             outputSer: KSerializer<O>,
-            input: ByteReadChannel
+            input: ByteReadChannel,
         ): O {
             try {
                 println("\n\n TEST Call $endpoint\n\n")
@@ -101,7 +105,7 @@ class RpcTypeTest {
             endpoint: String,
             service: RpcObject<O>,
             inputSer: KSerializer<I>,
-            input: I
+            input: I,
         ): O {
             error("Not implemented")
         }
