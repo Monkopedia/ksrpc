@@ -13,4 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-rootProject.name = "ksrpc"
+rootProject.name = "ksrpc-root"
+include(":ksrpc")
+include(":ksrpc-gradle-plugin")
+project(":ksrpc-gradle-plugin").projectDir = file("compiler/gradle")
+include(":ksrpc-compiler-plugin")
+project(":ksrpc-compiler-plugin").projectDir = file("compiler/plugin")
+include(":ksrpc-compiler-plugin-native")
+project(":ksrpc-compiler-plugin-native").projectDir = file("compiler/native")

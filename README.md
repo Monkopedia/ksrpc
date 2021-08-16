@@ -29,50 +29,67 @@ depending on the platform being targeted.
 
 # Service declaration
 
-The setup of a service has a bit of boiler plate, but after that its very easy to add/modify
-methods. The interface must extend RpcService, and it must have a companion that extends the
-RpcObject. To extend RpcObject, a stub factory needs to be passed in, which is setup easiest
-as the following.
+KSRPC uses annotations to tag services and provide information about how to uniquely map methods.
+The compiler plugin then generates a stub implementation and companion object to serve as adapters
+for the service.
 
 ```
+@KsService
 interface MyService : RpcService {
-    fun myRpcCall(i: MyInputSerializable): MyOutputSerializable = map("/myRpcCall", i)
+    @KsMethod("/myRpcCall")
+    fun myRpcCall(i: MyInputSerializable): MyOutputSerializable
 
-    fun myRpcWithoutInput(u: Unit): MyOutputSerializable = map("/noInput", u)
+    @KsMethod("/noInput")
+    fun myRpcWithoutInput(u: Unit): MyOutputSerializable
 
-    fun myRpcWithoutOutput(i: MyInputSerializable): Unit = map("/noOutput", u)
+    @KsMethod("/noOutput")
+    fun myRpcWithoutOutput(i: MyInputSerializable)
 
-    private class MyServiceStub(val channel: RpcServiceChannel): MyService, RpcService by channel
+    @KsMethod("/subService")
+    fun myUserService(userId: String): MyUserService // MyUserService is another RpcService
 
-    companion object : RpcObject<MyService>(MyService::class, ::MyServiceStub)
+    @KsMethod("/binaryInput")
+    fun writeBinaryData(data: ByteReadChannel): String
+
+    @KsMethod("/binaryOutput")
+    fun readBinaryData(key: String): ByteReadChannel
 }
 ```
-
-The map and subservice (see below) methods use inline reified types to pull the serializers
-relevant to the input/output types for any mapped methods.
 
 # Implementing services
 
 To implement a service, one simply extends the interface and implements all of the methods
-on it. Sadly there is no good way to enforce all methods are overridden in compilation, given the
-default implementations that are needed for JS/Native platforms, so be sure to override every
-method. To handle the binding to a channel for serving, all implementations should extend Service.
+on it.
 
 ```
-class MyServiceImpl : Service(), MyService {
+class MyServiceImpl : MyService {
+    override fun myRpcCall(i: MyInputSerializable): MyOutputSerializable {
+        useInput(i)
+        return MyOutputSerializable()
+    }
+
+    override fun myRpcWithoutInput(u: Unit): MyOutputSerializable {
+        return MyOutputSerializable()
+    }
+
+    override fun myRpcWithoutOutput(i: MyInputSerializable) {
+        useInput(i)
+    }
+    
+    override fun myUserService(userId: String): MyUserService {
+        return MyUserServiceImpl(userId)
+    }
+
+    override fun writeBinaryData(data: ByteReadChannel): String {
+        val key = generateKey()
+        someDataStore[key] = data.readRemaining()
+        return key
+    }
+
+    override fun readBinaryData(key: String): ByteReadChannel {
+        return ByteReadChannel(someDataStore[key])
+    }
 }
-    fun myRpcCall(i: MyInputSerializable): MyOutputSerializable {
-        useInput(i)
-        return MyOutputSerializable()
-    }
-
-    fun myRpcWithoutInput(u: Unit): MyOutputSerializable {
-        return MyOutputSerializable()
-    }
-
-    fun myRpcWithoutOutput(i: MyInputSerializable): Unit {
-        useInput(i)
-    }
 ```
 
 The companion (RpcObject) of the interface can turn the service into a channel, and then a number
@@ -80,7 +97,7 @@ of options can be used for hosting.
 
 ```
 val service = MyServiceImpl()
-val channel = MyService.serializedChannel(service)
+val channel = service.serialized(MyService)
 // Host on stdin/stdout
 channel.serveOnStd()
 // Host on an input/output stream
@@ -101,7 +118,7 @@ it will create a serialized channel, which can be wrapped into a service to make
 
 ```
 val uri = "http://localhost:8080/my_service".toKsrpcUri()
-val service = MyService.wrap(uri.connect())
+val service = MyService.createStub(uri.connect())
 
 val output = service.mRpcCall(MyInputSerializable())
 ```
