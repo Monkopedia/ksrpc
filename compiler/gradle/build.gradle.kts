@@ -20,6 +20,7 @@ plugins {
     kotlin("jvm")
     id("com.github.gmazzo.buildconfig")
     `maven-publish`
+    `signing`
 }
 
 group = "com.monkopedia"
@@ -49,4 +50,9 @@ buildConfig {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+signing {
+   useGpgCmd()
+   sign(publishing.publications)
 }

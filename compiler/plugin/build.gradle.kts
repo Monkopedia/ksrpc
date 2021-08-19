@@ -20,6 +20,7 @@ plugins {
     kotlin("kapt")
     id("com.github.gmazzo.buildconfig")
     `maven-publish`
+    `signing`
 }
 
 group = "com.monkopedia"
@@ -80,4 +81,9 @@ publishing {
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
     kotlinOptions.freeCompilerArgs = listOf("-Xjvm-default=enable")
+}
+
+signing {
+   useGpgCmd()
+   sign(publishing.publications)
 }

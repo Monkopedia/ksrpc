@@ -24,7 +24,7 @@ plugins {
 
     java
     `maven-publish`
-    // `signing`
+    `signing`
 }
 
 group = "com.monkopedia"
@@ -174,7 +174,7 @@ publishing {
     }
 }
 
-// signing {
-// useGpgCmd()
-// sign(publishing.publications)
-// }
+signing {
+   useGpgCmd()
+   sign(publishing.publications)
+}
