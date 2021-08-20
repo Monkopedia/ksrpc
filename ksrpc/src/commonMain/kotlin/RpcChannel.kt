@@ -15,11 +15,11 @@
  */
 package com.monkopedia.ksrpc
 
+import kotlin.native.concurrent.ThreadLocal
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.StringFormat
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
-import kotlin.native.concurrent.ThreadLocal
 
 fun interface ErrorListener {
     fun onError(t: Throwable)

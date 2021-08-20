@@ -15,18 +15,9 @@
  */
 package com.monkopedia.ksrpc
 
-import io.ktor.client.HttpClient
-import io.ktor.client.features.websocket.WebSockets
-import io.ktor.utils.io.ByteChannel
-import io.ktor.utils.io.ByteReadChannel
-import io.ktor.utils.io.ByteWriteChannel
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import kotlin.test.fail
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.serialization.StringFormat
 import kotlinx.serialization.builtins.PairSerializer
 import kotlinx.serialization.builtins.serializer
@@ -38,7 +29,24 @@ interface TestInterface : RpcService {
     suspend fun rpc(u: Pair<String, String>): String
 }
 
-class RpcServiceTest {
+class RpcServiceTest : RpcFunctionalityTest(
+    serializedChannel = {
+        val channel: TestInterface = object : TestInterface {
+            override suspend fun rpc(u: Pair<String, String>): String {
+                return "${u.first} ${u.second}"
+            }
+        }
+        channel.serialized()
+    },
+    verifyOnChannel = { serializedChannel ->
+        val stub = serializedChannel.toStub<TestInterface>()
+        stub.rpc("Hello" to "world")
+        assertEquals(
+            "Hello world",
+            stub.rpc("Hello" to "world")
+        )
+    }
+) {
     @Test
     fun testCreateInfo() = runBlockingUnit {
         assertNotNull(rpcObject<TestInterface>().findEndpoint("rpc"))
@@ -109,188 +117,22 @@ class RpcServiceTest {
             )
         )
     }
+}
 
-    @Test
-    fun testSerializePassthrough() = runBlockingUnit {
+class RpcServiceTwoCallsTest : RpcFunctionalityTest(
+    serializedChannel = {
         val channel: TestInterface = object : TestInterface {
             override suspend fun rpc(u: Pair<String, String>): String {
                 return "${u.first} ${u.second}"
             }
         }
-        val serializedChannel = channel.serialized()
+        channel.serialized()
+    },
+    verifyOnChannel = { serializedChannel ->
         val stub = serializedChannel.toStub<TestInterface>()
         assertEquals(
             "Hello world",
             stub.rpc("Hello" to "world")
         )
     }
-
-    @Test
-    fun testSerializePassthrough_twoCalls() = runBlockingUnit {
-        val channel: TestInterface = object : TestInterface {
-            override suspend fun rpc(u: Pair<String, String>): String {
-                return "${u.first} ${u.second}"
-            }
-        }
-        val serializedChannel = channel.serialized()
-        val stub = serializedChannel.toStub<TestInterface>()
-        stub.rpc("Hello" to "world")
-        assertEquals(
-            "Hello world",
-            stub.rpc("Hello" to "world")
-        )
-    }
-
-    @Test
-    fun testPipePassthrough() = runBlockingUnit {
-        val (output, input) = createPipe()
-        val (so, si) = createPipe()
-        val channel: TestInterface = object : TestInterface {
-            override suspend fun rpc(u: Pair<String, String>): String {
-                return "${u.first} ${u.second}"
-            }
-        }
-        val serializedChannel = channel.serialized()
-        GlobalScope.launch(Dispatchers.Default) {
-            serializedChannel.serve(si, output)
-        }
-        val stub = (input to so).asChannel().toStub<TestInterface>()
-        assertEquals(
-            "Hello world",
-            stub.rpc("Hello" to "world")
-        )
-    }
-
-    @Test
-    fun testPipePassthrough_twoCalls() = runBlockingUnit {
-        val (output, input) = createPipe()
-        val (so, si) = createPipe()
-        val channel: TestInterface = object : TestInterface {
-            override suspend fun rpc(u: Pair<String, String>): String {
-                return "${u.first} ${u.second}"
-            }
-        }
-        val serializedChannel = channel.serialized()
-        GlobalScope.launch(Dispatchers.Default) {
-            try {
-                serializedChannel.serve(si, output)
-            } catch (t: Throwable) {
-                t.printStackTrace()
-                fail("Exception")
-            }
-        }
-        val stub = (input to so).asChannel().toStub<TestInterface>()
-        stub.rpc("Hello" to "world")
-        assertEquals(
-            "Hello world",
-            stub.rpc("Hello" to "world")
-        )
-    }
-
-    @Test
-    fun testHttpPath() = runBlockingUnit {
-        val path = "/rpc/"
-        httpTest(
-            serve = {
-                val channel: TestInterface = object : TestInterface {
-                    override suspend fun rpc(u: Pair<String, String>): String {
-                        return "${u.first} ${u.second}"
-                    }
-                }
-                val serializedChannel = channel.serialized()
-
-                testServe(path, serializedChannel)
-            },
-            test = {
-                val client = HttpClient()
-                val stub = client.asChannel("http://localhost:$it$path").toStub<TestInterface>()
-                assertEquals(
-                    "Hello world",
-                    stub.rpc("Hello" to "world")
-                )
-            }
-        )
-    }
-
-    @Test
-    fun testWebsocketPath() = runBlockingUnit {
-        val path = "/rpc/"
-        httpTest(
-            serve = {
-                val channel: TestInterface = object : TestInterface {
-                    override suspend fun rpc(u: Pair<String, String>): String {
-                        return "${u.first} ${u.second}"
-                    }
-                }
-                val serializedChannel = channel.serialized()
-
-                testServeWebsocket(path, serializedChannel)
-            },
-            test = {
-                val client = HttpClient {
-                    install(WebSockets)
-                }
-                val stub =
-                    client.asWebsocketChannel("http://localhost:$it$path").toStub<TestInterface>()
-                assertEquals(
-                    "Hello world",
-                    stub.rpc("Hello" to "world")
-                )
-            }
-        )
-    }
-}
-
-suspend inline fun <reified T : RpcService> T.servePipe(
-    test: suspend (Pair<ByteReadChannel, ByteWriteChannel>) -> Unit
-) {
-    val serializedChannel = serialized()
-    val (output, input) = createPipe()
-    val (so, si) = createPipe()
-    GlobalScope.launch(Dispatchers.Default) {
-        serializedChannel.serve(
-            si,
-            output,
-            errorListener = {
-                it.printStackTrace()
-            }
-        )
-    }
-    try {
-        test(input to so)
-    } finally {
-        try {
-            input.cancel(null)
-        } catch (t: Throwable) {
-        }
-        try {
-            si.cancel(null)
-        } catch (t: Throwable) {
-        }
-        output.close(null)
-        so.close(null)
-    }
-}
-
-fun createPipe(): Pair<ByteWriteChannel, ByteReadChannel> {
-    val channel = ByteChannel(autoFlush = true)
-    return channel to channel
-}
-
-internal expect fun runBlockingUnit(function: suspend () -> Unit)
-
-expect class Routing
-expect suspend inline fun httpTest(
-    crossinline serve: suspend Routing.() -> Unit,
-    test: suspend (Int) -> Unit
-)
-expect fun Routing.testServe(
-    basePath: String,
-    channel: SerializedChannel,
-    errorListener: ErrorListener = ErrorListener { }
-)
-expect fun Routing.testServeWebsocket(
-    basePath: String,
-    channel: SerializedChannel,
-    errorListener: ErrorListener = ErrorListener { }
 )

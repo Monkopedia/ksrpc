@@ -15,7 +15,6 @@
  */
 package com.monkopedia.ksrpc
 
-import kotlin.test.fail
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.promise
 

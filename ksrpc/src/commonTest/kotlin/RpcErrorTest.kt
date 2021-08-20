@@ -15,126 +15,28 @@
  */
 package com.monkopedia.ksrpc
 
-import io.ktor.client.HttpClient
-import io.ktor.client.features.websocket.WebSockets
-import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlin.test.fail
 
-class RpcErrorTest {
-
-    @Test
-    fun testSerializePassthrough() = runBlockingUnit {
+class RpcErrorTest : RpcFunctionalityTest(
+    serializedChannel = {
         val channel: TestInterface = object : TestInterface {
             override suspend fun rpc(u: Pair<String, String>): String {
                 throw IllegalArgumentException("Failure")
             }
         }
-        val serializedChannel = channel.serialized()
+        channel.serialized()
+    },
+    verifyOnChannel = { serializedChannel ->
         val stub = serializedChannel.toStub<TestInterface>()
         try {
             stub.rpc("Hello" to "world")
             fail("Expected crash")
         } catch (t: Throwable) {
-            assertTrue(t is RpcException, "Expect an RpcException back, not ${t.stackTraceToString()}")
+            assertTrue(
+                t is RpcException,
+                "Expect an RpcException back, not ${t.stackTraceToString()}"
+            )
         }
     }
-
-    @Test
-    fun testPipePassthrough() = runBlockingUnit {
-        val channel: TestInterface = object : TestInterface {
-            override suspend fun rpc(u: Pair<String, String>): String {
-                throw IllegalArgumentException("Failure")
-            }
-        }
-        channel.servePipe { client ->
-            val stub = client.asChannel().toStub<TestInterface>()
-            try {
-                stub.rpc("Hello" to "world")
-                fail("Expected crash")
-            } catch (t: Throwable) {
-                assertTrue(t is RpcException, "Expect an RpcException back, not ${t.stackTraceToString()}")
-            }
-        }
-    }
-
-    @Test
-    fun testHttpPath() = runBlockingUnit {
-        val path = "/rpc/"
-        httpTest(
-            serve = {
-                val channel: TestInterface = object : TestInterface {
-                    override suspend fun rpc(u: Pair<String, String>): String {
-                        throw IllegalArgumentException("Failure")
-                    }
-                }
-                val serializedChannel = channel.serialized(
-                    errorListener = {
-                        it.printStackTrace()
-                    }
-                )
-                testServe(
-                    path,
-                    serializedChannel,
-                    errorListener = {
-                        it.printStackTrace()
-                    }
-                )
-            },
-            test = {
-                val client = HttpClient()
-                val stub = client.asChannel("http://localhost:$it$path").toStub<TestInterface>()
-                try {
-                    stub.rpc("Hello" to "world")
-                    fail("Expected crash")
-                } catch (t: Throwable) {
-                    assertTrue(t is RpcException, "Expect an RpcException back, not ${t.stackTraceToString()}")
-                }
-            }
-        )
-    }
-
-    @Test
-    fun testWebsocketPath() = runBlockingUnit {
-        val path = "/rpc/"
-        httpTest(
-            serve = {
-                val channel: TestInterface = object : TestInterface {
-                    override suspend fun rpc(u: Pair<String, String>): String {
-                        throw IllegalArgumentException("Failure")
-                    }
-                }
-                val serializedChannel = channel.serialized(
-                    errorListener = {
-                        it.printStackTrace()
-                    }
-                )
-                testServeWebsocket(
-                    path,
-                    serializedChannel,
-                    errorListener = {
-                        it.printStackTrace()
-                    }
-                )
-            },
-            test = {
-                val client = HttpClient {
-                    install(WebSockets)
-                }
-                try {
-                    client.asWebsocketChannel("http://localhost:$it$path").use { channel ->
-                        val stub = channel.toStub<TestInterface>()
-                        try {
-                            stub.rpc("Hello" to "world")
-                            fail("Expected crash")
-                        } catch (t: Throwable) {
-                            assertTrue(t is RpcException, "Expect an RpcException back, not ${t.stackTraceToString()}")
-                        }
-                    }
-                } finally {
-                    client.close()
-                }
-            }
-        )
-    }
-}
+)

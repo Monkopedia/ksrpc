@@ -15,11 +15,10 @@
  */
 package com.monkopedia.ksrpc
 
+import kotlin.test.assertEquals
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
 import kotlinx.serialization.Serializable
-import kotlin.test.Test
-import kotlin.test.assertEquals
 
 @Serializable
 data class MyJson(
@@ -109,27 +108,31 @@ class FakeTestTypes : TestTypesInterface {
     }
 }
 
-class RpcTypeTest {
-    private val service = FakeTestTypes()
-    private val channel: TestTypesInterface = service
+object RpcTypeTest {
 
-    @Test
-    fun testPairStr() = runBlockingUnit {
-        channel.servePipe { client ->
+    abstract class RpcTypeFunctionalityTest(
+        verifyOnChannel: suspend (SerializedChannel, FakeTestTypes) -> Unit,
+        private val service: FakeTestTypes = FakeTestTypes()
+    ) : RpcFunctionalityTest(
+        serializedChannel = { service.serialized<TestTypesInterface>() },
+        verifyOnChannel = { channel ->
+            verifyOnChannel(channel, service)
+        }
+    )
 
-            val stub = client.asChannel().toStub<TestTypesInterface>()
+    class PairStrTest : RpcTypeFunctionalityTest(
+        verifyOnChannel = { channel, service ->
+            val stub = channel.toStub<TestTypesInterface>()
             service.nextReturn.value = ""
             stub.rpc("Hello" to "world")
             assertEquals("rpc", service.lastCall.value)
             assertEquals("Hello" to "world", service.lastInput.value)
         }
-    }
+    )
 
-    @Test
-    fun testMap() = runBlockingUnit {
-        channel.servePipe { client ->
-
-            val stub = client.asChannel().toStub<TestTypesInterface>()
+    class MapTest : RpcTypeFunctionalityTest(
+        verifyOnChannel = { channel, service ->
+            val stub = channel.toStub<TestTypesInterface>()
             service.nextReturn.value = Unit
             stub.mapRpc(
                 mutableMapOf(
@@ -146,74 +149,65 @@ class RpcTypeTest {
                 service.lastInput.value
             )
         }
-    }
+    )
 
-    @Test
-    fun testInputInt() = runBlockingUnit {
-        channel.servePipe { client ->
-
-            val stub = client.asChannel().toStub<TestTypesInterface>()
+    class InputIntTest : RpcTypeFunctionalityTest(
+        verifyOnChannel = { channel, service ->
+            val stub = channel.toStub<TestTypesInterface>()
             service.nextReturn.value = Unit
             stub.inputInt(42)
             assertEquals("inputInt", service.lastCall.value)
             assertEquals(42, service.lastInput.value)
         }
-    }
+    )
 
-    @Test
-    fun testInputIntList() = runBlockingUnit {
-        channel.servePipe { client ->
-            val stub = client.asChannel().toStub<TestTypesInterface>()
+    class InputIntListTest : RpcTypeFunctionalityTest(
+        verifyOnChannel = { channel, service ->
+            val stub = channel.toStub<TestTypesInterface>()
             service.nextReturn.value = Unit
             service.inputIntList(listOf(42))
             assertEquals("inputIntList", service.lastCall.value)
             assertEquals(listOf(42), service.lastInput.value)
         }
-    }
+    )
 
-    @Test
-    fun testInputIntNullable() = runBlockingUnit {
-        channel.servePipe { client ->
-
-            val stub = client.asChannel().toStub<TestTypesInterface>()
+    class InputIntNullableTest : RpcTypeFunctionalityTest(
+        verifyOnChannel = { channel, service ->
+            val stub = channel.toStub<TestTypesInterface>()
             service.nextReturn.value = Unit
             service.inputIntNullable(null)
             assertEquals("inputIntNullable", service.lastCall.value)
             assertEquals(null, service.lastInput.value)
         }
-    }
+    )
 
-    @Test
-    fun testOutputInt() = runBlockingUnit {
-        channel.servePipe { client ->
-            val stub = client.asChannel().toStub<TestTypesInterface>()
+    class OutputIntTest : RpcTypeFunctionalityTest(
+        verifyOnChannel = { channel, service ->
+            val stub = channel.toStub<TestTypesInterface>()
             service.nextReturn.value = 42
             assertEquals(42, stub.outputInt(Unit))
             assertEquals("outputInt", service.lastCall.value)
             assertEquals(Unit, service.lastInput.value)
         }
-    }
+    )
 
-    @Test
-    fun testOutputIntNullable() = runBlockingUnit {
-        channel.servePipe { client ->
-            val stub = client.asChannel().toStub<TestTypesInterface>()
+    class OutputIntNullableTest : RpcTypeFunctionalityTest(
+        verifyOnChannel = { channel, service ->
+            val stub = channel.toStub<TestTypesInterface>()
             service.nextReturn.value = null
             assertEquals(null, stub.outputIntNullable(Unit))
             assertEquals("outputIntNullable", service.lastCall.value)
             assertEquals(Unit, service.lastInput.value)
         }
-    }
+    )
 
-    @Test
-    fun testReturnType() = runBlockingUnit {
-        channel.servePipe { client ->
-
-            val stub = client.asChannel().toStub<TestTypesInterface>()
+    class ReturnTypeTest : RpcTypeFunctionalityTest(
+        verifyOnChannel = { channel, service ->
+            val stub = channel.toStub<TestTypesInterface>()
             service.nextReturn.value = MyJson("second", 2, 1.2f)
             assertEquals(MyJson("second", 2, 1.2f), stub.returnType(Unit))
             assertEquals("returnType", service.lastCall.value)
             assertEquals(Unit, service.lastInput.value)
         }
-    }
+    )
 }

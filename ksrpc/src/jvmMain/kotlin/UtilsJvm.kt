@@ -16,10 +16,9 @@
 package com.monkopedia.ksrpc
 
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
+import kotlin.reflect.full.companionObjectInstance
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlin.reflect.full.companionObject
-import kotlin.reflect.full.companionObjectInstance
 
 actual fun randomUuid(): String {
     return NanoIdUtils.randomNanoId()

@@ -15,18 +15,19 @@
  */
 package com.monkopedia.ksrpc
 
+import kotlin.test.assertEquals
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
-import org.junit.Test
-import kotlin.test.assertEquals
 
-class OverlappingTest {
+abstract class OverlappingTest() : OverlappingTestBase()
 
-    @Test
-    fun testMultiCallOverlap() = runBlockingUnit {
-        var firstCall = CompletableDeferred<String>()
+// Hacks for firstCall usage :/.
+abstract class OverlappingTestBase(
+    var firstCall: CompletableDeferred<String> = CompletableDeferred<String>()
+) : RpcFunctionalityTest(
+    serializedChannel = {
         // Waits for the second call to come in before the first finishes.
         val service: TestInterface = object : TestInterface {
             var secondCall: CompletableDeferred<String>? = null
@@ -42,15 +43,16 @@ class OverlappingTest {
                 }
             }
         }
-        service.servePipe { client ->
-            val stub = client.asChannel().toStub<TestInterface>()
+        service.serialized()
+    },
+    verifyOnChannel = { serializedChannel ->
+        val stub = serializedChannel.toStub<TestInterface>()
 
-            val finish = GlobalScope.async(Dispatchers.IO) {
-                assertEquals("Hello second", stub.rpc("Hello" to "first"))
-            }
-            assertEquals("first", firstCall.await())
-            assertEquals("Hello second", stub.rpc("Hello" to "second"))
-            finish.await()
+        val finish = GlobalScope.async(Dispatchers.IO) {
+            assertEquals("Hello second", stub.rpc("Hello" to "first"))
         }
+        assertEquals("first", firstCall.await())
+        assertEquals("Hello second", stub.rpc("Hello" to "second"))
+        finish.await()
     }
-}
+)

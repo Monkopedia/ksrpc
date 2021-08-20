@@ -16,7 +16,6 @@
 package com.monkopedia.ksrpc
 
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.serializer
 
 interface RpcService
 
