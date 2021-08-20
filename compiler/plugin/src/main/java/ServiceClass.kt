@@ -42,10 +42,6 @@ private class Visitor(private val messageCollector: MessageCollector) : IrElemen
         } else {
             null
         }
-        messageCollector.report(
-            CompilerMessageSeverity.WARNING,
-            "Visit class ${declaration.name.asString()}"
-        )
         val ret = super.visitClass(declaration)
         if (annotation != null) {
             classes[declaration.name.asString()] = currentService

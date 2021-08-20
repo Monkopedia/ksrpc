@@ -36,11 +36,16 @@ import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrFunction
+import org.jetbrains.kotlin.ir.expressions.impl.IrClassReferenceImpl
+import org.jetbrains.kotlin.ir.expressions.putClassTypeArgument
 import org.jetbrains.kotlin.ir.types.IrSimpleType
+import org.jetbrains.kotlin.ir.types.starProjectedType
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
 import org.jetbrains.kotlin.ir.util.companionObject
+import org.jetbrains.kotlin.ir.util.constructors
 import org.jetbrains.kotlin.ir.util.functions
+import org.jetbrains.kotlin.ir.util.kotlinFqName
 import org.jetbrains.kotlin.ir.util.primaryConstructor
 import org.jetbrains.kotlin.name.Name
 
@@ -64,6 +69,15 @@ object CompanionGeneration {
             origin = IrDeclarationOrigin.IR_EXTERNAL_DECLARATION_STUB
             superTypes = listOf(env.rpcObject.typeWith(clsType))
             createImplicitParameterDeclarationWithWrappedDescriptor()
+        }
+        rpcObjectKey?.let {
+            cls.irClass.annotations += pluginContext.createIrBuilder(cls.irClass.symbol)
+                .irCallConstructor(
+                    it.constructors.find { it.owner.isPrimary } ?: error("No primary constructor"),
+                    emptyList()
+                ).apply {
+                    putValueArgument(0, createClassReference(companion, SYNTHETIC_OFFSET, SYNTHETIC_OFFSET))
+                }
         }
         companion.build {
             val existing = companion.functions.find {

@@ -19,6 +19,7 @@ object FqConstants {
     const val PKG = "com.monkopedia.ksrpc"
     const val RPC_ENDPOINT_EXCEPTION = "$PKG.RpcEndpointException"
     const val RPC_OBJECT = "$PKG.RpcObject"
+    const val RPC_OBJECT_KEY = "$PKG.RpcObjectKey"
     const val RPC_SERVICE = "$PKG.RpcService"
     const val SERIALIZED_CHANNEL = "$PKG.SerializedChannel"
     const val RPC_METHOD = "$PKG.RpcMethod"

@@ -15,11 +15,27 @@
  */
 package com.monkopedia.ksrpc
 
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
+
 interface RpcService
 
 interface RpcObject<T : RpcService> {
     fun createStub(channel: SerializedChannel): T
     fun findEndpoint(endpoint: String): RpcMethod<*, *, *>
+}
+
+expect inline fun <reified T : RpcService> rpcObject(): RpcObject<T>
+
+inline fun <reified T : RpcService> T.serialized(
+    errorListener: ErrorListener = ErrorListener { },
+    json: Json = Json { isLenient = true }
+): SerializedChannel {
+    return serialized(rpcObject(), errorListener, json)
+}
+
+inline fun <reified T : RpcService> SerializedChannel.toStub(): T {
+    return rpcObject<T>().createStub(this)
 }
 
 class RpcEndpointException(str: String) : IllegalArgumentException(str)

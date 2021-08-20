@@ -32,7 +32,7 @@ class UriTest {
         val clsString = Implementation::class.jvmName
         val uri = "local://$clsString"
         val channel = uri.toKsrpcUri().connect()
-        val service = TestInterface.createStub(channel)
+        val service = channel.toStub<TestInterface>()
 
         assertEquals("world hello", service.rpc("hello" to "world"))
     }

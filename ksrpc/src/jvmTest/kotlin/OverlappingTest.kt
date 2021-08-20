@@ -15,21 +15,20 @@
  */
 package com.monkopedia.ksrpc
 
-import kotlin.test.assertEquals
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import org.junit.Test
+import kotlin.test.assertEquals
 
 class OverlappingTest {
-    internal val info = TestInterface
 
     @Test
     fun testMultiCallOverlap() = runBlockingUnit {
         var firstCall = CompletableDeferred<String>()
         // Waits for the second call to come in before the first finishes.
-        val service = object : TestInterface {
+        val service: TestInterface = object : TestInterface {
             var secondCall: CompletableDeferred<String>? = null
 
             override suspend fun rpc(u: Pair<String, String>): String {
@@ -43,9 +42,8 @@ class OverlappingTest {
                 }
             }
         }
-        val channel = service
-        channel.servePipe(TestInterface) { client ->
-            val stub = TestInterface.createStub(client.asChannel())
+        service.servePipe { client ->
+            val stub = client.asChannel().toStub<TestInterface>()
 
             val finish = GlobalScope.async(Dispatchers.IO) {
                 assertEquals("Hello second", stub.rpc("Hello" to "first"))

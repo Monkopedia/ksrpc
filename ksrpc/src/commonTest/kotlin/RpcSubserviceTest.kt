@@ -17,13 +17,13 @@ package com.monkopedia.ksrpc
 
 import io.ktor.client.HttpClient
 import io.ktor.client.features.websocket.WebSockets
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.fail
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 @KsService
 interface TestSubInterface : RpcService {
@@ -44,15 +44,14 @@ class RpcSubserviceTest {
 
     @Test
     fun testCreateInfo() = runBlockingUnit {
-        val info = TestRootInterface
-        assertNotNull(info.findEndpoint("rpc"))
+        assertNotNull(rpcObject<TestRootInterface>().findEndpoint("rpc"))
     }
 
     @Test
     fun testSerializePassthrough() = runBlockingUnit {
         val channel = basicImpl
-        val serializedChannel = channel.serialized(TestRootInterface)
-        val stub = TestRootInterface.createStub(serializedChannel)
+        val serializedChannel = channel.serialized()
+        val stub = serializedChannel.toStub<TestRootInterface>()
         assertEquals(
             "oh, Hello world",
             stub.subservice("oh,").rpc("Hello" to "world")
@@ -62,8 +61,8 @@ class RpcSubserviceTest {
     @Test
     fun testSerializePassthrough_twoCalls() = runBlockingUnit {
         val channel = basicImpl
-        val serializedChannel = channel.serialized(TestRootInterface)
-        val stub = TestRootInterface.createStub(serializedChannel)
+        val serializedChannel = channel.serialized()
+        val stub = serializedChannel.toStub<TestRootInterface>()
         stub.subservice("oh,").rpc("Hello" to "world")
         assertEquals(
             "oh, Hello world",
@@ -77,10 +76,10 @@ class RpcSubserviceTest {
         val (so, si) = createPipe()
         val channel = basicImpl
         GlobalScope.launch(Dispatchers.Default) {
-            val serializedChannel = channel.serialized(TestRootInterface)
+            val serializedChannel = channel.serialized()
             serializedChannel.serve(si, output)
         }
-        val stub = TestRootInterface.createStub((input to so).asChannel())
+        val stub = (input to so).asChannel().toStub<TestRootInterface>()
         assertEquals(
             "oh, Hello world",
             stub.subservice("oh,").rpc("Hello" to "world")
@@ -93,7 +92,7 @@ class RpcSubserviceTest {
         val (so, si) = createPipe()
         val channel = basicImpl
         GlobalScope.launch(Dispatchers.Default) {
-            val serializedChannel = channel.serialized(TestRootInterface)
+            val serializedChannel = channel.serialized()
             try {
                 serializedChannel.serve(si, output)
             } catch (t: Throwable) {
@@ -101,7 +100,7 @@ class RpcSubserviceTest {
                 fail("Exception")
             }
         }
-        val stub = TestRootInterface.createStub((input to so).asChannel())
+        val stub = (input to so).asChannel().toStub<TestRootInterface>()
         val ohService = stub.subservice("oh,")
         stub.subservice("!!!").rpc("Hello" to "world")
         assertEquals(
@@ -116,14 +115,13 @@ class RpcSubserviceTest {
         httpTest(
             serve = {
                 val channel = basicImpl
-                val serializedChannel = channel.serialized(TestRootInterface)
+                val serializedChannel = channel.serialized()
                 testServe(path, serializedChannel)
             },
             test = {
                 val client = HttpClient()
-                val stub = TestRootInterface.createStub(
-                    client.asChannel("http://localhost:$it$path")
-                )
+                val stub =
+                    client.asChannel("http://localhost:$it$path").toStub<TestRootInterface>()
                 assertEquals(
                     "oh, Hello world",
                     stub.subservice("oh,").rpc("Hello" to "world")
@@ -138,16 +136,15 @@ class RpcSubserviceTest {
         httpTest(
             serve = {
                 val channel = basicImpl
-                val serializedChannel = channel.serialized(TestRootInterface)
+                val serializedChannel = channel.serialized()
                 testServeWebsocket(path, serializedChannel)
             },
             test = {
                 val client = HttpClient {
                     install(WebSockets)
                 }
-                val stub = TestRootInterface.createStub(
-                    client.asWebsocketChannel("http://localhost:$it$path")
-                )
+                val stub = client.asWebsocketChannel("http://localhost:$it$path")
+                    .toStub<TestRootInterface>()
                 assertEquals(
                     "oh, Hello world",
                     stub.subservice("oh,").rpc("Hello" to "world")

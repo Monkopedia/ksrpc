@@ -18,6 +18,10 @@ package com.monkopedia.ksrpc
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import nanoid.NanoIdUtils
+import kotlin.reflect.AssociatedObjectKey
+import kotlin.reflect.ExperimentalAssociatedObjects
+import kotlin.reflect.KClass
+import kotlin.reflect.findAssociatedObject
 
 actual fun randomUuid(): String {
     return NanoIdUtils.randomNanoId()
@@ -27,3 +31,13 @@ actual val DEFAULT_DISPATCHER: CoroutineDispatcher
 
 actual val Throwable.asString: String
     get() = this.getStackTrace().joinToString("\n")
+
+@OptIn(ExperimentalAssociatedObjects::class)
+@AssociatedObjectKey
+@Retention(AnnotationRetention.BINARY)
+annotation class RpcObjectKey(val rpcObject: KClass<out RpcObject<*>>)
+
+@OptIn(ExperimentalAssociatedObjects::class)
+actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> {
+    return T::class.findAssociatedObject<RpcObjectKey>() as RpcObject<T>
+}

@@ -71,6 +71,7 @@ class KsrpcGenerationEnvironment(
     val serializerTransformer = referenceClass(FqConstants.SERIALIZER_TRANSFORMER)
     val binaryTransformer = referenceObject(FqConstants.BINARY_TRANSFORMER)
     val subserviceTransformer = referenceClass(FqConstants.SUBSERVICE_TRANSFORMER)
+    val rpcObjectKey = maybeReferenceClass(FqConstants.RPC_OBJECT_KEY)
 
     val kSerializer = referenceClass(FqConstants.KSERIALIZER)
     val serializerMethod = pluginContext.referenceFunctions(FqName(FqConstants.SERIALIZER)).find {
@@ -84,9 +85,13 @@ class KsrpcGenerationEnvironment(
 
     val byteReadChannel = FqName(FqConstants.BYTE_READ_CHANNEL)
 
-    private fun referenceClass(name: String): IrClassSymbol {
+    private fun maybeReferenceClass(name: String): IrClassSymbol? {
         val fqName = FqName(name)
         return pluginContext.referenceClass(fqName)
+    }
+
+    private fun referenceClass(name: String): IrClassSymbol {
+        return maybeReferenceClass(name)
             ?: run {
                 messageCollector.report(
                     CompilerMessageSeverity.ERROR,

@@ -24,14 +24,13 @@ class RpcErrorTest {
 
     @Test
     fun testSerializePassthrough() = runBlockingUnit {
-        val info = TestInterface
-        val channel = object : TestInterface {
+        val channel: TestInterface = object : TestInterface {
             override suspend fun rpc(u: Pair<String, String>): String {
                 throw IllegalArgumentException("Failure")
             }
         }
-        val serializedChannel = channel.serialized(TestInterface)
-        val stub = TestInterface.createStub(serializedChannel)
+        val serializedChannel = channel.serialized()
+        val stub = serializedChannel.toStub<TestInterface>()
         try {
             stub.rpc("Hello" to "world")
             fail("Expected crash")
@@ -43,13 +42,13 @@ class RpcErrorTest {
 
     @Test
     fun testPipePassthrough() = runBlockingUnit {
-        val channel = object : TestInterface {
+        val channel: TestInterface = object : TestInterface {
             override suspend fun rpc(u: Pair<String, String>): String {
                 throw IllegalArgumentException("Failure")
             }
         }
-        channel.servePipe(TestInterface) { client ->
-            val stub = TestInterface.createStub(client.asChannel())
+        channel.servePipe { client ->
+            val stub = client.asChannel().toStub<TestInterface>()
             try {
                 stub.rpc("Hello" to "world")
                 fail("Expected crash")
@@ -65,13 +64,12 @@ class RpcErrorTest {
         val path = "/rpc/"
         httpTest(
             serve = {
-                val channel = object : TestInterface {
+                val channel: TestInterface = object : TestInterface {
                     override suspend fun rpc(u: Pair<String, String>): String {
                         throw IllegalArgumentException("Failure")
                     }
                 }
                 val serializedChannel = channel.serialized(
-                    TestInterface,
                     errorListener = {
                         it.printStackTrace()
                     }
@@ -86,7 +84,7 @@ class RpcErrorTest {
             },
             test = {
                 val client = HttpClient()
-                val stub = TestInterface.createStub(client.asChannel("http://localhost:$it$path"))
+                val stub = client.asChannel("http://localhost:$it$path").toStub<TestInterface>()
                 try {
                     stub.rpc("Hello" to "world")
                     fail("Expected crash")
@@ -103,14 +101,12 @@ class RpcErrorTest {
         val path = "/rpc/"
         httpTest(
             serve = {
-                val info = TestInterface
-                val channel = object : TestInterface {
+                val channel: TestInterface = object : TestInterface {
                     override suspend fun rpc(u: Pair<String, String>): String {
                         throw IllegalArgumentException("Failure")
                     }
                 }
                 val serializedChannel = channel.serialized(
-                    TestInterface,
                     errorListener = {
                         it.printStackTrace()
                     }
@@ -129,7 +125,7 @@ class RpcErrorTest {
                 }
                 try {
                     client.asWebsocketChannel("http://localhost:$it$path").use { channel ->
-                        val stub = TestInterface.createStub(channel)
+                        val stub = channel.toStub<TestInterface>()
                         try {
                             stub.rpc("Hello" to "world")
                             fail("Expected crash")

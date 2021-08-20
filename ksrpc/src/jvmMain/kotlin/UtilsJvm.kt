@@ -18,6 +18,8 @@ package com.monkopedia.ksrpc
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlin.reflect.full.companionObject
+import kotlin.reflect.full.companionObjectInstance
 
 actual fun randomUuid(): String {
     return NanoIdUtils.randomNanoId()
@@ -25,3 +27,7 @@ actual fun randomUuid(): String {
 
 actual val DEFAULT_DISPATCHER: CoroutineDispatcher
     get() = Dispatchers.IO
+
+actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> {
+    return T::class.companionObjectInstance as RpcObject<T>
+}
