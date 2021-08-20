@@ -45,11 +45,6 @@ actual fun Routing.testServeWebsocket(
 actual class Routing
 internal actual fun runBlockingUnit(function: suspend () -> Unit): dynamic {
     return GlobalScope.promise {
-        try {
-            function()
-        } catch (t: Throwable) {
-            t.printStackTrace()
-            fail("Caught exception $t")
-        }
+        function()
     }
 }

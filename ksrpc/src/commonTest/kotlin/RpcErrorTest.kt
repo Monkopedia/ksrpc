@@ -18,6 +18,7 @@ package com.monkopedia.ksrpc
 import io.ktor.client.HttpClient
 import io.ktor.client.features.websocket.WebSockets
 import kotlin.test.Test
+import kotlin.test.assertTrue
 import kotlin.test.fail
 
 class RpcErrorTest {
@@ -35,8 +36,7 @@ class RpcErrorTest {
             stub.rpc("Hello" to "world")
             fail("Expected crash")
         } catch (t: Throwable) {
-            t.printStackTrace()
-            t as RpcException
+            assertTrue(t is RpcException, "Expect an RpcException back, not ${t.stackTraceToString()}")
         }
     }
 
@@ -53,8 +53,7 @@ class RpcErrorTest {
                 stub.rpc("Hello" to "world")
                 fail("Expected crash")
             } catch (t: Throwable) {
-                t.printStackTrace()
-                t as RpcException
+                assertTrue(t is RpcException, "Expect an RpcException back, not ${t.stackTraceToString()}")
             }
         }
     }
@@ -89,8 +88,7 @@ class RpcErrorTest {
                     stub.rpc("Hello" to "world")
                     fail("Expected crash")
                 } catch (t: Throwable) {
-                    t.printStackTrace()
-                    t as RpcException
+                    assertTrue(t is RpcException, "Expect an RpcException back, not ${t.stackTraceToString()}")
                 }
             }
         )
@@ -130,8 +128,7 @@ class RpcErrorTest {
                             stub.rpc("Hello" to "world")
                             fail("Expected crash")
                         } catch (t: Throwable) {
-                            t.printStackTrace()
-                            t as RpcException
+                            assertTrue(t is RpcException, "Expect an RpcException back, not ${t.stackTraceToString()}")
                         }
                     }
                 } finally {
