@@ -30,11 +30,18 @@ dependencies {
     implementation(kotlin("gradle-plugin-api"))
 }
 
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
 gradlePlugin {
     plugins {
         create("ksrpc-gradle-plugin") {
             id = rootProject.extra["kotlin_plugin_id"].toString()
             implementationClass = "com.monkopedia.ksrpc.gradle.KsrpcGradlePlugin"
+            displayName = "ksrpc-gradle-plugin"
+            description = "A simple kotlin rpc library"
         }
     }
 }
@@ -50,6 +57,44 @@ buildConfig {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+publishing {
+    publications.all {
+        if (this !is MavenPublication) return@all
+        pom {
+            name.set("ksrpc-gradle-plugin")
+            description.set("A simple kotlin rpc library")
+            url.set("http://www.github.com/Monkopedia/ksrpc")
+            licenses {
+                license {
+                    name.set("The Apache License, Version 2.0")
+                    url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                }
+            }
+            developers {
+                developer {
+                    id.set("monkopedia")
+                    name.set("Jason Monk")
+                    email.set("monkopedia@gmail.com")
+                }
+            }
+            scm {
+                connection.set("scm:git:git://github.com/Monkopedia/ksrpc.git")
+                developerConnection.set("scm:git:ssh://github.com/Monkopedia/ksrpc.git")
+                url.set("http://github.com/Monkopedia/ksrpc/")
+            }
+        }
+    }
+    repositories {
+        maven(url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+            name = "OSSRH"
+            credentials {
+                username = System.getenv("MAVEN_USERNAME")
+                password = System.getenv("MAVEN_PASSWORD")
+            }
+        }
+    }
 }
 
 signing {

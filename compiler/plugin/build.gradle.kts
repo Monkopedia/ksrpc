@@ -76,6 +76,15 @@ publishing {
             }
         }
     }
+    repositories {
+        maven(url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+            name = "OSSRH"
+            credentials {
+                username = System.getenv("MAVEN_USERNAME")
+                password = System.getenv("MAVEN_PASSWORD")
+            }
+        }
+    }
 }
 
 tasks.withType<KotlinCompile> {
