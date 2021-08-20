@@ -19,6 +19,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.StringFormat
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
+import kotlin.native.concurrent.ThreadLocal
 
 fun interface ErrorListener {
     fun onError(t: Throwable)
@@ -58,6 +59,7 @@ private class SubserviceChannel(
 }
 
 private const val SPLIT_CHAR = ":"
+@ThreadLocal
 private val LIST_SERIALIZER = ListSerializer(String.serializer())
 
 fun StringFormat.encodedEndpoint(endpoint: List<String>): String {
