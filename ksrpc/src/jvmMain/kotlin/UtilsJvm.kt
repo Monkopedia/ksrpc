@@ -30,3 +30,14 @@ actual val DEFAULT_DISPATCHER: CoroutineDispatcher
 actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> {
     return T::class.companionObjectInstance as RpcObject<T>
 }
+
+internal actual interface VoidService : RpcService {
+    companion object : RpcObject<VoidService> {
+        override fun createStub(channel: SerializedChannel): VoidService {
+            return object : VoidService {}
+        }
+
+        override fun findEndpoint(endpoint: String): RpcMethod<*, *, *> =
+            throw RpcEndpointException("VoidService has no endpoints")
+    }
+}

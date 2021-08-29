@@ -15,11 +15,12 @@
  */
 package com.monkopedia.ksrpc
 
-import kotlin.native.concurrent.ThreadLocal
+import com.monkopedia.ksrpc.internal.SubserviceChannel
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.StringFormat
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
+import kotlin.native.concurrent.ThreadLocal
 
 fun interface ErrorListener {
     fun onError(t: Throwable)
@@ -31,31 +32,6 @@ internal const val ERROR_PREFIX = "ERROR:"
 
 fun SerializedChannel.subservice(serviceId: String, json: StringFormat? = null): SerializedChannel {
     return SubserviceChannel(json ?: serialization, this, serviceId)
-}
-
-private class SubserviceChannel(
-    override val serialization: StringFormat,
-    private val baseChannel: SerializedChannel,
-    private val serviceId: String
-) : SerializedChannel {
-
-    override suspend fun call(endpoint: String, input: CallData): CallData {
-        return call(listOf(endpoint), input)
-    }
-
-    private suspend fun call(
-        target: List<String>,
-        input: CallData
-    ): CallData {
-        if (baseChannel is SubserviceChannel) {
-            return baseChannel.call(target + serviceId, input)
-        }
-        return baseChannel.call(serialization.encodedEndpoint(target + serviceId), input)
-    }
-
-    override suspend fun close() {
-        call(listOf("", "close"), CallData.create(""))
-    }
 }
 
 private const val SPLIT_CHAR = ":"

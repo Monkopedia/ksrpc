@@ -41,3 +41,15 @@ annotation class RpcObjectKey(val rpcObject: KClass<out RpcObject<*>>)
 actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> {
     return T::class.findAssociatedObject<RpcObjectKey>() as RpcObject<T>
 }
+
+@RpcObjectKey(VoidService.Companion::class)
+internal actual interface VoidService : RpcService {
+    companion object : RpcObject<VoidService> {
+        override fun createStub(channel: SerializedChannel): VoidService {
+            return object : VoidService {}
+        }
+
+        override fun findEndpoint(endpoint: String): RpcMethod<*, *, *> =
+            throw RpcEndpointException("VoidService has no endpoints")
+    }
+}

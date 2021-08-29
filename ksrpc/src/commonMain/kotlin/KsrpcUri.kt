@@ -15,25 +15,13 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.internal.HttpPacketExchanger
+import com.monkopedia.ksrpc.internal.WebsocketPacketChannel
 import io.ktor.client.HttpClient
-import io.ktor.client.call.receive
 import io.ktor.client.features.websocket.webSocketSession
-import io.ktor.client.request.accept
-import io.ktor.client.request.post
-import io.ktor.client.statement.HttpResponse
-import io.ktor.http.ContentType
-import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLProtocol
-import io.ktor.http.cio.websocket.close
-import io.ktor.http.cio.websocket.readText
-import io.ktor.http.cio.websocket.send
-import io.ktor.http.encodeURLPath
 import io.ktor.http.takeFrom
-import io.ktor.utils.io.readRemaining
-import kotlinx.coroutines.sync.Mutex
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.StringFormat
-import kotlinx.serialization.json.Json
 
 const val KSRPC_BINARY: String = "KSRPC_BINARY"
 
@@ -68,77 +56,14 @@ expect suspend fun KsrpcUri.connect(
     clientFactory: () -> HttpClient = { HttpClient { } },
 ): SerializedChannel
 
-fun HttpClient.asChannel(baseUrl: String): SerializedChannel {
-    val baseStripped = baseUrl.trimEnd('/')
-    val client = this
-    return object : SerializedChannel {
-        override val serialization: StringFormat
-            get() = Json
+internal fun HttpClient.asPacketChannel(baseUrl: String) = HttpPacketExchanger(this, baseUrl.trimEnd('/'))
+fun HttpClient.asChannel(baseUrl: String): SerializedChannel = asPacketChannel(baseUrl)
 
-        override suspend fun call(endpoint: String, input: CallData): CallData {
-            val response = client.post<HttpResponse>(
-                "$baseStripped/call/${endpoint.encodeURLPath()}"
-            ) {
-                accept(ContentType.Application.Json)
-                headers[KSRPC_BINARY] = input.isBinary.toString()
-                body = if (input.isBinary) input.readBinary() else input.readSerialized()
-            }
-            response.checkErrors()
-            if (response.headers[KSRPC_BINARY]?.toBoolean() == true) {
-                return CallData.create(response.content)
-            }
-            return CallData.create(response.content.readRemaining().readText())
-        }
-
-        override suspend fun close() {
-        }
-    }
-}
-
-private suspend fun HttpResponse.checkErrors() {
-    if (status == HttpStatusCode.InternalServerError) {
-        val text = receive<String>()
-        if (text.startsWith(ERROR_PREFIX)) {
-            throw Json.decodeFromString(
-                RpcFailure.serializer(),
-                text.substring(ERROR_PREFIX.length)
-            ).toException()
-        } else {
-            throw IllegalStateException("Can't parse error $this")
-        }
-    }
-}
-
-suspend fun HttpClient.asWebsocketChannel(baseUrl: String): SerializedChannel {
-    val baseStripped = baseUrl.trimEnd('/')
-    val lock = Mutex()
-    val client = webSocketSession {
-        url.takeFrom(baseStripped)
+internal suspend fun HttpClient.asWebsocketPackets(baseUrl: String) =
+    WebsocketPacketChannel(webSocketSession {
+        url.takeFrom(baseUrl.trimEnd('/'))
         url.protocol = URLProtocol.WS
-    }
-    return object : SerializedChannel {
-        override val serialization: StringFormat
-            get() = Json
+    })
 
-        override suspend fun call(endpoint: String, input: CallData): CallData {
-            lock.lock(null)
-            var needsUnlock = true
-            try {
-                client.send(endpoint)
-                client.send(input)
-                return client.receiveCallData {
-                    lock.unlock(null)
-                    needsUnlock = false
-                }
-            } finally {
-                if (needsUnlock) {
-                    lock.unlock(null)
-                }
-            }
-        }
-
-        override suspend fun close() {
-            client.close()
-        }
-    }
-}
+suspend fun HttpClient.asWebsocketChannel(baseUrl: String): SerializedChannel =
+    asWebsocketPackets(baseUrl)

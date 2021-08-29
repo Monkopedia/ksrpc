@@ -40,7 +40,6 @@ class RpcServiceTest : RpcFunctionalityTest(
     },
     verifyOnChannel = { serializedChannel ->
         val stub = serializedChannel.toStub<TestInterface>()
-        stub.rpc("Hello" to "world")
         assertEquals(
             "Hello world",
             stub.rpc("Hello" to "world")
@@ -130,6 +129,7 @@ class RpcServiceTwoCallsTest : RpcFunctionalityTest(
     },
     verifyOnChannel = { serializedChannel ->
         val stub = serializedChannel.toStub<TestInterface>()
+        stub.rpc("Hello" to "world")
         assertEquals(
             "Hello world",
             stub.rpc("Hello" to "world")

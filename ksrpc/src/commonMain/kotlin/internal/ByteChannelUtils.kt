@@ -13,8 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.monkopedia.ksrpc
+package com.monkopedia.ksrpc.internal
 
+import com.monkopedia.ksrpc.CallData
+import com.monkopedia.ksrpc.ERROR_PREFIX
+import com.monkopedia.ksrpc.RpcFailure
 import io.ktor.http.cio.websocket.Frame
 import io.ktor.http.cio.websocket.WebSocketSession
 import io.ktor.http.cio.websocket.readBytes
@@ -25,7 +28,6 @@ import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.close
 import io.ktor.utils.io.core.readBytes
 import io.ktor.utils.io.readRemaining
-import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.flow.Flow
@@ -33,6 +35,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import kotlin.coroutines.coroutineContext
 
 private const val SIZE = 16 * 1024
 
@@ -101,7 +104,10 @@ private suspend fun handleFrame(
     return false
 }
 
-internal suspend fun WebSocketSession.send(input: CallData) {
+internal suspend fun WebSocketSession.send(packet: Packet) {
+    val input = packet.data
+    send(packet.input.toString())
+    send(packet.endpoint)
     if (input.isBinary) {
         input.readBinary().toFrameFlow().collect {
             outgoing.send(it)
@@ -110,13 +116,20 @@ internal suspend fun WebSocketSession.send(input: CallData) {
         outgoing.send(Frame.Text(input.readSerialized()))
     }
 }
-internal suspend fun WebSocketSession.receiveCallData(onClose: () -> Unit): CallData {
-    val input = incoming.receive()
-    return if (input is Frame.Text) {
-        CallData.create(input.expectText())
+
+internal suspend fun WebSocketSession.receivePacket(onClose: () -> Unit): Packet {
+    return incoming.receivePacket(onClose)
+}
+
+internal suspend fun ReceiveChannel<Frame>.receivePacket(onClose: () -> Unit): Packet {
+    val inputPacket = receive().expectText().toBoolean()
+    val endpoint = receive().expectText()
+    val input = receive()
+    return Packet(inputPacket, endpoint, if (input is Frame.Text) {
+        CallData.create(input.expectText()).also { onClose() }
     } else {
-        CallData.create(incoming.toReadChannel(input, onClose))
-    }
+        CallData.create(toReadChannel(input, onClose))
+    })
 }
 
 internal fun Frame.expectText(): String {
