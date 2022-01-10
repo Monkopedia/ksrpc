@@ -21,13 +21,13 @@ buildscript {
         mavenLocal()
     }
     dependencies {
-        classpath("com.monkopedia:ksrpc-gradle-plugin:0.4.1")
+        classpath("com.monkopedia:ksrpc-gradle-plugin:0.4.3")
     }
     extra["kotlin_plugin_id"] = "com.monkopedia.ksrpc.plugin"
 }
 plugins {
-    kotlin("multiplatform") version "1.5.21" apply false
-    kotlin("plugin.serialization") version "1.5.21" apply false
+    kotlin("multiplatform") version "1.6.10" apply false
+    kotlin("plugin.serialization") version "1.6.10" apply false
     id("com.github.autostyle") version "3.1"
     id("org.jetbrains.dokka") version "1.4.10.2" apply false
 
@@ -41,10 +41,6 @@ allprojects {
         jcenter()
         mavenLocal()
         mavenCentral()
-        maven(url = "https://dl.bintray.com/kotlin/kotlin-dev/")
-        maven(url = "https://dl.bintray.com/kotlin/kotlin-eap/")
-        maven(url = "https://kotlinx.bintray.com/kotlinx/")
-        maven(url = "https://dl.bintray.com/kotlin/dokka")
     }
 }
 
