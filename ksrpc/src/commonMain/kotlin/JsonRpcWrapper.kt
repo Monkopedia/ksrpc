@@ -7,6 +7,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.Required
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.StringFormat
 import kotlinx.serialization.decodeFromString
@@ -47,7 +48,7 @@ class JsonRpcSerializedChannel(
                 } ?: IllegalStateException("JsonRpcError(${parsedResponse.error.code}): ${parsedResponse.error.message}")
                 throw error
             }
-            require (parsedResponse.id == id) {
+            require (parsedResponse.id == request.id) {
                 "Unexpected id ${parsedResponse.id} when executing non-batched jsonrpc $id"
             }
             return CallData.create(serialization.encodeToString(parsedResponse.result))
@@ -114,18 +115,20 @@ class JsonRpcWrapper(private val channel: SerializedChannel) : JsonRpcChannel {
 
 @Serializable
 data class JsonRpcRequest(
+    @Required
+    val jsonrpc: String = "2.0",
     val method: String,
     val params: JsonElement,
     val id: Int?,
-    val jsonrpc: String = "2.0"
 )
 
 @Serializable
 data class JsonRpcResponse(
+    @Required
+    val jsonrpc: String = "2.0",
     val result: JsonElement? = null,
     val error: JsonRpcError? = null,
     val id: Int? = null,
-    val jsonrpc: String = "2.0"
 )
 
 @Serializable
