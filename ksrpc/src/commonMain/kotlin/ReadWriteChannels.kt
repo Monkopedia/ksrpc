@@ -16,13 +16,8 @@
 package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.internal.ReadWritePacketChannel
-import io.ktor.util.InternalAPI
-import io.ktor.util.decodeBase64Bytes
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
-import io.ktor.utils.io.readFully
-import io.ktor.utils.io.readUTF8Line
-import io.ktor.utils.io.writeStringUtf8
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.coroutineScope
@@ -48,9 +43,11 @@ suspend fun SerializedChannel.serve(
     errorListener: ErrorListener = ErrorListener { }
 ) {
     coroutineScope {
-        ReadWritePacketChannel(input, output).connect(this + asyncDispatcher + CoroutineExceptionHandler { _, t ->
-            errorListener.onError(t)
-        }) {
+        ReadWritePacketChannel(input, output).connect(
+            this + asyncDispatcher + CoroutineExceptionHandler { _, t ->
+                errorListener.onError(t)
+            }
+        ) {
             this@serve
         }
     }

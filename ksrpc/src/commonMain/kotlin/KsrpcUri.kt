@@ -56,14 +56,17 @@ expect suspend fun KsrpcUri.connect(
     clientFactory: () -> HttpClient = { HttpClient { } },
 ): SerializedChannel
 
-internal fun HttpClient.asPacketChannel(baseUrl: String) = HttpPacketExchanger(this, baseUrl.trimEnd('/'))
+internal fun HttpClient.asPacketChannel(baseUrl: String) =
+    HttpPacketExchanger(this, baseUrl.trimEnd('/'))
 fun HttpClient.asChannel(baseUrl: String): SerializedChannel = asPacketChannel(baseUrl)
 
 internal suspend fun HttpClient.asWebsocketPackets(baseUrl: String) =
-    WebsocketPacketChannel(webSocketSession {
-        url.takeFrom(baseUrl.trimEnd('/'))
-        url.protocol = URLProtocol.WS
-    })
+    WebsocketPacketChannel(
+        webSocketSession {
+            url.takeFrom(baseUrl.trimEnd('/'))
+            url.protocol = URLProtocol.WS
+        }
+    )
 
 suspend fun HttpClient.asWebsocketChannel(baseUrl: String): SerializedChannel =
     asWebsocketPackets(baseUrl)

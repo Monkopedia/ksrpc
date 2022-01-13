@@ -75,9 +75,11 @@ fun Routing.serveWebsocket(
     webSocket(baseStripped) {
         coroutineScope {
             val wb = WebsocketPacketChannel(this@webSocket)
-            wb.connect(CoroutineScope(this.coroutineContext) + CoroutineExceptionHandler { _, t ->
-                errorListener.onError(t)
-            }) {
+            wb.connect(
+                CoroutineScope(this.coroutineContext) + CoroutineExceptionHandler { _, t ->
+                    errorListener.onError(t)
+                }
+            ) {
                 channel
             }
         }

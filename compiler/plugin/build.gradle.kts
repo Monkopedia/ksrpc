@@ -95,6 +95,6 @@ tasks.withType<KotlinCompile> {
 }
 
 signing {
-   useGpgCmd()
-   sign(publishing.publications)
+    useGpgCmd()
+    sign(publishing.publications)
 }
