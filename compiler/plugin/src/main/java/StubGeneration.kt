@@ -19,6 +19,7 @@ import org.jetbrains.kotlin.backend.common.ir.addChild
 import org.jetbrains.kotlin.backend.common.ir.createImplicitParameterDeclarationWithWrappedDescriptor
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.backend.common.lower.irIfThen
+import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.descriptors.Modality
@@ -199,7 +200,8 @@ object StubGeneration {
         return with(companion) {
             val inputType = method.valueParameters[0].type
             val outputType = method.returnType
-            val type = env.determineType(method, inputType, outputType)
+            val inputRpcType = env.determineType(inputType)
+            val outputRpcType = env.determineType(outputType)
             val field = addField {
                 startOffset = SYNTHETIC_OFFSET
                 endOffset = SYNTHETIC_OFFSET
@@ -235,8 +237,8 @@ object StubGeneration {
                                 inputType,
                                 outputType,
                                 endpoint,
-                                type,
-                                this@apply,
+                                inputRpcType,
+                                outputRpcType,
                                 method
                             )
                         )
@@ -248,78 +250,75 @@ object StubGeneration {
     }
 
     private fun KsrpcGenerationEnvironment.irCreateRpcMethod(
-        irField: IrFunction,
+        function: IrFunction,
         serviceInterface: IrClass,
         inputType: IrType,
         outputType: IrType,
         endpoint: String,
-        type: RpcType,
-        field: IrSimpleFunction,
+        inputRpcType: RpcType,
+        outputRpcType: RpcType,
         method: IrSimpleFunction
-    ) =
-        with(pluginContext.createIrBuilder(irField.symbol)) {
-            irCallConstructor(
-                rpcMethod.constructors.first(),
-                listOf(serviceInterface.typeWith(), inputType, outputType)
+    ) = with(pluginContext.createIrBuilder(function.symbol)) {
+        messageCollector.report(
+            CompilerMessageSeverity.INFO,
+            "generating ${serviceInterface.name.identifier}#${function.name.identifier}(\"${
+            endpoint.trimStart('/')
+            }\") with types: $inputRpcType(${
+            inputType.classFqName?.shortName()
+            }) $outputRpcType(${outputType.classFqName?.shortName()})"
+        )
+        irCallConstructor(
+            rpcMethod.constructors.first(),
+            listOf(serviceInterface.typeWith(), inputType, outputType)
+        ).apply {
+            this.type = rpcMethod.typeWith(serviceInterface.typeWith(), inputType, outputType)
+            putValueArgument(0, irString(endpoint.trimStart('/')))
+            putValueArgument(1, createTypeConverter(inputRpcType, inputType, this@with))
+            putValueArgument(2, createTypeConverter(outputRpcType, outputType, this@with))
+            val createServiceExecutor = irCreateServiceExecutor(method, serviceInterface)
+            putValueArgument(
+                3,
+                irBlock {
+                    +irCallConstructor(
+                        createServiceExecutor.constructors.first().symbol,
+                        emptyList()
+                    ).apply {
+                        this.type = createServiceExecutor.typeWith()
+                    }
+                }
+            )
+        }
+    }
+
+    private fun KsrpcGenerationEnvironment.createTypeConverter(
+        outputRpcType: RpcType,
+        outputType: IrType,
+        declarationIrBuilder: DeclarationIrBuilder
+    ) = when (outputRpcType) {
+        RpcType.BINARY -> declarationIrBuilder.irGetObject(binaryTransformer)
+        RpcType.SERVICE ->
+            declarationIrBuilder.irCallConstructor(
+                subserviceTransformer.constructors.first(),
+                listOf(outputType)
             ).apply {
-                this.type = rpcMethod.typeWith(serviceInterface.typeWith(), inputType, outputType)
-                putValueArgument(0, irString(endpoint.trimStart('/')))
+                this.type = subserviceTransformer.typeWith(outputType)
                 putValueArgument(
-                    1,
-                    when (type) {
-                        RpcType.BINARY_INPUT -> irGetObject(binaryTransformer)
-                        else ->
-                            irCallConstructor(
-                                serializerTransformer.constructors.first(),
-                                listOf(inputType)
-                            ).apply {
-                                this.type = serializerTransformer.typeWith(inputType)
-                                putValueArgument(0, getSerializer(this@with, inputType))
-                            }
-                    }
-                )
-                putValueArgument(
-                    2,
-                    when (type) {
-                        RpcType.BINARY_OUTPUT -> irGetObject(binaryTransformer)
-                        RpcType.SERVICE ->
-                            irCallConstructor(
-                                subserviceTransformer.constructors.first(),
-                                listOf(outputType)
-                            ).apply {
-                                this.type = subserviceTransformer.typeWith(outputType)
-                                putValueArgument(
-                                    0,
-                                    irGetObject(
-                                        outputType.getClass()?.companionObject()?.symbol
-                                            ?: error("Missing companion")
-                                    )
-                                )
-                            }
-                        else ->
-                            irCallConstructor(
-                                serializerTransformer.constructors.first(),
-                                listOf(outputType)
-                            ).apply {
-                                this.type = serializerTransformer.typeWith(outputType)
-                                putValueArgument(0, getSerializer(this@with, outputType))
-                            }
-                    }
-                )
-                val createServiceExecutor = irCreateServiceExecutor(method, serviceInterface)
-                putValueArgument(
-                    3,
-                    irBlock {
-                        +irCallConstructor(
-                            createServiceExecutor.constructors.first().symbol,
-                            emptyList()
-                        ).apply {
-                            this.type = createServiceExecutor.typeWith()
-                        }
-                    }
+                    0,
+                    declarationIrBuilder.irGetObject(
+                        outputType.getClass()?.companionObject()?.symbol
+                            ?: error("Missing companion")
+                    )
                 )
             }
-        }
+        else ->
+            declarationIrBuilder.irCallConstructor(
+                serializerTransformer.constructors.first(),
+                listOf(outputType)
+            ).apply {
+                this.type = serializerTransformer.typeWith(outputType)
+                putValueArgument(0, getSerializer(declarationIrBuilder, outputType))
+            }
+    }
 
     private fun KsrpcGenerationEnvironment.irCreateServiceExecutor(
         referencedFunction: IrSimpleFunction,
@@ -387,21 +386,12 @@ object StubGeneration {
             this.type = kSerializer.typeWith(type)
         }
 
-    private fun KsrpcGenerationEnvironment.determineType(
-        method: IrFunction,
-        inputType: IrType,
-        outputType: IrType
-    ): RpcType {
-        if (method.returnType.extends(rpcService)) {
-            return RpcType.SERVICE
+    private fun KsrpcGenerationEnvironment.determineType(type: IrType): RpcType {
+        return when {
+            type.extends(rpcService) -> RpcType.SERVICE
+            type.classFqName == byteReadChannel -> RpcType.BINARY
+            else -> RpcType.DEFAULT
         }
-        if (inputType.classFqName == byteReadChannel) {
-            return RpcType.BINARY_INPUT
-        }
-        if (outputType.classFqName == byteReadChannel) {
-            return RpcType.BINARY_OUTPUT
-        }
-        return RpcType.DEFAULT
     }
 
     private fun IrType.extends(cls: IrClassSymbol): Boolean {
@@ -415,8 +405,7 @@ object StubGeneration {
 
     private enum class RpcType {
         DEFAULT,
-        BINARY_INPUT,
-        BINARY_OUTPUT,
+        BINARY,
         SERVICE
     }
 }

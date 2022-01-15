@@ -17,7 +17,9 @@ package com.monkopedia.ksrpc
 
 import kotlinx.serialization.json.Json
 
-interface RpcService
+interface RpcService : SuspendCloseable {
+    override suspend fun close() = Unit
+}
 
 interface RpcObject<T : RpcService> {
     fun createStub(channel: SerializedService): T

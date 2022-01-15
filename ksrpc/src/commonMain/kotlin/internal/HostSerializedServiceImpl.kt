@@ -17,6 +17,7 @@ package com.monkopedia.ksrpc.internal
 
 import com.monkopedia.ksrpc.CallData
 import com.monkopedia.ksrpc.ChannelClient
+import com.monkopedia.ksrpc.ChannelClientProvider
 import com.monkopedia.ksrpc.ChannelHost
 import com.monkopedia.ksrpc.ChannelHostProvider
 import com.monkopedia.ksrpc.ChannelId
@@ -36,8 +37,10 @@ import kotlinx.serialization.StringFormat
 internal class HostSerializedChannelImpl(
     private val errorListener: ErrorListener,
     override val serialization: StringFormat
-) : ChannelHost, SerializedChannel {
+) : ChannelHost, ChannelClientProvider, SerializedChannel {
     private var baseChannel: SerializedService? = null
+    override var client: ChannelClient? = null
+        internal set
 
     private val serviceMap by lazy {
         mutableMapOf<String, SerializedService>()
@@ -51,6 +54,7 @@ internal class HostSerializedChannelImpl(
                 serviceMap[channelId.id] ?: error("Cannot find service ${channelId.id}")
             }
             (channel as? HostSerializedServiceImpl<*>)?.host = this
+            (channel as? HostSerializedServiceImpl<*>)?.client = client
             channel.call(endpoint, data)
         } catch (t: Throwable) {
             errorListener.onError(t)
@@ -96,8 +100,10 @@ internal class HostSerializedServiceImpl<T : RpcService>(
     private val service: T,
     private val rpcObject: RpcObject<T>,
     override val serialization: StringFormat
-) : SerializedService, ChannelHostProvider {
+) : SerializedService, ChannelHostProvider, ChannelClientProvider {
     override var host: ChannelHost? = null
+        internal set
+    override var client: ChannelClient? = null
         internal set
 
     override suspend fun call(endpoint: String, input: CallData): CallData {

@@ -20,6 +20,16 @@ import io.ktor.utils.io.ByteReadChannel
 import kotlinx.serialization.StringFormat
 import kotlinx.serialization.json.Json
 
+inline fun <reified T : RpcService> ChannelHost.registerHost(
+    service: T,
+    serialization: StringFormat = this.serialization
+): ChannelId = registerHost(service, rpcObject(), serialization)
+
+inline fun <reified T : RpcService> ChannelHost.registerDefault(
+    service: T,
+    serialization: StringFormat = this.serialization
+) = registerDefault(service, rpcObject(), serialization)
+
 fun <T : RpcService> ChannelHost.registerHost(
     service: T,
     obj: RpcObject<T>,

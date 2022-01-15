@@ -38,6 +38,12 @@ class KsrpcIrGenerationExtension(
         KsrpcGenerationEnvironment.create(pluginContext, messageCollector) { env ->
             for (cls in classes) {
                 val clsType = cls.irClass.typeWith()
+                messageCollector.report(
+                    CompilerMessageSeverity.INFO,
+                    "Generating for class ${
+                    cls.irClass.name.identifier
+                    } with ${cls.methods.size} methods"
+                )
                 if (env.validate(cls)) {
                     val (stubCls, methods) = StubGeneration.generate(cls, clsType, env)
                     CompanionGeneration.generate(cls, env, clsType, stubCls, methods)

@@ -53,20 +53,25 @@ internal abstract class PacketChannelBase(
     private var receiveChannel: Channel<Packet> = Channel()
 
     init {
+        @Suppress("LeakingThis")
+        serviceChannel.client = this
+    }
+
+    init {
         scope.launch {
             try {
                 while (true) {
                     val p = receive()
                     if (p.input) {
                         launch {
-                            callLock.withLock {
-                                val response = serviceChannel.call(
+                            val response = callLock.withLock {
+                                serviceChannel.call(
                                     ChannelId(p.id),
                                     p.endpoint,
                                     p.data
                                 )
-                                send(Packet(false, p.id, p.endpoint, response))
                             }
+                            send(Packet(false, p.id, p.endpoint, response))
                         }
                     } else {
                         receiveChannel.send(p)
@@ -79,14 +84,12 @@ internal abstract class PacketChannelBase(
     }
 
     override fun wrapChannel(channelId: ChannelId): SerializedService {
-        return SubserviceChannel(this, channelId)
+        return SubserviceChannel(this, channelId, this)
     }
 
     override suspend fun call(channelId: ChannelId, endpoint: String, data: CallData): CallData {
-        callLock.withLock {
-            send(Packet(true, channelId.id, endpoint, data))
-            return receiveChannel.receive().data
-        }
+        send(Packet(true, channelId.id, endpoint, data))
+        return receiveChannel.receive().data
     }
 
     override suspend fun close(id: ChannelId) {

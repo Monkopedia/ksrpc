@@ -27,9 +27,6 @@ import org.jetbrains.kotlin.resolve.extensions.SyntheticResolveExtension
 @AutoService(ComponentRegistrar::class)
 class KsrpcComponentRegistrar : ComponentRegistrar {
 
-    init {
-    }
-
     override fun registerProjectComponents(
         project: MockProject,
         configuration: CompilerConfiguration
