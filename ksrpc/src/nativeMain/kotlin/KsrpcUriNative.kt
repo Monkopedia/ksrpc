@@ -20,13 +20,13 @@ import io.ktor.client.HttpClient
 actual suspend fun KsrpcUri.connect(clientFactory: () -> HttpClient): ChannelClient {
     return when (type) {
         KsrpcType.EXE -> {
-            throw NotImplementedError("EXE not supported in JS")
+            throw NotImplementedError("EXE not supported in Native")
         }
         KsrpcType.SOCKET -> {
-            throw NotImplementedError("Socket not supported in JS")
+            throw NotImplementedError("Socket not supported in Native")
         }
         KsrpcType.LOCAL -> {
-            throw NotImplementedError("Local not supported in JS")
+            throw NotImplementedError("Local not supported in Native")
         }
         KsrpcType.HTTP -> {
             clientFactory().asChannel(path)
