@@ -16,9 +16,14 @@
 package com.monkopedia.ksrpc.internal
 
 import com.monkopedia.ksrpc.CallData
+import com.monkopedia.ksrpc.ChannelClient
+import com.monkopedia.ksrpc.ChannelId
 import com.monkopedia.ksrpc.ERROR_PREFIX
 import com.monkopedia.ksrpc.KSRPC_BINARY
+import com.monkopedia.ksrpc.KSRPC_CHANNEL
 import com.monkopedia.ksrpc.RpcFailure
+import com.monkopedia.ksrpc.SerializedChannel
+import com.monkopedia.ksrpc.SerializedService
 import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
 import io.ktor.client.request.accept
@@ -28,29 +33,37 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.encodeURLPath
 import io.ktor.utils.io.readRemaining
+import kotlinx.serialization.StringFormat
 import kotlinx.serialization.json.Json
 
-internal class HttpPacketExchanger(
-    private val client: HttpClient,
-    private val baseStripped: String
-) : PacketExchangerBase(Json) {
-    override suspend fun call(packet: Packet): Packet {
-        require(packet.input) {
-            "HttpClient.asPacketChannel doesn't support non-input packets"
-        }
-        val input = packet.data
-        val response = client.post<HttpResponse>(
-            "$baseStripped/call/${packet.endpoint.encodeURLPath()}"
+internal class HttpSerializedChannel(
+    private val httpClient: HttpClient,
+    private val baseStripped: String,
+    override val serialization: StringFormat = Json
+) : SerializedChannel, ChannelClient {
+
+    override suspend fun call(channelId: ChannelId, endpoint: String, input: CallData): CallData {
+        val response = httpClient.post<HttpResponse>(
+            "$baseStripped/call/${endpoint.encodeURLPath()}"
         ) {
             accept(ContentType.Application.Json)
             headers[KSRPC_BINARY] = input.isBinary.toString()
+            headers[KSRPC_CHANNEL] = channelId.id
             body = if (input.isBinary) input.readBinary() else input.readSerialized()
         }
         response.checkErrors()
         if (response.headers[KSRPC_BINARY]?.toBoolean() == true) {
-            return packet.copy(data = CallData.create(response.content))
+            return CallData.create(response.content)
         }
-        return packet.copy(data = CallData.create(response.content.readRemaining().readText()))
+        return CallData.create(response.content.readRemaining().readText())
+    }
+
+    override suspend fun close(id: ChannelId) {
+        call(id, "", CallData.create("{}"))
+    }
+
+    override fun wrapChannel(channelId: ChannelId): SerializedService {
+        return SubserviceChannel(this, channelId)
     }
 
     override suspend fun close() {

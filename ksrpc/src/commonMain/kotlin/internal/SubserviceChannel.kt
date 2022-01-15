@@ -16,31 +16,23 @@
 package com.monkopedia.ksrpc.internal
 
 import com.monkopedia.ksrpc.CallData
-import com.monkopedia.ksrpc.SerializedChannel
-import com.monkopedia.ksrpc.encodedEndpoint
+import com.monkopedia.ksrpc.ChannelClient
+import com.monkopedia.ksrpc.ChannelId
+import com.monkopedia.ksrpc.SerializedService
 import kotlinx.serialization.StringFormat
 
 internal class SubserviceChannel(
-    override val serialization: StringFormat,
-    private val baseChannel: SerializedChannel,
-    private val serviceId: String
-) : SerializedChannel {
+    private val baseChannel: ChannelClient,
+    private val serviceId: ChannelId
+) : SerializedService, ChannelClient by baseChannel {
+    override val serialization: StringFormat
+        get() = baseChannel.serialization
 
     override suspend fun call(endpoint: String, input: CallData): CallData {
-        return call(listOf(endpoint), input)
-    }
-
-    private suspend fun call(
-        target: List<String>,
-        input: CallData
-    ): CallData {
-        if (baseChannel is SubserviceChannel) {
-            return baseChannel.call(target + serviceId, input)
-        }
-        return baseChannel.call(serialization.encodedEndpoint(target + serviceId), input)
+        return baseChannel.call(serviceId, endpoint, input)
     }
 
     override suspend fun close() {
-        call(listOf("", "close"), CallData.create(""))
+        baseChannel.close(serviceId)
     }
 }

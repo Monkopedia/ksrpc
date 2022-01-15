@@ -20,13 +20,16 @@ import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.plus
+import kotlin.coroutines.coroutineContext
 
 internal const val CONTENT_LENGTH = "Content-Length"
 internal const val METHOD = "Method"
 internal const val INPUT = "Input"
 internal const val TYPE = "Type"
+internal const val CHANNEL = "Channel"
 
 internal enum class SendType {
     NORMAL,
@@ -36,23 +39,27 @@ internal enum class SendType {
 
 expect val DEFAULT_DISPATCHER: CoroutineDispatcher
 
-suspend fun SerializedChannel.serve(
+suspend fun SerializedService.defaultHosting(
     input: ByteReadChannel,
     output: ByteWriteChannel,
     asyncDispatcher: CoroutineDispatcher = DEFAULT_DISPATCHER,
     errorListener: ErrorListener = ErrorListener { }
 ) {
     coroutineScope {
-        ReadWritePacketChannel(input, output).connect(
+        ReadWritePacketChannel(this, errorListener, input, output).connect(
             this + asyncDispatcher + CoroutineExceptionHandler { _, t ->
                 errorListener.onError(t)
             }
         ) {
-            this@serve
+            this@defaultHosting
         }
     }
 }
 
-fun Pair<ByteReadChannel, ByteWriteChannel>.asChannel(): SerializedChannel {
-    return ReadWritePacketChannel(first, second)
+suspend fun Pair<ByteReadChannel, ByteWriteChannel>.asChannel(
+    scope: CoroutineScope? = null,
+    errorListener: ErrorListener = ErrorListener { }
+): Connection {
+    val scope = scope ?: CoroutineScope(coroutineContext)
+    return ReadWritePacketChannel(scope, errorListener, first, second)
 }

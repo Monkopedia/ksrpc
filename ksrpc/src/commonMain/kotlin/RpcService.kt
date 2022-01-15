@@ -20,7 +20,7 @@ import kotlinx.serialization.json.Json
 interface RpcService
 
 interface RpcObject<T : RpcService> {
-    fun createStub(channel: SerializedChannel): T
+    fun createStub(channel: SerializedService): T
     fun findEndpoint(endpoint: String): RpcMethod<*, *, *>
 }
 
@@ -29,11 +29,11 @@ expect inline fun <reified T : RpcService> rpcObject(): RpcObject<T>
 inline fun <reified T : RpcService> T.serialized(
     errorListener: ErrorListener = ErrorListener { },
     json: Json = Json { isLenient = true }
-): SerializedChannel {
+): SerializedService {
     return serialized(rpcObject(), errorListener, json)
 }
 
-inline fun <reified T : RpcService> SerializedChannel.toStub(): T {
+inline fun <reified T : RpcService> SerializedService.toStub(): T {
     return rpcObject<T>().createStub(this)
 }
 

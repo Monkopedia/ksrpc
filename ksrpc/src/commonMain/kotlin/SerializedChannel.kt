@@ -15,18 +15,67 @@
  */
 package com.monkopedia.ksrpc
 
-import com.monkopedia.ksrpc.internal.SerializedChannelImpl
+import com.monkopedia.ksrpc.internal.HostSerializedServiceImpl
 import io.ktor.utils.io.ByteReadChannel
 import kotlinx.serialization.StringFormat
 import kotlinx.serialization.json.Json
 
-interface SerializedChannel : SuspendCloseable {
-    val serialization: StringFormat
-    suspend fun call(endpoint: String, input: CallData): CallData
+fun <T : RpcService> ChannelHost.registerHost(
+    service: T,
+    obj: RpcObject<T>,
+    serialization: StringFormat = this.serialization
+): ChannelId {
+    return registerHost(HostSerializedServiceImpl(service, obj, serialization))
 }
 
-interface HostingSerializedChannel : SerializedChannel {
-    fun <T : RpcService> registerSubService(serviceId: String, service: T, obj: RpcObject<T>)
+fun <T : RpcService> ChannelHost.registerDefault(
+    service: T,
+    obj: RpcObject<T>,
+    serialization: StringFormat = this.serialization
+) {
+    registerDefault(HostSerializedServiceImpl(service, obj, serialization))
+}
+
+interface ChannelHostProvider {
+    val host: ChannelHost?
+}
+
+interface ChannelHost : Serializing, ChannelHostProvider {
+    fun registerHost(service: SerializedService): ChannelId
+    fun registerDefault(service: SerializedService)
+    suspend fun close(id: ChannelId)
+
+    override val host: ChannelHost
+        get() = this
+}
+
+interface ChannelClientProvider {
+    val client: ChannelClient?
+}
+
+interface ChannelClient : SerializedChannel, ChannelClientProvider {
+    fun wrapChannel(channelId: ChannelId): SerializedService
+    fun defaultChannel() = wrapChannel(ChannelId(DEFAULT))
+
+    override val client: ChannelClient
+        get() = this
+
+    companion object {
+        const val DEFAULT = ""
+    }
+}
+
+interface Serializing {
+    val serialization: StringFormat
+}
+
+interface SerializedChannel : SuspendCloseable, Serializing {
+    suspend fun call(channelId: ChannelId, endpoint: String, data: CallData): CallData
+    suspend fun close(id: ChannelId)
+}
+
+interface SerializedService : SuspendCloseable, Serializing {
+    suspend fun call(endpoint: String, input: CallData): CallData
 }
 
 expect fun randomUuid(): String
@@ -35,9 +84,9 @@ fun <T : RpcService> T.serialized(
     rpcObject: RpcObject<T>,
     errorListener: ErrorListener = ErrorListener { },
     json: Json = Json { isLenient = true }
-): SerializedChannel {
+): SerializedService {
     val rpcChannel = this
-    return SerializedChannelImpl(rpcChannel, rpcObject, errorListener, json)
+    return HostSerializedServiceImpl(rpcChannel, rpcObject, json)
 }
 
 data class CallData private constructor(private val value: Any?) {
@@ -70,6 +119,6 @@ data class CallData private constructor(private val value: Any?) {
 fun <T : RpcService> RpcObject<T>.serializedChannel(
     service: T,
     errorListener: ErrorListener = ErrorListener { }
-): SerializedChannel {
+): SerializedService {
     return service.serialized(this, errorListener = errorListener)
 }

@@ -21,8 +21,8 @@ import kotlinx.serialization.StringFormat
 import kotlinx.serialization.builtins.serializer
 
 internal sealed interface Transformer<T> {
-    fun transform(input: T, channel: SerializedChannel): CallData
-    fun untransform(data: CallData, channel: SerializedChannel): T
+    fun transform(input: T, channel: SerializedService): CallData
+    fun untransform(data: CallData, channel: SerializedService): T
 
     fun unpackError(data: CallData, serialization: StringFormat) {
         if (!data.isBinary) {
@@ -37,22 +37,22 @@ internal sealed interface Transformer<T> {
 }
 
 internal class SerializerTransformer<I>(private val serializer: KSerializer<I>) : Transformer<I> {
-    override fun transform(input: I, channel: SerializedChannel): CallData {
+    override fun transform(input: I, channel: SerializedService): CallData {
         return CallData.create(channel.serialization.encodeToString(serializer, input))
     }
 
-    override fun untransform(data: CallData, channel: SerializedChannel): I {
+    override fun untransform(data: CallData, channel: SerializedService): I {
         unpackError(data, channel.serialization)
         return channel.serialization.decodeFromString(serializer, data.readSerialized())
     }
 }
 
 internal object BinaryTransformer : Transformer<ByteReadChannel> {
-    override fun transform(input: ByteReadChannel, channel: SerializedChannel): CallData {
+    override fun transform(input: ByteReadChannel, channel: SerializedService): CallData {
         return CallData.create(input)
     }
 
-    override fun untransform(data: CallData, channel: SerializedChannel): ByteReadChannel {
+    override fun untransform(data: CallData, channel: SerializedService): ByteReadChannel {
         unpackError(data, channel.serialization)
         return data.readBinary()
     }
@@ -61,21 +61,24 @@ internal object BinaryTransformer : Transformer<ByteReadChannel> {
 internal class SubserviceTransformer<T : RpcService>(
     private val serviceObj: RpcObject<T>
 ) : Transformer<T> {
-    override fun transform(input: T, channel: SerializedChannel): CallData {
-        val serviceId = randomUuid()
-        (channel as? HostingSerializedChannel)?.registerSubService(serviceId, input, serviceObj)
+    override fun transform(input: T, channel: SerializedService): CallData {
+        val host = (channel as? ChannelHostProvider)?.host
+            ?: error("Cannot transform service type to non-hosting channel")
+        val serviceId = host.registerHost(input, serviceObj)
         return CallData.create(
-            channel.serialization.encodeToString(String.serializer(), serviceId)
+            channel.serialization.encodeToString(String.serializer(), serviceId.id)
         )
     }
 
-    override fun untransform(data: CallData, channel: SerializedChannel): T {
+    override fun untransform(data: CallData, channel: SerializedService): T {
+        val client = (channel as? ChannelClientProvider)?.client
+            ?: error("Cannot untransform service type from non-client channel")
         BinaryTransformer.unpackError(data, channel.serialization)
         val serviceId = channel.serialization.decodeFromString(
             String.serializer(),
             data.readSerialized()
         )
-        return serviceObj.createStub(channel.subservice(serviceId))
+        return serviceObj.createStub(client.wrapChannel(ChannelId(serviceId)))
     }
 }
 
@@ -90,7 +93,7 @@ class RpcMethod<T : RpcService, I, O> internal constructor(
     private val method: ServiceExecutor
 ) {
     internal suspend fun call(
-        channel: SerializedChannel,
+        channel: SerializedService,
         service: RpcService,
         input: CallData
     ): CallData {
@@ -99,7 +102,7 @@ class RpcMethod<T : RpcService, I, O> internal constructor(
         return outputTransform.transform(output as O, channel)
     }
 
-    internal suspend fun callChannel(channel: SerializedChannel, input: Any?): Any? {
+    internal suspend fun callChannel(channel: SerializedService, input: Any?): Any? {
         val input = inputTransform.transform(input as I, channel)
         val transformedOutput = channel.call(endpoint, input)
         return outputTransform.untransform(transformedOutput, channel)

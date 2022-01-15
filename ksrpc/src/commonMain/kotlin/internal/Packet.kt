@@ -15,11 +15,13 @@
  */
 package com.monkopedia.ksrpc.internal
 
-import com.monkopedia.ksrpc.BidirectionalChannel
 import com.monkopedia.ksrpc.CallData
-import com.monkopedia.ksrpc.SerializedChannel
+import com.monkopedia.ksrpc.ChannelHost
+import com.monkopedia.ksrpc.ChannelId
+import com.monkopedia.ksrpc.Connection
+import com.monkopedia.ksrpc.ErrorListener
+import com.monkopedia.ksrpc.SerializedService
 import com.monkopedia.ksrpc.SuspendCloseable
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
@@ -29,13 +31,10 @@ import kotlinx.serialization.StringFormat
 
 internal data class Packet(
     val input: Boolean,
+    val id: String,
     val endpoint: String,
     val data: CallData
 )
-
-internal interface PacketExchanger : SuspendCloseable {
-    suspend fun call(packet: Packet): Packet
-}
 
 internal interface PacketChannel : SuspendCloseable {
     suspend fun send(packet: Packet)
@@ -43,93 +42,60 @@ internal interface PacketChannel : SuspendCloseable {
 }
 
 internal abstract class PacketChannelBase(
-    override val serialization: StringFormat
-) : PacketChannel, SerializedChannel, BidirectionalChannel {
-    private var lock = Mutex()
+    scope: CoroutineScope,
+    errorListener: ErrorListener,
+    override val serialization: StringFormat,
+    private val serviceChannel: HostSerializedChannelImpl =
+        HostSerializedChannelImpl(errorListener, serialization)
+) : PacketChannel, Connection, ChannelHost by serviceChannel {
     private var callLock = Mutex()
 
-    abstract suspend fun receiveImpl(): Packet
+    private var receiveChannel: Channel<Packet> = Channel()
 
-    override suspend fun CoroutineScope.receivingChannel(): SerializedChannel {
-        ensureInitBidi()
-        return this@PacketChannelBase
-    }
-
-    private lateinit var receiveChannel: Channel<Packet>
-    private val serviceCompletion by lazy {
-        CompletableDeferred<SerializedChannel>()
-    }
-    private var isBidi = false
-
-    private suspend fun CoroutineScope.ensureInitBidi() {
-        if (isBidi) return
-        lock.withLock {
-            if (isBidi) return
-
-            receiveChannel = Channel()
-            launch {
-                val service = serviceCompletion.await()
-                try {
-                    while (true) {
-                        val p = receiveImpl()
-                        if (p.input) {
-                            launch {
-                                service.handleInput(p)
+    init {
+        scope.launch {
+            try {
+                while (true) {
+                    val p = receive()
+                    if (p.input) {
+                        launch {
+                            callLock.withLock {
+                                val response = serviceChannel.call(
+                                    ChannelId(p.id),
+                                    p.endpoint,
+                                    p.data
+                                )
+                                send(Packet(false, p.id, p.endpoint, response))
                             }
-                        } else {
-                            receiveChannel.send(p)
                         }
+                    } else {
+                        receiveChannel.send(p)
                     }
-                } catch (t: Throwable) {
-                    receiveChannel.close(t)
                 }
-            }
-
-            isBidi = true
-        }
-    }
-
-    override suspend fun CoroutineScope.serve(sendingChannel: SerializedChannel) {
-        ensureInitBidi()
-        serviceCompletion.complete(sendingChannel)
-    }
-
-    private suspend fun SerializedChannel.handleInput(p: Packet) {
-        val output = call(p.endpoint, p.data)
-        send(Packet(false, p.endpoint, output))
-    }
-
-    override suspend fun receive(): Packet {
-        lock.withLock {
-            return if (isBidi) {
-                receiveChannel.receive()
-            } else {
-                receiveImpl()
+            } catch (t: Throwable) {
+                receiveChannel.close(t)
             }
         }
     }
 
-    override suspend fun call(endpoint: String, input: CallData): CallData {
+    override fun wrapChannel(channelId: ChannelId): SerializedService {
+        return SubserviceChannel(this, channelId)
+    }
+
+    override suspend fun call(channelId: ChannelId, endpoint: String, data: CallData): CallData {
         callLock.withLock {
-            send(Packet(true, endpoint, input))
-            return receive().data
+            send(Packet(true, channelId.id, endpoint, data))
+            return receiveChannel.receive().data
         }
+    }
+
+    override suspend fun close(id: ChannelId) {
+        call(id, "", CallData.create("{}"))
     }
 
     override suspend fun close() {
-        lock.withLock {
-            if (isBidi) {
-                receiveChannel.close()
-            }
+        callLock.withLock {
+            receiveChannel.close()
         }
-    }
-}
-
-internal abstract class PacketExchangerBase(
-    override val serialization: StringFormat
-) : PacketExchanger, SerializedChannel {
-
-    override suspend fun call(endpoint: String, input: CallData): CallData {
-        return call(Packet(true, endpoint, input)).data
     }
 }

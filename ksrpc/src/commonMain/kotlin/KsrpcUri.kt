@@ -15,15 +15,17 @@
  */
 package com.monkopedia.ksrpc
 
-import com.monkopedia.ksrpc.internal.HttpPacketExchanger
+import com.monkopedia.ksrpc.internal.HttpSerializedChannel
 import com.monkopedia.ksrpc.internal.WebsocketPacketChannel
 import io.ktor.client.HttpClient
 import io.ktor.client.features.websocket.webSocketSession
 import io.ktor.http.URLProtocol
 import io.ktor.http.takeFrom
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.Serializable
 
 const val KSRPC_BINARY: String = "KSRPC_BINARY"
+const val KSRPC_CHANNEL: String = "KSRPC_CHANNEL"
 
 enum class KsrpcType {
     EXE,
@@ -54,19 +56,24 @@ fun String.toKsrpcUri(): KsrpcUri = when {
 
 expect suspend fun KsrpcUri.connect(
     clientFactory: () -> HttpClient = { HttpClient { } },
-): SerializedChannel
+): ChannelClient
 
 internal fun HttpClient.asPacketChannel(baseUrl: String) =
-    HttpPacketExchanger(this, baseUrl.trimEnd('/'))
-fun HttpClient.asChannel(baseUrl: String): SerializedChannel = asPacketChannel(baseUrl)
+    HttpSerializedChannel(this, baseUrl.trimEnd('/'))
+fun HttpClient.asChannel(baseUrl: String): ChannelClient = asPacketChannel(baseUrl)
 
-internal suspend fun HttpClient.asWebsocketPackets(baseUrl: String) =
-    WebsocketPacketChannel(
-        webSocketSession {
-            url.takeFrom(baseUrl.trimEnd('/'))
-            url.protocol = URLProtocol.WS
-        }
-    )
+internal suspend fun HttpClient.asWebsocketPackets(
+    baseUrl: String,
+    scope: CoroutineScope? = null,
+    errorListener: ErrorListener = ErrorListener {  }
+) = WebsocketPacketChannel(
+    scope ?: CoroutineScope(coroutineContext),
+    errorListener,
+    webSocketSession {
+        url.takeFrom(baseUrl.trimEnd('/'))
+        url.protocol = URLProtocol.WS
+    }
+)
 
-suspend fun HttpClient.asWebsocketChannel(baseUrl: String): SerializedChannel =
+suspend fun HttpClient.asWebsocketChannel(baseUrl: String): Connection =
     asWebsocketPackets(baseUrl)

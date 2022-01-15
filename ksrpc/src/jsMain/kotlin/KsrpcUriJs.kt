@@ -17,7 +17,7 @@ package com.monkopedia.ksrpc
 
 import io.ktor.client.HttpClient
 
-actual suspend fun KsrpcUri.connect(clientFactory: () -> HttpClient): SerializedChannel {
+actual suspend fun KsrpcUri.connect(clientFactory: () -> HttpClient): ChannelClient {
     return when (type) {
         KsrpcType.EXE -> {
             throw NotImplementedError("EXE not supported in JS")

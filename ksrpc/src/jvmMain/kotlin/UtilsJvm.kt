@@ -33,7 +33,7 @@ actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> {
 
 internal actual interface VoidService : RpcService {
     companion object : RpcObject<VoidService> {
-        override fun createStub(channel: SerializedChannel): VoidService {
+        override fun createStub(channel: SerializedService): VoidService {
             return object : VoidService {}
         }
 

@@ -53,7 +53,7 @@ class RpcServiceTest : RpcFunctionalityTest(
 
     @Test
     fun testCreateStub() = runBlockingUnit {
-        val stub = object : SerializedChannel {
+        val stub = object : SerializedService {
 
             override val serialization: StringFormat
                 get() = error("Not implemented")
@@ -71,7 +71,7 @@ class RpcServiceTest : RpcFunctionalityTest(
 
     @Test
     fun testCallStub() = runBlockingUnit {
-        val stub = object : SerializedChannel {
+        val stub = object : SerializedService {
 
             override val serialization: StringFormat
                 get() = Json

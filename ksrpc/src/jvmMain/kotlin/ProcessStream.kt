@@ -18,7 +18,7 @@ package com.monkopedia.ksrpc
 import java.io.PrintWriter
 import java.io.StringWriter
 
-suspend fun SerializedChannel.serveOnStd() {
+suspend fun SerializedService.serveOnStd() {
     val input = System.`in`
     val output = System.out
     serve(input, output)
@@ -30,7 +30,7 @@ suspend fun System.rpcChannel(): SerializedChannel {
     return (input to output).asChannel()
 }
 
-suspend fun ProcessBuilder.asChannel(): SerializedChannel {
+suspend fun ProcessBuilder.asChannel(): Connection {
     val process = redirectInput(ProcessBuilder.Redirect.PIPE)
         .redirectOutput(ProcessBuilder.Redirect.PIPE)
         .start()
@@ -39,7 +39,7 @@ suspend fun ProcessBuilder.asChannel(): SerializedChannel {
     return (input to output).asChannel()
 }
 
-suspend fun SerializedChannel.serveTo(process: ProcessBuilder) {
+suspend fun SerializedService.serveTo(process: ProcessBuilder) {
     val process = process.redirectInput(ProcessBuilder.Redirect.PIPE)
         .redirectOutput(ProcessBuilder.Redirect.PIPE)
         .start()

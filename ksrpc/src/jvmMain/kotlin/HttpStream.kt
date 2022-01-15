@@ -15,6 +15,7 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
 import com.monkopedia.ksrpc.internal.WebsocketPacketChannel
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
@@ -31,7 +32,19 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.plus
+import kotlinx.serialization.StringFormat
 import kotlinx.serialization.json.Json
+
+fun Routing.serve(
+    basePath: String,
+    service: SerializedService,
+    errorListener: ErrorListener = ErrorListener { },
+    format: StringFormat = Json
+) {
+    serve(basePath, HostSerializedChannelImpl(errorListener, format).also {
+        it.registerDefault(service)
+    }, errorListener)
+}
 
 fun Routing.serve(
     basePath: String,
@@ -47,7 +60,8 @@ fun Routing.serve(
             } else {
                 CallData.create(call.receive<String>())
             }
-            val response = channel.call(method, content)
+            val channelId = call.request.headers[KSRPC_CHANNEL] ?: ChannelClient.DEFAULT
+            val response = channel.call(ChannelId(channelId), method, content)
             if (response.isBinary) {
                 call.response.headers.append(KSRPC_BINARY, "true")
                 call.respondBytesWriter {
@@ -68,13 +82,13 @@ fun Routing.serve(
 
 fun Routing.serveWebsocket(
     basePath: String,
-    channel: SerializedChannel,
+    channel: SerializedService,
     errorListener: ErrorListener = ErrorListener { }
 ) {
     val baseStripped = basePath.trimEnd('/')
     webSocket(baseStripped) {
         coroutineScope {
-            val wb = WebsocketPacketChannel(this@webSocket)
+            val wb = WebsocketPacketChannel(this, errorListener, this@webSocket)
             wb.connect(
                 CoroutineScope(this.coroutineContext) + CoroutineExceptionHandler { _, t ->
                     errorListener.onError(t)

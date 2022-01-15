@@ -15,6 +15,8 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
+import com.monkopedia.ksrpc.internal.asClient
 import io.ktor.client.HttpClient
 import io.ktor.client.features.websocket.WebSockets
 import io.ktor.utils.io.ByteChannel
@@ -24,11 +26,13 @@ import kotlin.test.Test
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import kotlin.test.fail
 
 abstract class RpcFunctionalityTest(
     private val supportedTypes: List<TestType> = TestType.values().toList(),
-    private val serializedChannel: suspend () -> SerializedChannel,
-    private val verifyOnChannel: suspend (SerializedChannel) -> Unit
+    private val serializedChannel: suspend () -> SerializedService,
+    private val verifyOnChannel: suspend (SerializedService) -> Unit
 ) {
     enum class TestType {
         SERIALIZE,
@@ -41,7 +45,10 @@ abstract class RpcFunctionalityTest(
     fun testSerializePassthrough() = runBlockingUnit {
         if (TestType.SERIALIZE !in supportedTypes) return@runBlockingUnit
         val serializedChannel = serializedChannel()
-        verifyOnChannel(serializedChannel)
+        val channel = HostSerializedChannelImpl({ }, Json)
+        channel.registerDefault(serializedChannel)
+
+        verifyOnChannel(channel.asClient.defaultChannel())
     }
 
     @Test
@@ -51,7 +58,7 @@ abstract class RpcFunctionalityTest(
         val (so, si) = createPipe()
         GlobalScope.launch(Dispatchers.Default) {
             val serializedChannel = serializedChannel()
-            serializedChannel.serve(
+            serializedChannel.defaultHosting(
                 si,
                 output,
                 errorListener = {
@@ -60,7 +67,7 @@ abstract class RpcFunctionalityTest(
             )
         }
         try {
-            verifyOnChannel((input to so).asChannel())
+            verifyOnChannel((input to so).asChannel().defaultChannel())
         } finally {
             try {
                 input.cancel(null)
@@ -93,7 +100,7 @@ abstract class RpcFunctionalityTest(
             test = {
                 val client = HttpClient()
                 client.asChannel("http://localhost:$it$path").use { channel ->
-                    verifyOnChannel(channel)
+                    verifyOnChannel(channel.defaultChannel())
                 }
             }
         )
@@ -119,7 +126,7 @@ abstract class RpcFunctionalityTest(
                     install(WebSockets)
                 }
                 client.asWebsocketChannel("http://localhost:$it$path").use { channel ->
-                    verifyOnChannel(channel)
+                    verifyOnChannel(channel.defaultChannel())
                 }
             }
         )
@@ -135,12 +142,12 @@ expect suspend inline fun httpTest(
 )
 expect fun Routing.testServe(
     basePath: String,
-    channel: SerializedChannel,
+    channel: SerializedService,
     errorListener: ErrorListener = ErrorListener { }
 )
 expect fun Routing.testServeWebsocket(
     basePath: String,
-    channel: SerializedChannel,
+    channel: SerializedService,
     errorListener: ErrorListener = ErrorListener { }
 )
 

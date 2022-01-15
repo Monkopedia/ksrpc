@@ -213,10 +213,6 @@ class KsrpcSyntheticResolveExtension(private val messageCollector: MessageCollec
             ClassId.topLevel(FqName("com.monkopedia.ksrpc.RpcObject"))
         )
             ?: error("Can't find RpcObject within module ${target.name.asString()}")
-        messageCollector.report(
-            CompilerMessageSeverity.WARNING,
-            "Adding supertype to ${thisDescriptor.fqNameUnsafe.asString()}"
-        )
         supertypes.add(KotlinTypeFactory.simpleNotNullType(Annotations.EMPTY, descriptor, types))
     }
 }

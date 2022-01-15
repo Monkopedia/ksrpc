@@ -15,18 +15,19 @@
  */
 package com.monkopedia.ksrpc
 
-import kotlin.coroutines.coroutineContext
-import kotlin.jvm.JvmName
 import kotlinx.coroutines.CoroutineScope
+import kotlin.coroutines.coroutineContext
+import kotlin.jvm.JvmInline
+import kotlin.jvm.JvmName
 
-interface BidirectionalChannel {
-    suspend fun CoroutineScope.receivingChannel(): SerializedChannel
-    suspend fun CoroutineScope.serve(sendingChannel: SerializedChannel)
-}
+interface Connection : ChannelHost, ChannelClient, SerializedChannel
+
+@JvmInline
+value class ChannelId(val id: String)
 
 internal expect interface VoidService : RpcService
 
-suspend inline fun <reified T : RpcService, reified R : RpcService> BidirectionalChannel.connect(
+suspend inline fun <reified T : RpcService, reified R : RpcService> Connection.connect(
     scope: CoroutineScope? = null,
     host: (R) -> T
 ) = connect(scope) { channel ->
@@ -34,12 +35,12 @@ suspend inline fun <reified T : RpcService, reified R : RpcService> Bidirectiona
 }
 
 @JvmName("connectSerialized")
-suspend inline fun BidirectionalChannel.connect(
+suspend inline fun Connection.connect(
     scope: CoroutineScope? = null,
-    host: (SerializedChannel) -> SerializedChannel
+    host: (SerializedService) -> SerializedService
 ) {
     val scope = scope ?: CoroutineScope(coroutineContext)
-    val recv = scope.receivingChannel()
+    val recv = defaultChannel()
     val serializedHost = host(recv)
-    scope.serve(serializedHost)
+    registerDefault(serializedHost)
 }

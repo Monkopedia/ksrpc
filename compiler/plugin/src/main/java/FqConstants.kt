@@ -21,7 +21,7 @@ object FqConstants {
     const val RPC_OBJECT = "$PKG.RpcObject"
     const val RPC_OBJECT_KEY = "$PKG.RpcObjectKey"
     const val RPC_SERVICE = "$PKG.RpcService"
-    const val SERIALIZED_CHANNEL = "$PKG.SerializedChannel"
+    const val SERIALIZED_SERVICE = "$PKG.SerializedService"
     const val RPC_METHOD = "$PKG.RpcMethod"
     const val SERVICE_EXECUTOR = "$PKG.ServiceExecutor"
     const val SERIALIZER_TRANSFORMER = "$PKG.SerializerTransformer"

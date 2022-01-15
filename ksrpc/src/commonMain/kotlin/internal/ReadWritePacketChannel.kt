@@ -15,8 +15,10 @@
  */
 package com.monkopedia.ksrpc.internal
 
+import com.monkopedia.ksrpc.CHANNEL
 import com.monkopedia.ksrpc.CONTENT_LENGTH
 import com.monkopedia.ksrpc.CallData
+import com.monkopedia.ksrpc.ErrorListener
 import com.monkopedia.ksrpc.INPUT
 import com.monkopedia.ksrpc.METHOD
 import com.monkopedia.ksrpc.SendType
@@ -32,15 +34,19 @@ import io.ktor.utils.io.readFully
 import io.ktor.utils.io.readRemaining
 import io.ktor.utils.io.readUTF8Line
 import io.ktor.utils.io.writeStringUtf8
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.StringFormat
 import kotlinx.serialization.json.Json
 
 internal class ReadWritePacketChannel(
+    scope: CoroutineScope,
+    errorListener: ErrorListener,
     private val read: ByteReadChannel,
-    private val write: ByteWriteChannel
-) :
-    PacketChannelBase(Json) {
+    private val write: ByteWriteChannel,
+    format: StringFormat = Json
+) : PacketChannelBase(scope, errorListener, format) {
     private val sendLock = Mutex()
     private val receiveLock = Mutex()
 
@@ -50,7 +56,7 @@ internal class ReadWritePacketChannel(
         }
     }
 
-    override suspend fun receiveImpl(): Packet {
+    override suspend fun receive(): Packet {
         receiveLock.withLock {
             return read.readPacket()
         }
@@ -77,6 +83,7 @@ private suspend fun ByteWriteChannel.send(
     }
     appendLine("$METHOD: ${packet.endpoint}")
     appendLine("$INPUT: ${packet.input}")
+    appendLine("$CHANNEL: ${packet.id}")
     appendLine("$CONTENT_LENGTH: ${content.length}")
     appendLine("$TYPE: ${if (data.isBinary) SendType.BINARY.name else SendType.NORMAL.name}")
     appendLine()
@@ -86,9 +93,10 @@ private suspend fun ByteWriteChannel.send(
 private suspend fun ByteReadChannel.readPacket(): Packet {
     val params = readFields()
     val input = params[INPUT]?.toBoolean() ?: true
+    val channel = params[CHANNEL] ?: ""
     val endpoint = params[METHOD] ?: return readPacket()
     val data = readContent(params)
-    return Packet(input, endpoint, data)
+    return Packet(input, channel, endpoint, data)
 }
 
 @OptIn(InternalAPI::class)

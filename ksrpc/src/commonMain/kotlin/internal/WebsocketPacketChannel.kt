@@ -15,33 +15,39 @@
  */
 package com.monkopedia.ksrpc.internal
 
+import com.monkopedia.ksrpc.ErrorListener
 import io.ktor.http.cio.websocket.DefaultWebSocketSession
 import io.ktor.http.cio.websocket.close
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.StringFormat
 import kotlinx.serialization.json.Json
 
 internal class WebsocketPacketChannel(
-    private val client: DefaultWebSocketSession
-) : PacketChannelBase(Json) {
+    scope: CoroutineScope,
+    errorListener: ErrorListener,
+    private val socketSession: DefaultWebSocketSession,
+    format: StringFormat = Json
+) : PacketChannelBase(scope, errorListener, format) {
     private val sendLock = Mutex()
     private val receiveLock = Mutex()
 
     override suspend fun send(packet: Packet) {
         sendLock.withLock {
-            client.send(packet)
+            socketSession.send(packet)
         }
     }
 
-    override suspend fun receiveImpl(): Packet {
+    override suspend fun receive(): Packet {
         receiveLock.lock(null)
-        return client.receivePacket {
+        return socketSession.receivePacket {
             receiveLock.unlock(null)
         }
     }
 
     override suspend fun close() {
         super.close()
-        client.close()
+        socketSession.close()
     }
 }

@@ -111,7 +111,7 @@ class FakeTestTypes : TestTypesInterface {
 object RpcTypeTest {
 
     abstract class RpcTypeFunctionalityTest(
-        verifyOnChannel: suspend (SerializedChannel, FakeTestTypes) -> Unit,
+        verifyOnChannel: suspend (SerializedService, FakeTestTypes) -> Unit,
         private val service: FakeTestTypes = FakeTestTypes()
     ) : RpcFunctionalityTest(
         serializedChannel = { service.serialized<TestTypesInterface>() },

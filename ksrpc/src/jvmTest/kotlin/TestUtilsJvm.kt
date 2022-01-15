@@ -67,13 +67,13 @@ actual suspend inline fun httpTest(
 
 actual fun Routing.testServe(
     basePath: String,
-    channel: SerializedChannel,
+    channel: SerializedService,
     errorListener: ErrorListener
 ) = jvmServe(basePath, channel, errorListener)
 
 actual fun Routing.testServeWebsocket(
     basePath: String,
-    channel: SerializedChannel,
+    channel: SerializedService,
     errorListener: ErrorListener
 ) = serveWebsocket(basePath, channel, errorListener)
 

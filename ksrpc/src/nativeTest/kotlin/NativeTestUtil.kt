@@ -27,7 +27,7 @@ actual suspend inline fun httpTest(
 
 actual fun Routing.testServe(
     basePath: String,
-    channel: SerializedChannel,
+    channel: SerializedService,
     errorListener: ErrorListener
 ) {
     // Do nothing, disable HTTP hosting in Native tests.
@@ -35,7 +35,7 @@ actual fun Routing.testServe(
 
 actual fun Routing.testServeWebsocket(
     basePath: String,
-    channel: SerializedChannel,
+    channel: SerializedService,
     errorListener: ErrorListener
 ) {
     // Do nothing, disable HTTP hosting in Native tests.

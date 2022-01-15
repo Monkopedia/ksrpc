@@ -87,7 +87,7 @@ object StubGeneration {
             createImplicitParameterDeclarationWithWrappedDescriptor()
             val field = addField {
                 name = Name.identifier("channel")
-                type = env.serializedChannel.typeWith()
+                type = env.serializedService.typeWith()
                 visibility = DescriptorVisibilities.PRIVATE
                 origin = IrDeclarationOrigin.DELEGATE
                 isFinal = true
@@ -102,7 +102,7 @@ object StubGeneration {
             }.apply {
                 val parameter = addValueParameter {
                     name = Name.identifier("channel")
-                    type = env.serializedChannel.typeWith()
+                    type = env.serializedService.typeWith()
                     startOffset = SYNTHETIC_OFFSET
                     endOffset = SYNTHETIC_OFFSET
                 }
@@ -263,7 +263,7 @@ object StubGeneration {
                 listOf(serviceInterface.typeWith(), inputType, outputType)
             ).apply {
                 this.type = rpcMethod.typeWith(serviceInterface.typeWith(), inputType, outputType)
-                putValueArgument(0, irString(endpoint))
+                putValueArgument(0, irString(endpoint.trimStart('/')))
                 putValueArgument(
                     1,
                     when (type) {

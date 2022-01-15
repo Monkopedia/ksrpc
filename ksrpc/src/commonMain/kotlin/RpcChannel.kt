@@ -30,10 +30,6 @@ expect val Throwable.asString: String
 
 internal const val ERROR_PREFIX = "ERROR:"
 
-fun SerializedChannel.subservice(serviceId: String, json: StringFormat? = null): SerializedChannel {
-    return SubserviceChannel(json ?: serialization, this, serviceId)
-}
-
 private const val SPLIT_CHAR = ":"
 @ThreadLocal
 private val LIST_SERIALIZER = ListSerializer(String.serializer())

@@ -65,7 +65,7 @@ class KsrpcGenerationEnvironment(
     val illegalArgumentStrConstructor = illegalArgument.constructors.first()
     val rpcObject = referenceClass(FqConstants.RPC_OBJECT)
     val rpcService = referenceClass(FqConstants.RPC_SERVICE)
-    val serializedChannel = referenceClass(FqConstants.SERIALIZED_CHANNEL)
+    val serializedService = referenceClass(FqConstants.SERIALIZED_SERVICE)
     val rpcMethod = referenceClass(FqConstants.RPC_METHOD)
     val serviceExecutor = referenceClass(FqConstants.SERVICE_EXECUTOR)
     val serializerTransformer = referenceClass(FqConstants.SERIALIZER_TRANSFORMER)

@@ -32,7 +32,6 @@ import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -107,6 +106,7 @@ private suspend fun handleFrame(
 internal suspend fun WebSocketSession.send(packet: Packet) {
     val input = packet.data
     send(packet.input.toString())
+    send(packet.id)
     send(packet.endpoint)
     if (input.isBinary) {
         input.readBinary().toFrameFlow().collect {
@@ -123,10 +123,13 @@ internal suspend fun WebSocketSession.receivePacket(onClose: () -> Unit): Packet
 
 internal suspend fun ReceiveChannel<Frame>.receivePacket(onClose: () -> Unit): Packet {
     val inputPacket = receive().expectText().toBoolean()
+    val id = receive().expectText()
     val endpoint = receive().expectText()
     val input = receive()
     return Packet(
-        inputPacket, endpoint,
+        inputPacket,
+        id,
+        endpoint,
         if (input is Frame.Text) {
             CallData.create(input.expectText()).also { onClose() }
         } else {

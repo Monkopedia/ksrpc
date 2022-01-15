@@ -88,7 +88,7 @@ abstract class ServiceApp(val appName: String) : CliktCommand() {
         }
     }
 
-    abstract fun createChannel(): SerializedChannel
+    abstract fun createChannel(): SerializedService
 
     companion object {
         internal var isActive = false

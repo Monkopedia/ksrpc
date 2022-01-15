@@ -25,7 +25,7 @@ import kotlin.concurrent.thread
 import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.Job
 
-suspend fun SerializedChannel.serve(
+suspend fun SerializedService.serve(
     input: InputStream,
     output: OutputStream,
     errorListener: ErrorListener = ErrorListener { }
@@ -36,11 +36,11 @@ suspend fun SerializedChannel.serve(
         thread(start = true) {
             channel.toInputStream(job).copyTo(output)
         }
-        serve(input.toByteReadChannel(), this, errorListener = errorListener)
+        defaultHosting(input.toByteReadChannel(), this, errorListener = errorListener)
     }
 }
 
-suspend fun Pair<InputStream, OutputStream>.asChannel(): SerializedChannel {
+suspend fun Pair<InputStream, OutputStream>.asChannel(): Connection {
     val (input, output) = this
     val channel = ByteChannel(autoFlush = true)
     val job = coroutineContext[Job]
