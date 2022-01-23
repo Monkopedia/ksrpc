@@ -25,11 +25,11 @@ actual suspend inline fun httpTest(
     // Do nothing, disable HTTP hosting in JS tests.
 }
 
-actual fun Routing.testServe(
+actual suspend fun testServe(
     basePath: String,
     channel: SerializedService,
     errorListener: ErrorListener
-) {
+): Routing.() -> Unit = {
     // Do nothing, disable HTTP hosting in JS tests.
 }
 

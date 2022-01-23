@@ -27,11 +27,12 @@ object FqConstants {
     const val SERIALIZER_TRANSFORMER = "$PKG.SerializerTransformer"
     const val BINARY_TRANSFORMER = "$PKG.BinaryTransformer"
     const val SUBSERVICE_TRANSFORMER = "$PKG.SubserviceTransformer"
+    const val SUSPEND_CLOSEABLE = "$PKG.SuspendCloseable"
 
     const val CREATE_STUB = "createStub"
     const val FIND_ENDPOINT = "findEndpoint"
     const val CALL_CHANNEL = "callChannel"
-    const val CALL = "call"
+    const val CLOSE = "close"
     const val INVOKE = "invoke"
 
     const val KSERIALIZER = "kotlinx.serialization.KSerializer"

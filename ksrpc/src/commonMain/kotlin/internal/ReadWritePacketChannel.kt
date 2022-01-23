@@ -34,19 +34,35 @@ import io.ktor.utils.io.readFully
 import io.ktor.utils.io.readRemaining
 import io.ktor.utils.io.readUTF8Line
 import io.ktor.utils.io.writeStringUtf8
+import kotlinx.coroutines.CloseableCoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.StringFormat
 import kotlinx.serialization.json.Json
+
+internal suspend fun ReadWritePacketChannel(
+    scope: CoroutineScope,
+    errorListener: ErrorListener,
+    read: ByteReadChannel,
+    write: ByteWriteChannel,
+    format: StringFormat = Json
+): ReadWritePacketChannel {
+    val thread = createChannelThread()
+    return withContext(thread) {
+        ReadWritePacketChannel(scope, errorListener, read, write, thread, format)
+    }
+}
 
 internal class ReadWritePacketChannel(
     scope: CoroutineScope,
     errorListener: ErrorListener,
     private val read: ByteReadChannel,
     private val write: ByteWriteChannel,
-    format: StringFormat = Json
-) : PacketChannelBase(scope, errorListener, format) {
+    channelThread: CloseableCoroutineDispatcher,
+    format: StringFormat = Json,
+) : PacketChannelBase(scope, errorListener, format, channelThread) {
     private val sendLock = Mutex()
     private val receiveLock = Mutex()
 
@@ -68,6 +84,7 @@ internal class ReadWritePacketChannel(
         read.cancel()
     }
 }
+
 private suspend fun ByteWriteChannel.appendLine(s: String = "") = writeStringUtf8("$s\n")
 private suspend fun ByteWriteChannel.append(content: String) = writeStringUtf8(content)
 
@@ -90,6 +107,7 @@ private suspend fun ByteWriteChannel.send(
     append(content)
     flush()
 }
+
 private suspend fun ByteReadChannel.readPacket(): Packet {
     val params = readFields()
     val input = params[INPUT]?.toBoolean() ?: true

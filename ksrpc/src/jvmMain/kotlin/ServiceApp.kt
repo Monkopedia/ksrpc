@@ -71,18 +71,17 @@ abstract class ServiceApp(val appName: String) : CliktCommand() {
                 }
             }
         }
-        for (h in http) {
-            embeddedServer(Netty, h) {
-                install(CORS) {
-                    anyHost()
-                }
-                routing {
-                    serve("/${appName.decapitalize()}", createChannel())
-                }
-            }.start()
-        }
-        if (stdOut) {
-            runBlocking {
+        runBlocking {
+            for (h in http) {
+                val routes = serve("/${appName.decapitalize()}", createChannel())
+                embeddedServer(Netty, h) {
+                    install(CORS) {
+                        anyHost()
+                    }
+                    routing(routes)
+                }.start()
+            }
+            if (stdOut) {
                 createChannel().serveOnStd()
             }
         }

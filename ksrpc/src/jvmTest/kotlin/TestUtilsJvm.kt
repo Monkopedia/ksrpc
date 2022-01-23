@@ -65,7 +65,7 @@ actual suspend inline fun httpTest(
     }
 }
 
-actual fun Routing.testServe(
+actual suspend fun testServe(
     basePath: String,
     channel: SerializedService,
     errorListener: ErrorListener

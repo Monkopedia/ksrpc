@@ -17,6 +17,7 @@ package com.monkopedia.ksrpc
 
 import kotlin.test.fail
 import kotlinx.coroutines.runBlocking
+import kotlin.native.concurrent.withWorker
 
 actual suspend inline fun httpTest(
     crossinline serve: suspend Routing.() -> Unit,
@@ -25,11 +26,11 @@ actual suspend inline fun httpTest(
     // Do nothing, disable HTTP hosting in Native tests.
 }
 
-actual fun Routing.testServe(
+actual suspend fun testServe(
     basePath: String,
     channel: SerializedService,
     errorListener: ErrorListener
-) {
+): Routing.() -> Unit = {
     // Do nothing, disable HTTP hosting in Native tests.
 }
 

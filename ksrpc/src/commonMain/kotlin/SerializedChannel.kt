@@ -20,17 +20,17 @@ import io.ktor.utils.io.ByteReadChannel
 import kotlinx.serialization.StringFormat
 import kotlinx.serialization.json.Json
 
-inline fun <reified T : RpcService> ChannelHost.registerHost(
+suspend inline fun <reified T : RpcService> ChannelHost.registerHost(
     service: T,
     serialization: StringFormat = this.serialization
 ): ChannelId = registerHost(service, rpcObject(), serialization)
 
-inline fun <reified T : RpcService> ChannelHost.registerDefault(
+suspend inline fun <reified T : RpcService> ChannelHost.registerDefault(
     service: T,
     serialization: StringFormat = this.serialization
 ) = registerDefault(service, rpcObject(), serialization)
 
-fun <T : RpcService> ChannelHost.registerHost(
+suspend fun <T : RpcService> ChannelHost.registerHost(
     service: T,
     obj: RpcObject<T>,
     serialization: StringFormat = this.serialization
@@ -38,7 +38,7 @@ fun <T : RpcService> ChannelHost.registerHost(
     return registerHost(HostSerializedServiceImpl(service, obj, serialization))
 }
 
-fun <T : RpcService> ChannelHost.registerDefault(
+suspend fun <T : RpcService> ChannelHost.registerDefault(
     service: T,
     obj: RpcObject<T>,
     serialization: StringFormat = this.serialization
@@ -51,8 +51,8 @@ interface ChannelHostProvider {
 }
 
 interface ChannelHost : Serializing, ChannelHostProvider {
-    fun registerHost(service: SerializedService): ChannelId
-    fun registerDefault(service: SerializedService)
+    suspend fun registerHost(service: SerializedService): ChannelId
+    suspend fun registerDefault(service: SerializedService)
     suspend fun close(id: ChannelId)
 
     override val host: ChannelHost

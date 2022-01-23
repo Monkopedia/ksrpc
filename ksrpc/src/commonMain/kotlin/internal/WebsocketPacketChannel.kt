@@ -18,18 +18,33 @@ package com.monkopedia.ksrpc.internal
 import com.monkopedia.ksrpc.ErrorListener
 import io.ktor.http.cio.websocket.DefaultWebSocketSession
 import io.ktor.http.cio.websocket.close
+import kotlinx.coroutines.CloseableCoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.StringFormat
 import kotlinx.serialization.json.Json
+
+internal suspend fun WebsocketPacketChannel(
+    scope: CoroutineScope,
+    errorListener: ErrorListener,
+    socketSession: DefaultWebSocketSession,
+    format: StringFormat = Json,
+): WebsocketPacketChannel {
+    val thread = createChannelThread()
+    return withContext(thread) {
+        WebsocketPacketChannel(scope, errorListener, socketSession, thread, format)
+    }
+}
 
 internal class WebsocketPacketChannel(
     scope: CoroutineScope,
     errorListener: ErrorListener,
     private val socketSession: DefaultWebSocketSession,
-    format: StringFormat = Json
-) : PacketChannelBase(scope, errorListener, format) {
+    channelThread: CloseableCoroutineDispatcher,
+    format: StringFormat = Json,
+) : PacketChannelBase(scope, errorListener, format, channelThread) {
     private val sendLock = Mutex()
     private val receiveLock = Mutex()
 

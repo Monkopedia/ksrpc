@@ -86,7 +86,7 @@ object StubGeneration {
             origin = IrDeclarationOrigin.DELEGATE
             superTypes = listOf(clsType, env.rpcService.typeWith())
             createImplicitParameterDeclarationWithWrappedDescriptor()
-            val field = addField {
+            val channelField = addField {
                 name = Name.identifier("channel")
                 type = env.serializedService.typeWith()
                 visibility = DescriptorVisibilities.PRIVATE
@@ -111,7 +111,7 @@ object StubGeneration {
                     +irDelegatingConstructorCall(
                         context.irBuiltIns.anyClass.owner.constructors.single()
                     )
-                    +irSetField(irGet(thisAsReceiverParameter), field, irGet(parameter))
+                    +irSetField(irGet(thisAsReceiverParameter), channelField, irGet(parameter))
                 }
             }
 
@@ -170,7 +170,7 @@ object StubGeneration {
                             }
                             putValueArgument(
                                 0,
-                                irGetField(irGet(override.dispatchReceiverParameter!!), field)
+                                irGetField(irGet(override.dispatchReceiverParameter!!), channelField)
                             )
                             if (override.valueParameters.size != 1) {
                                 val overrideParams = override.valueParameters.map {
@@ -183,6 +183,17 @@ object StubGeneration {
                             putValueArgument(1, irGet(override.valueParameters[0]))
                         }
                     )
+                }
+            }
+            val close = cls.irClass.functions.find {
+                it.name.asString() == FqConstants.CLOSE
+            } ?: error("Can't find close method")
+            val suspendClose = suspendCloseable.functions.find {
+                it.owner.name.asString() == FqConstants.CLOSE
+            } ?: error("Can't find close method")
+            overrideMethod(close.symbol, returnType = close.returnType) { override ->
+                +irCall(suspendClose).apply {
+                    dispatchReceiver = irGetField(irGet(override.dispatchReceiverParameter!!), channelField)
                 }
             }
         }

@@ -35,15 +35,18 @@ import kotlinx.coroutines.plus
 import kotlinx.serialization.StringFormat
 import kotlinx.serialization.json.Json
 
-fun Routing.serve(
+suspend fun serve(
     basePath: String,
     service: SerializedService,
     errorListener: ErrorListener = ErrorListener { },
     format: StringFormat = Json
-) {
-    serve(basePath, HostSerializedChannelImpl(errorListener, format).also {
+): Routing.() -> Unit {
+    val channel = HostSerializedChannelImpl(errorListener, format).also {
         it.registerDefault(service)
-    }, errorListener)
+    }
+    return {
+        serve(basePath, channel, errorListener)
+    }
 }
 
 fun Routing.serve(

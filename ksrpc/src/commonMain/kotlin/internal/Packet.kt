@@ -16,18 +16,23 @@
 package com.monkopedia.ksrpc.internal
 
 import com.monkopedia.ksrpc.CallData
+import com.monkopedia.ksrpc.ChannelContext
 import com.monkopedia.ksrpc.ChannelHost
 import com.monkopedia.ksrpc.ChannelId
 import com.monkopedia.ksrpc.Connection
 import com.monkopedia.ksrpc.ErrorListener
 import com.monkopedia.ksrpc.SerializedService
 import com.monkopedia.ksrpc.SuspendCloseable
+import kotlinx.coroutines.CloseableCoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.StringFormat
+import kotlin.native.concurrent.ThreadLocal
 
 internal data class Packet(
     val input: Boolean,
@@ -45,25 +50,31 @@ internal abstract class PacketChannelBase(
     scope: CoroutineScope,
     errorListener: ErrorListener,
     override val serialization: StringFormat,
-    private val serviceChannel: HostSerializedChannelImpl =
-        HostSerializedChannelImpl(errorListener, serialization)
-) : PacketChannel, Connection, ChannelHost by serviceChannel {
+    private val channelThread: CloseableCoroutineDispatcher
+) : PacketChannel, Connection, ChannelHost {
+    private var isClosed = false
     private var callLock = Mutex()
+
+    @Suppress("LeakingThis")
+    private val channelContext = ChannelContext(this)
+    @ThreadLocal
+    private val serviceChannel: HostSerializedChannelImpl =
+        HostSerializedChannelImpl(errorListener, serialization, channelThread, channelContext)
 
     private var receiveChannel: Channel<Packet> = Channel()
 
     init {
-        @Suppress("LeakingThis")
-        serviceChannel.client = this
-    }
-
-    init {
-        scope.launch {
+        scope.launch(channelThread) {
+            coroutineContext[Job]?.invokeOnCompletion {
+                scope.launch {
+                    close()
+                }
+            }
             try {
                 while (true) {
                     val p = receive()
                     if (p.input) {
-                        launch {
+                        launch(channelThread) {
                             val response = callLock.withLock {
                                 serviceChannel.call(
                                     ChannelId(p.id),
@@ -84,7 +95,7 @@ internal abstract class PacketChannelBase(
     }
 
     override fun wrapChannel(channelId: ChannelId): SerializedService {
-        return SubserviceChannel(this, channelId, this)
+        return SubserviceChannel(this, channelId)
     }
 
     override suspend fun call(channelId: ChannelId, endpoint: String, data: CallData): CallData {
@@ -93,12 +104,30 @@ internal abstract class PacketChannelBase(
     }
 
     override suspend fun close(id: ChannelId) {
+        withContext(channelThread) {
+            serviceChannel.close(id)
+        }
         call(id, "", CallData.create("{}"))
     }
 
+    override suspend fun registerDefault(service: SerializedService) =
+        withContext(channelThread) {
+            serviceChannel.registerDefault(service)
+        }
+
+    override suspend fun registerHost(service: SerializedService): ChannelId =
+        withContext(channelThread) {
+            serviceChannel.registerHost(service)
+        }
+
     override suspend fun close() {
         callLock.withLock {
+            if (isClosed) return
             receiveChannel.close()
+            withContext(channelThread) {
+                serviceChannel.close()
+            }
+            isClosed = true
         }
     }
 }

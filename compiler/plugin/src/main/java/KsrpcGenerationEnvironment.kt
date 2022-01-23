@@ -72,6 +72,7 @@ class KsrpcGenerationEnvironment(
     val binaryTransformer = referenceObject(FqConstants.BINARY_TRANSFORMER)
     val subserviceTransformer = referenceClass(FqConstants.SUBSERVICE_TRANSFORMER)
     val rpcObjectKey = maybeReferenceClass(FqConstants.RPC_OBJECT_KEY)
+    val suspendCloseable = referenceClass(FqConstants.SUSPEND_CLOSEABLE)
 
     val kSerializer = referenceClass(FqConstants.KSERIALIZER)
     val serializerMethod = pluginContext.referenceFunctions(FqName(FqConstants.SERIALIZER)).find {

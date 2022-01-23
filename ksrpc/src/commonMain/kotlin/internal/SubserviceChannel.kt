@@ -25,13 +25,10 @@ import kotlinx.serialization.StringFormat
 
 internal class SubserviceChannel(
     private val baseChannel: ChannelClient,
-    private val serviceId: ChannelId,
-    private val channelHostProvider: ChannelHostProvider? = null
-) : SerializedService, ChannelClient by baseChannel, ChannelHostProvider {
+    private val serviceId: ChannelId
+) : SerializedService, ChannelClient by baseChannel {
     override val serialization: StringFormat
         get() = baseChannel.serialization
-    override val host: ChannelHost?
-        get() = channelHostProvider?.host
 
     override suspend fun call(endpoint: String, input: CallData): CallData {
         return baseChannel.call(serviceId, endpoint, input)

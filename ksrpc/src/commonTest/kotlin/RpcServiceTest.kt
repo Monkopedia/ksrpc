@@ -22,6 +22,7 @@ import kotlinx.serialization.StringFormat
 import kotlinx.serialization.builtins.PairSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
+import kotlin.test.assertTrue
 
 @KsService
 interface TestInterface : RpcService {
@@ -115,6 +116,39 @@ class RpcServiceTest : RpcFunctionalityTest(
                 ).readSerialized()
             )
         )
+    }
+
+    @Test
+    fun testStubClosesChannel() = runBlockingUnit {
+        var hasCalledClose = false
+        val service = object : SerializedService {
+            override suspend fun close() {
+                hasCalledClose = true
+            }
+
+            override suspend fun call(endpoint: String, input: CallData): CallData =
+                error("Not implemented")
+
+            override val serialization: StringFormat
+                get() = error("Not implemented")
+        }
+        val stub = service.toStub<TestInterface>()
+        stub.close()
+        assertTrue(hasCalledClose)
+    }
+
+    @Test
+    fun testCloseChannelCallsService() = runBlockingUnit {
+        var hasCalledClose = false
+        val service = object : TestInterface {
+            override suspend fun rpc(u: Pair<String, String>): String = error("Not implemented")
+
+            override suspend fun close() {
+                hasCalledClose = true
+            }
+        }
+        service.serialized<TestInterface>().close()
+        assertTrue(hasCalledClose)
     }
 }
 
