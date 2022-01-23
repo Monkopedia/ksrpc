@@ -59,7 +59,11 @@ kotlin {
     sourceSets["commonMain"].dependencies {
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.3.2")
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
-        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0-native-mt")
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0-native-mt") {
+            version {
+                strictly("1.6.0-native-mt")
+            }
+        }
         implementation("org.jetbrains.kotlinx:atomicfu:0.16.2")
         implementation("io.ktor:ktor-client-core:1.6.4")
         implementation("io.ktor:ktor-client-websockets:1.6.4")
@@ -116,6 +120,12 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
         jvmTarget = "1.8"
         freeCompilerArgs += "-Xskip-prerelease-check"
         freeCompilerArgs += "-Xno-param-assertions"
+    }
+}
+
+kotlin.targets.withType(org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget::class.java) {
+    binaries.all {
+        binaryOptions["memoryModel"] = "experimental"
     }
 }
 
