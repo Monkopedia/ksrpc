@@ -32,7 +32,7 @@ inline fun <reified T : RpcService> T.serialized(
     errorListener: ErrorListener = ErrorListener { },
     json: Json = Json { isLenient = true }
 ): SerializedService {
-    return serialized(rpcObject(), errorListener, json)
+    return serialized(rpcObject(), json)
 }
 
 inline fun <reified T : RpcService> SerializedService.toStub(): T {

@@ -76,4 +76,4 @@ internal suspend fun HttpClient.asWebsocketPackets(
 )
 
 suspend fun HttpClient.asWebsocketChannel(baseUrl: String): Connection =
-    asWebsocketPackets(baseUrl)
+    asWebsocketPackets(baseUrl).threadSafe()

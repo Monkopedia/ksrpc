@@ -17,6 +17,7 @@ package com.monkopedia.ksrpc.internal
 
 import com.monkopedia.ksrpc.CallData
 import com.monkopedia.ksrpc.ChannelClient
+import com.monkopedia.ksrpc.ChannelContext
 import com.monkopedia.ksrpc.ChannelId
 import com.monkopedia.ksrpc.ERROR_PREFIX
 import com.monkopedia.ksrpc.KSRPC_BINARY
@@ -35,12 +36,15 @@ import io.ktor.http.encodeURLPath
 import io.ktor.utils.io.readRemaining
 import kotlinx.serialization.StringFormat
 import kotlinx.serialization.json.Json
+import kotlin.coroutines.CoroutineContext
 
 internal class HttpSerializedChannel(
     private val httpClient: HttpClient,
     private val baseStripped: String,
     override val serialization: StringFormat = Json
 ) : SerializedChannel, ChannelClient {
+
+    override val context: CoroutineContext = ChannelContext(this)
 
     override suspend fun call(channelId: ChannelId, endpoint: String, input: CallData): CallData {
         val response = httpClient.post<HttpResponse>(
@@ -62,7 +66,7 @@ internal class HttpSerializedChannel(
         call(id, "", CallData.create("{}"))
     }
 
-    override fun wrapChannel(channelId: ChannelId): SerializedService {
+    override suspend fun wrapChannel(channelId: ChannelId): SerializedService {
         return SubserviceChannel(this, channelId)
     }
 

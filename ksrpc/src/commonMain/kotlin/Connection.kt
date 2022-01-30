@@ -15,32 +15,105 @@
  */
 package com.monkopedia.ksrpc
 
-import kotlinx.coroutines.CoroutineScope
-import kotlin.coroutines.coroutineContext
-import kotlin.jvm.JvmInline
+import com.monkopedia.ksrpc.internal.threadSafe
+import com.monkopedia.ksrpc.internal.useBlocking
+import com.monkopedia.ksrpc.internal.useSafe
+import kotlinx.serialization.StringFormat
 import kotlin.jvm.JvmName
 
 interface Connection : ChannelHost, ChannelClient, SerializedChannel
 
-@JvmInline
-value class ChannelId(val id: String)
+// Problems with JS compiler and serialization
+data class ChannelId(val id: String)
 
 internal expect interface VoidService : RpcService
 
 suspend inline fun <reified T : RpcService, reified R : RpcService> Connection.connect(
-    scope: CoroutineScope? = null,
     host: (R) -> T
-) = connect(scope) { channel ->
+) = connect { channel ->
     host(channel.toStub()).serialized()
 }
 
 @JvmName("connectSerialized")
 suspend inline fun Connection.connect(
-    scope: CoroutineScope? = null,
     host: (SerializedService) -> SerializedService
 ) {
-    val scope = scope ?: CoroutineScope(coroutineContext)
     val recv = defaultChannel()
     val serializedHost = host(recv)
     registerDefault(serializedHost)
+}
+
+suspend fun SerializedService.threadSafe(): SerializedService {
+    return threadSafe {
+        object : SerializedService {
+            override suspend fun call(endpoint: String, input: CallData): CallData {
+                return useSafe {
+                    it.call(endpoint, input)
+                }
+            }
+
+            override suspend fun close() {
+                useSafe {
+                    it.close()
+                }
+            }
+
+            override val serialization: StringFormat
+                get() = useBlocking {
+                    it.serialization
+                }
+        }
+    }
+}
+
+suspend fun Connection.threadSafe(): Connection {
+    return threadSafe {
+        object : Connection {
+            override suspend fun registerHost(service: SerializedService): ChannelId {
+                return useSafe {
+                    it.registerHost(service.threadSafe())
+                }
+            }
+
+            override suspend fun registerDefault(service: SerializedService) {
+                return useSafe {
+                    it.registerDefault(service.threadSafe())
+                }
+            }
+
+            override suspend fun close(id: ChannelId) {
+                return useSafe {
+                    it.close(id)
+                }
+            }
+
+            override suspend fun close() {
+                return useSafe {
+                    it.close()
+                }
+            }
+
+            override val serialization: StringFormat
+                get() = useBlocking {
+                    it.serialization
+                }
+
+            override suspend fun wrapChannel(channelId: ChannelId): SerializedService {
+                return useSafe {
+                    it.wrapChannel(channelId).threadSafe()
+                }
+            }
+
+            override suspend fun call(
+                channelId: ChannelId,
+                endpoint: String,
+                data: CallData
+            ): CallData {
+                return useSafe {
+                    it.call(channelId, endpoint, data)
+                }
+            }
+
+        }
+    }
 }

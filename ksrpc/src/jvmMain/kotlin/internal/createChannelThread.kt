@@ -1,7 +1,7 @@
 package com.monkopedia.ksrpc.internal
 
-import kotlinx.coroutines.CloseableCoroutineDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.newSingleThreadContext
 
-internal actual fun createChannelThread(): CloseableCoroutineDispatcher =
+internal actual fun maybeCreateChannelThread(): CoroutineDispatcher =
     newSingleThreadContext("Channel thread")

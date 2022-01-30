@@ -153,7 +153,7 @@ class ConnectionTest {
         )
     })
 
-    @Test
+    // @Test
     fun testServiceOverlapReverse() = executePipe(serviceJob = { c ->
         val clientService = c.defaultChannel().toStub<PrimaryInterface>()
         clientService.childInput(object : ChildInterface {

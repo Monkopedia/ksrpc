@@ -35,6 +35,7 @@ import io.ktor.utils.io.readRemaining
 import io.ktor.utils.io.readUTF8Line
 import io.ktor.utils.io.writeStringUtf8
 import kotlinx.coroutines.CloseableCoroutineDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -49,9 +50,13 @@ internal suspend fun ReadWritePacketChannel(
     write: ByteWriteChannel,
     format: StringFormat = Json
 ): ReadWritePacketChannel {
-    val thread = createChannelThread()
+    val thread = maybeCreateChannelThread()
     return withContext(thread) {
-        ReadWritePacketChannel(scope, errorListener, read, write, thread, format)
+        ReadWritePacketChannel(scope, errorListener, read, write, thread, format).also {
+            it.onClose {
+                (thread as? CloseableCoroutineDispatcher)?.close()
+            }
+        }
     }
 }
 
@@ -60,7 +65,7 @@ internal class ReadWritePacketChannel(
     errorListener: ErrorListener,
     private val read: ByteReadChannel,
     private val write: ByteWriteChannel,
-    channelThread: CloseableCoroutineDispatcher,
+    channelThread: CoroutineDispatcher,
     format: StringFormat = Json,
 ) : PacketChannelBase(scope, errorListener, format, channelThread) {
     private val sendLock = Mutex()

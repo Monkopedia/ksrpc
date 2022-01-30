@@ -36,7 +36,7 @@ suspend fun ProcessBuilder.asChannel(): Connection {
         .start()
     val input = process.inputStream
     val output = process.outputStream
-    return (input to output).asChannel()
+    return (input to output).asChannel().threadSafe()
 }
 
 suspend fun SerializedService.serveTo(process: ProcessBuilder) {

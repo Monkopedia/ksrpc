@@ -47,5 +47,5 @@ suspend fun Pair<InputStream, OutputStream>.asChannel(): Connection {
     thread(start = true) {
         channel.toInputStream(job).copyTo(output)
     }
-    return (input.toByteReadChannel(coroutineContext) to channel).asChannel()
+    return (input.toByteReadChannel(coroutineContext) to channel).asChannel().threadSafe()
 }

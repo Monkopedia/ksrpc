@@ -16,6 +16,7 @@
 package com.monkopedia.ksrpc
 
 import io.ktor.utils.io.ByteReadChannel
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.StringFormat
 import kotlinx.serialization.builtins.serializer
@@ -95,14 +96,18 @@ class RpcMethod<T : RpcService, I, O> internal constructor(
         service: RpcService,
         input: CallData
     ): CallData {
-        val transformedInput = inputTransform.untransform(input, channel)
-        val output = method.invoke(service as T, transformedInput)
-        return outputTransform.transform(output as O, channel)
+        return withContext(channel.context) {
+            val transformedInput = inputTransform.untransform(input, channel)
+            val output = method.invoke(service as T, transformedInput)
+            outputTransform.transform(output as O, channel)
+        }
     }
 
     internal suspend fun callChannel(channel: SerializedService, input: Any?): Any? {
-        val input = inputTransform.transform(input as I, channel)
-        val transformedOutput = channel.call(endpoint, input)
-        return outputTransform.untransform(transformedOutput, channel)
+        return withContext(channel.context) {
+            val input = inputTransform.transform(input as I, channel)
+            val transformedOutput = channel.call(endpoint, input)
+            outputTransform.untransform(transformedOutput, channel)
+        }
     }
 }

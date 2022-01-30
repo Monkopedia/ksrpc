@@ -19,6 +19,7 @@ import com.monkopedia.ksrpc.ErrorListener
 import io.ktor.http.cio.websocket.DefaultWebSocketSession
 import io.ktor.http.cio.websocket.close
 import kotlinx.coroutines.CloseableCoroutineDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -32,9 +33,13 @@ internal suspend fun WebsocketPacketChannel(
     socketSession: DefaultWebSocketSession,
     format: StringFormat = Json,
 ): WebsocketPacketChannel {
-    val thread = createChannelThread()
+    val thread = maybeCreateChannelThread()
     return withContext(thread) {
-        WebsocketPacketChannel(scope, errorListener, socketSession, thread, format)
+        WebsocketPacketChannel(scope, errorListener, socketSession, thread, format).also {
+            it.onClose {
+                (thread as? CloseableCoroutineDispatcher)?.close()
+            }
+        }
     }
 }
 
@@ -42,7 +47,7 @@ internal class WebsocketPacketChannel(
     scope: CoroutineScope,
     errorListener: ErrorListener,
     private val socketSession: DefaultWebSocketSession,
-    channelThread: CloseableCoroutineDispatcher,
+    channelThread: CoroutineDispatcher,
     format: StringFormat = Json,
 ) : PacketChannelBase(scope, errorListener, format, channelThread) {
     private val sendLock = Mutex()

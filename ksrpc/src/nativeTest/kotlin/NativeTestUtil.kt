@@ -15,9 +15,13 @@
  */
 package com.monkopedia.ksrpc
 
+import kotlinx.coroutines.newSingleThreadContext
 import kotlin.test.fail
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import platform.posix.pthread_self
 import kotlin.native.concurrent.withWorker
+import kotlin.test.Test
 
 actual suspend inline fun httpTest(
     crossinline serve: suspend Routing.() -> Unit,
@@ -52,5 +56,26 @@ internal actual fun runBlockingUnit(function: suspend () -> Unit) {
     } catch (t: Throwable) {
         t.printStackTrace()
         fail("Caught exception $t")
+    }
+}
+
+class NativeTestTest {
+    @Test
+    fun testThreads() = runBlockingUnit {
+        val specialThread = newSingleThreadContext("Single thread")
+        println("Thread: ${pthread_self()}")
+        withContext(specialThread) {
+            println("Other Thread: ${pthread_self()}")
+        }
+        println("Thread: ${pthread_self()}")
+        withContext(specialThread) {
+            println("Other Thread: ${pthread_self()}")
+        }
+        val x = withContext(specialThread) {
+            (5 + 10).also {
+                println("Other Thread: $it")
+            }
+        }
+        println("Thread: $x")
     }
 }

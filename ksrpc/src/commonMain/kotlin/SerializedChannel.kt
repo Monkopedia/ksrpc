@@ -19,6 +19,8 @@ import com.monkopedia.ksrpc.internal.HostSerializedServiceImpl
 import io.ktor.utils.io.ByteReadChannel
 import kotlinx.serialization.StringFormat
 import kotlinx.serialization.json.Json
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 suspend inline fun <reified T : RpcService> ChannelHost.registerHost(
     service: T,
@@ -64,8 +66,8 @@ interface ChannelClientProvider {
 }
 
 interface ChannelClient : SerializedChannel, ChannelClientProvider {
-    fun wrapChannel(channelId: ChannelId): SerializedService
-    fun defaultChannel() = wrapChannel(ChannelId(DEFAULT))
+    suspend fun wrapChannel(channelId: ChannelId): SerializedService
+    suspend fun defaultChannel() = wrapChannel(ChannelId(DEFAULT))
 
     override val client: ChannelClient
         get() = this
@@ -79,12 +81,17 @@ interface Serializing {
     val serialization: StringFormat
 }
 
-interface SerializedChannel : SuspendCloseable, Serializing {
+interface ContextContainer {
+    val context: CoroutineContext
+        get() = EmptyCoroutineContext
+}
+
+interface SerializedChannel : SuspendCloseable, ContextContainer, KsrpcElement {
     suspend fun call(channelId: ChannelId, endpoint: String, data: CallData): CallData
     suspend fun close(id: ChannelId)
 }
 
-interface SerializedService : SuspendCloseable, Serializing {
+interface SerializedService : SuspendCloseable, ContextContainer, KsrpcElement {
     suspend fun call(endpoint: String, input: CallData): CallData
 }
 
@@ -92,7 +99,6 @@ expect fun randomUuid(): String
 
 fun <T : RpcService> T.serialized(
     rpcObject: RpcObject<T>,
-    errorListener: ErrorListener = ErrorListener { },
     json: Json = Json { isLenient = true }
 ): SerializedService {
     val rpcChannel = this
@@ -127,8 +133,7 @@ data class CallData private constructor(private val value: Any?) {
 }
 
 fun <T : RpcService> RpcObject<T>.serializedChannel(
-    service: T,
-    errorListener: ErrorListener = ErrorListener { }
+    service: T
 ): SerializedService {
-    return service.serialized(this, errorListener = errorListener)
+    return service.serialized(this)
 }

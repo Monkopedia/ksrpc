@@ -28,10 +28,7 @@ import io.ktor.routing.post
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.copyTo
 import io.ktor.websocket.webSocket
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.plus
 import kotlinx.serialization.StringFormat
 import kotlinx.serialization.json.Json
 
@@ -92,11 +89,7 @@ fun Routing.serveWebsocket(
     webSocket(baseStripped) {
         coroutineScope {
             val wb = WebsocketPacketChannel(this, errorListener, this@webSocket)
-            wb.connect(
-                CoroutineScope(this.coroutineContext) + CoroutineExceptionHandler { _, t ->
-                    errorListener.onError(t)
-                }
-            ) {
+            wb.connect {
                 channel
             }
         }

@@ -19,10 +19,8 @@ import com.monkopedia.ksrpc.internal.ReadWritePacketChannel
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.plus
 import kotlin.coroutines.coroutineContext
 
 internal const val CONTENT_LENGTH = "Content-Length"
@@ -46,11 +44,7 @@ suspend fun SerializedService.defaultHosting(
     errorListener: ErrorListener = ErrorListener { }
 ) {
     coroutineScope {
-        ReadWritePacketChannel(this, errorListener, input, output).connect(
-            this + asyncDispatcher + CoroutineExceptionHandler { _, t ->
-                errorListener.onError(t)
-            }
-        ) {
+        ReadWritePacketChannel(this, errorListener, input, output).connect {
             this@defaultHosting
         }
     }
@@ -61,5 +55,5 @@ suspend fun Pair<ByteReadChannel, ByteWriteChannel>.asChannel(
     errorListener: ErrorListener = ErrorListener { }
 ): Connection {
     val scope = scope ?: CoroutineScope(coroutineContext)
-    return ReadWritePacketChannel(scope, errorListener, first, second)
+    return ReadWritePacketChannel(scope, errorListener, first, second).threadSafe()
 }
