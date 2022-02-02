@@ -16,6 +16,7 @@
 package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.internal.HttpSerializedChannel
+import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
 import com.monkopedia.ksrpc.internal.WebsocketPacketChannel
 import io.ktor.client.HttpClient
 import io.ktor.client.features.websocket.webSocketSession
@@ -67,16 +68,21 @@ fun HttpClient.asChannel(baseUrl: String, env: KsrpcEnvironment): ChannelClient 
 
 internal suspend fun HttpClient.asWebsocketPackets(
     baseUrl: String,
-    env: KsrpcEnvironment,
-    scope: CoroutineScope? = null
-) = WebsocketPacketChannel(
-    scope ?: env.defaultScope,
-    webSocketSession {
+    env: KsrpcEnvironment
+): Connection {
+    val session = webSocketSession {
         url.takeFrom(baseUrl.trimEnd('/'))
         url.protocol = URLProtocol.WS
-    },
-    env
-)
+    }
+    return threadSafe { context ->
+        WebsocketPacketChannel(
+            CoroutineScope(context),
+            context,
+            session,
+            env
+        )
+    }
+}
 
 suspend fun HttpClient.asWebsocketChannel(baseUrl: String, env: KsrpcEnvironment): Connection =
-    asWebsocketPackets(baseUrl, env).threadSafe()
+    asWebsocketPackets(baseUrl, env)

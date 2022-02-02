@@ -16,11 +16,13 @@
 package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.internal.ReadWritePacketChannel
+import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.plus
 
 internal const val CONTENT_LENGTH = "Content-Length"
 internal const val METHOD = "Method"
@@ -42,17 +44,18 @@ suspend fun SerializedService.defaultHosting(
     env: KsrpcEnvironment
 ) {
     coroutineScope {
-        ReadWritePacketChannel(this, input, output, env).threadSafe().connect {
+        threadSafe { context ->
+            ReadWritePacketChannel(CoroutineScope(context), context, input, output, env)
+        }.connect {
             this@defaultHosting
         }
     }
 }
 
 suspend fun Pair<ByteReadChannel, ByteWriteChannel>.asChannel(
-    env: KsrpcEnvironment,
-    scope: CoroutineScope? = null,
-    errorListener: ErrorListener = ErrorListener { }
+    env: KsrpcEnvironment
 ): Connection {
-    val scope = scope ?: env.defaultScope
-    return ReadWritePacketChannel(scope, first, second, env).threadSafe()
+    return threadSafe { context ->
+        ReadWritePacketChannel(CoroutineScope(context), context, first, second, env)
+    }
 }

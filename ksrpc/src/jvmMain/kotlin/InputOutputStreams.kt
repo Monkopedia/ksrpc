@@ -47,5 +47,5 @@ suspend fun Pair<InputStream, OutputStream>.asChannel(env: KsrpcEnvironment): Co
     thread(start = true) {
         channel.toInputStream(job).copyTo(output)
     }
-    return (input.toByteReadChannel(coroutineContext) to channel).asChannel(env).threadSafe()
+    return (input.toByteReadChannel(coroutineContext) to channel).asChannel(env)
 }

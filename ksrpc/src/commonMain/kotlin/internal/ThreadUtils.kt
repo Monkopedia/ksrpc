@@ -1,9 +1,8 @@
 package com.monkopedia.ksrpc.internal
 
-internal expect inline fun <T : Any> T.threadSafe(
-    factory: ThreadSafeBuilder<T>.() -> T
-): T
+import kotlin.coroutines.CoroutineContext
 
-internal expect suspend inline fun <reified T : Any, R> ThreadSafeBuilder<T>.useSafe(crossinline usage: suspend (T) -> R): R
-internal expect inline fun <reified T : Any, R> ThreadSafeBuilder<T>.useBlocking(crossinline usage: (T) -> R): R
-internal expect class ThreadSafeBuilder<T : Any>
+internal expect object ThreadSafeManager {
+    inline fun <reified T : Any> T.threadSafe(): T
+    inline fun <reified T : Any> threadSafe(creator: (CoroutineContext) -> T): T
+}

@@ -19,6 +19,10 @@ interface SuspendCloseable {
     suspend fun close()
 }
 
+interface SuspendCloseableObservable : SuspendCloseable {
+    suspend fun onClose(onClose: suspend () -> Unit)
+}
+
 suspend inline fun <T : SuspendCloseable, R> T.use(usage: (T) -> R): R {
     try {
         return usage(this)

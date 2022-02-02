@@ -36,7 +36,7 @@ suspend fun ProcessBuilder.asChannel(env: KsrpcEnvironment): Connection {
         .start()
     val input = process.inputStream
     val output = process.outputStream
-    return (input to output).asChannel(env).threadSafe()
+    return (input to output).asChannel(env)
 }
 
 suspend fun SerializedService.serveTo(process: ProcessBuilder) {

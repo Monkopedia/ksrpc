@@ -47,10 +47,9 @@ interface ChannelHostProvider {
     val host: ChannelHost?
 }
 
-interface ChannelHost : ChannelHostProvider, KsrpcElement {
+interface ChannelHost : SerializedChannel, ChannelHostProvider, KsrpcElement {
     suspend fun registerHost(service: SerializedService): ChannelId
     suspend fun registerDefault(service: SerializedService)
-    suspend fun close(id: ChannelId)
 
     override val host: ChannelHost
         get() = this
@@ -81,12 +80,12 @@ interface ContextContainer {
         get() = EmptyCoroutineContext
 }
 
-interface SerializedChannel : SuspendCloseable, ContextContainer, KsrpcElement {
+interface SerializedChannel : SuspendCloseableObservable, ContextContainer, KsrpcElement {
     suspend fun call(channelId: ChannelId, endpoint: String, data: CallData): CallData
     suspend fun close(id: ChannelId)
 }
 
-interface SerializedService : SuspendCloseable, ContextContainer, KsrpcElement {
+interface SerializedService : SuspendCloseableObservable, ContextContainer, KsrpcElement {
     suspend fun call(endpoint: String, input: CallData): CallData
 }
 

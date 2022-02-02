@@ -63,7 +63,7 @@ internal class SubserviceTransformer<T : RpcService>(
     private val serviceObj: RpcObject<T>
 ) : Transformer<T> {
     override suspend fun transform(input: T, channel: SerializedService): CallData {
-        val host = host() ?: error("Cannot transform service type to non-hosting channel")
+        val host = host() ?: error("Cannot transform service type to non-hosting channel ${channel()}")
         val serviceId = host.registerHost(input, serviceObj)
         return CallData.create(
             channel.env.serialization.encodeToString(String.serializer(), serviceId.id)

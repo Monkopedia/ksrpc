@@ -35,13 +35,15 @@ import io.ktor.utils.io.writeStringUtf8
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlin.coroutines.CoroutineContext
 
 internal class ReadWritePacketChannel(
     scope: CoroutineScope,
+    context: CoroutineContext,
     private val read: ByteReadChannel,
     private val write: ByteWriteChannel,
     env: KsrpcEnvironment
-) : PacketChannelBase(scope, env) {
+) : PacketChannelBase(scope, context, env) {
     private val sendLock = Mutex()
     private val receiveLock = Mutex()
 

@@ -78,49 +78,39 @@ internal class HostSerializedChannelImpl(
     }
 
     override suspend fun close(id: ChannelId) {
-        withContext(context) {
-            serviceMap.remove(id.id)?.let {
-                it.trackingService?.onSerializationClosed(it)
-                it.close()
-            }
+        serviceMap.remove(id.id)?.let {
+            it.trackingService?.onSerializationClosed(it)
+            it.close()
         }
     }
 
     override suspend fun close() {
-        withContext(context) {
-            serviceMap.values.forEach {
-                it.trackingService?.onSerializationClosed(it)
-                it.close()
-            }
-            serviceMap.clear()
+        serviceMap.values.forEach {
+            it.trackingService?.onSerializationClosed(it)
+            it.close()
         }
+        serviceMap.clear()
         onCloseObservers.forEach { it.invoke() }
     }
 
-    fun onClose(onClose: suspend () -> Unit) {
+    override suspend fun onClose(onClose: suspend () -> Unit) {
         onCloseObservers.add(onClose)
     }
 
     override suspend fun registerDefault(channel: SerializedService) {
-        withContext(context) {
-            baseChannel.complete(channel)
-            channel.trackingService?.onSerializationCreated(channel)
-        }
+        baseChannel.complete(channel)
+        channel.trackingService?.onSerializationCreated(channel)
     }
 
     override suspend fun registerHost(channel: SerializedService): ChannelId {
-        return withContext(context) {
-            val serviceId = ChannelId(randomUuid())
-            serviceMap[serviceId.id] = channel
-            channel.trackingService?.onSerializationCreated(channel)
-            serviceId
-        }
+        val serviceId = ChannelId(randomUuid())
+        serviceMap[serviceId.id] = channel
+        channel.trackingService?.onSerializationCreated(channel)
+        return serviceId
     }
 
     override suspend fun wrapChannel(channelId: ChannelId): SerializedService {
-        return withContext(context) {
-            serviceMap[channelId.id] ?: error("Unknown service ${channelId.id}")
-        }
+        return serviceMap[channelId.id] ?: error("Unknown service ${channelId.id}")
     }
 
     private val SerializedService.trackingService: TrackingService?
@@ -139,13 +129,19 @@ internal class HostSerializedServiceImpl<T : RpcService>(
     private val rpcObject: RpcObject<T>,
     override val env: KsrpcEnvironment
 ) : SerializedService {
+    private val onCloseCallbacks = mutableSetOf<suspend () -> Unit>()
 
     override suspend fun call(endpoint: String, input: CallData): CallData {
         val rpcEndpoint = rpcObject.findEndpoint(endpoint)
         return rpcEndpoint.call(this, service, input)
     }
 
+    override suspend fun onClose(onClose: suspend () -> Unit) {
+        onCloseCallbacks.add(onClose)
+    }
+
     override suspend fun close() {
         (service as? SuspendCloseable)?.close()
+        onCloseCallbacks.forEach { it.invoke() }
     }
 }

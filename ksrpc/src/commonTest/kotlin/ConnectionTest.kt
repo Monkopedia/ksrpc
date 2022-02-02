@@ -47,7 +47,7 @@ class ConnectionTest {
         assertEquals("Respond: Hello world", service.basicCall("Hello world"))
     })
 
-    @Test
+//    @Test
     fun testReverse() = executePipe(serviceJob = { c ->
         val service = c.defaultChannel().toStub<PrimaryInterface>()
         service.basicCall("Hello world")
@@ -98,7 +98,7 @@ class ConnectionTest {
         assertEquals("Respond: Client: Hello world", service.basicCall("Hello world"))
     })
 
-    @Test
+//    @Test
     fun testOverlapReverse() = executePipe(serviceJob = { c ->
         val clientService = c.defaultChannel().toStub<PrimaryInterface>()
         c.registerDefault<PrimaryInterface>(object : PrimaryInterface {
@@ -201,7 +201,7 @@ class ConnectionTest {
         assertEquals("First service: Hello trees", firstService.rpc("Hello trees"))
     })
 
-    @Test
+//    @Test
     fun testReturnServiceReverse() = executePipe(serviceJob = { c ->
         val service = c.defaultChannel().toStub<PrimaryInterface>()
         val firstService = service.childOutput("First service")

@@ -15,13 +15,12 @@
  */
 package com.monkopedia.ksrpc
 
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlinx.serialization.StringFormat
 import kotlinx.serialization.builtins.PairSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 @KsService
@@ -37,7 +36,7 @@ class RpcServiceTest : RpcFunctionalityTest(
                 return "${u.first} ${u.second}"
             }
         }
-        channel.serialized(ksrpcEnvironment {  })
+        channel.serialized(ksrpcEnvironment { })
     },
     verifyOnChannel = { serializedChannel ->
         val stub = serializedChannel.toStub<TestInterface>()
@@ -56,13 +55,17 @@ class RpcServiceTest : RpcFunctionalityTest(
     fun testCreateStub() = runBlockingUnit {
         val stub = object : SerializedService {
             override val env: KsrpcEnvironment
-                get() = ksrpcEnvironment {  }
+                get() = ksrpcEnvironment { }
 
             override suspend fun call(endpoint: String, input: CallData): CallData {
                 error("Not implemented")
             }
 
             override suspend fun close() {
+                error("Not implemented")
+            }
+
+            override suspend fun onClose(onClose: suspend () -> Unit) {
                 error("Not implemented")
             }
         }.toStub<TestInterface>()
@@ -74,7 +77,7 @@ class RpcServiceTest : RpcFunctionalityTest(
         val stub = object : SerializedService {
 
             override val env: KsrpcEnvironment
-                get() = ksrpcEnvironment {  }
+                get() = ksrpcEnvironment { }
 
             override suspend fun call(endpoint: String, input: CallData): CallData {
                 val input = Json.decodeFromString(
@@ -84,6 +87,10 @@ class RpcServiceTest : RpcFunctionalityTest(
                 return CallData.create(
                     Json.encodeToString(String.serializer(), "${input.first} ${input.second}")
                 )
+            }
+
+            override suspend fun onClose(onClose: suspend () -> Unit) {
+                error("Not implemented")
             }
 
             override suspend fun close() {
@@ -99,7 +106,7 @@ class RpcServiceTest : RpcFunctionalityTest(
             override suspend fun rpc(u: Pair<String, String>): String {
                 return "${u.first} ${u.second}"
             }
-        }.serialized<TestInterface>(ksrpcEnvironment {  })
+        }.serialized<TestInterface>(ksrpcEnvironment { })
         assertEquals(
             "Hello world",
             Json.decodeFromString(
@@ -128,6 +135,10 @@ class RpcServiceTest : RpcFunctionalityTest(
             override suspend fun call(endpoint: String, input: CallData): CallData =
                 error("Not implemented")
 
+            override suspend fun onClose(onClose: suspend () -> Unit) {
+                error("Not implemented")
+            }
+
             override val env: KsrpcEnvironment
                 get() = error("Not implemented")
         }
@@ -146,7 +157,7 @@ class RpcServiceTest : RpcFunctionalityTest(
                 hasCalledClose = true
             }
         }
-        service.serialized<TestInterface>(ksrpcEnvironment {  }).close()
+        service.serialized<TestInterface>(ksrpcEnvironment { }).close()
         assertTrue(hasCalledClose)
     }
 }
@@ -158,7 +169,7 @@ class RpcServiceTwoCallsTest : RpcFunctionalityTest(
                 return "${u.first} ${u.second}"
             }
         }
-        channel.serialized(ksrpcEnvironment {  })
+        channel.serialized(ksrpcEnvironment { })
     },
     verifyOnChannel = { serializedChannel ->
         val stub = serializedChannel.toStub<TestInterface>()

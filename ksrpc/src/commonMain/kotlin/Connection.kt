@@ -15,10 +15,6 @@
  */
 package com.monkopedia.ksrpc
 
-import com.monkopedia.ksrpc.internal.threadSafe
-import com.monkopedia.ksrpc.internal.useBlocking
-import com.monkopedia.ksrpc.internal.useSafe
-import kotlinx.serialization.StringFormat
 import kotlin.jvm.JvmName
 
 interface Connection : ChannelHost, ChannelClient, SerializedChannel
@@ -29,86 +25,16 @@ data class ChannelId(val id: String)
 internal expect interface VoidService : RpcService
 
 suspend inline fun <reified T : RpcService, reified R : RpcService> Connection.connect(
-    host: (R) -> T
+    crossinline host: (R) -> T
 ) = connect { channel ->
     host(channel.toStub()).serialized(env)
 }
 
 @JvmName("connectSerialized")
-suspend inline fun Connection.connect(
+suspend fun Connection.connect(
     host: (SerializedService) -> SerializedService
 ) {
     val recv = defaultChannel()
     val serializedHost = host(recv)
     registerDefault(serializedHost)
-}
-
-suspend fun SerializedService.threadSafe(): SerializedService {
-    val env = env
-    return threadSafe {
-        object : SerializedService {
-            override suspend fun call(endpoint: String, input: CallData): CallData {
-                return useSafe {
-                    it.call(endpoint, input)
-                }
-            }
-
-            override suspend fun close() {
-                useSafe {
-                    it.close()
-                }
-            }
-
-            override val env: KsrpcEnvironment = env
-        }
-    }
-}
-
-suspend fun Connection.threadSafe(): Connection {
-    val env = env
-    return threadSafe {
-        object : Connection {
-            override suspend fun registerHost(service: SerializedService): ChannelId {
-                return useSafe {
-                    it.registerHost(service.threadSafe())
-                }
-            }
-
-            override suspend fun registerDefault(service: SerializedService) {
-                return useSafe {
-                    it.registerDefault(service.threadSafe())
-                }
-            }
-
-            override suspend fun close(id: ChannelId) {
-                return useSafe {
-                    it.close(id)
-                }
-            }
-
-            override suspend fun close() {
-                return useSafe {
-                    it.close()
-                }
-            }
-
-            override suspend fun wrapChannel(channelId: ChannelId): SerializedService {
-                return useSafe {
-                    it.wrapChannel(channelId).threadSafe()
-                }
-            }
-
-            override suspend fun call(
-                channelId: ChannelId,
-                endpoint: String,
-                data: CallData
-            ): CallData {
-                return useSafe {
-                    it.call(channelId, endpoint, data)
-                }
-            }
-
-            override val env: KsrpcEnvironment = env
-        }
-    }
 }

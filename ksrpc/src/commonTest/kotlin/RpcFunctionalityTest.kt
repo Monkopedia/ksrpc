@@ -26,8 +26,6 @@ import kotlin.test.Test
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
-import kotlin.test.fail
 
 abstract class RpcFunctionalityTest(
     private val supportedTypes: List<TestType> = TestType.values().toList(),

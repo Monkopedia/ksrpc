@@ -45,6 +45,7 @@ internal class HttpSerializedChannel(
     override val env: KsrpcEnvironment
 ) : SerializedChannel, ChannelClient {
 
+    private val onCloseHandlers = mutableSetOf<suspend () -> Unit>()
     override val context: CoroutineContext = ChannelContext(this)
 
     override suspend fun call(channelId: ChannelId, endpoint: String, input: CallData): CallData {
@@ -72,6 +73,11 @@ internal class HttpSerializedChannel(
     }
 
     override suspend fun close() {
+        onCloseHandlers.forEach { it.invoke() }
+    }
+
+    override suspend fun onClose(onClose: suspend () -> Unit) {
+        onCloseHandlers.add(onClose)
     }
 }
 

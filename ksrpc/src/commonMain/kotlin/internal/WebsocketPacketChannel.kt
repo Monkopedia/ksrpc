@@ -21,12 +21,14 @@ import io.ktor.http.cio.websocket.close
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlin.coroutines.CoroutineContext
 
 internal class WebsocketPacketChannel(
     scope: CoroutineScope,
+    context: CoroutineContext,
     private val socketSession: DefaultWebSocketSession,
     env: KsrpcEnvironment
-) : PacketChannelBase(scope, env) {
+) : PacketChannelBase(scope, context, env) {
     private val sendLock = Mutex()
     private val receiveLock = Mutex()
 
