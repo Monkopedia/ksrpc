@@ -15,8 +15,6 @@
  */
 package com.monkopedia.ksrpc
 
-import kotlinx.serialization.json.Json
-
 interface RpcService : SuspendCloseable {
     override suspend fun close() = Unit
 }
@@ -29,10 +27,9 @@ interface RpcObject<T : RpcService> {
 expect inline fun <reified T : RpcService> rpcObject(): RpcObject<T>
 
 inline fun <reified T : RpcService> T.serialized(
-    errorListener: ErrorListener = ErrorListener { },
-    json: Json = Json { isLenient = true }
+    env: KsrpcEnvironment
 ): SerializedService {
-    return serialized(rpcObject(), json)
+    return serialized(rpcObject(), env)
 }
 
 inline fun <reified T : RpcService> SerializedService.toStub(): T {

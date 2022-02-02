@@ -41,7 +41,7 @@ class BinaryTest : RpcFunctionalityTest(
                 error("Not implemented")
             }
         }
-        channel.serialized()
+        channel.serialized(ksrpcEnvironment {  })
     },
     verifyOnChannel = { serializedChannel ->
         val stub = serializedChannel.toStub<BinaryInterface>()
@@ -62,7 +62,7 @@ class BinaryInputTest : RpcFunctionalityTest(
                 error("Not implemented")
             }
         }
-        channel.serialized()
+        channel.serialized(ksrpcEnvironment {  })
     },
     verifyOnChannel = { serializedChannel ->
         val stub = serializedChannel.toStub<BinaryInterface>()

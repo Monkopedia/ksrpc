@@ -68,14 +68,14 @@ actual suspend inline fun httpTest(
 actual suspend fun testServe(
     basePath: String,
     channel: SerializedService,
-    errorListener: ErrorListener
-) = jvmServe(basePath, channel, errorListener)
+    env: KsrpcEnvironment
+) = jvmServe(basePath, channel, env)
 
 actual fun Routing.testServeWebsocket(
     basePath: String,
     channel: SerializedService,
-    errorListener: ErrorListener
-) = serveWebsocket(basePath, channel, errorListener)
+    env: KsrpcEnvironment
+) = serveWebsocket(basePath, channel, env)
 
 internal actual fun runBlockingUnit(function: suspend () -> Unit) {
     val block = CountDownLatch(1)

@@ -18,42 +18,41 @@ package com.monkopedia.ksrpc
 import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
 import com.monkopedia.ksrpc.internal.asClient
 import io.ktor.client.HttpClient
-import kotlinx.serialization.json.Json
 import java.io.File
 import java.net.Socket
 import kotlin.reflect.full.companionObjectInstance
 
-actual suspend fun KsrpcUri.connect(clientFactory: () -> HttpClient): ChannelClient {
+actual suspend fun KsrpcUri.connect(env: KsrpcEnvironment, clientFactory: () -> HttpClient): ChannelClient {
     return when (type) {
         KsrpcType.EXE -> {
             ProcessBuilder(listOf(path))
                 .redirectError(File("/tmp/ksrpc_errors.txt"))
-                .asChannel()
+                .asChannel(env)
         }
         KsrpcType.SOCKET -> {
             val (host, port) = path.substring("ksrpc://".length).split(":")
             val socket = Socket(host, port.toInt())
-            (socket.getInputStream() to socket.getOutputStream()).asChannel()
+            (socket.getInputStream() to socket.getOutputStream()).asChannel(env)
         }
         KsrpcType.HTTP -> {
             val client = clientFactory()
-            client.asChannel(path)
+            client.asChannel(path, env)
         }
         KsrpcType.LOCAL -> {
             val cls = Class.forName(path, true, this::class.java.classLoader)
             val companion = cls.findServiceObj() ?: error("Can't find RpcObject")
             val instance = (cls.newInstance() as RpcService)
-            HostSerializedChannelImpl({ }, Json).also {
+            HostSerializedChannelImpl(env).also {
                 it.registerDefault(instance, companion)
             }.asClient
         }
         KsrpcType.WEBSOCKET -> {
             val client = clientFactory()
-            client.asWebsocketChannel(path)
+            client.asWebsocketChannel(path, env)
         }
         KsrpcType.WEBSOCKET -> {
             val client = clientFactory()
-            client.asWebsocketChannel(path)
+            client.asWebsocketChannel(path, env)
         }
     }
 }

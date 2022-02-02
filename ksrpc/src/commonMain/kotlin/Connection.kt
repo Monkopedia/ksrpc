@@ -31,7 +31,7 @@ internal expect interface VoidService : RpcService
 suspend inline fun <reified T : RpcService, reified R : RpcService> Connection.connect(
     host: (R) -> T
 ) = connect { channel ->
-    host(channel.toStub()).serialized()
+    host(channel.toStub()).serialized(env)
 }
 
 @JvmName("connectSerialized")
@@ -44,6 +44,7 @@ suspend inline fun Connection.connect(
 }
 
 suspend fun SerializedService.threadSafe(): SerializedService {
+    val env = env
     return threadSafe {
         object : SerializedService {
             override suspend fun call(endpoint: String, input: CallData): CallData {
@@ -58,15 +59,13 @@ suspend fun SerializedService.threadSafe(): SerializedService {
                 }
             }
 
-            override val serialization: StringFormat
-                get() = useBlocking {
-                    it.serialization
-                }
+            override val env: KsrpcEnvironment = env
         }
     }
 }
 
 suspend fun Connection.threadSafe(): Connection {
+    val env = env
     return threadSafe {
         object : Connection {
             override suspend fun registerHost(service: SerializedService): ChannelId {
@@ -93,11 +92,6 @@ suspend fun Connection.threadSafe(): Connection {
                 }
             }
 
-            override val serialization: StringFormat
-                get() = useBlocking {
-                    it.serialization
-                }
-
             override suspend fun wrapChannel(channelId: ChannelId): SerializedService {
                 return useSafe {
                     it.wrapChannel(channelId).threadSafe()
@@ -114,6 +108,7 @@ suspend fun Connection.threadSafe(): Connection {
                 }
             }
 
+            override val env: KsrpcEnvironment = env
         }
     }
 }

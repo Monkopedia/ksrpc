@@ -39,12 +39,12 @@ internal sealed interface Transformer<T> {
 
 internal class SerializerTransformer<I>(private val serializer: KSerializer<I>) : Transformer<I> {
     override suspend fun transform(input: I, channel: SerializedService): CallData {
-        return CallData.create(channel.serialization.encodeToString(serializer, input))
+        return CallData.create(channel.env.serialization.encodeToString(serializer, input))
     }
 
     override suspend fun untransform(data: CallData, channel: SerializedService): I {
-        unpackError(data, channel.serialization)
-        return channel.serialization.decodeFromString(serializer, data.readSerialized())
+        unpackError(data, channel.env.serialization)
+        return channel.env.serialization.decodeFromString(serializer, data.readSerialized())
     }
 }
 
@@ -54,7 +54,7 @@ internal object BinaryTransformer : Transformer<ByteReadChannel> {
     }
 
     override suspend fun untransform(data: CallData, channel: SerializedService): ByteReadChannel {
-        unpackError(data, channel.serialization)
+        unpackError(data, channel.env.serialization)
         return data.readBinary()
     }
 }
@@ -66,14 +66,14 @@ internal class SubserviceTransformer<T : RpcService>(
         val host = host() ?: error("Cannot transform service type to non-hosting channel")
         val serviceId = host.registerHost(input, serviceObj)
         return CallData.create(
-            channel.serialization.encodeToString(String.serializer(), serviceId.id)
+            channel.env.serialization.encodeToString(String.serializer(), serviceId.id)
         )
     }
 
     override suspend fun untransform(data: CallData, channel: SerializedService): T {
         val client = client() ?: error("Cannot untransform service type from non-client channel")
-        BinaryTransformer.unpackError(data, channel.serialization)
-        val serviceId = channel.serialization.decodeFromString(
+        BinaryTransformer.unpackError(data, channel.env.serialization)
+        val serviceId = channel.env.serialization.decodeFromString(
             String.serializer(),
             data.readSerialized()
         )

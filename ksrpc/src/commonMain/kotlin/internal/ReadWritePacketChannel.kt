@@ -18,8 +18,8 @@ package com.monkopedia.ksrpc.internal
 import com.monkopedia.ksrpc.CHANNEL
 import com.monkopedia.ksrpc.CONTENT_LENGTH
 import com.monkopedia.ksrpc.CallData
-import com.monkopedia.ksrpc.ErrorListener
 import com.monkopedia.ksrpc.INPUT
+import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.METHOD
 import com.monkopedia.ksrpc.SendType
 import com.monkopedia.ksrpc.TYPE
@@ -28,46 +28,20 @@ import io.ktor.util.decodeBase64Bytes
 import io.ktor.util.encodeBase64
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
-import io.ktor.utils.io.cancel
-import io.ktor.utils.io.close
 import io.ktor.utils.io.readFully
 import io.ktor.utils.io.readRemaining
 import io.ktor.utils.io.readUTF8Line
 import io.ktor.utils.io.writeStringUtf8
-import kotlinx.coroutines.CloseableCoroutineDispatcher
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
-import kotlinx.serialization.StringFormat
-import kotlinx.serialization.json.Json
-
-internal suspend fun ReadWritePacketChannel(
-    scope: CoroutineScope,
-    errorListener: ErrorListener,
-    read: ByteReadChannel,
-    write: ByteWriteChannel,
-    format: StringFormat = Json
-): ReadWritePacketChannel {
-    val thread = maybeCreateChannelThread()
-    return withContext(thread) {
-        ReadWritePacketChannel(scope, errorListener, read, write, thread, format).also {
-            it.onClose {
-                (thread as? CloseableCoroutineDispatcher)?.close()
-            }
-        }
-    }
-}
 
 internal class ReadWritePacketChannel(
     scope: CoroutineScope,
-    errorListener: ErrorListener,
     private val read: ByteReadChannel,
     private val write: ByteWriteChannel,
-    channelThread: CoroutineDispatcher,
-    format: StringFormat = Json,
-) : PacketChannelBase(scope, errorListener, format, channelThread) {
+    env: KsrpcEnvironment
+) : PacketChannelBase(scope, env) {
     private val sendLock = Mutex()
     private val receiveLock = Mutex()
 
@@ -85,8 +59,8 @@ internal class ReadWritePacketChannel(
 
     override suspend fun close() {
         super.close()
-        write.close()
-        read.cancel()
+        write.close(Throwable())
+        read.cancel(Throwable())
     }
 }
 

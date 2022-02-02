@@ -22,6 +22,7 @@ import com.monkopedia.ksrpc.ChannelId
 import com.monkopedia.ksrpc.ERROR_PREFIX
 import com.monkopedia.ksrpc.KSRPC_BINARY
 import com.monkopedia.ksrpc.KSRPC_CHANNEL
+import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.SerializedChannel
 import com.monkopedia.ksrpc.SerializedService
@@ -41,7 +42,7 @@ import kotlin.coroutines.CoroutineContext
 internal class HttpSerializedChannel(
     private val httpClient: HttpClient,
     private val baseStripped: String,
-    override val serialization: StringFormat = Json
+    override val env: KsrpcEnvironment
 ) : SerializedChannel, ChannelClient {
 
     override val context: CoroutineContext = ChannelContext(this)

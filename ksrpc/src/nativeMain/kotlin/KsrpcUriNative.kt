@@ -17,7 +17,7 @@ package com.monkopedia.ksrpc
 
 import io.ktor.client.HttpClient
 
-actual suspend fun KsrpcUri.connect(clientFactory: () -> HttpClient): ChannelClient {
+actual suspend fun KsrpcUri.connect(env: KsrpcEnvironment, clientFactory: () -> HttpClient): ChannelClient {
     return when (type) {
         KsrpcType.EXE -> {
             throw NotImplementedError("EXE not supported in Native")
@@ -29,10 +29,10 @@ actual suspend fun KsrpcUri.connect(clientFactory: () -> HttpClient): ChannelCli
             throw NotImplementedError("Local not supported in Native")
         }
         KsrpcType.HTTP -> {
-            clientFactory().asChannel(path)
+            clientFactory().asChannel(path, env)
         }
         KsrpcType.WEBSOCKET -> {
-            clientFactory().asWebsocketChannel(path)
+            clientFactory().asWebsocketChannel(path, env)
         }
     }
 }

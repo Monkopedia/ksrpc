@@ -20,10 +20,9 @@ import com.monkopedia.ksrpc.ChannelContext
 import com.monkopedia.ksrpc.ChannelHost
 import com.monkopedia.ksrpc.ChannelId
 import com.monkopedia.ksrpc.Connection
-import com.monkopedia.ksrpc.ErrorListener
+import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.SerializedService
 import com.monkopedia.ksrpc.SuspendCloseable
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -31,7 +30,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.StringFormat
 import kotlin.coroutines.CoroutineContext
 
 internal data class Packet(
@@ -48,28 +46,21 @@ internal interface PacketChannel : SuspendCloseable {
 
 internal abstract class PacketChannelBase(
     scope: CoroutineScope,
-    errorListener: ErrorListener,
-    override val serialization: StringFormat,
-    dispatcher: CoroutineDispatcher
+    override val env: KsrpcEnvironment
 ) : PacketChannel, Connection, ChannelHost {
     private var isClosed = false
     private var callLock = Mutex()
 
     @Suppress("LeakingThis")
-    override val context: CoroutineContext = dispatcher + ChannelContext(this)
+    override val context: CoroutineContext = ChannelContext(this)
     private val serviceChannel: HostSerializedChannelImpl =
-        HostSerializedChannelImpl(errorListener, serialization, context)
+        HostSerializedChannelImpl(env, context)
     private val onCloseObservers = mutableSetOf<suspend () -> Unit>()
 
     private var receiveChannel: Channel<Packet> = Channel()
 
     init {
         scope.launch(context) {
-            coroutineContext[Job]?.invokeOnCompletion {
-                scope.launch {
-                    close()
-                }
-            }
             try {
                 while (true) {
                     val p = receive()

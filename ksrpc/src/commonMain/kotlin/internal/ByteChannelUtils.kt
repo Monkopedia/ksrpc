@@ -60,10 +60,12 @@ internal suspend fun ReceiveChannel<Frame>.toReadChannel(
                 if (handleFrame(frame, channel)) return@launch
             }
         }
-        job.invokeOnCompletion {
-            onClose()
-        }
-        channel.attachJob(job)
+        // job.invokeOnCompletion {
+        //     scope.launch {
+        //         onClose()
+        //     }
+        // }
+        // channel.attachJob(job)
     }
 }
 

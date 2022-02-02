@@ -21,7 +21,6 @@ import com.monkopedia.ksrpc.ChannelContext
 import com.monkopedia.ksrpc.ChannelHost
 import com.monkopedia.ksrpc.ChannelId
 import com.monkopedia.ksrpc.ERROR_PREFIX
-import com.monkopedia.ksrpc.ErrorListener
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.RpcObject
@@ -32,11 +31,9 @@ import com.monkopedia.ksrpc.SuspendCloseable
 import com.monkopedia.ksrpc.TrackingService
 import com.monkopedia.ksrpc.asString
 import com.monkopedia.ksrpc.randomUuid
-import kotlinx.coroutines.CloseableCoroutineDispatcher
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.StringFormat
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -45,10 +42,8 @@ import kotlin.coroutines.CoroutineContext
 internal expect fun maybeCreateChannelThread(): CoroutineDispatcher
 
 internal class HostSerializedChannelImpl(
-    private val errorListener: ErrorListener,
-    override val serialization: StringFormat,
+    override val env: KsrpcEnvironment,
     channelContext: CoroutineContext? = null,
-    override val env: KsrpcEnvironment
 ) : ChannelHost, ChannelClient, SerializedChannel {
     private var baseChannel = CompletableDeferred<SerializedService>()
     override val context: CoroutineContext = channelContext ?: ChannelContext(this)
@@ -72,9 +67,9 @@ internal class HostSerializedChannelImpl(
             }
         } catch (t: Throwable) {
             t.printStackTrace()
-            errorListener.onError(t)
+            env.errorListener.onError(t)
             CallData.create(
-                ERROR_PREFIX + serialization.encodeToString(
+                ERROR_PREFIX + env.serialization.encodeToString(
                     RpcFailure.serializer(),
                     RpcFailure(t.asString)
                 )
@@ -130,11 +125,6 @@ internal class HostSerializedChannelImpl(
 
     private val SerializedService.trackingService: TrackingService?
         get() = (this as? HostSerializedServiceImpl<*>)?.service as? TrackingService
-
-    companion object :
-        suspend (ErrorListener, StringFormat, ChannelContext?) -> HostSerializedChannelImpl,
-        suspend (ErrorListener, StringFormat) -> HostSerializedChannelImpl {
-    }
 }
 
 internal val SerializedChannel.asClient: ChannelClient

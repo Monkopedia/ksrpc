@@ -236,8 +236,8 @@ class ConnectionTest {
         if (RpcFunctionalityTest.TestType.PIPE !in supportedTypes) return@runBlockingUnit
         val (output, input) = createPipe()
         val (so, si) = createPipe()
-        val serviceChannel = (si to output).asChannel(GlobalScope)
-        val clientChannel = (input to so).asChannel(GlobalScope)
+        val serviceChannel = (si to output).asChannel(ksrpcEnvironment {  })
+        val clientChannel = (input to so).asChannel(ksrpcEnvironment {  })
         val bgJob = GlobalScope.launch(Dispatchers.Default) {
             serviceJob(serviceChannel)
         }

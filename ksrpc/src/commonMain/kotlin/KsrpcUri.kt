@@ -55,25 +55,28 @@ fun String.toKsrpcUri(): KsrpcUri = when {
 }
 
 expect suspend fun KsrpcUri.connect(
+    env: KsrpcEnvironment,
     clientFactory: () -> HttpClient = { HttpClient { } },
 ): ChannelClient
 
-internal fun HttpClient.asPacketChannel(baseUrl: String) =
-    HttpSerializedChannel(this, baseUrl.trimEnd('/'))
-fun HttpClient.asChannel(baseUrl: String): ChannelClient = asPacketChannel(baseUrl)
+internal fun HttpClient.asPacketChannel(baseUrl: String, env: KsrpcEnvironment) =
+    HttpSerializedChannel(this, baseUrl.trimEnd('/'), env)
+
+fun HttpClient.asChannel(baseUrl: String, env: KsrpcEnvironment): ChannelClient =
+    asPacketChannel(baseUrl, env)
 
 internal suspend fun HttpClient.asWebsocketPackets(
     baseUrl: String,
-    scope: CoroutineScope? = null,
-    errorListener: ErrorListener = ErrorListener {  }
+    env: KsrpcEnvironment,
+    scope: CoroutineScope? = null
 ) = WebsocketPacketChannel(
-    scope ?: CoroutineScope(coroutineContext),
-    errorListener,
+    scope ?: env.defaultScope,
     webSocketSession {
         url.takeFrom(baseUrl.trimEnd('/'))
         url.protocol = URLProtocol.WS
-    }
+    },
+    env
 )
 
-suspend fun HttpClient.asWebsocketChannel(baseUrl: String): Connection =
-    asWebsocketPackets(baseUrl).threadSafe()
+suspend fun HttpClient.asWebsocketChannel(baseUrl: String, env: KsrpcEnvironment): Connection =
+    asWebsocketPackets(baseUrl, env).threadSafe()

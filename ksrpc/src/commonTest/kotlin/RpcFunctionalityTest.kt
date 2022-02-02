@@ -45,7 +45,7 @@ abstract class RpcFunctionalityTest(
     fun testSerializePassthrough() = runBlockingUnit {
         if (TestType.SERIALIZE !in supportedTypes) return@runBlockingUnit
         val serializedChannel = serializedChannel()
-        val channel = HostSerializedChannelImpl({ }, Json)
+        val channel = HostSerializedChannelImpl(ksrpcEnvironment {  })
         channel.registerDefault(serializedChannel)
 
         verifyOnChannel(channel.asClient.defaultChannel())
@@ -61,13 +61,15 @@ abstract class RpcFunctionalityTest(
             serializedChannel.defaultHosting(
                 si,
                 output,
-                errorListener = {
-                    it.printStackTrace()
+                ksrpcEnvironment {
+                    errorListener = ErrorListener {
+                        it.printStackTrace()
+                    }
                 }
             )
         }
         try {
-            verifyOnChannel((input to so).asChannel().defaultChannel())
+            verifyOnChannel((input to so).asChannel(ksrpcEnvironment { }).defaultChannel())
         } finally {
             try {
                 input.cancel(null)
@@ -92,15 +94,17 @@ abstract class RpcFunctionalityTest(
                 val routing = testServe(
                     path,
                     serializedChannel,
-                    errorListener = {
-                        it.printStackTrace()
+                    ksrpcEnvironment {
+                        errorListener = ErrorListener {
+                            it.printStackTrace()
+                        }
                     }
                 )
                 routing()
             },
             test = {
                 val client = HttpClient()
-                client.asChannel("http://localhost:$it$path").use { channel ->
+                client.asChannel("http://localhost:$it$path", ksrpcEnvironment {  }).use { channel ->
                     verifyOnChannel(channel.defaultChannel())
                 }
             }
@@ -117,8 +121,10 @@ abstract class RpcFunctionalityTest(
                 testServeWebsocket(
                     path,
                     serializedChannel,
-                    errorListener = {
-                        it.printStackTrace()
+                    ksrpcEnvironment {
+                        errorListener = ErrorListener {
+                            it.printStackTrace()
+                        }
                     }
                 )
             },
@@ -126,7 +132,7 @@ abstract class RpcFunctionalityTest(
                 val client = HttpClient {
                     install(WebSockets)
                 }
-                client.asWebsocketChannel("http://localhost:$it$path").use { channel ->
+                client.asWebsocketChannel("http://localhost:$it$path", ksrpcEnvironment {  }).use { channel ->
                     verifyOnChannel(channel.defaultChannel())
                 }
             }
@@ -144,18 +150,13 @@ expect suspend inline fun httpTest(
 expect suspend fun testServe(
     basePath: String,
     channel: SerializedService,
-    errorListener: ErrorListener = ErrorListener { }
+    env: KsrpcEnvironment = ksrpcEnvironment {  }
 ): Routing.() -> Unit
 expect fun Routing.testServeWebsocket(
     basePath: String,
     channel: SerializedService,
-    errorListener: ErrorListener = ErrorListener { }
+    env: KsrpcEnvironment = ksrpcEnvironment { }
 )
-
-suspend inline fun <reified T : RpcService> T.servePipe(
-    test: suspend (Pair<ByteReadChannel, ByteWriteChannel>) -> Unit
-) {
-}
 
 fun createPipe(): Pair<ByteWriteChannel, ByteReadChannel> {
     val channel = ByteChannel(autoFlush = true)

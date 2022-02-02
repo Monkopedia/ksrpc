@@ -18,25 +18,25 @@ package com.monkopedia.ksrpc
 import java.io.PrintWriter
 import java.io.StringWriter
 
-suspend fun SerializedService.serveOnStd() {
+suspend fun SerializedService.serveOnStd(env: KsrpcEnvironment) {
     val input = System.`in`
     val output = System.out
-    serve(input, output)
+    serve(input, output, env)
 }
 
-suspend fun System.rpcChannel(): SerializedChannel {
+suspend fun System.rpcChannel(env: KsrpcEnvironment): SerializedChannel {
     val input = System.`in`
     val output = System.out
-    return (input to output).asChannel()
+    return (input to output).asChannel(env)
 }
 
-suspend fun ProcessBuilder.asChannel(): Connection {
+suspend fun ProcessBuilder.asChannel(env: KsrpcEnvironment): Connection {
     val process = redirectInput(ProcessBuilder.Redirect.PIPE)
         .redirectOutput(ProcessBuilder.Redirect.PIPE)
         .start()
     val input = process.inputStream
     val output = process.outputStream
-    return (input to output).asChannel().threadSafe()
+    return (input to output).asChannel(env).threadSafe()
 }
 
 suspend fun SerializedService.serveTo(process: ProcessBuilder) {
@@ -45,7 +45,7 @@ suspend fun SerializedService.serveTo(process: ProcessBuilder) {
         .start()
     val input = process.inputStream
     val output = process.outputStream
-    serve(input, output)
+    serve(input, output, env)
 }
 
 actual val Throwable.asString: String

@@ -28,7 +28,7 @@ actual suspend inline fun httpTest(
 actual suspend fun testServe(
     basePath: String,
     channel: SerializedService,
-    errorListener: ErrorListener
+    env: KsrpcEnvironment
 ): Routing.() -> Unit = {
     // Do nothing, disable HTTP hosting in JS tests.
 }
@@ -36,7 +36,7 @@ actual suspend fun testServe(
 actual fun Routing.testServeWebsocket(
     basePath: String,
     channel: SerializedService,
-    errorListener: ErrorListener
+    env: KsrpcEnvironment
 ) {
     // Do nothing, disable HTTP hosting in JS tests.
 }

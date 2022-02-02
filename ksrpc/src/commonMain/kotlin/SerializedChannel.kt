@@ -18,41 +18,36 @@ package com.monkopedia.ksrpc
 import com.monkopedia.ksrpc.internal.HostSerializedServiceImpl
 import io.ktor.utils.io.ByteReadChannel
 import kotlinx.serialization.StringFormat
-import kotlinx.serialization.json.Json
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
 suspend inline fun <reified T : RpcService> ChannelHost.registerHost(
-    service: T,
-    serialization: StringFormat = this.serialization
-): ChannelId = registerHost(service, rpcObject(), serialization)
+    service: T
+): ChannelId = registerHost(service, rpcObject())
 
 suspend inline fun <reified T : RpcService> ChannelHost.registerDefault(
-    service: T,
-    serialization: StringFormat = this.serialization
-) = registerDefault(service, rpcObject(), serialization)
+    service: T
+) = registerDefault(service, rpcObject())
 
 suspend fun <T : RpcService> ChannelHost.registerHost(
     service: T,
-    obj: RpcObject<T>,
-    serialization: StringFormat = this.serialization
+    obj: RpcObject<T>
 ): ChannelId {
-    return registerHost(HostSerializedServiceImpl(service, obj, serialization))
+    return registerHost(HostSerializedServiceImpl(service, obj, env))
 }
 
 suspend fun <T : RpcService> ChannelHost.registerDefault(
     service: T,
-    obj: RpcObject<T>,
-    serialization: StringFormat = this.serialization
+    obj: RpcObject<T>
 ) {
-    registerDefault(HostSerializedServiceImpl(service, obj, serialization))
+    registerDefault(HostSerializedServiceImpl(service, obj, env))
 }
 
 interface ChannelHostProvider {
     val host: ChannelHost?
 }
 
-interface ChannelHost : Serializing, ChannelHostProvider {
+interface ChannelHost : ChannelHostProvider, KsrpcElement {
     suspend fun registerHost(service: SerializedService): ChannelId
     suspend fun registerDefault(service: SerializedService)
     suspend fun close(id: ChannelId)
@@ -65,7 +60,7 @@ interface ChannelClientProvider {
     val client: ChannelClient?
 }
 
-interface ChannelClient : SerializedChannel, ChannelClientProvider {
+interface ChannelClient : SerializedChannel, ChannelClientProvider, KsrpcElement {
     suspend fun wrapChannel(channelId: ChannelId): SerializedService
     suspend fun defaultChannel() = wrapChannel(ChannelId(DEFAULT))
 
@@ -99,10 +94,10 @@ expect fun randomUuid(): String
 
 fun <T : RpcService> T.serialized(
     rpcObject: RpcObject<T>,
-    json: Json = Json { isLenient = true }
+    env: KsrpcEnvironment
 ): SerializedService {
     val rpcChannel = this
-    return HostSerializedServiceImpl(rpcChannel, rpcObject, json)
+    return HostSerializedServiceImpl(rpcChannel, rpcObject, env)
 }
 
 data class CallData private constructor(private val value: Any?) {
@@ -130,10 +125,4 @@ data class CallData private constructor(private val value: Any?) {
         fun create(str: String) = CallData(str)
         fun create(binary: ByteReadChannel) = CallData(binary)
     }
-}
-
-fun <T : RpcService> RpcObject<T>.serializedChannel(
-    service: T
-): SerializedService {
-    return service.serialized(this)
 }

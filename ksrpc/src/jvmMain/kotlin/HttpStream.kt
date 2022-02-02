@@ -29,27 +29,25 @@ import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.copyTo
 import io.ktor.websocket.webSocket
 import kotlinx.coroutines.coroutineScope
-import kotlinx.serialization.StringFormat
 import kotlinx.serialization.json.Json
 
 suspend fun serve(
     basePath: String,
     service: SerializedService,
-    errorListener: ErrorListener = ErrorListener { },
-    format: StringFormat = Json
+    env: KsrpcEnvironment
 ): Routing.() -> Unit {
-    val channel = HostSerializedChannelImpl(errorListener, format).also {
+    val channel = HostSerializedChannelImpl(env).also {
         it.registerDefault(service)
     }
     return {
-        serve(basePath, channel, errorListener)
+        serve(basePath, channel, env)
     }
 }
 
 fun Routing.serve(
     basePath: String,
     channel: SerializedChannel,
-    errorListener: ErrorListener = ErrorListener { }
+    env: KsrpcEnvironment
 ) {
     val baseStripped = basePath.trimEnd('/')
     post("$baseStripped/call/{method}") {
@@ -71,7 +69,7 @@ fun Routing.serve(
                 call.respond(response.readSerialized())
             }
         } catch (t: Throwable) {
-            errorListener.onError(t)
+            env.errorListener.onError(t)
             call.respond(
                 ERROR_PREFIX + Json.encodeToString(RpcFailure.serializer(), RpcFailure(t.asString))
             )
@@ -83,35 +81,15 @@ fun Routing.serve(
 fun Routing.serveWebsocket(
     basePath: String,
     channel: SerializedService,
-    errorListener: ErrorListener = ErrorListener { }
+    env: KsrpcEnvironment
 ) {
     val baseStripped = basePath.trimEnd('/')
     webSocket(baseStripped) {
         coroutineScope {
-            val wb = WebsocketPacketChannel(this, errorListener, this@webSocket)
+            val wb = WebsocketPacketChannel(this, this@webSocket, env)
             wb.connect {
                 channel
             }
         }
-        // while (!incoming.isClosedForReceive) {
-        //     try {
-        //         val packet = receivePacket {
-        //         }
-        //         val endpoint = packet.endpoint
-        //         val callData = packet.data
-        //         val response = channel.call(endpoint, callData)
-        //         send(Packet(false, endpoint, response))
-        //     } catch (_: ClosedReceiveChannelException) {
-        //         // Don't mind, just done with this channel.
-        //     } catch (t: Throwable) {
-        //         errorListener.onError(t)
-        //         val failure = RpcFailure(t.asString)
-        //         send(
-        //             Frame.Text(
-        //                 ERROR_PREFIX + Json.encodeToString(RpcFailure.serializer(), failure)
-        //             )
-        //         )
-        //     }
-        // }
     }
 }

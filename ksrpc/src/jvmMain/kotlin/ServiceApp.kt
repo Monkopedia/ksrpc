@@ -64,7 +64,7 @@ abstract class ServiceApp(val appName: String) : CliktCommand() {
                     GlobalScope.launch {
                         val context = newSingleThreadContext("$appName-socket-$p")
                         withContext(context) {
-                            createChannel().serve(s.getInputStream(), s.getOutputStream())
+                            createChannel().serve(s.getInputStream(), s.getOutputStream(), env)
                         }
                         context.close()
                     }
@@ -73,7 +73,7 @@ abstract class ServiceApp(val appName: String) : CliktCommand() {
         }
         runBlocking {
             for (h in http) {
-                val routes = serve("/${appName.decapitalize()}", createChannel())
+                val routes = serve("/${appName.decapitalize()}", createChannel(), env)
                 embeddedServer(Netty, h) {
                     install(CORS) {
                         anyHost()
@@ -82,9 +82,13 @@ abstract class ServiceApp(val appName: String) : CliktCommand() {
                 }.start()
             }
             if (stdOut) {
-                createChannel().serveOnStd()
+                createChannel().serveOnStd(env)
             }
         }
+    }
+
+    open val env: KsrpcEnvironment by lazy {
+        ksrpcEnvironment {}
     }
 
     abstract fun createChannel(): SerializedService

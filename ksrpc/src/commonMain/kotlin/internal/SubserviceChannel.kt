@@ -17,12 +17,9 @@ package com.monkopedia.ksrpc.internal
 
 import com.monkopedia.ksrpc.CallData
 import com.monkopedia.ksrpc.ChannelClient
-import com.monkopedia.ksrpc.ChannelContext
-import com.monkopedia.ksrpc.ChannelHost
-import com.monkopedia.ksrpc.ChannelHostProvider
 import com.monkopedia.ksrpc.ChannelId
+import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.SerializedService
-import kotlinx.serialization.StringFormat
 import kotlin.coroutines.CoroutineContext
 
 internal class SubserviceChannel(
@@ -30,10 +27,8 @@ internal class SubserviceChannel(
     private val serviceId: ChannelId
 ) : SerializedService, ChannelClient by baseChannel {
 
-    override val context: CoroutineContext
-        get() = baseChannel.context
-    override val serialization: StringFormat
-        get() = baseChannel.serialization
+    override val env: KsrpcEnvironment = baseChannel.env
+    override val context: CoroutineContext = baseChannel.context
 
     override suspend fun call(endpoint: String, input: CallData): CallData {
         return baseChannel.call(serviceId, endpoint, input)

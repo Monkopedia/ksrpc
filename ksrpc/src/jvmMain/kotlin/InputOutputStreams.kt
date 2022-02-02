@@ -19,16 +19,16 @@ import io.ktor.util.cio.use
 import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.jvm.javaio.toByteReadChannel
 import io.ktor.utils.io.jvm.javaio.toInputStream
+import kotlinx.coroutines.Job
 import java.io.InputStream
 import java.io.OutputStream
 import kotlin.concurrent.thread
 import kotlin.coroutines.coroutineContext
-import kotlinx.coroutines.Job
 
 suspend fun SerializedService.serve(
     input: InputStream,
     output: OutputStream,
-    errorListener: ErrorListener = ErrorListener { }
+    env: KsrpcEnvironment
 ) {
     val channel = ByteChannel(autoFlush = true)
     channel.use {
@@ -36,16 +36,16 @@ suspend fun SerializedService.serve(
         thread(start = true) {
             channel.toInputStream(job).copyTo(output)
         }
-        defaultHosting(input.toByteReadChannel(), this, errorListener = errorListener)
+        defaultHosting(input.toByteReadChannel(), this, env)
     }
 }
 
-suspend fun Pair<InputStream, OutputStream>.asChannel(): Connection {
+suspend fun Pair<InputStream, OutputStream>.asChannel(env: KsrpcEnvironment): Connection {
     val (input, output) = this
     val channel = ByteChannel(autoFlush = true)
     val job = coroutineContext[Job]
     thread(start = true) {
         channel.toInputStream(job).copyTo(output)
     }
-    return (input.toByteReadChannel(coroutineContext) to channel).asChannel().threadSafe()
+    return (input.toByteReadChannel(coroutineContext) to channel).asChannel(env).threadSafe()
 }
