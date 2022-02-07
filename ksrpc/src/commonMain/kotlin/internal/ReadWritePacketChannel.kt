@@ -66,8 +66,16 @@ internal class ReadWritePacketChannel(
     }
 }
 
-private suspend fun ByteWriteChannel.appendLine(s: String = "") = writeStringUtf8("$s\n")
-private suspend fun ByteWriteChannel.append(content: String) = writeStringUtf8(content)
+private suspend fun ByteWriteChannel.appendLine(s: String = "") = writeStringUtf8("$s\n").also { println("Writing $s") }
+private suspend fun ByteWriteChannel.append(content: String) {
+    val data = content.encodeToByteArray()
+    println("Writing content ${content.length}\nEnding: ${content.last()}\n\n")
+    println("Rereading content ${data.decodeToString().length}\nEnding: ${data.decodeToString().last()}\n\n")
+    for (i in data.size - 10 until data.size) {
+        println("Sending ending data ${data[i - 1]}")
+    }
+    writeFully(data, 0, data.size)
+}
 
 @OptIn(InternalAPI::class)
 private suspend fun ByteWriteChannel.send(
@@ -106,6 +114,10 @@ private suspend fun ByteReadChannel.readContent(
     val type = enumValueOf<SendType>(params[TYPE] ?: SendType.NORMAL.name)
     var byteArray = ByteArray(length)
     readFully(byteArray)
+    println("Read $length into ${byteArray.decodeToString().last()}")
+    for (i in byteArray.size - 10 until byteArray.size) {
+        println("Receiving ending data ${byteArray[i - 1]}")
+    }
     return when (type) {
         SendType.NORMAL -> CallData.create(byteArray.decodeToString())
         SendType.BINARY,
@@ -121,7 +133,9 @@ private suspend fun ByteReadChannel.readFields(): Map<String, String> {
         if (line != null) {
             fields.add(line)
         }
-        line = readUTF8Line()
+        line = readUTF8Line().also {
+            println("Read: $it")
+        }
     }
     return parseParams(fields)
 }

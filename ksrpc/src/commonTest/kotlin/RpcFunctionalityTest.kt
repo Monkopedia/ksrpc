@@ -16,6 +16,7 @@
 package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
+import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
 import com.monkopedia.ksrpc.internal.asClient
 import io.ktor.client.HttpClient
 import io.ktor.client.features.websocket.WebSockets
@@ -43,7 +44,7 @@ abstract class RpcFunctionalityTest(
     fun testSerializePassthrough() = runBlockingUnit {
         if (TestType.SERIALIZE !in supportedTypes) return@runBlockingUnit
         val serializedChannel = serializedChannel()
-        val channel = HostSerializedChannelImpl(ksrpcEnvironment {  })
+        val channel = HostSerializedChannelImpl(ksrpcEnvironment {  }).threadSafe<Connection>()
         channel.registerDefault(serializedChannel)
 
         verifyOnChannel(channel.asClient.defaultChannel())

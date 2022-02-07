@@ -17,7 +17,9 @@ package com.monkopedia.ksrpc
 
 import kotlin.jvm.JvmName
 
-interface Connection : ChannelHost, ChannelClient, SerializedChannel
+interface Connection : ChannelHost, ChannelClient, ConnectionProvider, SerializedChannel {
+    suspend fun init() = Unit
+}
 
 // Problems with JS compiler and serialization
 data class ChannelId(val id: String)

@@ -1,21 +1,23 @@
 package com.monkopedia.ksrpc.internal
 
 import com.monkopedia.ksrpc.ChannelClient
-import com.monkopedia.ksrpc.ChannelClientProvider
 import com.monkopedia.ksrpc.ChannelHost
-import com.monkopedia.ksrpc.ChannelHostProvider
 import com.monkopedia.ksrpc.Connection
+import com.monkopedia.ksrpc.ConnectionProvider
 import com.monkopedia.ksrpc.ContextContainer
 import com.monkopedia.ksrpc.SerializedService
+import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
 import internal.MovableInstance
 import internal.using
-import kotlinx.coroutines.CloseableCoroutineDispatcher
-import kotlinx.coroutines.newSingleThreadContext
-import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 import kotlin.native.concurrent.DetachedObjectGraph
 import kotlin.native.concurrent.attach
 import kotlin.native.concurrent.ensureNeverFrozen
+import kotlin.native.concurrent.freeze
+import kotlinx.coroutines.CloseableCoroutineDispatcher
+import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.withContext
+import kotlin.native.concurrent.TransferMode
 
 /**
  * Tags instances that are handling thread wrapping in native code already and
@@ -27,16 +29,16 @@ internal abstract class ThreadSafe<T>(
 ) : ContextContainer
 
 @ThreadLocal
-private lateinit var threadSafeCache: MutableMap<Any, Any>
+private var threadSafeCache: MutableMap<Any, Any> = mutableMapOf()
 
 @ThreadLocal
 private var threadSafeCacheInitialized: Boolean = false
 
 internal actual object ThreadSafeManager {
-    val allThreadSafes: MovableInstance<MutableMap<Any, Any>>
+    val allThreadSafes: MovableInstance<MutableMap<Any, Any>> = MovableInstance { mutableMapOf() }
 
-    init {
-        allThreadSafes = MovableInstance { kotlin.collections.mutableMapOf<kotlin.Any, kotlin.Any>() }
+    actual inline fun createKey(): Any {
+        return Any().freeze()
     }
 
     // VisibleForTesting
@@ -52,16 +54,16 @@ internal actual object ThreadSafeManager {
             threadSafeCacheInitialized = true
         }
         val instance = this
-        threadSafeCache[instance]?.let {
+        val key = (this as? ThreadSafeKeyed)?.key ?: this
+        threadSafeCache[key]?.let {
             return it as T
         }
-        println("About to use allThreadSafes")
         allThreadSafes.using { globalMap ->
-            println("Using allThreadSafes")
-            globalMap[instance]?.let {
-                threadSafeCache[instance] = it
+            globalMap[key]?.let {
+                threadSafeCache[key] = it
                 return it as T
             }
+            instance.ensureNeverFrozen()
             val thread = newSingleThreadContext("thread-safe-${T::class.qualifiedName}")
             val threadSafe = when (instance) {
                 is Connection -> createThreadSafeConnection(thread, instance)
@@ -70,23 +72,28 @@ internal actual object ThreadSafeManager {
                 is SerializedService -> createThreadSafeService(thread, instance)
                 else -> error("$instance is unsupported for threadSafe operation")
             }
-            threadSafeCache[instance] = threadSafe
-            globalMap[instance] = threadSafe
+            threadSafeCache[key] = threadSafe
+            globalMap[key] = threadSafe
             return threadSafe as T
         }
     }
 
     actual inline fun <reified T : Any> threadSafe(creator: (CoroutineContext) -> T): T {
+        println("Start thread safe")
         if (!threadSafeCacheInitialized) {
             threadSafeCache = mutableMapOf()
             threadSafeCacheInitialized = true
         }
-        println("About to use allThreadSafes")
+        println("Thread safe initialized $allThreadSafes")
         allThreadSafes.using { globalMap ->
-            println("Using allThreadSafes")
+            println("Fetched global map ${globalMap}")
             val thread = newSingleThreadContext("thread-safe-${T::class.qualifiedName}")
+            println("Created thread $thread")
             val instance = creator(thread)
             instance.ensureNeverFrozen()
+            println("Created instance $instance")
+            val key = (instance as? ThreadSafeKeyed)?.key ?: instance
+            println("Using key $key")
             val threadSafe = when (instance) {
                 is Connection -> createThreadSafeConnection(thread, instance)
                 is ChannelHost -> createThreadSafeChannelHost(thread, instance)
@@ -94,7 +101,10 @@ internal actual object ThreadSafeManager {
                 is SerializedService -> createThreadSafeService(thread, instance)
                 else -> error("$instance is unsupported for threadSafe operation")
             }
-            globalMap[instance] = threadSafe
+            println("Created wrapper")
+            globalMap[key] = threadSafe
+            threadSafeCache[key] = threadSafe
+            println("Returning")
             return threadSafe as T
         }
     }
@@ -103,65 +113,66 @@ internal actual object ThreadSafeManager {
         thread: CloseableCoroutineDispatcher,
         instance: SerializedService
     ): SerializedService {
-        val context = instance.context + thread
         val env = instance.env
-        val host = (instance as? ChannelHostProvider)?.host
-        val client = (instance as? ChannelClientProvider)?.client
-        return ThreadSafeService(context, DetachedObjectGraph { instance }, env, host, client)
+        val context = instance.context + thread
+        return ThreadSafeService(context, DetachedObjectGraph(TransferMode.UNSAFE) { instance }, env)
     }
 
     fun createThreadSafeChannelClient(
         thread: CloseableCoroutineDispatcher,
         instance: ChannelClient
     ): ChannelClient {
-        val context = instance.context + thread
         val env = instance.env
-        return ThreadSafeChannelClient(context, DetachedObjectGraph { instance }, env)
+        val context = instance.context + thread
+        return ThreadSafeChannelClient(
+            context,
+            DetachedObjectGraph(TransferMode.UNSAFE) { instance },
+            env
+        )
     }
 
     fun createThreadSafeChannelHost(
         thread: CloseableCoroutineDispatcher,
         instance: ChannelHost
     ): ChannelHost {
-        val context = instance.context + thread
         val env = instance.env
-        return ThreadSafeChannelHost(context, DetachedObjectGraph { instance }, env)
+        val context = instance.context + thread
+        return ThreadSafeChannelHost(
+            context,
+            DetachedObjectGraph(TransferMode.UNSAFE) { instance },
+            env
+        )
     }
 
     fun createThreadSafeConnection(
         thread: CloseableCoroutineDispatcher,
         instance: Connection
     ): Connection {
-        val context = instance.context + thread
         val env = instance.env
-        return ThreadSafeConnection(context, DetachedObjectGraph { instance }, env)
+        val context = instance.context + thread
+        println("Moving connection $instance")
+        return ThreadSafeConnection(
+            context,
+            DetachedObjectGraph(TransferMode.UNSAFE) { instance },
+            env
+        )
+    }
+
+    actual inline fun ThreadSafeKeyedConnection.threadSafeProvider(): ConnectionProvider {
+        ensureNeverFrozen()
+        return ThreadSafeConnectionProvider(key).freeze()
+    }
+
+    actual inline fun ThreadSafeKeyedHost.threadSafeProvider(): ThreadSafeHostProvider {
+        ensureNeverFrozen()
+        return ThreadSafeHostProvider(key).freeze()
+    }
+
+    actual inline fun ThreadSafeKeyedClient.threadSafeProvider(): ThreadSafeClientProvider {
+        ensureNeverFrozen()
+        return ThreadSafeClientProvider(key).freeze()
     }
 }
-
-// internal inline fun <T : Any> T.threadSafe(
-//    factory: ThreadSafeBuilder<T>.() -> T
-// ): T {
-//    if (this is ThreadSafe<*>) return this
-//    this.ensureNeverFrozen()
-//    val threadSafeBuilder = ThreadSafeBuilder(this)
-//    return threadSafeBuilder.factory()
-// }
-//
-// internal inline fun <T : Any> threadSafe(
-//    baseContext: CoroutineContext,
-//    instance: (CoroutineContext) -> T,
-//    factory: ThreadSafeBuilder<T>.() -> T
-// ): T {
-//    val thread = newSingleThreadContext("instance-thread")
-//    val instance = instance(baseContext + thread)
-//    if (instance is ThreadSafe<*>) {
-//        thread.close()
-//        return instance
-//    }
-//    instance.ensureNeverFrozen()
-//    val threadSafeBuilder = ThreadSafeBuilder(instance, thread)
-//    return threadSafeBuilder.factory()
-// }
 
 @ThreadLocal
 private var instance: Any? = null
@@ -169,14 +180,9 @@ private var instance: Any? = null
 @ThreadLocal
 private var initialized: Boolean = false
 
-// internal class ThreadSafeBuilder<T : Any>(
-//    instance: T,
-//    val thread: CloseableCoroutineDispatcher = newSingleThreadContext("instance-thread")
-// ) {
-//    val reference = DetachedObjectGraph { instance }
-// }
-
-internal suspend inline fun <reified T : Any, R> ThreadSafe<T>.useSafe(crossinline usage: suspend (T) -> R): R {
+internal suspend inline fun <reified T : Any, R> ThreadSafe<T>.useSafe(
+    crossinline usage: suspend (T) -> R
+): R {
     return withContext(context) {
         ensureInitialized()
         usage(instance as T)

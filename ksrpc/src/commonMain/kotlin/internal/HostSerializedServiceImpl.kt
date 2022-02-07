@@ -17,10 +17,11 @@ package com.monkopedia.ksrpc.internal
 
 import com.monkopedia.ksrpc.CallData
 import com.monkopedia.ksrpc.ChannelClient
-import com.monkopedia.ksrpc.ChannelContext
-import com.monkopedia.ksrpc.ChannelHost
 import com.monkopedia.ksrpc.ChannelId
+import com.monkopedia.ksrpc.ClientChannelContext
+import com.monkopedia.ksrpc.Connection
 import com.monkopedia.ksrpc.ERROR_PREFIX
+import com.monkopedia.ksrpc.HostChannelContext
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.RpcObject
@@ -30,11 +31,13 @@ import com.monkopedia.ksrpc.SerializedService
 import com.monkopedia.ksrpc.SuspendCloseable
 import com.monkopedia.ksrpc.TrackingService
 import com.monkopedia.ksrpc.asString
+import com.monkopedia.ksrpc.internal.ThreadSafeManager.createKey
+import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafeProvider
 import com.monkopedia.ksrpc.randomUuid
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
-import kotlin.coroutines.CoroutineContext
 
 /**
  * Creates a thread on platforms that need it (like native) or returns another coroutine dispatcher as needed.
@@ -44,9 +47,13 @@ internal expect fun maybeCreateChannelThread(): CoroutineDispatcher
 internal class HostSerializedChannelImpl(
     override val env: KsrpcEnvironment,
     channelContext: CoroutineContext? = null,
-) : ChannelHost, ChannelClient, SerializedChannel {
+) : Connection, ThreadSafeKeyedConnection {
     private var baseChannel = CompletableDeferred<SerializedService>()
-    override val context: CoroutineContext = channelContext ?: ChannelContext(this)
+    override val key: Any = createKey()
+    override val context: CoroutineContext =
+        channelContext ?: threadSafeProvider().let {
+            ClientChannelContext(it) + HostChannelContext(it)
+        }
     private val onCloseObservers = mutableSetOf<suspend () -> Unit>()
 
     private val serviceMap by lazy {
@@ -66,13 +73,14 @@ internal class HostSerializedChannelImpl(
                 channel.call(endpoint, data)
             }
         } catch (t: Throwable) {
-            t.printStackTrace()
             env.errorListener.onError(t)
             CallData.create(
                 ERROR_PREFIX + env.serialization.encodeToString(
                     RpcFailure.serializer(),
                     RpcFailure(t.asString)
-                )
+                ).also {
+                    println("Serialized error ${it.length}\n\n$it\n\nEnd: ${it.substring(it.length - 10)}")
+                }
             )
         }
     }

@@ -17,8 +17,8 @@ package com.monkopedia.ksrpc.internal
 
 import com.monkopedia.ksrpc.CallData
 import com.monkopedia.ksrpc.ChannelClient
-import com.monkopedia.ksrpc.ChannelContext
 import com.monkopedia.ksrpc.ChannelId
+import com.monkopedia.ksrpc.ClientChannelContext
 import com.monkopedia.ksrpc.ERROR_PREFIX
 import com.monkopedia.ksrpc.KSRPC_BINARY
 import com.monkopedia.ksrpc.KSRPC_CHANNEL
@@ -26,6 +26,8 @@ import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.SerializedChannel
 import com.monkopedia.ksrpc.SerializedService
+import com.monkopedia.ksrpc.internal.ThreadSafeManager.createKey
+import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafeProvider
 import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
 import io.ktor.client.request.accept
@@ -43,10 +45,11 @@ internal class HttpSerializedChannel(
     private val httpClient: HttpClient,
     private val baseStripped: String,
     override val env: KsrpcEnvironment
-) : SerializedChannel, ChannelClient {
+) : SerializedChannel, ChannelClient, ThreadSafeKeyedClient {
 
     private val onCloseHandlers = mutableSetOf<suspend () -> Unit>()
-    override val context: CoroutineContext = ChannelContext(this)
+    override val key: Any = createKey()
+    override val context: CoroutineContext = ClientChannelContext(threadSafeProvider())
 
     override suspend fun call(channelId: ChannelId, endpoint: String, input: CallData): CallData {
         val response = httpClient.post<HttpResponse>(

@@ -16,21 +16,25 @@
 package com.monkopedia.ksrpc.internal
 
 import com.monkopedia.ksrpc.CallData
-import com.monkopedia.ksrpc.ChannelContext
 import com.monkopedia.ksrpc.ChannelHost
+import com.monkopedia.ksrpc.ChannelHostProvider
 import com.monkopedia.ksrpc.ChannelId
+import com.monkopedia.ksrpc.ClientChannelContext
 import com.monkopedia.ksrpc.Connection
+import com.monkopedia.ksrpc.HostChannelContext
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.SerializedService
 import com.monkopedia.ksrpc.SuspendCloseable
+import com.monkopedia.ksrpc.internal.ThreadSafeManager.createKey
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
+import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafeProvider
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlin.coroutines.CoroutineContext
 
 internal data class Packet(
     val input: Boolean,
@@ -45,25 +49,28 @@ internal interface PacketChannel : SuspendCloseable {
 }
 
 internal abstract class PacketChannelBase(
-    scope: CoroutineScope,
+    private val scope: CoroutineScope,
     context: CoroutineContext,
     override val env: KsrpcEnvironment
-) : PacketChannel, Connection, ChannelHost {
+) : PacketChannel, Connection, ChannelHost, ThreadSafeKeyedConnection {
     private var isClosed = false
     private var callLock = Mutex()
+    override val key: Any = createKey()
+
+    private val threadSafeProvider = threadSafeProvider()
 
     @Suppress("LeakingThis")
-    override val context: CoroutineContext by lazy {
-        context + ChannelContext(threadSafe())
-    }
-    private val serviceChannel: ChannelHost by lazy {
-        HostSerializedChannelImpl(env, this.context).threadSafe()
+    override val context: CoroutineContext =
+        context + ClientChannelContext(threadSafeProvider) + HostChannelContext(threadSafeProvider)
+
+    private val serviceChannel by lazy {
+        HostSerializedChannelImpl(env, this.context).threadSafe<ChannelHost>()
     }
     private val onCloseObservers = mutableSetOf<suspend () -> Unit>()
 
     private var receiveChannel: Channel<Packet> = Channel()
 
-    init {
+    override suspend fun init() {
         scope.launch {
             withContext(context) {
                 val serviceChannel = serviceChannel

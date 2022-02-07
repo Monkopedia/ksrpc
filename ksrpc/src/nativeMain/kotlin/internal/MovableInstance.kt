@@ -1,30 +1,42 @@
 package internal
 
-import kotlinx.atomicfu.locks.SynchronizedObject
-import kotlinx.atomicfu.locks.withLock
 import kotlin.native.concurrent.AtomicReference
 import kotlin.native.concurrent.DetachedObjectGraph
 import kotlin.native.concurrent.attach
+import kotlinx.atomicfu.locks.SynchronizedObject
+import kotlinx.atomicfu.locks.withLock
 
-class MovableInstance<T>(creator: () -> T) : SynchronizedObject() {
-    val graph = AtomicReference(DetachedObjectGraph { creator() })
-    var instance: Any? = null
+@ThreadLocal
+private val currentInstances = mutableMapOf<MovableInstance<*>, Any>()
+
+class MovableInstance<T>(val creator: () -> T) : SynchronizedObject() {
+    val graph = AtomicReference(DetachedObjectGraph<T?> { null })
 }
 
-inline fun <reified T, R> MovableInstance<T>.using(block: (T) -> R): R {
-    println("About to grab lock")
+var <T : Any> MovableInstance<T>.instance: T?
+    get() = currentInstances[this] as? T
+    set(value) {
+        if (value != null) {
+            currentInstances[this] = value
+        } else {
+            currentInstances.remove(this)
+        }
+    }
+
+inline fun <reified T : Any, R> MovableInstance<T>.using(block: (T) -> R): R {
     return withLock {
         println("Have lock")
-        if (instance != null) {
-            return block(instance as T)
+        instance?.let {
+            println("Using instance")
+            return block(it)
         }
-        val objInstance = graph.value.attach()
+        val objInstance = graph.value.attach() ?: creator()
+        println("Attached")
         instance = objInstance
         block(objInstance).also {
             instance = null
+            println("Detaching")
             graph.value = DetachedObjectGraph { objInstance }
         }
-    }.also {
-        println("Released lock")
     }
 }

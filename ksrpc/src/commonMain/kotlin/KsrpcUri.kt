@@ -81,6 +81,8 @@ internal suspend fun HttpClient.asWebsocketPackets(
             session,
             env
         )
+    }.also {
+        it.init()
     }
 }
 

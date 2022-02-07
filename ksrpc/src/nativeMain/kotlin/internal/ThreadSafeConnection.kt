@@ -1,8 +1,13 @@
 package com.monkopedia.ksrpc.internal
 
 import com.monkopedia.ksrpc.CallData
+import com.monkopedia.ksrpc.ChannelClient
+import com.monkopedia.ksrpc.ChannelClientProvider
+import com.monkopedia.ksrpc.ChannelHost
+import com.monkopedia.ksrpc.ChannelHostProvider
 import com.monkopedia.ksrpc.ChannelId
 import com.monkopedia.ksrpc.Connection
+import com.monkopedia.ksrpc.ConnectionProvider
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.SerializedService
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
@@ -14,6 +19,13 @@ internal class ThreadSafeConnection(
     reference: DetachedObjectGraph<Connection>,
     override val env: KsrpcEnvironment
 ) : ThreadSafe<Connection>(context, reference), Connection {
+
+    override suspend fun init() {
+        return useSafe {
+            it.init()
+        }
+    }
+
     override suspend fun registerHost(service: SerializedService): ChannelId {
         val threadSafeService = service.threadSafe()
         return useSafe {
@@ -61,4 +73,11 @@ internal class ThreadSafeConnection(
             it.onClose(onClose)
         }
     }
+}
+
+internal class ThreadSafeConnectionProvider(private val key: Any) : ConnectionProvider {
+    override val host: ChannelHost?
+        get() = (key.threadSafe() as? ChannelHostProvider)?.host
+    override val client: ChannelClient?
+        get() = (key.threadSafe() as? ChannelClientProvider)?.client
 }

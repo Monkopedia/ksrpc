@@ -20,6 +20,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.StringFormat
 import kotlinx.serialization.builtins.serializer
+import kotlin.coroutines.coroutineContext
 
 internal sealed interface Transformer<T> {
     suspend fun transform(input: T, channel: SerializedService): CallData
@@ -30,6 +31,8 @@ internal sealed interface Transformer<T> {
             val outputStr = data.readSerialized()
             if (outputStr.startsWith(ERROR_PREFIX)) {
                 val errorStr = outputStr.substring(ERROR_PREFIX.length)
+                println("Unpacking error:\n$errorStr")
+                println("Length: ${errorStr.length} Ending: ${errorStr.substring(errorStr.length - 5)}")
                 throw serialization.decodeFromString(RpcFailure.serializer(), errorStr)
                     .toException()
             }
@@ -63,7 +66,7 @@ internal class SubserviceTransformer<T : RpcService>(
     private val serviceObj: RpcObject<T>
 ) : Transformer<T> {
     override suspend fun transform(input: T, channel: SerializedService): CallData {
-        val host = host() ?: error("Cannot transform service type to non-hosting channel ${channel()}")
+        val host = host() ?: error("Cannot transform service type to non-hosting channel ${coroutineContext[HostChannelContext.Key]?.channel}")
         val serviceId = host.registerHost(input, serviceObj)
         return CallData.create(
             channel.env.serialization.encodeToString(String.serializer(), serviceId.id)
@@ -71,8 +74,8 @@ internal class SubserviceTransformer<T : RpcService>(
     }
 
     override suspend fun untransform(data: CallData, channel: SerializedService): T {
-        val client = client() ?: error("Cannot untransform service type from non-client channel")
-        BinaryTransformer.unpackError(data, channel.env.serialization)
+        val client = client() ?: error("Cannot untransform service type from non-client channel ${coroutineContext[ClientChannelContext.Key]?.channel}")
+        unpackError(data, channel.env.serialization)
         val serviceId = channel.env.serialization.decodeFromString(
             String.serializer(),
             data.readSerialized()

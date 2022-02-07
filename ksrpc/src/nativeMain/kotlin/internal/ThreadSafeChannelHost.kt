@@ -1,7 +1,10 @@
 package com.monkopedia.ksrpc.internal
 
 import com.monkopedia.ksrpc.CallData
+import com.monkopedia.ksrpc.ChannelClient
+import com.monkopedia.ksrpc.ChannelClientProvider
 import com.monkopedia.ksrpc.ChannelHost
+import com.monkopedia.ksrpc.ChannelHostProvider
 import com.monkopedia.ksrpc.ChannelId
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.SerializedService
@@ -56,3 +59,8 @@ internal class ThreadSafeChannelHost(
         }
     }
 }
+internal class ThreadSafeHostProvider(private val key: Any) : ChannelHostProvider {
+    override val host: ChannelHost?
+        get() = (key.threadSafe() as? ChannelHostProvider)?.host
+}
+

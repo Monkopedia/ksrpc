@@ -2,7 +2,11 @@ package com.monkopedia.ksrpc.internal
 
 import com.monkopedia.ksrpc.CallData
 import com.monkopedia.ksrpc.ChannelClient
+import com.monkopedia.ksrpc.ChannelClientProvider
+import com.monkopedia.ksrpc.ChannelHost
+import com.monkopedia.ksrpc.ChannelHostProvider
 import com.monkopedia.ksrpc.ChannelId
+import com.monkopedia.ksrpc.ConnectionProvider
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.SerializedService
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
@@ -14,6 +18,7 @@ internal class ThreadSafeChannelClient(
     reference: DetachedObjectGraph<ChannelClient>,
     override val env: KsrpcEnvironment
 ) : ThreadSafe<ChannelClient>(context, reference), ChannelClient {
+
     override suspend fun wrapChannel(channelId: ChannelId): SerializedService {
         return useSafe {
             it.wrapChannel(channelId).threadSafe()
@@ -43,4 +48,8 @@ internal class ThreadSafeChannelClient(
             it.onClose(onClose)
         }
     }
+}
+internal class ThreadSafeClientProvider(private val key: Any) : ChannelClientProvider {
+    override val client: ChannelClient?
+        get() = (key.threadSafe() as? ChannelClientProvider)?.client
 }

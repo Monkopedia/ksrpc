@@ -15,6 +15,10 @@
  */
 package com.monkopedia.ksrpc
 
+import internal.MovableInstance
+import internal.using
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
 import kotlin.test.fail
 import kotlinx.coroutines.runBlocking
@@ -22,6 +26,7 @@ import kotlinx.coroutines.withContext
 import platform.posix.pthread_self
 import kotlin.native.concurrent.withWorker
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 actual suspend inline fun httpTest(
     crossinline serve: suspend Routing.() -> Unit,
@@ -77,5 +82,27 @@ class NativeTestTest {
             }
         }
         println("Thread: $x")
+    }
+
+    @Test
+    fun testMovableInstance() = runBlockingUnit {
+        val movable = MovableInstance { mutableSetOf<String>() }
+        val otherThread = newSingleThreadContext("test thread")
+
+        try {
+            movable.using {
+                it.add("First string")
+            }
+            GlobalScope.launch(otherThread) {
+                movable.using {
+                    it.add("Second string")
+                }
+            }.join()
+            movable.using {
+                assertEquals(it, setOf("First string", "Second string"))
+            }
+        } finally {
+            otherThread.close()
+        }
     }
 }

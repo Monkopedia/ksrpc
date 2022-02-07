@@ -17,9 +17,9 @@ package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.internal.HostSerializedServiceImpl
 import io.ktor.utils.io.ByteReadChannel
-import kotlinx.serialization.StringFormat
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
+import kotlinx.serialization.StringFormat
 
 suspend inline fun <reified T : RpcService> ChannelHost.registerHost(
     service: T
@@ -58,6 +58,8 @@ interface ChannelHost : SerializedChannel, ChannelHostProvider, KsrpcElement {
 interface ChannelClientProvider {
     val client: ChannelClient?
 }
+
+interface ConnectionProvider : ChannelHostProvider, ChannelClientProvider
 
 interface ChannelClient : SerializedChannel, ChannelClientProvider, KsrpcElement {
     suspend fun wrapChannel(channelId: ChannelId): SerializedService

@@ -3,23 +3,25 @@ package com.monkopedia.ksrpc
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
 
-class ChannelContext(val channel: SerializedChannel) : CoroutineContext.Element {
+class HostChannelContext(val channel: ChannelHostProvider) : CoroutineContext.Element {
     override val key: CoroutineContext.Key<*>
         get() = Key
 
-    object Key : CoroutineContext.Key<ChannelContext>
+    object Key : CoroutineContext.Key<HostChannelContext>
 }
+class ClientChannelContext(val channel: ChannelClientProvider) : CoroutineContext.Element {
+    override val key: CoroutineContext.Key<*>
+        get() = Key
 
-suspend fun channel(): SerializedChannel? {
-    return coroutineContext[ChannelContext.Key]?.channel
+    object Key : CoroutineContext.Key<ClientChannelContext>
 }
 
 suspend fun host(): ChannelHost? {
-    val channel = channel()
-    return (channel as? ChannelHostProvider)?.host
+    val channel = coroutineContext[HostChannelContext.Key]?.channel
+    return channel?.host
 }
 
 suspend fun client(): ChannelClient? {
-    val channel = channel()
-    return (channel as? ChannelClientProvider)?.client
+    val channel = coroutineContext[ClientChannelContext.Key]?.channel
+    return channel?.client
 }

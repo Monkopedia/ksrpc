@@ -21,7 +21,6 @@ import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.plus
 
 internal const val CONTENT_LENGTH = "Content-Length"
@@ -43,19 +42,21 @@ suspend fun SerializedService.defaultHosting(
     output: ByteWriteChannel,
     env: KsrpcEnvironment
 ) {
-    coroutineScope {
-        threadSafe { context ->
-            ReadWritePacketChannel(CoroutineScope(context), context, input, output, env)
-        }.connect {
-            this@defaultHosting
-        }
+    threadSafe<Connection> { context ->
+        ReadWritePacketChannel(CoroutineScope(context), context, input, output, env)
+    }.also {
+        it.init()
+    }.connect {
+        this@defaultHosting
     }
 }
 
 suspend fun Pair<ByteReadChannel, ByteWriteChannel>.asChannel(
     env: KsrpcEnvironment
 ): Connection {
-    return threadSafe { context ->
+    return threadSafe<Connection> { context ->
         ReadWritePacketChannel(CoroutineScope(context), context, first, second, env)
+    }.also {
+        it.init()
     }
 }
