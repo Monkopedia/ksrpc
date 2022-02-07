@@ -44,7 +44,9 @@ abstract class RpcFunctionalityTest(
     fun testSerializePassthrough() = runBlockingUnit {
         if (TestType.SERIALIZE !in supportedTypes) return@runBlockingUnit
         val serializedChannel = serializedChannel()
-        val channel = HostSerializedChannelImpl(ksrpcEnvironment {  }).threadSafe<Connection>()
+        val channel = threadSafe<Connection> {
+            HostSerializedChannelImpl(ksrpcEnvironment { })
+        }
         channel.registerDefault(serializedChannel)
 
         verifyOnChannel(channel.asClient.defaultChannel())

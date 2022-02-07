@@ -16,6 +16,7 @@
 package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
+import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
 import com.monkopedia.ksrpc.internal.asClient
 import io.ktor.client.HttpClient
 import java.io.File
@@ -42,7 +43,7 @@ actual suspend fun KsrpcUri.connect(env: KsrpcEnvironment, clientFactory: () -> 
             val cls = Class.forName(path, true, this::class.java.classLoader)
             val companion = cls.findServiceObj() ?: error("Can't find RpcObject")
             val instance = (cls.newInstance() as RpcService)
-            HostSerializedChannelImpl(env).also {
+            HostSerializedChannelImpl(env).threadSafe<Connection>().also {
                 it.registerDefault(instance, companion)
             }.asClient
         }

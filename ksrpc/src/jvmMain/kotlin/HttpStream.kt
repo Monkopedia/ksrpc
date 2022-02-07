@@ -16,6 +16,7 @@
 package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
+import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
 import com.monkopedia.ksrpc.internal.WebsocketPacketChannel
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
@@ -36,7 +37,7 @@ suspend fun serve(
     service: SerializedService,
     env: KsrpcEnvironment
 ): Routing.() -> Unit {
-    val channel = HostSerializedChannelImpl(env).also {
+    val channel = HostSerializedChannelImpl(env).threadSafe<Connection>().also {
         it.registerDefault(service)
     }
     return {
@@ -87,6 +88,7 @@ fun Routing.serveWebsocket(
     webSocket(baseStripped) {
         coroutineScope {
             val wb = WebsocketPacketChannel(this, coroutineContext, this@webSocket, env)
+                .threadSafe<Connection>()
             wb.init()
             wb.connect {
                 channel

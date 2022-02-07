@@ -25,6 +25,7 @@ import com.monkopedia.ksrpc.SendType
 import com.monkopedia.ksrpc.TYPE
 import io.ktor.util.InternalAPI
 import io.ktor.util.decodeBase64Bytes
+import io.ktor.util.decodeBase64String
 import io.ktor.util.encodeBase64
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
@@ -66,16 +67,7 @@ internal class ReadWritePacketChannel(
     }
 }
 
-private suspend fun ByteWriteChannel.appendLine(s: String = "") = writeStringUtf8("$s\n").also { println("Writing $s") }
-private suspend fun ByteWriteChannel.append(content: String) {
-    val data = content.encodeToByteArray()
-    println("Writing content ${content.length}\nEnding: ${content.last()}\n\n")
-    println("Rereading content ${data.decodeToString().length}\nEnding: ${data.decodeToString().last()}\n\n")
-    for (i in data.size - 10 until data.size) {
-        println("Sending ending data ${data[i - 1]}")
-    }
-    writeFully(data, 0, data.size)
-}
+private suspend fun ByteWriteChannel.appendLine(s: String = "") = writeStringUtf8("$s\n")
 
 @OptIn(InternalAPI::class)
 private suspend fun ByteWriteChannel.send(
@@ -86,14 +78,14 @@ private suspend fun ByteWriteChannel.send(
         data.readBinary().readRemaining().encodeBase64()
     } else {
         data.readSerialized()
-    }
+    }.encodeToByteArray(throwOnInvalidSequence = true)
     appendLine("$METHOD: ${packet.endpoint}")
     appendLine("$INPUT: ${packet.input}")
     appendLine("$CHANNEL: ${packet.id}")
-    appendLine("$CONTENT_LENGTH: ${content.length}")
+    appendLine("$CONTENT_LENGTH: ${content.size}")
     appendLine("$TYPE: ${if (data.isBinary) SendType.BINARY.name else SendType.NORMAL.name}")
     appendLine()
-    append(content)
+    writeFully(content, 0, content.size)
     flush()
 }
 
@@ -114,10 +106,6 @@ private suspend fun ByteReadChannel.readContent(
     val type = enumValueOf<SendType>(params[TYPE] ?: SendType.NORMAL.name)
     var byteArray = ByteArray(length)
     readFully(byteArray)
-    println("Read $length into ${byteArray.decodeToString().last()}")
-    for (i in byteArray.size - 10 until byteArray.size) {
-        println("Receiving ending data ${byteArray[i - 1]}")
-    }
     return when (type) {
         SendType.NORMAL -> CallData.create(byteArray.decodeToString())
         SendType.BINARY,
@@ -133,9 +121,7 @@ private suspend fun ByteReadChannel.readFields(): Map<String, String> {
         if (line != null) {
             fields.add(line)
         }
-        line = readUTF8Line().also {
-            println("Read: $it")
-        }
+        line = readUTF8Line()
     }
     return parseParams(fields)
 }

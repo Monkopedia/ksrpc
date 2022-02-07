@@ -61,7 +61,7 @@ expect suspend fun KsrpcUri.connect(
 ): ChannelClient
 
 internal fun HttpClient.asPacketChannel(baseUrl: String, env: KsrpcEnvironment) =
-    HttpSerializedChannel(this, baseUrl.trimEnd('/'), env)
+    HttpSerializedChannel(this, baseUrl.trimEnd('/'), env).threadSafe<ChannelClient>()
 
 fun HttpClient.asChannel(baseUrl: String, env: KsrpcEnvironment): ChannelClient =
     asPacketChannel(baseUrl, env)

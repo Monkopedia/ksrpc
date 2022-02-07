@@ -1,11 +1,11 @@
 package com.monkopedia.ksrpc
 
-import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 @KsService
 interface ChildInterface : RpcService {
@@ -47,7 +47,7 @@ class ConnectionTest {
         assertEquals("Respond: Hello world", service.basicCall("Hello world"))
     })
 
-   @Test
+    @Test
     fun testReverse() = executePipe(serviceJob = { c ->
         val service = c.defaultChannel().toStub<PrimaryInterface>()
         service.basicCall("Hello world")
@@ -98,7 +98,7 @@ class ConnectionTest {
         assertEquals("Respond: Client: Hello world", service.basicCall("Hello world"))
     })
 
-   @Test
+    @Test
     fun testOverlapReverse() = executePipe(serviceJob = { c ->
         val clientService = c.defaultChannel().toStub<PrimaryInterface>()
         c.registerDefault<PrimaryInterface>(object : PrimaryInterface {
@@ -201,7 +201,7 @@ class ConnectionTest {
         assertEquals("First service: Hello trees", firstService.rpc("Hello trees"))
     })
 
-   @Test
+    @Test
     fun testReturnServiceReverse() = executePipe(serviceJob = { c ->
         val service = c.defaultChannel().toStub<PrimaryInterface>()
         val firstService = service.childOutput("First service")
@@ -236,8 +236,20 @@ class ConnectionTest {
         if (RpcFunctionalityTest.TestType.PIPE !in supportedTypes) return@runBlockingUnit
         val (output, input) = createPipe()
         val (so, si) = createPipe()
-        val serviceChannel = (si to output).asChannel(ksrpcEnvironment {  })
-        val clientChannel = (input to so).asChannel(ksrpcEnvironment {  })
+        val serviceChannel = (si to output).asChannel(
+            ksrpcEnvironment {
+                errorListener = ErrorListener { t ->
+                    t.printStackTrace()
+                }
+            }
+        )
+        val clientChannel = (input to so).asChannel(
+            ksrpcEnvironment {
+                errorListener = ErrorListener { t ->
+                    t.printStackTrace()
+                }
+            }
+        )
         val bgJob = GlobalScope.launch(Dispatchers.Default) {
             serviceJob(serviceChannel)
         }

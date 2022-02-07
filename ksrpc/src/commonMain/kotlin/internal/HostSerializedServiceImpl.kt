@@ -34,10 +34,10 @@ import com.monkopedia.ksrpc.asString
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.createKey
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafeProvider
 import com.monkopedia.ksrpc.randomUuid
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Creates a thread on platforms that need it (like native) or returns another coroutine dispatcher as needed.
@@ -62,12 +62,10 @@ internal class HostSerializedChannelImpl(
 
     override suspend fun call(channelId: ChannelId, endpoint: String, data: CallData): CallData {
         return try {
-            val channel = withContext(context) {
-                if (channelId.id.isEmpty()) {
-                    baseChannel.await()
-                } else {
-                    serviceMap[channelId.id] ?: error("Cannot find service ${channelId.id}")
-                }
+            val channel = if (channelId.id.isEmpty()) {
+                baseChannel.await()
+            } else {
+                serviceMap[channelId.id] ?: error("Cannot find service ${channelId.id}")
             }
             withContext(context) {
                 channel.call(endpoint, data)
@@ -78,9 +76,7 @@ internal class HostSerializedChannelImpl(
                 ERROR_PREFIX + env.serialization.encodeToString(
                     RpcFailure.serializer(),
                     RpcFailure(t.asString)
-                ).also {
-                    println("Serialized error ${it.length}\n\n$it\n\nEnd: ${it.substring(it.length - 10)}")
-                }
+                )
             )
         }
     }

@@ -123,12 +123,6 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
     }
 }
 
-// kotlin.targets.withType(org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget::class.java) {
-//     binaries.all {
-//         binaryOptions["memoryModel"] = "experimental"
-//     }
-// }
-
 val dokkaJavadoc = tasks.create("dokkaJavadocCustom", org.jetbrains.dokka.gradle.DokkaTask::class) {
     dependencies {
         plugins("org.jetbrains.dokka:kotlin-as-java-plugin:1.4.10.2")
