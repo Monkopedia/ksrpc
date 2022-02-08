@@ -15,25 +15,60 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.channels.SerializedService
+import com.monkopedia.ksrpc.internal.HostSerializedServiceImpl
+
+/**
+ * Super-interface of all services tagged with [KsService].
+ */
 interface RpcService : SuspendCloseable {
     override suspend fun close() = Unit
 }
 
+/**
+ * Interface for generated companions of [RpcService].
+ */
 interface RpcObject<T : RpcService> {
     fun createStub(channel: SerializedService): T
     fun findEndpoint(endpoint: String): RpcMethod<*, *, *>
 }
 
+/**
+ * Helper to get [RpcObject] for a given [RpcService]
+ */
 expect inline fun <reified T : RpcService> rpcObject(): RpcObject<T>
 
+/**
+ * Convert a [T] into a [SerializedService] for hosting.
+ */
 inline fun <reified T : RpcService> T.serialized(
     env: KsrpcEnvironment
 ): SerializedService {
     return serialized(rpcObject(), env)
 }
 
+/**
+ * Convert a [T] into a [SerializedService] for hosting.
+ */
+fun <T : RpcService> T.serialized(
+    rpcObject: RpcObject<T>,
+    env: KsrpcEnvironment
+): SerializedService {
+    val rpcChannel = this
+    return HostSerializedServiceImpl(rpcChannel, rpcObject, env)
+}
+
+/**
+ * Convert a [SerializedService] to a [T] for use as a client.
+ */
 inline fun <reified T : RpcService> SerializedService.toStub(): T {
     return rpcObject<T>().createStub(this)
 }
 
+/**
+ * Thrown when an endpoint cannot be found.
+ * Could happen from version mismatch or other programmer errors.
+ */
 class RpcEndpointException(str: String) : IllegalArgumentException(str)

@@ -15,26 +15,25 @@
  */
 package com.monkopedia.ksrpc.internal
 
-import com.monkopedia.ksrpc.CallData
-import com.monkopedia.ksrpc.ChannelHost
-import com.monkopedia.ksrpc.ChannelHostProvider
-import com.monkopedia.ksrpc.ChannelId
-import com.monkopedia.ksrpc.ClientChannelContext
-import com.monkopedia.ksrpc.Connection
-import com.monkopedia.ksrpc.HostChannelContext
 import com.monkopedia.ksrpc.KsrpcEnvironment
-import com.monkopedia.ksrpc.SerializedService
 import com.monkopedia.ksrpc.SuspendCloseable
+import com.monkopedia.ksrpc.channels.CallData
+import com.monkopedia.ksrpc.channels.ChannelHost
+import com.monkopedia.ksrpc.channels.ChannelHostInternal
+import com.monkopedia.ksrpc.channels.ChannelId
+import com.monkopedia.ksrpc.channels.ConnectionInternal
+import com.monkopedia.ksrpc.channels.SerializedService
+import com.monkopedia.ksrpc.channels.SuspendInit
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.createKey
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafeProvider
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 internal data class Packet(
     val input: Boolean,
@@ -52,7 +51,7 @@ internal abstract class PacketChannelBase(
     private val scope: CoroutineScope,
     context: CoroutineContext,
     override val env: KsrpcEnvironment
-) : PacketChannel, Connection, ChannelHost, ThreadSafeKeyedConnection {
+) : PacketChannel, ConnectionInternal, ChannelHostInternal, ThreadSafeKeyedConnection, SuspendInit {
     private var isClosed = false
     private var callLock = Mutex()
     override val key: Any = createKey()

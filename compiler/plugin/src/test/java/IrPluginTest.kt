@@ -26,8 +26,8 @@ class IrPluginTest {
     val sourceFile = SourceFile.kotlin(
         "main.kt",
         """
-import com.monkopedia.ksrpc.KsMethod
-import com.monkopedia.ksrpc.KsService
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
 import com.monkopedia.ksrpc.RpcService
 
 @KsService

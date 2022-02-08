@@ -15,16 +15,16 @@
  */
 package com.monkopedia.ksrpc.internal
 
-import com.monkopedia.ksrpc.CallData
-import com.monkopedia.ksrpc.ChannelClient
-import com.monkopedia.ksrpc.ChannelClientProvider
-import com.monkopedia.ksrpc.ChannelId
 import com.monkopedia.ksrpc.KsrpcEnvironment
-import com.monkopedia.ksrpc.SerializedService
+import com.monkopedia.ksrpc.channels.CallData
+import com.monkopedia.ksrpc.channels.ChannelClientInternal
+import com.monkopedia.ksrpc.channels.ChannelClientProvider
+import com.monkopedia.ksrpc.channels.ChannelId
+import com.monkopedia.ksrpc.channels.SerializedService
 import kotlin.coroutines.CoroutineContext
 
 internal class SubserviceChannel(
-    private val baseChannel: ChannelClient,
+    private val baseChannel: ChannelClientInternal,
     private val serviceId: ChannelId
 ) : SerializedService, ChannelClientProvider by baseChannel {
 

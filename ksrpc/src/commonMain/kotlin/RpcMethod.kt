@@ -15,12 +15,17 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.channels.CallData
+import com.monkopedia.ksrpc.channels.ChannelId
+import com.monkopedia.ksrpc.channels.SerializedService
+import com.monkopedia.ksrpc.channels.registerHost
+import com.monkopedia.ksrpc.internal.client
+import com.monkopedia.ksrpc.internal.host
 import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.StringFormat
 import kotlinx.serialization.builtins.serializer
-import kotlin.coroutines.coroutineContext
 
 internal sealed interface Transformer<T> {
     suspend fun transform(input: T, channel: SerializedService): CallData
@@ -86,6 +91,9 @@ internal interface ServiceExecutor {
     suspend fun invoke(service: RpcService, input: Any?): Any?
 }
 
+/**
+ * A wrapper around calling into or from stubs/serialization.
+ */
 class RpcMethod<T : RpcService, I, O> internal constructor(
     private val endpoint: String,
     private val inputTransform: Transformer<I>,

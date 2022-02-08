@@ -13,8 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.monkopedia.ksrpc
+package com.monkopedia.ksrpc.annotation
 
+/**
+ * Annotation tagging an interface for processing by the compiler plugin.
+ *
+ * interfaces tagged with this are expected to extend [RpcService], and will
+ * have a companion generated for them that implements [RpcObject] for itself.
+ */
 annotation class KsService
 
+/**
+ * Tags a method within a [KsService] for rpc calls.
+ *
+ * The [name] must be unique within a [KsService] but need not be unique
+ * globally.
+ */
 annotation class KsMethod(val name: String)

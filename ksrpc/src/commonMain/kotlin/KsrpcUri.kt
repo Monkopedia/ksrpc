@@ -15,6 +15,7 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.channels.ChannelClient
 import com.monkopedia.ksrpc.internal.HttpSerializedChannel
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
 import com.monkopedia.ksrpc.internal.WebsocketPacketChannel
@@ -36,6 +37,11 @@ enum class KsrpcType {
     LOCAL
 }
 
+/**
+ * Class with explicit specification of the type of connection used in a uri.
+ *
+ * Generally created using [String.toKsrpcUri].
+ */
 @Serializable
 data class KsrpcUri(
     val type: KsrpcType,
@@ -46,6 +52,12 @@ data class KsrpcUri(
     }
 }
 
+/**
+ * Parses all supported types of uris into explicitly specified [KsrpcUri].
+ *
+ * Note that not all types returned by this are supported by all platforms. Checking for
+ * support needs to be handled elsewhere.
+ */
 fun String.toKsrpcUri(): KsrpcUri = when {
     startsWith("http://") -> KsrpcUri(KsrpcType.HTTP, this)
     startsWith("https://") -> KsrpcUri(KsrpcType.HTTP, this)
@@ -55,36 +67,11 @@ fun String.toKsrpcUri(): KsrpcUri = when {
     else -> throw IllegalArgumentException("Unable to parse $this")
 }
 
+/**
+ * Creates a [ChannelClient] from a [KsrpcUri].
+ * @Throws [IllegalArgumentException] if this [KsrpcType] is not supported on the current platform.
+ */
 expect suspend fun KsrpcUri.connect(
     env: KsrpcEnvironment,
     clientFactory: () -> HttpClient = { HttpClient { } },
 ): ChannelClient
-
-internal fun HttpClient.asPacketChannel(baseUrl: String, env: KsrpcEnvironment) =
-    HttpSerializedChannel(this, baseUrl.trimEnd('/'), env).threadSafe<ChannelClient>()
-
-fun HttpClient.asChannel(baseUrl: String, env: KsrpcEnvironment): ChannelClient =
-    asPacketChannel(baseUrl, env)
-
-internal suspend fun HttpClient.asWebsocketPackets(
-    baseUrl: String,
-    env: KsrpcEnvironment
-): Connection {
-    val session = webSocketSession {
-        url.takeFrom(baseUrl.trimEnd('/'))
-        url.protocol = URLProtocol.WS
-    }
-    return threadSafe { context ->
-        WebsocketPacketChannel(
-            CoroutineScope(context),
-            context,
-            session,
-            env
-        )
-    }.also {
-        it.init()
-    }
-}
-
-suspend fun HttpClient.asWebsocketChannel(baseUrl: String, env: KsrpcEnvironment): Connection =
-    asWebsocketPackets(baseUrl, env)

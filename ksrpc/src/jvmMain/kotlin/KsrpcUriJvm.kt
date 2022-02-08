@@ -15,6 +15,11 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.channels.ChannelClient
+import com.monkopedia.ksrpc.channels.Connection
+import com.monkopedia.ksrpc.channels.asConnection
+import com.monkopedia.ksrpc.channels.asWebsocketConnection
+import com.monkopedia.ksrpc.channels.registerDefault
 import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
 import com.monkopedia.ksrpc.internal.asClient
@@ -28,16 +33,16 @@ actual suspend fun KsrpcUri.connect(env: KsrpcEnvironment, clientFactory: () -> 
         KsrpcType.EXE -> {
             ProcessBuilder(listOf(path))
                 .redirectError(File("/tmp/ksrpc_errors.txt"))
-                .asChannel(env)
+                .asConnection(env)
         }
         KsrpcType.SOCKET -> {
             val (host, port) = path.substring("ksrpc://".length).split(":")
             val socket = Socket(host, port.toInt())
-            (socket.getInputStream() to socket.getOutputStream()).asChannel(env)
+            (socket.getInputStream() to socket.getOutputStream()).asConnection(env)
         }
         KsrpcType.HTTP -> {
             val client = clientFactory()
-            client.asChannel(path, env)
+            client.asConnection(path, env)
         }
         KsrpcType.LOCAL -> {
             val cls = Class.forName(path, true, this::class.java.classLoader)
@@ -49,11 +54,11 @@ actual suspend fun KsrpcUri.connect(env: KsrpcEnvironment, clientFactory: () -> 
         }
         KsrpcType.WEBSOCKET -> {
             val client = clientFactory()
-            client.asWebsocketChannel(path, env)
+            client.asWebsocketConnection(path, env)
         }
         KsrpcType.WEBSOCKET -> {
             val client = clientFactory()
-            client.asWebsocketChannel(path, env)
+            client.asWebsocketConnection(path, env)
         }
     }
 }

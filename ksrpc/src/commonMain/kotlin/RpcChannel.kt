@@ -15,39 +15,28 @@
  */
 package com.monkopedia.ksrpc
 
-import com.monkopedia.ksrpc.internal.SubserviceChannel
-import kotlin.native.concurrent.ThreadLocal
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.StringFormat
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.builtins.serializer
 
+/**
+ * Interface used for handling any errors that occur during hosting.
+ */
 fun interface ErrorListener {
+    /**
+     * Called when an error has occured during a hosted (incoming) call.
+     *
+     * The error will also be passed back to the client, this is purely for
+     * monitoring purposes.
+     */
     fun onError(t: Throwable)
 }
 
-expect val Throwable.asString: String
+internal expect val Throwable.asString: String
 
 internal const val ERROR_PREFIX = "ERROR:"
 
-private const val SPLIT_CHAR = ":"
-@ThreadLocal
-private val LIST_SERIALIZER = ListSerializer(String.serializer())
-
-fun StringFormat.encodedEndpoint(endpoint: List<String>): String {
-    val list = encodeToString(LIST_SERIALIZER, endpoint.subList(1, endpoint.size))
-    return "${endpoint.first()}$SPLIT_CHAR$list"
-}
-
-fun StringFormat.decodedEndpoint(endpoint: String): Pair<String, List<String>?> {
-    val index = endpoint.indexOf(SPLIT_CHAR)
-    if (index < 0) {
-        return endpoint.trimStart('/') to null
-    }
-    return endpoint.substring(0, index).trimStart('/') to
-        decodeFromString(LIST_SERIALIZER, endpoint.substring(index + 1))
-}
-
+/**
+ * Serializable wrapper around exceptions thrown in remote calls.
+ */
 @Serializable
 data class RpcFailure(val stack: String) {
     fun toException(): RuntimeException {
@@ -55,4 +44,7 @@ data class RpcFailure(val stack: String) {
     }
 }
 
+/**
+ * Wrapper around exceptions thrown in remote calls.
+ */
 class RpcException(override val message: String) : RuntimeException(message)

@@ -1,15 +1,17 @@
 package com.monkopedia.ksrpc.internal
 
-import com.monkopedia.ksrpc.CallData
-import com.monkopedia.ksrpc.ChannelClient
-import com.monkopedia.ksrpc.ChannelClientProvider
-import com.monkopedia.ksrpc.ChannelHost
-import com.monkopedia.ksrpc.ChannelHostProvider
-import com.monkopedia.ksrpc.ChannelId
-import com.monkopedia.ksrpc.Connection
-import com.monkopedia.ksrpc.ConnectionProvider
+import com.monkopedia.ksrpc.channels.CallData
+import com.monkopedia.ksrpc.channels.ChannelClient
+import com.monkopedia.ksrpc.channels.ChannelClientProvider
+import com.monkopedia.ksrpc.channels.ChannelHost
+import com.monkopedia.ksrpc.channels.ChannelHostProvider
+import com.monkopedia.ksrpc.channels.ChannelId
+import com.monkopedia.ksrpc.channels.Connection
+import com.monkopedia.ksrpc.channels.ConnectionProvider
 import com.monkopedia.ksrpc.KsrpcEnvironment
-import com.monkopedia.ksrpc.SerializedService
+import com.monkopedia.ksrpc.channels.ConnectionInternal
+import com.monkopedia.ksrpc.channels.SerializedService
+import com.monkopedia.ksrpc.channels.SuspendInit
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
 import kotlin.coroutines.CoroutineContext
 import kotlin.native.concurrent.DetachedObjectGraph
@@ -18,11 +20,11 @@ internal class ThreadSafeConnection(
     context: CoroutineContext,
     reference: DetachedObjectGraph<Connection>,
     override val env: KsrpcEnvironment
-) : ThreadSafe<Connection>(context, reference), Connection {
+) : ThreadSafe<Connection>(context, reference), ConnectionInternal, SuspendInit {
 
     override suspend fun init() {
         return useSafe {
-            it.init()
+            (it as SuspendInit).init()
         }
     }
 

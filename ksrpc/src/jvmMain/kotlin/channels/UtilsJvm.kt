@@ -13,22 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.monkopedia.ksrpc
+package com.monkopedia.ksrpc.channels
 
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
+import com.monkopedia.ksrpc.RpcEndpointException
+import com.monkopedia.ksrpc.RpcMethod
+import com.monkopedia.ksrpc.RpcObject
+import com.monkopedia.ksrpc.RpcService
 import kotlin.reflect.full.companionObjectInstance
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
 actual fun randomUuid(): String {
     return NanoIdUtils.randomNanoId()
-}
-
-actual val DEFAULT_DISPATCHER: CoroutineDispatcher
-    get() = Dispatchers.IO
-
-actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> {
-    return T::class.companionObjectInstance as RpcObject<T>
 }
 
 internal actual interface VoidService : RpcService {

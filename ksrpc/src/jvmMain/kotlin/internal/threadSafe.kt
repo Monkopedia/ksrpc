@@ -1,8 +1,8 @@
 package com.monkopedia.ksrpc.internal
 
-import com.monkopedia.ksrpc.ChannelClientProvider
-import com.monkopedia.ksrpc.ChannelHostProvider
-import com.monkopedia.ksrpc.ConnectionProvider
+import com.monkopedia.ksrpc.channels.ChannelClientProvider
+import com.monkopedia.ksrpc.channels.ChannelHostProvider
+import com.monkopedia.ksrpc.channels.ConnectionProvider
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 

@@ -12,13 +12,13 @@ import kotlin.native.concurrent.TransferMode.UNSAFE
 @ThreadLocal
 private val currentInstances = mutableMapOf<MovableInstance<*>, Any>()
 
-class MovableInstance<T>(val creator: () -> T) : SynchronizedObject() {
+internal class MovableInstance<T>(val creator: () -> T) : SynchronizedObject() {
     val graph = AtomicReference(DetachedObjectGraph<T?> { null })
     val holdsLock: Boolean
         get() = lock.value.let { it.status != UNLOCKED && it.ownerThreadId == pthread_self() }
 }
 
-var <T : Any> MovableInstance<T>.instance: T?
+internal var <T : Any> MovableInstance<T>.instance: T?
     get() = currentInstances[this] as? T
     set(value) {
         if (value != null) {
@@ -28,7 +28,7 @@ var <T : Any> MovableInstance<T>.instance: T?
         }
     }
 
-inline fun <reified T : Any, R> MovableInstance<T>.using(block: (T) -> R): R {
+internal inline fun <reified T : Any, R> MovableInstance<T>.using(block: (T) -> R): R {
     if (holdsLock) {
         return block(instance ?: error("Holds lock but missing instance"))
     }

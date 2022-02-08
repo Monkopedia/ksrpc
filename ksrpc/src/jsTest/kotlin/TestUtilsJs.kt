@@ -15,6 +15,7 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.channels.SerializedService
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.promise
 

@@ -15,6 +15,7 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.serve as jvmServe
 import io.ktor.application.install
 import io.ktor.routing.Routing

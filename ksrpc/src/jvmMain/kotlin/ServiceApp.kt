@@ -20,6 +20,9 @@ import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.multiple
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.int
+import com.monkopedia.ksrpc.channels.SerializedService
+import com.monkopedia.ksrpc.channels.asConnection
+import com.monkopedia.ksrpc.channels.stdInConnection
 import io.ktor.application.install
 import io.ktor.features.CORS
 import io.ktor.routing.routing
@@ -34,6 +37,10 @@ import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
+/**
+ * Base class that makes it easy to host a default service on any combination of
+ * std in/out, http, and sockets.
+ */
 abstract class ServiceApp(val appName: String) : CliktCommand() {
     init {
         isActive = true
@@ -64,7 +71,9 @@ abstract class ServiceApp(val appName: String) : CliktCommand() {
                     GlobalScope.launch {
                         val context = newSingleThreadContext("$appName-socket-$p")
                         withContext(context) {
-                            createChannel().serve(s.getInputStream(), s.getOutputStream(), env)
+                            val connection = (s.getInputStream() to s.getOutputStream())
+                                .asConnection(env)
+                            connection.registerDefault(createChannel())
                         }
                         context.close()
                     }
@@ -82,7 +91,7 @@ abstract class ServiceApp(val appName: String) : CliktCommand() {
                 }.start()
             }
             if (stdOut) {
-                createChannel().serveOnStd(env)
+                stdInConnection(env).registerDefault(createChannel())
             }
         }
     }

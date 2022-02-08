@@ -15,25 +15,25 @@
  */
 package com.monkopedia.ksrpc.internal
 
-import com.monkopedia.ksrpc.CallData
-import com.monkopedia.ksrpc.ChannelClient
-import com.monkopedia.ksrpc.ChannelId
-import com.monkopedia.ksrpc.ClientChannelContext
-import com.monkopedia.ksrpc.Connection
+import com.monkopedia.ksrpc.channels.CallData
+import com.monkopedia.ksrpc.channels.ChannelClient
+import com.monkopedia.ksrpc.channels.ChannelClientInternal
+import com.monkopedia.ksrpc.channels.ChannelId
+import com.monkopedia.ksrpc.channels.ConnectionInternal
 import com.monkopedia.ksrpc.ERROR_PREFIX
-import com.monkopedia.ksrpc.HostChannelContext
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.RpcObject
 import com.monkopedia.ksrpc.RpcService
-import com.monkopedia.ksrpc.SerializedChannel
-import com.monkopedia.ksrpc.SerializedService
+import com.monkopedia.ksrpc.channels.SerializedChannel
+import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.SuspendCloseable
+import com.monkopedia.ksrpc.channels.SuspendInit
 import com.monkopedia.ksrpc.TrackingService
 import com.monkopedia.ksrpc.asString
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.createKey
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafeProvider
-import com.monkopedia.ksrpc.randomUuid
+import com.monkopedia.ksrpc.channels.randomUuid
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -47,7 +47,7 @@ internal expect fun maybeCreateChannelThread(): CoroutineDispatcher
 internal class HostSerializedChannelImpl(
     override val env: KsrpcEnvironment,
     channelContext: CoroutineContext? = null,
-) : Connection, ThreadSafeKeyedConnection {
+) : ConnectionInternal, ThreadSafeKeyedConnection, SuspendInit {
     private var baseChannel = CompletableDeferred<SerializedService>()
     override val key: Any = createKey()
     override val context: CoroutineContext =
@@ -122,7 +122,7 @@ internal class HostSerializedChannelImpl(
 }
 
 internal val SerializedChannel.asClient: ChannelClient
-    get() = object : ChannelClient, SerializedChannel by this {
+    get() = object : ChannelClientInternal, SerializedChannel by this {
         override suspend fun wrapChannel(channelId: ChannelId): SerializedService {
             return SubserviceChannel(this, channelId)
         }

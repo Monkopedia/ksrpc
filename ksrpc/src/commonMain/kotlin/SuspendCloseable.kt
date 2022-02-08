@@ -15,14 +15,30 @@
  */
 package com.monkopedia.ksrpc
 
+/**
+ * Version of Closeable that has suspending close.
+ */
 interface SuspendCloseable {
+    /**
+     * Called when the interaction with this object is done and its resources can be cleaned up.
+     */
     suspend fun close()
 }
 
+/**
+ * Used for implementations of [SuspendCloseable] that need observers attached to be notified
+ * when [SuspendCloseable.close] is called.
+ */
 interface SuspendCloseableObservable : SuspendCloseable {
+    /**
+     * Add a callback to be invoked when [SuspendCloseable.close] is called.
+     */
     suspend fun onClose(onClose: suspend () -> Unit)
 }
 
+/**
+ * Helper that runs [usage] then invokes [SuspendCloseable.close] in the finally block.
+ */
 suspend inline fun <T : SuspendCloseable, R> T.use(usage: (T) -> R): R {
     try {
         return usage(this)

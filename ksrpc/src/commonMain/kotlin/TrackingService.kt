@@ -1,6 +1,11 @@
 package com.monkopedia.ksrpc
 
-abstract class TrackingService : RpcService {
+import com.monkopedia.ksrpc.channels.SerializedService
+
+/**
+ * Tagged with internal for now until this has some more thorough testing.
+ */
+internal abstract class TrackingService : RpcService {
     private val serializations = mutableSetOf<SerializedService>()
 
     internal fun onSerializationCreated(serialization: SerializedService) {

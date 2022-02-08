@@ -15,17 +15,16 @@
  */
 package com.monkopedia.ksrpc.internal
 
-import com.monkopedia.ksrpc.CallData
-import com.monkopedia.ksrpc.ChannelClient
-import com.monkopedia.ksrpc.ChannelId
-import com.monkopedia.ksrpc.ClientChannelContext
 import com.monkopedia.ksrpc.ERROR_PREFIX
 import com.monkopedia.ksrpc.KSRPC_BINARY
 import com.monkopedia.ksrpc.KSRPC_CHANNEL
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.RpcFailure
-import com.monkopedia.ksrpc.SerializedChannel
-import com.monkopedia.ksrpc.SerializedService
+import com.monkopedia.ksrpc.channels.CallData
+import com.monkopedia.ksrpc.channels.ChannelClientInternal
+import com.monkopedia.ksrpc.channels.ChannelId
+import com.monkopedia.ksrpc.channels.SerializedChannel
+import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.createKey
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafeProvider
 import io.ktor.client.HttpClient
@@ -37,7 +36,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.encodeURLPath
 import io.ktor.utils.io.readRemaining
-import kotlinx.serialization.StringFormat
 import kotlinx.serialization.json.Json
 import kotlin.coroutines.CoroutineContext
 
@@ -45,7 +43,7 @@ internal class HttpSerializedChannel(
     private val httpClient: HttpClient,
     private val baseStripped: String,
     override val env: KsrpcEnvironment
-) : SerializedChannel, ChannelClient, ThreadSafeKeyedClient {
+) : SerializedChannel, ChannelClientInternal, ThreadSafeKeyedClient {
 
     private val onCloseHandlers = mutableSetOf<suspend () -> Unit>()
     override val key: Any = createKey()

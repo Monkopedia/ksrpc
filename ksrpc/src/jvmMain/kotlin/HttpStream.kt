@@ -15,6 +15,14 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.channels.CallData
+import com.monkopedia.ksrpc.channels.ChannelClient
+import com.monkopedia.ksrpc.channels.ChannelId
+import com.monkopedia.ksrpc.channels.Connection
+import com.monkopedia.ksrpc.channels.ConnectionInternal
+import com.monkopedia.ksrpc.channels.SerializedChannel
+import com.monkopedia.ksrpc.channels.SerializedService
+import com.monkopedia.ksrpc.channels.connect
 import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
 import com.monkopedia.ksrpc.internal.WebsocketPacketChannel
@@ -88,7 +96,7 @@ fun Routing.serveWebsocket(
     webSocket(baseStripped) {
         coroutineScope {
             val wb = WebsocketPacketChannel(this, coroutineContext, this@webSocket, env)
-                .threadSafe<Connection>()
+                .threadSafe<ConnectionInternal>()
             wb.init()
             wb.connect {
                 channel

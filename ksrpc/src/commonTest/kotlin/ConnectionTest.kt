@@ -1,5 +1,10 @@
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.channels.Connection
+import com.monkopedia.ksrpc.channels.asConnection
+import com.monkopedia.ksrpc.channels.registerDefault
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -236,14 +241,14 @@ class ConnectionTest {
         if (RpcFunctionalityTest.TestType.PIPE !in supportedTypes) return@runBlockingUnit
         val (output, input) = createPipe()
         val (so, si) = createPipe()
-        val serviceChannel = (si to output).asChannel(
+        val serviceChannel = (si to output).asConnection(
             ksrpcEnvironment {
                 errorListener = ErrorListener { t ->
                     t.printStackTrace()
                 }
             }
         )
-        val clientChannel = (input to so).asChannel(
+        val clientChannel = (input to so).asConnection(
             ksrpcEnvironment {
                 errorListener = ErrorListener { t ->
                     t.printStackTrace()

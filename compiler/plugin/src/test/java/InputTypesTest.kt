@@ -10,8 +10,8 @@ class InputTypesTest {
     val sourceFile = SourceFile.kotlin(
         "main.kt",
         """
-import com.monkopedia.ksrpc.KsMethod
-import com.monkopedia.ksrpc.KsService
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
 import com.monkopedia.ksrpc.RpcService
 import io.ktor.utils.io.ByteReadChannel
 import kotlinx.serialization.Serializable

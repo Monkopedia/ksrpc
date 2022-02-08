@@ -45,7 +45,7 @@ import org.jetbrains.kotlin.types.Variance
 
 class KsrpcSyntheticResolveExtension(private val messageCollector: MessageCollector) :
     SyntheticResolveExtension {
-    private val service = FqName("com.monkopedia.ksrpc.KsService")
+    private val service = FqName("com.monkopedia.ksrpc.annotation.KsService")
     private fun Annotated.isKsService() = annotations.hasAnnotation(service)
 
     override fun getSyntheticCompanionObjectNameIfNeeded(thisDescriptor: ClassDescriptor): Name? {

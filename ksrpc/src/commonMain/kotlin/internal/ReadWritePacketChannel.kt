@@ -15,17 +15,16 @@
  */
 package com.monkopedia.ksrpc.internal
 
-import com.monkopedia.ksrpc.CHANNEL
-import com.monkopedia.ksrpc.CONTENT_LENGTH
-import com.monkopedia.ksrpc.CallData
-import com.monkopedia.ksrpc.INPUT
 import com.monkopedia.ksrpc.KsrpcEnvironment
-import com.monkopedia.ksrpc.METHOD
-import com.monkopedia.ksrpc.SendType
-import com.monkopedia.ksrpc.TYPE
+import com.monkopedia.ksrpc.channels.CHANNEL
+import com.monkopedia.ksrpc.channels.CONTENT_LENGTH
+import com.monkopedia.ksrpc.channels.CallData
+import com.monkopedia.ksrpc.channels.INPUT
+import com.monkopedia.ksrpc.channels.METHOD
+import com.monkopedia.ksrpc.channels.SendType
+import com.monkopedia.ksrpc.channels.TYPE
 import io.ktor.util.InternalAPI
 import io.ktor.util.decodeBase64Bytes
-import io.ktor.util.decodeBase64String
 import io.ktor.util.encodeBase64
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel

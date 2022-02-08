@@ -1,23 +1,23 @@
 package com.monkopedia.ksrpc.internal
 
-import com.monkopedia.ksrpc.ChannelClient
-import com.monkopedia.ksrpc.ChannelClientProvider
-import com.monkopedia.ksrpc.ChannelHost
-import com.monkopedia.ksrpc.ChannelHostProvider
-import com.monkopedia.ksrpc.Connection
-import com.monkopedia.ksrpc.ConnectionProvider
+import com.monkopedia.ksrpc.channels.ChannelClientInternal
+import com.monkopedia.ksrpc.channels.ChannelClientProvider
+import com.monkopedia.ksrpc.channels.ChannelHostInternal
+import com.monkopedia.ksrpc.channels.ChannelHostProvider
+import com.monkopedia.ksrpc.channels.ConnectionInternal
+import com.monkopedia.ksrpc.channels.ConnectionProvider
 import kotlin.coroutines.CoroutineContext
 
 /**
  * Interface to specify key for threadsafe lookup to avoid construction circular dependency.
  */
-interface ThreadSafeKeyed {
+internal interface ThreadSafeKeyed {
     val key: Any
 }
 
-interface ThreadSafeKeyedConnection : ThreadSafeKeyed, Connection
-interface ThreadSafeKeyedClient : ThreadSafeKeyed, ChannelClient
-interface ThreadSafeKeyedHost : ThreadSafeKeyed, ChannelHost
+internal interface ThreadSafeKeyedConnection : ThreadSafeKeyed, ConnectionInternal
+internal interface ThreadSafeKeyedClient : ThreadSafeKeyed, ChannelClientInternal
+internal interface ThreadSafeKeyedHost : ThreadSafeKeyed, ChannelHostInternal
 
 internal expect object ThreadSafeManager {
     inline fun createKey(): Any

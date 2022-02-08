@@ -1,13 +1,13 @@
 package com.monkopedia.ksrpc.internal
 
-import com.monkopedia.ksrpc.ChannelClient
-import com.monkopedia.ksrpc.ChannelClientProvider
-import com.monkopedia.ksrpc.ChannelHost
-import com.monkopedia.ksrpc.ChannelHostProvider
-import com.monkopedia.ksrpc.Connection
-import com.monkopedia.ksrpc.ConnectionProvider
-import com.monkopedia.ksrpc.ContextContainer
-import com.monkopedia.ksrpc.SerializedService
+import com.monkopedia.ksrpc.channels.ChannelClient
+import com.monkopedia.ksrpc.channels.ChannelClientProvider
+import com.monkopedia.ksrpc.channels.ChannelHost
+import com.monkopedia.ksrpc.channels.ChannelHostProvider
+import com.monkopedia.ksrpc.channels.Connection
+import com.monkopedia.ksrpc.channels.ConnectionProvider
+import com.monkopedia.ksrpc.channels.ContextContainer
+import com.monkopedia.ksrpc.channels.SerializedService
 import internal.MovableInstance
 import internal.using
 import kotlinx.coroutines.CloseableCoroutineDispatcher

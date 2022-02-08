@@ -29,8 +29,8 @@ import org.jetbrains.kotlin.name.FqName
 private class Visitor(private val messageCollector: MessageCollector) : IrElementTransformerVoid() {
     val classes = mutableMapOf<String, ServiceClass>()
     private var currentService: ServiceClass? = null
-    private val method = FqName("com.monkopedia.ksrpc.KsMethod")
-    private val service = FqName("com.monkopedia.ksrpc.KsService")
+    private val method = FqName("com.monkopedia.ksrpc.annotation.KsMethod")
+    private val service = FqName("com.monkopedia.ksrpc.annotation.KsService")
 
     override fun visitClass(declaration: IrClass): IrStatement {
         val annotation = declaration.annotations.find { annotation ->

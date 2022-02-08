@@ -15,6 +15,9 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.channels.SerializedService
 import kotlin.test.assertEquals
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic

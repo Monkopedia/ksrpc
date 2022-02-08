@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.monkopedia.ksrpc
+package com.monkopedia.ksrpc.channels
 
+import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.internal.ReadWritePacketChannel
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.plus
 
 internal const val CONTENT_LENGTH = "Content-Length"
 internal const val METHOD = "Method"
@@ -35,26 +34,13 @@ internal enum class SendType {
     BINARY_INPUT
 }
 
-expect val DEFAULT_DISPATCHER: CoroutineDispatcher
-
-suspend fun SerializedService.defaultHosting(
-    input: ByteReadChannel,
-    output: ByteWriteChannel,
-    env: KsrpcEnvironment
-) {
-    threadSafe<Connection> { context ->
-        ReadWritePacketChannel(CoroutineScope(context), context, input, output, env)
-    }.also {
-        it.init()
-    }.connect {
-        this@defaultHosting
-    }
-}
-
-suspend fun Pair<ByteReadChannel, ByteWriteChannel>.asChannel(
+/**
+ * Create a [Connection] for the given input/output channel.
+ */
+suspend fun Pair<ByteReadChannel, ByteWriteChannel>.asConnection(
     env: KsrpcEnvironment
 ): Connection {
-    return threadSafe<Connection> { context ->
+    return threadSafe<ConnectionInternal> { context ->
         ReadWritePacketChannel(CoroutineScope(context), context, first, second, env)
     }.also {
         it.init()

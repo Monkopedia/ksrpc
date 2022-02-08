@@ -15,6 +15,10 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.channels.Connection
+import com.monkopedia.ksrpc.channels.SerializedService
+import com.monkopedia.ksrpc.channels.asConnection
+import com.monkopedia.ksrpc.channels.asWebsocketConnection
 import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
 import com.monkopedia.ksrpc.internal.asClient
@@ -59,18 +63,15 @@ abstract class RpcFunctionalityTest(
         val (so, si) = createPipe()
         GlobalScope.launch(Dispatchers.Default) {
             val serializedChannel = serializedChannel()
-            serializedChannel.defaultHosting(
-                si,
-                output,
-                ksrpcEnvironment {
-                    errorListener = ErrorListener {
-                        it.printStackTrace()
-                    }
+            val connection = (si to output).asConnection(ksrpcEnvironment {
+                errorListener = ErrorListener {
+                    it.printStackTrace()
                 }
-            )
+            })
+            connection.registerDefault(serializedChannel)
         }
         try {
-            verifyOnChannel((input to so).asChannel(ksrpcEnvironment { }).defaultChannel())
+            verifyOnChannel((input to so).asConnection(ksrpcEnvironment { }).defaultChannel())
         } finally {
             try {
                 input.cancel(null)
@@ -105,7 +106,7 @@ abstract class RpcFunctionalityTest(
             },
             test = {
                 val client = HttpClient()
-                client.asChannel("http://localhost:$it$path", ksrpcEnvironment {  }).use { channel ->
+                client.asConnection("http://localhost:$it$path", ksrpcEnvironment {  }).use { channel ->
                     verifyOnChannel(channel.defaultChannel())
                 }
             }
@@ -133,7 +134,7 @@ abstract class RpcFunctionalityTest(
                 val client = HttpClient {
                     install(WebSockets)
                 }
-                client.asWebsocketChannel("http://localhost:$it$path", ksrpcEnvironment {  }).use { channel ->
+                client.asWebsocketConnection("http://localhost:$it$path", ksrpcEnvironment {  }).use { channel ->
                     verifyOnChannel(channel.defaultChannel())
                 }
             }

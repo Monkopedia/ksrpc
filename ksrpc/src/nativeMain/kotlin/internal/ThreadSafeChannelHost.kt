@@ -1,13 +1,13 @@
 package com.monkopedia.ksrpc.internal
 
-import com.monkopedia.ksrpc.CallData
-import com.monkopedia.ksrpc.ChannelClient
-import com.monkopedia.ksrpc.ChannelClientProvider
-import com.monkopedia.ksrpc.ChannelHost
-import com.monkopedia.ksrpc.ChannelHostProvider
-import com.monkopedia.ksrpc.ChannelId
+import com.monkopedia.ksrpc.channels.CallData
+import com.monkopedia.ksrpc.channels.ChannelClient
+import com.monkopedia.ksrpc.channels.ChannelClientProvider
+import com.monkopedia.ksrpc.channels.ChannelHost
+import com.monkopedia.ksrpc.channels.ChannelHostProvider
+import com.monkopedia.ksrpc.channels.ChannelId
 import com.monkopedia.ksrpc.KsrpcEnvironment
-import com.monkopedia.ksrpc.SerializedService
+import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
 import kotlin.coroutines.CoroutineContext
 import kotlin.native.concurrent.DetachedObjectGraph

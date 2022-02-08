@@ -13,25 +13,57 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.monkopedia.ksrpc
+package com.monkopedia.ksrpc.channels
 
+import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.serialized
+import com.monkopedia.ksrpc.toStub
 import kotlin.jvm.JvmName
 
-interface Connection : ChannelHost, ChannelClient, ConnectionProvider, SerializedChannel {
+internal interface SuspendInit {
     suspend fun init() = Unit
 }
+
+/**
+ * A bidirectional channel that can both host and call services/sub-services.
+ *
+ * (Meaning @KsServices can be used for both input and output of any @KsMethod)
+ */
+interface Connection : ChannelHost, ChannelClient
+
+internal interface ConnectionInternal :
+    Connection,
+    ChannelHostInternal,
+    ChannelClientInternal,
+    ConnectionProvider,
+    SuspendInit
+
+internal interface ConnectionProvider : ChannelHostProvider, ChannelClientProvider
 
 // Problems with JS compiler and serialization
 data class ChannelId(val id: String)
 
 internal expect interface VoidService : RpcService
 
+/**
+ * Connects both default channels for a connection (incoming and outgoing).
+ *
+ * Provides the [host] lambda with a stub connected to the default outgoing channel
+ * for the connection, and then connects the returned service as the hosted channel for
+ * the connection.
+ *
+ * This is equivalent to calling [registerDefault] for [T] instance and using
+ * [defaultChannel] and [toStub] to create [R].
+ */
 suspend inline fun <reified T : RpcService, reified R : RpcService> Connection.connect(
     crossinline host: (R) -> T
 ) = connect { channel ->
     host(channel.toStub()).serialized(env)
 }
 
+/**
+ * Raw version of [connect], performing the same functionality with [SerializedService] directly.
+ */
 @JvmName("connectSerialized")
 suspend fun Connection.connect(
     host: (SerializedService) -> SerializedService

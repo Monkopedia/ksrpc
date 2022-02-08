@@ -15,9 +15,9 @@
  */
 package com.monkopedia.ksrpc.internal
 
-import com.monkopedia.ksrpc.CallData
 import com.monkopedia.ksrpc.ERROR_PREFIX
 import com.monkopedia.ksrpc.RpcFailure
+import com.monkopedia.ksrpc.channels.CallData
 import io.ktor.http.cio.websocket.Frame
 import io.ktor.http.cio.websocket.WebSocketSession
 import io.ktor.http.cio.websocket.readBytes
