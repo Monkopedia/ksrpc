@@ -20,9 +20,6 @@ import com.monkopedia.ksrpc.RpcEndpointException
 import com.monkopedia.ksrpc.RpcMethod
 import com.monkopedia.ksrpc.RpcObject
 import com.monkopedia.ksrpc.RpcService
-import kotlin.reflect.full.companionObjectInstance
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 
 actual fun randomUuid(): String {
     return NanoIdUtils.randomNanoId()

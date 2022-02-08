@@ -18,15 +18,15 @@ package com.monkopedia.ksrpc
 import com.monkopedia.ksrpc.channels.SerializedService
 import internal.MovableInstance
 import internal.using
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.fail
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import platform.posix.pthread_self
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.fail
 
 actual suspend inline fun httpTest(
     crossinline serve: suspend Routing.() -> Unit,

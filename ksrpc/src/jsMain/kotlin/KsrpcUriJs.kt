@@ -20,7 +20,10 @@ import com.monkopedia.ksrpc.channels.asConnection
 import com.monkopedia.ksrpc.channels.asWebsocketConnection
 import io.ktor.client.HttpClient
 
-actual suspend fun KsrpcUri.connect(env: KsrpcEnvironment, clientFactory: () -> HttpClient): ChannelClient {
+actual suspend fun KsrpcUri.connect(
+    env: KsrpcEnvironment,
+    clientFactory: () -> HttpClient
+): ChannelClient {
     return when (type) {
         KsrpcType.EXE -> {
             throw NotImplementedError("EXE not supported in JS")

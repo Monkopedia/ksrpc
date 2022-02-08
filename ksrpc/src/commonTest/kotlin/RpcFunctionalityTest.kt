@@ -63,11 +63,13 @@ abstract class RpcFunctionalityTest(
         val (so, si) = createPipe()
         GlobalScope.launch(Dispatchers.Default) {
             val serializedChannel = serializedChannel()
-            val connection = (si to output).asConnection(ksrpcEnvironment {
-                errorListener = ErrorListener {
-                    it.printStackTrace()
+            val connection = (si to output).asConnection(
+                ksrpcEnvironment {
+                    errorListener = ErrorListener {
+                        it.printStackTrace()
+                    }
                 }
-            })
+            )
             connection.registerDefault(serializedChannel)
         }
         try {
@@ -106,9 +108,10 @@ abstract class RpcFunctionalityTest(
             },
             test = {
                 val client = HttpClient()
-                client.asConnection("http://localhost:$it$path", ksrpcEnvironment {  }).use { channel ->
-                    verifyOnChannel(channel.defaultChannel())
-                }
+                client.asConnection("http://localhost:$it$path", ksrpcEnvironment { })
+                    .use { channel ->
+                        verifyOnChannel(channel.defaultChannel())
+                    }
             }
         )
     }
@@ -134,9 +137,10 @@ abstract class RpcFunctionalityTest(
                 val client = HttpClient {
                     install(WebSockets)
                 }
-                client.asWebsocketConnection("http://localhost:$it$path", ksrpcEnvironment {  }).use { channel ->
-                    verifyOnChannel(channel.defaultChannel())
-                }
+                client.asWebsocketConnection("http://localhost:$it$path", ksrpcEnvironment { })
+                    .use { channel ->
+                        verifyOnChannel(channel.defaultChannel())
+                    }
             }
         )
     }
@@ -145,15 +149,18 @@ abstract class RpcFunctionalityTest(
 internal expect fun runBlockingUnit(function: suspend () -> Unit)
 
 expect class Routing
+
 expect suspend inline fun httpTest(
     crossinline serve: suspend Routing.() -> Unit,
     test: suspend (Int) -> Unit
 )
+
 expect suspend fun testServe(
     basePath: String,
     channel: SerializedService,
-    env: KsrpcEnvironment = ksrpcEnvironment {  }
+    env: KsrpcEnvironment = ksrpcEnvironment { }
 ): Routing.() -> Unit
+
 expect fun Routing.testServeWebsocket(
     basePath: String,
     channel: SerializedService,

@@ -27,13 +27,13 @@ import com.monkopedia.ksrpc.channels.SuspendInit
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.createKey
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafeProvider
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlin.coroutines.CoroutineContext
 
 internal data class Packet(
     val input: Boolean,

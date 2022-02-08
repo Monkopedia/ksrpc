@@ -15,7 +15,6 @@
  */
 package com.monkopedia.ksrpc
 
-import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.internal.HostSerializedServiceImpl

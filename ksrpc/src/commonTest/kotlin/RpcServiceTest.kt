@@ -19,13 +19,13 @@ import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.SerializedService
-import kotlinx.serialization.builtins.PairSerializer
-import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import kotlinx.serialization.builtins.PairSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 
 @KsService
 interface TestInterface : RpcService {

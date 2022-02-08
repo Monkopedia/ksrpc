@@ -1,3 +1,18 @@
+/*
+ * Copyright 2021 Jason Monk
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.monkopedia.ksrpc.internal
 
 import com.monkopedia.ksrpc.channels.ChannelClient
@@ -10,15 +25,15 @@ import com.monkopedia.ksrpc.channels.ContextContainer
 import com.monkopedia.ksrpc.channels.SerializedService
 import internal.MovableInstance
 import internal.using
-import kotlinx.coroutines.CloseableCoroutineDispatcher
-import kotlinx.coroutines.newSingleThreadContext
-import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 import kotlin.native.concurrent.DetachedObjectGraph
 import kotlin.native.concurrent.TransferMode
 import kotlin.native.concurrent.attach
 import kotlin.native.concurrent.ensureNeverFrozen
 import kotlin.native.concurrent.freeze
+import kotlinx.coroutines.CloseableCoroutineDispatcher
+import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.withContext
 
 /**
  * Tags instances that are handling thread wrapping in native code already and
@@ -160,7 +175,9 @@ internal actual object ThreadSafeManager {
 
     actual inline fun ThreadSafeKeyedConnection.threadSafeProvider(): ConnectionProvider {
         if (!allThreadSafes.holdsLock) {
-            throw IllegalStateException("Cannot create threadSafeProvider outside of threadSafe creation")
+            throw IllegalStateException(
+                "Cannot create threadSafeProvider outside of threadSafe creation"
+            )
         }
         ensureNeverFrozen()
         return ThreadSafeConnectionProvider(key).freeze()
@@ -168,7 +185,9 @@ internal actual object ThreadSafeManager {
 
     actual inline fun ThreadSafeKeyedHost.threadSafeProvider(): ChannelHostProvider {
         if (!allThreadSafes.holdsLock) {
-            throw IllegalStateException("Cannot create threadSafeProvider outside of threadSafe creation")
+            throw IllegalStateException(
+                "Cannot create threadSafeProvider outside of threadSafe creation"
+            )
         }
         ensureNeverFrozen()
         return ThreadSafeHostProvider(key).freeze()
@@ -176,7 +195,9 @@ internal actual object ThreadSafeManager {
 
     actual inline fun ThreadSafeKeyedClient.threadSafeProvider(): ChannelClientProvider {
         if (!allThreadSafes.holdsLock) {
-            throw IllegalStateException("Cannot create threadSafeProvider outside of threadSafe creation")
+            throw IllegalStateException(
+                "Cannot create threadSafeProvider outside of threadSafe creation"
+            )
         }
         ensureNeverFrozen()
         return ThreadSafeClientProvider(key).freeze()

@@ -15,34 +15,28 @@
  */
 package com.monkopedia.ksrpc.internal
 
-import com.monkopedia.ksrpc.channels.CallData
-import com.monkopedia.ksrpc.channels.ChannelClient
-import com.monkopedia.ksrpc.channels.ChannelClientInternal
-import com.monkopedia.ksrpc.channels.ChannelId
-import com.monkopedia.ksrpc.channels.ConnectionInternal
 import com.monkopedia.ksrpc.ERROR_PREFIX
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.RpcObject
 import com.monkopedia.ksrpc.RpcService
-import com.monkopedia.ksrpc.channels.SerializedChannel
-import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.SuspendCloseable
-import com.monkopedia.ksrpc.channels.SuspendInit
 import com.monkopedia.ksrpc.TrackingService
 import com.monkopedia.ksrpc.asString
+import com.monkopedia.ksrpc.channels.CallData
+import com.monkopedia.ksrpc.channels.ChannelClient
+import com.monkopedia.ksrpc.channels.ChannelClientInternal
+import com.monkopedia.ksrpc.channels.ChannelId
+import com.monkopedia.ksrpc.channels.ConnectionInternal
+import com.monkopedia.ksrpc.channels.SerializedChannel
+import com.monkopedia.ksrpc.channels.SerializedService
+import com.monkopedia.ksrpc.channels.SuspendInit
+import com.monkopedia.ksrpc.channels.randomUuid
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.createKey
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafeProvider
-import com.monkopedia.ksrpc.channels.randomUuid
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
-
-/**
- * Creates a thread on platforms that need it (like native) or returns another coroutine dispatcher as needed.
- */
-internal expect fun maybeCreateChannelThread(): CoroutineDispatcher
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.withContext
 
 internal class HostSerializedChannelImpl(
     override val env: KsrpcEnvironment,

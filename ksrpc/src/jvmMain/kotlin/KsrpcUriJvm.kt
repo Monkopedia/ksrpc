@@ -28,7 +28,10 @@ import java.io.File
 import java.net.Socket
 import kotlin.reflect.full.companionObjectInstance
 
-actual suspend fun KsrpcUri.connect(env: KsrpcEnvironment, clientFactory: () -> HttpClient): ChannelClient {
+actual suspend fun KsrpcUri.connect(
+    env: KsrpcEnvironment,
+    clientFactory: () -> HttpClient
+): ChannelClient {
     return when (type) {
         KsrpcType.EXE -> {
             ProcessBuilder(listOf(path))

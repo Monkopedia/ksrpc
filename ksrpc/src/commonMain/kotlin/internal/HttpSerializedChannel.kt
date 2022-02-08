@@ -36,8 +36,8 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.encodeURLPath
 import io.ktor.utils.io.readRemaining
-import kotlinx.serialization.json.Json
 import kotlin.coroutines.CoroutineContext
+import kotlinx.serialization.json.Json
 
 internal class HttpSerializedChannel(
     private val httpClient: HttpClient,

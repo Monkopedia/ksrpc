@@ -170,7 +170,10 @@ object StubGeneration {
                             }
                             putValueArgument(
                                 0,
-                                irGetField(irGet(override.dispatchReceiverParameter!!), channelField)
+                                irGetField(
+                                    irGet(override.dispatchReceiverParameter!!),
+                                    channelField
+                                )
                             )
                             if (override.valueParameters.size != 1) {
                                 val overrideParams = override.valueParameters.map {
@@ -193,7 +196,8 @@ object StubGeneration {
             } ?: error("Can't find close method")
             overrideMethod(close.symbol, returnType = close.returnType) { override ->
                 +irCall(suspendClose).apply {
-                    dispatchReceiver = irGetField(irGet(override.dispatchReceiverParameter!!), channelField)
+                    dispatchReceiver =
+                        irGetField(irGet(override.dispatchReceiverParameter!!), channelField)
                 }
             }
         }

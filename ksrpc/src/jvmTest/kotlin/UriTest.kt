@@ -31,7 +31,7 @@ class UriTest {
     fun testLocalService() = runBlockingUnit {
         val clsString = Implementation::class.jvmName
         val uri = "local://$clsString"
-        val channel = uri.toKsrpcUri().connect(ksrpcEnvironment {  })
+        val channel = uri.toKsrpcUri().connect(ksrpcEnvironment { })
         val service = channel.defaultChannel().toStub<TestInterface>()
 
         assertEquals("world hello", service.rpc("hello" to "world"))

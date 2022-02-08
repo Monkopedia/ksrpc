@@ -32,10 +32,10 @@ import io.ktor.utils.io.readFully
 import io.ktor.utils.io.readRemaining
 import io.ktor.utils.io.readUTF8Line
 import io.ktor.utils.io.writeStringUtf8
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlin.coroutines.CoroutineContext
 
 internal class ReadWritePacketChannel(
     scope: CoroutineScope,

@@ -110,6 +110,7 @@ interface ChannelClient : SerializedChannel, KsrpcEnvironment.Element {
         const val DEFAULT = ""
     }
 }
+
 internal interface ChannelClientInternal : ChannelClient, ChannelClientProvider {
     override val client: ChannelClient
         get() = this
@@ -128,7 +129,10 @@ interface ContextContainer {
  * directly with this, instead use either [ChannelClient] or [ChannelHost] to reference a
  * [SerializedService] instead.
  */
-interface SerializedChannel : SuspendCloseableObservable, ContextContainer, KsrpcEnvironment.Element {
+interface SerializedChannel :
+    SuspendCloseableObservable,
+    ContextContainer,
+    KsrpcEnvironment.Element {
     suspend fun call(channelId: ChannelId, endpoint: String, data: CallData): CallData
     suspend fun close(id: ChannelId)
 }
@@ -137,7 +141,10 @@ interface SerializedChannel : SuspendCloseableObservable, ContextContainer, Ksrp
  * Serialized version of a service. This can be transformed to and from a service using
  * [serialized] and [SerializedService.toStub].
  */
-interface SerializedService : SuspendCloseableObservable, ContextContainer, KsrpcEnvironment.Element {
+interface SerializedService :
+    SuspendCloseableObservable,
+    ContextContainer,
+    KsrpcEnvironment.Element {
     suspend fun call(endpoint: String, input: CallData): CallData
 }
 

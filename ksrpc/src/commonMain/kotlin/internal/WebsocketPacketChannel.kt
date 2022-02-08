@@ -18,10 +18,10 @@ package com.monkopedia.ksrpc.internal
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import io.ktor.http.cio.websocket.DefaultWebSocketSession
 import io.ktor.http.cio.websocket.close
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlin.coroutines.CoroutineContext
 
 internal class WebsocketPacketChannel(
     scope: CoroutineScope,

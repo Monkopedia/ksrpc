@@ -54,7 +54,7 @@ private val basicImpl: TestRootInterface
 class RpcSubserviceTest : RpcFunctionalityTest(
     serializedChannel = {
         val channel: TestRootInterface = basicImpl
-        channel.serialized(ksrpcEnvironment {  })
+        channel.serialized(ksrpcEnvironment { })
     },
     verifyOnChannel = { serializedChannel ->
         val stub = serializedChannel.toStub<TestRootInterface>()
@@ -73,7 +73,7 @@ class RpcSubserviceTest : RpcFunctionalityTest(
 class RpcSubserviceTwoCallsTest : RpcFunctionalityTest(
     serializedChannel = {
         val channel: TestRootInterface = basicImpl
-        channel.serialized(ksrpcEnvironment {  })
+        channel.serialized(ksrpcEnvironment { })
     },
     verifyOnChannel = { serializedChannel ->
         val stub = serializedChannel.toStub<TestRootInterface>()

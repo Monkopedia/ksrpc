@@ -56,7 +56,8 @@ interface MyInterface: RpcService {
         val result = compile(sourceFile = sourceFile)
         assertContains(
             result.messages,
-            "generating MyInterface#DoSomething(\"serial_name\") with types: DEFAULT(String) DEFAULT(Int)"
+            "generating MyInterface#DoSomething(\"serial_name\") with " +
+                "types: DEFAULT(String) DEFAULT(Int)"
         )
     }
 }
