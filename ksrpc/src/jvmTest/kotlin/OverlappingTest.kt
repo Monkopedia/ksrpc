@@ -43,7 +43,7 @@ abstract class OverlappingTestBase(
                 }
             }
         }
-        service.serialized()
+        service.serialized(ksrpcEnvironment { })
     },
     verifyOnChannel = { serializedChannel ->
         val stub = serializedChannel.toStub<TestInterface>()

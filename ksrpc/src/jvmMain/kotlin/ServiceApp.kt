@@ -20,6 +20,9 @@ import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.multiple
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.int
+import com.monkopedia.ksrpc.channels.SerializedService
+import com.monkopedia.ksrpc.channels.asConnection
+import com.monkopedia.ksrpc.channels.stdInConnection
 import io.ktor.application.install
 import io.ktor.features.CORS
 import io.ktor.routing.routing
@@ -34,6 +37,10 @@ import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
+/**
+ * Base class that makes it easy to host a default service on any combination of
+ * std in/out, http, and sockets.
+ */
 abstract class ServiceApp(val appName: String) : CliktCommand() {
     init {
         isActive = true
@@ -64,31 +71,36 @@ abstract class ServiceApp(val appName: String) : CliktCommand() {
                     GlobalScope.launch {
                         val context = newSingleThreadContext("$appName-socket-$p")
                         withContext(context) {
-                            createChannel().serve(s.getInputStream(), s.getOutputStream())
+                            val connection = (s.getInputStream() to s.getOutputStream())
+                                .asConnection(env)
+                            connection.registerDefault(createChannel())
                         }
                         context.close()
                     }
                 }
             }
         }
-        for (h in http) {
-            embeddedServer(Netty, h) {
-                install(CORS) {
-                    anyHost()
-                }
-                routing {
-                    serve("/${appName.decapitalize()}", createChannel())
-                }
-            }.start()
-        }
-        if (stdOut) {
-            runBlocking {
-                createChannel().serveOnStd()
+        runBlocking {
+            for (h in http) {
+                val routes = serve("/${appName.decapitalize()}", createChannel(), env)
+                embeddedServer(Netty, h) {
+                    install(CORS) {
+                        anyHost()
+                    }
+                    routing(routes)
+                }.start()
+            }
+            if (stdOut) {
+                stdInConnection(env).registerDefault(createChannel())
             }
         }
     }
 
-    abstract fun createChannel(): SerializedChannel
+    open val env: KsrpcEnvironment by lazy {
+        ksrpcEnvironment {}
+    }
+
+    abstract fun createChannel(): SerializedService
 
     companion object {
         internal var isActive = false

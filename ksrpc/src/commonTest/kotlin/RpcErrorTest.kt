@@ -25,7 +25,7 @@ class RpcErrorTest : RpcFunctionalityTest(
                 throw IllegalArgumentException("Failure")
             }
         }
-        channel.serialized()
+        channel.serialized(ksrpcEnvironment { })
     },
     verifyOnChannel = { serializedChannel ->
         val stub = serializedChannel.toStub<TestInterface>()

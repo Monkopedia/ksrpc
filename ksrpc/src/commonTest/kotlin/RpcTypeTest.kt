@@ -15,6 +15,9 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.channels.SerializedService
 import kotlin.test.assertEquals
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
@@ -111,10 +114,10 @@ class FakeTestTypes : TestTypesInterface {
 object RpcTypeTest {
 
     abstract class RpcTypeFunctionalityTest(
-        verifyOnChannel: suspend (SerializedChannel, FakeTestTypes) -> Unit,
+        verifyOnChannel: suspend (SerializedService, FakeTestTypes) -> Unit,
         private val service: FakeTestTypes = FakeTestTypes()
     ) : RpcFunctionalityTest(
-        serializedChannel = { service.serialized<TestTypesInterface>() },
+        serializedChannel = { service.serialized<TestTypesInterface>(ksrpcEnvironment { }) },
         verifyOnChannel = { channel ->
             verifyOnChannel(channel, service)
         }

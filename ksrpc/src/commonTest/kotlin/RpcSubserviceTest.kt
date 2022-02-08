@@ -15,6 +15,8 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -52,7 +54,7 @@ private val basicImpl: TestRootInterface
 class RpcSubserviceTest : RpcFunctionalityTest(
     serializedChannel = {
         val channel: TestRootInterface = basicImpl
-        channel.serialized()
+        channel.serialized(ksrpcEnvironment { })
     },
     verifyOnChannel = { serializedChannel ->
         val stub = serializedChannel.toStub<TestRootInterface>()
@@ -71,7 +73,7 @@ class RpcSubserviceTest : RpcFunctionalityTest(
 class RpcSubserviceTwoCallsTest : RpcFunctionalityTest(
     serializedChannel = {
         val channel: TestRootInterface = basicImpl
-        channel.serialized()
+        channel.serialized(ksrpcEnvironment { })
     },
     verifyOnChannel = { serializedChannel ->
         val stub = serializedChannel.toStub<TestRootInterface>()

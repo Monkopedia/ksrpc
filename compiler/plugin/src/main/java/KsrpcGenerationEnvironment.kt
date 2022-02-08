@@ -65,13 +65,14 @@ class KsrpcGenerationEnvironment(
     val illegalArgumentStrConstructor = illegalArgument.constructors.first()
     val rpcObject = referenceClass(FqConstants.RPC_OBJECT)
     val rpcService = referenceClass(FqConstants.RPC_SERVICE)
-    val serializedChannel = referenceClass(FqConstants.SERIALIZED_CHANNEL)
+    val serializedService = referenceClass(FqConstants.SERIALIZED_SERVICE)
     val rpcMethod = referenceClass(FqConstants.RPC_METHOD)
     val serviceExecutor = referenceClass(FqConstants.SERVICE_EXECUTOR)
     val serializerTransformer = referenceClass(FqConstants.SERIALIZER_TRANSFORMER)
     val binaryTransformer = referenceObject(FqConstants.BINARY_TRANSFORMER)
     val subserviceTransformer = referenceClass(FqConstants.SUBSERVICE_TRANSFORMER)
     val rpcObjectKey = maybeReferenceClass(FqConstants.RPC_OBJECT_KEY)
+    val suspendCloseable = referenceClass(FqConstants.SUSPEND_CLOSEABLE)
 
     val kSerializer = referenceClass(FqConstants.KSERIALIZER)
     val serializerMethod = pluginContext.referenceFunctions(FqName(FqConstants.SERIALIZER)).find {

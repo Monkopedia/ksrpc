@@ -13,40 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.monkopedia.ksrpc
+package com.monkopedia.ksrpc.channels
 
-import kotlin.reflect.AssociatedObjectKey
-import kotlin.reflect.ExperimentalAssociatedObjects
-import kotlin.reflect.KClass
-import kotlin.reflect.findAssociatedObject
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
+import com.monkopedia.ksrpc.RpcEndpointException
+import com.monkopedia.ksrpc.RpcMethod
+import com.monkopedia.ksrpc.RpcObject
+import com.monkopedia.ksrpc.RpcObjectKey
+import com.monkopedia.ksrpc.RpcService
 import nanoid.nanoid
 
-actual fun randomUuid(): String {
+internal actual fun randomUuid(): String {
     return nanoid()
-}
-
-actual val DEFAULT_DISPATCHER: CoroutineDispatcher
-    get() = Dispatchers.Default
-
-actual val Throwable.asString: String
-    get() = toString()
-
-@OptIn(ExperimentalAssociatedObjects::class)
-@AssociatedObjectKey
-@Retention(AnnotationRetention.BINARY)
-annotation class RpcObjectKey(val rpcObject: KClass<out RpcObject<*>>)
-
-@OptIn(ExperimentalAssociatedObjects::class)
-actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> {
-    return T::class.findAssociatedObject<RpcObjectKey>() as RpcObject<T>
 }
 
 @RpcObjectKey(VoidService.Companion::class)
 internal actual interface VoidService : RpcService {
     companion object : RpcObject<VoidService> {
-        override fun createStub(channel: SerializedChannel): VoidService {
+        override fun createStub(channel: SerializedService): VoidService {
             return object : VoidService {}
         }
 

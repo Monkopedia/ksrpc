@@ -19,19 +19,10 @@ import kotlin.reflect.AssociatedObjectKey
 import kotlin.reflect.ExperimentalAssociatedObjects
 import kotlin.reflect.KClass
 import kotlin.reflect.findAssociatedObject
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import nanoid.NanoIdUtils
 
-actual fun randomUuid(): String {
-    return NanoIdUtils.randomNanoId()
-}
-actual val DEFAULT_DISPATCHER: CoroutineDispatcher
-    get() = Dispatchers.Default
-
-actual val Throwable.asString: String
-    get() = this.getStackTrace().joinToString("\n")
-
+/**
+ * Used to find [RpcObject] of services in native implementations.
+ */
 @OptIn(ExperimentalAssociatedObjects::class)
 @AssociatedObjectKey
 @Retention(AnnotationRetention.BINARY)
@@ -42,14 +33,5 @@ actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> {
     return T::class.findAssociatedObject<RpcObjectKey>() as RpcObject<T>
 }
 
-@RpcObjectKey(VoidService.Companion::class)
-internal actual interface VoidService : RpcService {
-    companion object : RpcObject<VoidService> {
-        override fun createStub(channel: SerializedChannel): VoidService {
-            return object : VoidService {}
-        }
-
-        override fun findEndpoint(endpoint: String): RpcMethod<*, *, *> =
-            throw RpcEndpointException("VoidService has no endpoints")
-    }
-}
+actual val Throwable.asString: String
+    get() = this.getStackTrace().joinToString("\n")

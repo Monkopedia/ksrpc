@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.monkopedia.ksrpc
+package com.monkopedia.ksrpc.channels
 
-import io.ktor.util.cio.use
+import com.monkopedia.ksrpc.KsrpcEnvironment
 import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.jvm.javaio.toByteReadChannel
 import io.ktor.utils.io.jvm.javaio.toInputStream
@@ -25,27 +25,12 @@ import kotlin.concurrent.thread
 import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.Job
 
-suspend fun SerializedChannel.serve(
-    input: InputStream,
-    output: OutputStream,
-    errorListener: ErrorListener = ErrorListener { }
-) {
-    val channel = ByteChannel(autoFlush = true)
-    channel.use {
-        val job = coroutineContext[Job]
-        thread(start = true) {
-            channel.toInputStream(job).copyTo(output)
-        }
-        serve(input.toByteReadChannel(), this, errorListener = errorListener)
-    }
-}
-
-suspend fun Pair<InputStream, OutputStream>.asChannel(): SerializedChannel {
+suspend fun Pair<InputStream, OutputStream>.asConnection(env: KsrpcEnvironment): Connection {
     val (input, output) = this
     val channel = ByteChannel(autoFlush = true)
     val job = coroutineContext[Job]
     thread(start = true) {
         channel.toInputStream(job).copyTo(output)
     }
-    return (input.toByteReadChannel(coroutineContext) to channel).asChannel()
+    return (input.toByteReadChannel(coroutineContext) to channel).asConnection(env)
 }

@@ -21,7 +21,7 @@ buildscript {
         mavenLocal()
     }
     dependencies {
-        classpath("com.monkopedia:ksrpc-gradle-plugin:0.4.3")
+        classpath("com.monkopedia:ksrpc-gradle-plugin:0.5.0")
     }
     extra["kotlin_plugin_id"] = "com.monkopedia.ksrpc.plugin"
 }

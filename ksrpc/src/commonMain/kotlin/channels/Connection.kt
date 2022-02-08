@@ -1,0 +1,74 @@
+/*
+ * Copyright 2021 Jason Monk
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.monkopedia.ksrpc.channels
+
+import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.serialized
+import com.monkopedia.ksrpc.toStub
+import kotlin.jvm.JvmName
+
+internal interface SuspendInit {
+    suspend fun init() = Unit
+}
+
+/**
+ * A bidirectional channel that can both host and call services/sub-services.
+ *
+ * (Meaning @KsServices can be used for both input and output of any @KsMethod)
+ */
+interface Connection : ChannelHost, ChannelClient
+
+internal interface ConnectionInternal :
+    Connection,
+    ChannelHostInternal,
+    ChannelClientInternal,
+    ConnectionProvider,
+    SuspendInit
+
+internal interface ConnectionProvider : ChannelHostProvider, ChannelClientProvider
+
+// Problems with JS compiler and serialization
+data class ChannelId(val id: String)
+
+internal expect interface VoidService : RpcService
+
+/**
+ * Connects both default channels for a connection (incoming and outgoing).
+ *
+ * Provides the [host] lambda with a stub connected to the default outgoing channel
+ * for the connection, and then connects the returned service as the hosted channel for
+ * the connection.
+ *
+ * This is equivalent to calling [registerDefault] for [T] instance and using
+ * [defaultChannel] and [toStub] to create [R].
+ */
+suspend inline fun <reified T : RpcService, reified R : RpcService> Connection.connect(
+    crossinline host: (R) -> T
+) = connect { channel ->
+    host(channel.toStub()).serialized(env)
+}
+
+/**
+ * Raw version of [connect], performing the same functionality with [SerializedService] directly.
+ */
+@JvmName("connectSerialized")
+suspend fun Connection.connect(
+    host: (SerializedService) -> SerializedService
+) {
+    val recv = defaultChannel()
+    val serializedHost = host(recv)
+    registerDefault(serializedHost)
+}

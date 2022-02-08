@@ -15,15 +15,12 @@
  */
 package com.monkopedia.ksrpc
 
-import com.monkopedia.ksrpc.internal.HttpPacketExchanger
-import com.monkopedia.ksrpc.internal.WebsocketPacketChannel
+import com.monkopedia.ksrpc.channels.ChannelClient
 import io.ktor.client.HttpClient
-import io.ktor.client.features.websocket.webSocketSession
-import io.ktor.http.URLProtocol
-import io.ktor.http.takeFrom
 import kotlinx.serialization.Serializable
 
 const val KSRPC_BINARY: String = "KSRPC_BINARY"
+const val KSRPC_CHANNEL: String = "KSRPC_CHANNEL"
 
 enum class KsrpcType {
     EXE,
@@ -33,6 +30,11 @@ enum class KsrpcType {
     LOCAL
 }
 
+/**
+ * Class with explicit specification of the type of connection used in a uri.
+ *
+ * Generally created using [String.toKsrpcUri].
+ */
 @Serializable
 data class KsrpcUri(
     val type: KsrpcType,
@@ -43,6 +45,12 @@ data class KsrpcUri(
     }
 }
 
+/**
+ * Parses all supported types of uris into explicitly specified [KsrpcUri].
+ *
+ * Note that not all types returned by this are supported by all platforms. Checking for
+ * support needs to be handled elsewhere.
+ */
 fun String.toKsrpcUri(): KsrpcUri = when {
     startsWith("http://") -> KsrpcUri(KsrpcType.HTTP, this)
     startsWith("https://") -> KsrpcUri(KsrpcType.HTTP, this)
@@ -52,18 +60,11 @@ fun String.toKsrpcUri(): KsrpcUri = when {
     else -> throw IllegalArgumentException("Unable to parse $this")
 }
 
+/**
+ * Creates a [ChannelClient] from a [KsrpcUri].
+ * @Throws [IllegalArgumentException] if this [KsrpcType] is not supported on the current platform.
+ */
 expect suspend fun KsrpcUri.connect(
+    env: KsrpcEnvironment,
     clientFactory: () -> HttpClient = { HttpClient { } },
-): SerializedChannel
-
-internal fun HttpClient.asPacketChannel(baseUrl: String) = HttpPacketExchanger(this, baseUrl.trimEnd('/'))
-fun HttpClient.asChannel(baseUrl: String): SerializedChannel = asPacketChannel(baseUrl)
-
-internal suspend fun HttpClient.asWebsocketPackets(baseUrl: String) =
-    WebsocketPacketChannel(webSocketSession {
-        url.takeFrom(baseUrl.trimEnd('/'))
-        url.protocol = URLProtocol.WS
-    })
-
-suspend fun HttpClient.asWebsocketChannel(baseUrl: String): SerializedChannel =
-    asWebsocketPackets(baseUrl)
+): ChannelClient

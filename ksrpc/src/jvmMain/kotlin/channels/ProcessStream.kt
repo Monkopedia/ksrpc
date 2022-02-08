@@ -13,42 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.monkopedia.ksrpc
+package com.monkopedia.ksrpc.channels
 
-import java.io.PrintWriter
-import java.io.StringWriter
+import com.monkopedia.ksrpc.KsrpcEnvironment
 
-suspend fun SerializedChannel.serveOnStd() {
+/**
+ * Create a [Connection] that communicates over the std in/out streams of this process.
+ */
+suspend fun stdInConnection(env: KsrpcEnvironment): Connection {
     val input = System.`in`
     val output = System.out
-    serve(input, output)
+    return (input to output).asConnection(env)
 }
 
-suspend fun System.rpcChannel(): SerializedChannel {
-    val input = System.`in`
-    val output = System.out
-    return (input to output).asChannel()
-}
-
-suspend fun ProcessBuilder.asChannel(): SerializedChannel {
+/**
+ * Create a [Connection] that starts the process and uses the
+ * [Process.getInputStream] and [Process.getOutputStream] as the streams for communication
+ */
+suspend fun ProcessBuilder.asConnection(env: KsrpcEnvironment): Connection {
     val process = redirectInput(ProcessBuilder.Redirect.PIPE)
         .redirectOutput(ProcessBuilder.Redirect.PIPE)
         .start()
     val input = process.inputStream
     val output = process.outputStream
-    return (input to output).asChannel()
+    return (input to output).asConnection(env)
 }
-
-suspend fun SerializedChannel.serveTo(process: ProcessBuilder) {
-    val process = process.redirectInput(ProcessBuilder.Redirect.PIPE)
-        .redirectOutput(ProcessBuilder.Redirect.PIPE)
-        .start()
-    val input = process.inputStream
-    val output = process.outputStream
-    serve(input, output)
-}
-
-actual val Throwable.asString: String
-    get() = StringWriter().also {
-        printStackTrace(PrintWriter(it))
-    }.toString()

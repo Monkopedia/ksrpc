@@ -1,30 +1,52 @@
+/*
+ * Copyright 2021 Jason Monk
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.monkopedia.ksrpc.internal
 
+import com.monkopedia.ksrpc.KsrpcEnvironment
 import io.ktor.http.cio.websocket.DefaultWebSocketSession
 import io.ktor.http.cio.websocket.close
+import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.serialization.json.Json
 
-internal class WebsocketPacketChannel(private val client: DefaultWebSocketSession) : PacketChannelBase(Json) {
+internal class WebsocketPacketChannel(
+    scope: CoroutineScope,
+    context: CoroutineContext,
+    private val socketSession: DefaultWebSocketSession,
+    env: KsrpcEnvironment
+) : PacketChannelBase(scope, context, env) {
     private val sendLock = Mutex()
     private val receiveLock = Mutex()
 
     override suspend fun send(packet: Packet) {
         sendLock.withLock {
-            client.send(packet)
+            socketSession.send(packet)
         }
     }
 
-    override suspend fun receiveImpl(): Packet {
+    override suspend fun receive(): Packet {
         receiveLock.lock(null)
-        return client.receivePacket {
+        return socketSession.receivePacket {
             receiveLock.unlock(null)
         }
     }
 
     override suspend fun close() {
         super.close()
-        client.close()
+        socketSession.close()
     }
 }

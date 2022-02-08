@@ -15,6 +15,16 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.channels.CallData
+import com.monkopedia.ksrpc.channels.ChannelClient
+import com.monkopedia.ksrpc.channels.ChannelId
+import com.monkopedia.ksrpc.channels.Connection
+import com.monkopedia.ksrpc.channels.ConnectionInternal
+import com.monkopedia.ksrpc.channels.SerializedChannel
+import com.monkopedia.ksrpc.channels.SerializedService
+import com.monkopedia.ksrpc.channels.connect
+import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
+import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
 import com.monkopedia.ksrpc.internal.WebsocketPacketChannel
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
@@ -27,16 +37,26 @@ import io.ktor.routing.post
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.copyTo
 import io.ktor.websocket.webSocket
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.plus
 import kotlinx.serialization.json.Json
+
+suspend fun serve(
+    basePath: String,
+    service: SerializedService,
+    env: KsrpcEnvironment
+): Routing.() -> Unit {
+    val channel = HostSerializedChannelImpl(env).threadSafe<Connection>().also {
+        it.registerDefault(service)
+    }
+    return {
+        serve(basePath, channel, env)
+    }
+}
 
 fun Routing.serve(
     basePath: String,
     channel: SerializedChannel,
-    errorListener: ErrorListener = ErrorListener { }
+    env: KsrpcEnvironment
 ) {
     val baseStripped = basePath.trimEnd('/')
     post("$baseStripped/call/{method}") {
@@ -47,7 +67,8 @@ fun Routing.serve(
             } else {
                 CallData.create(call.receive<String>())
             }
-            val response = channel.call(method, content)
+            val channelId = call.request.headers[KSRPC_CHANNEL] ?: ChannelClient.DEFAULT
+            val response = channel.call(ChannelId(channelId), method, content)
             if (response.isBinary) {
                 call.response.headers.append(KSRPC_BINARY, "true")
                 call.respondBytesWriter {
@@ -57,7 +78,7 @@ fun Routing.serve(
                 call.respond(response.readSerialized())
             }
         } catch (t: Throwable) {
-            errorListener.onError(t)
+            env.errorListener.onError(t)
             call.respond(
                 ERROR_PREFIX + Json.encodeToString(RpcFailure.serializer(), RpcFailure(t.asString))
             )
@@ -68,38 +89,18 @@ fun Routing.serve(
 
 fun Routing.serveWebsocket(
     basePath: String,
-    channel: SerializedChannel,
-    errorListener: ErrorListener = ErrorListener { }
+    channel: SerializedService,
+    env: KsrpcEnvironment
 ) {
     val baseStripped = basePath.trimEnd('/')
     webSocket(baseStripped) {
         coroutineScope {
-            val wb = WebsocketPacketChannel(this@webSocket)
-            wb.connect(CoroutineScope(this.coroutineContext) + CoroutineExceptionHandler { _, t ->
-                errorListener.onError(t)
-            }) {
+            val wb = WebsocketPacketChannel(this, coroutineContext, this@webSocket, env)
+                .threadSafe<ConnectionInternal>()
+            wb.init()
+            wb.connect {
                 channel
             }
         }
-        // while (!incoming.isClosedForReceive) {
-        //     try {
-        //         val packet = receivePacket {
-        //         }
-        //         val endpoint = packet.endpoint
-        //         val callData = packet.data
-        //         val response = channel.call(endpoint, callData)
-        //         send(Packet(false, endpoint, response))
-        //     } catch (_: ClosedReceiveChannelException) {
-        //         // Don't mind, just done with this channel.
-        //     } catch (t: Throwable) {
-        //         errorListener.onError(t)
-        //         val failure = RpcFailure(t.asString)
-        //         send(
-        //             Frame.Text(
-        //                 ERROR_PREFIX + Json.encodeToString(RpcFailure.serializer(), failure)
-        //             )
-        //         )
-        //     }
-        // }
     }
 }

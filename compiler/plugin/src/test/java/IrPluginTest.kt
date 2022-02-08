@@ -26,8 +26,8 @@ class IrPluginTest {
     val sourceFile = SourceFile.kotlin(
         "main.kt",
         """
-import com.monkopedia.ksrpc.KsMethod
-import com.monkopedia.ksrpc.KsService
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
 import com.monkopedia.ksrpc.RpcService
 
 @KsService
@@ -36,11 +36,6 @@ interface MyInterface: RpcService {
     @KsMethod("/serial_name")
     suspend fun doSomething(input: String): Int
 }
-
-fun main() {
-  println(debug())
-}
-fun debug() = "Hello, World!"
 """
     )
 
@@ -48,13 +43,22 @@ fun debug() = "Hello, World!"
     fun `IR plugin success`() {
         val result = compile(sourceFile = sourceFile)
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
-        assertEquals("", result.outputDirectory.absolutePath)
     }
 
     @Test
     fun `IR plugin method detection`() {
         val result = compile(sourceFile = sourceFile)
         assertContains(result.messages, "Generating for class MyInterface with 1 methods")
+    }
+
+    @Test
+    fun `IR plugin method type logging`() {
+        val result = compile(sourceFile = sourceFile)
+        assertContains(
+            result.messages,
+            "generating MyInterface#DoSomething(\"serial_name\") with " +
+                "types: DEFAULT(String) DEFAULT(Int)"
+        )
     }
 }
 

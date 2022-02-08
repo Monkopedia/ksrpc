@@ -15,9 +15,15 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.channels.ChannelClient
+import com.monkopedia.ksrpc.channels.asConnection
+import com.monkopedia.ksrpc.channels.asWebsocketConnection
 import io.ktor.client.HttpClient
 
-actual suspend fun KsrpcUri.connect(clientFactory: () -> HttpClient): SerializedChannel {
+actual suspend fun KsrpcUri.connect(
+    env: KsrpcEnvironment,
+    clientFactory: () -> HttpClient
+): ChannelClient {
     return when (type) {
         KsrpcType.EXE -> {
             throw NotImplementedError("EXE not supported in JS")
@@ -29,10 +35,10 @@ actual suspend fun KsrpcUri.connect(clientFactory: () -> HttpClient): Serialized
             throw NotImplementedError("Local not supported in JS")
         }
         KsrpcType.HTTP -> {
-            clientFactory().asChannel(path)
+            clientFactory().asConnection(path, env)
         }
         KsrpcType.WEBSOCKET -> {
-            clientFactory().asWebsocketChannel(path)
+            clientFactory().asWebsocketConnection(path, env)
         }
     }
 }

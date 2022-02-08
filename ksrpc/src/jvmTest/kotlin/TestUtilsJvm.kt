@@ -15,6 +15,7 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.serve as jvmServe
 import io.ktor.application.install
 import io.ktor.routing.Routing
@@ -65,17 +66,17 @@ actual suspend inline fun httpTest(
     }
 }
 
-actual fun Routing.testServe(
+actual suspend fun testServe(
     basePath: String,
-    channel: SerializedChannel,
-    errorListener: ErrorListener
-) = jvmServe(basePath, channel, errorListener)
+    channel: SerializedService,
+    env: KsrpcEnvironment
+) = jvmServe(basePath, channel, env)
 
 actual fun Routing.testServeWebsocket(
     basePath: String,
-    channel: SerializedChannel,
-    errorListener: ErrorListener
-) = serveWebsocket(basePath, channel, errorListener)
+    channel: SerializedService,
+    env: KsrpcEnvironment
+) = serveWebsocket(basePath, channel, env)
 
 internal actual fun runBlockingUnit(function: suspend () -> Unit) {
     val block = CountDownLatch(1)

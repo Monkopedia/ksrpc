@@ -15,6 +15,15 @@
  */
 package com.monkopedia.ksrpc
 
-annotation class KsService
+import java.io.PrintWriter
+import java.io.StringWriter
+import kotlin.reflect.full.companionObjectInstance
 
-annotation class KsMethod(val name: String)
+actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> {
+    return T::class.companionObjectInstance as RpcObject<T>
+}
+
+actual val Throwable.asString: String
+    get() = StringWriter().also {
+        printStackTrace(PrintWriter(it))
+    }.toString()

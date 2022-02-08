@@ -42,6 +42,7 @@ import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
 import org.jetbrains.kotlin.ir.util.companionObject
 import org.jetbrains.kotlin.ir.util.constructors
 import org.jetbrains.kotlin.ir.util.functions
+import org.jetbrains.kotlin.ir.util.kotlinFqName
 import org.jetbrains.kotlin.ir.util.primaryConstructor
 import org.jetbrains.kotlin.name.Name
 
@@ -125,6 +126,12 @@ object CompanionGeneration {
                                                     irString("Unknown endpoint: ")
                                                 )
                                                 addArgument(irGet(input))
+                                                addArgument(
+                                                    irString(
+                                                        " in service " +
+                                                            cls.irClass.kotlinFqName.asString()
+                                                    )
+                                                )
                                             }
                                         )
                                     }

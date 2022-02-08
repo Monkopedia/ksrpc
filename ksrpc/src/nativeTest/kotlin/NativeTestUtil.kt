@@ -15,8 +15,18 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.channels.SerializedService
+import internal.MovableInstance
+import internal.using
+import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.fail
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import platform.posix.pthread_self
 
 actual suspend inline fun httpTest(
     crossinline serve: suspend Routing.() -> Unit,
@@ -25,18 +35,18 @@ actual suspend inline fun httpTest(
     // Do nothing, disable HTTP hosting in Native tests.
 }
 
-actual fun Routing.testServe(
+actual suspend fun testServe(
     basePath: String,
-    channel: SerializedChannel,
-    errorListener: ErrorListener
-) {
+    channel: SerializedService,
+    env: KsrpcEnvironment
+): Routing.() -> Unit = {
     // Do nothing, disable HTTP hosting in Native tests.
 }
 
 actual fun Routing.testServeWebsocket(
     basePath: String,
-    channel: SerializedChannel,
-    errorListener: ErrorListener
+    channel: SerializedService,
+    env: KsrpcEnvironment
 ) {
     // Do nothing, disable HTTP hosting in Native tests.
 }
@@ -51,5 +61,48 @@ internal actual fun runBlockingUnit(function: suspend () -> Unit) {
     } catch (t: Throwable) {
         t.printStackTrace()
         fail("Caught exception $t")
+    }
+}
+
+class NativeTestTest {
+    @Test
+    fun testThreads() = runBlockingUnit {
+        val specialThread = newSingleThreadContext("Single thread")
+        println("Thread: ${pthread_self()}")
+        withContext(specialThread) {
+            println("Other Thread: ${pthread_self()}")
+        }
+        println("Thread: ${pthread_self()}")
+        withContext(specialThread) {
+            println("Other Thread: ${pthread_self()}")
+        }
+        val x = withContext(specialThread) {
+            (5 + 10).also {
+                println("Other Thread: $it")
+            }
+        }
+        println("Thread: $x")
+    }
+
+    @Test
+    fun testMovableInstance() = runBlockingUnit {
+        val movable = MovableInstance { mutableSetOf<String>() }
+        val otherThread = newSingleThreadContext("test thread")
+
+        try {
+            movable.using {
+                it.add("First string")
+            }
+            GlobalScope.launch(otherThread) {
+                movable.using {
+                    it.add("Second string")
+                }
+            }.join()
+            movable.using {
+                assertEquals(it, setOf("First string", "Second string"))
+            }
+        } finally {
+            otherThread.close()
+        }
     }
 }

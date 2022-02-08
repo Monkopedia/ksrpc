@@ -29,7 +29,7 @@ import kotlin.random.Random
  *
  * @author David Klebanoff
  */
-object NanoIdUtils {
+internal object NanoIdUtils {
     /**
      * The default random number generator used by this class.
      * Creates cryptographically strong NanoId Strings.

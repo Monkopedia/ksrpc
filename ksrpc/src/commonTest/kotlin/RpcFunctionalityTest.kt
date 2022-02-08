@@ -15,6 +15,13 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.channels.Connection
+import com.monkopedia.ksrpc.channels.SerializedService
+import com.monkopedia.ksrpc.channels.asConnection
+import com.monkopedia.ksrpc.channels.asWebsocketConnection
+import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
+import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
+import com.monkopedia.ksrpc.internal.asClient
 import io.ktor.client.HttpClient
 import io.ktor.client.features.websocket.WebSockets
 import io.ktor.utils.io.ByteChannel
@@ -27,8 +34,8 @@ import kotlinx.coroutines.launch
 
 abstract class RpcFunctionalityTest(
     private val supportedTypes: List<TestType> = TestType.values().toList(),
-    private val serializedChannel: suspend () -> SerializedChannel,
-    private val verifyOnChannel: suspend (SerializedChannel) -> Unit
+    private val serializedChannel: suspend () -> SerializedService,
+    private val verifyOnChannel: suspend (SerializedService) -> Unit
 ) {
     enum class TestType {
         SERIALIZE,
@@ -41,7 +48,12 @@ abstract class RpcFunctionalityTest(
     fun testSerializePassthrough() = runBlockingUnit {
         if (TestType.SERIALIZE !in supportedTypes) return@runBlockingUnit
         val serializedChannel = serializedChannel()
-        verifyOnChannel(serializedChannel)
+        val channel = threadSafe<Connection> {
+            HostSerializedChannelImpl(ksrpcEnvironment { })
+        }
+        channel.registerDefault(serializedChannel)
+
+        verifyOnChannel(channel.asClient.defaultChannel())
     }
 
     @Test
@@ -51,16 +63,17 @@ abstract class RpcFunctionalityTest(
         val (so, si) = createPipe()
         GlobalScope.launch(Dispatchers.Default) {
             val serializedChannel = serializedChannel()
-            serializedChannel.serve(
-                si,
-                output,
-                errorListener = {
-                    it.printStackTrace()
+            val connection = (si to output).asConnection(
+                ksrpcEnvironment {
+                    errorListener = ErrorListener {
+                        it.printStackTrace()
+                    }
                 }
             )
+            connection.registerDefault(serializedChannel)
         }
         try {
-            verifyOnChannel((input to so).asChannel())
+            verifyOnChannel((input to so).asConnection(ksrpcEnvironment { }).defaultChannel())
         } finally {
             try {
                 input.cancel(null)
@@ -82,19 +95,23 @@ abstract class RpcFunctionalityTest(
         httpTest(
             serve = {
                 val serializedChannel = serializedChannel()
-                testServe(
+                val routing = testServe(
                     path,
                     serializedChannel,
-                    errorListener = {
-                        it.printStackTrace()
+                    ksrpcEnvironment {
+                        errorListener = ErrorListener {
+                            it.printStackTrace()
+                        }
                     }
                 )
+                routing()
             },
             test = {
                 val client = HttpClient()
-                client.asChannel("http://localhost:$it$path").use { channel ->
-                    verifyOnChannel(channel)
-                }
+                client.asConnection("http://localhost:$it$path", ksrpcEnvironment { })
+                    .use { channel ->
+                        verifyOnChannel(channel.defaultChannel())
+                    }
             }
         )
     }
@@ -109,8 +126,10 @@ abstract class RpcFunctionalityTest(
                 testServeWebsocket(
                     path,
                     serializedChannel,
-                    errorListener = {
-                        it.printStackTrace()
+                    ksrpcEnvironment {
+                        errorListener = ErrorListener {
+                            it.printStackTrace()
+                        }
                     }
                 )
             },
@@ -118,9 +137,10 @@ abstract class RpcFunctionalityTest(
                 val client = HttpClient {
                     install(WebSockets)
                 }
-                client.asWebsocketChannel("http://localhost:$it$path").use { channel ->
-                    verifyOnChannel(channel)
-                }
+                client.asWebsocketConnection("http://localhost:$it$path", ksrpcEnvironment { })
+                    .use { channel ->
+                        verifyOnChannel(channel.defaultChannel())
+                    }
             }
         )
     }
@@ -129,25 +149,23 @@ abstract class RpcFunctionalityTest(
 internal expect fun runBlockingUnit(function: suspend () -> Unit)
 
 expect class Routing
+
 expect suspend inline fun httpTest(
     crossinline serve: suspend Routing.() -> Unit,
     test: suspend (Int) -> Unit
 )
-expect fun Routing.testServe(
+
+expect suspend fun testServe(
     basePath: String,
-    channel: SerializedChannel,
-    errorListener: ErrorListener = ErrorListener { }
-)
+    channel: SerializedService,
+    env: KsrpcEnvironment = ksrpcEnvironment { }
+): Routing.() -> Unit
+
 expect fun Routing.testServeWebsocket(
     basePath: String,
-    channel: SerializedChannel,
-    errorListener: ErrorListener = ErrorListener { }
+    channel: SerializedService,
+    env: KsrpcEnvironment = ksrpcEnvironment { }
 )
-
-suspend inline fun <reified T : RpcService> T.servePipe(
-    test: suspend (Pair<ByteReadChannel, ByteWriteChannel>) -> Unit
-) {
-}
 
 fun createPipe(): Pair<ByteWriteChannel, ByteReadChannel> {
     val channel = ByteChannel(autoFlush = true)

@@ -15,7 +15,6 @@
  */
 package com.monkopedia.ksrpc.plugin
 
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.descriptors.CallableMemberDescriptor
 import org.jetbrains.kotlin.descriptors.ClassDescriptor
@@ -32,7 +31,6 @@ import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.psi.synthetics.SyntheticClassOrObjectDescriptor
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
-import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameUnsafe
 import org.jetbrains.kotlin.resolve.descriptorUtil.module
 import org.jetbrains.kotlin.resolve.descriptorUtil.parents
 import org.jetbrains.kotlin.resolve.extensions.SyntheticResolveExtension
@@ -45,7 +43,7 @@ import org.jetbrains.kotlin.types.Variance
 
 class KsrpcSyntheticResolveExtension(private val messageCollector: MessageCollector) :
     SyntheticResolveExtension {
-    private val service = FqName("com.monkopedia.ksrpc.KsService")
+    private val service = FqName("com.monkopedia.ksrpc.annotation.KsService")
     private fun Annotated.isKsService() = annotations.hasAnnotation(service)
 
     override fun getSyntheticCompanionObjectNameIfNeeded(thisDescriptor: ClassDescriptor): Name? {
@@ -213,10 +211,6 @@ class KsrpcSyntheticResolveExtension(private val messageCollector: MessageCollec
             ClassId.topLevel(FqName("com.monkopedia.ksrpc.RpcObject"))
         )
             ?: error("Can't find RpcObject within module ${target.name.asString()}")
-        messageCollector.report(
-            CompilerMessageSeverity.WARNING,
-            "Adding supertype to ${thisDescriptor.fqNameUnsafe.asString()}"
-        )
         supertypes.add(KotlinTypeFactory.simpleNotNullType(Annotations.EMPTY, descriptor, types))
     }
 }

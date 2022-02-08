@@ -15,6 +15,7 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.channels.SerializedService
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.promise
 
@@ -25,18 +26,18 @@ actual suspend inline fun httpTest(
     // Do nothing, disable HTTP hosting in JS tests.
 }
 
-actual fun Routing.testServe(
+actual suspend fun testServe(
     basePath: String,
-    channel: SerializedChannel,
-    errorListener: ErrorListener
-) {
+    channel: SerializedService,
+    env: KsrpcEnvironment
+): Routing.() -> Unit = {
     // Do nothing, disable HTTP hosting in JS tests.
 }
 
 actual fun Routing.testServeWebsocket(
     basePath: String,
-    channel: SerializedChannel,
-    errorListener: ErrorListener
+    channel: SerializedService,
+    env: KsrpcEnvironment
 ) {
     // Do nothing, disable HTTP hosting in JS tests.
 }
