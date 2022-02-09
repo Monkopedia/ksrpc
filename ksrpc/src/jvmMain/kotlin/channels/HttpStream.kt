@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.monkopedia.ksrpc
+package com.monkopedia.ksrpc.channels
 
-import com.monkopedia.ksrpc.channels.CallData
-import com.monkopedia.ksrpc.channels.ChannelClient
-import com.monkopedia.ksrpc.channels.ChannelId
-import com.monkopedia.ksrpc.channels.Connection
-import com.monkopedia.ksrpc.channels.ConnectionInternal
-import com.monkopedia.ksrpc.channels.SerializedChannel
-import com.monkopedia.ksrpc.channels.SerializedService
-import com.monkopedia.ksrpc.channels.connect
+import com.monkopedia.ksrpc.ERROR_PREFIX
+import com.monkopedia.ksrpc.KSRPC_BINARY
+import com.monkopedia.ksrpc.KSRPC_CHANNEL
+import com.monkopedia.ksrpc.KsrpcEnvironment
+import com.monkopedia.ksrpc.RpcFailure
+import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.asString
 import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
 import com.monkopedia.ksrpc.internal.WebsocketPacketChannel
+import com.monkopedia.ksrpc.serialized
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.decodeURLPart
@@ -39,6 +39,18 @@ import io.ktor.utils.io.copyTo
 import io.ktor.websocket.webSocket
 import kotlinx.coroutines.coroutineScope
 import kotlinx.serialization.json.Json
+
+suspend inline fun <reified T : RpcService> Routing.serve(
+    basePath: String,
+    service: T,
+    env: KsrpcEnvironment
+) = serve(basePath, service.serialized<T>(env), env)
+
+suspend inline fun <reified T : RpcService> Routing.serveWebsocket(
+    basePath: String,
+    service: T,
+    env: KsrpcEnvironment
+) = serveWebsocket(basePath, service.serialized<T>(env), env)
 
 suspend fun serve(
     basePath: String,

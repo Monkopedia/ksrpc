@@ -37,22 +37,22 @@ for the service.
 @KsService
 interface MyService : RpcService {
     @KsMethod("/myRpcCall")
-    fun myRpcCall(i: MyInputSerializable): MyOutputSerializable
+    suspend fun myRpcCall(i: MyInputSerializable): MyOutputSerializable
 
     @KsMethod("/noInput")
-    fun myRpcWithoutInput(u: Unit): MyOutputSerializable
+    suspend fun myRpcWithoutInput(u: Unit): MyOutputSerializable
 
     @KsMethod("/noOutput")
-    fun myRpcWithoutOutput(i: MyInputSerializable)
+    suspend fun myRpcWithoutOutput(i: MyInputSerializable)
 
     @KsMethod("/subService")
-    fun myUserService(userId: String): MyUserService // MyUserService is another RpcService
+    suspend fun myUserService(userId: String): MyUserService // MyUserService is another RpcService
 
     @KsMethod("/binaryInput")
-    fun writeBinaryData(data: ByteReadChannel): String
+    suspend fun writeBinaryData(data: ByteReadChannel): String
 
     @KsMethod("/binaryOutput")
-    fun readBinaryData(key: String): ByteReadChannel
+    suspend fun readBinaryData(key: String): ByteReadChannel
 }
 ```
 
@@ -63,30 +63,30 @@ on it.
 
 ```
 class MyServiceImpl : MyService {
-    override fun myRpcCall(i: MyInputSerializable): MyOutputSerializable {
+    override suspend fun myRpcCall(i: MyInputSerializable): MyOutputSerializable {
         useInput(i)
         return MyOutputSerializable()
     }
 
-    override fun myRpcWithoutInput(u: Unit): MyOutputSerializable {
+    override suspend fun myRpcWithoutInput(u: Unit): MyOutputSerializable {
         return MyOutputSerializable()
     }
 
-    override fun myRpcWithoutOutput(i: MyInputSerializable) {
+    override suspend fun myRpcWithoutOutput(i: MyInputSerializable) {
         useInput(i)
     }
     
-    override fun myUserService(userId: String): MyUserService {
+    override suspend fun myUserService(userId: String): MyUserService {
         return MyUserServiceImpl(userId)
     }
 
-    override fun writeBinaryData(data: ByteReadChannel): String {
+    override suspend fun writeBinaryData(data: ByteReadChannel): String {
         val key = generateKey()
         someDataStore[key] = data.readRemaining()
         return key
     }
 
-    override fun readBinaryData(key: String): ByteReadChannel {
+    override suspend fun readBinaryData(key: String): ByteReadChannel {
         return ByteReadChannel(someDataStore[key])
     }
 }
@@ -96,17 +96,19 @@ The companion (RpcObject) of the interface can turn the service into a channel, 
 of options can be used for hosting.
 
 ```
+val env = ksrpcEnvironment { }
 val service = MyServiceImpl()
-val channel = service.serialized(MyService)
 // Host on stdin/stdout
-channel.serveOnStd()
+val connection1 = stdInConnection(env)
+connection1.registerDefault(service)
 // Host on an input/output stream
-channel.serve(inputStream, outputStream)
+val connection2 = (inputStream to outputStream).asConnection(env)
+connection2.registerDefault(service)
 // Host on HTTP with Ktor
 embeddedServer {
     ...
     routing {
-        serve("/my_service", channel)
+        serve("/my_service", service, env)
     }
 }
 ```
@@ -117,8 +119,9 @@ Each platform provides a form of KsrpcUri.connect() which has different capabili
 it will create a serialized channel, which can be wrapped into a service to make calls on.
 
 ```
+val env = ksrpcEnvironment { }
 val uri = "http://localhost:8080/my_service".toKsrpcUri()
-val service = MyService.createStub(uri.connect())
+val service = uri.connect(env).toStub<MyService>()
 
 val output = service.mRpcCall(MyInputSerializable())
 ```

@@ -22,6 +22,7 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.int
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.channels.asConnection
+import com.monkopedia.ksrpc.channels.serve
 import com.monkopedia.ksrpc.channels.stdInConnection
 import io.ktor.application.install
 import io.ktor.features.CORS
