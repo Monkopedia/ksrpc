@@ -17,13 +17,16 @@ jobs:
           cat <(echo -e "${{ secrets.OSSRH_GPG_SECRET_KEY }}") | gpg --batch --import
           gpg --list-secret-keys --keyid-format LONG
       - name: Install local versions (gradle)
-        run: gradle -Pplugin_version=0.4.2 ksrpc-gradle-plugin:publishToMavenLocal -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
+        run: gradle -Pplugin_version='0.4.2' ksrpc-gradle-plugin:publishToMavenLocal -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
 
       - name: Install local versions (plugin)
-        run: gradle -Pplugin_version=0.4.2 ksrpc-compiler-plugin:publishToMavenLocal -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
+        run: gradle -Pplugin_version='0.4.2' ksrpc-compiler-plugin:publishToMavenLocal -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
 
       - name: Install local versions (plugin native)
-        run: gradle -Pplugin_version=0.4.2 ksrpc-compiler-plugin-native:publishToMavenLocal -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
+        run: gradle -Pplugin_version='0.4.2' ksrpc-compiler-plugin-native:publishToMavenLocal -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
+
+      - name: Pre-build
+        run: gradle build -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}' || gradle build -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}' || gradle build -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
 
       - name: Publish package
         run: gradle publish -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
@@ -45,13 +48,16 @@ jobs:
           gpg --list-secret-keys --keyid-format LONG
 
       - name: Install local versions (gradle)
-        run: gradle -Pplugin_version=0.4.2 ksrpc-gradle-plugin:publishToMavenLocal -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
+        run: gradle -Pplugin_version='0.4.2' ksrpc-gradle-plugin:publishToMavenLocal -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
 
       - name: Install local versions (plugin)
-        run: gradle -Pplugin_version=0.4.2 ksrpc-compiler-plugin:publishToMavenLocal -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
+        run: gradle -Pplugin_version='0.4.2' ksrpc-compiler-plugin:publishToMavenLocal -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
 
       - name: Install local versions (plugin native)
-        run: gradle -Pplugin_version=0.4.2 ksrpc-compiler-plugin-native:publishToMavenLocal -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
+        run: gradle -Pplugin_version='0.4.2' ksrpc-compiler-plugin-native:publishToMavenLocal -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
+
+      - name: Pre-build
+        run: gradle build -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}' || gradle build -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}' || gradle build -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
 
       - name: Publish package
         run: gradle publish -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
@@ -73,13 +79,16 @@ jobs:
           gpg --list-secret-keys --keyid-format LONG
 
       - name: Install local versions (gradle)
-        run: gradle -Pplugin_version=0.4.2 ksrpc-gradle-plugin:publishToMavenLocal -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
+        run: gradle -Pplugin_version='0.4.2' ksrpc-gradle-plugin:publishToMavenLocal -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
 
       - name: Install local versions (plugin)
-        run: gradle -Pplugin_version=0.4.2 ksrpc-compiler-plugin:publishToMavenLocal -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
+        run: gradle -Pplugin_version='0.4.2' ksrpc-compiler-plugin:publishToMavenLocal -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
 
       - name: Install local versions (plugin native)
-        run: gradle -Pplugin_version=0.4.2 ksrpc-compiler-plugin-native:publishToMavenLocal -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
+        run: gradle -Pplugin_version='0.4.2' ksrpc-compiler-plugin-native:publishToMavenLocal -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
+
+      - name: Pre-build
+        run: gradle build -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}' || gradle build -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}' || gradle build -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
 
       - name: Publish package
         run: gradle publish -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
