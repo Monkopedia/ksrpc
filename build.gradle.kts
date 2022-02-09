@@ -45,6 +45,7 @@ allprojects {
 }
 
 subprojects {
+    if (name == "ksrpc-compiler-plugin-native") return@subprojects
     plugins.apply("com.github.autostyle")
     autostyle {
         kotlinGradle {
