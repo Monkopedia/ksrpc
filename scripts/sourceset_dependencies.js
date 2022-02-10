@@ -1,0 +1,1 @@
+sourceset_dependencies = '{":ksrpc:dokkaHtml/commonMain": [], ":ksrpc:dokkaHtml/jsMain": [":ksrpc:dokkaHtml/commonMain"], ":ksrpc:dokkaHtml/jvmMain": [":ksrpc:dokkaHtml/commonMain"], ":ksrpc:dokkaHtml/nativeMain": [":ksrpc:dokkaHtml/commonMain"]}'

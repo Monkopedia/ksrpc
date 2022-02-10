@@ -1,0 +1,9 @@
+$dokka.format:html-v1
+$dokka.linkExtension:html
+$dokka.location:com.monkopedia.ksrpc/RpcObjectKey///PointingToDeclaration/com.monkopedia.ksrpc/[native]-rpc-object-key/index.html
+$dokka.location:com.monkopedia.ksrpc/RpcObjectKey/RpcObjectKey/#kotlin.reflect.KClass[com.monkopedia.ksrpc.RpcObject[*]]/PointingToDeclaration/com.monkopedia.ksrpc/[native]-rpc-object-key/-rpc-object-key.html
+$dokka.location:com.monkopedia.ksrpc/RpcObjectKey/rpcObject/#/PointingToDeclaration/com.monkopedia.ksrpc/[native]-rpc-object-key/rpc-object.html
+com.monkopedia.ksrpc
+com.monkopedia.ksrpc.annotation
+com.monkopedia.ksrpc.channels
+
