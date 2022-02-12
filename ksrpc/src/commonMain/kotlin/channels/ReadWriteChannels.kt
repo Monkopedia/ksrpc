@@ -23,6 +23,8 @@ import io.ktor.utils.io.ByteWriteChannel
 import kotlinx.coroutines.CoroutineScope
 
 internal const val CONTENT_LENGTH = "Content-Length"
+internal const val CONTENT_TYPE = "Content-Type"
+internal const val DEFAULT_CONTENT_TYPE = "application/vscode-jsonrpc; charset=utf-8"
 internal const val METHOD = "Method"
 internal const val INPUT = "Input"
 internal const val TYPE = "Type"

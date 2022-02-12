@@ -23,6 +23,7 @@ import com.monkopedia.ksrpc.channels.Connection
 import com.monkopedia.ksrpc.channels.ConnectionProvider
 import com.monkopedia.ksrpc.channels.ContextContainer
 import com.monkopedia.ksrpc.channels.SerializedService
+import com.monkopedia.ksrpc.internal.jsonrpc.JsonRpcChannel
 import internal.MovableInstance
 import internal.using
 import kotlin.coroutines.CoroutineContext
@@ -34,6 +35,7 @@ import kotlin.native.concurrent.freeze
 import kotlinx.coroutines.CloseableCoroutineDispatcher
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.withContext
+import kotlin.native.concurrent.TransferMode.UNSAFE
 
 /**
  * Tags instances that are handling thread wrapping in native code already and
@@ -90,6 +92,7 @@ internal actual object ThreadSafeManager {
                 is ChannelHost -> createThreadSafeChannelHost(thread, instance)
                 is ChannelClient -> createThreadSafeChannelClient(thread, instance)
                 is SerializedService -> createThreadSafeService(thread, instance)
+                is JsonRpcChannel -> createThreadSafeJsonRpcChannel(thread, instance)
                 else -> error("$instance is unsupported for threadSafe operation")
             }
             threadSafeCache[key] = threadSafe
@@ -106,6 +109,7 @@ internal actual object ThreadSafeManager {
         allThreadSafes.using { globalMap ->
             val thread = newSingleThreadContext("thread-safe-${T::class.qualifiedName}")
             val instance = creator(thread)
+            if (instance == Unit) return Unit as T
             instance.ensureNeverFrozen()
             val key = (instance as? ThreadSafeKeyed)?.key ?: instance
             val threadSafe = when (instance) {
@@ -113,6 +117,7 @@ internal actual object ThreadSafeManager {
                 is ChannelHost -> createThreadSafeChannelHost(thread, instance)
                 is ChannelClient -> createThreadSafeChannelClient(thread, instance)
                 is SerializedService -> createThreadSafeService(thread, instance)
+                is JsonRpcChannel -> createThreadSafeJsonRpcChannel(thread, instance)
                 else -> error("$instance is unsupported for threadSafe operation")
             }
             globalMap[key] = threadSafe
@@ -169,6 +174,19 @@ internal actual object ThreadSafeManager {
         return ThreadSafeConnection(
             context,
             DetachedObjectGraph(TransferMode.UNSAFE) { instance },
+            env
+        ).freeze()
+    }
+
+    fun createThreadSafeJsonRpcChannel(
+        thread: CloseableCoroutineDispatcher,
+        instance: JsonRpcChannel
+    ): ThreadSafeJsonRpcChannel {
+        val env = instance.env
+        val context = thread
+        return ThreadSafeJsonRpcChannel(
+            context,
+            DetachedObjectGraph(UNSAFE) { instance },
             env
         ).freeze()
     }

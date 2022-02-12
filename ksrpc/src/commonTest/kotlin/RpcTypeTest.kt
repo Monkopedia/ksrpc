@@ -21,6 +21,7 @@ import com.monkopedia.ksrpc.channels.SerializedService
 import kotlin.test.assertEquals
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -61,52 +62,61 @@ class FakeTestTypes : TestTypesInterface {
     var lastInput: AtomicRef<Any?> = atomic(null)
     var nextReturn: AtomicRef<Any?> = atomic(null)
     var lastCall: AtomicRef<String?> = atomic(null)
+    var callComplete: AtomicRef<CompletableDeferred<Unit>?> = atomic(null)
 
     override suspend fun rpc(u: Pair<String, String>): String {
         lastInput.value = u
         lastCall.value = "rpc"
+        callComplete?.value?.complete(Unit)
         return nextReturn.value as String
     }
 
     override suspend fun mapRpc(u: Map<String, MyJson>) {
         lastInput.value = u
         lastCall.value = "mapRpc"
+        callComplete?.value?.complete(Unit)
         return nextReturn.value as Unit
     }
 
     override suspend fun returnType(u: Unit): MyJson {
         lastInput.value = u
         lastCall.value = "returnType"
+        callComplete?.value?.complete(Unit)
         return nextReturn.value as MyJson
     }
 
     override suspend fun inputInt(i: Int) {
         lastInput.value = i
         lastCall.value = "inputInt"
+        callComplete?.value?.complete(Unit)
         return nextReturn.value as Unit
     }
 
     override suspend fun inputIntList(i: List<Int>) {
         lastInput.value = i
         lastCall.value = "inputIntList"
+        callComplete?.value?.complete(Unit)
         return nextReturn.value as Unit
     }
 
     override suspend fun outputInt(u: Unit): Int {
         lastInput.value = u
         lastCall.value = "outputInt"
+        callComplete?.value?.complete(Unit)
         return nextReturn.value as Int
     }
 
     override suspend fun inputIntNullable(i: Int?) {
         lastInput.value = i
         lastCall.value = "inputIntNullable"
+        callComplete?.value?.complete(Unit)
         return nextReturn.value as Unit
     }
 
     override suspend fun outputIntNullable(u: Unit): Int? {
         lastInput.value = u
         lastCall.value = "outputIntNullable"
+        callComplete?.value?.complete(Unit)
         return nextReturn.value as Int?
     }
 }
@@ -168,7 +178,7 @@ object RpcTypeTest {
         verifyOnChannel = { channel, service ->
             val stub = channel.toStub<TestTypesInterface>()
             service.nextReturn.value = Unit
-            service.inputIntList(listOf(42))
+            stub.inputIntList(listOf(42))
             assertEquals("inputIntList", service.lastCall.value)
             assertEquals(listOf(42), service.lastInput.value)
         }
@@ -178,7 +188,7 @@ object RpcTypeTest {
         verifyOnChannel = { channel, service ->
             val stub = channel.toStub<TestTypesInterface>()
             service.nextReturn.value = Unit
-            service.inputIntNullable(null)
+            stub.inputIntNullable(null)
             assertEquals("inputIntNullable", service.lastCall.value)
             assertEquals(null, service.lastInput.value)
         }
