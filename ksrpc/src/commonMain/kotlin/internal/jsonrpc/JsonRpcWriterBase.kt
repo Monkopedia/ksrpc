@@ -2,9 +2,11 @@ package com.monkopedia.ksrpc.internal.jsonrpc
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.RpcException
+import com.monkopedia.ksrpc.asString
+import com.monkopedia.ksrpc.channels.SerializedService
+import com.monkopedia.ksrpc.channels.SingleChannelConnection
 import com.monkopedia.ksrpc.channels.SuspendInit
 import io.ktor.utils.io.core.internal.DangerousInternalIoApi
-import io.ktor.utils.io.preventFreeze
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -12,7 +14,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.encodeToJsonElement
 import kotlin.coroutines.CoroutineContext
 
 @OptIn(DangerousInternalIoApi::class)
@@ -20,16 +25,13 @@ internal class JsonRpcWriterBase(
     private val scope: CoroutineScope,
     private val context: CoroutineContext,
     override val env: KsrpcEnvironment,
-    private val comm: JsonRpcTransformer<JsonRpcRequest, JsonRpcResponse>,
-) : JsonRpcChannel, SuspendInit {
+    private val comm: JsonRpcTransformer,
+) : JsonRpcChannel, SingleChannelConnection, SuspendInit {
     private val json = (env.serialization as? Json) ?: Json
     private var id = 1
 
-    private val completions = mutableMapOf<Int, CompletableDeferred<JsonRpcResponse?>>()
-
-    init {
-        preventFreeze()
-    }
+    private var baseChannel = CompletableDeferred<JsonRpcChannel>()
+    private val completions = mutableMapOf<String, CompletableDeferred<JsonRpcResponse?>>()
 
     override suspend fun init() {
         scope.launch {
@@ -37,8 +39,14 @@ internal class JsonRpcWriterBase(
                 try {
                     while (comm.isOpen) {
                         val p = comm.receive() ?: continue
-                        completions.remove(p.id)?.complete(p)
-                            ?: println("Warning, no completion found for $p")
+                        if ((p as? JsonObject)?.containsKey("method") == true) {
+                            val request = json.decodeFromJsonElement<JsonRpcRequest>(p)
+                            launchRequestHandler(baseChannel.await(), request)
+                        } else {
+                            val response = json.decodeFromJsonElement<JsonRpcResponse>(p)
+                            completions.remove(response.id.toString())?.complete(response)
+                                ?: println("Warning, no completion found for $p")
+                        }
                     }
                 } catch (t: Throwable) {
                     try {
@@ -50,11 +58,41 @@ internal class JsonRpcWriterBase(
         }
     }
 
+    private fun launchRequestHandler(channel: JsonRpcChannel, message: JsonRpcRequest) {
+        scope.launch(context) {
+            try {
+                val response =
+                    channel.execute(message.method, message.params, message.id == null)
+                if (message.id == null) return@launch
+                comm.send(
+                    json.encodeToJsonElement(
+                        JsonRpcResponse(
+                            result = response,
+                            id = message.id
+                        )
+                    )
+                )
+            } catch (t: Throwable) {
+                env.errorListener.onError(t)
+                if (message.id != null) {
+                    comm.send(
+                        json.encodeToJsonElement(
+                            JsonRpcResponse(
+                                error = JsonRpcError(JsonRpcError.INTERNAL_ERROR, t.asString),
+                                id = message.id
+                            )
+                        )
+                    )
+                }
+            }
+        }
+    }
+
     private fun allocateResponse(isNotify: Boolean): Pair<Deferred<JsonRpcResponse?>?, Int?> {
         if (isNotify) return null to null
         val id = id++
         return (CompletableDeferred<JsonRpcResponse?>() to id).also {
-            completions[it.second] = it.first
+            completions[JsonPrimitive(it.second).toString()] = it.first
         }
     }
 
@@ -67,9 +105,9 @@ internal class JsonRpcWriterBase(
         val request = JsonRpcRequest(
             method = method,
             params = message,
-            id = id
+            id = JsonPrimitive(id)
         )
-        comm.send(request)
+        comm.send(json.encodeToJsonElement(request))
         val response = responseHolder?.await() ?: return null
         if (response.error != null) {
             val error = response.error.data?.let {
@@ -88,5 +126,13 @@ internal class JsonRpcWriterBase(
         } catch (t: IllegalStateException) {
             // Sometimes expected
         }
+    }
+
+    override suspend fun registerDefault(service: SerializedService) {
+        baseChannel.complete(JsonRpcServiceWrapper(service))
+    }
+
+    override suspend fun defaultChannel(): SerializedService {
+        return JsonRpcSerializedChannel(context, this, env)
     }
 }

@@ -12,45 +12,37 @@ import io.ktor.utils.io.readFully
 import io.ktor.utils.io.readUTF8Line
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.serializer
+import kotlinx.serialization.json.JsonElement
 
-internal abstract class JsonRpcTransformer<I, O> {
+internal abstract class JsonRpcTransformer {
     abstract val isOpen: Boolean
 
-    abstract suspend fun send(message: I)
-    abstract suspend fun receive(): O?
+    abstract suspend fun send(message: JsonElement)
+    abstract suspend fun receive(): JsonElement?
     abstract fun close(cause: Throwable?)
 }
 
-internal fun Pair<ByteReadChannel, ByteWriteChannel>.jsonHeaderSender(
+internal fun Pair<ByteReadChannel, ByteWriteChannel>.jsonHeader(
     env: KsrpcEnvironment
-): JsonRpcTransformer<JsonRpcRequest, JsonRpcResponse> =
-    JsonRpcHeader(env, first, second, serializer(), serializer())
+): JsonRpcTransformer = JsonRpcHeader(env, first, second)
 
-internal fun Pair<ByteReadChannel, ByteWriteChannel>.jsonHeaderReceiver(
-    env: KsrpcEnvironment
-): JsonRpcTransformer<JsonRpcResponse, JsonRpcRequest> =
-    JsonRpcHeader(env, first, second, serializer(), serializer())
-
-internal class JsonRpcHeader<I, O>(
+internal class JsonRpcHeader(
     env: KsrpcEnvironment,
     private val input: ByteReadChannel,
     private val output: ByteWriteChannel,
-    private val inputSerializer: KSerializer<I>,
-    private val outputSerializer: KSerializer<O>,
-) : JsonRpcTransformer<I, O>() {
+) : JsonRpcTransformer() {
     private val json = (env.serialization as? Json) ?: Json
     private val sendLock = Mutex()
     private val receiveLock = Mutex()
+    private val serializer = JsonElement.serializer()
 
     override val isOpen: Boolean
         get() = !input.isClosedForRead
 
-    override suspend fun send(message: I) {
+    override suspend fun send(message: JsonElement) {
         sendLock.withLock {
-            val content = json.encodeToString(inputSerializer, message)
+            val content = json.encodeToString(serializer, message)
             val contentBytes = content.encodeToByteArray()
             output.appendLine("$CONTENT_LENGTH: ${contentBytes.size}")
             output.appendLine("$CONTENT_TYPE: $DEFAULT_CONTENT_TYPE")
@@ -60,13 +52,13 @@ internal class JsonRpcHeader<I, O>(
         }
     }
 
-    override suspend fun receive(): O? {
+    override suspend fun receive(): JsonElement? {
         receiveLock.withLock {
             val params = input.readFields()
             val length = params[CONTENT_LENGTH]?.toIntOrNull() ?: return null
             var byteArray = ByteArray(length)
             input.readFully(byteArray)
-            return json.decodeFromString(outputSerializer, byteArray.decodeToString())
+            return json.decodeFromString(serializer, byteArray.decodeToString())
         }
     }
 
@@ -75,33 +67,26 @@ internal class JsonRpcHeader<I, O>(
     }
 }
 
-internal fun Pair<ByteReadChannel, ByteWriteChannel>.jsonLineSender(
+internal fun Pair<ByteReadChannel, ByteWriteChannel>.jsonLine(
     env: KsrpcEnvironment
-): JsonRpcTransformer<JsonRpcRequest, JsonRpcResponse> =
-    JsonRpcLine(env, first, second, serializer(), serializer())
+): JsonRpcTransformer = JsonRpcLine(env, first, second)
 
-internal fun Pair<ByteReadChannel, ByteWriteChannel>.jsonLineReceiver(
-    env: KsrpcEnvironment
-): JsonRpcTransformer<JsonRpcResponse, JsonRpcRequest> =
-    JsonRpcLine(env, first, second, serializer(), serializer())
-
-internal class JsonRpcLine<I, O>(
+internal class JsonRpcLine(
     env: KsrpcEnvironment,
     private val input: ByteReadChannel,
     private val output: ByteWriteChannel,
-    private val inputSerializer: KSerializer<I>,
-    private val outputSerializer: KSerializer<O>,
-) : JsonRpcTransformer<I, O>() {
+) : JsonRpcTransformer() {
     private val json = (env.serialization as? Json) ?: Json
     private val sendLock = Mutex()
     private val receiveLock = Mutex()
+    private val serializer = JsonElement.serializer()
 
     override val isOpen: Boolean
         get() = !input.isClosedForRead
 
-    override suspend fun send(message: I) {
+    override suspend fun send(message: JsonElement) {
         sendLock.withLock {
-            val content = json.encodeToString(inputSerializer, message)
+            val content = json.encodeToString(serializer, message)
             require('\n' !in content) {
                 "Cannot have new-lines in encoding check environment json config"
             }
@@ -110,10 +95,10 @@ internal class JsonRpcLine<I, O>(
         }
     }
 
-    override suspend fun receive(): O? {
+    override suspend fun receive(): JsonElement? {
         receiveLock.withLock {
             val line = input.readUTF8Line() ?: return null
-            return json.decodeFromString(outputSerializer, line)
+            return json.decodeFromString(serializer, line)
         }
     }
 

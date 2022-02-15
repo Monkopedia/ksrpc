@@ -29,7 +29,7 @@ internal interface SuspendInit {
  *
  * (Meaning @KsServices can be used for both input and output of any @KsMethod)
  */
-interface Connection : ChannelHost, ChannelClient
+interface Connection : ChannelHost, ChannelClient, SingleChannelConnection
 
 internal interface ConnectionInternal :
     Connection,
@@ -39,6 +39,11 @@ internal interface ConnectionInternal :
     SuspendInit
 
 internal interface ConnectionProvider : ChannelHostProvider, ChannelClientProvider
+
+/**
+ * A bidirectional channel that can host one service in each direction (1 host and 1 client).
+ */
+interface SingleChannelConnection : SingleChannelHost, SingleChannelClient
 
 // Problems with JS compiler and serialization
 data class ChannelId(val id: String)
@@ -55,7 +60,7 @@ internal expect interface VoidService : RpcService
  * This is equivalent to calling [registerDefault] for [T] instance and using
  * [defaultChannel] and [toStub] to create [R].
  */
-suspend inline fun <reified T : RpcService, reified R : RpcService> Connection.connect(
+suspend inline fun <reified T : RpcService, reified R : RpcService> SingleChannelConnection.connect(
     crossinline host: (R) -> T
 ) = connect { channel ->
     host(channel.toStub()).serialized(env)
@@ -65,7 +70,7 @@ suspend inline fun <reified T : RpcService, reified R : RpcService> Connection.c
  * Raw version of [connect], performing the same functionality with [SerializedService] directly.
  */
 @JvmName("connectSerialized")
-suspend fun Connection.connect(
+suspend fun SingleChannelConnection.connect(
     host: (SerializedService) -> SerializedService
 ) {
     val recv = defaultChannel()

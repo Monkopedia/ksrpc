@@ -19,36 +19,15 @@ import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.channels.SuspendInit
-import kotlin.coroutines.CoroutineContext
-import kotlin.native.concurrent.DetachedObjectGraph
 
 internal class ThreadSafeService(
-    context: CoroutineContext,
-    reference: DetachedObjectGraph<SerializedService>,
+    threadSafe: ThreadSafe<SerializedService>,
     override val env: KsrpcEnvironment
-) : ThreadSafe<SerializedService>(context, reference), SerializedService, SuspendInit {
-
-    override suspend fun init() {
-        return useSafe {
-            (it as? SuspendInit)?.init()
-        }
-    }
+) : ThreadSafeUser<SerializedService>(threadSafe), SerializedService, SuspendInit {
 
     override suspend fun call(endpoint: String, input: CallData): CallData {
         return useSafe {
             it.call(endpoint, input)
-        }
-    }
-
-    override suspend fun close() {
-        useSafe {
-            it.close()
-        }
-    }
-
-    override suspend fun onClose(onClose: suspend () -> Unit) {
-        return useSafe {
-            it.onClose(onClose)
         }
     }
 }

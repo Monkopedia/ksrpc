@@ -26,10 +26,9 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.native.concurrent.DetachedObjectGraph
 
 internal class ThreadSafeChannelHost(
-    context: CoroutineContext,
-    reference: DetachedObjectGraph<ChannelHost>,
+    threadSafe: ThreadSafe<ChannelHost>,
     override val env: KsrpcEnvironment
-) : ThreadSafe<ChannelHost>(context, reference), ChannelHost {
+) : ThreadSafeUser<ChannelHost>(threadSafe), ChannelHost {
     override suspend fun registerHost(service: SerializedService): ChannelId {
         val threadSafeService = service.threadSafe()
         return useSafe {
@@ -57,18 +56,6 @@ internal class ThreadSafeChannelHost(
     ): CallData {
         return useSafe {
             it.call(channelId, endpoint, data)
-        }
-    }
-
-    override suspend fun close() {
-        return useSafe {
-            it.close()
-        }
-    }
-
-    override suspend fun onClose(onClose: suspend () -> Unit) {
-        return useSafe {
-            it.onClose(onClose)
         }
     }
 }

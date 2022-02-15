@@ -3,8 +3,7 @@ package com.monkopedia.ksrpc
 import com.monkopedia.ksrpc.channels.DEFAULT_CONTENT_TYPE
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.channels.SuspendInit
-import com.monkopedia.ksrpc.channels.asJsonRpcChannel
-import com.monkopedia.ksrpc.channels.asJsonRpcHost
+import com.monkopedia.ksrpc.channels.asJsonRpcConnection
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
 import com.monkopedia.ksrpc.internal.appendLine
 import com.monkopedia.ksrpc.internal.jsonrpc.JsonRpcChannel
@@ -13,10 +12,8 @@ import com.monkopedia.ksrpc.internal.jsonrpc.JsonRpcResponse
 import com.monkopedia.ksrpc.internal.jsonrpc.JsonRpcSerializedChannel
 import com.monkopedia.ksrpc.internal.jsonrpc.JsonRpcServiceWrapper
 import com.monkopedia.ksrpc.internal.jsonrpc.JsonRpcWriterBase
-import com.monkopedia.ksrpc.internal.jsonrpc.jsonHeaderReceiver
-import com.monkopedia.ksrpc.internal.jsonrpc.jsonHeaderSender
-import com.monkopedia.ksrpc.internal.jsonrpc.jsonLineReceiver
-import com.monkopedia.ksrpc.internal.jsonrpc.jsonLineSender
+import com.monkopedia.ksrpc.internal.jsonrpc.jsonHeader
+import com.monkopedia.ksrpc.internal.jsonrpc.jsonLine
 import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.close
 import io.ktor.utils.io.readUTF8Line
@@ -28,6 +25,8 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.encodeToJsonElement
 import kotlin.coroutines.coroutineContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -39,12 +38,14 @@ class JsonRpcTest {
         val expectedMessage = """{"jsonrpc":"2.0","method":"subtract","params":[42,23],"id":1}"""
         val outputChannel = ByteChannel()
         val inputChannel = ByteChannel()
-        val sender = (inputChannel to outputChannel).jsonLineSender(ksrpcEnvironment { })
+        val sender = (inputChannel to outputChannel).jsonLine(ksrpcEnvironment { })
         sender.send(
-            JsonRpcRequest(
-                method = "subtract",
-                params = Json.decodeFromString("[42,23]"),
-                id = 1
+            Json.encodeToJsonElement(
+                JsonRpcRequest(
+                    method = "subtract",
+                    params = Json.decodeFromString("[42,23]"),
+                    id = JsonPrimitive(1)
+                )
             )
         )
         assertEquals(expectedMessage, outputChannel.readUTF8Line())
@@ -55,8 +56,12 @@ class JsonRpcTest {
         val expectedResponse = """{"jsonrpc":"2.0","result":-19,"id":1}"""
         val outputChannel = ByteChannel()
         val inputChannel = ByteChannel()
-        val sender = (inputChannel to outputChannel).jsonLineReceiver(ksrpcEnvironment { })
-        sender.send(JsonRpcResponse(result = Json.decodeFromString("-19"), id = 1))
+        val sender = (inputChannel to outputChannel).jsonLine(ksrpcEnvironment { })
+        sender.send(
+            Json.encodeToJsonElement(
+                JsonRpcResponse(result = Json.decodeFromString("-19"), id = JsonPrimitive(1))
+            )
+        )
         assertEquals(expectedResponse, outputChannel.readUTF8Line())
     }
 
@@ -67,9 +72,15 @@ class JsonRpcTest {
         val inputChannel = ByteChannel()
         inputChannel.appendLine(expectedMessage)
         inputChannel.flush()
-        val sender = (inputChannel to outputChannel).jsonLineReceiver(ksrpcEnvironment { })
+        val sender = (inputChannel to outputChannel).jsonLine(ksrpcEnvironment { })
         val expectedRequest =
-            JsonRpcRequest(method = "subtract", params = Json.decodeFromString("[42,23]"), id = 1)
+            Json.encodeToJsonElement(
+                JsonRpcRequest(
+                    method = "subtract",
+                    params = Json.decodeFromString("[42,23]"),
+                    id = JsonPrimitive(1)
+                )
+            )
         assertEquals(expectedRequest, sender.receive())
     }
 
@@ -80,8 +91,11 @@ class JsonRpcTest {
         val inputChannel = ByteChannel()
         inputChannel.appendLine(expectedResponse)
         inputChannel.flush()
-        val sender = (inputChannel to outputChannel).jsonLineSender(ksrpcEnvironment { })
-        val expectedRequest = JsonRpcResponse(result = Json.decodeFromString("-19"), id = 1)
+        val sender = (inputChannel to outputChannel).jsonLine(ksrpcEnvironment { })
+        val expectedRequest =
+            Json.encodeToJsonElement(
+                JsonRpcResponse(result = Json.decodeFromString("-19"), id = JsonPrimitive(1))
+            )
         assertEquals(expectedRequest, sender.receive())
     }
 
@@ -90,12 +104,14 @@ class JsonRpcTest {
         val expectedMessage = """{"jsonrpc":"2.0","method":"subtract","params":[42,23],"id":1}"""
         val outputChannel = ByteChannel()
         val inputChannel = ByteChannel()
-        val sender = (inputChannel to outputChannel).jsonHeaderSender(ksrpcEnvironment { })
+        val sender = (inputChannel to outputChannel).jsonHeader(ksrpcEnvironment { })
         sender.send(
-            JsonRpcRequest(
-                method = "subtract",
-                params = Json.decodeFromString("[42,23]"),
-                id = 1
+            Json.encodeToJsonElement(
+                JsonRpcRequest(
+                    method = "subtract",
+                    params = Json.decodeFromString("[42,23]"),
+                    id = JsonPrimitive(1)
+                )
             )
         )
         assertEquals("Content-Length: 61", outputChannel.readUTF8Line())
@@ -112,8 +128,12 @@ class JsonRpcTest {
         val expectedResponse = """{"jsonrpc":"2.0","result":-19,"id":1}"""
         val outputChannel = ByteChannel()
         val inputChannel = ByteChannel()
-        val sender = (inputChannel to outputChannel).jsonHeaderReceiver(ksrpcEnvironment { })
-        sender.send(JsonRpcResponse(result = Json.decodeFromString("-19"), id = 1))
+        val sender = (inputChannel to outputChannel).jsonHeader(ksrpcEnvironment { })
+        sender.send(
+            Json.encodeToJsonElement(
+                JsonRpcResponse(result = Json.decodeFromString("-19"), id = JsonPrimitive(1))
+            )
+        )
         assertEquals("Content-Length: 37", outputChannel.readUTF8Line())
         assertEquals("Content-Type: $DEFAULT_CONTENT_TYPE", outputChannel.readUTF8Line())
         assertEquals("", outputChannel.readUTF8Line())
@@ -133,9 +153,15 @@ class JsonRpcTest {
         inputChannel.appendLine()
         inputChannel.appendLine(expectedMessage)
         inputChannel.flush()
-        val sender = (inputChannel to outputChannel).jsonHeaderReceiver(ksrpcEnvironment { })
+        val sender = (inputChannel to outputChannel).jsonHeader(ksrpcEnvironment { })
         val expectedRequest =
-            JsonRpcRequest(method = "subtract", params = Json.decodeFromString("[42,23]"), id = 1)
+            Json.encodeToJsonElement(
+                JsonRpcRequest(
+                    method = "subtract",
+                    params = Json.decodeFromString("[42,23]"),
+                    id = JsonPrimitive(1)
+                )
+            )
         assertEquals(expectedRequest, sender.receive())
     }
 
@@ -149,8 +175,11 @@ class JsonRpcTest {
         inputChannel.appendLine()
         inputChannel.appendLine(expectedResponse)
         inputChannel.flush()
-        val sender = (inputChannel to outputChannel).jsonHeaderSender(ksrpcEnvironment { })
-        val expectedRequest = JsonRpcResponse(result = Json.decodeFromString("-19"), id = 1)
+        val sender = (inputChannel to outputChannel).jsonHeader(ksrpcEnvironment { })
+        val expectedRequest =
+            Json.encodeToJsonElement(
+                JsonRpcResponse(result = Json.decodeFromString("-19"), id = JsonPrimitive(1))
+            )
         assertEquals(expectedRequest, sender.receive())
     }
 
@@ -172,7 +201,7 @@ class JsonRpcTest {
                 CoroutineScope(context),
                 context,
                 ksrpcEnvironment { },
-                (inIn to outOut).jsonLineSender(ksrpcEnvironment { })
+                (inIn to outOut).jsonLine(ksrpcEnvironment { })
             )
         }.also {
             (it as? SuspendInit)?.init()
@@ -188,8 +217,16 @@ class JsonRpcTest {
             )
         )
         jsonChannel.close()
-        inOut.close()
-        outOut.close()
+        try {
+            inOut.close()
+        } catch (t: Throwable) {
+            // Don't care
+        }
+        try {
+            outOut.close()
+        } catch (t: Throwable) {
+            // Don't care
+        }
     }
 }
 
@@ -206,7 +243,6 @@ abstract class JsonRpcFunctionalityTest(
         verifyOnChannel(
             JsonRpcSerializedChannel(
                 coroutineContext,
-                TestTypesInterface,
                 channel,
                 ksrpcEnvironment { }
             )
@@ -219,26 +255,25 @@ abstract class JsonRpcFunctionalityTest(
         val (so, si) = createPipe()
         GlobalScope.launch(Dispatchers.Default) {
             val serializedChannel = serializedChannel()
-            val connection = (input to so).asJsonRpcHost(
+            val connection = (input to so).asJsonRpcConnection(
                 ksrpcEnvironment {
                     errorListener = ErrorListener {
                         it.printStackTrace()
                     }
                 }
             )
-            connection.hostService(serializedChannel)
+            connection.registerDefault(serializedChannel)
         }
         try {
-            val channel = (si to output).asJsonRpcChannel(
+            val channel = (si to output).asJsonRpcConnection(
                 ksrpcEnvironment {
                     errorListener = ErrorListener {
                         it.printStackTrace()
                     }
                 },
-                true,
-                TestTypesInterface
+                true
             )
-            verifyOnChannel(channel)
+            verifyOnChannel(channel.defaultChannel())
         } finally {
             try {
                 input.cancel(null)
@@ -259,7 +294,7 @@ abstract class JsonRpcFunctionalityTest(
         val (so, si) = createPipe()
         GlobalScope.launch(Dispatchers.Default) {
             val serializedChannel = serializedChannel()
-            val connection = (input to so).asJsonRpcHost(
+            val connection = (input to so).asJsonRpcConnection(
                 ksrpcEnvironment {
                     errorListener = ErrorListener {
                         it.printStackTrace()
@@ -267,19 +302,18 @@ abstract class JsonRpcFunctionalityTest(
                 },
                 false
             )
-            connection.hostService(serializedChannel)
+            connection.registerDefault(serializedChannel)
         }
         try {
-            val channel = (si to output).asJsonRpcChannel(
+            val channel = (si to output).asJsonRpcConnection(
                 ksrpcEnvironment {
                     errorListener = ErrorListener {
                         it.printStackTrace()
                     }
                 },
-                false,
-                TestTypesInterface
+                false
             )
-            verifyOnChannel(channel)
+            verifyOnChannel(channel.defaultChannel())
         } finally {
             try {
                 input.cancel(null)

@@ -34,34 +34,3 @@ internal class JsonRpcServiceWrapper(
     }
 }
 
-internal suspend fun launchServeJsonMessages(
-    scope: CoroutineScope,
-    context: CoroutineContext,
-    channel: JsonRpcChannel,
-    env: KsrpcEnvironment,
-    comm: JsonRpcTransformer<JsonRpcResponse, JsonRpcRequest>,
-) {
-    scope.launch(context) {
-        while (true) {
-            val message = comm.receive() ?: continue
-            scope.launch(context) {
-                try {
-                    val response =
-                        channel.execute(message.method, message.params, message.id == null)
-                    if (message.id == null) return@launch
-                    comm.send(JsonRpcResponse(result = response, id = message.id))
-                } catch (t: Throwable) {
-                    env.errorListener.onError(t)
-                    if (message.id != null) {
-                        comm.send(
-                            JsonRpcResponse(
-                                error = JsonRpcError(JsonRpcError.INTERNAL_ERROR, t.asString),
-                                id = message.id
-                            )
-                        )
-                    }
-                }
-            }
-        }
-    }
-}

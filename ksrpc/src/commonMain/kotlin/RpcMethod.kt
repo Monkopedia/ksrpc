@@ -101,7 +101,7 @@ internal interface ServiceExecutor {
  * A wrapper around calling into or from stubs/serialization.
  */
 class RpcMethod<T : RpcService, I, O> internal constructor(
-    private val endpoint: String,
+    val endpoint: String,
     private val inputTransform: Transformer<I>,
     private val outputTransform: Transformer<O>,
     private val method: ServiceExecutor
@@ -125,7 +125,7 @@ class RpcMethod<T : RpcService, I, O> internal constructor(
     internal suspend fun callChannel(channel: SerializedService, input: Any?): Any? {
         return withContext(channel.context) {
             val input = inputTransform.transform(input as I, channel)
-            val transformedOutput = channel.call(endpoint, input)
+            val transformedOutput = channel.call(this@RpcMethod, input)
             outputTransform.untransform(transformedOutput, channel)
         }
     }

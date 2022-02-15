@@ -43,7 +43,7 @@ suspend fun HttpClient.asWebsocketConnection(baseUrl: String, env: KsrpcEnvironm
         url.takeFrom(baseUrl.trimEnd('/'))
         url.protocol = URLProtocol.WS
     }
-    return threadSafe { context ->
+    return threadSafe<Connection> { context ->
         WebsocketPacketChannel(
             CoroutineScope(context),
             context,
@@ -51,6 +51,6 @@ suspend fun HttpClient.asWebsocketConnection(baseUrl: String, env: KsrpcEnvironm
             env
         )
     }.also {
-        it.init()
+        (it as SuspendInit).init()
     }
 }

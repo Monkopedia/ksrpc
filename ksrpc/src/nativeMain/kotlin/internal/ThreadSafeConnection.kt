@@ -28,20 +28,11 @@ import com.monkopedia.ksrpc.channels.ConnectionProvider
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.channels.SuspendInit
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
-import kotlin.coroutines.CoroutineContext
-import kotlin.native.concurrent.DetachedObjectGraph
 
 internal class ThreadSafeConnection(
-    context: CoroutineContext,
-    reference: DetachedObjectGraph<Connection>,
+    threadSafe: ThreadSafe<Connection>,
     override val env: KsrpcEnvironment
-) : ThreadSafe<Connection>(context, reference), ConnectionInternal, SuspendInit {
-
-    override suspend fun init() {
-        return useSafe {
-            (it as SuspendInit).init()
-        }
-    }
+) : ThreadSafeUser<Connection>(threadSafe), ConnectionInternal, SuspendInit {
 
     override suspend fun registerHost(service: SerializedService): ChannelId {
         val threadSafeService = service.threadSafe()
@@ -63,12 +54,6 @@ internal class ThreadSafeConnection(
         }
     }
 
-    override suspend fun close() {
-        return useSafe {
-            it.close()
-        }
-    }
-
     override suspend fun wrapChannel(channelId: ChannelId): SerializedService {
         return useSafe {
             it.wrapChannel(channelId).threadSafe()
@@ -84,17 +69,11 @@ internal class ThreadSafeConnection(
             it.call(channelId, endpoint, data)
         }
     }
-
-    override suspend fun onClose(onClose: suspend () -> Unit) {
-        return useSafe {
-            it.onClose(onClose)
-        }
-    }
 }
 
 internal class ThreadSafeConnectionProvider(private val key: Any) : ConnectionProvider {
     override val host: ChannelHost?
-        get() = (key.threadSafe() as? ChannelHostProvider)?.host
+        get() = (key.threadSafe() as ThreadSafe<Connection>).getWrapper<ConnectionInternal>().host
     override val client: ChannelClient?
-        get() = (key.threadSafe() as? ChannelClientProvider)?.client
+        get() = (key.threadSafe() as ThreadSafe<Connection>).getWrapper<ConnectionInternal>().client
 }

@@ -5,6 +5,7 @@ import com.monkopedia.ksrpc.SuspendCloseable
 import kotlinx.serialization.Required
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonPrimitive
 
 internal interface JsonRpcChannel : SuspendCloseable, Element {
     suspend fun execute(method: String, message: JsonElement?, isNotify: Boolean): JsonElement?
@@ -16,7 +17,7 @@ internal data class JsonRpcRequest(
     val jsonrpc: String = "2.0",
     val method: String,
     val params: JsonElement?,
-    val id: Int?,
+    val id: JsonPrimitive?,
 )
 
 @Serializable
@@ -25,7 +26,7 @@ internal data class JsonRpcResponse(
     val jsonrpc: String = "2.0",
     val result: JsonElement? = null,
     val error: JsonRpcError? = null,
-    val id: Int? = null,
+    val id: JsonPrimitive? = null,
 )
 
 @Serializable
