@@ -25,6 +25,9 @@ import kotlin.concurrent.thread
 import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.Job
 
+/**
+ * Helper that calls into Pair<ByteReadChannel, ByteWriteChannel>.asConnection.
+ */
 suspend fun Pair<InputStream, OutputStream>.asConnection(env: KsrpcEnvironment): Connection {
     val (input, output) = this
     val channel = ByteChannel(autoFlush = true)
@@ -33,4 +36,19 @@ suspend fun Pair<InputStream, OutputStream>.asConnection(env: KsrpcEnvironment):
         channel.toInputStream(job).copyTo(output)
     }
     return (input.toByteReadChannel(coroutineContext) to channel).asConnection(env)
+}
+
+/**
+ * Helper that calls into Pair<ByteReadChannel, ByteWriteChannel>.asJsonRpcConnection.
+ */
+suspend fun Pair<InputStream, OutputStream>.asJsonRpcConnection(
+    env: KsrpcEnvironment
+): SingleChannelConnection {
+    val (input, output) = this
+    val channel = ByteChannel(autoFlush = true)
+    val job = coroutineContext[Job]
+    thread(start = true) {
+        channel.toInputStream(job).copyTo(output)
+    }
+    return (input.toByteReadChannel(coroutineContext) to channel).asJsonRpcConnection(env)
 }

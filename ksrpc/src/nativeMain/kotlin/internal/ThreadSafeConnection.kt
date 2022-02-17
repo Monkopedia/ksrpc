@@ -18,9 +18,7 @@ package com.monkopedia.ksrpc.internal
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.ChannelClient
-import com.monkopedia.ksrpc.channels.ChannelClientProvider
 import com.monkopedia.ksrpc.channels.ChannelHost
-import com.monkopedia.ksrpc.channels.ChannelHostProvider
 import com.monkopedia.ksrpc.channels.ChannelId
 import com.monkopedia.ksrpc.channels.Connection
 import com.monkopedia.ksrpc.channels.ConnectionInternal

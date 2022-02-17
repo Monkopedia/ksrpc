@@ -22,8 +22,6 @@ import com.monkopedia.ksrpc.channels.ChannelClientProvider
 import com.monkopedia.ksrpc.channels.ChannelId
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
-import kotlin.coroutines.CoroutineContext
-import kotlin.native.concurrent.DetachedObjectGraph
 
 internal class ThreadSafeChannelClient(
     threadSafe: ThreadSafe<ChannelClient>,

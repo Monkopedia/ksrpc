@@ -18,6 +18,9 @@ package com.monkopedia.ksrpc.channels
 import com.monkopedia.ksrpc.RpcService
 import com.monkopedia.ksrpc.serialized
 import com.monkopedia.ksrpc.toStub
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 import kotlin.jvm.JvmName
 
 internal interface SuspendInit {
@@ -60,19 +63,29 @@ internal expect interface VoidService : RpcService
  * This is equivalent to calling [registerDefault] for [T] instance and using
  * [defaultChannel] and [toStub] to create [R].
  */
+@OptIn(ExperimentalContracts::class)
 suspend inline fun <reified T : RpcService, reified R : RpcService> SingleChannelConnection.connect(
-    crossinline host: (R) -> T
-) = connect { channel ->
-    host(channel.toStub()).serialized(env)
+    crossinline host: suspend (R) -> T
+) {
+    contract {
+        callsInPlace(host, InvocationKind.EXACTLY_ONCE)
+    }
+    connect { channel ->
+        host(channel.toStub()).serialized(env)
+    }
 }
 
 /**
  * Raw version of [connect], performing the same functionality with [SerializedService] directly.
  */
 @JvmName("connectSerialized")
+@OptIn(ExperimentalContracts::class)
 suspend fun SingleChannelConnection.connect(
-    host: (SerializedService) -> SerializedService
+    host: suspend (SerializedService) -> SerializedService
 ) {
+    contract {
+        callsInPlace(host, InvocationKind.EXACTLY_ONCE)
+    }
     val recv = defaultChannel()
     val serializedHost = host(recv)
     registerDefault(serializedHost)

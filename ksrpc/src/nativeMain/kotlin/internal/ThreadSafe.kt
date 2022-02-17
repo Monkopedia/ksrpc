@@ -32,9 +32,6 @@ import com.monkopedia.ksrpc.channels.SuspendInit
 import com.monkopedia.ksrpc.internal.jsonrpc.JsonRpcChannel
 import internal.MovableInstance
 import internal.using
-import kotlinx.coroutines.CloseableCoroutineDispatcher
-import kotlinx.coroutines.newSingleThreadContext
-import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.native.concurrent.DetachedObjectGraph
@@ -43,6 +40,9 @@ import kotlin.native.concurrent.attach
 import kotlin.native.concurrent.ensureNeverFrozen
 import kotlin.native.concurrent.freeze
 import kotlin.reflect.KClass
+import kotlinx.coroutines.CloseableCoroutineDispatcher
+import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.withContext
 
 /**
  * Tags instances that are handling thread wrapping in native code already and
@@ -190,7 +190,9 @@ internal actual object ThreadSafeManager {
         }
     }
 
-    actual inline fun <reified T : KsrpcEnvironment.Element> threadSafe(creator: (CoroutineContext) -> T): T {
+    actual inline fun <reified T : KsrpcEnvironment.Element> threadSafe(
+        creator: (CoroutineContext) -> T
+    ): T {
         if (!threadSafeCacheInitialized) {
             threadSafeCache = mutableMapOf()
             threadSafeCacheInitialized = true

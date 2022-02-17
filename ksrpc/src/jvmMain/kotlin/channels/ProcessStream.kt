@@ -38,3 +38,27 @@ suspend fun ProcessBuilder.asConnection(env: KsrpcEnvironment): Connection {
     val output = process.outputStream
     return (input to output).asConnection(env)
 }
+
+/**
+ * Create a [SingleChannelConnection] that communicates over the std in/out streams of this process
+ * using jsonrpc.
+ */
+suspend fun stdInJsonRpcConnection(env: KsrpcEnvironment): SingleChannelConnection {
+    val input = System.`in`
+    val output = System.out
+    return (input to output).asJsonRpcConnection(env)
+}
+
+/**
+ * Create a [SingleChannelConnection] that starts the process and uses the
+ * [Process.getInputStream] and [Process.getOutputStream] as the streams for communication using
+ * jsonrpc.
+ */
+suspend fun ProcessBuilder.asJsonRpcConnection(env: KsrpcEnvironment): SingleChannelConnection {
+    val process = redirectInput(ProcessBuilder.Redirect.PIPE)
+        .redirectOutput(ProcessBuilder.Redirect.PIPE)
+        .start()
+    val input = process.inputStream
+    val output = process.outputStream
+    return (input to output).asJsonRpcConnection(env)
+}

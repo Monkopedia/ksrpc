@@ -19,13 +19,14 @@ import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.channels.ChannelClientProvider
 import com.monkopedia.ksrpc.channels.ChannelHostProvider
 import com.monkopedia.ksrpc.channels.ConnectionProvider
-import com.monkopedia.ksrpc.internal.jsonrpc.JsonRpcSerializedChannel
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
 internal actual object ThreadSafeManager {
     actual inline fun <reified T : Any> T.threadSafe(): T = this
-    actual inline fun <reified T : KsrpcEnvironment.Element> threadSafe(creator: (CoroutineContext) -> T): T =
+    actual inline fun <reified T : KsrpcEnvironment.Element> threadSafe(
+        creator: (CoroutineContext) -> T
+    ): T =
         creator(EmptyCoroutineContext)
 
     actual inline fun createKey(): Any = Unit

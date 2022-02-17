@@ -59,10 +59,6 @@ actual suspend fun KsrpcUri.connect(
             val client = clientFactory()
             client.asWebsocketConnection(path, env)
         }
-        KsrpcType.WEBSOCKET -> {
-            val client = clientFactory()
-            client.asWebsocketConnection(path, env)
-        }
     }
 }
 
