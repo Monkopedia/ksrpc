@@ -16,18 +16,22 @@
 package com.monkopedia.ksrpc.internal
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
-import com.monkopedia.ksrpc.channels.CallData
-import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.channels.SuspendInit
+import com.monkopedia.ksrpc.internal.jsonrpc.JsonRpcChannel
+import kotlinx.serialization.json.JsonElement
 
-internal class ThreadSafeService(
-    threadSafe: ThreadSafe<SerializedService>,
+internal class ThreadSafeJsonRpcChannel(
+    threadSafe: ThreadSafe<JsonRpcChannel>,
     override val env: KsrpcEnvironment
-) : ThreadSafeUser<SerializedService>(threadSafe), SerializedService, SuspendInit {
+) : ThreadSafeUser<JsonRpcChannel>(threadSafe), JsonRpcChannel, SuspendInit {
 
-    override suspend fun call(endpoint: String, input: CallData): CallData {
+    override suspend fun execute(
+        method: String,
+        message: JsonElement?,
+        isNotify: Boolean
+    ): JsonElement? {
         return useSafe {
-            it.call(endpoint, input)
+            it.execute(method, message, isNotify)
         }
     }
 }

@@ -3,6 +3,7 @@
 build/
 local.properties
 **/build
+**/*.swp
 
 # Eclipse
 .classpath

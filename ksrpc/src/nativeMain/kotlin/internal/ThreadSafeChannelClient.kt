@@ -22,14 +22,11 @@ import com.monkopedia.ksrpc.channels.ChannelClientProvider
 import com.monkopedia.ksrpc.channels.ChannelId
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
-import kotlin.coroutines.CoroutineContext
-import kotlin.native.concurrent.DetachedObjectGraph
 
 internal class ThreadSafeChannelClient(
-    context: CoroutineContext,
-    reference: DetachedObjectGraph<ChannelClient>,
+    threadSafe: ThreadSafe<ChannelClient>,
     override val env: KsrpcEnvironment
-) : ThreadSafe<ChannelClient>(context, reference), ChannelClient {
+) : ThreadSafeUser<ChannelClient>(threadSafe), ChannelClient {
 
     override suspend fun wrapChannel(channelId: ChannelId): SerializedService {
         return useSafe {
@@ -46,18 +43,6 @@ internal class ThreadSafeChannelClient(
     override suspend fun close(id: ChannelId) {
         return useSafe {
             it.close(id)
-        }
-    }
-
-    override suspend fun close() {
-        return useSafe {
-            it.close()
-        }
-    }
-
-    override suspend fun onClose(onClose: suspend () -> Unit) {
-        return useSafe {
-            it.onClose(onClose)
         }
     }
 }

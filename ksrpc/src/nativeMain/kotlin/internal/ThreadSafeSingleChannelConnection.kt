@@ -16,48 +16,26 @@
 package com.monkopedia.ksrpc.internal
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
-import com.monkopedia.ksrpc.channels.CallData
-import com.monkopedia.ksrpc.channels.ChannelHost
-import com.monkopedia.ksrpc.channels.ChannelHostProvider
-import com.monkopedia.ksrpc.channels.ChannelId
 import com.monkopedia.ksrpc.channels.SerializedService
+import com.monkopedia.ksrpc.channels.SingleChannelConnection
+import com.monkopedia.ksrpc.channels.SuspendInit
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
 
-internal class ThreadSafeChannelHost(
-    threadSafe: ThreadSafe<ChannelHost>,
+internal class ThreadSafeSingleChannelConnection(
+    threadSafe: ThreadSafe<SingleChannelConnection>,
     override val env: KsrpcEnvironment
-) : ThreadSafeUser<ChannelHost>(threadSafe), ChannelHost {
-    override suspend fun registerHost(service: SerializedService): ChannelId {
-        val threadSafeService = service.threadSafe()
-        return useSafe {
-            it.registerHost(threadSafeService)
-        }
-    }
+) : ThreadSafeUser<SingleChannelConnection>(threadSafe), SingleChannelConnection, SuspendInit {
 
     override suspend fun registerDefault(service: SerializedService) {
         val threadSafeService = service.threadSafe()
-        return useSafe {
+        useSafe {
             it.registerDefault(threadSafeService)
         }
     }
 
-    override suspend fun close(id: ChannelId) {
+    override suspend fun defaultChannel(): SerializedService {
         return useSafe {
-            it.close(id)
+            it.defaultChannel().threadSafe()
         }
     }
-
-    override suspend fun call(
-        channelId: ChannelId,
-        endpoint: String,
-        data: CallData
-    ): CallData {
-        return useSafe {
-            it.call(channelId, endpoint, data)
-        }
-    }
-}
-internal class ThreadSafeHostProvider(private val key: Any) : ChannelHostProvider {
-    override val host: ChannelHost?
-        get() = (key.threadSafe() as? ChannelHostProvider)?.host
 }

@@ -66,7 +66,7 @@ internal class ReadWritePacketChannel(
     }
 }
 
-private suspend fun ByteWriteChannel.appendLine(s: String = "") = writeStringUtf8("$s\n")
+internal suspend fun ByteWriteChannel.appendLine(s: String = "") = writeStringUtf8("$s\n")
 
 @OptIn(InternalAPI::class)
 private suspend fun ByteWriteChannel.send(
@@ -113,7 +113,7 @@ private suspend fun ByteReadChannel.readContent(
     }
 }
 
-private suspend fun ByteReadChannel.readFields(): Map<String, String> {
+internal suspend fun ByteReadChannel.readFields(): Map<String, String> {
     val fields = mutableListOf<String>()
     var line = readUTF8Line()
     while (line == null || line.isNotEmpty()) {

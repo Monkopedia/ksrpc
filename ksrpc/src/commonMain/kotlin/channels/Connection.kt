@@ -18,6 +18,9 @@ package com.monkopedia.ksrpc.channels
 import com.monkopedia.ksrpc.RpcService
 import com.monkopedia.ksrpc.serialized
 import com.monkopedia.ksrpc.toStub
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 import kotlin.jvm.JvmName
 
 internal interface SuspendInit {
@@ -29,7 +32,7 @@ internal interface SuspendInit {
  *
  * (Meaning @KsServices can be used for both input and output of any @KsMethod)
  */
-interface Connection : ChannelHost, ChannelClient
+interface Connection : ChannelHost, ChannelClient, SingleChannelConnection
 
 internal interface ConnectionInternal :
     Connection,
@@ -39,6 +42,11 @@ internal interface ConnectionInternal :
     SuspendInit
 
 internal interface ConnectionProvider : ChannelHostProvider, ChannelClientProvider
+
+/**
+ * A bidirectional channel that can host one service in each direction (1 host and 1 client).
+ */
+interface SingleChannelConnection : SingleChannelHost, SingleChannelClient
 
 // Problems with JS compiler and serialization
 data class ChannelId(val id: String)
@@ -55,19 +63,29 @@ internal expect interface VoidService : RpcService
  * This is equivalent to calling [registerDefault] for [T] instance and using
  * [defaultChannel] and [toStub] to create [R].
  */
-suspend inline fun <reified T : RpcService, reified R : RpcService> Connection.connect(
-    crossinline host: (R) -> T
-) = connect { channel ->
-    host(channel.toStub()).serialized(env)
+@OptIn(ExperimentalContracts::class)
+suspend inline fun <reified T : RpcService, reified R : RpcService> SingleChannelConnection.connect(
+    crossinline host: suspend (R) -> T
+) {
+    contract {
+        callsInPlace(host, InvocationKind.EXACTLY_ONCE)
+    }
+    connect { channel ->
+        host(channel.toStub()).serialized(env)
+    }
 }
 
 /**
  * Raw version of [connect], performing the same functionality with [SerializedService] directly.
  */
 @JvmName("connectSerialized")
-suspend fun Connection.connect(
-    host: (SerializedService) -> SerializedService
+@OptIn(ExperimentalContracts::class)
+suspend fun SingleChannelConnection.connect(
+    host: suspend (SerializedService) -> SerializedService
 ) {
+    contract {
+        callsInPlace(host, InvocationKind.EXACTLY_ONCE)
+    }
     val recv = defaultChannel()
     val serializedHost = host(recv)
     registerDefault(serializedHost)

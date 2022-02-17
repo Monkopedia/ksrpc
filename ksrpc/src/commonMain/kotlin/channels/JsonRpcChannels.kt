@@ -16,35 +16,26 @@
 package com.monkopedia.ksrpc.channels
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
-import com.monkopedia.ksrpc.internal.ReadWritePacketChannel
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
+import com.monkopedia.ksrpc.internal.jsonrpc.JsonRpcWriterBase
+import com.monkopedia.ksrpc.internal.jsonrpc.jsonHeader
+import com.monkopedia.ksrpc.internal.jsonrpc.jsonLine
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
 import kotlinx.coroutines.CoroutineScope
 
-internal const val CONTENT_LENGTH = "Content-Length"
-internal const val CONTENT_TYPE = "Content-Type"
-internal const val DEFAULT_CONTENT_TYPE = "application/vscode-jsonrpc; charset=utf-8"
-internal const val METHOD = "Method"
-internal const val INPUT = "Input"
-internal const val TYPE = "Type"
-internal const val CHANNEL = "Channel"
-
-internal enum class SendType {
-    NORMAL,
-    BINARY,
-    BINARY_INPUT
-}
-
-/**
- * Create a [Connection] for the given input/output channel.
- */
-suspend fun Pair<ByteReadChannel, ByteWriteChannel>.asConnection(
-    env: KsrpcEnvironment
-): Connection {
-    return threadSafe<ConnectionInternal> { context ->
-        ReadWritePacketChannel(CoroutineScope(context), context, first, second, env)
+suspend fun Pair<ByteReadChannel, ByteWriteChannel>.asJsonRpcConnection(
+    env: KsrpcEnvironment,
+    includeContentHeaders: Boolean = true
+): SingleChannelConnection {
+    return threadSafe<SingleChannelConnection> { context ->
+        JsonRpcWriterBase(
+            CoroutineScope(context),
+            context,
+            env,
+            if (includeContentHeaders) jsonHeader(env) else jsonLine(env)
+        )
     }.also {
-        it.init()
+        (it as? SuspendInit)?.init()
     }
 }

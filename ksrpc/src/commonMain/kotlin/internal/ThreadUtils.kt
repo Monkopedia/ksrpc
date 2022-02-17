@@ -15,6 +15,7 @@
  */
 package com.monkopedia.ksrpc.internal
 
+import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.channels.ChannelClientInternal
 import com.monkopedia.ksrpc.channels.ChannelClientProvider
 import com.monkopedia.ksrpc.channels.ChannelHostInternal
@@ -37,7 +38,9 @@ internal interface ThreadSafeKeyedHost : ThreadSafeKeyed, ChannelHostInternal
 internal expect object ThreadSafeManager {
     inline fun createKey(): Any
     inline fun <reified T : Any> T.threadSafe(): T
-    inline fun <reified T : Any> threadSafe(creator: (CoroutineContext) -> T): T
+    inline fun <reified T : KsrpcEnvironment.Element> threadSafe(
+        creator: (CoroutineContext) -> T
+    ): T
 
     inline fun ThreadSafeKeyedConnection.threadSafeProvider(): ConnectionProvider
     inline fun ThreadSafeKeyedClient.threadSafeProvider(): ChannelClientProvider
