@@ -66,7 +66,7 @@ internal class ReadWritePacketChannel(
     }
 }
 
-internal suspend fun ByteWriteChannel.appendLine(s: String = "") = writeStringUtf8("$s\n")
+internal suspend fun ByteWriteChannel.appendLine(s: String = "") = writeStringUtf8("$s\r\n")
 
 @OptIn(InternalAPI::class)
 private suspend fun ByteWriteChannel.send(

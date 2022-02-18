@@ -64,6 +64,7 @@ internal class JsonRpcWriterBase(
                         }
                     }
                 } catch (t: Throwable) {
+                    env.errorListener.onError(t)
                     try {
                         close()
                     } catch (t: Throwable) {
