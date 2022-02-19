@@ -469,3 +469,4 @@ Unranked list of things I know I want to implement:
 - Finish testing [TrackingService](ksrpc/src/commonMain/kotlin/TrackingService.kt) and publish it as API
 - Add tests to ensure no leaks around sub-service usage and cleanup
 - Better native handling of threading
+- Support building mac/windows binaries in github release workflow
