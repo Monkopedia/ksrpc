@@ -59,15 +59,15 @@ kotlin {
     sourceSets["commonMain"].dependencies {
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.3.2")
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
-        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0-native-mt") {
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.2-native-mt") {
             version {
-                strictly("1.6.0-native-mt")
+                strictly("1.6.1-native-mt")
             }
         }
-        implementation("org.jetbrains.kotlinx:atomicfu:0.16.2")
-        implementation("io.ktor:ktor-client-core:1.6.4")
-        implementation("io.ktor:ktor-client-websockets:1.6.4")
-        implementation("io.ktor:ktor-http:1.6.4")
+        implementation("org.jetbrains.kotlinx:atomicfu:0.17.1")
+        implementation("io.ktor:ktor-client-core:1.6.8")
+        implementation("io.ktor:ktor-client-websockets:1.6.8")
+        implementation("io.ktor:ktor-http:1.6.8")
     }
     sourceSets["commonTest"].dependencies {
         implementation(kotlin("test"))
@@ -78,11 +78,11 @@ kotlin {
         implementation(kotlin("stdlib"))
         implementation(kotlin("reflect"))
         implementation("org.slf4j:slf4j-api:1.6.1")
-        compileOnly("io.ktor:ktor-server-core:1.6.4")
-        compileOnly("io.ktor:ktor-server-host-common:1.6.4")
-        compileOnly("io.ktor:ktor-server-netty:1.6.4")
-        compileOnly("io.ktor:ktor-websockets:1.6.4")
-        compileOnly("io.ktor:ktor-client-core:1.6.4")
+        compileOnly("io.ktor:ktor-server-core:1.6.8")
+        compileOnly("io.ktor:ktor-server-host-common:1.6.8")
+        compileOnly("io.ktor:ktor-server-netty:1.6.8")
+        compileOnly("io.ktor:ktor-websockets:1.6.8")
+        compileOnly("io.ktor:ktor-client-core:1.6.8")
 
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.3.2")
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
@@ -90,28 +90,28 @@ kotlin {
     }
     sourceSets["jvmTest"].dependencies {
         implementation(kotlin("test-junit"))
-        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0-native-mt")
-        implementation("io.ktor:ktor-server-core:1.6.4")
-        implementation("io.ktor:ktor-server-netty:1.6.4")
-        implementation("io.ktor:ktor-jackson:1.6.4")
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1-native-mt")
+        implementation("io.ktor:ktor-server-core:1.6.8")
+        implementation("io.ktor:ktor-server-netty:1.6.8")
+        implementation("io.ktor:ktor-jackson:1.6.8")
 
-        implementation("io.ktor:ktor-client-core:1.6.4")
-        implementation("io.ktor:ktor-client-okhttp:1.6.4")
-        implementation("io.ktor:ktor-websockets:1.6.4")
-        implementation("io.ktor:ktor-client-websockets:1.6.4")
-        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.0-native-mt")
+        implementation("io.ktor:ktor-client-core:1.6.8")
+        implementation("io.ktor:ktor-client-okhttp:1.6.8")
+        implementation("io.ktor:ktor-websockets:1.6.8")
+        implementation("io.ktor:ktor-client-websockets:1.6.8")
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.1-native-mt")
     }
     sourceSets["jsTest"].dependencies {
         implementation(kotlin("test-js"))
-        implementation("io.ktor:ktor-client-core:1.6.4")
+        implementation("io.ktor:ktor-client-core:1.6.8")
     }
     sourceSets["jsMain"].dependencies {
         implementation(npm("nanoid", "3.1.22"))
-        compileOnly("io.ktor:ktor-client-core:1.6.4")
+        compileOnly("io.ktor:ktor-client-core:1.6.8")
     }
     sourceSets["nativeMain"].dependencies {
-        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0-native-mt")
-        implementation("io.ktor:ktor-client-curl:1.6.4")
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1-native-mt")
+        implementation("io.ktor:ktor-client-curl:1.6.8")
     }
 }
 
