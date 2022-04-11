@@ -24,6 +24,9 @@ import io.ktor.routing.routing
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.utils.io.ByteChannel
+import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.websocket.WebSockets
 import java.util.concurrent.CountDownLatch
 import kotlinx.coroutines.CompletableDeferred
@@ -78,6 +81,11 @@ actual fun Routing.testServeWebsocket(
     channel: SerializedService,
     env: KsrpcEnvironment
 ) = serveWebsocket(basePath, channel, env)
+
+actual fun createPipe(): Pair<ByteWriteChannel, ByteReadChannel> {
+    val channel = ByteChannel(autoFlush = true)
+    return channel to channel
+}
 
 internal actual fun runBlockingUnit(function: suspend () -> Unit) {
     val block = CountDownLatch(1)

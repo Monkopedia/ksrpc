@@ -110,6 +110,7 @@ kotlin {
         compileOnly("io.ktor:ktor-client-core:1.6.8")
     }
     sourceSets["nativeMain"].dependencies {
+        implementation(kotlin("stdlib"))
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1-native-mt")
         implementation("io.ktor:ktor-client-curl:1.6.8")
     }

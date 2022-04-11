@@ -16,6 +16,9 @@
 package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.channels.SerializedService
+import io.ktor.utils.io.ByteChannel
+import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.ByteWriteChannel
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.promise
 
@@ -40,6 +43,11 @@ actual fun Routing.testServeWebsocket(
     env: KsrpcEnvironment
 ) {
     // Do nothing, disable HTTP hosting in JS tests.
+}
+
+actual fun createPipe(): Pair<ByteWriteChannel, ByteReadChannel> {
+    val channel = ByteChannel(autoFlush = true)
+    return channel to channel
 }
 
 actual class Routing

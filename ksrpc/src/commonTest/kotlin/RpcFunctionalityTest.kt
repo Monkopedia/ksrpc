@@ -167,7 +167,4 @@ expect fun Routing.testServeWebsocket(
     env: KsrpcEnvironment = ksrpcEnvironment { }
 )
 
-fun createPipe(): Pair<ByteWriteChannel, ByteReadChannel> {
-    val channel = ByteChannel(autoFlush = true)
-    return channel to channel
-}
+expect fun createPipe(): Pair<ByteWriteChannel, ByteReadChannel>
