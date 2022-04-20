@@ -24,7 +24,6 @@ import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
 import com.monkopedia.ksrpc.internal.asClient
 import io.ktor.client.HttpClient
 import io.ktor.client.features.websocket.WebSockets
-import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
 import kotlin.test.Test

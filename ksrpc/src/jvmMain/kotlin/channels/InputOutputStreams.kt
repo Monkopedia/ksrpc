@@ -16,17 +16,13 @@
 package com.monkopedia.ksrpc.channels
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
-import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.jvm.javaio.toByteReadChannel
-import io.ktor.utils.io.jvm.javaio.toInputStream
 import io.ktor.utils.io.reader
-import kotlinx.coroutines.GlobalScope
 import java.io.InputStream
 import java.io.OutputStream
-import kotlin.concurrent.thread
-import kotlin.coroutines.coroutineContext
-import kotlinx.coroutines.Job
 import java.nio.channels.Channels
+import kotlin.coroutines.coroutineContext
+import kotlinx.coroutines.GlobalScope
 
 /**
  * Helper that calls into Pair<ByteReadChannel, ByteWriteChannel>.asConnection.

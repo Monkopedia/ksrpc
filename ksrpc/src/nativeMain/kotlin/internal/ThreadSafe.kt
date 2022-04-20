@@ -1,12 +1,12 @@
 /*
  * Copyright 2021 Jason Monk
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *     https://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,9 +32,6 @@ import com.monkopedia.ksrpc.channels.SuspendInit
 import com.monkopedia.ksrpc.internal.jsonrpc.JsonRpcChannel
 import internal.MovableInstance
 import internal.using
-import kotlinx.coroutines.CloseableCoroutineDispatcher
-import kotlinx.coroutines.newSingleThreadContext
-import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.native.concurrent.DetachedObjectGraph
@@ -43,6 +40,9 @@ import kotlin.native.concurrent.attach
 import kotlin.native.concurrent.ensureNeverFrozen
 import kotlin.native.concurrent.freeze
 import kotlin.reflect.KClass
+import kotlinx.coroutines.CloseableCoroutineDispatcher
+import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.withContext
 
 /**
  * Tags instances that are handling thread wrapping in native code already and
