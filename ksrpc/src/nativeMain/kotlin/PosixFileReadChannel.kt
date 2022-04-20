@@ -29,6 +29,7 @@ import kotlinx.cinterop.memScoped
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.newSingleThreadContext
 import platform.posix.close
+import platform.posix.fflush
 import platform.posix.fsync
 import platform.posix.read
 import platform.posix.write
@@ -53,6 +54,7 @@ fun posixFileReadChannel(fd: Int): ByteReadChannel {
                     if (readCount == 0L) continue
 
                     channel.writeFully(buffer, 0, readCount)
+                    channel.flush()
                 }
             } catch (cause: Throwable) {
                 channel.close(cause)
@@ -83,6 +85,7 @@ fun posixFileWriteChannel(fd: Int): ByteWriteChannel {
                         source.copyTo(buffer, start, size, 0)
                         write(fd, buffer, size.toULong())
                         fsync(fd)
+                        fflush(null)
                         size.toInt()
                     }
                 }

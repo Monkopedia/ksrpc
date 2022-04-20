@@ -59,7 +59,7 @@ kotlin {
     sourceSets["commonMain"].dependencies {
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.3.2")
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
-        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.2-native-mt") {
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1-native-mt") {
             version {
                 strictly("1.6.1-native-mt")
             }

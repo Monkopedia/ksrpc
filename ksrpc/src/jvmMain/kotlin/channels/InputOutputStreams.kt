@@ -19,22 +19,29 @@ import com.monkopedia.ksrpc.KsrpcEnvironment
 import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.jvm.javaio.toByteReadChannel
 import io.ktor.utils.io.jvm.javaio.toInputStream
+import io.ktor.utils.io.reader
+import kotlinx.coroutines.GlobalScope
 import java.io.InputStream
 import java.io.OutputStream
 import kotlin.concurrent.thread
 import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.Job
+import java.nio.channels.Channels
 
 /**
  * Helper that calls into Pair<ByteReadChannel, ByteWriteChannel>.asConnection.
  */
 suspend fun Pair<InputStream, OutputStream>.asConnection(env: KsrpcEnvironment): Connection {
     val (input, output) = this
-    val channel = ByteChannel(autoFlush = true)
-    val job = coroutineContext[Job]
-    thread(start = true) {
-        channel.toInputStream(job).copyTo(output)
-    }
+    val channel = GlobalScope.reader(coroutineContext) {
+        val outputChannel = Channels.newChannel(output)
+        while (!channel.isClosedForRead) {
+            channel.read { buffer ->
+                outputChannel.write(buffer)
+                output.flush()
+            }
+        }
+    }.channel
     return (input.toByteReadChannel(coroutineContext) to channel).asConnection(env)
 }
 
@@ -45,10 +52,14 @@ suspend fun Pair<InputStream, OutputStream>.asJsonRpcConnection(
     env: KsrpcEnvironment
 ): SingleChannelConnection {
     val (input, output) = this
-    val channel = ByteChannel(autoFlush = true)
-    val job = coroutineContext[Job]
-    thread(start = true) {
-        channel.toInputStream(job).copyTo(output)
-    }
+    val channel = GlobalScope.reader(coroutineContext) {
+        val outputChannel = Channels.newChannel(output)
+        while (!channel.isClosedForRead) {
+            channel.read { buffer ->
+                outputChannel.write(buffer)
+                output.flush()
+            }
+        }
+    }.channel
     return (input.toByteReadChannel(coroutineContext) to channel).asJsonRpcConnection(env)
 }
