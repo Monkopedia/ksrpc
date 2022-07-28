@@ -16,3 +16,4 @@ bin/
 *.iml
 *.iws
 *.ipr
+kotlin-js-store
