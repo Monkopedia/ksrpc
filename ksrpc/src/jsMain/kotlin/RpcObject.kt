@@ -25,12 +25,14 @@ import kotlin.reflect.findAssociatedObject
  */
 @OptIn(ExperimentalAssociatedObjects::class)
 @AssociatedObjectKey
-@Retention(AnnotationRetention.BINARY)
+@Retention(AnnotationRetention.RUNTIME)
 annotation class RpcObjectKey(val rpcObject: KClass<out RpcObject<*>>)
 
 @OptIn(ExperimentalAssociatedObjects::class)
 actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> {
-    return T::class.findAssociatedObject<RpcObjectKey>() as RpcObject<T>
+    val obj = T::class.findAssociatedObject<RpcObjectKey>()
+    println("Object: $obj for ${T::class}")
+    return obj as RpcObject<T>
 }
 
 actual val Throwable.asString: String

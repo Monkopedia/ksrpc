@@ -24,11 +24,11 @@ import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.channels.asConnection
 import com.monkopedia.ksrpc.channels.serve
 import com.monkopedia.ksrpc.channels.stdInConnection
-import io.ktor.application.install
-import io.ktor.features.CORS
-import io.ktor.routing.routing
+import io.ktor.server.application.install
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.server.plugins.cors.routing.*
+import io.ktor.server.routing.*
 import java.net.ServerSocket
 import kotlin.concurrent.thread
 import kotlin.system.exitProcess

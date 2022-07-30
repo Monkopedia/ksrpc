@@ -26,8 +26,8 @@ buildscript {
     extra["kotlin_plugin_id"] = "com.monkopedia.ksrpc.plugin"
 }
 plugins {
-    kotlin("multiplatform") version "1.6.20" apply false
-    kotlin("plugin.serialization") version "1.6.20" apply false
+    kotlin("multiplatform") version "1.7.10" apply false
+    kotlin("plugin.serialization") version "1.7.10" apply false
     id("com.github.autostyle") version "3.1"
     id("org.jetbrains.dokka") version "1.4.10.2" apply false
 
