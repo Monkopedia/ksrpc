@@ -38,6 +38,7 @@ import org.jetbrains.kotlin.resolve.lazy.LazyClassContext
 import org.jetbrains.kotlin.resolve.lazy.declarations.ClassMemberDeclarationProvider
 import org.jetbrains.kotlin.types.KotlinType
 import org.jetbrains.kotlin.types.KotlinTypeFactory
+import org.jetbrains.kotlin.types.TypeAttributes
 import org.jetbrains.kotlin.types.TypeProjectionImpl
 import org.jetbrains.kotlin.types.Variance
 
@@ -204,13 +205,13 @@ class KsrpcSyntheticResolveExtension(private val messageCollector: MessageCollec
         val types = listOf(
             TypeProjectionImpl(
                 projectionType,
-                KotlinTypeFactory.simpleNotNullType(Annotations.EMPTY, target, emptyList())
+                KotlinTypeFactory.simpleNotNullType(TypeAttributes.Empty, target, emptyList())
             )
         )
         val descriptor = target.module.findClassAcrossModuleDependencies(
             ClassId.topLevel(FqName("com.monkopedia.ksrpc.RpcObject"))
         )
             ?: error("Can't find RpcObject within module ${target.name.asString()}")
-        supertypes.add(KotlinTypeFactory.simpleNotNullType(Annotations.EMPTY, descriptor, types))
+        supertypes.add(KotlinTypeFactory.simpleNotNullType(TypeAttributes.Empty, descriptor, types))
     }
 }

@@ -23,7 +23,7 @@ import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
 import com.monkopedia.ksrpc.internal.asClient
 import io.ktor.client.HttpClient
-import io.ktor.client.features.websocket.WebSockets
+import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
 import kotlin.test.Test

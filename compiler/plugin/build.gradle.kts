@@ -41,7 +41,7 @@ dependencies {
     testImplementation(project(":ksrpc"))
     testImplementation(kotlin("test-junit"))
     testImplementation("org.jetbrains.kotlin:kotlin-compiler-embeddable")
-    testImplementation("com.github.tschuchortdev:kotlin-compile-testing:1.4.8")
+    testImplementation("com.github.tschuchortdev:kotlin-compile-testing:1.4.9")
 }
 
 buildConfig {

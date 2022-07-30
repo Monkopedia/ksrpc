@@ -20,7 +20,7 @@ import com.monkopedia.ksrpc.internal.HttpSerializedChannel
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
 import com.monkopedia.ksrpc.internal.WebsocketPacketChannel
 import io.ktor.client.HttpClient
-import io.ktor.client.features.websocket.webSocketSession
+import io.ktor.client.plugins.websocket.webSocketSession
 import io.ktor.http.URLProtocol
 import io.ktor.http.takeFrom
 import kotlinx.coroutines.CoroutineScope

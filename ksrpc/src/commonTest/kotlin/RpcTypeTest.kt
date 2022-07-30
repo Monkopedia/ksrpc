@@ -127,7 +127,12 @@ object RpcTypeTest {
         verifyOnChannel: suspend (SerializedService, FakeTestTypes) -> Unit,
         private val service: FakeTestTypes = FakeTestTypes()
     ) : RpcFunctionalityTest(
-        serializedChannel = { service.serialized<TestTypesInterface>(ksrpcEnvironment { }) },
+        serializedChannel = {
+            val rpcObject = rpcObject<TestTypesInterface>()
+            error("rpcObject is fine")
+            //val ret = service.serialized<TestTypesInterface>(ksrpcEnvironment { })
+            //ret
+        },
         verifyOnChannel = { channel ->
             verifyOnChannel(channel, service)
         }

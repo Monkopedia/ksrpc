@@ -18,6 +18,7 @@ package com.monkopedia.ksrpc.plugin
 import org.jetbrains.kotlin.backend.common.ir.createImplicitParameterDeclarationWithWrappedDescriptor
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.backend.common.lower.irThrow
+import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.descriptors.Modality
@@ -67,6 +68,10 @@ object CompanionGeneration {
             superTypes = listOf(env.rpcObject.typeWith(clsType))
             createImplicitParameterDeclarationWithWrappedDescriptor()
         }
+                messageCollector.report(
+                    CompilerMessageSeverity.WARNING,
+                    "Generating companion for ${cls.irClass.name.asString()}"
+                )
         rpcObjectKey?.let {
             cls.irClass.annotations += pluginContext.createIrBuilder(cls.irClass.symbol)
                 .irCallConstructor(
@@ -122,15 +127,11 @@ object CompanionGeneration {
                                         putValueArgument(
                                             0,
                                             irConcat().apply {
-                                                addArgument(
-                                                    irString("Unknown endpoint: ")
-                                                )
-                                                addArgument(irGet(input))
-                                                addArgument(
-                                                    irString(
-                                                        " in service " +
-                                                            cls.irClass.kotlinFqName.asString()
-                                                    )
+                                                arguments += irString("Unknown endpoint: ")
+                                                arguments += irGet(input)
+                                                arguments += irString(
+                                                    " in service " +
+                                                        cls.irClass.kotlinFqName.asString()
                                                 )
                                             }
                                         )

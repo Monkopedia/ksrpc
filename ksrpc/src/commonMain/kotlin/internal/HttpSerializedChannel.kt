@@ -28,13 +28,15 @@ import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.createKey
 import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafeProvider
 import io.ktor.client.HttpClient
-import io.ktor.client.call.receive
+import io.ktor.client.call.body
 import io.ktor.client.request.accept
 import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.encodeURLPath
+import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.readRemaining
 import kotlin.coroutines.CoroutineContext
 import kotlinx.serialization.json.Json
@@ -50,19 +52,19 @@ internal class HttpSerializedChannel(
     override val context: CoroutineContext = ClientChannelContext(threadSafeProvider())
 
     override suspend fun call(channelId: ChannelId, endpoint: String, input: CallData): CallData {
-        val response = httpClient.post<HttpResponse>(
+        val response = httpClient.post(
             "$baseStripped/call/${endpoint.encodeURLPath()}"
         ) {
             accept(ContentType.Application.Json)
             headers[KSRPC_BINARY] = input.isBinary.toString()
             headers[KSRPC_CHANNEL] = channelId.id
-            body = if (input.isBinary) input.readBinary() else input.readSerialized()
+            setBody(if (input.isBinary) input.readBinary() else input.readSerialized())
         }
         response.checkErrors()
         if (response.headers[KSRPC_BINARY]?.toBoolean() == true) {
-            return CallData.create(response.content)
+            return CallData.create(response.body<ByteReadChannel>())
         }
-        return CallData.create(response.content.readRemaining().readText())
+        return CallData.create(response.body<String>())
     }
 
     override suspend fun close(id: ChannelId) {
@@ -84,7 +86,7 @@ internal class HttpSerializedChannel(
 
 internal suspend fun HttpResponse.checkErrors() {
     if (status == HttpStatusCode.InternalServerError) {
-        val text = receive<String>()
+        val text = body<String>()
         if (text.startsWith(ERROR_PREFIX)) {
             throw Json.decodeFromString(
                 RpcFailure.serializer(),

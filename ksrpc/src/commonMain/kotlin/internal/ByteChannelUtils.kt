@@ -18,11 +18,11 @@ package com.monkopedia.ksrpc.internal
 import com.monkopedia.ksrpc.ERROR_PREFIX
 import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.channels.CallData
-import io.ktor.http.cio.websocket.Frame
-import io.ktor.http.cio.websocket.WebSocketSession
-import io.ktor.http.cio.websocket.readBytes
-import io.ktor.http.cio.websocket.readText
-import io.ktor.http.cio.websocket.send
+import io.ktor.websocket.Frame
+import io.ktor.websocket.WebSocketSession
+import io.ktor.websocket.readBytes
+import io.ktor.websocket.readText
+import io.ktor.websocket.send
 import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.close
@@ -98,8 +98,7 @@ private suspend fun handleFrame(
             channel.close()
             return true
         }
-        is Frame.Ping,
-        is Frame.Pong -> {
+        else -> {
         }
     }
     return false
