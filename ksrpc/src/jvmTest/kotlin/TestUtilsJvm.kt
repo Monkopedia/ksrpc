@@ -16,29 +16,28 @@
 package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.channels.SerializedService
-import com.monkopedia.ksrpc.channels.serve as jvmServe
 import com.monkopedia.ksrpc.channels.serveWebsocket
-import io.ktor.application.install
-import io.ktor.routing.Routing
-import io.ktor.routing.routing
+import io.ktor.server.application.install
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.server.routing.routing
+import io.ktor.server.websocket.WebSockets
 import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
-import io.ktor.websocket.WebSockets
-import java.util.concurrent.CountDownLatch
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
+import java.util.concurrent.CountDownLatch
+import com.monkopedia.ksrpc.channels.serve as jvmServe
 
 var PORT = 8081
 
-actual typealias Routing = Routing
+actual typealias Routing = io.ktor.server.routing.Routing
 
 actual suspend inline fun httpTest(
     crossinline serve: suspend Routing.() -> Unit,

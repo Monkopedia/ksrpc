@@ -25,8 +25,6 @@ import com.monkopedia.ksrpc.channels.ChannelClientInternal
 import com.monkopedia.ksrpc.channels.ChannelId
 import com.monkopedia.ksrpc.channels.SerializedChannel
 import com.monkopedia.ksrpc.channels.SerializedService
-import com.monkopedia.ksrpc.internal.ThreadSafeManager.createKey
-import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafeProvider
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
@@ -37,19 +35,17 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.encodeURLPath
 import io.ktor.utils.io.ByteReadChannel
-import io.ktor.utils.io.readRemaining
-import kotlin.coroutines.CoroutineContext
 import kotlinx.serialization.json.Json
+import kotlin.coroutines.CoroutineContext
 
 internal class HttpSerializedChannel(
     private val httpClient: HttpClient,
     private val baseStripped: String,
     override val env: KsrpcEnvironment
-) : SerializedChannel, ChannelClientInternal, ThreadSafeKeyedClient {
+) : SerializedChannel, ChannelClientInternal {
 
     private val onCloseHandlers = mutableSetOf<suspend () -> Unit>()
-    override val key: Any = createKey()
-    override val context: CoroutineContext = ClientChannelContext(threadSafeProvider())
+    override val context: CoroutineContext = ClientChannelContext(this)
 
     override suspend fun call(channelId: ChannelId, endpoint: String, input: CallData): CallData {
         val response = httpClient.post(

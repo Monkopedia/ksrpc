@@ -28,6 +28,11 @@ import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.close
 import io.ktor.utils.io.core.readBytes
 import io.ktor.utils.io.readRemaining
+import io.ktor.websocket.Frame.Binary
+import io.ktor.websocket.Frame.Close
+import io.ktor.websocket.Frame.Ping
+import io.ktor.websocket.Frame.Pong
+import io.ktor.websocket.Frame.Text
 import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -74,7 +79,7 @@ private suspend fun handleFrame(
     channel: ByteChannel
 ): Boolean {
     when (frame) {
-        is Frame.Binary -> {
+        is Binary -> {
             val src = frame.readBytes()
             if (!channel.isClosedForWrite) {
                 channel.writeFully(src, 0, src.size)
@@ -84,7 +89,7 @@ private suspend fun handleFrame(
                 return true
             }
         }
-        is Frame.Text -> {
+        is Text -> {
             val text = frame.readText()
             if (text.startsWith(ERROR_PREFIX)) {
                 throw Json.decodeFromString(
@@ -94,12 +99,11 @@ private suspend fun handleFrame(
             }
             throw IllegalStateException("Unexpected response $frame")
         }
-        is Frame.Close -> {
+        is Close -> {
             channel.close()
             return true
         }
-        else -> {
-        }
+        else -> {}
     }
     return false
 }

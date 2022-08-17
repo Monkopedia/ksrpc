@@ -20,16 +20,15 @@ import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.channels.asConnection
 import com.monkopedia.ksrpc.channels.asWebsocketConnection
 import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
-import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
 import com.monkopedia.ksrpc.internal.asClient
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
-import kotlin.test.Test
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlin.test.Test
 
 abstract class RpcFunctionalityTest(
     private val supportedTypes: List<TestType> = TestType.values().toList(),
@@ -47,9 +46,7 @@ abstract class RpcFunctionalityTest(
     fun testSerializePassthrough() = runBlockingUnit {
         if (TestType.SERIALIZE !in supportedTypes) return@runBlockingUnit
         val serializedChannel = serializedChannel()
-        val channel = threadSafe<Connection> {
-            HostSerializedChannelImpl(ksrpcEnvironment { })
-        }
+        val channel = HostSerializedChannelImpl(ksrpcEnvironment { })
         channel.registerDefault(serializedChannel)
 
         verifyOnChannel(channel.asClient.defaultChannel())

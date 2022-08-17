@@ -16,24 +16,19 @@
 package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.channels.SerializedService
-import internal.MovableInstance
-import internal.using
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.fail
 import kotlinx.cinterop.IntVar
 import kotlinx.cinterop.allocArray
 import kotlinx.cinterop.get
 import kotlinx.cinterop.memScoped
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import platform.posix.pipe
 import platform.posix.pthread_self
+import kotlin.test.Test
+import kotlin.test.fail
 
 actual suspend inline fun httpTest(
     crossinline serve: suspend Routing.() -> Unit,
@@ -99,27 +94,5 @@ class NativeTestTest {
             }
         }
         println("Thread: $x")
-    }
-
-    @Test
-    fun testMovableInstance() = runBlockingUnit {
-        val movable = MovableInstance { mutableSetOf<String>() }
-        val otherThread = newSingleThreadContext("test thread")
-
-        try {
-            movable.using {
-                it.add("First string")
-            }
-            GlobalScope.launch(otherThread) {
-                movable.using {
-                    it.add("Second string")
-                }
-            }.join()
-            movable.using {
-                assertEquals(it, setOf("First string", "Second string"))
-            }
-        } finally {
-            otherThread.close()
-        }
     }
 }

@@ -18,18 +18,10 @@ package com.monkopedia.ksrpc
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
 import com.monkopedia.ksrpc.channels.SerializedService
-import kotlin.test.assertEquals
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.serialization.Serializable
-
-@Serializable
-data class MyJson(
-    val str: String,
-    val int: Int,
-    val nFloat: Float?
-)
+import kotlin.test.assertEquals
 
 @KsService
 interface TestTypesInterface : RpcService {

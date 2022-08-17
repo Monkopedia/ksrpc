@@ -1,12 +1,12 @@
 /*
  * Copyright 2021 Jason Monk
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     https://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,6 +29,9 @@ interface BinaryInterface : RpcService {
 
     @KsMethod("/input")
     suspend fun inputRpc(u: ByteReadChannel): String
+
+    @KsMethod("/ping")
+    suspend fun ping(input: String): String
 }
 
 class BinaryTest : RpcFunctionalityTest(
@@ -42,6 +45,11 @@ class BinaryTest : RpcFunctionalityTest(
             override suspend fun inputRpc(u: ByteReadChannel): String {
                 error("Not implemented")
             }
+
+            override suspend fun ping(input: String): String {
+                assertEquals("ping", input)
+                return "pong"
+            }
         }
         channel.serialized(ksrpcEnvironment { })
     },
@@ -50,6 +58,38 @@ class BinaryTest : RpcFunctionalityTest(
         val response = stub.rpc("Hello" to "world")
         val str = response.readRemaining().readText()
         assertEquals("Hello world", str)
+        assertEquals("pong", stub.ping("ping"))
+    }
+)
+
+val longLongContent = List(2048) {
+    "Test string content"
+}.joinToString { "" }
+
+class MultiFrameBinaryTest : RpcFunctionalityTest(
+    serializedChannel = {
+        val channel: BinaryInterface = object : BinaryInterface {
+            override suspend fun rpc(u: Pair<String, String>): ByteReadChannel {
+                return ByteReadChannel(longLongContent.encodeToByteArray())
+            }
+
+            override suspend fun inputRpc(u: ByteReadChannel): String {
+                error("Not implemented")
+            }
+
+            override suspend fun ping(input: String): String {
+                assertEquals("ping", input)
+                return "pong"
+            }
+        }
+        channel.serialized(ksrpcEnvironment { })
+    },
+    verifyOnChannel = { serializedChannel ->
+        val stub = serializedChannel.toStub<BinaryInterface>()
+        val response = stub.rpc("Hello" to "world")
+        val str = response.readRemaining().readText()
+        assertEquals(longLongContent, str)
+        assertEquals("pong", stub.ping("ping"))
     }
 )
 
@@ -63,6 +103,11 @@ class BinaryInputTest : RpcFunctionalityTest(
             override suspend fun rpc(u: Pair<String, String>): ByteReadChannel {
                 error("Not implemented")
             }
+
+            override suspend fun ping(input: String): String {
+                assertEquals("ping", input)
+                return "pong"
+            }
         }
         channel.serialized(ksrpcEnvironment { })
     },
@@ -70,5 +115,6 @@ class BinaryInputTest : RpcFunctionalityTest(
         val stub = serializedChannel.toStub<BinaryInterface>()
         val response = stub.inputRpc(ByteReadChannel("Hello world".encodeToByteArray()))
         assertEquals("Input: Hello world", response)
+        assertEquals("pong", stub.ping("ping"))
     }
 )

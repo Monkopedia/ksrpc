@@ -1,12 +1,12 @@
 /*
  * Copyright 2021 Jason Monk
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     https://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,22 +18,18 @@ package com.monkopedia.ksrpc.internal
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.SuspendCloseable
 import com.monkopedia.ksrpc.channels.CallData
-import com.monkopedia.ksrpc.channels.ChannelHost
 import com.monkopedia.ksrpc.channels.ChannelHostInternal
 import com.monkopedia.ksrpc.channels.ChannelId
 import com.monkopedia.ksrpc.channels.ConnectionInternal
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.channels.SuspendInit
-import com.monkopedia.ksrpc.internal.ThreadSafeManager.createKey
-import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafe
-import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafeProvider
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 internal data class Packet(
     val input: Boolean,
@@ -51,19 +47,16 @@ internal abstract class PacketChannelBase(
     private val scope: CoroutineScope,
     context: CoroutineContext,
     override val env: KsrpcEnvironment
-) : PacketChannel, ConnectionInternal, ChannelHostInternal, ThreadSafeKeyedConnection, SuspendInit {
+) : PacketChannel, ConnectionInternal, ChannelHostInternal, SuspendInit {
     private var isClosed = false
     private var callLock = Mutex()
-    override val key: Any = createKey()
-
-    private val threadSafeProvider = threadSafeProvider()
 
     @Suppress("LeakingThis")
     override val context: CoroutineContext =
-        context + ClientChannelContext(threadSafeProvider) + HostChannelContext(threadSafeProvider)
+        context + ClientChannelContext(this) + HostChannelContext(this)
 
     private val serviceChannel by lazy {
-        HostSerializedChannelImpl(env, this.context).threadSafe<ChannelHost>()
+        HostSerializedChannelImpl(env, this.context)
     }
     private val onCloseObservers = mutableSetOf<suspend () -> Unit>()
 
@@ -78,14 +71,12 @@ internal abstract class PacketChannelBase(
                         val p = receive()
                         if (p.input) {
                             launch {
-                                val response = callLock.withLock {
-                                    withContext(context) {
-                                        serviceChannel.call(
-                                            ChannelId(p.id),
-                                            p.endpoint,
-                                            p.data
-                                        )
-                                    }
+                                val response = withContext(context) {
+                                    serviceChannel.call(
+                                        ChannelId(p.id),
+                                        p.endpoint,
+                                        p.data
+                                    )
                                 }
                                 send(Packet(false, p.id, p.endpoint, response))
                             }
@@ -106,7 +97,21 @@ internal abstract class PacketChannelBase(
 
     override suspend fun call(channelId: ChannelId, endpoint: String, data: CallData): CallData {
         send(Packet(true, channelId.id, endpoint, data))
-        return receiveChannel.receive().data
+        return receiveFor(channelId)
+    }
+
+    private suspend fun receiveFor(channelId: ChannelId): CallData {
+        val packet = receiveChannel.receive()
+        if (packet.id != channelId.id) {
+            // Wrong channel, so try receiving again, then send out the message again to get
+            // it to the right place.
+            return receiveFor(channelId).also {
+                scope.launch {
+                    receiveChannel.send(packet)
+                }
+            }
+        }
+        return packet.data
     }
 
     override suspend fun close(id: ChannelId) {

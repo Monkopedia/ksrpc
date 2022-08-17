@@ -95,7 +95,7 @@ kotlin {
 
         implementation("io.ktor:ktor-client-core:2.0.2")
         implementation("io.ktor:ktor-client-okhttp:2.0.2")
-        implementation("io.ktor:ktor-websockets:2.0.2")
+        implementation("io.ktor:ktor-server-websockets:2.0.2")
         implementation("io.ktor:ktor-client-websockets:2.0.2")
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.3-native-mt")
     }
@@ -121,6 +121,13 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
         freeCompilerArgs += "-Xno-param-assertions"
     }
 }
+
+kotlin.targets.withType(org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget::class.java) {
+    binaries.all {
+        binaryOptions["memoryModel"] = "experimental"
+    }
+}
+
 
 val dokkaJavadoc = tasks.create("dokkaJavadocCustom", org.jetbrains.dokka.gradle.DokkaTask::class) {
     dependencies {

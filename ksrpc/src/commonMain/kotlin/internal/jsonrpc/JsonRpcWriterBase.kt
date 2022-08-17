@@ -35,7 +35,6 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 
-@OptIn(DangerousInternalIoApi::class)
 internal class JsonRpcWriterBase(
     private val scope: CoroutineScope,
     private val context: CoroutineContext,

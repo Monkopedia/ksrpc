@@ -32,22 +32,17 @@ import com.monkopedia.ksrpc.channels.SerializedChannel
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.channels.SuspendInit
 import com.monkopedia.ksrpc.channels.randomUuid
-import com.monkopedia.ksrpc.internal.ThreadSafeManager.createKey
-import com.monkopedia.ksrpc.internal.ThreadSafeManager.threadSafeProvider
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 internal class HostSerializedChannelImpl(
     override val env: KsrpcEnvironment,
     channelContext: CoroutineContext? = null,
-) : ConnectionInternal, ThreadSafeKeyedConnection, SuspendInit {
+) : ConnectionInternal, SuspendInit {
     private var baseChannel = CompletableDeferred<SerializedService>()
-    override val key: Any = createKey()
     override val context: CoroutineContext =
-        channelContext ?: threadSafeProvider().let {
-            ClientChannelContext(it) + HostChannelContext(it)
-        }
+        channelContext ?: (ClientChannelContext(this) + HostChannelContext(this))
     private val onCloseObservers = mutableSetOf<suspend () -> Unit>()
 
     private val serviceMap by lazy {
