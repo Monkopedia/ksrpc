@@ -23,25 +23,12 @@ import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.jvm.JvmName
 
-internal interface SuspendInit {
-    suspend fun init() = Unit
-}
-
 /**
  * A bidirectional channel that can both host and call services/sub-services.
  *
  * (Meaning @KsServices can be used for both input and output of any @KsMethod)
  */
 interface Connection : ChannelHost, ChannelClient, SingleChannelConnection
-
-internal interface ConnectionInternal :
-    Connection,
-    ChannelHostInternal,
-    ChannelClientInternal,
-    ConnectionProvider,
-    SuspendInit
-
-internal interface ConnectionProvider : ChannelHostProvider, ChannelClientProvider
 
 /**
  * A bidirectional channel that can host one service in each direction (1 host and 1 client).

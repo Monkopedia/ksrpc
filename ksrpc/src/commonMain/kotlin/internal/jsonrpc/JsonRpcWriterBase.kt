@@ -1,12 +1,12 @@
 /*
  * Copyright 2021 Jason Monk
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     https://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,9 +20,6 @@ import com.monkopedia.ksrpc.RpcException
 import com.monkopedia.ksrpc.asString
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.channels.SingleChannelConnection
-import com.monkopedia.ksrpc.channels.SuspendInit
-import io.ktor.utils.io.core.internal.DangerousInternalIoApi
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -34,20 +31,21 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
+import kotlin.coroutines.CoroutineContext
 
 internal class JsonRpcWriterBase(
     private val scope: CoroutineScope,
     private val context: CoroutineContext,
     override val env: KsrpcEnvironment,
-    private val comm: JsonRpcTransformer,
-) : JsonRpcChannel, SingleChannelConnection, SuspendInit {
+    private val comm: JsonRpcTransformer
+) : JsonRpcChannel, SingleChannelConnection {
     private val json = (env.serialization as? Json) ?: Json
     private var id = 1
 
     private var baseChannel = CompletableDeferred<JsonRpcChannel>()
     private val completions = mutableMapOf<String, CompletableDeferred<JsonRpcResponse?>>()
 
-    override suspend fun init() {
+    init {
         scope.launch {
             withContext(context) {
                 try {

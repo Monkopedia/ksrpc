@@ -21,7 +21,7 @@ import com.monkopedia.ksrpc.KSRPC_CHANNEL
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.channels.CallData
-import com.monkopedia.ksrpc.channels.ChannelClientInternal
+import com.monkopedia.ksrpc.channels.ChannelClient
 import com.monkopedia.ksrpc.channels.ChannelId
 import com.monkopedia.ksrpc.channels.SerializedChannel
 import com.monkopedia.ksrpc.channels.SerializedService
@@ -42,7 +42,7 @@ internal class HttpSerializedChannel(
     private val httpClient: HttpClient,
     private val baseStripped: String,
     override val env: KsrpcEnvironment
-) : SerializedChannel, ChannelClientInternal {
+) : SerializedChannel, ChannelClient {
 
     private val onCloseHandlers = mutableSetOf<suspend () -> Unit>()
     override val context: CoroutineContext = ClientChannelContext(this)

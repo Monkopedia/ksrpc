@@ -18,11 +18,10 @@ package com.monkopedia.ksrpc.internal
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.SuspendCloseable
 import com.monkopedia.ksrpc.channels.CallData
-import com.monkopedia.ksrpc.channels.ChannelHostInternal
+import com.monkopedia.ksrpc.channels.ChannelHost
 import com.monkopedia.ksrpc.channels.ChannelId
-import com.monkopedia.ksrpc.channels.ConnectionInternal
+import com.monkopedia.ksrpc.channels.Connection
 import com.monkopedia.ksrpc.channels.SerializedService
-import com.monkopedia.ksrpc.channels.SuspendInit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
@@ -45,15 +44,14 @@ internal interface PacketChannel : SuspendCloseable {
 
 internal abstract class PacketChannelBase(
     private val scope: CoroutineScope,
-    context: CoroutineContext,
     override val env: KsrpcEnvironment
-) : PacketChannel, ConnectionInternal, ChannelHostInternal, SuspendInit {
+) : PacketChannel, Connection, ChannelHost {
     private var isClosed = false
     private var callLock = Mutex()
 
     @Suppress("LeakingThis")
     override val context: CoroutineContext =
-        context + ClientChannelContext(this) + HostChannelContext(this)
+        ClientChannelContext(this) + HostChannelContext(this)
 
     private val serviceChannel by lazy {
         HostSerializedChannelImpl(env, this.context)
@@ -62,7 +60,7 @@ internal abstract class PacketChannelBase(
 
     private var receiveChannel: Channel<Packet> = Channel()
 
-    override suspend fun init() {
+    init {
         scope.launch {
             withContext(context) {
                 val serviceChannel = serviceChannel

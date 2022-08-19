@@ -44,10 +44,7 @@ suspend fun HttpClient.asWebsocketConnection(baseUrl: String, env: KsrpcEnvironm
     }
     return WebsocketPacketChannel(
         CoroutineScope(coroutineContext),
-        coroutineContext,
         session,
         env
-    ).also {
-        it.init()
-    }
+    )
 }

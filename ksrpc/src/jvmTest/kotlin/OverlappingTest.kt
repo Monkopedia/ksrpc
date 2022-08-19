@@ -21,7 +21,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlin.test.assertEquals
 
-class OverlappingTest() : OverlappingTestBase()
+//class OverlappingTest() : OverlappingTestBase()
 
 // Hacks for firstCall usage :/.
 abstract class OverlappingTestBase(

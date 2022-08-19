@@ -18,17 +18,15 @@ package com.monkopedia.ksrpc.internal
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import io.ktor.websocket.DefaultWebSocketSession
 import io.ktor.websocket.close
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 internal class WebsocketPacketChannel(
     scope: CoroutineScope,
-    context: CoroutineContext,
     private val socketSession: DefaultWebSocketSession,
     env: KsrpcEnvironment
-) : PacketChannelBase(scope, context, env) {
+) : PacketChannelBase(scope, env) {
     private val sendLock = Mutex()
     private val receiveLock = Mutex()
 

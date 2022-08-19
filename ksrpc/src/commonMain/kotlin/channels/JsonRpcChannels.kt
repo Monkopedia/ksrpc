@@ -33,7 +33,5 @@ suspend fun Pair<ByteReadChannel, ByteWriteChannel>.asJsonRpcConnection(
         coroutineContext,
         env,
         if (includeContentHeaders) jsonHeader(env) else jsonLine(env)
-    ).also {
-        it.init()
-    }
+    )
 }

@@ -66,10 +66,6 @@ suspend fun <T : RpcService> SingleChannelHost.registerDefault(
     registerDefault(HostSerializedServiceImpl(service, obj, env))
 }
 
-internal interface ChannelHostProvider {
-    val host: ChannelHost?
-}
-
 /**
  * A wrapper around a communication pathway that can be turned into a primary
  * SerializedService.
@@ -99,15 +95,6 @@ interface ChannelHost : SerializedChannel, SingleChannelHost, KsrpcEnvironment.E
      * [KsMethod]s are automatically registered and translated across a channel.
      */
     suspend fun registerHost(service: SerializedService): ChannelId
-}
-
-internal interface ChannelHostInternal : ChannelHost, ChannelHostProvider {
-    override val host: ChannelHost
-        get() = this
-}
-
-internal interface ChannelClientProvider {
-    val client: ChannelClient?
 }
 
 /**
@@ -150,11 +137,6 @@ interface ChannelClient : SerializedChannel, SingleChannelClient, KsrpcEnvironme
          */
         const val DEFAULT = ""
     }
-}
-
-internal interface ChannelClientInternal : ChannelClient, ChannelClientProvider {
-    override val client: ChannelClient
-        get() = this
 }
 
 /**

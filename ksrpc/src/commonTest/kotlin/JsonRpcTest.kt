@@ -216,9 +216,7 @@ class JsonRpcTest {
             jsonChannelContext,
             ksrpcEnvironment { },
             (inIn to outOut).jsonLine(ksrpcEnvironment { })
-        ).also {
-            it.init()
-        }
+        )
         assertEquals(
             expectedResponse,
             Json.encodeToString(

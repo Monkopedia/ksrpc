@@ -25,12 +25,10 @@ import com.monkopedia.ksrpc.TrackingService
 import com.monkopedia.ksrpc.asString
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.ChannelClient
-import com.monkopedia.ksrpc.channels.ChannelClientInternal
 import com.monkopedia.ksrpc.channels.ChannelId
-import com.monkopedia.ksrpc.channels.ConnectionInternal
+import com.monkopedia.ksrpc.channels.Connection
 import com.monkopedia.ksrpc.channels.SerializedChannel
 import com.monkopedia.ksrpc.channels.SerializedService
-import com.monkopedia.ksrpc.channels.SuspendInit
 import com.monkopedia.ksrpc.channels.randomUuid
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.withContext
@@ -39,7 +37,7 @@ import kotlin.coroutines.CoroutineContext
 internal class HostSerializedChannelImpl(
     override val env: KsrpcEnvironment,
     channelContext: CoroutineContext? = null,
-) : ConnectionInternal, SuspendInit {
+) : Connection {
     private var baseChannel = CompletableDeferred<SerializedService>()
     override val context: CoroutineContext =
         channelContext ?: (ClientChannelContext(this) + HostChannelContext(this))
@@ -111,7 +109,7 @@ internal class HostSerializedChannelImpl(
 }
 
 internal val SerializedChannel.asClient: ChannelClient
-    get() = object : ChannelClientInternal, SerializedChannel by this {
+    get() = object : ChannelClient, SerializedChannel by this {
         override suspend fun wrapChannel(channelId: ChannelId): SerializedService {
             return SubserviceChannel(this, channelId)
         }

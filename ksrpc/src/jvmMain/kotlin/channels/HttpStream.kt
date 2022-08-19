@@ -106,8 +106,7 @@ fun Routing.serveWebsocket(
     val baseStripped = basePath.trimEnd('/')
     webSocket(baseStripped) {
         coroutineScope {
-            val wb = WebsocketPacketChannel(this, coroutineContext, this@webSocket, env)
-            wb.init()
+            val wb = WebsocketPacketChannel(this, this@webSocket, env)
             wb.connect {
                 channel
             }

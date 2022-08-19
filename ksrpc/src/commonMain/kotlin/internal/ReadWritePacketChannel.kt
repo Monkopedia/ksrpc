@@ -23,27 +23,23 @@ import com.monkopedia.ksrpc.channels.INPUT
 import com.monkopedia.ksrpc.channels.METHOD
 import com.monkopedia.ksrpc.channels.SendType
 import com.monkopedia.ksrpc.channels.TYPE
-import io.ktor.util.InternalAPI
 import io.ktor.util.decodeBase64Bytes
 import io.ktor.util.encodeBase64
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.readFully
-import io.ktor.utils.io.readRemaining
 import io.ktor.utils.io.readUTF8Line
 import io.ktor.utils.io.writeStringUtf8
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 internal class ReadWritePacketChannel(
     scope: CoroutineScope,
-    context: CoroutineContext,
     private val read: ByteReadChannel,
     private val write: ByteWriteChannel,
     env: KsrpcEnvironment
-) : PacketChannelBase(scope, context, env) {
+) : PacketChannelBase(scope, env) {
     private val sendLock = Mutex()
     private val receiveLock = Mutex()
 
@@ -68,7 +64,6 @@ internal class ReadWritePacketChannel(
 
 internal suspend fun ByteWriteChannel.appendLine(s: String = "") = writeStringUtf8("$s\r\n")
 
-@OptIn(InternalAPI::class)
 private suspend fun ByteWriteChannel.send(
     packet: Packet
 ) {
@@ -97,13 +92,12 @@ private suspend fun ByteReadChannel.readPacket(): Packet {
     return Packet(input, channel, endpoint, data)
 }
 
-@OptIn(InternalAPI::class)
 private suspend fun ByteReadChannel.readContent(
     params: Map<String, String>
 ): CallData {
-    var length = params[CONTENT_LENGTH]?.toIntOrNull() ?: error("Missing content length in $params")
+    val length = params[CONTENT_LENGTH]?.toIntOrNull() ?: error("Missing content length in $params")
     val type = enumValueOf<SendType>(params[TYPE] ?: SendType.NORMAL.name)
-    var byteArray = ByteArray(length)
+    val byteArray = ByteArray(length)
     readFully(byteArray)
     return when (type) {
         SendType.NORMAL -> CallData.create(byteArray.decodeToString())

@@ -16,19 +16,18 @@
 package com.monkopedia.ksrpc.internal
 
 import com.monkopedia.ksrpc.channels.ChannelClient
-import com.monkopedia.ksrpc.channels.ChannelClientProvider
 import com.monkopedia.ksrpc.channels.ChannelHost
-import com.monkopedia.ksrpc.channels.ChannelHostProvider
+import com.monkopedia.ksrpc.internal.ClientChannelContext.Key
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
 
-internal class HostChannelContext(val channel: ChannelHostProvider) : CoroutineContext.Element {
+internal class HostChannelContext(val channel: ChannelHost) : CoroutineContext.Element {
     override val key: CoroutineContext.Key<*>
         get() = Key
 
     object Key : CoroutineContext.Key<HostChannelContext>
 }
-internal class ClientChannelContext(val channel: ChannelClientProvider) : CoroutineContext.Element {
+internal class ClientChannelContext(val channel: ChannelClient) : CoroutineContext.Element {
     override val key: CoroutineContext.Key<*>
         get() = Key
 
@@ -36,11 +35,9 @@ internal class ClientChannelContext(val channel: ChannelClientProvider) : Corout
 }
 
 internal suspend fun host(): ChannelHost? {
-    val channel = coroutineContext[HostChannelContext.Key]?.channel
-    return channel?.host
+    return coroutineContext[HostChannelContext.Key]?.channel
 }
 
 internal suspend fun client(): ChannelClient? {
-    val channel = coroutineContext[ClientChannelContext.Key]?.channel
-    return channel?.client
+    return coroutineContext[Key]?.channel
 }

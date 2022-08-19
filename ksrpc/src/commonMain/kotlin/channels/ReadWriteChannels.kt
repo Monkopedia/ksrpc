@@ -44,11 +44,8 @@ suspend fun Pair<ByteReadChannel, ByteWriteChannel>.asConnection(
 ): Connection {
     return ReadWritePacketChannel(
         CoroutineScope(coroutineContext),
-        coroutineContext,
         first,
         second,
         env
-    ).also {
-        it.init()
-    }
+    )
 }

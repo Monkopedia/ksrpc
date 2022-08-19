@@ -19,7 +19,6 @@ import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.RpcMethod
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.SerializedService
-import com.monkopedia.ksrpc.channels.SuspendInit
 import kotlin.coroutines.CoroutineContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -30,7 +29,7 @@ internal class JsonRpcSerializedChannel(
     override val context: CoroutineContext,
     private val channel: JsonRpcChannel,
     override val env: KsrpcEnvironment
-) : SerializedService, SuspendInit {
+) : SerializedService {
     private val onCloseCallbacks = mutableSetOf<suspend () -> Unit>()
     private val json = (env.serialization as? Json) ?: Json
 
