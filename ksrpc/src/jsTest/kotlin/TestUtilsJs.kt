@@ -19,6 +19,8 @@ import com.monkopedia.ksrpc.channels.SerializedService
 import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.promise
 
@@ -51,7 +53,8 @@ actual fun createPipe(): Pair<ByteWriteChannel, ByteReadChannel> {
 }
 
 actual class Routing
-internal actual fun runBlockingUnit(function: suspend () -> Unit): dynamic {
+@OptIn(DelicateCoroutinesApi::class)
+internal actual fun runBlockingUnit(function: suspend CoroutineScope.() -> Unit): dynamic {
     return GlobalScope.promise {
         function()
     }

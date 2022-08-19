@@ -29,6 +29,7 @@ internal const val METHOD = "Method"
 internal const val INPUT = "Input"
 internal const val TYPE = "Type"
 internal const val CHANNEL = "Channel"
+internal const val MESSAGE = "Message"
 
 internal enum class SendType {
     NORMAL,

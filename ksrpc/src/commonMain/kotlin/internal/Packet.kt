@@ -33,6 +33,7 @@ import kotlin.coroutines.CoroutineContext
 internal data class Packet(
     val input: Boolean,
     val id: String,
+    val messageId: String,
     val endpoint: String,
     val data: CallData
 )
@@ -59,6 +60,7 @@ internal abstract class PacketChannelBase(
     private val onCloseObservers = mutableSetOf<suspend () -> Unit>()
 
     private var receiveChannel: Channel<Packet> = Channel()
+    private var messageId: Long = 0L
 
     init {
         scope.launch {
@@ -76,7 +78,7 @@ internal abstract class PacketChannelBase(
                                         p.data
                                     )
                                 }
-                                send(Packet(false, p.id, p.endpoint, response))
+                                send(Packet(false, p.id, p.messageId, p.endpoint, response))
                             }
                         } else {
                             receiveChannel.send(p)
@@ -94,20 +96,20 @@ internal abstract class PacketChannelBase(
     }
 
     override suspend fun call(channelId: ChannelId, endpoint: String, data: CallData): CallData {
-        send(Packet(true, channelId.id, endpoint, data))
-        return receiveFor(channelId)
+        val messageId = callLock.withLock { messageId++.toString() }
+        send(Packet(true, channelId.id, messageId, endpoint, data))
+        return receiveFor(channelId, messageId)
     }
 
-    private suspend fun receiveFor(channelId: ChannelId): CallData {
+    private suspend fun receiveFor(channelId: ChannelId, messageId: String): CallData {
         val packet = receiveChannel.receive()
-        if (packet.id != channelId.id) {
-            // Wrong channel, so try receiving again, then send out the message again to get
+        if (packet.id != channelId.id || packet.messageId != messageId) {
+            // Wrong channel, so try receiving again, also send out the message again to get
             // it to the right place.
-            return receiveFor(channelId).also {
-                scope.launch {
-                    receiveChannel.send(packet)
-                }
+            scope.launch {
+                receiveChannel.send(packet)
             }
+            return receiveFor(channelId, messageId)
         }
         return packet.data
     }

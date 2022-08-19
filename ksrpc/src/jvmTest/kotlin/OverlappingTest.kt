@@ -17,11 +17,11 @@ package com.monkopedia.ksrpc
 
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlin.test.assertEquals
 
-//class OverlappingTest() : OverlappingTestBase()
+class OverlappingTest() : OverlappingTestBase()
 
 // Hacks for firstCall usage :/.
 abstract class OverlappingTestBase(
@@ -55,17 +55,19 @@ abstract class OverlappingTestBase(
         )
     },
     verifyOnChannel = { serializedChannel ->
-        val stub = serializedChannel.toStub<TestInterface>()
+        coroutineScope {
+            val stub = serializedChannel.toStub<TestInterface>()
 
-        val finish = GlobalScope.async(Dispatchers.IO) {
-            Result.runCatching {
-                assertEquals("Hello second done", stub.rpc("Hello" to "first"))
+            val finish = async(Dispatchers.IO) {
+                Result.runCatching {
+                    assertEquals("Hello second done", stub.rpc("Hello" to "first"))
+                }.also { println("Call $it") }
             }
+            assertEquals("first", firstCall.await())
+            assertEquals("Hello second", stub.rpc("Hello" to "second"))
+            println("Second call done")
+            secondCallReturn.complete("done")
+            finish.await().getOrThrow()
         }
-        assertEquals("first", firstCall.await())
-        assertEquals("Hello second", stub.rpc("Hello" to "second"))
-        println("Second call done")
-        secondCallReturn.complete("done")
-        finish.await().getOrThrow()
     }
 )

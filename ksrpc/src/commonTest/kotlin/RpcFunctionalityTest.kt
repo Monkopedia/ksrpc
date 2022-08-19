@@ -25,6 +25,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -57,7 +58,7 @@ abstract class RpcFunctionalityTest(
         if (TestType.PIPE !in supportedTypes) return@runBlockingUnit
         val (output, input) = createPipe()
         val (so, si) = createPipe()
-        GlobalScope.launch(Dispatchers.Default) {
+        launch(Dispatchers.Default) {
             val serializedChannel = serializedChannel()
             val connection = (si to output).asConnection(
                 ksrpcEnvironment {
@@ -142,7 +143,7 @@ abstract class RpcFunctionalityTest(
     }
 }
 
-internal expect fun runBlockingUnit(function: suspend () -> Unit)
+internal expect fun runBlockingUnit(function: suspend CoroutineScope.() -> Unit)
 
 expect class Routing
 

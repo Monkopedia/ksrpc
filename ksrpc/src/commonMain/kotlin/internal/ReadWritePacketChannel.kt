@@ -20,6 +20,7 @@ import com.monkopedia.ksrpc.channels.CHANNEL
 import com.monkopedia.ksrpc.channels.CONTENT_LENGTH
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.INPUT
+import com.monkopedia.ksrpc.channels.MESSAGE
 import com.monkopedia.ksrpc.channels.METHOD
 import com.monkopedia.ksrpc.channels.SendType
 import com.monkopedia.ksrpc.channels.TYPE
@@ -76,6 +77,7 @@ private suspend fun ByteWriteChannel.send(
     appendLine("$METHOD: ${packet.endpoint}")
     appendLine("$INPUT: ${packet.input}")
     appendLine("$CHANNEL: ${packet.id}")
+    appendLine("$MESSAGE: ${packet.messageId}")
     appendLine("$CONTENT_LENGTH: ${content.size}")
     appendLine("$TYPE: ${if (data.isBinary) SendType.BINARY.name else SendType.NORMAL.name}")
     appendLine()
@@ -87,9 +89,10 @@ private suspend fun ByteReadChannel.readPacket(): Packet {
     val params = readFields()
     val input = params[INPUT]?.toBoolean() ?: true
     val channel = params[CHANNEL] ?: ""
+    val messageId = params[MESSAGE] ?: ""
     val endpoint = params[METHOD] ?: return readPacket()
     val data = readContent(params)
-    return Packet(input, channel, endpoint, data)
+    return Packet(input, channel, messageId, endpoint, data)
 }
 
 private suspend fun ByteReadChannel.readContent(

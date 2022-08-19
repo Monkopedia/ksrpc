@@ -35,6 +35,7 @@ import io.ktor.websocket.Frame.Pong
 import io.ktor.websocket.Frame.Text
 import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -50,6 +51,7 @@ internal fun ByteReadChannel.toFrameFlow(maxSize: Int = SIZE): Flow<Frame> = flo
     }
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 internal suspend fun ReceiveChannel<Frame>.toReadChannel(
     first: Frame? = null,
     onClose: () -> Unit
@@ -112,6 +114,7 @@ internal suspend fun WebSocketSession.send(packet: Packet) {
     val input = packet.data
     send(packet.input.toString())
     send(packet.id)
+    send(packet.messageId)
     send(packet.endpoint)
     if (input.isBinary) {
         input.readBinary().toFrameFlow().collect {
@@ -129,11 +132,13 @@ internal suspend fun WebSocketSession.receivePacket(onClose: () -> Unit): Packet
 internal suspend fun ReceiveChannel<Frame>.receivePacket(onClose: () -> Unit): Packet {
     val inputPacket = receive().expectText().toBoolean()
     val id = receive().expectText()
+    val messageId = receive().expectText()
     val endpoint = receive().expectText()
     val input = receive()
     return Packet(
         inputPacket,
         id,
+        messageId,
         endpoint,
         if (input is Frame.Text) {
             CallData.create(input.expectText()).also { onClose() }

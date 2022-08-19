@@ -22,6 +22,7 @@ import kotlinx.cinterop.IntVar
 import kotlinx.cinterop.allocArray
 import kotlinx.cinterop.get
 import kotlinx.cinterop.memScoped
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -65,7 +66,7 @@ actual fun createPipe(): Pair<ByteWriteChannel, ByteReadChannel> {
 
 actual class Routing
 
-internal actual fun runBlockingUnit(function: suspend () -> Unit) {
+internal actual fun runBlockingUnit(function: suspend CoroutineScope.() -> Unit) {
     try {
         runBlocking {
             function()
