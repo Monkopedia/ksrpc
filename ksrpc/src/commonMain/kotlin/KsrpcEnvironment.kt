@@ -27,6 +27,7 @@ interface KsrpcEnvironment {
     val serialization: StringFormat
     val defaultScope: CoroutineScope
     val errorListener: ErrorListener
+    val maxParallelReceives: Int
 
     interface Element {
         val env: KsrpcEnvironment
@@ -59,7 +60,8 @@ fun ksrpcEnvironment(builder: KsrpcEnvironmentBuilder.() -> Unit): KsrpcEnvironm
 }
 
 data class KsrpcEnvironmentBuilder internal constructor(
-    override var serialization: StringFormat = Json { },
+    override var serialization: StringFormat = Json,
     override var defaultScope: CoroutineScope = GlobalScope,
-    override var errorListener: ErrorListener = ErrorListener { }
+    override var errorListener: ErrorListener = ErrorListener { },
+    override var maxParallelReceives: Int = 5
 ) : KsrpcEnvironment

@@ -26,8 +26,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 import kotlin.coroutines.CoroutineContext
 
 internal data class Packet(
@@ -45,7 +49,7 @@ internal interface PacketChannel : SuspendCloseable {
 
 internal abstract class PacketChannelBase(
     private val scope: CoroutineScope,
-    override val env: KsrpcEnvironment
+    final override val env: KsrpcEnvironment
 ) : PacketChannel, Connection, ChannelHost {
     private var isClosed = false
     private var callLock = Mutex()
@@ -59,7 +63,9 @@ internal abstract class PacketChannelBase(
     }
     private val onCloseObservers = mutableSetOf<suspend () -> Unit>()
 
-    private var receiveChannel: Channel<Packet> = Channel()
+    private val receiveChannels = arrayOfNulls<ReceiveChannel>(env.maxParallelReceives)
+    private var receiveLock = Semaphore(env.maxParallelReceives)
+    private val acquireChannelLock = Mutex()
     private var messageId: Long = 0L
 
     init {
@@ -81,11 +87,20 @@ internal abstract class PacketChannelBase(
                                 send(Packet(false, p.id, p.messageId, p.endpoint, response))
                             }
                         } else {
-                            receiveChannel.send(p)
+                            val channel = receiveChannels[p.messageId.toInt()]
+                            if (channel != null) {
+                                channel.channel.send(p)
+                            } else {
+                                env.errorListener.onError(
+                                    IllegalStateException(
+                                        "Got packet $p for unexpected message id ${p.messageId}"
+                                    )
+                                )
+                            }
                         }
                     }
                 } catch (t: Throwable) {
-                    receiveChannel.close(t)
+                    receiveChannels.filterNotNull().forEach { it.channel.close(t) }
                 }
             }
         }
@@ -96,22 +111,56 @@ internal abstract class PacketChannelBase(
     }
 
     override suspend fun call(channelId: ChannelId, endpoint: String, data: CallData): CallData {
-        val messageId = callLock.withLock { messageId++.toString() }
-        send(Packet(true, channelId.id, messageId, endpoint, data))
-        return receiveFor(channelId, messageId)
+        return withChannel { channel ->
+            val messageId = channel.id.toString()
+            send(Packet(true, channelId.id, messageId, endpoint, data))
+            channel.channel.receive().data
+        }
     }
 
-    private suspend fun receiveFor(channelId: ChannelId, messageId: String): CallData {
-        val packet = receiveChannel.receive()
-        if (packet.id != channelId.id || packet.messageId != messageId) {
-            // Wrong channel, so try receiving again, also send out the message again to get
-            // it to the right place.
-            scope.launch {
-                receiveChannel.send(packet)
-            }
-            return receiveFor(channelId, messageId)
+    @OptIn(ExperimentalContracts::class)
+    private suspend inline fun <T> withChannel(withChannel: (ReceiveChannel) -> T): T {
+        contract {
+            callsInPlace(withChannel, kotlin.contracts.InvocationKind.EXACTLY_ONCE)
         }
-        return packet.data
+        if (receiveChannels.size == 1) {
+            return acquireChannelLock.withLock {
+                val channel = channelFor(0)
+                withChannel(channel)
+            }
+        }
+        return receiveLock.withPermit {
+            val channel = acquireChannelLock.withLock {
+                acquireChannel()
+            }
+            try {
+                withChannel(channel)
+            } finally {
+                acquireChannelLock.withLock {
+                    releaseChannel(channel)
+                }
+            }
+        }
+    }
+
+    private fun channelFor(index: Int) =
+        receiveChannels[index] ?: ReceiveChannel(index, Channel()).also {
+            receiveChannels[index] = it
+        }
+
+    private fun acquireChannel(): ReceiveChannel {
+        for (i in receiveChannels.indices) {
+            if (receiveChannels[i]?.isLocked != true) {
+                return channelFor(i).also {
+                    it.isLocked = true
+                }
+            }
+        }
+        error("Holding semaphore $receiveLock but no channels available")
+    }
+
+    private fun releaseChannel(channel: ReceiveChannel) {
+        channel.isLocked = false
     }
 
     override suspend fun close(id: ChannelId) {
@@ -133,7 +182,9 @@ internal abstract class PacketChannelBase(
     override suspend fun close() {
         callLock.withLock {
             if (isClosed) return
-            receiveChannel.close()
+            receiveChannels.filterNotNull().forEach {
+                it.channel.close()
+            }
             serviceChannel.close()
             isClosed = true
             onCloseObservers.forEach { it.invoke() }
@@ -142,5 +193,12 @@ internal abstract class PacketChannelBase(
 
     override suspend fun onClose(onClose: suspend () -> Unit) {
         onCloseObservers.add(onClose)
+    }
+
+    private data class ReceiveChannel(
+        val id: Int,
+        val channel: Channel<Packet>
+    ) {
+        var isLocked: Boolean = false
     }
 }
