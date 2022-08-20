@@ -47,8 +47,9 @@ private const val SIZE = 16 * 1024
 internal fun ByteReadChannel.toFrameFlow(maxSize: Int = SIZE): Flow<Frame> = flow {
     while (!isClosedForRead) {
         val packet = readRemaining(maxSize.toLong())
-        emit(Frame.Binary(isClosedForRead, packet.readBytes()))
+        emit(Binary(isClosedForRead, packet.readBytes()))
     }
+    emit(Text("nif"))
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -86,10 +87,6 @@ private suspend fun handleFrame(
             if (!channel.isClosedForWrite) {
                 channel.writeFully(src, 0, src.size)
             }
-            if (frame.fin) {
-                channel.close()
-                return true
-            }
         }
         is Text -> {
             val text = frame.readText()
@@ -98,6 +95,9 @@ private suspend fun handleFrame(
                     RpcFailure.serializer(),
                     text.substring(ERROR_PREFIX.length)
                 ).toException()
+            } else if (text == "nif") {
+                channel.close()
+                return true
             }
             throw IllegalStateException("Unexpected response $frame")
         }
@@ -121,7 +121,7 @@ internal suspend fun WebSocketSession.send(packet: Packet) {
             outgoing.send(it)
         }
     } else {
-        outgoing.send(Frame.Text(input.readSerialized()))
+        outgoing.send(Text(input.readSerialized()))
     }
 }
 
@@ -140,7 +140,7 @@ internal suspend fun ReceiveChannel<Frame>.receivePacket(onClose: () -> Unit): P
         id,
         messageId,
         endpoint,
-        if (input is Frame.Text) {
+        if (input is Text) {
             CallData.create(input.expectText()).also { onClose() }
         } else {
             CallData.create(toReadChannel(input, onClose))
@@ -149,7 +149,7 @@ internal suspend fun ReceiveChannel<Frame>.receivePacket(onClose: () -> Unit): P
 }
 
 internal fun Frame.expectText(): String {
-    if (this is Frame.Text) {
+    if (this is Text) {
         return readText()
     } else {
         throw IllegalStateException("Unexpected frame $this")
