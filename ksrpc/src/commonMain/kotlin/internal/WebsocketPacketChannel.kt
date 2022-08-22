@@ -17,10 +17,15 @@ package com.monkopedia.ksrpc.internal
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import io.ktor.websocket.DefaultWebSocketSession
+import io.ktor.websocket.Frame
+import io.ktor.websocket.Frame.Text
 import io.ktor.websocket.close
+import io.ktor.websocket.readText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 
 internal class WebsocketPacketChannel(
     scope: CoroutineScope,
@@ -30,21 +35,38 @@ internal class WebsocketPacketChannel(
     private val sendLock = Mutex()
     private val receiveLock = Mutex()
 
+    // Use socket max frame with some room for padding.
+    // Divide by 2 to allow for manual base64-ing.
+    override val maxSize: Long
+        get() = socketSession.maxFrameSize / 2 - 1024
+
     override suspend fun send(packet: Packet) {
         sendLock.withLock {
-            socketSession.send(packet)
+            val serialized = env.serialization.encodeToString(packet)
+            socketSession.send(Text(serialized))
         }
     }
 
     override suspend fun receive(): Packet {
-        receiveLock.lock(null)
-        return socketSession.receivePacket {
-            receiveLock.unlock(null)
+        receiveLock.lock()
+        try {
+            val packetText = socketSession.incoming.receive()
+            return env.serialization.decodeFromString(packetText.expectText())
+        } finally {
+            receiveLock.unlock()
         }
     }
 
     override suspend fun close() {
         super.close()
         socketSession.close()
+    }
+}
+
+private fun Frame.expectText(): String {
+    if (this is Text) {
+        return readText()
+    } else {
+        throw IllegalStateException("Unexpected frame $this")
     }
 }

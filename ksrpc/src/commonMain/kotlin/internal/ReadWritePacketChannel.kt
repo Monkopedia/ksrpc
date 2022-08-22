@@ -1,12 +1,12 @@
 /*
  * Copyright 2021 Jason Monk
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     https://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,16 +16,7 @@
 package com.monkopedia.ksrpc.internal
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
-import com.monkopedia.ksrpc.channels.CHANNEL
 import com.monkopedia.ksrpc.channels.CONTENT_LENGTH
-import com.monkopedia.ksrpc.channels.CallData
-import com.monkopedia.ksrpc.channels.INPUT
-import com.monkopedia.ksrpc.channels.MESSAGE
-import com.monkopedia.ksrpc.channels.METHOD
-import com.monkopedia.ksrpc.channels.SendType
-import com.monkopedia.ksrpc.channels.TYPE
-import io.ktor.util.decodeBase64Bytes
-import io.ktor.util.encodeBase64
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.readFully
@@ -34,6 +25,9 @@ import io.ktor.utils.io.writeStringUtf8
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.StringFormat
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 
 internal class ReadWritePacketChannel(
     scope: CoroutineScope,
@@ -46,13 +40,13 @@ internal class ReadWritePacketChannel(
 
     override suspend fun send(packet: Packet) {
         sendLock.withLock {
-            write.send(packet)
+            write.send(packet, env.serialization)
         }
     }
 
     override suspend fun receive(): Packet {
         receiveLock.withLock {
-            return read.readPacket()
+            return read.readPacket(env.serialization)
         }
     }
 
@@ -66,48 +60,30 @@ internal class ReadWritePacketChannel(
 internal suspend fun ByteWriteChannel.appendLine(s: String = "") = writeStringUtf8("$s\r\n")
 
 private suspend fun ByteWriteChannel.send(
-    packet: Packet
+    packet: Packet,
+    serialization: StringFormat
 ) {
-    val data = packet.data
-    val content = if (data.isBinary) {
-        data.readBinary().readRemaining().encodeBase64()
-    } else {
-        data.readSerialized()
-    }.encodeToByteArray(throwOnInvalidSequence = true)
-    appendLine("$METHOD: ${packet.endpoint}")
-    appendLine("$INPUT: ${packet.input}")
-    appendLine("$CHANNEL: ${packet.id}")
-    appendLine("$MESSAGE: ${packet.messageId}")
+    val content =
+        serialization.encodeToString(packet).encodeToByteArray(throwOnInvalidSequence = true)
     appendLine("$CONTENT_LENGTH: ${content.size}")
-    appendLine("$TYPE: ${if (data.isBinary) SendType.BINARY.name else SendType.NORMAL.name}")
     appendLine()
     writeFully(content, 0, content.size)
     flush()
 }
 
-private suspend fun ByteReadChannel.readPacket(): Packet {
+private suspend fun ByteReadChannel.readPacket(serialization: StringFormat): Packet {
     val params = readFields()
-    val input = params[INPUT]?.toBoolean() ?: true
-    val channel = params[CHANNEL] ?: ""
-    val messageId = params[MESSAGE] ?: ""
-    val endpoint = params[METHOD] ?: return readPacket()
-    val data = readContent(params)
-    return Packet(input, channel, messageId, endpoint, data)
+    val data = readContent(params) ?: return readPacket(serialization)
+    return serialization.decodeFromString(data)
 }
 
 private suspend fun ByteReadChannel.readContent(
     params: Map<String, String>
-): CallData {
-    val length = params[CONTENT_LENGTH]?.toIntOrNull() ?: error("Missing content length in $params")
-    val type = enumValueOf<SendType>(params[TYPE] ?: SendType.NORMAL.name)
+): String? {
+    val length = params[CONTENT_LENGTH]?.toIntOrNull() ?: return null
     val byteArray = ByteArray(length)
     readFully(byteArray)
-    return when (type) {
-        SendType.NORMAL -> CallData.create(byteArray.decodeToString())
-        SendType.BINARY,
-        SendType.BINARY_INPUT ->
-            CallData.create(ByteReadChannel(byteArray.decodeToString().decodeBase64Bytes()))
-    }
+    return byteArray.decodeToString()
 }
 
 internal suspend fun ByteReadChannel.readFields(): Map<String, String> {
