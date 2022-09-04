@@ -15,7 +15,6 @@
  */
 package com.monkopedia.ksrpc
 
-import com.monkopedia.ksrpc.channels.Connection
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.channels.asConnection
 import com.monkopedia.ksrpc.channels.asWebsocketConnection
@@ -25,16 +24,15 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
+import kotlin.test.Test
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlin.test.Test
 
 abstract class RpcFunctionalityTest(
     private val supportedTypes: List<TestType> = TestType.values().toList(),
-    private val serializedChannel: suspend () -> SerializedService,
-    private val verifyOnChannel: suspend (SerializedService) -> Unit
+    private val serializedChannel: suspend CoroutineScope.() -> SerializedService,
+    private val verifyOnChannel: suspend CoroutineScope.(SerializedService) -> Unit
 ) {
     enum class TestType {
         SERIALIZE,
@@ -47,7 +45,7 @@ abstract class RpcFunctionalityTest(
     fun testSerializePassthrough() = runBlockingUnit {
         if (TestType.SERIALIZE !in supportedTypes) return@runBlockingUnit
         val serializedChannel = serializedChannel()
-        val channel = HostSerializedChannelImpl(ksrpcEnvironment { })
+        val channel = HostSerializedChannelImpl(createEnv())
         channel.registerDefault(serializedChannel)
 
         verifyOnChannel(channel.asClient.defaultChannel())
@@ -61,16 +59,12 @@ abstract class RpcFunctionalityTest(
         launch(Dispatchers.Default) {
             val serializedChannel = serializedChannel()
             val connection = (si to output).asConnection(
-                ksrpcEnvironment {
-                    errorListener = ErrorListener {
-                        it.printStackTrace()
-                    }
-                }
+                createEnv()
             )
             connection.registerDefault(serializedChannel)
         }
         try {
-            verifyOnChannel((input to so).asConnection(ksrpcEnvironment { }).defaultChannel())
+            verifyOnChannel((input to so).asConnection(createEnv()).defaultChannel())
         } finally {
             try {
                 input.cancel(null)
@@ -95,17 +89,13 @@ abstract class RpcFunctionalityTest(
                 val routing = testServe(
                     path,
                     serializedChannel,
-                    ksrpcEnvironment {
-                        errorListener = ErrorListener {
-                            it.printStackTrace()
-                        }
-                    }
+                    createEnv()
                 )
                 routing()
             },
             test = {
                 val client = HttpClient()
-                client.asConnection("http://localhost:$it$path", ksrpcEnvironment { })
+                client.asConnection("http://localhost:$it$path", createEnv())
                     .use { channel ->
                         verifyOnChannel(channel.defaultChannel())
                     }
@@ -123,24 +113,22 @@ abstract class RpcFunctionalityTest(
                 testServeWebsocket(
                     path,
                     serializedChannel,
-                    ksrpcEnvironment {
-                        errorListener = ErrorListener {
-                            it.printStackTrace()
-                        }
-                    }
+                    createEnv()
                 )
             },
             test = {
                 val client = HttpClient {
                     install(WebSockets)
                 }
-                client.asWebsocketConnection("http://localhost:$it$path", ksrpcEnvironment { })
+                client.asWebsocketConnection("http://localhost:$it$path", createEnv())
                     .use { channel ->
                         verifyOnChannel(channel.defaultChannel())
                     }
             }
         )
     }
+
+    protected open fun createEnv() = ksrpcEnvironment { }
 }
 
 internal expect fun runBlockingUnit(function: suspend CoroutineScope.() -> Unit)

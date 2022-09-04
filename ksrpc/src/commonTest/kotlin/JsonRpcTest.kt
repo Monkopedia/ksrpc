@@ -1,12 +1,12 @@
 /*
  * Copyright 2021 Jason Monk
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *     https://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,6 +29,9 @@ import com.monkopedia.ksrpc.internal.jsonrpc.jsonLine
 import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.close
 import io.ktor.utils.io.readUTF8Line
+import kotlin.coroutines.coroutineContext
+import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -40,9 +43,6 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.encodeToJsonElement
-import kotlin.coroutines.coroutineContext
-import kotlin.test.Test
-import kotlin.test.assertEquals
 
 class JsonRpcTest {
 
@@ -214,7 +214,11 @@ class JsonRpcTest {
         val jsonChannel = JsonRpcWriterBase(
             CoroutineScope(jsonChannelContext),
             jsonChannelContext,
-            ksrpcEnvironment { },
+            ksrpcEnvironment {
+                errorListener = ErrorListener {
+                    it.printStackTrace()
+                }
+            },
             (inIn to outOut).jsonLine(ksrpcEnvironment { })
         )
         assertEquals(

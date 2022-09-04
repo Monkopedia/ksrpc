@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.monkopedia.ksrpc.internal
+package com.monkopedia.ksrpc
 
-import io.ktor.websocket.Frame
-import io.ktor.websocket.Frame.Text
-import io.ktor.websocket.readText
+import kotlin.js.Date
+
+internal actual fun epochMillis(): Long = Date.now().toLong()

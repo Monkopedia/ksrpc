@@ -27,8 +27,9 @@ import com.monkopedia.ksrpc.channels.stdInConnection
 import io.ktor.server.application.install
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import io.ktor.server.plugins.cors.routing.*
-import io.ktor.server.routing.*
+import io.ktor.server.plugins.cors.routing.CORS
+import io.ktor.server.routing.Routing
+import io.ktor.server.routing.routing
 import java.net.ServerSocket
 import kotlin.concurrent.thread
 import kotlin.system.exitProcess
@@ -83,18 +84,23 @@ abstract class ServiceApp(val appName: String) : CliktCommand() {
         }
         runBlocking {
             for (h in http) {
-                val routes = serve("/${appName.decapitalize()}", createChannel(), env)
                 embeddedServer(Netty, h) {
                     install(CORS) {
                         anyHost()
                     }
-                    routing(routes)
+                    routing {
+                        createRouting()
+                    }
                 }.start()
             }
             if (stdOut) {
                 stdInConnection(env).registerDefault(createChannel())
             }
         }
+    }
+
+    protected open fun Routing.createRouting() {
+        serve("/${appName.decapitalize()}", createChannel(), env)(this)
     }
 
     open val env: KsrpcEnvironment by lazy {

@@ -20,6 +20,7 @@ import com.monkopedia.ksrpc.annotation.KsService
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlinx.coroutines.CompletableDeferred
 
 @KsService
 interface TestSubInterface : RpcService {
@@ -84,3 +85,49 @@ class RpcSubserviceTwoCallsTest : RpcFunctionalityTest(
         )
     }
 )
+
+private var closeCompletion: CompletableDeferred<Unit>? = null
+
+class RpcSubserviceCloseTest : RpcFunctionalityTest(
+    serializedChannel = {
+        val channel: TestRootInterface = object : TestRootInterface {
+            override suspend fun rpc(u: Pair<String, String>): String {
+                return "${u.first} ${u.second}"
+            }
+
+            override suspend fun subservice(prefix: String): TestSubInterface {
+                return object : TestSubInterface {
+                    override suspend fun rpc(u: Pair<String, String>): String {
+                        return "$prefix ${u.first} ${u.second}"
+                    }
+
+                    override suspend fun close() {
+                        closeCompletion?.complete(Unit)
+                    }
+                }
+            }
+        }
+        channel.serialized(ksrpcEnvironment { })
+    },
+    verifyOnChannel = { serializedChannel ->
+        val stub = serializedChannel.toStub<TestRootInterface>()
+        closeCompletion = CompletableDeferred()
+        assertEquals(
+            "oh, Hello world",
+            stub.subservice("oh,").run {
+                rpc("Hello" to "world").also {
+                    close()
+                }
+            }
+        )
+        closeCompletion?.await()
+    }
+) {
+    override fun createEnv(): KsrpcEnvironment {
+        return ksrpcEnvironment {
+            errorListener = ErrorListener {
+                closeCompletion?.completeExceptionally(it)
+            }
+        }
+    }
+}

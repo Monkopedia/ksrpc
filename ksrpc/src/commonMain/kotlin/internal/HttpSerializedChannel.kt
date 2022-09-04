@@ -1,12 +1,12 @@
 /*
  * Copyright 2021 Jason Monk
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *     https://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,6 +19,7 @@ import com.monkopedia.ksrpc.ERROR_PREFIX
 import com.monkopedia.ksrpc.KSRPC_BINARY
 import com.monkopedia.ksrpc.KSRPC_CHANNEL
 import com.monkopedia.ksrpc.KsrpcEnvironment
+import com.monkopedia.ksrpc.RpcEndpointException
 import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.ChannelClient
@@ -35,8 +36,8 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.encodeURLPath
 import io.ktor.utils.io.ByteReadChannel
-import kotlinx.serialization.json.Json
 import kotlin.coroutines.CoroutineContext
+import kotlinx.serialization.json.Json
 
 internal class HttpSerializedChannel(
     private val httpClient: HttpClient,
@@ -48,14 +49,14 @@ internal class HttpSerializedChannel(
     override val context: CoroutineContext =
         ClientChannelContext(this) + env.coroutineExceptionHandler
 
-    override suspend fun call(channelId: ChannelId, endpoint: String, input: CallData): CallData {
+    override suspend fun call(channelId: ChannelId, endpoint: String, data: CallData): CallData {
         val response = httpClient.post(
             "$baseStripped/call/${endpoint.encodeURLPath()}"
         ) {
             accept(ContentType.Application.Json)
-            headers[KSRPC_BINARY] = input.isBinary.toString()
+            headers[KSRPC_BINARY] = data.isBinary.toString()
             headers[KSRPC_CHANNEL] = channelId.id
-            setBody(if (input.isBinary) input.readBinary() else input.readSerialized())
+            setBody(if (data.isBinary) data.readBinary() else data.readSerialized())
         }
         response.checkErrors()
         if (response.headers[KSRPC_BINARY]?.toBoolean() == true) {
@@ -92,5 +93,7 @@ internal suspend fun HttpResponse.checkErrors() {
         } else {
             throw IllegalStateException("Can't parse error $this")
         }
+    } else if (status == HttpStatusCode.NotFound) {
+        throw RpcEndpointException("Url not found $this")
     }
 }

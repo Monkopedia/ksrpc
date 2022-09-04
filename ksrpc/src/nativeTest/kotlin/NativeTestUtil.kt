@@ -18,6 +18,8 @@ package com.monkopedia.ksrpc
 import com.monkopedia.ksrpc.channels.SerializedService
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
+import kotlin.test.Test
+import kotlin.test.fail
 import kotlinx.cinterop.IntVar
 import kotlinx.cinterop.allocArray
 import kotlinx.cinterop.get
@@ -28,8 +30,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import platform.posix.pipe
 import platform.posix.pthread_self
-import kotlin.test.Test
-import kotlin.test.fail
 
 actual suspend inline fun httpTest(
     crossinline serve: suspend Routing.() -> Unit,

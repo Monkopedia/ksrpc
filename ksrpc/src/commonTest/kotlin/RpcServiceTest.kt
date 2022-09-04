@@ -19,10 +19,13 @@ import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.SerializedService
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.PairSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
@@ -184,3 +187,51 @@ class RpcServiceTwoCallsTest : RpcFunctionalityTest(
         )
     }
 )
+
+private var cancelSignal: CompletableDeferred<CompletableDeferred<Unit>>? = null
+
+class RpcServiceCancelTest : RpcFunctionalityTest(
+    serializedChannel = {
+        val channel: TestInterface = object : TestInterface {
+            override suspend fun rpc(u: Pair<String, String>): String {
+                val completion = CompletableDeferred<Unit>()
+                cancelSignal?.complete(completion)
+                completion.await()
+                return "${u.first} ${u.second}"
+            }
+        }
+        channel.serialized(ksrpcEnvironment { })
+    },
+    verifyOnChannel = { serializedChannel ->
+        val stub = serializedChannel.toStub<TestInterface>()
+        val rpcJob = launch {
+            try {
+                stub.rpc("Hello" to "world")
+                cancelSignal!!.completeExceptionally(RuntimeException("Test failure"))
+            } finally {
+            }
+        }
+        val continueSignal = cancelSignal!!.await()
+        rpcJob.cancel()
+        continueSignal.complete(Unit)
+
+        cancelSignal = CompletableDeferred<CompletableDeferred<Unit>>().also {
+            launch {
+                it.await().complete(Unit)
+            }
+        }
+
+        assertEquals(
+            "Hello world",
+            stub.rpc("Hello" to "world")
+        )
+    },
+    supportedTypes = TestType.values().toList() - TestType.SERIALIZE
+) {
+    @BeforeTest
+    fun setup() {
+        cancelSignal = CompletableDeferred()
+    }
+
+    @Test fun testNothing() = Unit
+}

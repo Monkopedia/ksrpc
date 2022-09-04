@@ -1,12 +1,12 @@
 /*
  * Copyright 2021 Jason Monk
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *     https://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,9 +20,10 @@ import com.monkopedia.ksrpc.RpcException
 import com.monkopedia.ksrpc.asString
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.channels.SingleChannelConnection
+import com.monkopedia.ksrpc.internal.MultiChannel
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -31,7 +32,6 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
-import kotlin.coroutines.CoroutineContext
 
 internal class JsonRpcWriterBase(
     private val scope: CoroutineScope,
@@ -40,10 +40,9 @@ internal class JsonRpcWriterBase(
     private val comm: JsonRpcTransformer
 ) : JsonRpcChannel, SingleChannelConnection {
     private val json = (env.serialization as? Json) ?: Json
-    private var id = 1
 
     private var baseChannel = CompletableDeferred<JsonRpcChannel>()
-    private val completions = mutableMapOf<String, CompletableDeferred<JsonRpcResponse?>>()
+    private val multiChannel = MultiChannel<JsonRpcResponse>()
 
     init {
         scope.launch {
@@ -56,8 +55,7 @@ internal class JsonRpcWriterBase(
                             launchRequestHandler(baseChannel.await(), request)
                         } else {
                             val response = json.decodeFromJsonElement<JsonRpcResponse>(p)
-                            completions.remove(response.id.toString())?.complete(response)
-                                ?: println("Warning, no completion found for $p")
+                            multiChannel.send(response.id.toString(), response)
                         }
                     }
                 } catch (t: Throwable) {
@@ -101,27 +99,19 @@ internal class JsonRpcWriterBase(
         }
     }
 
-    private fun allocateResponse(isNotify: Boolean): Pair<Deferred<JsonRpcResponse?>?, Int?> {
-        if (isNotify) return null to null
-        val id = id++
-        return (CompletableDeferred<JsonRpcResponse?>() to id).also {
-            completions[JsonPrimitive(it.second).toString()] = it.first
-        }
-    }
-
     override suspend fun execute(
         method: String,
         message: JsonElement?,
         isNotify: Boolean
     ): JsonElement? {
-        val (responseHolder, id) = allocateResponse(isNotify)
+        val (id, pending) = if (isNotify) null to null else multiChannel.allocateReceive()
         val request = JsonRpcRequest(
             method = method,
             params = message,
             id = JsonPrimitive(id)
         )
         comm.send(json.encodeToJsonElement(request))
-        val response = responseHolder?.await() ?: return null
+        val response = pending?.await() ?: return null
         if (response.error != null) {
             val error = response.error.data?.let {
                 json.decodeFromJsonElement<RpcException>(it)
@@ -138,6 +128,11 @@ internal class JsonRpcWriterBase(
             comm.close(IllegalStateException("JsonRpcWriter is shutting down"))
         } catch (t: IllegalStateException) {
             // Sometimes expected
+        }
+        try {
+            multiChannel.close()
+        } catch (t: Throwable) {
+            // Thats fine, just pending messages getting unhappy.
         }
     }
 

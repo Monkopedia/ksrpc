@@ -59,11 +59,12 @@ kotlin {
     sourceSets["commonMain"].dependencies {
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.3.3")
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
-        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.3-native-mt")
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
         implementation("org.jetbrains.kotlinx:atomicfu:0.17.1")
         implementation("io.ktor:ktor-client-core:2.0.2")
         implementation("io.ktor:ktor-client-websockets:2.0.2")
         implementation("io.ktor:ktor-http:2.0.2")
+        implementation("io.ktor:ktor-serialization-kotlinx-json:2.0.2")
     }
     sourceSets["commonTest"].dependencies {
         implementation(kotlin("test"))
@@ -88,7 +89,7 @@ kotlin {
     }
     sourceSets["jvmTest"].dependencies {
         implementation(kotlin("test-junit"))
-        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.3-native-mt")
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
         implementation("io.ktor:ktor-server-core:2.0.2")
         implementation("io.ktor:ktor-server-netty:2.0.2")
         implementation("io.ktor:ktor-serialization-jackson:2.0.2")
@@ -97,7 +98,7 @@ kotlin {
         implementation("io.ktor:ktor-client-okhttp:2.0.2")
         implementation("io.ktor:ktor-server-websockets:2.0.2")
         implementation("io.ktor:ktor-client-websockets:2.0.2")
-        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.3-native-mt")
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
     }
     sourceSets["jsTest"].dependencies {
         implementation(kotlin("test-js"))
@@ -109,7 +110,7 @@ kotlin {
     }
     sourceSets["nativeMain"].dependencies {
         implementation(kotlin("stdlib"))
-        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.3-native-mt")
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
         implementation("io.ktor:ktor-client-curl:2.0.2")
     }
 }
@@ -127,7 +128,6 @@ kotlin.targets.withType(org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarge
         binaryOptions["memoryModel"] = "experimental"
     }
 }
-
 
 val dokkaJavadoc = tasks.create("dokkaJavadocCustom", org.jetbrains.dokka.gradle.DokkaTask::class) {
     dependencies {

@@ -26,7 +26,6 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlin.native.concurrent.SharedImmutable
 
 @KsService
 interface ChildInterface : RpcService {
@@ -71,14 +70,18 @@ class ConnectionTest {
         }
     )
 
+    private var pendingFinish: CompletableDeferred<Unit>? = null
+
     @Test
     fun testReverse() = executePipe(
         serviceJob = { c ->
             val service = c.defaultChannel().toStub<PrimaryInterface>()
             service.basicCall("Hello world")
+            pendingFinish?.complete(Unit)
         },
         clientJob = { c ->
             val callComplete = CompletableDeferred<String>()
+            pendingFinish = CompletableDeferred()
             c.registerDefault<PrimaryInterface>(object : PrimaryInterface {
                 override suspend fun basicCall(input: String): String {
                     callComplete.complete(input)
@@ -92,6 +95,7 @@ class ConnectionTest {
                     error("Not implemented")
             })
             assertEquals("Hello world", callComplete.await())
+            pendingFinish?.await()
         }
     )
 
@@ -144,10 +148,12 @@ class ConnectionTest {
                     error("Not implemented")
             })
             clientService.basicCall("Hello world")
+            pendingFinish?.complete(Unit)
         },
         clientJob = { c ->
             val service = c.defaultChannel().toStub<PrimaryInterface>()
             val callComplete = CompletableDeferred<String>()
+            pendingFinish = CompletableDeferred()
             c.registerDefault<PrimaryInterface>(object : PrimaryInterface {
                 override suspend fun basicCall(input: String): String {
                     return "Client: ${service.basicCall(input)}".also { callComplete.complete(it) }
@@ -160,6 +166,7 @@ class ConnectionTest {
                     error("Not implemented")
             })
             assertEquals("Client: Respond: Hello world", callComplete.await())
+            pendingFinish?.await()
         }
     )
 
@@ -198,9 +205,11 @@ class ConnectionTest {
                     return "Respond: $input"
                 }
             })
+            pendingFinish?.complete(Unit)
         },
         clientJob = { c ->
             val callComplete = CompletableDeferred<String>()
+            pendingFinish = CompletableDeferred()
             c.registerDefault<PrimaryInterface>(object : PrimaryInterface {
                 override suspend fun basicCall(input: String): String = error("Not implemented")
 
@@ -213,6 +222,7 @@ class ConnectionTest {
                     error("Not implemented")
             })
             assertEquals("Respond: Hello world", callComplete.await())
+            pendingFinish?.await()
         }
     )
 
@@ -253,9 +263,11 @@ class ConnectionTest {
             assertEquals("Second service: Hello trees", secondService.rpc("Hello trees"))
             assertEquals("First service: Hello trees", firstService.rpc("Hello trees"))
             service.basicCall("Done")
+            pendingFinish?.complete(Unit)
         },
         clientJob = { c ->
             val callComplete = CompletableDeferred<String>()
+            pendingFinish = CompletableDeferred()
             c.registerDefault<PrimaryInterface>(object : PrimaryInterface {
                 override suspend fun basicCall(input: String): String =
                     input.also { callComplete.complete(input) }
@@ -271,6 +283,7 @@ class ConnectionTest {
                     }
             })
             assertEquals("Done", callComplete.await())
+            pendingFinish?.await()
         }
     )
 

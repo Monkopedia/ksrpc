@@ -16,7 +16,6 @@
 package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.channels.ChannelClient
-import com.monkopedia.ksrpc.channels.Connection
 import com.monkopedia.ksrpc.channels.asConnection
 import com.monkopedia.ksrpc.channels.asWebsocketConnection
 import com.monkopedia.ksrpc.channels.registerDefault

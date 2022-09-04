@@ -1,12 +1,12 @@
 /*
  * Copyright 2021 Jason Monk
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *     https://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,12 +19,12 @@ import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.channels.CONTENT_LENGTH
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
+import io.ktor.utils.io.errors.IOException
 import io.ktor.utils.io.readFully
 import io.ktor.utils.io.readUTF8Line
 import io.ktor.utils.io.writeStringUtf8
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.StringFormat
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -39,14 +39,20 @@ internal class ReadWritePacketChannel(
     private val receiveLock = Mutex()
 
     override suspend fun send(packet: Packet) {
-        sendLock.withLock {
+        sendLock.lock()
+        try {
             write.send(packet, env.serialization)
+        } finally {
+            sendLock.unlock()
         }
     }
 
     override suspend fun receive(): Packet {
-        receiveLock.withLock {
+        receiveLock.lock()
+        try {
             return read.readPacket(env.serialization)
+        } finally {
+            receiveLock.unlock()
         }
     }
 
@@ -88,12 +94,10 @@ private suspend fun ByteReadChannel.readContent(
 
 internal suspend fun ByteReadChannel.readFields(): Map<String, String> {
     val fields = mutableListOf<String>()
-    var line = readUTF8Line()
-    while (line == null || line.isNotEmpty()) {
-        if (line != null) {
-            fields.add(line)
-        }
-        line = readUTF8Line()
+    var line = readUTF8Line() ?: throw IOException("$this is closed for reading")
+    while (line.isNotEmpty()) {
+        fields.add(line)
+        line = readUTF8Line() ?: ""
     }
     return parseParams(fields)
 }

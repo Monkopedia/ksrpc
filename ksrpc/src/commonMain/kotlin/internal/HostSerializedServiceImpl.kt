@@ -1,12 +1,12 @@
 /*
  * Copyright 2021 Jason Monk
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *     https://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,9 +30,9 @@ import com.monkopedia.ksrpc.channels.Connection
 import com.monkopedia.ksrpc.channels.SerializedChannel
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.channels.randomUuid
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.withContext
-import kotlin.coroutines.CoroutineContext
 
 internal class HostSerializedChannelImpl(
     override val env: KsrpcEnvironment,
@@ -55,7 +55,12 @@ internal class HostSerializedChannelImpl(
                 serviceMap[channelId.id] ?: error("Cannot find service ${channelId.id}")
             }
             withContext(context) {
-                channel.call(endpoint, data)
+                if (endpoint.isEmpty()) {
+                    close(channelId)
+                    CallData.create("{}")
+                } else {
+                    channel.call(endpoint, data)
+                }
             }
         } catch (t: Throwable) {
             env.errorListener.onError(t)
