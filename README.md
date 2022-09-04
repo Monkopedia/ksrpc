@@ -42,12 +42,12 @@ as depending on the runtime library.
 plugins {
     `java`
     ...
-    id("com.monkopedia.ksrpc.plugin") version "0.5.2"
+    id("com.monkopedia.ksrpc.plugin") version "0.6.0"
 }
 
 dependencies {
     ...
-    implementation("com.monkopedia:ksrpc:0.5.2")
+    implementation("com.monkopedia:ksrpc:0.6.0")
 }
 ```
 
@@ -462,11 +462,9 @@ For further information, see the API docs, which are hosted on [monkopedia.githu
 
 Unranked list of things I know I want to implement:
 
-- Socket native methods that call into common code ByteReadChannel/ByteWriteChannel implementations
 - Stdin/out native methods that use the above implementation
 - jsonrpc native support (much like above)
 - Additional annotations and parsing in compiler plugin to have support for things like notifications not just requests
 - Finish testing [TrackingService](ksrpc/src/commonMain/kotlin/TrackingService.kt) and publish it as API
 - Add tests to ensure no leaks around sub-service usage and cleanup
-- Better native handling of threading
 - Support building mac/windows binaries in github release workflow
