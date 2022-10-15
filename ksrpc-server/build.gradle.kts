@@ -34,4 +34,3 @@ kotlin {
         implementation("io.ktor:ktor-server-cors:2.0.2")
     }
 }
-

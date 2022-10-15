@@ -33,8 +33,6 @@ kotlin {
     }
     linuxX64("native") {
         binaries {
-
         }
     }
 }
-

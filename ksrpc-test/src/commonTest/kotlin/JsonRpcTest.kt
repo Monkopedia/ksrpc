@@ -15,9 +15,9 @@
  */
 package com.monkopedia.ksrpc
 
-import com.monkopedia.ksrpc.jsonrpc.internal.DEFAULT_CONTENT_TYPE
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.jsonrpc.asJsonRpcConnection
+import com.monkopedia.ksrpc.jsonrpc.internal.DEFAULT_CONTENT_TYPE
 import com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcRequest
 import com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcResponse
 import com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcSerializedChannel

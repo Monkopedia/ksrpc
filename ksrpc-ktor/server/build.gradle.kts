@@ -27,6 +27,4 @@ kotlin {
     sourceSets["commonMain"].dependencies {
         api("io.ktor:ktor-server-core:2.0.2")
     }
-
 }
-

@@ -27,4 +27,3 @@ kotlin {
         implementation("io.ktor:ktor-client-websockets:2.0.2")
     }
 }
-

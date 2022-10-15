@@ -20,8 +20,8 @@ import com.monkopedia.ksrpc.channels.Connection
 import com.monkopedia.ksrpc.sockets.internal.ReadWritePacketChannel
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
-import kotlinx.coroutines.CoroutineScope
 import kotlin.coroutines.coroutineContext
+import kotlinx.coroutines.CoroutineScope
 
 internal const val TYPE = "Type"
 internal const val CHANNEL = "Channel"

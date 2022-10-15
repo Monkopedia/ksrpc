@@ -29,4 +29,3 @@ kotlin {
         api("io.ktor:ktor-serialization-kotlinx-json:2.0.2")
     }
 }
-

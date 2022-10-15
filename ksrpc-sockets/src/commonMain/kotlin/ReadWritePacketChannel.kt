@@ -21,9 +21,7 @@ import com.monkopedia.ksrpc.packets.internal.Packet
 import com.monkopedia.ksrpc.packets.internal.PacketChannelBase
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
-import io.ktor.utils.io.errors.IOException
 import io.ktor.utils.io.readFully
-import io.ktor.utils.io.readUTF8Line
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.serialization.StringFormat
@@ -90,4 +88,3 @@ private suspend fun ByteReadChannel.readContent(
     readFully(byteArray)
     return byteArray.decodeToString()
 }
-

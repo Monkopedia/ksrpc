@@ -29,4 +29,3 @@ kotlin {
         api("io.ktor:ktor-server-websockets:2.0.2")
     }
 }
-

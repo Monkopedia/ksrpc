@@ -61,4 +61,3 @@ kotlin {
         implementation("io.ktor:ktor-client-curl:2.0.2")
     }
 }
-

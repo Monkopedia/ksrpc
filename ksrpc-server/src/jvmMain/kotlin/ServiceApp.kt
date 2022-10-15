@@ -32,14 +32,14 @@ import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.routing
+import java.net.ServerSocket
+import kotlin.concurrent.thread
+import kotlin.system.exitProcess
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import java.net.ServerSocket
-import kotlin.concurrent.thread
-import kotlin.system.exitProcess
 
 /**
  * Base class that makes it easy to host a default service on any combination of
