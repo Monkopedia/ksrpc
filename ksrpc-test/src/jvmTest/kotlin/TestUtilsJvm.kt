@@ -45,7 +45,8 @@ actual typealias Routing = io.ktor.server.routing.Routing
 
 actual suspend inline fun httpTest(
     crossinline serve: suspend Routing.() -> Unit,
-    test: suspend (Int) -> Unit
+    test: suspend (Int) -> Unit,
+    isWebsocket: Boolean
 ) {
     val port = PORT++
     val serverCompletion = CompletableDeferred<ApplicationEngine>()

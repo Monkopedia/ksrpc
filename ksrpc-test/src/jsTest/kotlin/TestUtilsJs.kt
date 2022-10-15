@@ -26,7 +26,8 @@ import kotlinx.coroutines.promise
 
 actual suspend inline fun httpTest(
     crossinline serve: suspend Routing.() -> Unit,
-    test: suspend (Int) -> Unit
+    test: suspend (Int) -> Unit,
+    isWebsocket: Boolean
 ) {
     // Do nothing, disable HTTP hosting in JS tests.
 }

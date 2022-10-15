@@ -47,6 +47,7 @@ kotlin {
     sourceSets["nativeTest"].dependencies {
         implementation(project(":ksrpc-ktor-server"))
         implementation(project(":ksrpc-ktor-websocket-server"))
+        implementation("io.ktor:ktor-server-cio:2.0.2")
     }
     sourceSets["jsTest"].dependencies {
     }

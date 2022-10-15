@@ -100,7 +100,8 @@ abstract class RpcFunctionalityTest(
                     .use { channel ->
                         verifyOnChannel(channel.defaultChannel())
                     }
-            }
+            },
+            isWebsocket = false
         )
     }
 
@@ -125,7 +126,8 @@ abstract class RpcFunctionalityTest(
                     .use { channel ->
                         verifyOnChannel(channel.defaultChannel())
                     }
-            }
+            },
+            isWebsocket = true
         )
     }
 
@@ -138,7 +140,8 @@ expect class Routing
 
 expect suspend inline fun httpTest(
     crossinline serve: suspend Routing.() -> Unit,
-    test: suspend (Int) -> Unit
+    test: suspend (Int) -> Unit,
+    isWebsocket: Boolean
 )
 
 expect suspend fun testServe(

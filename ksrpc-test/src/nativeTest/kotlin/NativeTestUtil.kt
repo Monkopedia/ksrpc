@@ -16,43 +16,75 @@
 package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.channels.SerializedService
+import io.ktor.server.cio.CIO
+import io.ktor.server.engine.ApplicationEngine
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.routing.routing
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
-import kotlin.test.Test
-import kotlin.test.fail
 import kotlinx.cinterop.IntVar
 import kotlinx.cinterop.allocArray
 import kotlinx.cinterop.get
 import kotlinx.cinterop.memScoped
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.newFixedThreadPoolContext
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import platform.posix.pipe
 import platform.posix.pthread_self
+import kotlin.test.Test
+import kotlin.test.fail
+import com.monkopedia.ksrpc.ktor.serve as nativeServe
+
+var PORT = 9081
+val serverDispatcher = newFixedThreadPoolContext(8, "server-threads")
 
 actual suspend inline fun httpTest(
     crossinline serve: suspend Routing.() -> Unit,
-    test: suspend (Int) -> Unit
+    test: suspend (Int) -> Unit,
+    isWebsocket: Boolean
 ) {
-    // Do nothing, disable HTTP hosting in Native tests.
+    if (isWebsocket) return
+    val port = PORT++
+    val serverCompletion = CompletableDeferred<ApplicationEngine>()
+    GlobalScope.launch(serverDispatcher) {
+        try {
+            serverCompletion.complete(
+                embeddedServer(CIO, port) {
+                    routing {
+                        runBlocking {
+                            serve()
+                        }
+                    }
+                }.start()
+            )
+        } catch (t: Throwable) {
+            serverCompletion.completeExceptionally(t)
+        }
+    }
+    val server = serverCompletion.await()
+    try {
+        test(port)
+    } finally {
+        server.stop(500, 500)
+    }
 }
 
 actual suspend fun testServe(
     basePath: String,
     channel: SerializedService,
     env: KsrpcEnvironment
-): Routing.() -> Unit = {
-    // Do nothing, disable HTTP hosting in Native tests.
-}
+): Routing.() -> Unit = nativeServe(basePath, channel, env)
 
 actual fun Routing.testServeWebsocket(
     basePath: String,
     channel: SerializedService,
     env: KsrpcEnvironment
-) {
-    // Do nothing, disable HTTP hosting in Native tests.
-}
+) = Unit
 
 actual fun createPipe(): Pair<ByteWriteChannel, ByteReadChannel> {
     memScoped {
@@ -64,7 +96,7 @@ actual fun createPipe(): Pair<ByteWriteChannel, ByteReadChannel> {
     }
 }
 
-actual class Routing
+actual typealias Routing = io.ktor.server.routing.Routing
 
 internal actual fun runBlockingUnit(function: suspend CoroutineScope.() -> Unit) {
     try {
