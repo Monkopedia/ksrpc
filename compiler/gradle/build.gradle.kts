@@ -40,7 +40,7 @@ java {
 gradlePlugin {
     plugins {
         create("ksrpc-gradle-plugin") {
-            id = rootProject.extra["kotlin_plugin_id"].toString()
+            id = rootProject.extra["kotlin_plugin_id"]?.toString() ?: "com.monkopedia.ksrpc.plugin"
             implementationClass = "com.monkopedia.ksrpc.gradle.KsrpcGradlePlugin"
             displayName = "ksrpc-gradle-plugin"
             description = "A simple kotlin rpc library"

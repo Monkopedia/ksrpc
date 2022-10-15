@@ -21,17 +21,18 @@ buildscript {
         mavenLocal()
     }
     dependencies {
-        classpath("com.monkopedia:ksrpc-gradle-plugin:${project.extra["plugin_version"]}")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.20")
+        classpath("org.jetbrains.dokka:dokka-gradle-plugin:1.4.10.2")
     }
     extra["kotlin_plugin_id"] = "com.monkopedia.ksrpc.plugin"
 }
 plugins {
-    kotlin("multiplatform") version "1.7.10" apply false
-    kotlin("plugin.serialization") version "1.7.10" apply false
+    kotlin("plugin.serialization") version "1.7.20" apply false
     id("com.github.autostyle") version "3.1"
-    id("org.jetbrains.dokka") version "1.4.10.2" apply false
 
     id("com.github.gmazzo.buildconfig") version "2.0.2" apply false
+    id("ksrpc-generate-module")
+    id("com.monkopedia.ksrpc.plugin") apply false
 }
 
 group = "com.monkopedia"

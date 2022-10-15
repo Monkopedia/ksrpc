@@ -14,10 +14,24 @@
  * limitations under the License.
  */
 rootProject.name = "ksrpc-root"
-include(":ksrpc")
-include(":ksrpc-gradle-plugin")
-project(":ksrpc-gradle-plugin").projectDir = file("compiler/gradle")
-include(":ksrpc-compiler-plugin")
-project(":ksrpc-compiler-plugin").projectDir = file("compiler/plugin")
-include(":ksrpc-compiler-plugin-native")
-project(":ksrpc-compiler-plugin-native").projectDir = file("compiler/native")
+include(":ksrpc-core")
+
+include(":ksrpc-jsonrpc")
+
+include(":ksrpc-packets")
+include(":ksrpc-server")
+include(":ksrpc-sockets")
+include(":ksrpc-test")
+
+include(":ksrpc-ktor-client")
+project(":ksrpc-ktor-client").projectDir = file("ksrpc-ktor/client")
+include(":ksrpc-ktor-server")
+project(":ksrpc-ktor-server").projectDir = file("ksrpc-ktor/server")
+include(":ksrpc-ktor-websocket-shared")
+project(":ksrpc-ktor-websocket-shared").projectDir = file("ksrpc-ktor/websocket/shared")
+include(":ksrpc-ktor-websocket-client")
+project(":ksrpc-ktor-websocket-client").projectDir = file("ksrpc-ktor/websocket/client")
+include(":ksrpc-ktor-websocket-server")
+project(":ksrpc-ktor-websocket-server").projectDir = file("ksrpc-ktor/websocket/server")
+
+includeBuild("compiler")
