@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.monkopedia.ksrpc
+package com.monkopedia.ksrpc.sockets
 
+import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.channels.Connection
 import com.monkopedia.ksrpc.sockets.asConnection
 import com.monkopedia.ksrpc.sockets.internal.swallow
@@ -43,7 +44,7 @@ import platform.posix.write
 
 private const val bufferSize = 4096
 
-suspend inline fun withPosixStdInOut(ksrpcEnvironment: KsrpcEnvironment, withConnection: (Connection) -> Unit) {
+actual suspend inline fun withStdInOut(ksrpcEnvironment: KsrpcEnvironment, withConnection: (Connection) -> Unit) {
     val input = posixFileReadChannel(STDIN_FILENO)
     val output = posixFileWriteChannel(STDOUT_FILENO)
     withoutIcanon {

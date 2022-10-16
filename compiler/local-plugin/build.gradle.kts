@@ -20,7 +20,7 @@ plugins {
     kotlin("jvm")
 }
 
-group = "com.monkopedia"
+group = "com.monkopedia.ksrpc"
 
 dependencies {
     implementation(kotlin("stdlib"))

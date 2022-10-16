@@ -21,13 +21,15 @@ import com.monkopedia.ksrpc.sockets.internal.swallow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-/**
- * Create a [Connection] that communicates over the std in/out streams of this process.
- */
-suspend fun stdInConnection(env: KsrpcEnvironment): Connection {
+actual suspend inline fun withStdInOut(ksrpcEnvironment: KsrpcEnvironment, withConnection: (Connection) -> Unit) {
     val input = System.`in`
     val output = System.out
-    return (input to output).asConnection(env)
+    val connection = (input to output).asConnection(ksrpcEnvironment)
+    try {
+        withConnection(connection)
+    } finally {
+        swallow { connection.close() }
+    }
 }
 
 /**

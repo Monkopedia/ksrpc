@@ -23,7 +23,7 @@ plugins {
     `signing`
 }
 
-group = "com.monkopedia"
+group = "com.monkopedia.ksrpc"
 
 java {
     withJavadocJar()

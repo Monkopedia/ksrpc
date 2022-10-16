@@ -32,7 +32,7 @@ fun Project.ksrpcModule(
     supportNative: Boolean = true,
     includePublications: Boolean = true
 ) {
-    group = "com.monkopedia"
+    group = "com.monkopedia.ksrpc"
 
     plugins.apply("org.jetbrains.kotlin.multiplatform")
     plugins.apply("org.jetbrains.kotlin.plugin.serialization")

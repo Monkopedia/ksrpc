@@ -33,7 +33,7 @@ plugins {
     id("com.github.gmazzo.buildconfig") version "2.0.2" apply false
 }
 
-group = "com.monkopedia"
+group = "com.monkopedia.ksrpc"
 
 allprojects {
     repositories {

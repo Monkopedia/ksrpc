@@ -87,12 +87,11 @@ abstract class RpcFunctionalityTest(
         httpTest(
             serve = {
                 val serializedChannel = serializedChannel()
-                val routing = testServe(
+                testServe(
                     path,
                     serializedChannel,
                     createEnv()
                 )
-                routing()
             },
             test = {
                 val client = HttpClient()
@@ -144,11 +143,11 @@ expect suspend inline fun httpTest(
     isWebsocket: Boolean
 )
 
-expect suspend fun testServe(
+expect suspend fun Routing.testServe(
     basePath: String,
     channel: SerializedService,
     env: KsrpcEnvironment = ksrpcEnvironment { }
-): Routing.() -> Unit
+)
 
 expect fun Routing.testServeWebsocket(
     basePath: String,

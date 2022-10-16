@@ -76,11 +76,11 @@ actual suspend inline fun httpTest(
     }
 }
 
-actual suspend fun testServe(
+actual suspend fun Routing.testServe(
     basePath: String,
     channel: SerializedService,
     env: KsrpcEnvironment
-) = jvmServe(basePath, channel, env)
+): Unit = jvmServe(basePath, channel, env)
 
 actual fun Routing.testServeWebsocket(
     basePath: String,

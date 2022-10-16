@@ -35,7 +35,7 @@ plugins {
     id("com.monkopedia.ksrpc.plugin") apply false
 }
 
-group = "com.monkopedia"
+group = "com.monkopedia.ksrpc"
 
 allprojects {
     repositories {
