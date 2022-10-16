@@ -15,6 +15,9 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.channels.Connection
+import com.monkopedia.ksrpc.sockets.asConnection
+import com.monkopedia.ksrpc.sockets.internal.swallow
 import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
@@ -26,8 +29,12 @@ import io.ktor.utils.io.writer
 import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.allocArray
 import kotlinx.cinterop.memScoped
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.newSingleThreadContext
+import platform.posix.STDIN_FILENO
+import platform.posix.STDOUT_FILENO
 import platform.posix.close
 import platform.posix.fflush
 import platform.posix.fsync
@@ -36,12 +43,27 @@ import platform.posix.write
 
 private const val bufferSize = 4096
 
+suspend inline fun withPosixStdInOut(ksrpcEnvironment: KsrpcEnvironment, withConnection: (Connection) -> Unit) {
+    val input = posixFileReadChannel(STDIN_FILENO)
+    val output = posixFileWriteChannel(STDOUT_FILENO)
+    withoutIcanon {
+        val connection = (input to output).asConnection(ksrpcEnvironment)
+        try {
+            withConnection(connection)
+        } finally {
+            swallow { connection.close() }
+            swallow { output.close() }
+        }
+    }
+}
+
 /**
  * Creates a [ByteReadChannel] that will read bytes from the specified file descriptor [fd].
  *
  * This is accomplished by creating a dedicated thread that blocks on reads before queueing to
  * a [ByteChannel] for suspended reading, so only use when needed.
  */
+@OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
 fun posixFileReadChannel(fd: Int): ByteReadChannel {
     val thread = newSingleThreadContext("read-channel-$fd")
     return GlobalScope.writer(thread, autoFlush = true) {
@@ -73,6 +95,7 @@ fun posixFileReadChannel(fd: Int): ByteReadChannel {
  * This is accomplished by creating a dedicated thread that blocks on reads before queueing to
  * a [ByteChannel] for suspended reading, so only use when needed.
  */
+@OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
 fun posixFileWriteChannel(fd: Int): ByteWriteChannel {
     val thread = newSingleThreadContext("write-channel-$fd")
     return GlobalScope.reader(thread, autoFlush = true) {
