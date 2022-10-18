@@ -71,6 +71,7 @@ abstract class BaseServiceApp internal constructor(val appName: String) : CliktC
                     awaitCancellation()
                 }
             }
+            awaitCancellation()
         }
     }
 
