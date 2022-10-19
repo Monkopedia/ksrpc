@@ -106,7 +106,6 @@ abstract class PacketChannelBase(
                 }
             }
         } catch (t: Throwable) {
-            t.printStackTrace()
             binaryChannels.values.forEach { it.channel.close(t) }
             multiChannel.close()
         }

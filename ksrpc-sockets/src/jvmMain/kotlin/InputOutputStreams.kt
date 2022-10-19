@@ -70,15 +70,21 @@ private suspend fun ByteReadChannel.copyToAndFlush(
         var copied = 0L
         val bufferSize = buffer.size.toLong()
 
-        while (copied < limit) {
-            val rc = readAvailable(buffer, 0, minOf(limit - copied, bufferSize).toInt())
-            if (rc == -1 && isClosedForRead) break
-            if (rc > 0) {
-                withContext(Dispatchers.IO) {
-                    out.write(buffer, 0, rc)
-                    out.flush()
+        while (copied < limit && !isClosedForRead) {
+            try {
+                val rc = readAvailable(buffer, 0, minOf(limit - copied, bufferSize).toInt())
+                if (rc == -1 && isClosedForRead) break
+                if (rc > 0) {
+                    withContext(Dispatchers.IO) {
+                        out.write(buffer, 0, rc)
+                        out.flush()
+                    }
+                    copied += rc
                 }
-                copied += rc
+            } catch (t: Throwable) {
+                if (!isClosedForRead) {
+                    throw t
+                }
             }
         }
         swallow { out.close() }
