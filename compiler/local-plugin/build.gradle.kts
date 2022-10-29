@@ -27,7 +27,7 @@ dependencies {
     implementation(kotlin("gradle-plugin-api"))
     implementation(gradleKotlinDsl())
     api("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.20")
-    api("org.jetbrains.dokka:dokka-gradle-plugin:1.4.10.2")
+    api("org.jetbrains.dokka:dokka-gradle-plugin:1.7.20")
 }
 
 java {

@@ -34,6 +34,7 @@ import org.gradle.api.publish.PublishingExtension
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.withType
 import org.gradle.plugins.signing.SigningExtension
+import org.jetbrains.dokka.gradle.DokkaTaskPartial
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 class KsrpcDummyPlugin : Plugin<Project> {
@@ -156,11 +157,43 @@ fun Project.ksrpcModule(
 
     val dokkaJavadoc = tasks.create("dokkaJavadocCustom", DokkaTask::class) {
         it.project.dependencies {
-            it.plugins("org.jetbrains.dokka:kotlin-as-java-plugin:1.4.10.2")
+            it.plugins("org.jetbrains.dokka:kotlin-as-java-plugin:1.7.20")
         }
         // outputFormat = "javadoc"
         it.outputDirectory.set(File(project.buildDir, "javadoc"))
         it.inputs.dir("src/commonMain/kotlin")
+    }
+    afterEvaluate {
+        (tasks["dokkaHtmlPartial"] as DokkaTaskPartial).apply {
+            dokkaSourceSets.configureEach {
+                it.includes.from(rootProject.file("dokka/moduledoc.md").path)
+                it.skipEmptyPackages.set(true)
+                it.perPackageOption {
+                    it.matchingRegex.set("com.monkopedia.ksrpc.internal")
+                    it.suppress.set(true)
+                }
+                it.perPackageOption {
+                    it.matchingRegex.set("com.monkopedia.ksrpc.jsonrpc.internal")
+                    it.suppress.set(true)
+                }
+                it.perPackageOption {
+                    it.matchingRegex.set("com.monkopedia.ksrpc.ktor.internal")
+                    it.suppress.set(true)
+                }
+                it.perPackageOption {
+                    it.matchingRegex.set("com.monkopedia.ksrpc.ktor.websocket.internal")
+                    it.suppress.set(true)
+                }
+                it.perPackageOption {
+                    it.matchingRegex.set("com.monkopedia.ksrpc.packets.internal")
+                    it.suppress.set(true)
+                }
+                it.perPackageOption {
+                    it.matchingRegex.set("com.monkopedia.ksrpc.sockets.internal")
+                    it.suppress.set(true)
+                }
+            }
+        }
     }
 
     val javadocJar = tasks.create("javadocJar", Jar::class) {

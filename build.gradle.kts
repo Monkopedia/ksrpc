@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import org.jetbrains.dokka.base.DokkaBase
+import org.jetbrains.dokka.base.DokkaBaseConfiguration
 
 buildscript {
     repositories {
@@ -22,7 +24,8 @@ buildscript {
     }
     dependencies {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.20")
-        classpath("org.jetbrains.dokka:dokka-gradle-plugin:1.4.10.2")
+        classpath("org.jetbrains.dokka:dokka-gradle-plugin:1.7.20")
+        classpath("org.jetbrains.dokka:dokka-base:1.7.20")
     }
     extra["kotlin_plugin_id"] = "com.monkopedia.ksrpc.plugin"
 }
@@ -34,6 +37,7 @@ plugins {
     id("com.github.gmazzo.buildconfig") version "2.0.2" apply false
     id("ksrpc-generate-module")
     id("com.monkopedia.ksrpc.plugin") apply false
+    id("org.jetbrains.dokka") version "1.7.20"
 }
 
 group = "com.monkopedia.ksrpc"
@@ -50,11 +54,17 @@ allprojects {
     if (name == "ksrpc-compiler-plugin-native") return@allprojects
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
     apply(plugin = "com.github.hierynomus.license")
-    tasks.register("licenseCheckForKotlin", com.hierynomus.gradle.license.tasks.LicenseCheck::class) {
+    tasks.register(
+        "licenseCheckForKotlin",
+        com.hierynomus.gradle.license.tasks.LicenseCheck::class
+    ) {
         source = fileTree(project.projectDir) { include("**/*.kt") }
     }
     tasks["license"].dependsOn("licenseCheckForKotlin")
-    tasks.register("licenseFormatForKotlin", com.hierynomus.gradle.license.tasks.LicenseFormat::class) {
+    tasks.register(
+        "licenseFormatForKotlin",
+        com.hierynomus.gradle.license.tasks.LicenseFormat::class
+    ) {
         source = fileTree(project.projectDir) { include("**/*.kt") }
     }
     tasks["licenseFormat"].dependsOn("licenseFormatForKotlin")
@@ -71,4 +81,15 @@ allprojects {
     configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
         android.set(true)
     }
+}
+
+tasks.dokkaHtmlMultiModule.configure {
+    pluginConfiguration<DokkaBase, DokkaBaseConfiguration> {
+        customAssets = file("dokka/assets").listFiles().toList()
+        customStyleSheets = file("dokka/styles").listFiles().toList()
+    }
+
+    outputDirectory.set(buildDir.resolve("dokka"))
+    rootProject.findProject(":ksrpc-packets")?.let { this.removeChildTasks(it) }
+    rootProject.findProject(":ksrpc-ktor-websocket-shared")?.let { this.removeChildTasks(it) }
 }

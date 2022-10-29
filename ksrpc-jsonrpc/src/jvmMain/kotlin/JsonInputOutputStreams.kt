@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.monkopedia.ksrpc.channels
+package com.monkopedia.ksrpc.jsonrpc
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
+import com.monkopedia.ksrpc.channels.SingleChannelConnection
 import com.monkopedia.ksrpc.jsonrpc.asJsonRpcConnection
 import com.monkopedia.ksrpc.sockets.internal.swallow
 import io.ktor.utils.io.jvm.javaio.toByteReadChannel
