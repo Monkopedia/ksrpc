@@ -1,5 +1,5 @@
-/*
- * Copyright 2021 Jason Monk
+/**
+ * Copyright (C) 2022 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +26,14 @@ import io.ktor.server.engine.BaseApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.routing.Routing
+import java.net.ServerSocket
+import kotlin.concurrent.thread
+import kotlin.system.exitProcess
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.withContext
-import java.net.ServerSocket
-import kotlin.concurrent.thread
-import kotlin.system.exitProcess
 
 /**
  * Base class that makes it easy to host a default service on any combination of

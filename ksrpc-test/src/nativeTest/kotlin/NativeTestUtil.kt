@@ -1,12 +1,12 @@
-/*
- * Copyright 2021 Jason Monk
- * 
+/**
+ * Copyright (C) 2022 Jason Monk <monkopedia@gmail.com>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     https://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,6 +16,7 @@
 package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.channels.SerializedService
+import com.monkopedia.ksrpc.ktor.serve as nativeServe
 import com.monkopedia.ksrpc.sockets.posixFileReadChannel
 import com.monkopedia.ksrpc.sockets.posixFileWriteChannel
 import io.ktor.server.cio.CIO
@@ -24,6 +25,8 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.routing
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
+import kotlin.test.Test
+import kotlin.test.fail
 import kotlinx.cinterop.IntVar
 import kotlinx.cinterop.allocArray
 import kotlinx.cinterop.get
@@ -38,9 +41,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import platform.posix.pipe
 import platform.posix.pthread_self
-import kotlin.test.Test
-import kotlin.test.fail
-import com.monkopedia.ksrpc.ktor.serve as nativeServe
 
 var PORT = 9081
 val serverDispatcher = newFixedThreadPoolContext(8, "server-threads")

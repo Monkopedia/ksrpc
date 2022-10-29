@@ -1,12 +1,12 @@
-/*
- * Copyright 2021 Jason Monk
- * 
+/**
+ * Copyright (C) 2022 Jason Monk <monkopedia@gmail.com>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     https://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,7 +17,6 @@ package com.monkopedia.ksrpc.sockets
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.channels.Connection
-import com.monkopedia.ksrpc.sockets.asConnection
 import com.monkopedia.ksrpc.sockets.internal.swallow
 import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.ByteReadChannel
@@ -44,7 +43,10 @@ import platform.posix.write
 
 private const val bufferSize = 4096
 
-actual suspend inline fun withStdInOut(ksrpcEnvironment: KsrpcEnvironment, withConnection: (Connection) -> Unit) {
+actual suspend inline fun withStdInOut(
+    ksrpcEnvironment: KsrpcEnvironment,
+    withConnection: (Connection) -> Unit
+) {
     val input = posixFileReadChannel(STDIN_FILENO)
     val output = posixFileWriteChannel(STDOUT_FILENO)
     withoutIcanon {

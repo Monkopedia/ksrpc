@@ -1,5 +1,5 @@
-/*
- * Copyright 2021 Jason Monk
+/**
+ * Copyright (C) 2022 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,15 +22,15 @@ import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.jvm.javaio.toByteReadChannel
 import io.ktor.utils.io.pool.ByteArrayPool
+import java.io.InputStream
+import java.io.OutputStream
+import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newFixedThreadPoolContext
 import kotlinx.coroutines.withContext
-import java.io.InputStream
-import java.io.OutputStream
-import kotlin.coroutines.coroutineContext
 
 /**
  * Helper that calls into Pair<ByteReadChannel, ByteWriteChannel>.asConnection.
