@@ -1,12 +1,12 @@
 /*
  * Copyright 2020 Jason Monk
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     https://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,7 +28,6 @@ buildscript {
 }
 plugins {
     kotlin("plugin.serialization") version "1.7.20" apply false
-    id("com.github.autostyle") version "3.1"
     id("com.github.hierynomus.license") version "0.16.1"
     id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
 
