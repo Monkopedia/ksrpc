@@ -19,7 +19,7 @@ jobs:
           gpg --list-secret-keys --keyid-format LONG
 
       - name: Install libcurl
-        run: sudo apt-get install -y libcurl4-openssl-dev
+        run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev
 
       - name: Pre-build
         run: gradle build -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}' || gradle build -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}' || gradle build -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
