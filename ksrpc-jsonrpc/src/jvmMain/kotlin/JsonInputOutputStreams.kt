@@ -17,7 +17,6 @@ package com.monkopedia.ksrpc.jsonrpc
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.channels.SingleChannelConnection
-import com.monkopedia.ksrpc.jsonrpc.asJsonRpcConnection
 import com.monkopedia.ksrpc.sockets.internal.swallow
 import io.ktor.utils.io.jvm.javaio.toByteReadChannel
 import io.ktor.utils.io.reader
