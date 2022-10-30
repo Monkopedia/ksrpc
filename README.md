@@ -2,7 +2,7 @@
 
 [![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](http://www.apache.org/licenses/LICENSE-2.0)
 [![Kotlin](https://img.shields.io/badge/kotlin-1.7.20-blue.svg?logo=kotlin)](http://kotlinlang.org)
-[![Maven Central](https://img.shields.io/maven-central/v/com.monkopedia/ksrpc/0.5.5)](https://search.maven.org/artifact/com.monkopedia/ksrpc/0.5.5/pom)
+[![Maven Central](https://img.shields.io/maven-central/v/com.monkopedia/ksrpc-core/0.7.0)](https://search.maven.org/artifact/com.monkopedia/ksrpc-core/0.7.0/pom)
 [![KDoc link](https://img.shields.io/badge/API_reference-KDoc-blue)](https://monkopedia.github.io/ksrpc/ksrpc/)
 
 This is a simple library that allows for json-like RPCs with a simple service declaration in kotlin
@@ -24,11 +24,11 @@ The result after a little work was ksrpc. Its not perfect, but it fits my situat
 has a relatively simple way to declare services and supports a number of connection mechanisms
 depending on the platform being targeted.
 
- - HTTP (JVM, JS, Native)
- - Socket (JVM, Native\*)
- - Stdin/out (JVM, Native\*)
+ - HTTP (JVM, Native, JS (Client only))
+ - Socket (JVM, Native)
+ - Stdin/out (JVM, Native)
  - Local class instantiation (JVM)
- - Web sockets (JVM, JS)
+ - Web sockets (JVM, Native, JS (Client only))
  - jsonrpc 2.0 (JVM, Native\*)
 
  \* Not implemented but expected soon
@@ -42,12 +42,12 @@ as depending on the runtime library.
 plugins {
     `java`
     ...
-    id("com.monkopedia.ksrpc.plugin") version "0.6.0"
+    id("com.monkopedia.ksrpc.plugin") version "0.7.0"
 }
 
 dependencies {
     ...
-    implementation("com.monkopedia:ksrpc:0.6.0")
+    implementation("com.monkopedia:ksrpc-core:0.7.0")
 }
 ```
 
@@ -241,7 +241,7 @@ val localEnv = env.onError { t ->
 
 # Hosting (JVM)
 
-## HTTP
+## HTTP (ksrpc-ktor-client, ksrpc-ktor-server)
 
 Hosting on HTTP is integrated with ktor, a base url is provided both on the client and server and
 all RPCs run on sub-paths using POSTs, and the content is encoded as json.
@@ -258,7 +258,7 @@ embeddedServer {
 }
 ```
 
-## Web sockets
+## Web sockets (ksrpc-ktor-websocket-client, ksrpc-ktor-websocket-server)
 
 Serving websockets attaches pretty much the same way as HTTP, except a different method. The
 communication happens with a custom protocol over websocket packets, sending some header
@@ -277,7 +277,7 @@ embeddedServer {
 ```
 
 
-## Socket
+## Socket (ksrpc-sockets)
 
 Given an input and output stream (from a socket or otherwise), a [Connection](https://monkopedia.github.io/ksrpc/ksrpc/com.monkopedia.ksrpc.channels/-connection/index.html) can be created, and
 then a service hosted on it. When communication goes over input/output streams, a Content-Length is
@@ -299,7 +299,7 @@ while (true) {
 }
 ```
 
-## Std in/out
+## Std in/out (ksrpc-sockets)
 
 A convenience method is provided to do the same kind of hosting as with Sockets.
 
@@ -310,10 +310,10 @@ val connection = stdInConnection(env)
 connection.registerDefault(service)
 ```
 
-## jsonrpc 2.0
+## jsonrpc 2.0 (ksrpc-jsonrpc)
 
 As of 0.5.2, jsonrpc 2.0 is functional in ksrpc. This is supported on a socket or std in/out, with
-similar methods to connect them. The name from the [KsMethod](https://monkopedia.github.io/ksrpc/ksrpc/com.monkopedia.ksrpc.annotation/-ks-method/index.html) annotation is translated to the jsonrpc
+similar methods to connect them. The name from the [KsMethod](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.annotation/-ks-method/index.html) annotation is translated to the jsonrpc
 method field.
 
 ```kotlin
@@ -336,18 +336,36 @@ interface MyService : RpcService {
 
 # Connecting
 
-Each platform provides a form of [KsrpcUri.connect()](https://monkopedia.github.io/ksrpc/ksrpc/com.monkopedia.ksrpc/connect.html)
-which has different capabilities. If possible, it will create a serialized channel, which can be wrapped into a service to make calls on.
+Each protocol provides different mechanisms for creating a connection or a channel depending on
+the current platforms capabilities. Those can then by turned into the hosted API service using
+`toStub()'.
 
 ```kotlin
 val env = ksrpcEnvironment { }
-val uri = "http://localhost:8080/my_service".toKsrpcUri()
-val service = uri.connect(env).toStub<MyService>()
+val connection = HttpClient { }.asConnection("http://localhost:8080/my_service", env)
+val service = connection.defaultChannel().toStub<MyService>()
 
 val output = service.mRpcCall(MyInputSerializable())
 ```
 
-## [Connection](https://monkopedia.github.io/ksrpc/ksrpc/com.monkopedia.ksrpc.channels/-connection/index.html) / [SingleChannelConnection](https://monkopedia.github.io/ksrpc/ksrpc/com.monkopedia.ksrpc.channels/-single-channel-connection/index.html)
+Client side or bidirectional connection methods:
+
+ - [HttpClient.asConnection(baseUrl, env)](https://monkopedia.github.io/ksrpc/ksrpc-ktor-client/com.monkopedia.ksrpc.ktor/as-connection.html)
+ - [HttpClient.asWebsocketConnection(baseUrl, env)](https://monkopedia.github.io/ksrpc/ksrpc-ktor-websocket-client/com.monkopedia.ksrpc.ktor.websocket/as-websocket-connection.html)
+ - [Pair<ByteReadChannel, ByteWriteChannel>.asConnection(env)](https://monkopedia.github.io/ksrpc/ksrpc-sockets/com.monkopedia.ksrpc.sockets/as-connection.html)
+ - [Pair<InputStream, OutputStream>.asConnection(env)](https://monkopedia.github.io/ksrpc/ksrpc-sockets/com.monkopedia.ksrpc.sockets/as-connection.html)
+ - [ProcessBuilder.asConnection(env)](https://monkopedia.github.io/ksrpc/ksrpc-sockets/com.monkopedia.ksrpc.sockets/as-connection.html)
+ - [Pair<ByteReadChannel, ByteWriteChannel>.asJsonRpcConnection(env)](https://monkopedia.github.io/ksrpc/ksrpc-jsonrpc/com.monkopedia.ksrpc.jsonrpc/as-json-rpc-connection.html)
+
+Server side hosting methods:
+ - [Routing.serve(basePath, service, env)](https://monkopedia.github.io/ksrpc/ksrpc-ktor-server/com.monkopedia.ksrpc.ktor/serve.html)
+ - [Routing.serveWebsocket(basePath, service, env)[https://monkopedia.github.io/ksrpc/ksrpc-ktor-websocket-server/com.monkopedia.ksrpc.ktor.websocket/serve-websocket.html]
+ - [withStdInOut(env, withConnection)](https://monkopedia.github.io/ksrpc/ksrpc-sockets/com.monkopedia.ksrpc.sockets/with-std-in-out.html)
+ - [ServiceApp](https://monkopedia.github.io/ksrpc/ksrpc-server/com.monkopedia.ksrpc.server/-service-app/index.html)
+ - [stdInJsonRpcConnection(env)](https://monkopedia.github.io/ksrpc/ksrpc-jsonrpc/com.monkopedia.ksrpc.jsonrpc/std-in-json-rpc-connection.html)
+
+
+## [Connection](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html) / [SingleChannelConnection](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-single-channel-connection/index.html)
 
 For bidirectional communication channels (see section on bidirectional channels below), a default
 channel can be used to connect to it.
@@ -365,10 +383,10 @@ val output = service.mRpcCall(MyInputSerializable())
 When communicating on a socket, websocket or jsonrpc, calls can happen in both directions. Allowing both a hosted
 service that receives incoming calls and a client that sends outgoing calls.
 
-## [SingleChannelConnection](https://monkopedia.github.io/ksrpc/ksrpc/com.monkopedia.ksrpc.channels/-single-channel-connection/index.html)
+## [SingleChannelConnection](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-single-channel-connection/index.html)
 
-For jsonrpc, a [SingleChannelConnection](https://monkopedia.github.io/ksrpc/ksrpc/com.monkopedia.ksrpc.channels/-single-channel-connection/index.html) is provided, which can handle one service in each direction
-(no sub-services). This contains both the [registerDefault](https://monkopedia.github.io/ksrpc/ksrpc/com.monkopedia.ksrpc.channels/register-default.html) and [defaultChannel](https://monkopedia.github.io/ksrpc/ksrpc/com.monkopedia.ksrpc.channels/-single-channel-client/default-channel.html) methods referenced
+For jsonrpc, a [SingleChannelConnection](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-single-channel-connection/index.html) is provided, which can handle one service in each direction
+(no sub-services). This contains both the [registerDefault](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/register-default.html) and [defaultChannel](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-single-channel-client/default-channel.html) methods referenced
 above, and can use both of them at once.
 
 ```kotlin
@@ -392,10 +410,10 @@ connection.connect<MyHostService, MyClientService> { client ->
 }
 ```
 
-## [Connection](https://monkopedia.github.io/ksrpc/ksrpc/com.monkopedia.ksrpc.channels/-connection/index.html)
+## [Connection](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html)
 
-[Connections](https://monkopedia.github.io/ksrpc/ksrpc/com.monkopedia.ksrpc.channels/-connection/index.html) work the
-same way as [SingleChannelConnections](https://monkopedia.github.io/ksrpc/ksrpc/com.monkopedia.ksrpc.channels/-single-channel-connection/index.html)
+[Connections](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html) work the
+same way as [SingleChannelConnections](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-single-channel-connection/index.html)
 for setup and connection, however they support sub-services both for input and output. This way services as inputs to
 methods can be used for contextual callbacks.
 
@@ -456,7 +474,7 @@ service.createTask(object : MyCallbackService {
 
 # API Docs
 
-For further information, see the API docs, which are hosted on [monkopedia.github.io](https://monkopedia.github.io/ksrpc/ksrpc/).
+For further information, see the API docs, which are hosted on [monkopedia.github.io](https://monkopedia.github.io/ksrpc/).
 
 # TODO List
 
