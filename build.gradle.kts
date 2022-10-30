@@ -19,7 +19,6 @@ import org.jetbrains.dokka.base.DokkaBaseConfiguration
 buildscript {
     repositories {
         mavenCentral()
-        jcenter()
         mavenLocal()
     }
     dependencies {
@@ -44,7 +43,6 @@ group = "com.monkopedia.ksrpc"
 
 allprojects {
     repositories {
-        jcenter()
         mavenLocal()
         mavenCentral()
     }
