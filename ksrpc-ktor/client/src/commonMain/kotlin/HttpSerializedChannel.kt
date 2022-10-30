@@ -16,8 +16,6 @@
 package com.monkopedia.ksrpc.ktor.internal
 
 import com.monkopedia.ksrpc.ERROR_PREFIX
-import com.monkopedia.ksrpc.KSRPC_BINARY
-import com.monkopedia.ksrpc.KSRPC_CHANNEL
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.RpcEndpointException
 import com.monkopedia.ksrpc.RpcFailure
@@ -40,6 +38,9 @@ import io.ktor.http.encodeURLPath
 import io.ktor.utils.io.ByteReadChannel
 import kotlin.coroutines.CoroutineContext
 import kotlinx.serialization.json.Json
+
+private const val KSRPC_BINARY = "binary"
+private const val KSRPC_CHANNEL = "channel"
 
 internal class HttpSerializedChannel(
     private val httpClient: HttpClient,

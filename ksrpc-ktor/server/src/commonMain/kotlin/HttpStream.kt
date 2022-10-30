@@ -16,8 +16,6 @@
 package com.monkopedia.ksrpc.ktor
 
 import com.monkopedia.ksrpc.ERROR_PREFIX
-import com.monkopedia.ksrpc.KSRPC_BINARY
-import com.monkopedia.ksrpc.KSRPC_CHANNEL
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.RpcService
@@ -43,6 +41,9 @@ import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.copyTo
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+
+private const val KSRPC_BINARY = "binary"
+private const val KSRPC_CHANNEL = "channel"
 
 inline fun <reified T : RpcService> Routing.serve(
     basePath: String,
