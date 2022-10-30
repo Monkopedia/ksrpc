@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>withStdInOut</title>
+<link href="../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../styles/style.css" rel="Stylesheet">
+<link href="../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../styles/main.css" rel="Stylesheet">
+<link href="../../styles/prism.css" rel="Stylesheet">
+<link href="../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../index.html">
+<span>ksrpc</span>            </a>    </div>
+    <div>0.7.0
+    </div>
+    <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":ksrpc-sockets:dokkaHtmlPartial/commonMain">common</button>
+                <button class="platform-tag platform-selector js-like" data-active="" data-filter=":ksrpc-sockets:dokkaHtmlPartial/jsMain">js</button>
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":ksrpc-sockets:dokkaHtmlPartial/jvmMain">jvm</button>
+                <button class="platform-tag platform-selector native-like" data-active="" data-filter=":ksrpc-sockets:dokkaHtmlPartial/nativeMain">native</button>
+        </div>
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageids="ksrpc-sockets::com.monkopedia.ksrpc.sockets//withStdInOut/#com.monkopedia.ksrpc.KsrpcEnvironment#kotlin.Function1[com.monkopedia.ksrpc.channels.Connection,kotlin.Unit]/PointingToDeclaration//-1488494742">
+  <div class="breadcrumbs"><a href="../index.html">ksrpc-sockets</a><span class="delimiter">/</span><a href="index.html">com.monkopedia.ksrpc.sockets</a><span class="delimiter">/</span><span class="current">withStdInOut</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>with</span><wbr><span>Std</span><wbr><span>In</span><wbr><span><span>Out</span></span></h1>
+  </div>
+  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":ksrpc-sockets:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-sockets:dokkaHtmlPartial/commonMain" data-active="" data-toggle=":ksrpc-sockets:dokkaHtmlPartial/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":ksrpc-sockets:dokkaHtmlPartial/jsMain" data-filterable-set=":ksrpc-sockets:dokkaHtmlPartial/jsMain" data-toggle=":ksrpc-sockets:dokkaHtmlPartial/jsMain">js</button><button class="platform-bookmark" data-filterable-current=":ksrpc-sockets:dokkaHtmlPartial/jvmMain" data-filterable-set=":ksrpc-sockets:dokkaHtmlPartial/jvmMain" data-toggle=":ksrpc-sockets:dokkaHtmlPartial/jvmMain">jvm</button><button class="platform-bookmark" data-filterable-current=":ksrpc-sockets:dokkaHtmlPartial/nativeMain" data-filterable-set=":ksrpc-sockets:dokkaHtmlPartial/nativeMain" data-toggle=":ksrpc-sockets:dokkaHtmlPartial/nativeMain">native</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-sockets:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="with-std-in-out.html"><span class="token function">withStdInOut</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">ksrpcEnvironment<span class="token operator">: </span><a href="../../ksrpc-core/com.monkopedia.ksrpc/-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token punctuation">, </span></span><span class="parameter ">withConnection<span class="token operator">: </span><span class="token punctuation">(</span><span class="token keyword"></span><a href="../../ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html">Connection</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><p class="paragraph">Create a <a href="../../ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html">Connection</a> that communicates over the std in/out streams of this process.</p></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-sockets:dokkaHtmlPartial/jsMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="with-std-in-out.html"><span class="token function">withStdInOut</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">ksrpcEnvironment<span class="token operator">: </span><a href="../../ksrpc-core/com.monkopedia.ksrpc/-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token punctuation">, </span></span><span class="parameter ">withConnection<span class="token operator">: </span><span class="token punctuation">(</span><span class="token keyword"></span><a href="../../ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html">Connection</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><p class="paragraph">Create a <a href="../../ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html">Connection</a> that communicates over the std in/out streams of this process.</p></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-sockets:dokkaHtmlPartial/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="with-std-in-out.html"><span class="token function">withStdInOut</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">ksrpcEnvironment<span class="token operator">: </span><a href="../../ksrpc-core/com.monkopedia.ksrpc/-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token punctuation">, </span></span><span class="parameter ">withConnection<span class="token operator">: </span><span class="token punctuation">(</span><span class="token keyword"></span><a href="../../ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html">Connection</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-sockets:dokkaHtmlPartial/nativeMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="with-std-in-out.html"><span class="token function">withStdInOut</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">ksrpcEnvironment<span class="token operator">: </span><a href="../../ksrpc-core/com.monkopedia.ksrpc/-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token punctuation">, </span></span><span class="parameter ">withConnection<span class="token operator">: </span><span class="token punctuation">(</span><span class="token keyword"></span><a href="../../ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html">Connection</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div></div>  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2022 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+
+</body></html>
+

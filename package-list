@@ -1,0 +1,24 @@
+$dokka.format:html-v1
+$dokka.linkExtension:html
+$dokka.location:com.monkopedia.ksrpc.server/ServiceApp/embeddedServer/#kotlin.Int#kotlin.Function1[io.ktor.server.application.Application,kotlin.Unit]/PointingToDeclaration/ksrpc-server/com.monkopedia.ksrpc.server/-service-app/[native]embedded-server.html
+$dokka.location:com.monkopedia.ksrpc.server/ServiceApp/run/#/PointingToDeclaration/ksrpc-server/com.monkopedia.ksrpc.server/-service-app/[native]run.html
+$dokka.location:com.monkopedia.ksrpc/RpcObjectKey///PointingToDeclaration/ksrpc-core/com.monkopedia.ksrpc/[native]-rpc-object-key/index.html
+$dokka.location:com.monkopedia.ksrpc/RpcObjectKey/rpcObject/#/PointingToDeclaration/ksrpc-core/com.monkopedia.ksrpc/[native]-rpc-object-key/rpc-object.html
+module:ksrpc-core
+com.monkopedia.ksrpc
+com.monkopedia.ksrpc.annotation
+com.monkopedia.ksrpc.channels
+module:ksrpc-jsonrpc
+com.monkopedia.ksrpc.jsonrpc
+module:ksrpc-ktor-client
+com.monkopedia.ksrpc.ktor
+module:ksrpc-ktor-server
+com.monkopedia.ksrpc.ktor
+module:ksrpc-ktor-websocket-client
+com.monkopedia.ksrpc.ktor.websocket
+module:ksrpc-ktor-websocket-server
+com.monkopedia.ksrpc.ktor.websocket
+module:ksrpc-server
+com.monkopedia.ksrpc.server
+module:ksrpc-sockets
+com.monkopedia.ksrpc.sockets
