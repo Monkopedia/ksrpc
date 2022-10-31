@@ -2,7 +2,7 @@
 
 [![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](http://www.apache.org/licenses/LICENSE-2.0)
 [![Kotlin](https://img.shields.io/badge/kotlin-1.7.20-blue.svg?logo=kotlin)](http://kotlinlang.org)
-[![Maven Central](https://img.shields.io/maven-central/v/com.monkopedia/ksrpc-core/0.7.0)](https://search.maven.org/artifact/com.monkopedia/ksrpc-core/0.7.0/pom)
+[![Maven Central](https://img.shields.io/maven-central/v/com.monkopedia.ksrpc/ksrpc-core/0.7.0)](https://search.maven.org/artifact/com.monkopedia.ksrpc/ksrpc-core/0.7.0/pom)
 [![KDoc link](https://img.shields.io/badge/API_reference-KDoc-blue)](https://monkopedia.github.io/ksrpc/ksrpc/)
 
 This is a simple library that allows for json-like RPCs with a simple service declaration in kotlin
