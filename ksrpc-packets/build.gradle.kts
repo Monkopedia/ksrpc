@@ -39,7 +39,6 @@ kotlin {
 
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.3.3")
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
-        implementation("com.github.ajalt:clikt:2.8.0")
     }
     sourceSets["jvmTest"].dependencies {
         implementation("io.ktor:ktor-server-core:2.0.2")
