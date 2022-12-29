@@ -22,18 +22,18 @@ buildscript {
         mavenLocal()
     }
     dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.20")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0")
         classpath("org.jetbrains.dokka:dokka-gradle-plugin:1.7.20")
         classpath("org.jetbrains.dokka:dokka-base:1.7.20")
     }
     extra["kotlin_plugin_id"] = "com.monkopedia.ksrpc.plugin"
 }
 plugins {
-    kotlin("plugin.serialization") version "1.7.20" apply false
+    kotlin("plugin.serialization") version "1.8.0" apply false
     id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
     id("com.github.hierynomus.license") version "0.16.1"
 
-    id("com.github.gmazzo.buildconfig") version "2.0.2" apply false
+    id("com.github.gmazzo.buildconfig") version "3.1.0" apply false
     id("ksrpc-generate-module")
     id("com.monkopedia.ksrpc.plugin") apply false
     id("org.jetbrains.dokka") version "1.7.20"
@@ -77,6 +77,7 @@ allprojects {
     }
 
     configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
+        version.set("0.48.0")
         android.set(true)
     }
 }

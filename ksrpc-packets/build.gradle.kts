@@ -23,40 +23,40 @@ ksrpcModule()
 
 kotlin {
     sourceSets["commonMain"].dependencies {
-        implementation("io.ktor:ktor-client-core:2.0.2")
-        implementation("io.ktor:ktor-client-websockets:2.0.2")
-        implementation("io.ktor:ktor-http:2.0.2")
-        implementation("io.ktor:ktor-serialization-kotlinx-json:2.0.2")
+        implementation("io.ktor:ktor-client-core:2.2.1")
+        implementation("io.ktor:ktor-client-websockets:2.2.1")
+        implementation("io.ktor:ktor-http:2.2.1")
+        implementation("io.ktor:ktor-serialization-kotlinx-json:2.2.1")
     }
     sourceSets["jvmMain"].dependencies {
-        compileOnly("io.ktor:ktor-server-core:2.0.2")
-        compileOnly("io.ktor:ktor-server-host-common:2.0.2")
-        compileOnly("io.ktor:ktor-server-netty:2.0.2")
-        compileOnly("io.ktor:ktor-websockets:2.0.2")
-        compileOnly("io.ktor:ktor-server-websockets:2.0.2")
-        compileOnly("io.ktor:ktor-client-core:2.0.2")
-        compileOnly("io.ktor:ktor-server-cors:2.0.2")
+        compileOnly("io.ktor:ktor-server-core:2.2.1")
+        compileOnly("io.ktor:ktor-server-host-common:2.2.1")
+        compileOnly("io.ktor:ktor-server-netty:2.2.1")
+        compileOnly("io.ktor:ktor-websockets:2.2.1")
+        compileOnly("io.ktor:ktor-server-websockets:2.2.1")
+        compileOnly("io.ktor:ktor-client-core:2.2.1")
+        compileOnly("io.ktor:ktor-server-cors:2.2.1")
 
-        implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.3.3")
-        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
+        implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.4.1")
+        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
     }
     sourceSets["jvmTest"].dependencies {
-        implementation("io.ktor:ktor-server-core:2.0.2")
-        implementation("io.ktor:ktor-server-netty:2.0.2")
-        implementation("io.ktor:ktor-serialization-jackson:2.0.2")
+        implementation("io.ktor:ktor-server-core:2.2.1")
+        implementation("io.ktor:ktor-server-netty:2.2.1")
+        implementation("io.ktor:ktor-serialization-jackson:2.2.1")
 
-        implementation("io.ktor:ktor-client-core:2.0.2")
-        implementation("io.ktor:ktor-client-okhttp:2.0.2")
-        implementation("io.ktor:ktor-server-websockets:2.0.2")
-        implementation("io.ktor:ktor-client-websockets:2.0.2")
+        implementation("io.ktor:ktor-client-core:2.2.1")
+        implementation("io.ktor:ktor-client-okhttp:2.2.1")
+        implementation("io.ktor:ktor-server-websockets:2.2.1")
+        implementation("io.ktor:ktor-client-websockets:2.2.1")
     }
     sourceSets["jsTest"].dependencies {
-        implementation("io.ktor:ktor-client-core:2.0.2")
+        implementation("io.ktor:ktor-client-core:2.2.1")
     }
     sourceSets["jsMain"].dependencies {
-        compileOnly("io.ktor:ktor-client-core:2.0.2")
+        compileOnly("io.ktor:ktor-client-core:2.2.1")
     }
     sourceSets["nativeMain"].dependencies {
-        implementation("io.ktor:ktor-client-curl:2.0.2")
+        implementation("io.ktor:ktor-client-curl:2.2.1")
     }
 }

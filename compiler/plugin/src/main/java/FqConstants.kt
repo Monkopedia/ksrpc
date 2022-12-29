@@ -15,6 +15,10 @@
  */
 package com.monkopedia.ksrpc.plugin
 
+import org.jetbrains.kotlin.name.CallableId
+import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.name.Name
+
 object FqConstants {
     const val PKG = "com.monkopedia.ksrpc"
     const val RPC_ENDPOINT_EXCEPTION = "$PKG.RpcEndpointException"
@@ -36,7 +40,8 @@ object FqConstants {
     const val INVOKE = "invoke"
 
     const val KSERIALIZER = "kotlinx.serialization.KSerializer"
-    const val SERIALIZER = "kotlinx.serialization.serializer"
+    val SERIALIZER_CALLABLE: CallableId =
+        CallableId(FqName("kotlinx.serialization"), Name.identifier("serializer"))
     const val TYPE_OF = "kotlin.reflect.typeOf"
     const val BYTE_READ_CHANNEL = "io.ktor.utils.io.ByteReadChannel"
     const val THREAD_LOCAL = "kotlin.native.concurrent.ThreadLocal"

@@ -53,7 +53,10 @@ class WebsocketPacketChannel(
     override suspend fun receive(): Packet {
         receiveLock.lock()
         try {
-            return socketSession.receiveDeserializedBase(converter, Charsets.UTF_8)
+            return socketSession.receiveDeserializedBase<Packet>(
+                converter,
+                Charsets.UTF_8
+            ) as Packet
         } finally {
             receiveLock.unlock()
         }

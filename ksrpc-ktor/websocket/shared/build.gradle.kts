@@ -24,8 +24,8 @@ ksrpcModule()
 kotlin {
     sourceSets["commonMain"].dependencies {
         api(project(":ksrpc-packets"))
-        api("io.ktor:ktor-websockets:2.0.2")
-        api("io.ktor:ktor-websocket-serialization:2.0.2")
-        api("io.ktor:ktor-serialization-kotlinx-json:2.0.2")
+        api("io.ktor:ktor-websockets:2.2.1")
+        api("io.ktor:ktor-websocket-serialization:2.2.1")
+        api("io.ktor:ktor-serialization-kotlinx-json:2.2.1")
     }
 }

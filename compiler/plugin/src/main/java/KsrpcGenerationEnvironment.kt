@@ -54,6 +54,7 @@ import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.functions
 import org.jetbrains.kotlin.ir.util.parentAsClass
 import org.jetbrains.kotlin.ir.util.parentClassOrNull
+import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 
 class KsrpcGenerationEnvironment(
@@ -75,7 +76,7 @@ class KsrpcGenerationEnvironment(
     val suspendCloseable = referenceClass(FqConstants.SUSPEND_CLOSEABLE)
 
     val kSerializer = referenceClass(FqConstants.KSERIALIZER)
-    val serializerMethod = pluginContext.referenceFunctions(FqName(FqConstants.SERIALIZER)).find {
+    val serializerMethod = pluginContext.referenceFunctions(FqConstants.SERIALIZER_CALLABLE).find {
         it.owner.dispatchReceiverParameter == null &&
             it.owner.extensionReceiverParameter == null &&
             it.owner.typeParameters.size == 1 &&
@@ -87,7 +88,7 @@ class KsrpcGenerationEnvironment(
     val byteReadChannel = FqName(FqConstants.BYTE_READ_CHANNEL)
 
     private fun maybeReferenceClass(name: String): IrClassSymbol? {
-        val fqName = FqName(name)
+        val fqName = ClassId.fromString(name)
         return pluginContext.referenceClass(fqName)
     }
 
@@ -103,7 +104,7 @@ class KsrpcGenerationEnvironment(
     }
 
     private fun referenceObject(name: String): IrClassSymbol {
-        val fqName = FqName(name)
+        val fqName = ClassId.fromString(name)
         return pluginContext.referenceClass(fqName)
             ?: run {
                 messageCollector.report(
