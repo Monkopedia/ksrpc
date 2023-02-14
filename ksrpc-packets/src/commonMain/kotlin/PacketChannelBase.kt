@@ -32,11 +32,12 @@ import io.ktor.util.encodeBase64
 import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.close
 import io.ktor.utils.io.core.readBytes
-import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 private const val DEFAULT_MAX_SIZE = 16 * 1024L
 
@@ -107,7 +108,7 @@ abstract class PacketChannelBase(
             }
         } catch (t: Throwable) {
             binaryChannels.values.forEach { it.channel.close(t) }
-            multiChannel.close()
+            multiChannel.close(CancellationException("Multi-channel failure", t))
         }
     }
 

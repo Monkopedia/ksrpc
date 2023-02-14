@@ -23,13 +23,14 @@ import kotlinx.coroutines.sync.Mutex
 class MultiChannel<T> {
 
     private var isClosed: Boolean = false
+    private var closeException: Throwable? = null
     private val lock = Mutex()
     private val pending = mutableListOf<Pair<String, CompletableDeferred<T>>>()
     private var id = 1
 
     private fun checkClosed() {
-        require(!isClosed) {
-            "$this has already been closed"
+        if (isClosed) {
+            throw IllegalStateException("MultiChannel ($this) is closed", closeException)
         }
     }
 
@@ -64,6 +65,7 @@ class MultiChannel<T> {
     suspend fun close(t: CancellationException? = null) {
         lock.lock()
         isClosed = true
+        closeException = t
         pending.forEach {
             it.second.completeExceptionally(t ?: CancellationException("Closing MultiChannel"))
         }
