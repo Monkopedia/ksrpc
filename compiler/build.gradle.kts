@@ -15,28 +15,25 @@
  */
 
 buildscript {
-    repositories {
-        mavenCentral()
-        mavenLocal()
-    }
     dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0")
-        classpath("org.jetbrains.dokka:dokka-gradle-plugin:1.7.20")
+        classpath(libs.bundles.dokka)
     }
     extra["kotlin_plugin_id"] = "com.monkopedia.ksrpc.plugin"
 }
 plugins {
-    kotlin("plugin.serialization") version "1.8.0" apply false
-    id("com.github.hierynomus.license") version "0.16.1"
-    id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
+    alias(libs.plugins.kotlin) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.hierynomus.license)
+    alias(libs.plugins.jlleitschuh.ktlint)
 
-    id("com.github.gmazzo.buildconfig") version "3.1.0" apply false
+    alias(libs.plugins.gmazzo.buildconfig) apply false
 }
 
 group = "com.monkopedia.ksrpc"
 
 allprojects {
     repositories {
+        google()
         mavenLocal()
         mavenCentral()
     }

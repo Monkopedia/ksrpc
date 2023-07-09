@@ -1,0 +1,62 @@
+[versions]
+gradleplugin = "8.0.0"
+kotlin = "1.9.0"
+kotlin-serialization = "1.5.1"
+kotlin-coroutines = "1.7.2"
+kotlin-atomicfu = "0.21.0"
+kotlin-compiletesting = "1.4.9"
+dokka = "1.8.20"
+ktor = "2.3.2"
+googleautoservice = "1.0.1"
+ksrpctest = "0.7.1"
+nanoid = "3.1.22"
+jnanoid = "2.0.0"
+slf4j = "2.0.6"
+clikt = "3.5.1"
+
+[libraries]
+dokka-base = { module = "org.jetbrains.dokka:dokka-base", version.ref = "dokka" }
+dokka-gradle = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
+kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+autoservice = { module = "com.google.auto.service:auto-service", version.ref = "googleautoservice" }
+autoservice-annotations = { module = "com.google.auto.service:auto-service-annotations", version.ref = "googleautoservice" }
+ksrpctest = { module = "com.monkopedia.ksrpc:ksrpc-core", version.ref = "ksrpctest"}
+kotlin-compiletesting = { module = "com.github.tschuchortdev:kotlin-compile-testing", version.ref = "kotlin-compiletesting"}
+ktor-io = { module = "io.ktor:ktor-io", version.ref = "ktor" }
+kotlinx-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlin-serialization"}
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlin-serialization"}
+kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutines"}
+kotlinx-atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version.ref = "kotlin-atomicfu"}
+jnanoid = { module = "com.aventrix.jnanoid:jnanoid", version.ref = "jnanoid" }
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j"}
+ktor-client = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-curl = { module = "io.ktor:ktor-client-curl", version.ref = "ktor" }
+ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+ktor-client-websockets = { module = "io.ktor:ktor-client-websockets", version.ref = "ktor" }
+ktor-server = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
+ktor-server-websockets = { module = "io.ktor:ktor-server-websockets", version.ref = "ktor" }
+ktor-server-cors = { module = "io.ktor:ktor-server-cors", version.ref = "ktor" }
+ktor-server-host-common = { module = "io.ktor:ktor-server-host-common", version.ref = "ktor" }
+ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor" }
+ktor-server-cio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor" }
+ktor-http = { module = "io.ktor:ktor-http", version.ref = "ktor" }
+ktor-kotlinx-serialization = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-jackson-serialization = { module = "io.ktor:ktor-serialization-jackson", version.ref = "ktor" }
+ktor-websockets = { module = "io.ktor:ktor-websockets", version.ref = "ktor" }
+ktor-websockets-serialization = { module = "io.ktor:ktor-websocket-serialization", version.ref = "ktor" }
+clikt = { module = "com.github.ajalt.clikt:clikt", version.ref = "clikt"}
+
+[bundles]
+dokka = ["dokka-base", "dokka-gradle"]
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "gradleplugin" }
+android-library = { id = "com.android.library", version.ref = "gradleplugin" }
+kotlin = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
+hierynomus-license = { id = "com.github.hierynomus.license", version = "0.16.1" }
+jlleitschuh-ktlint = { id = "org.jlleitschuh.gradle.ktlint", version = "11.0.0" }
+gmazzo-buildconfig = { id = "com.github.gmazzo.buildconfig", version = "3.1.0" }

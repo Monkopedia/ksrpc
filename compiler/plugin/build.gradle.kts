@@ -35,13 +35,13 @@ java {
 dependencies {
     compileOnly("org.jetbrains.kotlin:kotlin-compiler-embeddable")
 
-    kapt("com.google.auto.service:auto-service:1.0-rc7")
-    compileOnly("com.google.auto.service:auto-service-annotations:1.0-rc7")
+    kapt(libs.autoservice)
+    compileOnly(libs.autoservice.annotations)
 
-    testImplementation("com.monkopedia:ksrpc:0.6.0")
+    testImplementation(libs.ksrpctest)
     testImplementation(kotlin("test-junit"))
     testImplementation("org.jetbrains.kotlin:kotlin-compiler-embeddable")
-    testImplementation("com.github.tschuchortdev:kotlin-compile-testing:1.4.9")
+    testImplementation(libs.kotlin.compiletesting)
 }
 
 buildConfig {
@@ -91,7 +91,7 @@ publishing {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
-    kotlinOptions.freeCompilerArgs = listOf("-Xjvm-default=enable")
+    kotlinOptions.freeCompilerArgs = listOf("-Xjvm-default=all")
 }
 
 signing {

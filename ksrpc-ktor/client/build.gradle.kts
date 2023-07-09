@@ -23,20 +23,20 @@ ksrpcModule()
 
 kotlin {
     sourceSets["commonMain"].dependencies {
-        implementation("io.ktor:ktor-client-core:2.2.1")
-        implementation("io.ktor:ktor-http:2.2.1")
-        implementation("io.ktor:ktor-serialization-kotlinx-json:2.2.1")
+        implementation(libs.ktor.client)
+        implementation(libs.ktor.http)
+        implementation(libs.ktor.kotlinx.serialization)
     }
     sourceSets["jvmMain"].dependencies {
-        compileOnly("io.ktor:ktor-client-core:2.2.1")
+        compileOnly(libs.ktor.client)
 
-        implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.4.1")
-        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
+        implementation(libs.kotlinx.serialization)
+        implementation(libs.kotlinx.serialization.json)
     }
     sourceSets["jsMain"].dependencies {
-        compileOnly("io.ktor:ktor-client-core:2.2.1")
+        compileOnly(libs.ktor.client)
     }
     sourceSets["nativeMain"].dependencies {
-        implementation("io.ktor:ktor-client-curl:2.2.1")
+        implementation(libs.ktor.client.curl)
     }
 }

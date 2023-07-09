@@ -26,6 +26,6 @@ ksrpcModule(
 kotlin {
     sourceSets["commonMain"].dependencies {
         api(project(":ksrpc-ktor-websocket-shared"))
-        api("io.ktor:ktor-server-websockets:2.2.1")
+        api(libs.ktor.server.websockets)
     }
 }

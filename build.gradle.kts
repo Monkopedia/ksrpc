@@ -1,3 +1,7 @@
+import org.jetbrains.dokka.DokkaConfiguration
+import org.jetbrains.dokka.gradle.DokkaPlugin
+import org.jetbrains.dokka.plugability.ConfigurableBlock
+
 /*
  * Copyright 2020 Jason Monk
  *
@@ -17,26 +21,25 @@ import org.jetbrains.dokka.base.DokkaBase
 import org.jetbrains.dokka.base.DokkaBaseConfiguration
 
 buildscript {
-    repositories {
-        mavenCentral()
-        mavenLocal()
-    }
     dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0")
-        classpath("org.jetbrains.dokka:dokka-gradle-plugin:1.7.20")
-        classpath("org.jetbrains.dokka:dokka-base:1.7.20")
+        classpath(libs.bundles.dokka)
     }
     extra["kotlin_plugin_id"] = "com.monkopedia.ksrpc.plugin"
 }
 plugins {
-    kotlin("plugin.serialization") version "1.8.0" apply false
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.android.library) apply false
+    alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.kotlin.kapt) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.dokka)
+
     id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
     id("com.github.hierynomus.license") version "0.16.1"
 
     id("com.github.gmazzo.buildconfig") version "3.1.0" apply false
     id("ksrpc-generate-module")
     id("com.monkopedia.ksrpc.plugin") apply false
-    id("org.jetbrains.dokka") version "1.7.20"
 }
 
 group = "com.monkopedia.ksrpc"

@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(ExperimentalForeignApi::class)
+
 package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.channels.SerializedService
@@ -25,6 +27,7 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.routing
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
+import kotlinx.cinterop.ExperimentalForeignApi
 import kotlin.test.Test
 import kotlin.test.fail
 import kotlinx.cinterop.IntVar
@@ -42,7 +45,7 @@ import kotlinx.coroutines.withContext
 import platform.posix.pipe
 import platform.posix.pthread_self
 
-var PORT = 9081
+var PORT = 9181
 val serverDispatcher = newFixedThreadPoolContext(8, "server-threads")
 
 actual suspend inline fun httpTest(

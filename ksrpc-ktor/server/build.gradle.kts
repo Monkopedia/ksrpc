@@ -25,6 +25,6 @@ ksrpcModule(
 
 kotlin {
     sourceSets["commonMain"].dependencies {
-        api("io.ktor:ktor-server-core:2.2.1")
+        api(libs.ktor.server)
     }
 }

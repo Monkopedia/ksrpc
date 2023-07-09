@@ -19,6 +19,7 @@ import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.packets.internal.Packet
 import com.monkopedia.ksrpc.packets.internal.PacketChannelBase
 import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
+import io.ktor.util.InternalAPI
 import io.ktor.utils.io.charsets.Charsets
 import io.ktor.websocket.DefaultWebSocketSession
 import io.ktor.websocket.close
@@ -27,6 +28,7 @@ import io.ktor.websocket.serialization.sendSerializedBase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.sync.Mutex
 
+@OptIn(InternalAPI::class)
 class WebsocketPacketChannel(
     scope: CoroutineScope,
     private val socketSession: DefaultWebSocketSession,
@@ -44,7 +46,7 @@ class WebsocketPacketChannel(
     override suspend fun send(packet: Packet) {
         sendLock.lock()
         try {
-            socketSession.sendSerializedBase(packet, converter, Charsets.UTF_8)
+            socketSession.sendSerializedBase<Packet>(packet, converter, Charsets.UTF_8)
         } finally {
             sendLock.unlock()
         }

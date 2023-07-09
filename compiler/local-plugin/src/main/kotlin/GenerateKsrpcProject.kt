@@ -100,33 +100,21 @@ fun Project.ksrpcModule(
             if (name != "ksrpc-core") {
                 api(project(":ksrpc-core"))
             }
-            implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.4.1")
-            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-            implementation("org.jetbrains.kotlinx:atomicfu:0.18.5")
         }
         sourceSets["commonTest"].dependencies {
             implementation(kotlin("test"))
         }
         if (supportJvm) {
             sourceSets["jvmMain"].dependencies {
-                implementation("com.aventrix.jnanoid:jnanoid:2.0.0")
-
                 implementation(kotlin("stdlib"))
                 implementation(kotlin("reflect"))
-                implementation("org.slf4j:slf4j-api:2.0.6")
             }
             sourceSets["jvmTest"].dependencies {
                 implementation(kotlin("test-junit"))
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.4.1")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
             }
         }
         if (supportJs) {
             sourceSets["jsMain"].dependencies {
-                implementation(npm("nanoid", "3.1.22"))
             }
             sourceSets["jsTest"].dependencies {
                 implementation(kotlin("test-js"))
@@ -135,7 +123,6 @@ fun Project.ksrpcModule(
         if (supportNative) {
             sourceSets["nativeMain"].dependencies {
                 implementation(kotlin("stdlib"))
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
             }
         }
     }
@@ -157,7 +144,7 @@ fun Project.ksrpcModule(
 
     val dokkaJavadoc = tasks.create("dokkaJavadocCustom", DokkaTask::class) {
         it.project.dependencies {
-            it.plugins("org.jetbrains.dokka:kotlin-as-java-plugin:1.7.20")
+            it.plugins("org.jetbrains.dokka:kotlin-as-java-plugin")
         }
         // outputFormat = "javadoc"
         it.outputDirectory.set(File(project.buildDir, "javadoc"))

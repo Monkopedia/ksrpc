@@ -25,7 +25,7 @@ kotlin {
     sourceSets["commonMain"].dependencies {
         api(project(":ksrpc-packets"))
         api(project(":ksrpc-sockets"))
-        api("io.ktor:ktor-io:2.2.1")
+        api(libs.ktor.io)
     }
     sourceSets["jvmMain"].dependencies {
     }

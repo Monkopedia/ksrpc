@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(ExperimentalForeignApi::class)
+
 package com.monkopedia.ksrpc.sockets
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
@@ -27,6 +29,7 @@ import io.ktor.utils.io.read
 import io.ktor.utils.io.reader
 import io.ktor.utils.io.writer
 import kotlinx.cinterop.ByteVar
+import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.allocArray
 import kotlinx.cinterop.memScoped
 import kotlinx.coroutines.DelicateCoroutinesApi

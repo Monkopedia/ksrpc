@@ -28,16 +28,16 @@ kotlin {
         api(project(":ksrpc-ktor-server"))
         api(project(":ksrpc-ktor-websocket-server"))
         api(project(":ksrpc-sockets"))
-        api("com.github.ajalt.clikt:clikt:3.5.1")
-        api("io.ktor:ktor-server-core:2.2.1")
-        api("io.ktor:ktor-server-cors:2.2.1")
-        api("io.ktor:ktor-server-host-common:2.2.1")
+        api(libs.clikt)
+        api(libs.ktor.server)
+        api(libs.ktor.server.cors)
+        api(libs.ktor.server.host.common)
     }
     sourceSets["jvmMain"].dependencies {
         api(project(":ksrpc-sockets"))
-        api("io.ktor:ktor-server-netty:2.2.1")
+        api(libs.ktor.server.netty)
     }
     sourceSets["nativeMain"].dependencies {
-        api("io.ktor:ktor-server-cio:2.2.1")
+        api(libs.ktor.server.cio)
     }
 }

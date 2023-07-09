@@ -26,8 +26,8 @@ dependencies {
     implementation(kotlin("stdlib"))
     implementation(kotlin("gradle-plugin-api"))
     implementation(gradleKotlinDsl())
-    api("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0")
-    api("org.jetbrains.dokka:dokka-gradle-plugin:1.7.20")
+    api(libs.kotlin.gradle)
+    api(libs.bundles.dokka)
 }
 
 java {

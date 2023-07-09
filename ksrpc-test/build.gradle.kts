@@ -15,24 +15,24 @@ kotlin {
         implementation(project(":ksrpc-ktor-client"))
         implementation(project(":ksrpc-ktor-websocket-client"))
         implementation(project(":ksrpc-sockets"))
-        implementation("io.ktor:ktor-client-core:2.2.1")
+        implementation(libs.ktor.client)
     }
     sourceSets["jvmTest"].dependencies {
         implementation(project(":ksrpc-server"))
         implementation(project(":ksrpc-ktor-server"))
         implementation(project(":ksrpc-ktor-websocket-server"))
-        implementation("io.ktor:ktor-server-core:2.2.1")
-        implementation("io.ktor:ktor-server-netty:2.2.1")
-        implementation("io.ktor:ktor-serialization-jackson:2.2.1")
+        implementation(libs.ktor.server)
+        implementation(libs.ktor.server.netty)
+        implementation(libs.ktor.jackson.serialization)
 
-        implementation("io.ktor:ktor-client-okhttp:2.2.1")
-        implementation("io.ktor:ktor-server-websockets:2.2.1")
-        implementation("io.ktor:ktor-client-websockets:2.2.1")
+        implementation(libs.ktor.client.okhttp)
+        implementation(libs.ktor.server.websockets)
+        implementation(libs.ktor.client.websockets)
     }
     sourceSets["nativeTest"].dependencies {
         implementation(project(":ksrpc-ktor-server"))
         implementation(project(":ksrpc-ktor-websocket-server"))
-        implementation("io.ktor:ktor-server-cio:2.2.1")
+        implementation(libs.ktor.server.cio)
     }
     sourceSets["jsTest"].dependencies {
     }

@@ -35,8 +35,8 @@ java {
 dependencies {
     compileOnly("org.jetbrains.kotlin:kotlin-compiler")
 
-    kapt("com.google.auto.service:auto-service:1.0-rc7")
-    compileOnly("com.google.auto.service:auto-service-annotations:1.0-rc7")
+    kapt(libs.autoservice)
+    compileOnly(libs.autoservice.annotations)
 }
 
 tasks.named("compileKotlin") { dependsOn("syncSource") }
@@ -95,7 +95,7 @@ publishing {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
-    kotlinOptions.freeCompilerArgs = listOf("-Xjvm-default=enable")
+    kotlinOptions.freeCompilerArgs = listOf("-Xjvm-default=all")
 }
 
 signing {
