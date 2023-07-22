@@ -39,8 +39,12 @@ dependencies {
     compileOnly(libs.autoservice.annotations)
 }
 
-tasks.named("compileKotlin") { dependsOn("syncSource") }
-tasks.register<Sync>("syncSource") {
+afterEvaluate {
+    tasks.named("compileKotlin") { dependsOn("syncSource") }
+    tasks.named("kaptGenerateStubsKotlin") { dependsOn("syncSource") }
+    tasks.named("sourcesJar") { dependsOn("syncSource") }
+}
+val syncSource = tasks.register<Sync>("syncSource") {
     from(project(":ksrpc-compiler-plugin").sourceSets.main.get().allSource)
     into("src/main/kotlin")
     filter {

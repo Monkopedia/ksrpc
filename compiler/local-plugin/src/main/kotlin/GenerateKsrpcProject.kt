@@ -144,7 +144,7 @@ fun Project.ksrpcModule(
 
     val dokkaJavadoc = tasks.create("dokkaJavadocCustom", DokkaTask::class) {
         it.project.dependencies {
-            it.plugins("org.jetbrains.dokka:kotlin-as-java-plugin")
+            it.plugins("org.jetbrains.dokka:kotlin-as-java-plugin:1.8.20")
         }
         // outputFormat = "javadoc"
         it.outputDirectory.set(File(project.buildDir, "javadoc"))
@@ -231,5 +231,14 @@ fun Project.ksrpcModule(
     extensions.getByType<SigningExtension>().apply {
         useGpgCmd()
         sign(publishing.publications)
+    }
+    project.afterEvaluate {
+        tasks.withType(org.gradle.plugins.signing.Sign::class) { signingTask ->
+            tasks.withType(org.gradle.api.publish.maven.tasks.AbstractPublishToMaven::class) { publishTask ->
+                publishTask.dependsOn(signingTask)
+            }
+        }
+
+
     }
 }
