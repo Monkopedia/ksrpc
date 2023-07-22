@@ -28,6 +28,7 @@ include(":ksrpc-jsonrpc")
 include(":ksrpc-packets")
 include(":ksrpc-server")
 include(":ksrpc-sockets")
+include(":ksrpc-jni")
 include(":ksrpc-test")
 
 include(":ksrpc-ktor-client")
