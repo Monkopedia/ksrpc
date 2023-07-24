@@ -20,7 +20,22 @@ plugins {
 }
 
 ksrpcModule(
-    supportJs = false
+    supportJs = false,
+    nativeConfig = {
+        binaries {
+            sharedLib()
+        }
+        compilations["main"].cinterops.create("jni") {
+            val javaHome = File(System.getProperty("java.home")!!)
+            packageName = "com.monkopedia.jni"
+            includeDirs(
+                Callable { File(javaHome, "include") },
+                Callable { File(javaHome, "include/darwin") },
+                Callable { File(javaHome, "include/linux") },
+                Callable { File(javaHome, "include/win32") }
+            )
+        }
+    }
 )
 
 kotlin {

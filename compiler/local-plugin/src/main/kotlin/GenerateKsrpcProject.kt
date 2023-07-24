@@ -34,6 +34,7 @@ import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.dokka.gradle.DokkaTaskPartial
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTargetWithTests
 import org.jetbrains.kotlin.gradle.targets.js.yarn.yarn
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -46,7 +47,8 @@ fun Project.ksrpcModule(
     supportJvm: Boolean = true,
     supportJs: Boolean = true,
     supportNative: Boolean = true,
-    includePublications: Boolean = true
+    includePublications: Boolean = true,
+    nativeConfig: KotlinNativeTargetWithTests<*>.() -> Unit = {}
 ) {
     group = "com.monkopedia.ksrpc"
 
@@ -94,6 +96,7 @@ fun Project.ksrpcModule(
             hostTarget.apply {
                 binaries {
                 }
+                nativeConfig()
             }
         }
         sourceSets["commonMain"].dependencies {
