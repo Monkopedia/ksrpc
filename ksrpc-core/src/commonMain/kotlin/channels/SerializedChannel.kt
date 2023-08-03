@@ -25,6 +25,7 @@ import com.monkopedia.ksrpc.channels.ChannelClient.Companion.DEFAULT
 import com.monkopedia.ksrpc.internal.HostSerializedServiceImpl
 import com.monkopedia.ksrpc.rpcObject
 import io.ktor.utils.io.ByteReadChannel
+import kotlinx.serialization.KSerializer
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -179,44 +180,61 @@ expect fun randomUuid(): String
  * Wrapper around data being serialized through calls.
  * Could be a reference to a string for a serialized object or to binary data.
  */
-data class CallData private constructor(private val value: Any?) {
-    val isBinary: Boolean
-        get() = value is ByteReadChannel
+sealed class CallData private constructor() {
+    abstract val isBinary: Boolean
 
     /**
      * Read the serialized content of this object.
-     * If this is not a string then throws []IllegalStateException].
+     * If this is not a string then throws [IllegalStateException].
      */
-    fun readSerialized(): String {
-        if (isBinary) error("Cannot read serialization out of binary data.")
-        return value as String
-    }
+    abstract fun readSerialized(): String
 
     /**
      * Get the [ByteReadChannel] for the binary data held by this call..
-     * If this is not binary data then throws []IllegalStateException].
+     * If this is not binary data then throws [IllegalStateException].
      */
-    fun readBinary(): ByteReadChannel {
-        if (!isBinary) error("Cannot read binary data out of serialized content.")
-        return value as ByteReadChannel
-    }
+    abstract fun readBinary(): ByteReadChannel
 
-    override fun toString(): String {
-        if (isBinary) {
+    data class Binary(private val value: ByteReadChannel) : CallData() {
+        override val isBinary: Boolean
+            get() = true
+
+        override fun readSerialized(): String =
+            error("Cannot read serialization out of binary data.")
+
+        override fun readBinary(): ByteReadChannel = value
+
+        override fun toString(): String {
             return "binary(${(value as? ByteReadChannel)?.availableForRead})"
         }
-        return value.toString()
+    }
+
+    data class Serialized(private val value: String) : CallData() {
+        override val isBinary: Boolean
+            get() = false
+
+        override fun readSerialized(): String {
+            return value
+        }
+
+        override fun readBinary(): ByteReadChannel {
+            error("Cannot read binary data out of serialized content.")
+        }
+
+        override fun toString(): String {
+            return value
+        }
     }
 
     companion object {
         /**
          * Create a CallData holding content serialized in a string.
          */
-        fun create(str: String) = CallData(str)
+        fun create(str: String) = Serialized(str)
 
         /**
          * Create a CallData wrapping a [ByteReadChannel] for reading binary data.
          */
-        fun create(binary: ByteReadChannel) = CallData(binary)
+        fun create(binary: ByteReadChannel) = Binary(binary)
     }
 }
