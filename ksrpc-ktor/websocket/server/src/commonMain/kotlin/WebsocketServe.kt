@@ -28,19 +28,19 @@ import kotlinx.coroutines.coroutineScope
 inline fun <reified T : RpcService> Routing.serveWebsocket(
     basePath: String,
     service: T,
-    env: KsrpcEnvironment
+    env: KsrpcEnvironment<String>
 ) = serveWebsocket(basePath, service.serialized(env), env)
 
 fun Routing.serveWebsocket(
     basePath: String,
-    channel: SerializedService,
-    env: KsrpcEnvironment
+    channel: SerializedService<String>,
+    env: KsrpcEnvironment<String>
 ) {
     val baseStripped = basePath.trimEnd('/')
     webSocket(baseStripped) {
         coroutineScope {
             val wb = WebsocketPacketChannel(this, this@webSocket, env)
-            wb.connect {
+            wb.connect<String> {
                 channel
             }
         }

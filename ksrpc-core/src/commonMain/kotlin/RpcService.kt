@@ -30,7 +30,7 @@ interface RpcService : SuspendCloseable {
  * Interface for generated companions of [RpcService].
  */
 interface RpcObject<T : RpcService> {
-    fun createStub(channel: SerializedService): T
+    fun <S> createStub(channel: SerializedService<S>): T
     fun findEndpoint(endpoint: String): RpcMethod<*, *, *>
 }
 
@@ -42,19 +42,19 @@ expect inline fun <reified T : RpcService> rpcObject(): RpcObject<T>
 /**
  * Convert a [T] into a [SerializedService] for hosting.
  */
-inline fun <reified T : RpcService> T.serialized(
-    env: KsrpcEnvironment
-): SerializedService {
+inline fun <reified T : RpcService, S> T.serialized(
+    env: KsrpcEnvironment<S>
+): SerializedService<S> {
     return serialized(rpcObject(), env)
 }
 
 /**
  * Convert a [T] into a [SerializedService] for hosting.
  */
-fun <T : RpcService> T.serialized(
+fun <T : RpcService, S> T.serialized(
     rpcObject: RpcObject<T>,
-    env: KsrpcEnvironment
-): SerializedService {
+    env: KsrpcEnvironment<S>
+): SerializedService<S> {
     val rpcChannel = this
     return HostSerializedServiceImpl(rpcChannel, rpcObject, env)
 }
@@ -62,7 +62,7 @@ fun <T : RpcService> T.serialized(
 /**
  * Convert a [SerializedService] to a [T] for use as a client.
  */
-inline fun <reified T : RpcService> SerializedService.toStub(): T {
+inline fun <reified T : RpcService, S> SerializedService<S>.toStub(): T {
     return rpcObject<T>().createStub(this)
 }
 

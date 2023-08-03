@@ -40,11 +40,11 @@ abstract class JsonRpcTransformer {
 }
 
 fun Pair<ByteReadChannel, ByteWriteChannel>.jsonHeader(
-    env: KsrpcEnvironment
+    env: KsrpcEnvironment<String>
 ): JsonRpcTransformer = JsonRpcHeader(env, first, second)
 
 internal class JsonRpcHeader(
-    env: KsrpcEnvironment,
+    env: KsrpcEnvironment<String>,
     private val input: ByteReadChannel,
     private val output: ByteWriteChannel,
 ) : JsonRpcTransformer() {
@@ -84,11 +84,11 @@ internal class JsonRpcHeader(
 }
 
 fun Pair<ByteReadChannel, ByteWriteChannel>.jsonLine(
-    env: KsrpcEnvironment
+    env: KsrpcEnvironment<String>
 ): JsonRpcTransformer = JsonRpcLine(env, first, second)
 
 internal class JsonRpcLine(
-    env: KsrpcEnvironment,
+    env: KsrpcEnvironment<String>,
     private val input: ByteReadChannel,
     private val output: ByteWriteChannel,
 ) : JsonRpcTransformer() {

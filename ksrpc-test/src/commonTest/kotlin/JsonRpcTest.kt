@@ -247,8 +247,8 @@ class JsonRpcTest {
 }
 
 abstract class JsonRpcFunctionalityTest(
-    private val serializedChannel: suspend () -> SerializedService,
-    private val verifyOnChannel: suspend (SerializedService) -> Unit
+    private val serializedChannel: suspend () -> SerializedService<String>,
+    private val verifyOnChannel: suspend (SerializedService<String>) -> Unit
 ) {
 
     @Test

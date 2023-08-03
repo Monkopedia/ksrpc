@@ -33,21 +33,22 @@ import com.monkopedia.ksrpc.channels.randomUuid
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.builtins.serializer
 
-class HostSerializedChannelImpl(
-    override val env: KsrpcEnvironment,
+class HostSerializedChannelImpl<T>(
+    override val env: KsrpcEnvironment<T>,
     channelContext: CoroutineContext? = null
-) : Connection {
-    private var baseChannel = CompletableDeferred<SerializedService>()
+) : Connection<T> {
+    private var baseChannel = CompletableDeferred<SerializedService<T>>()
     override val context: CoroutineContext = channelContext
         ?: (ClientChannelContext(this) + HostChannelContext(this) + env.coroutineExceptionHandler)
     private val onCloseObservers = mutableSetOf<suspend () -> Unit>()
 
     private val serviceMap by lazy {
-        mutableMapOf<String, SerializedService>()
+        mutableMapOf<String, SerializedService<T>>()
     }
 
-    override suspend fun call(channelId: ChannelId, endpoint: String, data: CallData): CallData {
+    override suspend fun call(channelId: ChannelId, endpoint: String, data: CallData<T>): CallData<T> {
         return try {
             val channel = if (channelId.id.isEmpty()) {
                 baseChannel.await()
@@ -57,18 +58,16 @@ class HostSerializedChannelImpl(
             withContext(context) {
                 if (endpoint.isEmpty()) {
                     close(channelId)
-                    CallData.create("{}")
+                    env.serialization.createCallData(Unit.serializer(), Unit)
                 } else {
                     channel.call(endpoint, data)
                 }
             }
         } catch (t: Throwable) {
             env.errorListener.onError(t)
-            CallData.create(
-                ERROR_PREFIX + env.serialization.encodeToString(
-                    RpcFailure.serializer(),
-                    RpcFailure(t.asString)
-                )
+            env.serialization.createErrorCallData(
+                RpcFailure.serializer(),
+                RpcFailure(t.asString)
             )
         }
     }
@@ -93,41 +92,41 @@ class HostSerializedChannelImpl(
         onCloseObservers.add(onClose)
     }
 
-    override suspend fun registerDefault(channel: SerializedService) {
-        baseChannel.complete(channel)
-        channel.trackingService?.onSerializationCreated(channel)
+    override suspend fun registerDefault(service: SerializedService<T>) {
+        baseChannel.complete(service)
+        service.trackingService?.onSerializationCreated(service)
     }
 
-    override suspend fun registerHost(channel: SerializedService): ChannelId {
+    override suspend fun registerHost(service: SerializedService<T>): ChannelId {
         val serviceId = ChannelId(randomUuid())
-        serviceMap[serviceId.id] = channel
-        channel.trackingService?.onSerializationCreated(channel)
+        serviceMap[serviceId.id] = service
+        service.trackingService?.onSerializationCreated(service)
         return serviceId
     }
 
-    override suspend fun wrapChannel(channelId: ChannelId): SerializedService {
+    override suspend fun wrapChannel(channelId: ChannelId): SerializedService<T> {
         return serviceMap[channelId.id] ?: error("Unknown service ${channelId.id}")
     }
 
-    private val SerializedService.trackingService: TrackingService?
-        get() = (this as? HostSerializedServiceImpl<*>)?.service as? TrackingService
+    private val SerializedService<T>.trackingService: TrackingService?
+        get() = (this as? HostSerializedServiceImpl<*, T>)?.service as? TrackingService
 }
 
-val SerializedChannel.asClient: ChannelClient
-    get() = object : ChannelClient, SerializedChannel by this {
-        override suspend fun wrapChannel(channelId: ChannelId): SerializedService {
+val <T> SerializedChannel<T>.asClient: ChannelClient<T>
+    get() = object : ChannelClient<T>, SerializedChannel<T> by this {
+        override suspend fun wrapChannel(channelId: ChannelId): SerializedService<T> {
             return SubserviceChannel(this, channelId)
         }
     }
 
-internal class HostSerializedServiceImpl<T : RpcService>(
+internal class HostSerializedServiceImpl<T : RpcService, S>(
     internal val service: T,
     private val rpcObject: RpcObject<T>,
-    override val env: KsrpcEnvironment
-) : SerializedService {
+    override val env: KsrpcEnvironment<S>
+) : SerializedService<S> {
     private val onCloseCallbacks = mutableSetOf<suspend () -> Unit>()
 
-    override suspend fun call(endpoint: String, input: CallData): CallData {
+    override suspend fun call(endpoint: String, input: CallData<S>): CallData<S> {
         val rpcEndpoint = rpcObject.findEndpoint(endpoint)
         return rpcEndpoint.call(this, service, input)
     }

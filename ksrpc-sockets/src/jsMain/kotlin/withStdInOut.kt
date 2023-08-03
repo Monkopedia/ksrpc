@@ -22,6 +22,6 @@ import com.monkopedia.ksrpc.channels.Connection
  * Create a [Connection] that communicates over the std in/out streams of this process.
  */
 actual suspend inline fun withStdInOut(
-    ksrpcEnvironment: KsrpcEnvironment,
-    withConnection: (Connection) -> Unit
+    ksrpcEnvironment: KsrpcEnvironment<String>,
+    withConnection: (Connection<String>) -> Unit
 ): Unit = error("Unsupported for js targets")

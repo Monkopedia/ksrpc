@@ -52,7 +52,7 @@ class ConnectionTest {
     @Test
     fun testForward() = executePipe(
         serviceJob = { c ->
-            c.registerDefault<PrimaryInterface>(object : PrimaryInterface {
+            c.registerDefault<PrimaryInterface, String>(object : PrimaryInterface {
                 override suspend fun basicCall(input: String): String {
                     return "Respond: $input"
                 }
@@ -65,7 +65,7 @@ class ConnectionTest {
             })
         },
         clientJob = { c ->
-            val service = c.defaultChannel().toStub<PrimaryInterface>()
+            val service = c.defaultChannel().toStub<PrimaryInterface, String>()
             assertEquals("Respond: Hello world", service.basicCall("Hello world"))
         }
     )
@@ -75,14 +75,14 @@ class ConnectionTest {
     @Test
     fun testReverse() = executePipe(
         serviceJob = { c ->
-            val service = c.defaultChannel().toStub<PrimaryInterface>()
+            val service = c.defaultChannel().toStub<PrimaryInterface, String>()
             service.basicCall("Hello world")
             pendingFinish?.complete(Unit)
         },
         clientJob = { c ->
             val callComplete = CompletableDeferred<String>()
             pendingFinish = CompletableDeferred()
-            c.registerDefault<PrimaryInterface>(object : PrimaryInterface {
+            c.registerDefault<PrimaryInterface, String>(object : PrimaryInterface {
                 override suspend fun basicCall(input: String): String {
                     callComplete.complete(input)
                     return "Respond: $input"
@@ -102,8 +102,8 @@ class ConnectionTest {
     @Test
     fun testOverlapForward() = executePipe(
         serviceJob = { c ->
-            val clientService = c.defaultChannel().toStub<PrimaryInterface>()
-            c.registerDefault<PrimaryInterface>(object : PrimaryInterface {
+            val clientService = c.defaultChannel().toStub<PrimaryInterface, String>()
+            c.registerDefault<PrimaryInterface, String>(object : PrimaryInterface {
                 override suspend fun basicCall(input: String): String {
                     return "Respond: ${clientService.basicCall(input)}"
                 }
@@ -116,8 +116,8 @@ class ConnectionTest {
             })
         },
         clientJob = { c ->
-            val service = c.defaultChannel().toStub<PrimaryInterface>()
-            c.registerDefault<PrimaryInterface>(object : PrimaryInterface {
+            val service = c.defaultChannel().toStub<PrimaryInterface, String>()
+            c.registerDefault<PrimaryInterface, String>(object : PrimaryInterface {
                 override suspend fun basicCall(input: String): String {
                     return "Client: $input"
                 }
@@ -135,8 +135,8 @@ class ConnectionTest {
     @Test
     fun testOverlapReverse() = executePipe(
         serviceJob = { c ->
-            val clientService = c.defaultChannel().toStub<PrimaryInterface>()
-            c.registerDefault<PrimaryInterface>(object : PrimaryInterface {
+            val clientService = c.defaultChannel().toStub<PrimaryInterface, String>()
+            c.registerDefault<PrimaryInterface, String>(object : PrimaryInterface {
                 override suspend fun basicCall(input: String): String {
                     return "Respond: $input"
                 }
@@ -151,10 +151,10 @@ class ConnectionTest {
             pendingFinish?.complete(Unit)
         },
         clientJob = { c ->
-            val service = c.defaultChannel().toStub<PrimaryInterface>()
+            val service = c.defaultChannel().toStub<PrimaryInterface, String>()
             val callComplete = CompletableDeferred<String>()
             pendingFinish = CompletableDeferred()
-            c.registerDefault<PrimaryInterface>(object : PrimaryInterface {
+            c.registerDefault<PrimaryInterface, String>(object : PrimaryInterface {
                 override suspend fun basicCall(input: String): String {
                     return "Client: ${service.basicCall(input)}".also { callComplete.complete(it) }
                 }
@@ -173,7 +173,7 @@ class ConnectionTest {
     @Test
     fun testServiceOverlapForward() = executePipe(
         serviceJob = { c ->
-            c.registerDefault<PrimaryInterface>(object : PrimaryInterface {
+            c.registerDefault<PrimaryInterface, String>(object : PrimaryInterface {
                 override suspend fun basicCall(input: String): String = error("Not implemented")
 
                 override suspend fun childInput(input: ChildInterface): String =
@@ -184,7 +184,7 @@ class ConnectionTest {
             })
         },
         clientJob = { c ->
-            val service = c.defaultChannel().toStub<PrimaryInterface>()
+            val service = c.defaultChannel().toStub<PrimaryInterface, String>()
             assertEquals(
                 "Client: Hello world",
                 service.childInput(object : ChildInterface {
@@ -199,7 +199,7 @@ class ConnectionTest {
     @Test
     fun testServiceOverlapReverse() = executePipe(
         serviceJob = { c ->
-            val clientService = c.defaultChannel().toStub<PrimaryInterface>()
+            val clientService = c.defaultChannel().toStub<PrimaryInterface, String>()
             clientService.childInput(object : ChildInterface {
                 override suspend fun rpc(input: String): String {
                     return "Respond: $input"
@@ -210,7 +210,7 @@ class ConnectionTest {
         clientJob = { c ->
             val callComplete = CompletableDeferred<String>()
             pendingFinish = CompletableDeferred()
-            c.registerDefault<PrimaryInterface>(object : PrimaryInterface {
+            c.registerDefault<PrimaryInterface, String>(object : PrimaryInterface {
                 override suspend fun basicCall(input: String): String = error("Not implemented")
 
                 override suspend fun childInput(input: ChildInterface): String =
@@ -229,7 +229,7 @@ class ConnectionTest {
     @Test
     fun testReturnServiceForward() = executePipe(
         serviceJob = { c ->
-            c.registerDefault<PrimaryInterface>(object : PrimaryInterface {
+            c.registerDefault<PrimaryInterface, String>(object : PrimaryInterface {
                 override suspend fun basicCall(input: String): String = error("Not implemented")
 
                 override suspend fun childInput(input: ChildInterface): String =
@@ -244,7 +244,7 @@ class ConnectionTest {
             })
         },
         clientJob = { c ->
-            val service = c.defaultChannel().toStub<PrimaryInterface>()
+            val service = c.defaultChannel().toStub<PrimaryInterface, String>()
             val firstService = service.childOutput("First service")
             val secondService = service.childOutput("Second service")
             assertEquals("First service: Hello world", firstService.rpc("Hello world"))
@@ -256,7 +256,7 @@ class ConnectionTest {
     @Test
     fun testReturnServiceReverse() = executePipe(
         serviceJob = { c ->
-            val service = c.defaultChannel().toStub<PrimaryInterface>()
+            val service = c.defaultChannel().toStub<PrimaryInterface, String>()
             val firstService = service.childOutput("First service")
             val secondService = service.childOutput("Second service")
             assertEquals("First service: Hello world", firstService.rpc("Hello world"))
@@ -268,7 +268,7 @@ class ConnectionTest {
         clientJob = { c ->
             val callComplete = CompletableDeferred<String>()
             pendingFinish = CompletableDeferred()
-            c.registerDefault<PrimaryInterface>(object : PrimaryInterface {
+            c.registerDefault<PrimaryInterface, String>(object : PrimaryInterface {
                 override suspend fun basicCall(input: String): String =
                     input.also { callComplete.complete(input) }
 
@@ -288,8 +288,8 @@ class ConnectionTest {
     )
 
     private fun executePipe(
-        serviceJob: suspend (Connection) -> Unit,
-        clientJob: suspend (Connection) -> Unit
+        serviceJob: suspend (Connection<String>) -> Unit,
+        clientJob: suspend (Connection<String>) -> Unit
     ) = runBlockingUnit {
         if (RpcFunctionalityTest.TestType.PIPE !in supportedTypes) return@runBlockingUnit
         val (output, input) = createPipe()

@@ -15,7 +15,9 @@
  */
 package com.monkopedia.ksrpc.channels
 
+import com.monkopedia.ksrpc.ERROR_PREFIX
 import com.monkopedia.ksrpc.KsrpcEnvironment
+import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.RpcMethod
 import com.monkopedia.ksrpc.RpcObject
 import com.monkopedia.ksrpc.RpcService
@@ -34,14 +36,14 @@ import kotlin.coroutines.EmptyCoroutineContext
  * is returned. Generally this should not be called directly, as it will happen
  * automatically when services are returned from [KsMethod] tagged methods.
  */
-suspend inline fun <reified T : RpcService> ChannelHost.registerHost(
+suspend inline fun <reified T : RpcService, S> ChannelHost<S>.registerHost(
     service: T
 ): ChannelId = registerHost(service, rpcObject())
 
 /**
  * Register a service to be hosted on the default channel.
  */
-suspend inline fun <reified T : RpcService> SingleChannelHost.registerDefault(
+suspend inline fun <reified T : RpcService, S> SingleChannelHost<S>.registerDefault(
     service: T
 ) = registerDefault(service, rpcObject())
 
@@ -50,7 +52,7 @@ suspend inline fun <reified T : RpcService> SingleChannelHost.registerDefault(
  * is returned. Generally this should not be called directly, as it will happen
  * automatically when services are returned from [KsMethod] tagged methods.
  */
-suspend fun <T : RpcService> ChannelHost.registerHost(
+suspend fun <T : RpcService, S> ChannelHost<S>.registerHost(
     service: T,
     obj: RpcObject<T>
 ): ChannelId {
@@ -60,7 +62,7 @@ suspend fun <T : RpcService> ChannelHost.registerHost(
 /**
  * Register a service to be hosted on the default channel.
  */
-suspend fun <T : RpcService> SingleChannelHost.registerDefault(
+suspend fun <T : RpcService, S> SingleChannelHost<S>.registerDefault(
     service: T,
     obj: RpcObject<T>
 ) {
@@ -71,14 +73,14 @@ suspend fun <T : RpcService> SingleChannelHost.registerDefault(
  * A wrapper around a communication pathway that can be turned into a primary
  * SerializedService.
  */
-interface SingleChannelHost : KsrpcEnvironment.Element {
+interface SingleChannelHost<T> : KsrpcEnvironment.Element<T> {
     /**
      * Register the primary service to be hosted on this communication channel.
      *
      * The coroutine context and dispatcher on which calls are executed in on depends
      * on the construction of the host.
      */
-    suspend fun registerDefault(service: SerializedService)
+    suspend fun registerDefault(service: SerializedService<T>)
 }
 
 /**
@@ -87,7 +89,7 @@ interface SingleChannelHost : KsrpcEnvironment.Element {
  * This could be a bidirectional conduit like a [Connection], or it could be a hosting only
  * service such as http hosting.
  */
-interface ChannelHost : SerializedChannel, SingleChannelHost, KsrpcEnvironment.Element {
+interface ChannelHost<T> : SerializedChannel<T>, SingleChannelHost<T>, KsrpcEnvironment.Element<T> {
     /**
      * Add a serialized service that can receive calls on this channel with the returned
      * [ChannelId]. The calls will be allowed until [close] is called.
@@ -95,19 +97,19 @@ interface ChannelHost : SerializedChannel, SingleChannelHost, KsrpcEnvironment.E
      * Generally this shouldn't need to be called directly, as services returned from
      * [KsMethod]s are automatically registered and translated across a channel.
      */
-    suspend fun registerHost(service: SerializedService): ChannelId
+    suspend fun registerHost(service: SerializedService<T>): ChannelId
 }
 
 /**
  * A wrapper around a communication pathway that can be turned into a primary
  * SerializedService.
  */
-interface SingleChannelClient {
+interface SingleChannelClient<T> {
 
     /**
      * Get a [SerializedService] that is the default on this client
      */
-    suspend fun defaultChannel(): SerializedService
+    suspend fun defaultChannel(): SerializedService<T>
 }
 
 /**
@@ -116,14 +118,14 @@ interface SingleChannelClient {
  * This could be a bidirectional conduit like a [Connection], or it could be a client only
  * service such as http client.
  */
-interface ChannelClient : SerializedChannel, SingleChannelClient, KsrpcEnvironment.Element {
+interface ChannelClient<T> : SerializedChannel<T>, SingleChannelClient<T>, KsrpcEnvironment.Element<T> {
     /**
      * Takes a given channel id and creates a service wrapper to make calls on that channel.
      *
      * Generally this shouldn't be called directly, as services returned from [KsMethod]s
      * will automatically be wrapped before being returned from stubs.
      */
-    suspend fun wrapChannel(channelId: ChannelId): SerializedService
+    suspend fun wrapChannel(channelId: ChannelId): SerializedService<T>
 
     /**
      * Get a [SerializedService] that is the default on this client
@@ -153,11 +155,11 @@ interface ContextContainer {
  * directly with this, instead use either [ChannelClient] or [ChannelHost] to reference a
  * [SerializedService] instead.
  */
-interface SerializedChannel :
+interface SerializedChannel<T> :
     SuspendCloseableObservable,
     ContextContainer,
-    KsrpcEnvironment.Element {
-    suspend fun call(channelId: ChannelId, endpoint: String, data: CallData): CallData
+    KsrpcEnvironment.Element<T> {
+    suspend fun call(channelId: ChannelId, endpoint: String, data: CallData<T>): CallData<T>
     suspend fun close(id: ChannelId)
 }
 
@@ -165,12 +167,12 @@ interface SerializedChannel :
  * Serialized version of a service. This can be transformed to and from a service using
  * [serialized] and [SerializedService.toStub].
  */
-interface SerializedService :
+interface SerializedService<T> :
     SuspendCloseableObservable,
     ContextContainer,
-    KsrpcEnvironment.Element {
-    suspend fun call(endpoint: String, input: CallData): CallData
-    suspend fun call(endpoint: RpcMethod<*, *, *>, input: CallData): CallData =
+    KsrpcEnvironment.Element<T> {
+    suspend fun call(endpoint: String, input: CallData<T>): CallData<T>
+    suspend fun call(endpoint: RpcMethod<*, *, *>, input: CallData<T>): CallData<T> =
         call(endpoint.endpoint, input)
 }
 
@@ -180,14 +182,15 @@ expect fun randomUuid(): String
  * Wrapper around data being serialized through calls.
  * Could be a reference to a string for a serialized object or to binary data.
  */
-sealed class CallData private constructor() {
+sealed class CallData<T> private constructor() {
+    abstract val isError: Boolean
     abstract val isBinary: Boolean
 
     /**
      * Read the serialized content of this object.
      * If this is not a string then throws [IllegalStateException].
      */
-    abstract fun readSerialized(): String
+    abstract fun readSerialized(): T
 
     /**
      * Get the [ByteReadChannel] for the binary data held by this call..
@@ -195,21 +198,30 @@ sealed class CallData private constructor() {
      */
     abstract fun readBinary(): ByteReadChannel
 
-    data class Binary(private val value: ByteReadChannel) : CallData() {
+    abstract fun decodeError(channel: SerializedService<T>): Throwable
+
+    data class Binary<T>(private val value: ByteReadChannel) : CallData<T>() {
+        override val isError: Boolean
+            get() = false
         override val isBinary: Boolean
             get() = true
 
-        override fun readSerialized(): String =
+        override fun readSerialized(): T =
             error("Cannot read serialization out of binary data.")
 
         override fun readBinary(): ByteReadChannel = value
+
+        override fun decodeError(channel: SerializedService<T>): Throwable =
+            error("Binary data cannot hold errors")
 
         override fun toString(): String {
             return "binary(${(value as? ByteReadChannel)?.availableForRead})"
         }
     }
 
-    data class Serialized(private val value: String) : CallData() {
+    data class Serialized(private val value: String) : CallData<String>() {
+        override val isError: Boolean
+            get() = value.startsWith(ERROR_PREFIX)
         override val isBinary: Boolean
             get() = false
 
@@ -219,6 +231,13 @@ sealed class CallData private constructor() {
 
         override fun readBinary(): ByteReadChannel {
             error("Cannot read binary data out of serialized content.")
+        }
+
+        override fun decodeError(channel: SerializedService<String>): Throwable {
+            val errorStr = value.substring(ERROR_PREFIX.length)
+            val serialized = Serialized(errorStr)
+            return channel.env.serialization.decodeCallData(RpcFailure.serializer(), serialized)
+                .toException()
         }
 
         override fun toString(): String {
@@ -235,6 +254,6 @@ sealed class CallData private constructor() {
         /**
          * Create a CallData wrapping a [ByteReadChannel] for reading binary data.
          */
-        fun create(binary: ByteReadChannel) = Binary(binary)
+        fun <T> create(binary: ByteReadChannel): CallData<T> = Binary(binary)
     }
 }

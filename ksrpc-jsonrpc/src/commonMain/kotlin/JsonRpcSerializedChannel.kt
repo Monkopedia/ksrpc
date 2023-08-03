@@ -28,20 +28,20 @@ import kotlinx.serialization.json.JsonElement
 class JsonRpcSerializedChannel(
     override val context: CoroutineContext,
     private val channel: JsonRpcChannel,
-    override val env: KsrpcEnvironment
-) : SerializedService {
+    override val env: KsrpcEnvironment<String>
+) : SerializedService<String> {
     private val onCloseCallbacks = mutableSetOf<suspend () -> Unit>()
     private val json = (env.serialization as? Json) ?: Json
 
-    override suspend fun call(endpoint: RpcMethod<*, *, *>, input: CallData): CallData {
+    override suspend fun call(endpoint: RpcMethod<*, *, *>, input: CallData<String>): CallData<String> {
         return call(endpoint.endpoint, input, !endpoint.hasReturnType)
     }
 
-    override suspend fun call(endpoint: String, input: CallData): CallData {
+    override suspend fun call(endpoint: String, input: CallData<String>): CallData<String> {
         return call(endpoint, input, false)
     }
 
-    private suspend fun call(endpoint: String, input: CallData, isNotify: Boolean): CallData {
+    private suspend fun call(endpoint: String, input: CallData<String>, isNotify: Boolean): CallData<String> {
         require(!input.isBinary) {
             "JsonRpc does not support binary data"
         }

@@ -22,8 +22,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 actual suspend inline fun withStdInOut(
-    ksrpcEnvironment: KsrpcEnvironment,
-    withConnection: (Connection) -> Unit
+    ksrpcEnvironment: KsrpcEnvironment<String>,
+    withConnection: (Connection<String>) -> Unit
 ) {
     val input = System.`in`
     val output = System.out
@@ -39,7 +39,7 @@ actual suspend inline fun withStdInOut(
  * Create a [Connection] that starts the process and uses the
  * [Process.getInputStream] and [Process.getOutputStream] as the streams for communication
  */
-suspend fun ProcessBuilder.asConnection(env: KsrpcEnvironment): Connection {
+suspend fun ProcessBuilder.asConnection(env: KsrpcEnvironment<String>): Connection<String> {
     val process = redirectInput(ProcessBuilder.Redirect.PIPE)
         .redirectOutput(ProcessBuilder.Redirect.PIPE)
         .start()

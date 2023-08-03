@@ -36,9 +36,9 @@ import kotlinx.serialization.json.encodeToJsonElement
 class JsonRpcWriterBase(
     private val scope: CoroutineScope,
     private val context: CoroutineContext,
-    override val env: KsrpcEnvironment,
+    override val env: KsrpcEnvironment<String>,
     private val comm: JsonRpcTransformer
-) : JsonRpcChannel, SingleChannelConnection {
+) : JsonRpcChannel, SingleChannelConnection<String> {
     private val json = (env.serialization as? Json) ?: Json
 
     private var baseChannel = CompletableDeferred<JsonRpcChannel>()
@@ -136,11 +136,11 @@ class JsonRpcWriterBase(
         }
     }
 
-    override suspend fun registerDefault(service: SerializedService) {
+    override suspend fun registerDefault(service: SerializedService<String>) {
         baseChannel.complete(JsonRpcServiceWrapper(service))
     }
 
-    override suspend fun defaultChannel(): SerializedService {
+    override suspend fun defaultChannel(): SerializedService<String> {
         return JsonRpcSerializedChannel(context, this, env)
     }
 }

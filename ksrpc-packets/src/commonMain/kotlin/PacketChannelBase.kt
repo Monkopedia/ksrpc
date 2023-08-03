@@ -43,8 +43,8 @@ private const val DEFAULT_MAX_SIZE = 16 * 1024L
 
 abstract class PacketChannelBase(
     private val scope: CoroutineScope,
-    final override val env: KsrpcEnvironment
-) : PacketChannel, Connection, ChannelHost {
+    final override val env: KsrpcEnvironment<String>
+) : PacketChannel, Connection<String>, ChannelHost<String> {
     private var isClosed = false
     private var callLock = Mutex()
     protected open val maxSize: Long = DEFAULT_MAX_SIZE
@@ -117,7 +117,7 @@ abstract class PacketChannelBase(
         id: String,
         messageId: String,
         endpoint: String,
-        response: CallData
+        response: CallData<String>
     ) {
         if (response.isBinary) {
             val binaryChannel = randomUuid()
@@ -178,7 +178,7 @@ abstract class PacketChannelBase(
         }
     }
 
-    private suspend fun getCallData(packet: Packet): CallData {
+    private suspend fun getCallData(packet: Packet): CallData<String> {
         return if (packet.startBinary) {
             CallData.create(getByteChannel(packet.data))
         } else if (packet.binary) {
@@ -218,11 +218,11 @@ abstract class PacketChannelBase(
         }
     }
 
-    override suspend fun wrapChannel(channelId: ChannelId): SerializedService {
+    override suspend fun wrapChannel(channelId: ChannelId): SerializedService<String> {
         return SubserviceChannel(this, channelId)
     }
 
-    override suspend fun call(channelId: ChannelId, endpoint: String, data: CallData): CallData {
+    override suspend fun call(channelId: ChannelId, endpoint: String, data: CallData<String>): CallData<String> {
         val (messageId, response) = multiChannel.allocateReceive()
         scope.sendPacket(true, channelId.id, messageId.toString(), endpoint, data)
         return getCallData(response.await())
@@ -234,12 +234,12 @@ abstract class PacketChannelBase(
         call(id, "", CallData.create("{}"))
     }
 
-    override suspend fun registerDefault(service: SerializedService) {
+    override suspend fun registerDefault(service: SerializedService<String>) {
         val serviceChannel = serviceChannel
         serviceChannel.registerDefault(service)
     }
 
-    override suspend fun registerHost(service: SerializedService): ChannelId {
+    override suspend fun registerHost(service: SerializedService<String>): ChannelId {
         val serviceChannel = serviceChannel
         return serviceChannel.registerHost(service)
     }

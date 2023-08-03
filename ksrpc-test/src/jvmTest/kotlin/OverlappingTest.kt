@@ -56,7 +56,7 @@ abstract class OverlappingTestBase(
     },
     verifyOnChannel = { serializedChannel ->
         coroutineScope {
-            val stub = serializedChannel.toStub<TestInterface>()
+            val stub = serializedChannel.toStub<TestInterface, String>()
 
             val finish = async(Dispatchers.IO) {
                 Result.runCatching {

@@ -31,8 +31,8 @@ internal const val MESSAGE = "Message"
  * Create a [Connection] for the given input/output channel.
  */
 suspend fun Pair<ByteReadChannel, ByteWriteChannel>.asConnection(
-    env: KsrpcEnvironment
-): Connection {
+    env: KsrpcEnvironment<String>
+): Connection<String> {
     return ReadWritePacketChannel(
         CoroutineScope(coroutineContext),
         first,

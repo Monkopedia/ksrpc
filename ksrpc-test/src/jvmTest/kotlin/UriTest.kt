@@ -32,7 +32,7 @@ class UriTest {
         val clsString = Implementation::class.jvmName
         val channel = (Class.forName(clsString).newInstance() as TestInterface)
             .serialized(ksrpcEnvironment { })
-        val service = channel.toStub<TestInterface>()
+        val service = channel.toStub<TestInterface, String>()
 
         assertEquals("world hello", service.rpc("hello" to "world"))
     }

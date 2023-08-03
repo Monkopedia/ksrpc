@@ -32,8 +32,8 @@ import kotlinx.coroutines.withContext
  * Helper that calls into Pair<ByteReadChannel, ByteWriteChannel>.asJsonRpcConnection.
  */
 suspend fun Pair<InputStream, OutputStream>.asJsonRpcConnection(
-    env: KsrpcEnvironment
-): SingleChannelConnection {
+    env: KsrpcEnvironment<String>
+): SingleChannelConnection<String> {
     val (input, output) = this
     val channel = GlobalScope.reader(coroutineContext) {
         val outputChannel = Channels.newChannel(output)
@@ -51,7 +51,7 @@ suspend fun Pair<InputStream, OutputStream>.asJsonRpcConnection(
  * Create a [SingleChannelConnection] that communicates over the std in/out streams of this process
  * using jsonrpc.
  */
-suspend fun stdInJsonRpcConnection(env: KsrpcEnvironment): SingleChannelConnection {
+suspend fun stdInJsonRpcConnection(env: KsrpcEnvironment<String>): SingleChannelConnection<String> {
     val input = System.`in`
     val output = System.out
     return (input to output).asJsonRpcConnection(env)
@@ -62,7 +62,7 @@ suspend fun stdInJsonRpcConnection(env: KsrpcEnvironment): SingleChannelConnecti
  * [Process.getInputStream] and [Process.getOutputStream] as the streams for communication using
  * jsonrpc.
  */
-suspend fun ProcessBuilder.asJsonRpcConnection(env: KsrpcEnvironment): SingleChannelConnection {
+suspend fun ProcessBuilder.asJsonRpcConnection(env: KsrpcEnvironment<String>): SingleChannelConnection<String> {
     val process = redirectInput(ProcessBuilder.Redirect.PIPE)
         .redirectOutput(ProcessBuilder.Redirect.PIPE)
         .start()

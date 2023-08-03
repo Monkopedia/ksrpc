@@ -24,24 +24,18 @@ import com.monkopedia.ksrpc.internal.host
 import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.StringFormat
 import kotlinx.serialization.builtins.serializer
 
 internal sealed interface Transformer<T> {
     val hasContent: Boolean
         get() = true
 
-    suspend fun transform(input: T, channel: SerializedService): CallData
-    suspend fun untransform(data: CallData, channel: SerializedService): T
+    suspend fun <S> transform(input: T, channel: SerializedService<S>): CallData<S>
+    suspend fun <S> untransform(data: CallData<S>, channel: SerializedService<S>): T
 
-    fun unpackError(data: CallData, serialization: StringFormat) {
-        if (!data.isBinary) {
-            val outputStr = data.readSerialized()
-            if (outputStr.startsWith(ERROR_PREFIX)) {
-                val errorStr = outputStr.substring(ERROR_PREFIX.length)
-                throw serialization.decodeFromString(RpcFailure.serializer(), errorStr)
-                    .toException()
-            }
+    fun <S> unpackError(data: CallData<S>, channel: SerializedService<S>) {
+        if (!data.isBinary && data.isError) {
+            throw data.decodeError(channel)
         }
     }
 }
@@ -50,23 +44,29 @@ internal class SerializerTransformer<I>(private val serializer: KSerializer<I>) 
     override val hasContent: Boolean
         get() = serializer != Unit.serializer()
 
-    override suspend fun transform(input: I, channel: SerializedService): CallData {
-        return CallData.create(channel.env.serialization.encodeToString(serializer, input))
+    override suspend fun <T> transform(input: I, channel: SerializedService<T>): CallData<T> {
+        return channel.env.serialization.createCallData(serializer, input)
     }
 
-    override suspend fun untransform(data: CallData, channel: SerializedService): I {
-        unpackError(data, channel.env.serialization)
-        return channel.env.serialization.decodeFromString(serializer, data.readSerialized())
+    override suspend fun <T> untransform(data: CallData<T>, channel: SerializedService<T>): I {
+        unpackError(data, channel)
+        return channel.env.serialization.decodeCallData(serializer, data)
     }
 }
 
 internal object BinaryTransformer : Transformer<ByteReadChannel> {
-    override suspend fun transform(input: ByteReadChannel, channel: SerializedService): CallData {
+    override suspend fun <T> transform(
+        input: ByteReadChannel,
+        channel: SerializedService<T>
+    ): CallData<T> {
         return CallData.create(input)
     }
 
-    override suspend fun untransform(data: CallData, channel: SerializedService): ByteReadChannel {
-        unpackError(data, channel.env.serialization)
+    override suspend fun <T> untransform(
+        data: CallData<T>,
+        channel: SerializedService<T>
+    ): ByteReadChannel {
+        unpackError(data, channel)
         return data.readBinary()
     }
 }
@@ -74,21 +74,16 @@ internal object BinaryTransformer : Transformer<ByteReadChannel> {
 internal class SubserviceTransformer<T : RpcService>(
     private val serviceObj: RpcObject<T>
 ) : Transformer<T> {
-    override suspend fun transform(input: T, channel: SerializedService): CallData {
-        val host = host() ?: error("Cannot transform service type to non-hosting channel")
+    override suspend fun <S> transform(input: T, channel: SerializedService<S>): CallData<S> {
+        val host = host<S>() ?: error("Cannot transform service type to non-hosting channel")
         val serviceId = host.registerHost(input, serviceObj)
-        return CallData.create(
-            channel.env.serialization.encodeToString(String.serializer(), serviceId.id)
-        )
+        return channel.env.serialization.createCallData(String.serializer(), serviceId.id)
     }
 
-    override suspend fun untransform(data: CallData, channel: SerializedService): T {
-        val client = client() ?: error("Cannot untransform service type from non-client channel")
-        unpackError(data, channel.env.serialization)
-        val serviceId = channel.env.serialization.decodeFromString(
-            String.serializer(),
-            data.readSerialized()
-        )
+    override suspend fun <S> untransform(data: CallData<S>, channel: SerializedService<S>): T {
+        val client = client<S>() ?: error("Cannot untransform service type from non-client channel")
+        unpackError(data, channel)
+        val serviceId = channel.env.serialization.decodeCallData(String.serializer(), data)
         return serviceObj.createStub(client.wrapChannel(ChannelId(serviceId)))
     }
 }
@@ -110,11 +105,12 @@ class RpcMethod<T : RpcService, I, O> internal constructor(
     val hasReturnType: Boolean
         get() = outputTransform.hasContent
 
-    internal suspend fun call(
-        channel: SerializedService,
+    @Suppress("UNCHECKED_CAST")
+    internal suspend fun <S> call(
+        channel: SerializedService<S>,
         service: RpcService,
-        input: CallData
-    ): CallData {
+        input: CallData<S>
+    ): CallData<S> {
         return withContext(channel.context) {
             val transformedInput = inputTransform.untransform(input, channel)
             val output = method.invoke(service as T, transformedInput)
@@ -122,7 +118,8 @@ class RpcMethod<T : RpcService, I, O> internal constructor(
         }
     }
 
-    internal suspend fun callChannel(channel: SerializedService, input: Any?): Any? {
+    @Suppress("UNCHECKED_CAST")
+    internal suspend fun <S> callChannel(channel: SerializedService<S>, input: Any?): Any? {
         return withContext(channel.context) {
             val input = inputTransform.transform(input as I, channel)
             val transformedOutput = channel.call(this@RpcMethod, input)

@@ -47,8 +47,8 @@ import platform.posix.write
 private const val bufferSize = 4096
 
 actual suspend inline fun withStdInOut(
-    ksrpcEnvironment: KsrpcEnvironment,
-    withConnection: (Connection) -> Unit
+    ksrpcEnvironment: KsrpcEnvironment<String>,
+    withConnection: (Connection<String>) -> Unit
 ) {
     val input = posixFileReadChannel(STDIN_FILENO)
     val output = posixFileWriteChannel(STDOUT_FILENO)

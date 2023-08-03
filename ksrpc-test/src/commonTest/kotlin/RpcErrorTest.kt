@@ -28,7 +28,7 @@ class RpcErrorTest : RpcFunctionalityTest(
         channel.serialized(ksrpcEnvironment { })
     },
     verifyOnChannel = { serializedChannel ->
-        val stub = serializedChannel.toStub<TestInterface>()
+        val stub = serializedChannel.toStub<TestInterface, String>()
         try {
             stub.rpc("Hello" to "world")
             fail("Expected crash")

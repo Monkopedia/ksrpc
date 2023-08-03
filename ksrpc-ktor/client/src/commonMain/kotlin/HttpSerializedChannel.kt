@@ -45,14 +45,14 @@ private const val KSRPC_CHANNEL = "channel"
 internal class HttpSerializedChannel(
     private val httpClient: HttpClient,
     private val baseStripped: String,
-    override val env: KsrpcEnvironment
-) : SerializedChannel, ChannelClient {
+    override val env: KsrpcEnvironment<String>
+) : SerializedChannel<String>, ChannelClient<String> {
 
     private val onCloseHandlers = mutableSetOf<suspend () -> Unit>()
     override val context: CoroutineContext =
         ClientChannelContext(this) + env.coroutineExceptionHandler
 
-    override suspend fun call(channelId: ChannelId, endpoint: String, data: CallData): CallData {
+    override suspend fun call(channelId: ChannelId, endpoint: String, data: CallData<String>): CallData<String> {
         val response = httpClient.post(
             "$baseStripped/call/${endpoint.encodeURLPath()}"
         ) {
@@ -72,7 +72,7 @@ internal class HttpSerializedChannel(
         call(id, "", CallData.create("{}"))
     }
 
-    override suspend fun wrapChannel(channelId: ChannelId): SerializedService {
+    override suspend fun wrapChannel(channelId: ChannelId): SerializedService<String> {
         return SubserviceChannel(this, channelId)
     }
 

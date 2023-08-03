@@ -29,7 +29,7 @@ actual fun randomUuid(): String {
 @RpcObjectKey(VoidService.Companion::class)
 internal actual interface VoidService : RpcService {
     companion object : RpcObject<VoidService> {
-        override fun createStub(channel: SerializedService): VoidService {
+        override fun <T> createStub(channel: SerializedService<T>): VoidService {
             return object : VoidService {}
         }
 

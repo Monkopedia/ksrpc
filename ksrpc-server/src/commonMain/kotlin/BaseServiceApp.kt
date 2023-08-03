@@ -89,11 +89,11 @@ abstract class BaseServiceApp internal constructor(val appName: String) : CliktC
         routing.serve("/${appName.decapitalize()}", createChannel(), env)
     }
 
-    open val env: KsrpcEnvironment by lazy {
+    open val env: KsrpcEnvironment<String> by lazy {
         ksrpcEnvironment {}
     }
 
-    abstract fun createChannel(): SerializedService
+    abstract fun createChannel(): SerializedService<String>
 
     companion object {
         internal var isActive = false

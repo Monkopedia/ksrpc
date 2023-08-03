@@ -26,9 +26,9 @@ import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CoroutineScope
 
 suspend fun Pair<ByteReadChannel, ByteWriteChannel>.asJsonRpcConnection(
-    env: KsrpcEnvironment,
+    env: KsrpcEnvironment<String>,
     includeContentHeaders: Boolean = true
-): SingleChannelConnection {
+): SingleChannelConnection<String> {
     return JsonRpcWriterBase(
         CoroutineScope(coroutineContext),
         coroutineContext,

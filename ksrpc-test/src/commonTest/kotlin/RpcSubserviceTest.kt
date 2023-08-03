@@ -58,7 +58,7 @@ class RpcSubserviceTest : RpcFunctionalityTest(
         channel.serialized(ksrpcEnvironment { })
     },
     verifyOnChannel = { serializedChannel ->
-        val stub = serializedChannel.toStub<TestRootInterface>()
+        val stub = serializedChannel.toStub<TestRootInterface, String>()
         assertEquals(
             "oh, Hello world",
             stub.subservice("oh,").rpc("Hello" to "world")
@@ -77,7 +77,7 @@ class RpcSubserviceTwoCallsTest : RpcFunctionalityTest(
         channel.serialized(ksrpcEnvironment { })
     },
     verifyOnChannel = { serializedChannel ->
-        val stub = serializedChannel.toStub<TestRootInterface>()
+        val stub = serializedChannel.toStub<TestRootInterface, String>()
         stub.subservice("oh,").rpc("Hello" to "world")
         assertEquals(
             "oh, Hello world",
@@ -110,7 +110,7 @@ class RpcSubserviceCloseTest : RpcFunctionalityTest(
         channel.serialized(ksrpcEnvironment { })
     },
     verifyOnChannel = { serializedChannel ->
-        val stub = serializedChannel.toStub<TestRootInterface>()
+        val stub = serializedChannel.toStub<TestRootInterface, String>()
         closeCompletion = CompletableDeferred()
         assertEquals(
             "oh, Hello world",
@@ -123,7 +123,7 @@ class RpcSubserviceCloseTest : RpcFunctionalityTest(
         closeCompletion?.await()
     }
 ) {
-    override fun createEnv(): KsrpcEnvironment {
+    override fun createEnv(): KsrpcEnvironment<String> {
         return ksrpcEnvironment {
             errorListener = ErrorListener {
                 closeCompletion?.completeExceptionally(it)

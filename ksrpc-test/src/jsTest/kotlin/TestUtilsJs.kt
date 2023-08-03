@@ -34,16 +34,16 @@ actual suspend inline fun httpTest(
 
 actual suspend fun Routing.testServe(
     basePath: String,
-    channel: SerializedService,
-    env: KsrpcEnvironment
+    channel: SerializedService<String>,
+    env: KsrpcEnvironment<String>
 ) {
     // Do nothing, disable HTTP hosting in JS tests.
 }
 
 actual fun Routing.testServeWebsocket(
     basePath: String,
-    channel: SerializedService,
-    env: KsrpcEnvironment
+    channel: SerializedService<String>,
+    env: KsrpcEnvironment<String>
 ) {
     // Do nothing, disable HTTP hosting in JS tests.
 }

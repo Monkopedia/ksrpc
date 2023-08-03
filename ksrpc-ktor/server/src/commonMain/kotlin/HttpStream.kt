@@ -48,7 +48,7 @@ private const val KSRPC_CHANNEL = "channel"
 inline fun <reified T : RpcService> Routing.serve(
     basePath: String,
     service: T,
-    env: KsrpcEnvironment
+    env: KsrpcEnvironment<String>
 ) {
     val serializedService = service.serialized(env)
     serve(basePath, serializedService, env)
@@ -56,8 +56,8 @@ inline fun <reified T : RpcService> Routing.serve(
 
 fun Routing.serve(
     basePath: String,
-    serializedService: SerializedService,
-    env: KsrpcEnvironment
+    serializedService: SerializedService<String>,
+    env: KsrpcEnvironment<String>
 ) {
     val channel = HostSerializedChannelImpl(env).also {
         env.defaultScope.launch {
@@ -69,8 +69,8 @@ fun Routing.serve(
 
 fun Routing.serve(
     basePath: String,
-    channel: SerializedChannel,
-    env: KsrpcEnvironment
+    channel: SerializedChannel<String>,
+    env: KsrpcEnvironment<String>
 ) {
     val baseStripped = basePath.trimEnd('/')
     post("$baseStripped/call/") {
@@ -87,7 +87,7 @@ fun Routing.serve(
 }
 
 private suspend fun PipelineContext<Unit, ApplicationCall>.execCall(
-    channel: SerializedChannel,
+    channel: SerializedChannel<String>,
     method: String
 ) {
     val content = if (call.request.headers[KSRPC_BINARY]?.toBoolean() == true) {
@@ -108,7 +108,7 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.execCall(
 }
 
 private suspend inline fun PipelineContext<Unit, ApplicationCall>.runCatching(
-    env: KsrpcEnvironment,
+    env: KsrpcEnvironment<String>,
     exec: suspend () -> Unit
 ) {
     try {

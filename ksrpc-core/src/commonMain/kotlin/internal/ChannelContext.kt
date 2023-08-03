@@ -21,23 +21,26 @@ import com.monkopedia.ksrpc.internal.ClientChannelContext.Key
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
 
-class HostChannelContext(val channel: ChannelHost) : CoroutineContext.Element {
+class HostChannelContext<T>(val channel: ChannelHost<T>) : CoroutineContext.Element {
     override val key: CoroutineContext.Key<*>
         get() = Key
 
-    object Key : CoroutineContext.Key<HostChannelContext>
+    object Key : CoroutineContext.Key<HostChannelContext<*>>
 }
-class ClientChannelContext(val channel: ChannelClient) : CoroutineContext.Element {
+
+class ClientChannelContext<T>(val channel: ChannelClient<T>) : CoroutineContext.Element {
     override val key: CoroutineContext.Key<*>
         get() = Key
 
-    object Key : CoroutineContext.Key<ClientChannelContext>
+    object Key : CoroutineContext.Key<ClientChannelContext<*>>
 }
 
-internal suspend fun host(): ChannelHost? {
-    return coroutineContext[HostChannelContext.Key]?.channel
+internal suspend fun <T> host(): ChannelHost<T>? {
+    @Suppress("UNCHECKED_CAST")
+    return coroutineContext[HostChannelContext.Key]?.channel as ChannelHost<T>?
 }
 
-internal suspend fun client(): ChannelClient? {
-    return coroutineContext[Key]?.channel
+internal suspend fun <T> client(): ChannelClient<T>? {
+    @Suppress("UNCHECKED_CAST")
+    return coroutineContext[Key]?.channel as ChannelClient<T>?
 }

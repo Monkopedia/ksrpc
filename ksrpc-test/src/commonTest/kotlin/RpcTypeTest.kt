@@ -116,11 +116,11 @@ class FakeTestTypes : TestTypesInterface {
 object RpcTypeTest {
 
     abstract class RpcTypeFunctionalityTest(
-        verifyOnChannel: suspend (SerializedService, FakeTestTypes) -> Unit,
+        verifyOnChannel: suspend (SerializedService<String>, FakeTestTypes) -> Unit,
         private val service: FakeTestTypes = FakeTestTypes()
     ) : RpcFunctionalityTest(
         serializedChannel = {
-            service.serialized<TestTypesInterface>(ksrpcEnvironment { })
+            service.serialized<TestTypesInterface, String>(ksrpcEnvironment { })
         },
         verifyOnChannel = { channel ->
             verifyOnChannel(channel, service)
@@ -129,7 +129,7 @@ object RpcTypeTest {
 
     class PairStrTest : RpcTypeFunctionalityTest(
         verifyOnChannel = { channel, service ->
-            val stub = channel.toStub<TestTypesInterface>()
+            val stub = channel.toStub<TestTypesInterface, String>()
             service.nextReturn.value = ""
             stub.rpc("Hello" to "world")
             assertEquals("rpc", service.lastCall.value)
@@ -139,7 +139,7 @@ object RpcTypeTest {
 
     class MapTest : RpcTypeFunctionalityTest(
         verifyOnChannel = { channel, service ->
-            val stub = channel.toStub<TestTypesInterface>()
+            val stub = channel.toStub<TestTypesInterface, String>()
             service.nextReturn.value = Unit
             stub.mapRpc(
                 mutableMapOf(
@@ -160,7 +160,7 @@ object RpcTypeTest {
 
     class InputIntTest : RpcTypeFunctionalityTest(
         verifyOnChannel = { channel, service ->
-            val stub = channel.toStub<TestTypesInterface>()
+            val stub = channel.toStub<TestTypesInterface, String>()
             service.nextReturn.value = Unit
             stub.inputInt(42)
             assertEquals("inputInt", service.lastCall.value)
@@ -170,7 +170,7 @@ object RpcTypeTest {
 
     class InputIntListTest : RpcTypeFunctionalityTest(
         verifyOnChannel = { channel, service ->
-            val stub = channel.toStub<TestTypesInterface>()
+            val stub = channel.toStub<TestTypesInterface, String>()
             service.nextReturn.value = Unit
             stub.inputIntList(listOf(42))
             assertEquals("inputIntList", service.lastCall.value)
@@ -180,7 +180,7 @@ object RpcTypeTest {
 
     class InputIntNullableTest : RpcTypeFunctionalityTest(
         verifyOnChannel = { channel, service ->
-            val stub = channel.toStub<TestTypesInterface>()
+            val stub = channel.toStub<TestTypesInterface, String>()
             service.nextReturn.value = Unit
             stub.inputIntNullable(null)
             assertEquals("inputIntNullable", service.lastCall.value)
@@ -190,7 +190,7 @@ object RpcTypeTest {
 
     class OutputIntTest : RpcTypeFunctionalityTest(
         verifyOnChannel = { channel, service ->
-            val stub = channel.toStub<TestTypesInterface>()
+            val stub = channel.toStub<TestTypesInterface, String>()
             service.nextReturn.value = 42
             assertEquals(42, stub.outputInt(Unit))
             assertEquals("outputInt", service.lastCall.value)
@@ -200,7 +200,7 @@ object RpcTypeTest {
 
     class OutputIntNullableTest : RpcTypeFunctionalityTest(
         verifyOnChannel = { channel, service ->
-            val stub = channel.toStub<TestTypesInterface>()
+            val stub = channel.toStub<TestTypesInterface, String>()
             service.nextReturn.value = null
             assertEquals(null, stub.outputIntNullable(Unit))
             assertEquals("outputIntNullable", service.lastCall.value)
@@ -210,7 +210,7 @@ object RpcTypeTest {
 
     class ReturnTypeTest : RpcTypeFunctionalityTest(
         verifyOnChannel = { channel, service ->
-            val stub = channel.toStub<TestTypesInterface>()
+            val stub = channel.toStub<TestTypesInterface, String>()
             service.nextReturn.value = MyJson("second", 2, 1.2f)
             assertEquals(MyJson("second", 2, 1.2f), stub.returnType(Unit))
             assertEquals("returnType", service.lastCall.value)

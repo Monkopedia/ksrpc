@@ -15,7 +15,9 @@
  */
 package com.monkopedia.ksrpc.sockets.internal
 
+import com.monkopedia.ksrpc.CallDataSerializer
 import com.monkopedia.ksrpc.KsrpcEnvironment
+import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.packets.internal.CONTENT_LENGTH
 import com.monkopedia.ksrpc.packets.internal.Packet
 import com.monkopedia.ksrpc.packets.internal.PacketChannelBase
@@ -24,15 +26,12 @@ import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.readFully
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.sync.Mutex
-import kotlinx.serialization.StringFormat
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 
 internal class ReadWritePacketChannel(
     scope: CoroutineScope,
     private val read: ByteReadChannel,
     private val write: ByteWriteChannel,
-    env: KsrpcEnvironment
+    env: KsrpcEnvironment<String>
 ) : PacketChannelBase(scope, env) {
     private val sendLock = Mutex()
     private val receiveLock = Mutex()
@@ -64,20 +63,23 @@ internal class ReadWritePacketChannel(
 
 private suspend fun ByteWriteChannel.send(
     packet: Packet,
-    serialization: StringFormat
+    serialization: CallDataSerializer<String>
 ) {
     val content =
-        serialization.encodeToString(packet).encodeToByteArray(throwOnInvalidSequence = true)
+        serialization.createCallData(Packet.serializer(), packet)
+            .readSerialized()
+            .encodeToByteArray(throwOnInvalidSequence = true)
     appendLine("$CONTENT_LENGTH: ${content.size}")
     appendLine()
     writeFully(content, 0, content.size)
     flush()
 }
 
-private suspend fun ByteReadChannel.readPacket(serialization: StringFormat): Packet {
+private suspend fun ByteReadChannel.readPacket(serialization: CallDataSerializer<String>): Packet {
     val params = readFields()
     val data = readContent(params) ?: return readPacket(serialization)
-    return serialization.decodeFromString(data)
+    val callData = CallData.create(data)
+    return serialization.decodeCallData(Packet.serializer(), callData)
 }
 
 private suspend fun ByteReadChannel.readContent(

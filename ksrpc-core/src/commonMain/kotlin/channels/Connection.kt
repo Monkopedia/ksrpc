@@ -28,12 +28,12 @@ import kotlin.jvm.JvmName
  *
  * (Meaning @KsServices can be used for both input and output of any @KsMethod)
  */
-interface Connection : ChannelHost, ChannelClient, SingleChannelConnection
+interface Connection<T> : ChannelHost<T>, ChannelClient<T>, SingleChannelConnection<T>
 
 /**
  * A bidirectional channel that can host one service in each direction (1 host and 1 client).
  */
-interface SingleChannelConnection : SingleChannelHost, SingleChannelClient
+interface SingleChannelConnection<T> : SingleChannelHost<T>, SingleChannelClient<T>
 
 // Problems with JS compiler and serialization
 data class ChannelId(val id: String)
@@ -51,13 +51,13 @@ internal expect interface VoidService : RpcService
  * [defaultChannel] and [toStub] to create [R].
  */
 @OptIn(ExperimentalContracts::class)
-suspend inline fun <reified T : RpcService, reified R : RpcService> SingleChannelConnection.connect(
+suspend inline fun <reified T : RpcService, reified R : RpcService, S> SingleChannelConnection<S>.connect(
     crossinline host: suspend (R) -> T
 ) {
     contract {
         callsInPlace(host, InvocationKind.EXACTLY_ONCE)
     }
-    connect { channel ->
+    connect<S> { channel ->
         host(channel.toStub()).serialized(env)
     }
 }
@@ -67,8 +67,8 @@ suspend inline fun <reified T : RpcService, reified R : RpcService> SingleChanne
  */
 @JvmName("connectSerialized")
 @OptIn(ExperimentalContracts::class)
-suspend fun SingleChannelConnection.connect(
-    host: suspend (SerializedService) -> SerializedService
+suspend fun <T> SingleChannelConnection<T>.connect(
+    host: suspend (SerializedService<T>) -> SerializedService<T>
 ) {
     contract {
         callsInPlace(host, InvocationKind.EXACTLY_ONCE)

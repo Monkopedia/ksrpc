@@ -27,16 +27,17 @@ import io.ktor.websocket.serialization.receiveDeserializedBase
 import io.ktor.websocket.serialization.sendSerializedBase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.sync.Mutex
+import kotlinx.serialization.json.Json
 
 @OptIn(InternalAPI::class)
 class WebsocketPacketChannel(
     scope: CoroutineScope,
     private val socketSession: DefaultWebSocketSession,
-    env: KsrpcEnvironment
+    env: KsrpcEnvironment<String>
 ) : PacketChannelBase(scope, env) {
     private val sendLock = Mutex()
     private val receiveLock = Mutex()
-    private val converter = KotlinxWebsocketSerializationConverter(env.serialization)
+    private val converter = KotlinxWebsocketSerializationConverter(Json)
 
     // Use socket max frame with some room for padding.
     // Divide by 2 to allow for manual base64-ing.

@@ -32,8 +32,8 @@ import kotlinx.coroutines.launch
 
 abstract class RpcFunctionalityTest(
     private val supportedTypes: List<TestType> = TestType.values().toList(),
-    private val serializedChannel: suspend CoroutineScope.() -> SerializedService,
-    private val verifyOnChannel: suspend CoroutineScope.(SerializedService) -> Unit
+    private val serializedChannel: suspend CoroutineScope.() -> SerializedService<String>,
+    private val verifyOnChannel: suspend CoroutineScope.(SerializedService<String>) -> Unit
 ) {
     enum class TestType {
         SERIALIZE,
@@ -145,14 +145,14 @@ expect suspend inline fun httpTest(
 
 expect suspend fun Routing.testServe(
     basePath: String,
-    channel: SerializedService,
-    env: KsrpcEnvironment = ksrpcEnvironment { }
+    channel: SerializedService<String>,
+    env: KsrpcEnvironment<String> = ksrpcEnvironment { }
 )
 
 expect fun Routing.testServeWebsocket(
     basePath: String,
-    channel: SerializedService,
-    env: KsrpcEnvironment = ksrpcEnvironment { }
+    channel: SerializedService<String>,
+    env: KsrpcEnvironment<String> = ksrpcEnvironment { }
 )
 
 expect fun createPipe(): Pair<ByteWriteChannel, ByteReadChannel>

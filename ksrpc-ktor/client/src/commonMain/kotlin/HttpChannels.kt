@@ -25,5 +25,5 @@ import io.ktor.client.HttpClient
  *
  * This is functionally equivalent to baseUrl.toKsrpcUri().connect(env).
  */
-fun HttpClient.asConnection(baseUrl: String, env: KsrpcEnvironment): ChannelClient =
+fun HttpClient.asConnection(baseUrl: String, env: KsrpcEnvironment<String>): ChannelClient<String> =
     HttpSerializedChannel(this, baseUrl.trimEnd('/'), env)

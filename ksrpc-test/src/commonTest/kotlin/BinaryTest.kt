@@ -54,7 +54,7 @@ class BinaryTest : RpcFunctionalityTest(
         channel.serialized(ksrpcEnvironment { })
     },
     verifyOnChannel = { serializedChannel ->
-        val stub = serializedChannel.toStub<BinaryInterface>()
+        val stub = serializedChannel.toStub<BinaryInterface, String>()
         val response = stub.rpc("Hello" to "world")
         val str = response.readRemaining().readText()
         assertEquals("Hello world", str)
@@ -85,7 +85,7 @@ class MultiFrameBinaryTest : RpcFunctionalityTest(
         channel.serialized(ksrpcEnvironment { })
     },
     verifyOnChannel = { serializedChannel ->
-        val stub = serializedChannel.toStub<BinaryInterface>()
+        val stub = serializedChannel.toStub<BinaryInterface, String>()
         val response = stub.rpc("Hello" to "world")
         val str = response.readRemaining().readText()
         assertEquals(longLongContent, str)
@@ -112,7 +112,7 @@ class BinaryInputTest : RpcFunctionalityTest(
         channel.serialized(ksrpcEnvironment { })
     },
     verifyOnChannel = { serializedChannel ->
-        val stub = serializedChannel.toStub<BinaryInterface>()
+        val stub = serializedChannel.toStub<BinaryInterface, String>()
         val response = stub.inputRpc(ByteReadChannel("Hello world".encodeToByteArray()))
         assertEquals("Input: Hello world", response)
         assertEquals("pong", stub.ping("ping"))

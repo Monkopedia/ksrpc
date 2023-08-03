@@ -78,14 +78,14 @@ actual suspend inline fun httpTest(
 
 actual suspend fun Routing.testServe(
     basePath: String,
-    channel: SerializedService,
-    env: KsrpcEnvironment
+    channel: SerializedService<String>,
+    env: KsrpcEnvironment<String>
 ): Unit = jvmServe(basePath, channel, env)
 
 actual fun Routing.testServeWebsocket(
     basePath: String,
-    channel: SerializedService,
-    env: KsrpcEnvironment
+    channel: SerializedService<String>,
+    env: KsrpcEnvironment<String>
 ) = serveWebsocket(basePath, channel, env)
 
 actual fun createPipe(): Pair<ByteWriteChannel, ByteReadChannel> {

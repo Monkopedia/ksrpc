@@ -81,14 +81,14 @@ actual suspend inline fun httpTest(
 
 actual suspend fun Routing.testServe(
     basePath: String,
-    channel: SerializedService,
-    env: KsrpcEnvironment
+    channel: SerializedService<String>,
+    env: KsrpcEnvironment<String>
 ): Unit = nativeServe(basePath, channel, env)
 
 actual fun Routing.testServeWebsocket(
     basePath: String,
-    channel: SerializedService,
-    env: KsrpcEnvironment
+    channel: SerializedService<String>,
+    env: KsrpcEnvironment<String>
 ) = Unit
 
 actual fun createPipe(): Pair<ByteWriteChannel, ByteReadChannel> {
