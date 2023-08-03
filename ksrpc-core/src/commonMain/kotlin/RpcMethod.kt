@@ -34,8 +34,8 @@ internal sealed interface Transformer<T> {
     suspend fun <S> untransform(data: CallData<S>, channel: SerializedService<S>): T
 
     fun <S> unpackError(data: CallData<S>, channel: SerializedService<S>) {
-        if (!data.isBinary && data.isError) {
-            throw data.decodeError(channel)
+        if (!data.isBinary && channel.env.serialization.isError(data)) {
+            throw channel.env.serialization.decodeErrorCallData(data)
         }
     }
 }
@@ -59,7 +59,7 @@ internal object BinaryTransformer : Transformer<ByteReadChannel> {
         input: ByteReadChannel,
         channel: SerializedService<T>
     ): CallData<T> {
-        return CallData.create(input)
+        return CallData.createBinary(input)
     }
 
     override suspend fun <T> untransform(

@@ -91,7 +91,7 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.execCall(
     method: String
 ) {
     val content = if (call.request.headers[KSRPC_BINARY]?.toBoolean() == true) {
-        CallData.create(call.receive<ByteReadChannel>())
+        CallData.createBinary(call.receive<ByteReadChannel>())
     } else {
         CallData.create(call.receive<String>())
     }

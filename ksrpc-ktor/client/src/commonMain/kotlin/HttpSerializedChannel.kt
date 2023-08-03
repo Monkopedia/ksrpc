@@ -63,7 +63,7 @@ internal class HttpSerializedChannel(
         }
         response.checkErrors()
         if (response.headers[KSRPC_BINARY]?.toBoolean() == true) {
-            return CallData.create(response.body<ByteReadChannel>())
+            return CallData.createBinary(response.body<ByteReadChannel>())
         }
         return CallData.create(response.body<String>())
     }

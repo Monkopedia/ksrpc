@@ -180,7 +180,7 @@ abstract class PacketChannelBase(
 
     private suspend fun getCallData(packet: Packet): CallData<String> {
         return if (packet.startBinary) {
-            CallData.create(getByteChannel(packet.data))
+            CallData.createBinary(getByteChannel(packet.data))
         } else if (packet.binary) {
             error("Unexpected binary packet")
         } else {

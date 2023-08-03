@@ -16,7 +16,6 @@
 package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.channels.CallData
-import com.monkopedia.ksrpc.channels.CallData.Companion
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
@@ -42,6 +41,8 @@ interface CallDataSerializer<T> {
     fun <I> createCallData(serializer: KSerializer<I>, input: I): CallData<T>
     fun <I> createErrorCallData(serializer: KSerializer<I>, input: I): CallData<T>
     fun <I> decodeCallData(serializer: KSerializer<I>, data: CallData<T>): I
+    fun decodeErrorCallData(callData: CallData<T>): Throwable
+    fun isError(data: CallData<T>): Boolean
 }
 
 /**
@@ -85,11 +86,21 @@ private class StringSerializer(val stringFormat: StringFormat = Json) : CallData
     }
 
     override fun <I> createErrorCallData(serializer: KSerializer<I>, input: I): CallData<String> {
-        return CallData.create(ERROR_PREFIX + stringFormat.encodeToString(serializer, input))
+        return CallData.createError(stringFormat.encodeToString(serializer, input))
     }
 
     override fun <I> decodeCallData(serializer: KSerializer<I>, data: CallData<String>): I {
         return stringFormat.decodeFromString(serializer, data.readSerialized())
+    }
+
+    override fun decodeErrorCallData(callData: CallData<String>): Throwable {
+        val errorStr = callData.readSerialized().substring(ERROR_PREFIX.length)
+        return stringFormat.decodeFromString(RpcFailure.serializer(), errorStr)
+            .toException()
+    }
+
+    override fun isError(data: CallData<String>): Boolean {
+        return data.readSerialized().startsWith(ERROR_PREFIX)
     }
 }
 

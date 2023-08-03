@@ -17,7 +17,6 @@ package com.monkopedia.ksrpc.channels
 
 import com.monkopedia.ksrpc.ERROR_PREFIX
 import com.monkopedia.ksrpc.KsrpcEnvironment
-import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.RpcMethod
 import com.monkopedia.ksrpc.RpcObject
 import com.monkopedia.ksrpc.RpcService
@@ -27,7 +26,6 @@ import com.monkopedia.ksrpc.channels.ChannelClient.Companion.DEFAULT
 import com.monkopedia.ksrpc.internal.HostSerializedServiceImpl
 import com.monkopedia.ksrpc.rpcObject
 import io.ktor.utils.io.ByteReadChannel
-import kotlinx.serialization.KSerializer
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -183,7 +181,6 @@ expect fun randomUuid(): String
  * Could be a reference to a string for a serialized object or to binary data.
  */
 sealed class CallData<T> private constructor() {
-    abstract val isError: Boolean
     abstract val isBinary: Boolean
 
     /**
@@ -198,11 +195,7 @@ sealed class CallData<T> private constructor() {
      */
     abstract fun readBinary(): ByteReadChannel
 
-    abstract fun decodeError(channel: SerializedService<T>): Throwable
-
     data class Binary<T>(private val value: ByteReadChannel) : CallData<T>() {
-        override val isError: Boolean
-            get() = false
         override val isBinary: Boolean
             get() = true
 
@@ -211,21 +204,16 @@ sealed class CallData<T> private constructor() {
 
         override fun readBinary(): ByteReadChannel = value
 
-        override fun decodeError(channel: SerializedService<T>): Throwable =
-            error("Binary data cannot hold errors")
-
         override fun toString(): String {
             return "binary(${(value as? ByteReadChannel)?.availableForRead})"
         }
     }
 
-    data class Serialized(private val value: String) : CallData<String>() {
-        override val isError: Boolean
-            get() = value.startsWith(ERROR_PREFIX)
+    data class Serialized<T>(private val value: T) : CallData<T>() {
         override val isBinary: Boolean
             get() = false
 
-        override fun readSerialized(): String {
+        override fun readSerialized(): T {
             return value
         }
 
@@ -233,15 +221,8 @@ sealed class CallData<T> private constructor() {
             error("Cannot read binary data out of serialized content.")
         }
 
-        override fun decodeError(channel: SerializedService<String>): Throwable {
-            val errorStr = value.substring(ERROR_PREFIX.length)
-            val serialized = Serialized(errorStr)
-            return channel.env.serialization.decodeCallData(RpcFailure.serializer(), serialized)
-                .toException()
-        }
-
         override fun toString(): String {
-            return value
+            return value.toString()
         }
     }
 
@@ -249,11 +230,13 @@ sealed class CallData<T> private constructor() {
         /**
          * Create a CallData holding content serialized in a string.
          */
-        fun create(str: String) = Serialized(str)
+        fun <T> create(str: T) = Serialized(str)
+
+        fun createError(str: String) = Serialized(ERROR_PREFIX + str)
 
         /**
          * Create a CallData wrapping a [ByteReadChannel] for reading binary data.
          */
-        fun <T> create(binary: ByteReadChannel): CallData<T> = Binary(binary)
+        fun <T> createBinary(binary: ByteReadChannel): CallData<T> = Binary(binary)
     }
 }
