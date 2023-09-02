@@ -1,0 +1,16 @@
+package com.monkopedia.ksrpc
+
+import com.monkopedia.ksrpc.jni.JniSerialized
+import com.monkopedia.ksrpc.jni.NativeJniContinuation
+
+class NativeHost {
+    external fun serializeDeserialize(x: JniSerialized): JniSerialized
+    external fun createContinuations(
+        receiver: Receiver,
+        list: MutableList<NativeJniContinuation<Int>>
+    )
+}
+
+interface Receiver {
+    fun message(str: String)
+}

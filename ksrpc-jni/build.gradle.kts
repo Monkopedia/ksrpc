@@ -22,9 +22,6 @@ plugins {
 ksrpcModule(
     supportJs = false,
     nativeConfig = {
-        binaries {
-            sharedLib()
-        }
         compilations["main"].cinterops.create("jni") {
             val javaHome = File(System.getProperty("java.home")!!)
             packageName = "com.monkopedia.jni"

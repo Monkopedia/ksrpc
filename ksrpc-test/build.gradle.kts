@@ -5,7 +5,14 @@ plugins {
 }
 
 ksrpcModule(
-    includePublications = false
+    includePublications = false,
+    nativeConfig = {
+        binaries {
+            sharedLib {
+                this.export(project(":ksrpc-jni"))
+            }
+        }
+    }
 )
 
 kotlin {
@@ -31,6 +38,9 @@ kotlin {
         implementation(libs.ktor.server.websockets)
         implementation(libs.ktor.client.websockets)
     }
+    sourceSets["nativeMain"].dependencies {
+        api(project(":ksrpc-jni"))
+    }
     sourceSets["nativeTest"].dependencies {
         implementation(project(":ksrpc-ktor-server"))
         implementation(project(":ksrpc-ktor-websocket-server"))
@@ -40,9 +50,8 @@ kotlin {
     }
 }
 val copyLib = tasks.register("copyLib", Copy::class) {
-    val jniProject = rootProject.findProject(":ksrpc-jni")!!
-    dependsOn(jniProject.tasks.findByName("linkDebugSharedNative"))
-    from(jniProject.buildDir.resolve("bin/native/debugShared/libksrpc_jni.so"))
+    dependsOn(tasks.findByName("linkDebugSharedNative"))
+    from(buildDir.resolve("bin/native/debugShared/libksrpc_test.so"))
     destinationDir = buildDir.resolve("generated/lib/resources/libs/")
     doFirst {
     }

@@ -1,45 +1,56 @@
 package com.monkopedia.ksrpc.jni
 
-class JavaTypeConverter() : JniTypeConverter<Any?> {
+import kotlinx.serialization.KSerializer
 
-    override fun convertBoolean(value: Boolean): Any = value
+object JavaTypeConverter : JniTypeConverter<Any?> {
 
-    override fun convertByte(value: Byte): Any = value
+    init {
+        JNIControl.ensureInit()
+    }
 
-    override fun convertShort(value: Short): Any = value
+    @Suppress("UNCHECKED_CAST")
+    open class CastConverter<V> : Converter<Any?, V> {
+        override fun convertTo(rawValue: Any?): V = rawValue as V
+        override fun convertFrom(value: V): Any? = value
+    }
 
-    override fun convertInt(value: Int): Any = value
+    object BooleanConverter : CastConverter<Boolean>()
+    object ByteConverter : CastConverter<Byte>()
+    object ShortConverter : CastConverter<Short>()
+    object IntConverter : CastConverter<Int>()
+    object LongConverter : CastConverter<Long>()
+    object FloatConverter : CastConverter<Float>()
+    object DoubleConverter : CastConverter<Double>()
+    object CharConverter : CastConverter<Char>()
+    object StringConverter : CastConverter<String>()
 
-    override fun convertLong(value: Long): Any = value
+    override val boolean: Converter<Any?, Boolean> = BooleanConverter
+    override val byte: Converter<Any?, Byte> = ByteConverter
+    override val short: Converter<Any?, Short> = ShortConverter
+    override val int: Converter<Any?, Int> = IntConverter
+    override val long: Converter<Any?, Long> = LongConverter
+    override val float: Converter<Any?, Float> = FloatConverter
+    override val double: Converter<Any?, Double> = DoubleConverter
+    override val char: Converter<Any?, Char> = CharConverter
+    override val string: Converter<Any?, String> = StringConverter
+}
 
-    override fun convertFloat(value: Float): Any = value
 
-    override fun convertDouble(value: Double): Any = value
+actual fun <V> JniSer.converterOf(serializer: KSerializer<V>): Converter<*, V> {
+    JNIControl.ensureInit()
+    return object : Converter<JniSerialized, V> {
+        override fun convertTo(rawValue: JniSerialized?): V {
+            @Suppress("UNCHECKED_CAST")
+            return rawValue?.let { decodeFromJni(serializer, it) } as V
+        }
 
-    override fun convertChar(value: Char): Any = value
-
-    override fun convertString(value: String): Any = value
-
-    override fun convertToString(rawValue: Any?): String = rawValue as String
-
-    override fun convertToChar(rawValue: Any?): Char = rawValue as Char
-
-    override fun convertToDouble(rawValue: Any?): Double = rawValue as Double
-
-    override fun convertToFloat(rawValue: Any?): Float = rawValue as Float
-
-    override fun convertToLong(rawValue: Any?): Long = rawValue as Long
-
-    override fun convertToInt(rawValue: Any?): Int = rawValue as Int
-
-    override fun convertToShort(rawValue: Any?): Short = rawValue as Short
-
-    override fun convertToByte(rawValue: Any?): Byte = rawValue as Byte
-
-    override fun convertToBoolean(rawValue: Any?): Boolean = rawValue as Boolean
+        override fun convertFrom(value: V): JniSerialized {
+            return encodeToJni(serializer, value)
+        }
+    }
 }
 
 actual fun <T> newTypeConverter(): JniTypeConverter<T> {
     @Suppress("UNCHECKED_CAST")
-    return JavaTypeConverter() as JniTypeConverter<T>
+    return JavaTypeConverter as JniTypeConverter<T>
 }

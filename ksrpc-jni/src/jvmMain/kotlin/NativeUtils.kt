@@ -1,4 +1,4 @@
-package com.monkopedia.jnitest
+package com.monkopedia.ksrpc.jni
 
 import java.io.File
 import java.io.FileNotFoundException

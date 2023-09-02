@@ -5,7 +5,6 @@ package com.monkopedia.ksrpc.jni
 import com.monkopedia.jni.JNIEnvVar
 import com.monkopedia.jni.jobject
 import com.monkopedia.jnitest.JNI
-import com.monkopedia.jnitest.JNI.toStr
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 
@@ -14,30 +13,30 @@ internal open class NativeListWrapper(val list: jobject) : BasicList<jobject?> {
         get() = JniSerialized(this)
 
     override val size: Int
-        get() = JNI.sizeOfList(list)
+        get() = JNI.List.size(list)
 
     override fun get(index: Int): jobject? {
-        return JNI.getFromList(list, index)
+        return JNI.List.get(list, index)
     }
 
     override fun toString(): String {
-        return list.toStr() ?: "null"
+        return JNI.Obj.toString(list) ?: "null"
     }
 }
 
-internal class NativeMutableListWrapper(list: jobject = JNI.newList() ?: error("Failed to initialize list")) :
+internal class NativeMutableListWrapper(list: jobject = JNI.ArrayList.new() ?: error("Failed to initialize list")) :
     NativeListWrapper(list), MutableBasicList<jobject?> {
 
     override fun set(index: Int, value: jobject?) {
-        JNI.setInList(list, index, value)
+        JNI.ArrayList.set(list, index, value)
     }
 
     override fun add(value: jobject?) {
-        JNI.addToList(list, value)
+        JNI.ArrayList.add(list, value)
     }
 
     override fun toString(): String {
-        return list.toStr() ?: "null"
+        return JNI.Obj.toString(list) ?: "null"
     }
 }
 
@@ -46,13 +45,13 @@ actual fun <T> newList(): MutableBasicList<T> {
     return NativeMutableListWrapper() as MutableBasicList<T>
 }
 
-fun toSerialized(jniEnv: CPointer<JNIEnvVar>, serialized: jobject): JniSerialized {
+fun JniSerialized.Companion.fromJvm(jniEnv: CPointer<JNIEnvVar>, serialized: jobject): JniSerialized {
     JNI.init(jniEnv)
-    return NativeListWrapper(JNI.toList(serialized)).asSerialized
+    return NativeListWrapper(JNI.JavaListWrapperKt.toList(serialized)!!).asSerialized
 }
 
-fun toJniReturn(jniEnv: CPointer<JNIEnvVar>, serialized: JniSerialized): jobject {
+fun JniSerialized.toJvm(jniEnv: CPointer<JNIEnvVar>): jobject {
     JNI.init(jniEnv)
-    val list = (serialized.list as NativeListWrapper).list
-    return JNI.toSerialized(list)
+    val list = (list as NativeListWrapper).list
+    return JNI.JavaListWrapperKt.toSerialized(list)!!
 }

@@ -26,7 +26,7 @@ data class JniDecoder<T> internal constructor(
     }
 
     override fun beginStructure(descriptor: SerialDescriptor): CompositeDecoder {
-        structEnds.add(typeConverter.convertToInt(next()))
+        structEnds.add(typeConverter.int.convertTo(next()))
         return super.beginStructure(descriptor)
     }
 
@@ -35,11 +35,11 @@ data class JniDecoder<T> internal constructor(
     }
 
     override fun decodeElementIndex(descriptor: SerialDescriptor): Int {
-        return if (index < structEnds.last()) typeConverter.convertToInt(next()) else CompositeDecoder.DECODE_DONE
+        return if (index < structEnds.last()) typeConverter.int.convertTo(next()) else CompositeDecoder.DECODE_DONE
     }
 
     override fun decodeNotNullMark(): Boolean {
-        return next()?.let { typeConverter.convertToBoolean(it) } ?: false
+        return next()?.let { typeConverter.boolean.convertTo(it) } ?: false
     }
 
     override fun decodeNull(): Nothing? {
@@ -47,42 +47,42 @@ data class JniDecoder<T> internal constructor(
     }
 
     override fun decodeBoolean(): Boolean {
-        return typeConverter.convertToBoolean(next())
+        return typeConverter.boolean.convertTo(next())
     }
 
     override fun decodeByte(): Byte {
-        return typeConverter.convertToByte(next())
+        return typeConverter.byte.convertTo(next())
     }
 
     override fun decodeShort(): Short {
-        return typeConverter.convertToShort(next())
+        return typeConverter.short.convertTo(next())
     }
 
     override fun decodeInt(): Int {
-        return typeConverter.convertToInt(next())
+        return typeConverter.int.convertTo(next())
     }
 
     override fun decodeLong(): Long {
-        return typeConverter.convertToLong(next())
+        return typeConverter.long.convertTo(next())
     }
 
     override fun decodeFloat(): Float {
-        return typeConverter.convertToFloat(next())
+        return typeConverter.float.convertTo(next())
     }
 
     override fun decodeDouble(): Double {
-        return typeConverter.convertToDouble(next())
+        return typeConverter.double.convertTo(next())
     }
 
     override fun decodeChar(): Char {
-        return typeConverter.convertToChar(next())
+        return typeConverter.char.convertTo(next())
     }
 
     override fun decodeString(): String {
-        return typeConverter.convertToString(next())
+        return typeConverter.string.convertTo(next())
     }
 
     override fun decodeEnum(enumDescriptor: SerialDescriptor): Int {
-        return typeConverter.convertToInt(next())
+        return typeConverter.int.convertTo(next())
     }
 }

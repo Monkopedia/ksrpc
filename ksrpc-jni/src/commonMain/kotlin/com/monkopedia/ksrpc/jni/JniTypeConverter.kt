@@ -1,33 +1,31 @@
 package com.monkopedia.ksrpc.jni
 
+import kotlinx.serialization.KSerializer
+
 interface JniTypeConverter<T> {
+    val boolean: Converter<T, Boolean>
 
-    fun convertToBoolean(rawValue: T?): Boolean
-    fun convertBoolean(value: Boolean): T
+    val byte: Converter<T, Byte>
 
-    fun convertToByte(rawValue: T?): Byte
-    fun convertByte(value: Byte): T
+    val short: Converter<T, Short>
 
-    fun convertToShort(rawValue: T?): Short
-    fun convertShort(value: Short): T
+    val int: Converter<T, Int>
 
-    fun convertToInt(rawValue: T?): Int
-    fun convertInt(value: Int): T
+    val long: Converter<T, Long>
 
-    fun convertToLong(rawValue: T?): Long
-    fun convertLong(value: Long): T
+    val float: Converter<T, Float>
 
-    fun convertToFloat(rawValue: T?): Float
-    fun convertFloat(value: Float): T
+    val double: Converter<T, Double>
 
-    fun convertToDouble(rawValue: T?): Double
-    fun convertDouble(value: Double): T
+    val char: Converter<T, Char>
 
-    fun convertToChar(rawValue: T?): Char
-    fun convertChar(value: Char): T
-
-    fun convertToString(rawValue: T?): String
-    fun convertString(value: String): T
+    val string: Converter<T, String>
 }
 
+interface Converter<T, N> {
+    fun convertTo(rawValue: T?): N
+    fun convertFrom(value: N): T?
+}
+
+expect fun <V> JniSer.converterOf(serializer: KSerializer<V>): Converter<*, V>
 expect fun <T> newTypeConverter(): JniTypeConverter<T>
