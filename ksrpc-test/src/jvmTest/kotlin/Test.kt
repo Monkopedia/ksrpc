@@ -1,5 +1,6 @@
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.jni.JavaJniContinuation
 import com.monkopedia.ksrpc.jni.JniSerialized
 import com.monkopedia.ksrpc.jni.NativeJniContinuation
 
@@ -9,6 +10,10 @@ class NativeHost {
         receiver: Receiver,
         list: MutableList<NativeJniContinuation<Int>>
     )
+
+    external fun createContinuationRelay(
+        output: JavaJniContinuation<Int>
+    ): NativeJniContinuation<Int>
 }
 
 interface Receiver {

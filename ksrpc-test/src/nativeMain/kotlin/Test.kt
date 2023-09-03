@@ -5,17 +5,11 @@ import com.monkopedia.jni.jmethodID
 import com.monkopedia.jni.jobject
 import com.monkopedia.jni.jvalue
 import com.monkopedia.jnitest.com.monkopedia.ksrpc.jni.JNIDispatcher
+import com.monkopedia.jnitest.com.monkopedia.ksrpc.jni.JavaJniContinuationConverter
 import com.monkopedia.jnitest.initThread
 import com.monkopedia.jnitest.threadEnv
 import com.monkopedia.jnitest.threadJni
-import com.monkopedia.ksrpc.jni.JniSer
-import com.monkopedia.ksrpc.jni.JniSerialized
-import com.monkopedia.ksrpc.jni.NativeJniContinuation
-import com.monkopedia.ksrpc.jni.decodeFromJni
-import com.monkopedia.ksrpc.jni.encodeToJni
-import com.monkopedia.ksrpc.jni.fromJvm
-import com.monkopedia.ksrpc.jni.newTypeConverter
-import com.monkopedia.ksrpc.jni.toJvm
+import com.monkopedia.ksrpc.jni.*
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.suspendCoroutine
 import kotlinx.cinterop.*
@@ -86,14 +80,15 @@ private fun MemScope.add(
     addMethod: jmethodID?,
     continuation: Continuation<Int>
 ) {
+    val converter = NativeJniContinuationConverter<Int>(env)
     jni.CallBooleanMethodA!!.invoke(
         env,
         list,
         addMethod,
         cValue<jvalue> {
             this.l =
-                NativeJniContinuation(continuation, newTypeConverter<jobject?>().int).toJvm(
-                    env
+                converter.convertFrom(
+                    NativeJniContinuation(continuation, newTypeConverter<jobject?>().int)
                 )
         }.ptr
     )
@@ -138,4 +133,18 @@ fun createReceiver(input: jobject): suspend (String) -> Unit {
             threadJni.DeleteLocalRef!!.invoke(threadEnv, str)
         }
     }
+}
+
+@OptIn(ExperimentalForeignApi::class)
+@CName("Java_com_monkopedia_ksrpc_NativeHost_createContinuationRelay")
+fun createContinuationRelay(env: CPointer<JNIEnvVar>, clazz: jobject, output: jobject): jobject? {
+    initThread(env)
+    val javaContinuation = JavaJniContinuationConverter<Int>(env).convertTo(output)
+    val typeConverter = newTypeConverter<jobject>()
+    val continuation = createContinuation(GlobalScope) {
+        javaContinuation.resumeWith(typeConverter.int, Result.success(it + 1))
+    }
+    return NativeJniContinuationConverter<Int>(env).convertFrom(
+        continuation.withConverter(typeConverter.int)
+    )
 }

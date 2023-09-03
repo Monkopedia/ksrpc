@@ -9,6 +9,7 @@ import com.monkopedia.jni.jmethodID
 import com.monkopedia.jni.jobject
 import com.monkopedia.jni.jstring
 import com.monkopedia.jni.jvalue
+import kotlin.native.concurrent.ThreadLocal
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.CPointerVarOf
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -23,12 +24,19 @@ import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.ptr
 import kotlinx.cinterop.toKString
 import kotlinx.cinterop.wcstr
-import kotlin.native.concurrent.ThreadLocal
 
-private typealias JniInvoker<R> = MemScope.(JNINativeInterface_, CPointer<JNIEnvVar>?, jobject?, jmethodID?, CPointer<jvalue>?, Boolean) -> R
+private typealias JniInvoker<R> = MemScope.(
+    JNINativeInterface_,
+    CPointer<JNIEnvVar>?,
+    jobject?,
+    jmethodID?,
+    CPointer<jvalue>?,
+    Boolean
+) -> R
 
 @ThreadLocal
 internal lateinit var jni: JNINativeInterface_
+
 @ThreadLocal
 internal lateinit var env: CPointer<CPointerVarOf<CPointer<JNINativeInterface_>>>
 
@@ -72,52 +80,85 @@ internal object JNI {
         this.l = it
     }
     val voidMethod: JniInvoker<Unit> = { jni, env, jobj, jmeth, arg, static ->
-        if (static) jni.CallStaticVoidMethodA!!(env, jobj, jmeth, arg)
-        else jni.CallVoidMethodA!!(env, jobj, jmeth, arg)
+        if (static) {
+            jni.CallStaticVoidMethodA!!(env, jobj, jmeth, arg)
+        } else {
+            jni.CallVoidMethodA!!(env, jobj, jmeth, arg)
+        }
     }
     val boolMethod: JniInvoker<Boolean> = { jni, env, jobj, jmeth, arg, static ->
-        if (static) jni.CallStaticBooleanMethodA!!(env, jobj, jmeth, arg) != 0u.toUByte()
-        else jni.CallBooleanMethodA!!(env, jobj, jmeth, arg) != 0u.toUByte()
+        if (static) {
+            jni.CallStaticBooleanMethodA!!(env, jobj, jmeth, arg) != 0u.toUByte()
+        } else {
+            jni.CallBooleanMethodA!!(env, jobj, jmeth, arg) != 0u.toUByte()
+        }
     }
     val byteMethod: JniInvoker<kotlin.Byte> = { jni, env, jobj, jmeth, arg, static ->
-        if (static) jni.CallStaticByteMethodA!!(env, jobj, jmeth, arg)
-        else jni.CallByteMethodA!!(env, jobj, jmeth, arg)
+        if (static) {
+            jni.CallStaticByteMethodA!!(env, jobj, jmeth, arg)
+        } else {
+            jni.CallByteMethodA!!(env, jobj, jmeth, arg)
+        }
     }
     val shortMethod: JniInvoker<kotlin.Short> = { jni, env, jobj, jmeth, arg, static ->
-        if (static) jni.CallStaticShortMethodA!!(env, jobj, jmeth, arg)
-        else jni.CallShortMethodA!!(env, jobj, jmeth, arg)
+        if (static) {
+            jni.CallStaticShortMethodA!!(env, jobj, jmeth, arg)
+        } else {
+            jni.CallShortMethodA!!(env, jobj, jmeth, arg)
+        }
     }
     val intMethod: JniInvoker<kotlin.Int> = { jni, env, jobj, jmeth, arg, static ->
-        if (static) jni.CallStaticIntMethodA!!(env, jobj, jmeth, arg)
-        else jni.CallIntMethodA!!(env, jobj, jmeth, arg)
+        if (static) {
+            jni.CallStaticIntMethodA!!(env, jobj, jmeth, arg)
+        } else {
+            jni.CallIntMethodA!!(env, jobj, jmeth, arg)
+        }
     }
     val longMethod: JniInvoker<kotlin.Long> = { jni, env, jobj, jmeth, arg, static ->
-        if (static) jni.CallStaticLongMethodA!!(env, jobj, jmeth, arg)
-        else jni.CallLongMethodA!!(env, jobj, jmeth, arg)
+        if (static) {
+            jni.CallStaticLongMethodA!!(env, jobj, jmeth, arg)
+        } else {
+            jni.CallLongMethodA!!(env, jobj, jmeth, arg)
+        }
     }
     val floatMethod: JniInvoker<kotlin.Float> = { jni, env, jobj, jmeth, arg, static ->
-        if (static) jni.CallStaticFloatMethodA!!(env, jobj, jmeth, arg)
-        else jni.CallFloatMethodA!!(env, jobj, jmeth, arg)
+        if (static) {
+            jni.CallStaticFloatMethodA!!(env, jobj, jmeth, arg)
+        } else {
+            jni.CallFloatMethodA!!(env, jobj, jmeth, arg)
+        }
     }
     val doubleMethod: JniInvoker<kotlin.Double> = { jni, env, jobj, jmeth, arg, static ->
-        if (static) jni.CallStaticDoubleMethodA!!(env, jobj, jmeth, arg)
-        else jni.CallDoubleMethodA!!(env, jobj, jmeth, arg)
+        if (static) {
+            jni.CallStaticDoubleMethodA!!(env, jobj, jmeth, arg)
+        } else {
+            jni.CallDoubleMethodA!!(env, jobj, jmeth, arg)
+        }
     }
     val charMethod: JniInvoker<kotlin.Char> = { jni, env, jobj, jmeth, arg, static ->
-        if (static) jni.CallStaticCharMethodA!!(env, jobj, jmeth, arg).toInt().toChar()
-        else jni.CallCharMethodA!!(env, jobj, jmeth, arg).toInt().toChar()
+        if (static) {
+            jni.CallStaticCharMethodA!!(env, jobj, jmeth, arg).toInt().toChar()
+        } else {
+            jni.CallCharMethodA!!(env, jobj, jmeth, arg).toInt().toChar()
+        }
     }
     val objMethod: JniInvoker<jobject?> = { jni, env, jobj, jmeth, arg, static ->
-        if (static) jni.CallStaticObjectMethodA!!(env, jobj, jmeth, arg)
-        else jni.CallObjectMethodA!!(env, jobj, jmeth, arg)
+        if (static) {
+            jni.CallStaticObjectMethodA!!(env, jobj, jmeth, arg)
+        } else {
+            jni.CallObjectMethodA!!(env, jobj, jmeth, arg)
+        }
     }
     val constructor: JniInvoker<jobject?> = { jni, env, jobj, jmeth, arg, static ->
         jni.NewObjectA!!(env, jobj, jmeth, arg)
     }
 
     val stringMethod: JniInvoker<String?> = { jni, env, jobj, jmeth, arg, static ->
-        val str = if (static) jni.CallStaticObjectMethodA!!(env, jobj, jmeth, arg)
-        else jni.CallObjectMethodA!!(env, jobj, jmeth, arg)
+        val str = if (static) {
+            jni.CallStaticObjectMethodA!!(env, jobj, jmeth, arg)
+        } else {
+            jni.CallObjectMethodA!!(env, jobj, jmeth, arg)
+        }
         val utfChars = jni.GetStringUTFChars!!(env, str, cValuesOf(0u.toUByte()).ptr)
         utfChars?.toKString()?.also {
             jni.ReleaseStringUTFChars!!(env, str, utfChars)
@@ -127,8 +168,8 @@ internal object JNI {
     fun <V, R> ((jobject) -> V).mapped(map: (V) -> R): (jobject) -> R =
         { map(this@mapped.invoke(it)) }
 
-    open class JvmClass(str: String) {
-        val cls by lazy { findClass(str) }
+    open class JvmClass(private val str: String) {
+        val cls get() = findClass(str)
 
         inner class Method0<R>(
             name: String,
@@ -183,12 +224,12 @@ internal object JNI {
         }
 
         inner class Constructor<I, R>(
-            name: String,
-            sig: String,
+            private val name: String,
+            private val sig: String,
             private val typeMapping: jvalue.(I) -> Unit,
             private val invoker: JniInvoker<R>
         ) : (I) -> R {
-            val method by lazy { cls.findMethod(name, sig) }
+            val method get() = cls.findMethod(name, sig)
 
             override fun invoke(input: I): R = memScoped {
                 invoker(jni, env, cls, method, alloc<jvalue> { this.typeMapping(input) }.ptr, false)
@@ -264,6 +305,11 @@ internal object JNI {
     data object List : JvmClass("java/util/List") {
         val get = Method1("get", "(I)Ljava/lang/Object;", intArg, objMethod)
         val size = Method0("size", "()I", intMethod)
+    }
+
+    data object JavaJniContinuation : JvmClass("com/monkopedia/ksrpc/jni/JavaJniContinuation") {
+        val resumeSuccess = Method1("resumeSuccess", "(Ljava/lang/Object;)V", objArg, voidMethod)
+        val resumeFailure = Method1("resumeFailure", "(Ljava/lang/Object;)V", objArg, voidMethod)
     }
 
     data object ArrayList : JvmClass("java/util/ArrayList") {

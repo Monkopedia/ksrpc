@@ -4,9 +4,6 @@ package com.monkopedia.ksrpc.jni
 
 import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.asString
-import kotlin.coroutines.Continuation
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 
 class NativeJniContinuation<T>(val nativeObject: Long) : JniContinuation<T> {
     var ser: JniSer = JniSer
@@ -25,16 +22,6 @@ class NativeJniContinuation<T>(val nativeObject: Long) : JniContinuation<T> {
         }.onFailure {
             val rpcFailure = RpcFailure(it.asString)
             resumeFailure(nativeObject, ser.encodeToJni(RpcFailure.serializer(), rpcFailure))
-        }
-    }
-
-    override fun asCompletion(int: Converter<Any, T>): Continuation<T> {
-        return object : Continuation<T> {
-            override val context: CoroutineContext = EmptyCoroutineContext
-
-            override fun resumeWith(result: Result<T>) {
-                resumeWith(int, result)
-            }
         }
     }
 
