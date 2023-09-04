@@ -34,7 +34,7 @@ class WebsocketPacketChannel(
     scope: CoroutineScope,
     private val socketSession: DefaultWebSocketSession,
     env: KsrpcEnvironment<String>
-) : PacketChannelBase(scope, env) {
+) : PacketChannelBase<String>(scope, env) {
     private val sendLock = Mutex()
     private val receiveLock = Mutex()
     private val converter = KotlinxWebsocketSerializationConverter(Json)
@@ -44,22 +44,23 @@ class WebsocketPacketChannel(
     override val maxSize: Long
         get() = socketSession.maxFrameSize / 2 - 1024
 
-    override suspend fun send(packet: Packet) {
+    override suspend fun send(packet: Packet<String>) {
         sendLock.lock()
         try {
-            socketSession.sendSerializedBase<Packet>(packet, converter, Charsets.UTF_8)
+            socketSession.sendSerializedBase<Packet<String>>(packet, converter, Charsets.UTF_8)
         } finally {
             sendLock.unlock()
         }
     }
 
-    override suspend fun receive(): Packet {
+    override suspend fun receive(): Packet<String> {
         receiveLock.lock()
         try {
-            return socketSession.receiveDeserializedBase<Packet>(
+            @Suppress("UNCHECKED_CAST")
+            return socketSession.receiveDeserializedBase<Packet<String>>(
                 converter,
                 Charsets.UTF_8
-            ) as Packet
+            ) as Packet<String>
         } finally {
             receiveLock.unlock()
         }

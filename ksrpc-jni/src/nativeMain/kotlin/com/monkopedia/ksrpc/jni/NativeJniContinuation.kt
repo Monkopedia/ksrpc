@@ -6,6 +6,7 @@ import com.monkopedia.jni.JNIEnvVar
 import com.monkopedia.jni.jlong
 import com.monkopedia.jni.jobject
 import com.monkopedia.jnitest.JNI
+import com.monkopedia.jnitest.initThread
 import com.monkopedia.ksrpc.RpcFailure
 import kotlin.coroutines.Continuation
 import kotlinx.cinterop.CPointed
@@ -61,6 +62,7 @@ class NativeJniContinuationConverter<T>(env: CPointer<JNIEnvVar>) :
 @OptIn(ExperimentalForeignApi::class)
 @CName("Java_com_monkopedia_ksrpc_jni_NativeJniContinuation_resumeSuccess")
 fun resumeSuccess(env: CPointer<JNIEnvVar>, clazz: jobject, nativeObject: jlong, input: jobject) {
+    initThread(env)
     try {
         val ptr = nativeObject.toCPointer<CPointed>()?.asStableRef<NativeJniContinuation<Any>>()?.get()
             ?: return
@@ -74,6 +76,7 @@ fun resumeSuccess(env: CPointer<JNIEnvVar>, clazz: jobject, nativeObject: jlong,
 @OptIn(ExperimentalForeignApi::class)
 @CName("Java_com_monkopedia_ksrpc_jni_NativeJniContinuation_resumeFailure")
 fun resumeFailure(env: CPointer<JNIEnvVar>, clazz: jobject, nativeObject: jlong, input: jobject) {
+    initThread(env)
     try {
         val ptr = nativeObject.toCPointer<CPointed>()?.asStableRef<NativeJniContinuation<Any>>()?.get()
             ?: return
@@ -89,6 +92,7 @@ fun resumeFailure(env: CPointer<JNIEnvVar>, clazz: jobject, nativeObject: jlong,
 @OptIn(ExperimentalForeignApi::class)
 @CName("Java_com_monkopedia_ksrpc_jni_NativeJniContinuation_finalize")
 fun finalize(env: CPointer<JNIEnvVar>, clazz: jobject, nativeObject: jlong) {
+    initThread(env)
     try {
         val ptr = nativeObject.toCPointer<CPointed>()?.asStableRef<NativeJniContinuation<Any>>()
             ?: return

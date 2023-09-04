@@ -83,4 +83,13 @@ data class JniEncoder<T> internal constructor(
         encodeInt(index)
         return super.encodeElement(descriptor, index)
     }
+
+    fun encodeSerialized(value: JniSerialized) {
+        @Suppress("UNCHECKED_CAST")
+        val list = value.list as BasicList<T>
+        encodeInt(list.size)
+        for (i in 0 until list.size) {
+            outputList.add(list[i])
+        }
+    }
 }

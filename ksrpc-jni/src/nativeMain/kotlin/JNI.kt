@@ -343,6 +343,23 @@ internal object JNI {
         val getNativeObject = Method0("getNativeObject", "()J", longMethod)
     }
 
+    data object JniConnection : JvmClass("com/monkopedia/ksrpc/jni/JniConnection") {
+        val closeFromNative = Method1(
+            "closeFromNative",
+            "(Lcom/monkopedia/ksrpc/jni/NativeJniContinuation)V",
+            objArg,
+            voidMethod
+        )
+        val sendFromNative = Method2(
+            "sendFromNative",
+            "(Lcom/monkopedia/ksrpc/jni/JniSerialized;" +
+                "Lcom/monkopedia/ksrpc/jni/NativeJniContinuation)V",
+            objArg,
+            objArg,
+            voidMethod
+        )
+    }
+
     fun init(e: CPointer<JNIEnvVar>) {
         env = e
         jni = e[0]!![0]

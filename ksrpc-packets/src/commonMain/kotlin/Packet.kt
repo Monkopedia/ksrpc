@@ -20,7 +20,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Packet(
+data class Packet<T>(
     @SerialName("t")
     val type: Int = 0,
     @SerialName("i")
@@ -30,7 +30,7 @@ data class Packet(
     @SerialName("e")
     val endpoint: String,
     @SerialName("d")
-    val data: String
+    val data: T
 ) {
     val input: Boolean get() = (type and 1) != 0
     val binary: Boolean get() = (type and 2) != 0
@@ -43,7 +43,7 @@ data class Packet(
         id: String,
         messageId: String,
         endpoint: String,
-        data: String
+        data: T
     ) : this(
         (if (input) 1 else 0) or
             (if (binary) 2 else 0) or
@@ -55,7 +55,7 @@ data class Packet(
     )
 }
 
-internal interface PacketChannel : SuspendCloseable {
-    suspend fun send(packet: Packet)
-    suspend fun receive(): Packet
+internal interface PacketChannel<T> : SuspendCloseable {
+    suspend fun send(packet: Packet<T>)
+    suspend fun receive(): Packet<T>
 }

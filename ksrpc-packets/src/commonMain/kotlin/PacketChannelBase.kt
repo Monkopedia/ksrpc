@@ -27,24 +27,26 @@ import com.monkopedia.ksrpc.internal.HostChannelContext
 import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
 import com.monkopedia.ksrpc.internal.MultiChannel
 import com.monkopedia.ksrpc.internal.SubserviceChannel
-import io.ktor.util.decodeBase64Bytes
-import io.ktor.util.encodeBase64
 import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.close
 import io.ktor.utils.io.core.readBytes
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withContext
-import kotlin.coroutines.CoroutineContext
+import kotlinx.serialization.builtins.ByteArraySerializer
+import kotlinx.serialization.builtins.serializer
 
 private const val DEFAULT_MAX_SIZE = 16 * 1024L
 
-abstract class PacketChannelBase(
-    private val scope: CoroutineScope,
-    final override val env: KsrpcEnvironment<String>
-) : PacketChannel, Connection<String>, ChannelHost<String> {
+abstract class PacketChannelBase<T>(
+    protected val scope: CoroutineScope,
+    final override val env: KsrpcEnvironment<T>
+) : PacketChannel<T>, Connection<T>, ChannelHost<T> {
+    private val sendLock = Mutex()
+    private val receiveLock = Mutex()
     private var isClosed = false
     private var callLock = Mutex()
     protected open val maxSize: Long = DEFAULT_MAX_SIZE
@@ -59,9 +61,9 @@ abstract class PacketChannelBase(
     private val onCloseObservers = mutableSetOf<suspend () -> Unit>()
 
     private val binaryChannelLock = Mutex()
-    private val binaryChannels = mutableMapOf<String, BinaryChannel>()
+    private val binaryChannels = mutableMapOf<String, BinaryChannel<T>>()
 
-    private val multiChannel = MultiChannel<Packet>()
+    private val multiChannel = MultiChannel<Packet<T>>()
 
     init {
         scope.launch {
@@ -117,7 +119,7 @@ abstract class PacketChannelBase(
         id: String,
         messageId: String,
         endpoint: String,
-        response: CallData<String>
+        response: CallData<T>
     ) {
         if (response.isBinary) {
             val binaryChannel = randomUuid()
@@ -129,7 +131,10 @@ abstract class PacketChannelBase(
                     id = id,
                     messageId = messageId,
                     endpoint = endpoint,
-                    data = binaryChannel
+                    data = env.serialization.createCallData(
+                        String.serializer(),
+                        binaryChannel
+                    ).readSerialized()
                 )
             )
             launch {
@@ -146,7 +151,10 @@ abstract class PacketChannelBase(
                                 id = binaryChannel,
                                 messageId = id++.toString(),
                                 endpoint = endpoint,
-                                data = packet.encodeBase64()
+                                data = env.serialization.createCallData(
+                                    ByteArraySerializer(),
+                                    packet
+                                ).readSerialized()
                             )
                         )
                     }
@@ -159,7 +167,10 @@ abstract class PacketChannelBase(
                         id = binaryChannel,
                         messageId = id.toString(),
                         endpoint = endpoint,
-                        data = ByteArray(0).encodeBase64()
+                        data = env.serialization.createCallData(
+                            ByteArraySerializer(),
+                            ByteArray(0)
+                        ).readSerialized()
                     )
                 )
             }
@@ -178,9 +189,11 @@ abstract class PacketChannelBase(
         }
     }
 
-    private suspend fun getCallData(packet: Packet): CallData<String> {
+    private suspend fun getCallData(packet: Packet<T>): CallData<T> {
         return if (packet.startBinary) {
-            CallData.createBinary(getByteChannel(packet.data))
+            val callData = CallData.create(packet.data)
+            val decoded = env.serialization.decodeCallData(String.serializer(), callData)
+            CallData.createBinary(getByteChannel(decoded))
         } else if (packet.binary) {
             error("Unexpected binary packet")
         } else {
@@ -188,7 +201,7 @@ abstract class PacketChannelBase(
         }
     }
 
-    private suspend fun removeBinaryChannelIfDone(channel: BinaryChannel) {
+    private suspend fun removeBinaryChannelIfDone(channel: BinaryChannel<T>) {
         if (!channel.isDone) {
             return
         }
@@ -200,11 +213,11 @@ abstract class PacketChannelBase(
         }
     }
 
-    private suspend fun getBinaryChannel(id: String): BinaryChannel {
+    private suspend fun getBinaryChannel(id: String): BinaryChannel<T> {
         binaryChannelLock.lock()
         try {
             return binaryChannels.getOrPut(id) {
-                BinaryChannel(id)
+                BinaryChannel(id, env)
             }
         } finally {
             binaryChannelLock.unlock()
@@ -218,11 +231,15 @@ abstract class PacketChannelBase(
         }
     }
 
-    override suspend fun wrapChannel(channelId: ChannelId): SerializedService<String> {
+    override suspend fun wrapChannel(channelId: ChannelId): SerializedService<T> {
         return SubserviceChannel(this, channelId)
     }
 
-    override suspend fun call(channelId: ChannelId, endpoint: String, data: CallData<String>): CallData<String> {
+    override suspend fun call(
+        channelId: ChannelId,
+        endpoint: String,
+        data: CallData<T>
+    ): CallData<T> {
         val (messageId, response) = multiChannel.allocateReceive()
         scope.sendPacket(true, channelId.id, messageId.toString(), endpoint, data)
         return getCallData(response.await())
@@ -231,15 +248,15 @@ abstract class PacketChannelBase(
     override suspend fun close(id: ChannelId) {
         val serviceChannel = serviceChannel
         serviceChannel.close(id)
-        call(id, "", CallData.create("{}"))
+        call(id, "", env.serialization.createCallData(Unit.serializer(), Unit))
     }
 
-    override suspend fun registerDefault(service: SerializedService<String>) {
+    override suspend fun registerDefault(service: SerializedService<T>) {
         val serviceChannel = serviceChannel
         serviceChannel.registerDefault(service)
     }
 
-    override suspend fun registerHost(service: SerializedService<String>): ChannelId {
+    override suspend fun registerHost(service: SerializedService<T>): ChannelId {
         val serviceChannel = serviceChannel
         return serviceChannel.registerHost(service)
     }
@@ -264,27 +281,31 @@ abstract class PacketChannelBase(
         onCloseObservers.add(onClose)
     }
 
-    private class BinaryChannel(
+    private class BinaryChannel<T>(
         val id: String,
+        val env: KsrpcEnvironment<T>,
         val channel: ByteChannel = ByteChannel(),
         var currentPacket: Int = 0,
-        var pending: MutableMap<Int, Packet> = mutableMapOf()
+        var pending: MutableMap<Int, Packet<T>> = mutableMapOf()
     ) {
         private var hasClosedChannel: Boolean = false
         private var hasGottenChannel: Boolean = false
         val isDone: Boolean
             get() = hasClosedChannel && hasGottenChannel
 
-        suspend fun handlePacket(packet: Packet): Boolean {
+        suspend fun handlePacket(packet: Packet<T>): Boolean {
             if (packet.messageId.toInt() == currentPacket) {
                 currentPacket++
-                if (packet.data.isEmpty()) {
+                val data = env.serialization.decodeCallData(
+                    ByteArraySerializer(),
+                    CallData.create(packet.data)
+                )
+                if (data.isEmpty()) {
                     channel.flush()
                     channel.close()
                     hasClosedChannel = true
                     return true
                 } else {
-                    val data = packet.data.decodeBase64Bytes()
                     channel.writeFully(data, 0, data.size)
                     pending[currentPacket]?.let { handlePacket(it) }
                 }
@@ -301,8 +322,8 @@ abstract class PacketChannelBase(
         }
     }
 
-    private data class PendingPacket(
+    private data class PendingPacket<T>(
         val receivedAt: Long,
-        val packet: Packet
+        val packet: Packet<T>
     )
 }

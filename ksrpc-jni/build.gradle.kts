@@ -37,6 +37,7 @@ ksrpcModule(
 
 kotlin {
     sourceSets["commonMain"].dependencies {
+        api(project(":ksrpc-packets"))
     }
     sourceSets["jvmMain"].dependencies {
         implementation(libs.kotlinx.serialization)

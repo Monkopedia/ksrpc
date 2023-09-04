@@ -85,4 +85,12 @@ data class JniDecoder<T> internal constructor(
     override fun decodeEnum(enumDescriptor: SerialDescriptor): Int {
         return typeConverter.int.convertTo(next())
     }
+
+    fun decodeSerialized(): JniSerialized {
+        val list = newList<T>()
+        for (i in 0 until decodeInt()) {
+            list.add(next())
+        }
+        return JniSerialized(list)
+    }
 }

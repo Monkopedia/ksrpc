@@ -26,17 +26,18 @@ import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.readFully
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.sync.Mutex
+import kotlinx.serialization.builtins.serializer
 
 internal class ReadWritePacketChannel(
     scope: CoroutineScope,
     private val read: ByteReadChannel,
     private val write: ByteWriteChannel,
     env: KsrpcEnvironment<String>
-) : PacketChannelBase(scope, env) {
+) : PacketChannelBase<String>(scope, env) {
     private val sendLock = Mutex()
     private val receiveLock = Mutex()
 
-    override suspend fun send(packet: Packet) {
+    override suspend fun send(packet: Packet<String>) {
         sendLock.lock()
         try {
             write.send(packet, env.serialization)
@@ -45,7 +46,7 @@ internal class ReadWritePacketChannel(
         }
     }
 
-    override suspend fun receive(): Packet {
+    override suspend fun receive(): Packet<String> {
         receiveLock.lock()
         try {
             return read.readPacket(env.serialization)
@@ -62,11 +63,11 @@ internal class ReadWritePacketChannel(
 }
 
 private suspend fun ByteWriteChannel.send(
-    packet: Packet,
+    packet: Packet<String>,
     serialization: CallDataSerializer<String>
 ) {
     val content =
-        serialization.createCallData(Packet.serializer(), packet)
+        serialization.createCallData(Packet.serializer(String.serializer()), packet)
             .readSerialized()
             .encodeToByteArray(throwOnInvalidSequence = true)
     appendLine("$CONTENT_LENGTH: ${content.size}")
@@ -75,11 +76,11 @@ private suspend fun ByteWriteChannel.send(
     flush()
 }
 
-private suspend fun ByteReadChannel.readPacket(serialization: CallDataSerializer<String>): Packet {
+private suspend fun ByteReadChannel.readPacket(serialization: CallDataSerializer<String>): Packet<String> {
     val params = readFields()
     val data = readContent(params) ?: return readPacket(serialization)
     val callData = CallData.create(data)
-    return serialization.decodeCallData(Packet.serializer(), callData)
+    return serialization.decodeCallData(Packet.serializer(String.serializer()), callData)
 }
 
 private suspend fun ByteReadChannel.readContent(
