@@ -10,6 +10,7 @@ import com.monkopedia.jni.jobject
 import com.monkopedia.jni.jstring
 import com.monkopedia.jni.jvalue
 import kotlin.native.concurrent.ThreadLocal
+import kotlin.native.concurrent.Worker
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.CPointerVarOf
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -41,7 +42,14 @@ internal lateinit var jni: JNINativeInterface_
 internal lateinit var env: CPointer<CPointerVarOf<CPointer<JNINativeInterface_>>>
 
 val threadJni: JNINativeInterface_
-    get() = jni
+    get() {
+        try {
+            println("Worker: ${Worker.current}")
+        } catch (t: Throwable) {
+            println("No worker")
+        }
+        return jni
+    }
 val threadEnv: CPointer<CPointerVarOf<CPointer<JNINativeInterface_>>>
     get() = env
 
@@ -344,16 +352,21 @@ internal object JNI {
     }
 
     data object JniConnection : JvmClass("com/monkopedia/ksrpc/jni/JniConnection") {
+        val getNativeConnection = Method0(
+            "getNativeConnection",
+            "()J",
+            longMethod
+        )
         val closeFromNative = Method1(
             "closeFromNative",
-            "(Lcom/monkopedia/ksrpc/jni/NativeJniContinuation)V",
+            "(Lcom/monkopedia/ksrpc/jni/NativeJniContinuation;)V",
             objArg,
             voidMethod
         )
         val sendFromNative = Method2(
             "sendFromNative",
             "(Lcom/monkopedia/ksrpc/jni/JniSerialized;" +
-                "Lcom/monkopedia/ksrpc/jni/NativeJniContinuation)V",
+                "Lcom/monkopedia/ksrpc/jni/NativeJniContinuation;)V",
             objArg,
             objArg,
             voidMethod

@@ -2,7 +2,6 @@ package com.monkopedia.ksrpc.jni
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.channels.CallData
-import com.monkopedia.ksrpc.jni.com.monkopedia.ksrpc.jni.asNativeScope
 import com.monkopedia.ksrpc.packets.internal.Packet
 import com.monkopedia.ksrpc.packets.internal.PacketChannelBase
 import kotlin.coroutines.suspendCoroutine
@@ -27,6 +26,8 @@ class JniConnection(
         env: KsrpcEnvironment<JniSerialized>,
         nativeEnvironmentFactory: NativeKsrpcEnvironmentFactory
     ) : this(scope, env, nativeEnvironmentFactory.createNativeEnvironment())
+
+    fun getNativeConnection(): Long = nativeConnection
 
     fun finalize() {
         finalize(nativeConnection, nativeEnvironment)
@@ -103,4 +104,15 @@ class JniConnection(
         packet: JniSerialized,
         continuation: JavaJniContinuation<Int>
     )
+
+    companion object : Converter<Any?, JniConnection> {
+        override fun convertTo(rawValue: Any?): JniConnection {
+            @Suppress("CAST_NEVER_SUCCEEDS")
+            return (this as JniConnection)
+        }
+
+        override fun convertFrom(value: JniConnection): Any {
+            return value
+        }
+    }
 }

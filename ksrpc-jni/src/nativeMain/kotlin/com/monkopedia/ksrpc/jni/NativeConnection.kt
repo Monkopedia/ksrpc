@@ -98,6 +98,18 @@ class NativeConnection(
             continuation.resumeWith(typeConverter.int, result)
         }
     }
+
+    companion object : Converter<jobject, NativeConnection> {
+        override fun convertTo(rawValue: jobject?): NativeConnection {
+            val ptr = JNI.JniConnection.getNativeConnection(rawValue!!)
+            val connection = ptr.toCPointer<CPointed>()?.asStableRef<NativeConnection>()
+            return connection?.get() ?: error("No connection found")
+        }
+
+        override fun convertFrom(value: NativeConnection): jobject {
+            return value.objectRef
+        }
+    }
 }
 
 @OptIn(ExperimentalForeignApi::class)

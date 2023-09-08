@@ -9,7 +9,11 @@ import com.monkopedia.jnitest.com.monkopedia.ksrpc.jni.JavaJniContinuationConver
 import com.monkopedia.jnitest.initThread
 import com.monkopedia.jnitest.threadEnv
 import com.monkopedia.jnitest.threadJni
+import com.monkopedia.ksrpc.JniTestInterface
+import com.monkopedia.ksrpc.TestJniImpl
 import com.monkopedia.ksrpc.jni.*
+import com.monkopedia.ksrpc.ksrpcEnvironment
+import com.monkopedia.ksrpc.serialized
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.suspendCoroutine
 import kotlinx.cinterop.*
@@ -147,4 +151,40 @@ fun createContinuationRelay(env: CPointer<JNIEnvVar>, clazz: jobject, output: jo
     return NativeJniContinuationConverter<Int>(env).convertFrom(
         continuation.withConverter(typeConverter.int)
     )
+}
+
+@OptIn(ExperimentalForeignApi::class)
+@CName("Java_com_monkopedia_ksrpc_NativeHost_registerService")
+fun registerService(env: CPointer<JNIEnvVar>, clazz: jobject, input: jobject, output: jobject) {
+    initThread(env)
+    try {
+        val jniSerialized = NativeConnection.convertTo(input)
+        val javaContinuation = JavaJniContinuationConverter<Int>(env).convertTo(output)
+        GlobalScope.launch(JNIDispatcher) {
+            runCatching {
+                val service: JniTestInterface = TestJniImpl()
+                jniSerialized.registerDefault(service.serialized(jniSerialized.env))
+                0
+            }.let {
+                javaContinuation.resumeWith(newTypeConverter<jobject>().int, it)
+            }
+        }
+    } catch (t: Throwable) {
+        t.printStackTrace()
+        usleep(1000000u)
+    }
+}
+
+@OptIn(ExperimentalForeignApi::class)
+@CName("Java_com_monkopedia_ksrpc_NativeHost_createEnv")
+fun createEnv(env: CPointer<JNIEnvVar>, clazz: jobject): Long {
+    initThread(env)
+    try {
+        val env = ksrpcEnvironment(JniSerialization()) {}
+        return StableRef.create(env).asCPointer().toLong()
+    } catch (t: Throwable) {
+        t.printStackTrace()
+        usleep(1000000u)
+        return -1
+    }
 }

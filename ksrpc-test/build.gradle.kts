@@ -40,6 +40,7 @@ kotlin {
     }
     sourceSets["nativeMain"].dependencies {
         api(project(":ksrpc-jni"))
+        implementation(libs.ktor.client)
     }
     sourceSets["nativeTest"].dependencies {
         implementation(project(":ksrpc-ktor-server"))

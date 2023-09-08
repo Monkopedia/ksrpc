@@ -22,14 +22,10 @@ class JniTest {
             mapOf("second" to OtherClass(false, 1.67f))
         )
         val result = JniSer.encodeToJni(encode)
-        println("Result: $result")
         val decoded = JniSer.decodeFromJni<ComplexClass>(result)
-        println("Decoded: $decoded")
         assertEquals(decoded, encode)
         val nativeVersion = NativeHost().serializeDeserialize(result)
-        println("Native: $nativeVersion")
         val nativeDecoded = JniSer.decodeFromJni<ComplexClass>(nativeVersion)
-        println("Native version $nativeDecoded")
         assertEquals(nativeDecoded, encode.copy(intValue = 6))
     }
 
@@ -83,5 +79,19 @@ class JniTest {
         relay2.asContinuation(newTypeConverter<Any>().int).resume(4)
         assertEquals(2, result1.await())
         assertEquals(5, result2.await())
+    }
+
+    @Test
+    fun testConnectionPing() = runBlockingUnit {
+        NativeUtils.loadLibraryFromJar("/libs/libksrpc_test.so")
+        val env = ksrpcEnvironment(JniSerialization()) {}
+        val nativeEnvironment = NativeHost().createEnv()
+        val connection = JniConnection(this, env, nativeEnvironment)
+        suspendCoroutine<Int> {
+            NativeHost().registerService(connection, it.withConverter(newTypeConverter<Any?>().int))
+        }
+        val service = connection.defaultChannel().toStub<JniTestInterface, JniSerialized>()
+        val result = service.ping("ping")
+        assertEquals("pong", result)
     }
 }

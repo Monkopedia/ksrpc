@@ -1,7 +1,7 @@
-package com.monkopedia.ksrpc.jni.com.monkopedia.ksrpc.jni
+package com.monkopedia.ksrpc.jni
 
-import com.monkopedia.ksrpc.jni.com.monkopedia.ksrpc.jni.NativeScopeHandler.cancelScope
-import com.monkopedia.ksrpc.jni.com.monkopedia.ksrpc.jni.NativeScopeHandler.createNativeScope
+import com.monkopedia.ksrpc.jni.NativeScopeHandler.cancelScope
+import com.monkopedia.ksrpc.jni.NativeScopeHandler.createNativeScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.job
 

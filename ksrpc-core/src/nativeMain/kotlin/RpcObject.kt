@@ -34,4 +34,4 @@ actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> {
 }
 
 actual val Throwable.asString: String
-    get() = this.getStackTrace().joinToString("\n")
+    get() = this.message + "\n" + this.getStackTrace().joinToString("\n")
