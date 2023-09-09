@@ -3,11 +3,13 @@ package com.monkopedia.ksrpc
 import ComplexClass
 import OtherClass
 import com.monkopedia.ksrpc.jni.*
+import io.ktor.utils.io.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 class JniTest {
@@ -83,6 +85,56 @@ class JniTest {
 
     @Test
     fun testConnectionPing() = runBlockingUnit {
+        val service = createService()
+        val result = service.ping("ping")
+        assertEquals("pong", result)
+    }
+
+    @Test
+    fun testBinaryTest() = runBlockingUnit {
+        val stub = createService()
+        val response = stub.binaryRpc("Hello" to "world")
+        val str = response.readRemaining().readText()
+        assertEquals("Hello world", str)
+        assertEquals("pong", stub.ping("ping"))
+    }
+
+    @Test
+    fun testMultiFrameBinaryTest() = runBlockingUnit {
+        val stub = createService()
+        val response = stub.binaryRpc("Long" to "world")
+        val str = response.readRemaining().readText()
+        assertEquals(longLongContent, str)
+    }
+
+    @Test
+    fun testBinaryInputTest() = runBlockingUnit {
+        val stub = createService()
+        val response = stub.inputRpc(ByteReadChannel("Hello world".encodeToByteArray()))
+        assertEquals("Input: Hello world", response)
+        assertEquals("pong", stub.ping("ping"))
+    }
+
+    @Test
+    fun testSubService() = runBlockingUnit {
+        val stub = createService()
+        assertEquals(
+            "oh, Hello world",
+            stub.subservice("oh,").rpc("Hello" to "world")
+        )
+    }
+
+    @Test
+    fun testSubServiceTwoCalls() = runBlockingUnit {
+        val stub = createService()
+        stub.subservice("oh,").rpc("Hello" to "world")
+        assertEquals(
+            "oh, Hello world",
+            stub.subservice("oh,").rpc("Hello" to "world")
+        )
+    }
+
+    private suspend fun CoroutineScope.createService(): JniTestInterface {
         NativeUtils.loadLibraryFromJar("/libs/libksrpc_test.so")
         val env = ksrpcEnvironment(JniSerialization()) {}
         val nativeEnvironment = NativeHost().createEnv()
@@ -90,8 +142,6 @@ class JniTest {
         suspendCoroutine<Int> {
             NativeHost().registerService(connection, it.withConverter(newTypeConverter<Any?>().int))
         }
-        val service = connection.defaultChannel().toStub<JniTestInterface, JniSerialized>()
-        val result = service.ping("ping")
-        assertEquals("pong", result)
+        return connection.defaultChannel().toStub<JniTestInterface, JniSerialized>()
     }
 }

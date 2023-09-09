@@ -26,8 +26,8 @@ class TestJniImpl : JniTestInterface {
         return "${u.first} ${u.second}"
     }
 
-    override suspend fun subservice(prefix: String): TestSubInterface {
-        return object : TestSubInterface {
+    override suspend fun subservice(prefix: String): JniTestSubInterface {
+        return object : JniTestSubInterface {
             override suspend fun rpc(u: Pair<String, String>): String {
                 return "$prefix ${u.first} ${u.second}"
             }

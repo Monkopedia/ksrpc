@@ -23,11 +23,11 @@ interface JniTestInterface : RpcService {
     suspend fun rpc(u: Pair<String, String>): String
 
     @KsMethod("/service")
-    suspend fun subservice(prefix: String): TestSubInterface
+    suspend fun subservice(prefix: String): JniTestSubInterface
 }
 
 @KsService
-interface TestSubInterface : RpcService {
+interface JniTestSubInterface : RpcService {
     @KsMethod("/rpc")
     suspend fun rpc(u: Pair<String, String>): String
 }
