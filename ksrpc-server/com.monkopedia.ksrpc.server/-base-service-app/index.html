@@ -1,9 +1,11 @@
 <!doctype html>
-<html>
+<html class="no-js">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <title>BaseServiceApp</title>
-<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">    <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
     if (storage == null) {
         const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
         if (osDarkSchemePreferred === true) {
@@ -16,12 +18,13 @@
         }
     }
     </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async></script>
 <script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
 <link href="../../../styles/style.css" rel="Stylesheet">
-<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
 <link href="../../../styles/main.css" rel="Stylesheet">
 <link href="../../../styles/prism.css" rel="Stylesheet">
 <link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
 <script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
 <script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
 <script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
@@ -29,26 +32,32 @@
 <script type="text/javascript" src="../../../scripts/prism.js" async></script>
 <script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
 <body>
-<div class="navigation-wrapper" id="navigation-wrapper">
-    <div id="leftToggler"><span class="icon-toggler"></span></div>
-    <div class="library-name">
-<a href="../../../index.html">
-<span>ksrpc</span>            </a>    </div>
-    <div>0.7.4
-    </div>
-    <div class="pull-right d-flex">
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+<a class="library-name--link" href="../../../index.html">
+                            ksrpc
+                    </a>            </div>
+            <div class="library-version">0.8.0
+            </div>
+        </div>
         <div class="filter-section" id="filter-section">
                 <button class="platform-tag platform-selector common-like" data-active="" data-filter=":ksrpc-server:dokkaHtmlPartial/commonMain">common</button>
         </div>
-        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
-        <div id="searchBar"></div>
     </div>
-</div>
-<div id="container">
-    <div id="leftColumn">
-        <div id="sideMenu"></div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
     </div>
-    <div id="main">
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
 <div class="main-content" data-page-type="classlike" id="content" pageids="ksrpc-server::com.monkopedia.ksrpc.server/BaseServiceApp///PointingToDeclaration//2145666080">
   <div class="breadcrumbs"><a href="../../index.html">ksrpc-server</a><span class="delimiter">/</span><a href="../index.html">com.monkopedia.ksrpc.server</a><span class="delimiter">/</span><span class="current">BaseServiceApp</span></div>
   <div class="cover ">
@@ -104,7 +113,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-server:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="../-service-app/index.html#-856470529%2FProperties%2F2145666080">commandHelp</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-server:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="../-service-app/index.html#-856470529%2FProperties%2F2145666080"><strike>commandHelp</strike></a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -119,7 +128,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-server:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="../-service-app/index.html#-1748751431%2FProperties%2F2145666080">commandHelpEpilog</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-server:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="../-service-app/index.html#-1748751431%2FProperties%2F2145666080"><strike>commandHelpEpilog</strike></a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -179,7 +188,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-server:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="env.html">env</a><span class="token operator">: </span><a href="../../../ksrpc-core/com.monkopedia.ksrpc/-ksrpc-environment/index.html">KsrpcEnvironment</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-server:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="env.html">env</a><span class="token operator">: </span><a href="../../../ksrpc-core/com.monkopedia.ksrpc/-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -293,6 +302,51 @@
               </div>
             </div>
           </div>
+<a data-name="1021653123%2FFunctions%2F2145666080" anchor-label="allHelpParams" id="1021653123%2FFunctions%2F2145666080" data-filterable-set=":ksrpc-server:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":ksrpc-server:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-server:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-service-app/index.html#1021653123%2FFunctions%2F2145666080"><span>all</span><wbr><span>Help</span><wbr><span><span>Params</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1021653123%2FFunctions%2F2145666080"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-server:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-service-app/index.html#1021653123%2FFunctions%2F2145666080"><span class="token function">allHelpParams</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><span data-unresolved-link="com.github.ajalt.clikt.output/HelpFormatter.ParameterHelp///PointingToDeclaration/">HelpFormatter.ParameterHelp</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-832571982%2FFunctions%2F2145666080" anchor-label="commandHelp" id="-832571982%2FFunctions%2F2145666080" data-filterable-set=":ksrpc-server:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":ksrpc-server:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-server:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-service-app/index.html#-832571982%2FFunctions%2F2145666080"><span>command</span><wbr><span><span>Help</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-832571982%2FFunctions%2F2145666080"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-server:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-service-app/index.html#-832571982%2FFunctions%2F2145666080"><span class="token function">commandHelp</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">context<span class="token operator">: </span><span data-unresolved-link="com.github.ajalt.clikt.core/Context///PointingToDeclaration/">Context</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="429501368%2FFunctions%2F2145666080" anchor-label="commandHelpEpilog" id="429501368%2FFunctions%2F2145666080" data-filterable-set=":ksrpc-server:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":ksrpc-server:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-server:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-service-app/index.html#429501368%2FFunctions%2F2145666080"><span>command</span><wbr><span>Help</span><wbr><span><span>Epilog</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="429501368%2FFunctions%2F2145666080"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-server:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-service-app/index.html#429501368%2FFunctions%2F2145666080"><span class="token function">commandHelpEpilog</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">context<span class="token operator">: </span><span data-unresolved-link="com.github.ajalt.clikt.core/Context///PointingToDeclaration/">Context</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
 <a data-name="1850578865%2FFunctions%2F2145666080" anchor-label="configureHttp" id="1850578865%2FFunctions%2F2145666080" data-filterable-set=":ksrpc-server:dokkaHtmlPartial/commonMain"></a>
           <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":ksrpc-server:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-server:dokkaHtmlPartial/commonMain">
             <div class="main-subrow keyValue ">
@@ -308,6 +362,21 @@
               </div>
             </div>
           </div>
+<a data-name="-1781462213%2FFunctions%2F2145666080" anchor-label="confirm" id="-1781462213%2FFunctions%2F2145666080" data-filterable-set=":ksrpc-server:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":ksrpc-server:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-server:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-service-app/index.html#-1781462213%2FFunctions%2F2145666080"><span><span>confirm</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1781462213%2FFunctions%2F2145666080"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-server:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-service-app/index.html#-1781462213%2FFunctions%2F2145666080"><span class="token function"><strike>confirm</strike></span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">text<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">default<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">uppercaseDefault<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">showChoices<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">choiceStrings<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">promptSuffix<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">invalidChoiceMessage<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
 <a data-name="1336072759%2FFunctions%2F2145666080" anchor-label="createChannel" id="1336072759%2FFunctions%2F2145666080" data-filterable-set=":ksrpc-server:dokkaHtmlPartial/commonMain"></a>
           <div class="table-row" data-filterable-current=":ksrpc-server:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-server:dokkaHtmlPartial/commonMain">
             <div class="main-subrow keyValue ">
@@ -318,7 +387,37 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-server:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="create-channel.html"><span class="token function">createChannel</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../ksrpc-core/com.monkopedia.ksrpc.channels/-serialized-service/index.html">SerializedService</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-server:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="create-channel.html"><span class="token function">createChannel</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../ksrpc-core/com.monkopedia.ksrpc.channels/-serialized-service/index.html">SerializedService</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-737933702%2FFunctions%2F2145666080" anchor-label="echo" id="-737933702%2FFunctions%2F2145666080" data-filterable-set=":ksrpc-server:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":ksrpc-server:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-server:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-service-app/index.html#44673290%2FFunctions%2F2145666080"><span><span>echo</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-737933702%2FFunctions%2F2145666080"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-server:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-service-app/index.html#44673290%2FFunctions%2F2145666080"><span class="token function">echo</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-service-app/index.html#-2060816840%2FFunctions%2F2145666080"><span class="token function">echo</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">message<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">trailingNewline<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">err<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1073110419%2FFunctions%2F2145666080" anchor-label="echoFormattedHelp" id="-1073110419%2FFunctions%2F2145666080" data-filterable-set=":ksrpc-server:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":ksrpc-server:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-server:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-service-app/index.html#-1073110419%2FFunctions%2F2145666080"><span>echo</span><wbr><span>Formatted</span><wbr><span><span>Help</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1073110419%2FFunctions%2F2145666080"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-server:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-service-app/index.html#-1073110419%2FFunctions%2F2145666080"><span class="token function">echoFormattedHelp</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">error<span class="token operator">: </span><span data-unresolved-link="com.github.ajalt.clikt.core/CliktError///PointingToDeclaration/">CliktError</span><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -338,32 +437,17 @@
               </div>
             </div>
           </div>
-<a data-name="1541301256%2FFunctions%2F2145666080" anchor-label="getFormattedHelp" id="1541301256%2FFunctions%2F2145666080" data-filterable-set=":ksrpc-server:dokkaHtmlPartial/commonMain"></a>
+<a data-name="-2014278408%2FFunctions%2F2145666080" anchor-label="getFormattedHelp" id="-2014278408%2FFunctions%2F2145666080" data-filterable-set=":ksrpc-server:dokkaHtmlPartial/commonMain"></a>
           <div class="table-row" data-filterable-current=":ksrpc-server:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-server:dokkaHtmlPartial/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="../-service-app/index.html#1541301256%2FFunctions%2F2145666080"><span>get</span><wbr><span>Formatted</span><wbr><span><span>Help</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1541301256%2FFunctions%2F2145666080"></span>
+                  <div><a href="../-service-app/index.html#-2014278408%2FFunctions%2F2145666080"><span>get</span><wbr><span>Formatted</span><wbr><span><span>Help</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2014278408%2FFunctions%2F2145666080"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-server:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-service-app/index.html#1541301256%2FFunctions%2F2145666080"><span class="token function">getFormattedHelp</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="1370818128%2FFunctions%2F2145666080" anchor-label="getFormattedUsage" id="1370818128%2FFunctions%2F2145666080" data-filterable-set=":ksrpc-server:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":ksrpc-server:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-server:dokkaHtmlPartial/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="../-service-app/index.html#1370818128%2FFunctions%2F2145666080"><span>get</span><wbr><span>Formatted</span><wbr><span><span>Usage</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1370818128%2FFunctions%2F2145666080"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-server:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-service-app/index.html#1370818128%2FFunctions%2F2145666080"><span class="token function">getFormattedUsage</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-server:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-service-app/index.html#-2014278408%2FFunctions%2F2145666080"><span class="token function">getFormattedHelp</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">error<span class="token operator">: </span><span data-unresolved-link="com.github.ajalt.clikt.core/CliktError///PointingToDeclaration/">CliktError</span><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -409,6 +493,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-server:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-service-app/index.html#-94074571%2FFunctions%2F2145666080"><span class="token function">parse</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">argv<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">parentContext<span class="token operator">: </span><span data-unresolved-link="com.github.ajalt.clikt.core/Context///PointingToDeclaration/">Context</span><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-service-app/index.html#1024544399%2FFunctions%2F2145666080"><span class="token function">parse</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">argv<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">parentContext<span class="token operator">: </span><span data-unresolved-link="com.github.ajalt.clikt.core/Context///PointingToDeclaration/">Context</span><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1507000871%2FFunctions%2F2145666080" anchor-label="prompt" id="1507000871%2FFunctions%2F2145666080" data-filterable-set=":ksrpc-server:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":ksrpc-server:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-server:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-service-app/index.html#-1650637036%2FFunctions%2F2145666080"><span><span>prompt</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1507000871%2FFunctions%2F2145666080"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-server:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-service-app/index.html#-1650637036%2FFunctions%2F2145666080"><span class="token function"><strike>prompt</strike></span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">text<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">default<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">showDefault<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">showChoices<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">hideInput<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">choices<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-collection/index.html">Collection</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">promptSuffix<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">invalidChoiceMessage<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></div><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../-service-app/index.html#647396127%2FFunctions%2F2145666080">T</a><span class="token operator">&gt; </span><a href="../-service-app/index.html#647396127%2FFunctions%2F2145666080"><span class="token function"><strike>prompt</strike></span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">text<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">default<span class="token operator">: </span><a href="../-service-app/index.html#647396127%2FFunctions%2F2145666080">T</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">showDefault<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">showChoices<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">hideInput<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">choices<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-collection/index.html">Collection</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../-service-app/index.html#647396127%2FFunctions%2F2145666080">T</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">promptSuffix<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">invalidChoiceMessage<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">convert<span class="token operator">: </span><span class="token punctuation">(</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><span data-unresolved-link="com.github.ajalt.mordant.terminal/ConversionResult///PointingToDeclaration/">ConversionResult</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../-service-app/index.html#647396127%2FFunctions%2F2145666080">T</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-service-app/index.html#647396127%2FFunctions%2F2145666080">T</a><span class="token operator">?</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -571,8 +670,9 @@
       <div class="footer">
         <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
       </div>
+            </div>
+        </div>
     </div>
-</div>
 </body>
 </html>
 

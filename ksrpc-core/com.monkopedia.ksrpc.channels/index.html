@@ -1,9 +1,11 @@
 <!doctype html>
-<html>
+<html class="no-js">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <title>com.monkopedia.ksrpc.channels</title>
-<link href="../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+<link href="../../images/logo-icon.svg" rel="icon" type="image/svg">    <script>var pathToRoot = "../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
     if (storage == null) {
         const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
         if (osDarkSchemePreferred === true) {
@@ -16,12 +18,13 @@
         }
     }
     </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async></script>
 <script type="text/javascript" src="../../scripts/sourceset_dependencies.js" async></script>
 <link href="../../styles/style.css" rel="Stylesheet">
-<link href="../../styles/jetbrains-mono.css" rel="Stylesheet">
 <link href="../../styles/main.css" rel="Stylesheet">
 <link href="../../styles/prism.css" rel="Stylesheet">
 <link href="../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../styles/font-jb-sans-auto.css" rel="Stylesheet">
 <script type="text/javascript" src="../../scripts/clipboard.js" async></script>
 <script type="text/javascript" src="../../scripts/navigation-loader.js" async></script>
 <script type="text/javascript" src="../../scripts/platform-content-handler.js" async></script>
@@ -29,29 +32,35 @@
 <script type="text/javascript" src="../../scripts/prism.js" async></script>
 <script type="text/javascript" src="../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
 <body>
-<div class="navigation-wrapper" id="navigation-wrapper">
-    <div id="leftToggler"><span class="icon-toggler"></span></div>
-    <div class="library-name">
-<a href="../../index.html">
-<span>ksrpc</span>            </a>    </div>
-    <div>0.7.4
-    </div>
-    <div class="pull-right d-flex">
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+<a class="library-name--link" href="../../index.html">
+                            ksrpc
+                    </a>            </div>
+            <div class="library-version">0.8.0
+            </div>
+        </div>
         <div class="filter-section" id="filter-section">
                 <button class="platform-tag platform-selector common-like" data-active="" data-filter=":ksrpc-core:dokkaHtmlPartial/commonMain">common</button>
                 <button class="platform-tag platform-selector js-like" data-active="" data-filter=":ksrpc-core:dokkaHtmlPartial/jsMain">js</button>
                 <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":ksrpc-core:dokkaHtmlPartial/jvmMain">jvm</button>
                 <button class="platform-tag platform-selector native-like" data-active="" data-filter=":ksrpc-core:dokkaHtmlPartial/nativeMain">native</button>
         </div>
-        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
-        <div id="searchBar"></div>
     </div>
-</div>
-<div id="container">
-    <div id="leftColumn">
-        <div id="sideMenu"></div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
     </div>
-    <div id="main">
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
 <div class="main-content" data-page-type="package" id="content" pageids="ksrpc-core::com.monkopedia.ksrpc.channels////PointingToDeclaration//538831056">
   <div class="breadcrumbs"><a href="../index.html">ksrpc-core</a><span class="delimiter">/</span><span class="current">com.monkopedia.ksrpc.channels</span></div>
   <div class="cover ">
@@ -75,7 +84,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-call-data/index.html">CallData</a></div><div class="brief "><p class="paragraph">Wrapper around data being serialized through calls. Could be a reference to a string for a serialized object or to binary data.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">sealed </span><span class="token keyword">class </span><a href="-call-data/index.html">CallData</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-call-data/index.html">T</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Wrapper around data being serialized through calls. Could be a reference to a string for a serialized object or to binary data.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -90,7 +99,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-channel-client/index.html">ChannelClient</a> : <a href="-serialized-channel/index.html">SerializedChannel</a>, <a href="-single-channel-client/index.html">SingleChannelClient</a>, <a href="../com.monkopedia.ksrpc/-ksrpc-environment/-element/index.html">KsrpcEnvironment.Element</a></div><div class="brief "><p class="paragraph">A <a href="-serialized-channel/index.html">SerializedChannel</a> that can call into sub-services.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-channel-client/index.html">ChannelClient</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-channel-client/index.html">T</a><span class="token operator">&gt;</span> : <a href="-serialized-channel/index.html">SerializedChannel</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-channel-client/index.html">T</a><span class="token operator">&gt; </span>, <a href="-single-channel-client/index.html">SingleChannelClient</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-channel-client/index.html">T</a><span class="token operator">&gt; </span>, <a href="../com.monkopedia.ksrpc/-ksrpc-environment/-element/index.html">KsrpcEnvironment.Element</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-channel-client/index.html">T</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">A <a href="-serialized-channel/index.html">SerializedChannel</a> that can call into sub-services.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -105,7 +114,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-channel-host/index.html">ChannelHost</a> : <a href="-serialized-channel/index.html">SerializedChannel</a>, <a href="-single-channel-host/index.html">SingleChannelHost</a>, <a href="../com.monkopedia.ksrpc/-ksrpc-environment/-element/index.html">KsrpcEnvironment.Element</a></div><div class="brief "><p class="paragraph">A <a href="-serialized-channel/index.html">SerializedChannel</a> that can host sub-services.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-channel-host/index.html">ChannelHost</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-channel-host/index.html">T</a><span class="token operator">&gt;</span> : <a href="-serialized-channel/index.html">SerializedChannel</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-channel-host/index.html">T</a><span class="token operator">&gt; </span>, <a href="-single-channel-host/index.html">SingleChannelHost</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-channel-host/index.html">T</a><span class="token operator">&gt; </span>, <a href="../com.monkopedia.ksrpc/-ksrpc-environment/-element/index.html">KsrpcEnvironment.Element</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-channel-host/index.html">T</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">A <a href="-serialized-channel/index.html">SerializedChannel</a> that can host sub-services.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -135,7 +144,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-connection/index.html">Connection</a> : <a href="-channel-host/index.html">ChannelHost</a>, <a href="-channel-client/index.html">ChannelClient</a>, <a href="-single-channel-connection/index.html">SingleChannelConnection</a></div><div class="brief "><p class="paragraph">A bidirectional channel that can both host and call services/sub-services.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-connection/index.html">Connection</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-connection/index.html">T</a><span class="token operator">&gt;</span> : <a href="-channel-host/index.html">ChannelHost</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-connection/index.html">T</a><span class="token operator">&gt; </span>, <a href="-channel-client/index.html">ChannelClient</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-connection/index.html">T</a><span class="token operator">&gt; </span>, <a href="-single-channel-connection/index.html">SingleChannelConnection</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-connection/index.html">T</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">A bidirectional channel that can both host and call services/sub-services.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -165,7 +174,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-serialized-channel/index.html">SerializedChannel</a> : <a href="../com.monkopedia.ksrpc/-suspend-closeable-observable/index.html">SuspendCloseableObservable</a>, <a href="-context-container/index.html">ContextContainer</a>, <a href="../com.monkopedia.ksrpc/-ksrpc-environment/-element/index.html">KsrpcEnvironment.Element</a></div><div class="brief "><p class="paragraph">A multi-channel interface for serialized communication, generally shouldn't need to interact directly with this, instead use either <a href="-channel-client/index.html">ChannelClient</a> or <a href="-channel-host/index.html">ChannelHost</a> to reference a <a href="-serialized-service/index.html">SerializedService</a> instead.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-serialized-channel/index.html">SerializedChannel</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-serialized-channel/index.html">T</a><span class="token operator">&gt;</span> : <a href="../com.monkopedia.ksrpc/-suspend-closeable-observable/index.html">SuspendCloseableObservable</a>, <a href="-context-container/index.html">ContextContainer</a>, <a href="../com.monkopedia.ksrpc/-ksrpc-environment/-element/index.html">KsrpcEnvironment.Element</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-serialized-channel/index.html">T</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">A multi-channel interface for serialized communication, generally shouldn't need to interact directly with this, instead use either <a href="-channel-client/index.html">ChannelClient</a> or <a href="-channel-host/index.html">ChannelHost</a> to reference a <a href="-serialized-service/index.html">SerializedService</a> instead.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -180,7 +189,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-serialized-service/index.html">SerializedService</a> : <a href="../com.monkopedia.ksrpc/-suspend-closeable-observable/index.html">SuspendCloseableObservable</a>, <a href="-context-container/index.html">ContextContainer</a>, <a href="../com.monkopedia.ksrpc/-ksrpc-environment/-element/index.html">KsrpcEnvironment.Element</a></div><div class="brief "><p class="paragraph">Serialized version of a service. This can be transformed to and from a service using serialized and SerializedService.toStub.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-serialized-service/index.html">SerializedService</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-serialized-service/index.html">T</a><span class="token operator">&gt;</span> : <a href="../com.monkopedia.ksrpc/-suspend-closeable-observable/index.html">SuspendCloseableObservable</a>, <a href="-context-container/index.html">ContextContainer</a>, <a href="../com.monkopedia.ksrpc/-ksrpc-environment/-element/index.html">KsrpcEnvironment.Element</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-serialized-service/index.html">T</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">Serialized version of a service. This can be transformed to and from a service using serialized and SerializedService.toStub.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -195,7 +204,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-single-channel-client/index.html">SingleChannelClient</a></div><div class="brief "><p class="paragraph">A wrapper around a communication pathway that can be turned into a primary SerializedService.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-single-channel-client/index.html">SingleChannelClient</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-single-channel-client/index.html">T</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">A wrapper around a communication pathway that can be turned into a primary SerializedService.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -210,7 +219,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-single-channel-connection/index.html">SingleChannelConnection</a> : <a href="-single-channel-host/index.html">SingleChannelHost</a>, <a href="-single-channel-client/index.html">SingleChannelClient</a></div><div class="brief "><p class="paragraph">A bidirectional channel that can host one service in each direction (1 host and 1 client).</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-single-channel-connection/index.html">SingleChannelConnection</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-single-channel-connection/index.html">T</a><span class="token operator">&gt;</span> : <a href="-single-channel-host/index.html">SingleChannelHost</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-single-channel-connection/index.html">T</a><span class="token operator">&gt; </span>, <a href="-single-channel-client/index.html">SingleChannelClient</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-single-channel-connection/index.html">T</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">A bidirectional channel that can host one service in each direction (1 host and 1 client).</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -225,7 +234,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-single-channel-host/index.html">SingleChannelHost</a> : <a href="../com.monkopedia.ksrpc/-ksrpc-environment/-element/index.html">KsrpcEnvironment.Element</a></div><div class="brief "><p class="paragraph">A wrapper around a communication pathway that can be turned into a primary SerializedService.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-single-channel-host/index.html">SingleChannelHost</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-single-channel-host/index.html">T</a><span class="token operator">&gt;</span> : <a href="../com.monkopedia.ksrpc/-ksrpc-environment/-element/index.html">KsrpcEnvironment.Element</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-single-channel-host/index.html">T</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">A wrapper around a communication pathway that can be turned into a primary SerializedService.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -234,17 +243,17 @@
       </div>
       <div data-togglable="FUNCTION">
         <h2 class="">Functions</h2>
-        <div class="table"><a data-name="-2092475990%2FFunctions%2F-1379736828" anchor-label="connect" id="-2092475990%2FFunctions%2F-1379736828" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain"></a>
+        <div class="table"><a data-name="-1557051660%2FFunctions%2F-1379736828" anchor-label="connect" id="-1557051660%2FFunctions%2F-1379736828" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain"></a>
           <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="connect.html"><span><span>connect</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2092475990%2FFunctions%2F-1379736828"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1557051660%2FFunctions%2F-1379736828"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="connect.html">T</a><span class="token operator"> : </span><a href="../com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="connect.html">R</a><span class="token operator"> : </span><a href="../com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token operator">&gt; </span><a href="-single-channel-connection/index.html">SingleChannelConnection</a><span class="token punctuation">.</span><a href="connect.html"><span class="token function">connect</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">crossinline </span>host<span class="token operator">: </span><span class="token keyword">suspend </span><span class="token punctuation">(</span><span class="token keyword"></span><a href="connect.html">R</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="connect.html">T</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Connects both default channels for a connection (incoming and outgoing).</p></div><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-name/index.html"><span class="token annotation builtin">JvmName</span></a><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"connectSerialized"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="-single-channel-connection/index.html">SingleChannelConnection</a><span class="token punctuation">.</span><a href="connect.html"><span class="token function">connect</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">host<span class="token operator">: </span><span class="token keyword">suspend </span><span class="token punctuation">(</span><span class="token keyword"></span><a href="-serialized-service/index.html">SerializedService</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="-serialized-service/index.html">SerializedService</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Raw version of <a href="connect.html">connect</a>, performing the same functionality with <a href="-serialized-service/index.html">SerializedService</a> directly.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="connect.html">T</a><span class="token operator"> : </span><a href="../com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="connect.html">R</a><span class="token operator"> : </span><a href="../com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="connect.html">S</a><span class="token operator">&gt; </span><a href="-single-channel-connection/index.html">SingleChannelConnection</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="connect.html">S</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="connect.html"><span class="token function">connect</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">crossinline </span>host<span class="token operator">: </span><span class="token keyword">suspend </span><span class="token punctuation">(</span><span class="token keyword"></span><a href="connect.html">R</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="connect.html">T</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Connects both default channels for a connection (incoming and outgoing).</p></div><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-name/index.html"><span class="token annotation builtin">JvmName</span></a><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"connectSerialized"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">suspend </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="connect.html">T</a><span class="token operator">&gt; </span><a href="-single-channel-connection/index.html">SingleChannelConnection</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="connect.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="connect.html"><span class="token function">connect</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">host<span class="token operator">: </span><span class="token keyword">suspend </span><span class="token punctuation">(</span><span class="token keyword"></span><a href="-serialized-service/index.html">SerializedService</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="connect.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="-serialized-service/index.html">SerializedService</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="connect.html">T</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Raw version of <a href="connect.html">connect</a>, performing the same functionality with <a href="-serialized-service/index.html">SerializedService</a> directly.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -266,32 +275,32 @@
               </div>
             </div>
           </div>
-<a data-name="1228062057%2FFunctions%2F-1379736828" anchor-label="registerDefault" id="1228062057%2FFunctions%2F-1379736828" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain"></a>
+<a data-name="894426049%2FFunctions%2F-1379736828" anchor-label="registerDefault" id="894426049%2FFunctions%2F-1379736828" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain"></a>
           <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="register-default.html"><span>register</span><wbr><span><span>Default</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1228062057%2FFunctions%2F-1379736828"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="894426049%2FFunctions%2F-1379736828"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="register-default.html">T</a><span class="token operator"> : </span><a href="../com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token operator">&gt; </span><a href="-single-channel-host/index.html">SingleChannelHost</a><span class="token punctuation">.</span><a href="register-default.html"><span class="token function">registerDefault</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">service<span class="token operator">: </span><a href="register-default.html">T</a></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="register-default.html">T</a><span class="token operator"> : </span><a href="../com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token operator">&gt; </span><a href="-single-channel-host/index.html">SingleChannelHost</a><span class="token punctuation">.</span><a href="register-default.html"><span class="token function">registerDefault</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">service<span class="token operator">: </span><a href="register-default.html">T</a><span class="token punctuation">, </span></span><span class="parameter ">obj<span class="token operator">: </span><a href="../com.monkopedia.ksrpc/-rpc-object/index.html">RpcObject</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="register-default.html">T</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Register a service to be hosted on the default channel.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="register-default.html">T</a><span class="token operator"> : </span><a href="../com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="register-default.html">S</a><span class="token operator">&gt; </span><a href="-single-channel-host/index.html">SingleChannelHost</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="register-default.html">S</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="register-default.html"><span class="token function">registerDefault</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">service<span class="token operator">: </span><a href="register-default.html">T</a></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="register-default.html">T</a><span class="token operator"> : </span><a href="../com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="register-default.html">S</a><span class="token operator">&gt; </span><a href="-single-channel-host/index.html">SingleChannelHost</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="register-default.html">S</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="register-default.html"><span class="token function">registerDefault</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">service<span class="token operator">: </span><a href="register-default.html">T</a><span class="token punctuation">, </span></span><span class="parameter ">obj<span class="token operator">: </span><a href="../com.monkopedia.ksrpc/-rpc-object/index.html">RpcObject</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="register-default.html">T</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Register a service to be hosted on the default channel.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-554208061%2FFunctions%2F-1379736828" anchor-label="registerHost" id="-554208061%2FFunctions%2F-1379736828" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain"></a>
+<a data-name="-392802679%2FFunctions%2F-1379736828" anchor-label="registerHost" id="-392802679%2FFunctions%2F-1379736828" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain"></a>
           <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="register-host.html"><span>register</span><wbr><span><span>Host</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-554208061%2FFunctions%2F-1379736828"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-392802679%2FFunctions%2F-1379736828"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="register-host.html">T</a><span class="token operator"> : </span><a href="../com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token operator">&gt; </span><a href="-channel-host/index.html">ChannelHost</a><span class="token punctuation">.</span><a href="register-host.html"><span class="token function">registerHost</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">service<span class="token operator">: </span><a href="register-host.html">T</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-channel-id/index.html">ChannelId</a></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="register-host.html">T</a><span class="token operator"> : </span><a href="../com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token operator">&gt; </span><a href="-channel-host/index.html">ChannelHost</a><span class="token punctuation">.</span><a href="register-host.html"><span class="token function">registerHost</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">service<span class="token operator">: </span><a href="register-host.html">T</a><span class="token punctuation">, </span></span><span class="parameter ">obj<span class="token operator">: </span><a href="../com.monkopedia.ksrpc/-rpc-object/index.html">RpcObject</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="register-host.html">T</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-channel-id/index.html">ChannelId</a></div><div class="brief "><p class="paragraph">Register a service to be hosted, the <a href="-channel-id/index.html">ChannelId</a> ollocated to this service is returned. Generally this should not be called directly, as it will happen automatically when services are returned from <a href="../com.monkopedia.ksrpc.annotation/-ks-method/index.html">KsMethod</a> tagged methods.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="register-host.html">T</a><span class="token operator"> : </span><a href="../com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="register-host.html">S</a><span class="token operator">&gt; </span><a href="-channel-host/index.html">ChannelHost</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="register-host.html">S</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="register-host.html"><span class="token function">registerHost</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">service<span class="token operator">: </span><a href="register-host.html">T</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-channel-id/index.html">ChannelId</a></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="register-host.html">T</a><span class="token operator"> : </span><a href="../com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="register-host.html">S</a><span class="token operator">&gt; </span><a href="-channel-host/index.html">ChannelHost</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="register-host.html">S</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="register-host.html"><span class="token function">registerHost</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">service<span class="token operator">: </span><a href="register-host.html">T</a><span class="token punctuation">, </span></span><span class="parameter ">obj<span class="token operator">: </span><a href="../com.monkopedia.ksrpc/-rpc-object/index.html">RpcObject</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="register-host.html">T</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-channel-id/index.html">ChannelId</a></div><div class="brief "><p class="paragraph">Register a service to be hosted, the <a href="-channel-id/index.html">ChannelId</a> ollocated to this service is returned. Generally this should not be called directly, as it will happen automatically when services are returned from <a href="../com.monkopedia.ksrpc.annotation/-ks-method/index.html">KsMethod</a> tagged methods.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -304,8 +313,9 @@
       <div class="footer">
         <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
       </div>
+            </div>
+        </div>
     </div>
-</div>
 </body>
 </html>
 

@@ -1,0 +1,221 @@
+<!doctype html>
+<html class="no-js">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>[root]</title>
+<link href="../../images/logo-icon.svg" rel="icon" type="image/svg">    <script>var pathToRoot = "../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async></script>
+<script type="text/javascript" src="../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../styles/style.css" rel="Stylesheet">
+<link href="../../styles/main.css" rel="Stylesheet">
+<link href="../../styles/prism.css" rel="Stylesheet">
+<link href="../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<script type="text/javascript" src="../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<body>
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+<a class="library-name--link" href="../../index.html">
+                            ksrpc
+                    </a>            </div>
+            <div class="library-version">0.8.0
+            </div>
+        </div>
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":ksrpc-test:dokkaHtmlPartial/commonMain">common</button>
+                <button class="platform-tag platform-selector native-like" data-active="" data-filter=":ksrpc-test:dokkaHtmlPartial/nativeMain">native</button>
+        </div>
+    </div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
+    </div>
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="package" id="content" pageids="ksrpc-test::////PointingToDeclaration//-1403049536">
+  <div class="breadcrumbs"><a href="../index.html">ksrpc-test</a><span class="delimiter">/</span><span class="current">[root]</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button><button class="section-tab" data-togglable="FUNCTION,EXTENSION_FUNCTION">Functions</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="">Types</h2>
+        <div class="table"><a data-name="837333402%2FClasslikes%2F-1964522767" anchor-label="ComplexClass" id="837333402%2FClasslikes%2F-1964522767" data-filterable-set=":ksrpc-test:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":ksrpc-test:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-test:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-complex-class/index.html"><span>Complex</span><wbr><span><span>Class</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="837333402%2FClasslikes%2F-1964522767"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-test:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">class </span><a href="-complex-class/index.html">ComplexClass</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>intValue<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>stringsValue<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>child<span class="token operator">: </span><a href="-complex-class/index.html">ComplexClass</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>otherValues<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="-other-class/index.html">OtherClass</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1857522630%2FClasslikes%2F-1964522767" anchor-label="OtherClass" id="-1857522630%2FClasslikes%2F-1964522767" data-filterable-set=":ksrpc-test:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":ksrpc-test:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-test:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-other-class/index.html"><span>Other</span><wbr><span><span>Class</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1857522630%2FClasslikes%2F-1964522767"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-test:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">class </span><a href="-other-class/index.html">OtherClass</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>bool<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>float<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html">Float</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="-1581849211%2FFunctions%2F363289285" anchor-label="createContinuationRelay" id="-1581849211%2FFunctions%2F363289285" data-filterable-set=":ksrpc-test:dokkaHtmlPartial/nativeMain"></a>
+          <div class="table-row" data-filterable-current=":ksrpc-test:dokkaHtmlPartial/nativeMain" data-filterable-set=":ksrpc-test:dokkaHtmlPartial/nativeMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-continuation-relay.html"><span>create</span><wbr><span>Continuation</span><wbr><span><span>Relay</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1581849211%2FFunctions%2F363289285"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":ksrpc-test:dokkaHtmlPartial/nativeMain" data-filterable-set=":ksrpc-test:dokkaHtmlPartial/nativeMain" data-active="" data-toggle=":ksrpc-test:dokkaHtmlPartial/nativeMain">native</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-test:dokkaHtmlPartial/nativeMain"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="create-continuation-relay.html"><span class="token function">createContinuationRelay</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">env<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlinx.cinterop/-c-pointer/index.html">CPointer</a><span class="token operator">&lt;</span><span class="token keyword"></span><span data-unresolved-link="com.monkopedia.jni/JNIEnvVar///PointingToDeclaration/">JNIEnvVar</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">clazz<span class="token operator">: </span><span data-unresolved-link="com.monkopedia.jni/jobject///PointingToDeclaration/">jobject</span><span class="token punctuation">, </span></span><span class="parameter ">output<span class="token operator">: </span><span data-unresolved-link="com.monkopedia.jni/jobject///PointingToDeclaration/">jobject</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="com.monkopedia.jni/jobject///PointingToDeclaration/">jobject</span><span class="token operator">?</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1391376994%2FFunctions%2F363289285" anchor-label="createContinuations" id="-1391376994%2FFunctions%2F363289285" data-filterable-set=":ksrpc-test:dokkaHtmlPartial/nativeMain"></a>
+          <div class="table-row" data-filterable-current=":ksrpc-test:dokkaHtmlPartial/nativeMain" data-filterable-set=":ksrpc-test:dokkaHtmlPartial/nativeMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-continuations.html"><span>create</span><wbr><span><span>Continuations</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1391376994%2FFunctions%2F363289285"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":ksrpc-test:dokkaHtmlPartial/nativeMain" data-filterable-set=":ksrpc-test:dokkaHtmlPartial/nativeMain" data-active="" data-toggle=":ksrpc-test:dokkaHtmlPartial/nativeMain">native</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-test:dokkaHtmlPartial/nativeMain"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="create-continuations.html"><span class="token function">createContinuations</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">env<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlinx.cinterop/-c-pointer/index.html">CPointer</a><span class="token operator">&lt;</span><span class="token keyword"></span><span data-unresolved-link="com.monkopedia.jni/JNIEnvVar///PointingToDeclaration/">JNIEnvVar</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">clazz<span class="token operator">: </span><span data-unresolved-link="com.monkopedia.jni/jobject///PointingToDeclaration/">jobject</span><span class="token punctuation">, </span></span><span class="parameter ">input<span class="token operator">: </span><span data-unresolved-link="com.monkopedia.jni/jobject///PointingToDeclaration/">jobject</span><span class="token punctuation">, </span></span><span class="parameter ">list<span class="token operator">: </span><span data-unresolved-link="com.monkopedia.jni/jobject///PointingToDeclaration/">jobject</span></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1363847793%2FFunctions%2F363289285" anchor-label="createEnv" id="-1363847793%2FFunctions%2F363289285" data-filterable-set=":ksrpc-test:dokkaHtmlPartial/nativeMain"></a>
+          <div class="table-row" data-filterable-current=":ksrpc-test:dokkaHtmlPartial/nativeMain" data-filterable-set=":ksrpc-test:dokkaHtmlPartial/nativeMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-env.html"><span>create</span><wbr><span><span>Env</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1363847793%2FFunctions%2F363289285"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":ksrpc-test:dokkaHtmlPartial/nativeMain" data-filterable-set=":ksrpc-test:dokkaHtmlPartial/nativeMain" data-active="" data-toggle=":ksrpc-test:dokkaHtmlPartial/nativeMain">native</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-test:dokkaHtmlPartial/nativeMain"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="create-env.html"><span class="token function">createEnv</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">env<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlinx.cinterop/-c-pointer/index.html">CPointer</a><span class="token operator">&lt;</span><span class="token keyword"></span><span data-unresolved-link="com.monkopedia.jni/JNIEnvVar///PointingToDeclaration/">JNIEnvVar</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">clazz<span class="token operator">: </span><span data-unresolved-link="com.monkopedia.jni/jobject///PointingToDeclaration/">jobject</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html">Long</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1806235188%2FFunctions%2F363289285" anchor-label="createReceiver" id="1806235188%2FFunctions%2F363289285" data-filterable-set=":ksrpc-test:dokkaHtmlPartial/nativeMain"></a>
+          <div class="table-row" data-filterable-current=":ksrpc-test:dokkaHtmlPartial/nativeMain" data-filterable-set=":ksrpc-test:dokkaHtmlPartial/nativeMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create-receiver.html"><span>create</span><wbr><span><span>Receiver</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1806235188%2FFunctions%2F363289285"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":ksrpc-test:dokkaHtmlPartial/nativeMain" data-filterable-set=":ksrpc-test:dokkaHtmlPartial/nativeMain" data-active="" data-toggle=":ksrpc-test:dokkaHtmlPartial/nativeMain">native</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-test:dokkaHtmlPartial/nativeMain"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="create-receiver.html"><span class="token function">createReceiver</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">input<span class="token operator">: </span><span data-unresolved-link="com.monkopedia.jni/jobject///PointingToDeclaration/">jobject</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span class="token keyword">suspend </span><span class="token punctuation">(</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2120068912%2FFunctions%2F363289285" anchor-label="registerService" id="2120068912%2FFunctions%2F363289285" data-filterable-set=":ksrpc-test:dokkaHtmlPartial/nativeMain"></a>
+          <div class="table-row" data-filterable-current=":ksrpc-test:dokkaHtmlPartial/nativeMain" data-filterable-set=":ksrpc-test:dokkaHtmlPartial/nativeMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="register-service.html"><span>register</span><wbr><span><span>Service</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2120068912%2FFunctions%2F363289285"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":ksrpc-test:dokkaHtmlPartial/nativeMain" data-filterable-set=":ksrpc-test:dokkaHtmlPartial/nativeMain" data-active="" data-toggle=":ksrpc-test:dokkaHtmlPartial/nativeMain">native</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-test:dokkaHtmlPartial/nativeMain"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="register-service.html"><span class="token function">registerService</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">env<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlinx.cinterop/-c-pointer/index.html">CPointer</a><span class="token operator">&lt;</span><span class="token keyword"></span><span data-unresolved-link="com.monkopedia.jni/JNIEnvVar///PointingToDeclaration/">JNIEnvVar</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">clazz<span class="token operator">: </span><span data-unresolved-link="com.monkopedia.jni/jobject///PointingToDeclaration/">jobject</span><span class="token punctuation">, </span></span><span class="parameter ">input<span class="token operator">: </span><span data-unresolved-link="com.monkopedia.jni/jobject///PointingToDeclaration/">jobject</span><span class="token punctuation">, </span></span><span class="parameter ">output<span class="token operator">: </span><span data-unresolved-link="com.monkopedia.jni/jobject///PointingToDeclaration/">jobject</span></span></span><span class="token punctuation">)</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="166614436%2FFunctions%2F363289285" anchor-label="serializeDeserialize" id="166614436%2FFunctions%2F363289285" data-filterable-set=":ksrpc-test:dokkaHtmlPartial/nativeMain"></a>
+          <div class="table-row" data-filterable-current=":ksrpc-test:dokkaHtmlPartial/nativeMain" data-filterable-set=":ksrpc-test:dokkaHtmlPartial/nativeMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="serialize-deserialize.html"><span>serialize</span><wbr><span><span>Deserialize</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="166614436%2FFunctions%2F363289285"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":ksrpc-test:dokkaHtmlPartial/nativeMain" data-filterable-set=":ksrpc-test:dokkaHtmlPartial/nativeMain" data-active="" data-toggle=":ksrpc-test:dokkaHtmlPartial/nativeMain">native</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-test:dokkaHtmlPartial/nativeMain"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="serialize-deserialize.html"><span class="token function">serializeDeserialize</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">env<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlinx.cinterop/-c-pointer/index.html">CPointer</a><span class="token operator">&lt;</span><span class="token keyword"></span><span data-unresolved-link="com.monkopedia.jni/JNIEnvVar///PointingToDeclaration/">JNIEnvVar</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">clazz<span class="token operator">: </span><span data-unresolved-link="com.monkopedia.jni/jobject///PointingToDeclaration/">jobject</span><span class="token punctuation">, </span></span><span class="parameter ">input<span class="token operator">: </span><span data-unresolved-link="com.monkopedia.jni/jobject///PointingToDeclaration/">jobject</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="com.monkopedia.jni/jobject///PointingToDeclaration/">jobject</span><span class="token operator">?</span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
