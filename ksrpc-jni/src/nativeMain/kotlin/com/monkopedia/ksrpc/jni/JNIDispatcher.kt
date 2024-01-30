@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@file:OptIn(ExperimentalForeignApi::class)
+@file:OptIn(
+    ExperimentalForeignApi::class,
+    ExperimentalCoroutinesApi::class,
+    ExperimentalNativeApi::class
+)
 
 package com.monkopedia.jnitest.com.monkopedia.ksrpc.jni
 
@@ -22,10 +26,12 @@ import com.monkopedia.jni.jint
 import com.monkopedia.jni.jobject
 import com.monkopedia.jnitest.JNI
 import kotlin.coroutines.CoroutineContext
+import kotlin.experimental.ExperimentalNativeApi
 import kotlin.native.concurrent.ThreadLocal
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.channels.Channel

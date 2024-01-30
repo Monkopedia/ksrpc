@@ -20,7 +20,8 @@ plugins {
 }
 
 ksrpcModule(
-    supportJs = false
+    supportJs = false,
+    supportMingw = false
 )
 
 kotlin {

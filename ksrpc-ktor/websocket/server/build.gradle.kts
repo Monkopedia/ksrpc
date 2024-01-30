@@ -20,12 +20,14 @@ plugins {
 }
 
 ksrpcModule(
-    supportJs = false
+    supportJs = false,
+    supportMingw = false
 )
 
 kotlin {
     sourceSets["commonMain"].dependencies {
         api(project(":ksrpc-ktor-websocket-shared"))
+        api(project(":ksrpc-packets"))
         api(libs.ktor.server.websockets)
     }
 }

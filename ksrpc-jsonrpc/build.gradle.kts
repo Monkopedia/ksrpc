@@ -19,7 +19,9 @@ plugins {
     kotlin("multiplatform")
 }
 
-ksrpcModule()
+ksrpcModule(
+    supportMingw = false
+)
 
 kotlin {
     sourceSets["commonMain"].dependencies {

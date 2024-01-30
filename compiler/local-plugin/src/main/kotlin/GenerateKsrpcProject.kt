@@ -26,6 +26,7 @@ import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.maven
+import org.gradle.kotlin.dsl.provideDelegate
 import org.gradle.kotlin.dsl.withType
 import org.gradle.plugins.signing.SigningExtension
 import org.jetbrains.dokka.gradle.DokkaTask
@@ -46,6 +47,7 @@ fun Project.ksrpcModule(
     supportJvm: Boolean = true,
     supportJs: Boolean = true,
     supportNative: Boolean = true,
+    supportMingw: Boolean = supportNative,
     includePublications: Boolean = true,
     nativeConfig: KotlinNativeTargetWithTests<*>.() -> Unit = {}
 ) {
@@ -71,33 +73,29 @@ fun Project.ksrpcModule(
                 yarn.version = "1.22.19"
                 browser {
                     testTask {
-                        useMocha {
-                        }
+                        it.useMocha()
                     }
                 }
             }
         }
 
         if (supportNative) {
-            // Determine host preset.
-            val hostOs = System.getProperty("os.name")
-
-            // Create target for the host platform.
-            val hostTarget = when {
-                hostOs == "Mac OS X" -> macosX64("native")
-                hostOs == "Linux" -> linuxX64("native")
-                hostOs.startsWith("Windows") -> mingwX64("native")
-                else -> throw GradleException(
-                    "Host OS '$hostOs' is not supported in Kotlin/Native $project."
-                )
-            }
-
-            hostTarget.apply {
-                binaries {
-                }
+            macosX64 {
+                binaries {}
                 nativeConfig()
             }
+            linuxX64 {
+                binaries {}
+                nativeConfig()
+            }
+            if (supportMingw) {
+                mingwX64 {
+                    binaries {}
+                    nativeConfig()
+                }
+            }
         }
+        applyDefaultHierarchyTemplate()
         sourceSets["commonMain"].dependencies {
             if (name != "ksrpc-core") {
                 api(project(":ksrpc-core"))
@@ -119,15 +117,15 @@ fun Project.ksrpcModule(
             sourceSets["jsMain"].dependencies {
             }
             sourceSets["jsTest"].dependencies {
-                implementation(kotlin("test-js"))
+                implementation(kotlin("stdlib"))
+                implementation(kotlin("test"))
             }
         }
         if (supportNative) {
-//            val nativeSource by sourceSets.creating {
-//
-//            }
-            sourceSets["nativeMain"].dependencies {
-                implementation(kotlin("stdlib"))
+            afterEvaluate {
+                sourceSets["nativeMain"].dependencies {
+                    implementation(kotlin("stdlib"))
+                }
             }
         }
     }

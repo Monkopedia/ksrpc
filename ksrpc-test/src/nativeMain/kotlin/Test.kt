@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@file:OptIn(ExperimentalForeignApi::class)
+@file:OptIn(ExperimentalForeignApi::class, ExperimentalNativeApi::class)
 
 import com.monkopedia.jni.JNIEnvVar
 import com.monkopedia.jni.JNINativeInterface_
@@ -27,6 +27,7 @@ import com.monkopedia.jnitest.threadEnv
 import com.monkopedia.jnitest.threadJni
 import com.monkopedia.ksrpc.JniTestInterface
 import com.monkopedia.ksrpc.TestJniImpl
+import com.monkopedia.ksrpc.channels.registerDefault
 import com.monkopedia.ksrpc.jni.JniSer
 import com.monkopedia.ksrpc.jni.JniSerialization
 import com.monkopedia.ksrpc.jni.JniSerialized
@@ -43,6 +44,7 @@ import com.monkopedia.ksrpc.ksrpcEnvironment
 import com.monkopedia.ksrpc.serialized
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.suspendCoroutine
+import kotlin.experimental.ExperimentalNativeApi
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.MemScope

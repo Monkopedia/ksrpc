@@ -5,6 +5,7 @@ plugins {
 }
 
 ksrpcModule(
+    supportMingw = false,
     includePublications = false,
     nativeConfig = {
         binaries {
@@ -22,6 +23,7 @@ kotlin {
         implementation(project(":ksrpc-ktor-client"))
         implementation(project(":ksrpc-ktor-websocket-client"))
         implementation(project(":ksrpc-sockets"))
+        implementation(project(":ksrpc-packets"))
         implementation(libs.ktor.client)
     }
     sourceSets["jvmTest"].resources.srcDir(buildDir.resolve("generated/lib/resources"))
@@ -39,6 +41,7 @@ kotlin {
         implementation(libs.ktor.client.websockets)
     }
     sourceSets["nativeMain"].dependencies {
+        implementation(project(":ksrpc-packets"))
         api(project(":ksrpc-jni"))
         implementation(libs.ktor.client)
     }
@@ -48,11 +51,22 @@ kotlin {
         implementation(libs.ktor.server.cio)
     }
     sourceSets["jsTest"].dependencies {
+        implementation(kotlin("stdlib"))
+        implementation(kotlin("test"))
     }
 }
 val copyLib = tasks.register("copyLib", Copy::class) {
-    dependsOn(tasks.findByName("linkDebugSharedNative"))
-    from(buildDir.resolve("bin/native/debugShared/libksrpc_test.so"))
+    val hostOs = System.getProperty("os.name")
+    val hostTarget = when {
+        hostOs == "Mac OS X" -> "macosX64"
+        hostOs == "Linux" -> "linuxX64"
+        hostOs.startsWith("Windows") -> "mingwX64"
+        else -> throw GradleException(
+            "Host OS '$hostOs' is not supported in Kotlin/Native $project."
+        )
+    }
+    dependsOn(tasks.findByName("linkDebugShared${hostTarget.capitalize()}"))
+    from(buildDir.resolve("bin/$hostTarget/debugShared/libksrpc_test.so"))
     destinationDir = buildDir.resolve("generated/lib/resources/libs/")
     doFirst {
     }
@@ -60,4 +74,5 @@ val copyLib = tasks.register("copyLib", Copy::class) {
 
 afterEvaluate {
     tasks["jvmTestProcessResources"].dependsOn(copyLib)
+    tasks.findByName("jsBrowserTest")?.dependsOn(tasks["jsTestTestProductionExecutableCompileSync"])
 }

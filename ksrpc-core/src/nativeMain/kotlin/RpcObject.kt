@@ -15,6 +15,7 @@
  */
 package com.monkopedia.ksrpc
 
+import kotlin.experimental.ExperimentalNativeApi
 import kotlin.reflect.AssociatedObjectKey
 import kotlin.reflect.ExperimentalAssociatedObjects
 import kotlin.reflect.KClass
@@ -33,5 +34,6 @@ actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> {
     return T::class.findAssociatedObject<RpcObjectKey>() as RpcObject<T>
 }
 
+@OptIn(ExperimentalNativeApi::class)
 actual val Throwable.asString: String
     get() = this.message + "\n" + this.getStackTrace().joinToString("\n")

@@ -38,8 +38,8 @@ kotlin {
     }
     sourceSets["nativeMain"].dependencies {
     }
-    linuxX64("native") {
-        binaries {
-        }
-    }
+//    linuxX64("native") {
+//        binaries {
+//        }
+//    }
 }
