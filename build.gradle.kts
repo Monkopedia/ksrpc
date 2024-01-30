@@ -1,7 +1,3 @@
-import org.jetbrains.dokka.DokkaConfiguration
-import org.jetbrains.dokka.gradle.DokkaPlugin
-import org.jetbrains.dokka.plugability.ConfigurableBlock
-
 /*
  * Copyright 2020 Jason Monk
  *
@@ -34,7 +30,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.dokka)
 
-    id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
     id("com.github.hierynomus.license") version "0.16.1"
 
     id("com.github.gmazzo.buildconfig") version "3.1.0" apply false

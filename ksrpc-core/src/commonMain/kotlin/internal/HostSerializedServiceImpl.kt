@@ -15,7 +15,6 @@
  */
 package com.monkopedia.ksrpc.internal
 
-import com.monkopedia.ksrpc.ERROR_PREFIX
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.RpcObject
@@ -48,7 +47,11 @@ class HostSerializedChannelImpl<T>(
         mutableMapOf<String, SerializedService<T>>()
     }
 
-    override suspend fun call(channelId: ChannelId, endpoint: String, data: CallData<T>): CallData<T> {
+    override suspend fun call(
+        channelId: ChannelId,
+        endpoint: String,
+        data: CallData<T>
+    ): CallData<T> {
         return try {
             val channel = if (channelId.id.isEmpty()) {
                 baseChannel.await()

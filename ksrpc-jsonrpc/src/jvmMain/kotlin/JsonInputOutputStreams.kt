@@ -62,7 +62,9 @@ suspend fun stdInJsonRpcConnection(env: KsrpcEnvironment<String>): SingleChannel
  * [Process.getInputStream] and [Process.getOutputStream] as the streams for communication using
  * jsonrpc.
  */
-suspend fun ProcessBuilder.asJsonRpcConnection(env: KsrpcEnvironment<String>): SingleChannelConnection<String> {
+suspend fun ProcessBuilder.asJsonRpcConnection(
+    env: KsrpcEnvironment<String>
+): SingleChannelConnection<String> {
     val process = redirectInput(ProcessBuilder.Redirect.PIPE)
         .redirectOutput(ProcessBuilder.Redirect.PIPE)
         .start()

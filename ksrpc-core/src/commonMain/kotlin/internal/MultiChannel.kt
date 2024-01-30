@@ -81,6 +81,8 @@ internal inline fun <T> MutableList<T>.consume(
         if (matcher(it)) {
             consumer(it)
             true
-        } else false
+        } else {
+            false
+        }
     }
 }

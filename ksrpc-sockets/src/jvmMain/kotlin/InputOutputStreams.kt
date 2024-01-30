@@ -36,7 +36,9 @@ import kotlinx.coroutines.withContext
  * Helper that calls into Pair<ByteReadChannel, ByteWriteChannel>.asConnection.
  */
 @OptIn(DelicateCoroutinesApi::class)
-suspend fun Pair<InputStream, OutputStream>.asConnection(env: KsrpcEnvironment<String>): Connection<String> {
+suspend fun Pair<InputStream, OutputStream>.asConnection(
+    env: KsrpcEnvironment<String>
+): Connection<String> {
     val (input, output) = this
     val channel = ByteChannel(autoFlush = true)
     val threadExecutor = newFixedThreadPoolContext(2, "ServeThreads")

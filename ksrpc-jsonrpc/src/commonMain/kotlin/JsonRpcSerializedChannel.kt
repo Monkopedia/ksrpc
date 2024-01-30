@@ -33,7 +33,10 @@ class JsonRpcSerializedChannel(
     private val onCloseCallbacks = mutableSetOf<suspend () -> Unit>()
     private val json = (env.serialization as? Json) ?: Json
 
-    override suspend fun call(endpoint: RpcMethod<*, *, *>, input: CallData<String>): CallData<String> {
+    override suspend fun call(
+        endpoint: RpcMethod<*, *, *>,
+        input: CallData<String>
+    ): CallData<String> {
         return call(endpoint.endpoint, input, !endpoint.hasReturnType)
     }
 
@@ -41,7 +44,11 @@ class JsonRpcSerializedChannel(
         return call(endpoint, input, false)
     }
 
-    private suspend fun call(endpoint: String, input: CallData<String>, isNotify: Boolean): CallData<String> {
+    private suspend fun call(
+        endpoint: String,
+        input: CallData<String>,
+        isNotify: Boolean
+    ): CallData<String> {
         require(!input.isBinary) {
             "JsonRpc does not support binary data"
         }
@@ -49,8 +56,11 @@ class JsonRpcSerializedChannel(
         val response = channel.execute(endpoint, message, isNotify)
 
         return CallData.create(
-            if (isNotify) json.encodeToString(Unit)
-            else json.encodeToString(response)
+            if (isNotify) {
+                json.encodeToString(Unit)
+            } else {
+                json.encodeToString(response)
+            }
         )
     }
 

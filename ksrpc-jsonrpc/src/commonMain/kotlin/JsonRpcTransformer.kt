@@ -46,7 +46,7 @@ fun Pair<ByteReadChannel, ByteWriteChannel>.jsonHeader(
 internal class JsonRpcHeader(
     env: KsrpcEnvironment<String>,
     private val input: ByteReadChannel,
-    private val output: ByteWriteChannel,
+    private val output: ByteWriteChannel
 ) : JsonRpcTransformer() {
     private val json = (env.serialization as? Json) ?: Json
     private val sendLock = Mutex()
@@ -90,7 +90,7 @@ fun Pair<ByteReadChannel, ByteWriteChannel>.jsonLine(
 internal class JsonRpcLine(
     env: KsrpcEnvironment<String>,
     private val input: ByteReadChannel,
-    private val output: ByteWriteChannel,
+    private val output: ByteWriteChannel
 ) : JsonRpcTransformer() {
     private val json = (env.serialization as? Json) ?: Json
     private val sendLock = Mutex()

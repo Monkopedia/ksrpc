@@ -1,7 +1,7 @@
 package com.monkopedia.ksrpc
 
-import io.ktor.util.*
-import io.ktor.utils.io.*
+import io.ktor.util.toByteArray
+import io.ktor.utils.io.ByteReadChannel
 import kotlin.test.assertEquals
 
 class TestJniImpl : JniTestInterface {

@@ -123,7 +123,9 @@ actual fun <V> JniSer.converterOf(serializer: KSerializer<V>): Converter<*, V> {
     return object : Converter<jobject?, V> {
         override fun convertTo(rawValue: jobject?): V {
             @Suppress("UNCHECKED_CAST")
-            return rawValue?.let { decodeFromJni(serializer, JniSerialized.fromJvm(threadEnv, it)) } as V
+            return rawValue?.let {
+                decodeFromJni(serializer, JniSerialized.fromJvm(threadEnv, it))
+            } as V
         }
 
         override fun convertFrom(value: V): jobject? {

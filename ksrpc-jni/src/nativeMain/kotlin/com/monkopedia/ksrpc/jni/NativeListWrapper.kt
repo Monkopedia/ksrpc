@@ -24,7 +24,9 @@ internal open class NativeListWrapper(val list: jobject) : BasicList<jobject?> {
     }
 }
 
-internal class NativeMutableListWrapper(list: jobject = JNI.ArrayList.new() ?: error("Failed to initialize list")) :
+internal class NativeMutableListWrapper(
+    list: jobject = JNI.ArrayList.new() ?: error("Failed to initialize list")
+) :
     NativeListWrapper(list), MutableBasicList<jobject?> {
 
     override fun set(index: Int, value: jobject?) {
@@ -45,7 +47,10 @@ actual fun <T> newList(): MutableBasicList<T> {
     return NativeMutableListWrapper() as MutableBasicList<T>
 }
 
-fun JniSerialized.Companion.fromJvm(jniEnv: CPointer<JNIEnvVar>, serialized: jobject): JniSerialized {
+fun JniSerialized.Companion.fromJvm(
+    jniEnv: CPointer<JNIEnvVar>,
+    serialized: jobject
+): JniSerialized {
     JNI.init(jniEnv)
     return NativeListWrapper(JNI.JavaListWrapperKt.toList(serialized)!!).asSerialized
 }

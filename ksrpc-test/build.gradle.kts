@@ -61,4 +61,3 @@ val copyLib = tasks.register("copyLib", Copy::class) {
 afterEvaluate {
     tasks["jvmTestProcessResources"].dependsOn(copyLib)
 }
-

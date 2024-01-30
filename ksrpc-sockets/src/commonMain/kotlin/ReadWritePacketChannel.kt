@@ -76,7 +76,9 @@ private suspend fun ByteWriteChannel.send(
     flush()
 }
 
-private suspend fun ByteReadChannel.readPacket(serialization: CallDataSerializer<String>): Packet<String> {
+private suspend fun ByteReadChannel.readPacket(
+    serialization: CallDataSerializer<String>
+): Packet<String> {
     val params = readFields()
     val data = readContent(params) ?: return readPacket(serialization)
     val callData = CallData.create(data)

@@ -1,6 +1,7 @@
 @file:OptIn(ExperimentalForeignApi::class)
 
-import com.monkopedia.jni.*
+import com.monkopedia.jni.JNIEnvVar
+import com.monkopedia.jni.JNINativeInterface_
 import com.monkopedia.jni.jmethodID
 import com.monkopedia.jni.jobject
 import com.monkopedia.jni.jvalue
@@ -11,13 +12,37 @@ import com.monkopedia.jnitest.threadEnv
 import com.monkopedia.jnitest.threadJni
 import com.monkopedia.ksrpc.JniTestInterface
 import com.monkopedia.ksrpc.TestJniImpl
-import com.monkopedia.ksrpc.jni.*
+import com.monkopedia.ksrpc.jni.JniSer
+import com.monkopedia.ksrpc.jni.JniSerialization
+import com.monkopedia.ksrpc.jni.JniSerialized
+import com.monkopedia.ksrpc.jni.NativeConnection
+import com.monkopedia.ksrpc.jni.NativeJniContinuation
+import com.monkopedia.ksrpc.jni.NativeJniContinuationConverter
+import com.monkopedia.ksrpc.jni.decodeFromJni
+import com.monkopedia.ksrpc.jni.encodeToJni
+import com.monkopedia.ksrpc.jni.fromJvm
+import com.monkopedia.ksrpc.jni.newTypeConverter
+import com.monkopedia.ksrpc.jni.toJvm
+import com.monkopedia.ksrpc.jni.withConverter
 import com.monkopedia.ksrpc.ksrpcEnvironment
 import com.monkopedia.ksrpc.serialized
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.suspendCoroutine
-import kotlinx.cinterop.*
-import kotlinx.coroutines.*
+import kotlinx.cinterop.CPointer
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.MemScope
+import kotlinx.cinterop.StableRef
+import kotlinx.cinterop.cValue
+import kotlinx.cinterop.cstr
+import kotlinx.cinterop.invoke
+import kotlinx.cinterop.memScoped
+import kotlinx.cinterop.toLong
+import kotlinx.cinterop.wcstr
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.newSingleThreadContext
 import platform.posix.usleep
 
 @OptIn(ExperimentalForeignApi::class)

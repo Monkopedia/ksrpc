@@ -24,7 +24,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 
 class JsonRpcServiceWrapper(
-    private val channel: SerializedService<String>,
+    private val channel: SerializedService<String>
 ) : JsonRpcChannel, Element<String> by channel {
     private val json = (channel.env.serialization as? Json) ?: Json
     override suspend fun execute(

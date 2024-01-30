@@ -35,7 +35,6 @@ object JavaTypeConverter : JniTypeConverter<Any?> {
     override val string: Converter<Any?, String> = StringConverter
 }
 
-
 actual fun <V> JniSer.converterOf(serializer: KSerializer<V>): Converter<*, V> {
     JNIControl.ensureInit()
     return object : Converter<JniSerialized, V> {

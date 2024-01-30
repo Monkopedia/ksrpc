@@ -52,7 +52,11 @@ internal class HttpSerializedChannel(
     override val context: CoroutineContext =
         ClientChannelContext(this) + env.coroutineExceptionHandler
 
-    override suspend fun call(channelId: ChannelId, endpoint: String, data: CallData<String>): CallData<String> {
+    override suspend fun call(
+        channelId: ChannelId,
+        endpoint: String,
+        data: CallData<String>
+    ): CallData<String> {
         val response = httpClient.post(
             "$baseStripped/call/${endpoint.encodeURLPath()}"
         ) {

@@ -79,7 +79,9 @@ object NativeUtils {
         val filename = if (parts.size > 1) parts[parts.size - 1] else null
 
         // Check if the filename is okay
-        require(!(filename == null || filename.length < MIN_PREFIX_LENGTH)) { "The filename has to be at least 3 characters long." }
+        require(!(filename == null || filename.length < MIN_PREFIX_LENGTH)) {
+            "The filename has to be at least 3 characters long."
+        }
 
         // Prepare temporary file
         if (temporaryDir == null) {
@@ -127,8 +129,11 @@ object NativeUtils {
     private fun createTempDirectory(): File {
         val tempDir = System.getProperty("java.io.tmpdir")
         val generatedDir = File(tempDir, NATIVE_FOLDER_PATH_PREFIX + System.nanoTime())
-        if (!generatedDir.mkdir()) throw IOException("Failed to create temp directory " + generatedDir.name)
+        if (!generatedDir.mkdir()) {
+            throw IOException(
+                "Failed to create temp directory " + generatedDir.name
+            )
+        }
         return generatedDir
     }
 }
-

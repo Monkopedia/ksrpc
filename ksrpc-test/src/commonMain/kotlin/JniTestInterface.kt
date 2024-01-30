@@ -2,7 +2,7 @@ package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
-import io.ktor.utils.io.*
+import io.ktor.utils.io.ByteReadChannel
 
 val jniTestContent = List(2048) {
     "Test string content"

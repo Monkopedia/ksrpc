@@ -35,7 +35,11 @@ data class JniDecoder<T> internal constructor(
     }
 
     override fun decodeElementIndex(descriptor: SerialDescriptor): Int {
-        return if (index < structEnds.last()) typeConverter.int.convertTo(next()) else CompositeDecoder.DECODE_DONE
+        return if (index < structEnds.last()) {
+            typeConverter.int.convertTo(next())
+        } else {
+            CompositeDecoder.DECODE_DONE
+        }
     }
 
     override fun decodeNotNullMark(): Boolean {

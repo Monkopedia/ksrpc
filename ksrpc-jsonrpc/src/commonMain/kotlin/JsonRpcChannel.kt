@@ -32,7 +32,7 @@ data class JsonRpcRequest(
     val jsonrpc: String = "2.0",
     val method: String,
     val params: JsonElement?,
-    val id: JsonPrimitive? = null,
+    val id: JsonPrimitive? = null
 )
 
 @Serializable
@@ -41,7 +41,7 @@ data class JsonRpcResponse(
     val jsonrpc: String = "2.0",
     val result: JsonElement? = null,
     val error: JsonRpcError? = null,
-    val id: JsonPrimitive? = null,
+    val id: JsonPrimitive? = null
 )
 
 @Serializable

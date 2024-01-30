@@ -29,7 +29,10 @@ import kotlinx.coroutines.CoroutineScope
  *
  * This is functionally equivalent to baseUrl.toKsrpcUri().connect(env).
  */
-suspend fun HttpClient.asWebsocketConnection(baseUrl: String, env: KsrpcEnvironment<String>): Connection<String> {
+suspend fun HttpClient.asWebsocketConnection(
+    baseUrl: String,
+    env: KsrpcEnvironment<String>
+): Connection<String> {
     val session = webSocketSession {
         url.takeFrom(baseUrl.trimEnd('/'))
         url.protocol = URLProtocol.WS

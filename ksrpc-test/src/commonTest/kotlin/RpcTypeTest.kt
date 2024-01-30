@@ -144,14 +144,14 @@ object RpcTypeTest {
             stub.mapRpc(
                 mutableMapOf(
                     "First" to MyJson("first", 1, null),
-                    "Second" to MyJson("second", 2, 1.2f),
+                    "Second" to MyJson("second", 2, 1.2f)
                 )
             )
             assertEquals("mapRpc", service.lastCall.value)
             assertEquals(
                 mutableMapOf(
                     "First" to MyJson("first", 1, null),
-                    "Second" to MyJson("second", 2, 1.2f),
+                    "Second" to MyJson("second", 2, 1.2f)
                 ),
                 service.lastInput.value
             )

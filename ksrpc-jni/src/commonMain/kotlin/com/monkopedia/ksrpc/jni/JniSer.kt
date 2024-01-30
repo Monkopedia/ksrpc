@@ -14,7 +14,10 @@ open class JniSer(
     private constructor(jniBuilder: JniBuilder<Any>) : this(jniBuilder.encoder, jniBuilder.decoder)
     constructor(builder: JniBuilder<*>.() -> Unit = {}) : this(JniBuilder<Any>().also(builder))
 
-    fun <T> decodeFromJni(serializationStrategy: DeserializationStrategy<T>, jniSerialized: JniSerialized): T {
+    fun <T> decodeFromJni(
+        serializationStrategy: DeserializationStrategy<T>,
+        jniSerialized: JniSerialized
+    ): T {
         return serializationStrategy.deserialize(decoder.decoderFor(jniSerialized))
     }
 

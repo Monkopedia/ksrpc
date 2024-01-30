@@ -19,7 +19,10 @@ class JniSerialization(private val jniSer: JniSer = JniSer) : CallDataSerializer
         )
     }
 
-    override fun <I> createErrorCallData(serializer: KSerializer<I>, input: I): CallData<JniSerialized> {
+    override fun <I> createErrorCallData(
+        serializer: KSerializer<I>,
+        input: I
+    ): CallData<JniSerialized> {
         return CallData.create(
             jniSer.encodeToJni(
                 Wrapper.serializer(),

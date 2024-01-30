@@ -13,7 +13,7 @@ object JNIControl {
     fun initJniDispatcher(threads: Int) {
         hasInited = true
         val newThreads =
-                if (threads > this.threads) (this.threads until threads) else IntRange.EMPTY
+            if (threads > this.threads) (this.threads until threads) else IntRange.EMPTY
         this.threads = threads
         updateThreads(threads)
         newThreads.forEach {
