@@ -15,7 +15,6 @@
  */
 package com.monkopedia.ksrpc.local
 
-import java.io.File
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -27,7 +26,6 @@ import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.maven
-import org.gradle.kotlin.dsl.repositories
 import org.gradle.kotlin.dsl.withType
 import org.gradle.plugins.signing.SigningExtension
 import org.jetbrains.dokka.gradle.DokkaTask
@@ -37,6 +35,7 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTargetWithTests
 import org.jetbrains.kotlin.gradle.targets.js.yarn.yarn
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.io.File
 
 class KsrpcDummyPlugin : Plugin<Project> {
     override fun apply(project: Project) {
@@ -124,6 +123,9 @@ fun Project.ksrpcModule(
             }
         }
         if (supportNative) {
+//            val nativeSource by sourceSets.creating {
+//
+//            }
             sourceSets["nativeMain"].dependencies {
                 implementation(kotlin("stdlib"))
             }

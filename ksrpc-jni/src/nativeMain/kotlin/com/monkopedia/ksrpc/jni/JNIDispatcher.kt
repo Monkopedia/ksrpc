@@ -21,6 +21,8 @@ import com.monkopedia.jni.JNIEnvVar
 import com.monkopedia.jni.jint
 import com.monkopedia.jni.jobject
 import com.monkopedia.jnitest.JNI
+import kotlin.coroutines.CoroutineContext
+import kotlin.native.concurrent.ThreadLocal
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.CoroutineDispatcher
@@ -33,8 +35,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
 import platform.posix.usleep
-import kotlin.coroutines.CoroutineContext
-import kotlin.native.concurrent.ThreadLocal
 
 @ThreadLocal
 private var dispatchThread = false

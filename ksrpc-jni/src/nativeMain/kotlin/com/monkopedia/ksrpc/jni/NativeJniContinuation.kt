@@ -23,13 +23,13 @@ import com.monkopedia.jni.jobject
 import com.monkopedia.jnitest.JNI
 import com.monkopedia.jnitest.initThread
 import com.monkopedia.ksrpc.RpcFailure
+import kotlin.coroutines.Continuation
 import kotlinx.cinterop.CPointed
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.StableRef
 import kotlinx.cinterop.asStableRef
 import kotlinx.cinterop.toCPointer
-import kotlin.coroutines.Continuation
 
 @Suppress("UNCHECKED_CAST")
 internal val <N> Converter<*, N>.native: Converter<jobject?, N>
@@ -79,7 +79,8 @@ class NativeJniContinuationConverter<T>(env: CPointer<JNIEnvVar>) :
 fun resumeSuccess(env: CPointer<JNIEnvVar>, clazz: jobject, nativeObject: jlong, input: jobject) {
     initThread(env)
     try {
-        val ptr = nativeObject.toCPointer<CPointed>()?.asStableRef<NativeJniContinuation<Any>>()?.get()
+        val ptr = nativeObject.toCPointer<CPointed>()
+            ?.asStableRef<NativeJniContinuation<Any>>()?.get()
             ?: return
         val result = Result.success(ptr.typeConverter.convertTo(input))
         ptr.resumeWith(result)
@@ -93,7 +94,8 @@ fun resumeSuccess(env: CPointer<JNIEnvVar>, clazz: jobject, nativeObject: jlong,
 fun resumeFailure(env: CPointer<JNIEnvVar>, clazz: jobject, nativeObject: jlong, input: jobject) {
     initThread(env)
     try {
-        val ptr = nativeObject.toCPointer<CPointed>()?.asStableRef<NativeJniContinuation<Any>>()?.get()
+        val ptr = nativeObject.toCPointer<CPointed>()
+            ?.asStableRef<NativeJniContinuation<Any>>()?.get()
             ?: return
         val failure = Result.failure<Any>(
             NativeJniContinuation.failureConverter.convertTo(input).toException()

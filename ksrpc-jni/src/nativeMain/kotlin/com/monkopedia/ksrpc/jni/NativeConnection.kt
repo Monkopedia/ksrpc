@@ -30,6 +30,7 @@ import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.packets.internal.Packet
 import com.monkopedia.ksrpc.packets.internal.PacketChannelBase
+import kotlin.coroutines.suspendCoroutine
 import kotlinx.cinterop.CPointed
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -41,7 +42,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
-import kotlin.coroutines.suspendCoroutine
 
 class NativeConnection(
     scope: CoroutineScope,
@@ -144,7 +144,8 @@ fun jniConnectionFinalize(
     initThread(env)
     try {
         nativeObject.toCPointer<CPointed>()?.asStableRef<NativeConnection>()?.dispose()
-        nativeEnvironment.toCPointer<CPointed>()?.asStableRef<KsrpcEnvironment<jobject>>()?.dispose()
+        nativeEnvironment.toCPointer<CPointed>()?.asStableRef<KsrpcEnvironment<jobject>>()
+            ?.dispose()
     } catch (t: Throwable) {
         t.printStackTrace()
     }
@@ -152,12 +153,18 @@ fun jniConnectionFinalize(
 
 @OptIn(ExperimentalForeignApi::class)
 @CName("Java_com_monkopedia_ksrpc_jni_JniConnection_createConnection")
-fun jniCreateConnection(env: CPointer<JNIEnvVar>, clazz: jobject, scope: jlong, ksrpcEnv: jlong): jlong {
+fun jniCreateConnection(
+    env: CPointer<JNIEnvVar>,
+    clazz: jobject,
+    scope: jlong,
+    ksrpcEnv: jlong
+): jlong {
     initThread(env)
     try {
         val nativeScope = scope.toCPointer<CPointed>()?.asStableRef<CoroutineScope>()?.get()
             ?: return -1
-        val nativeEnv = ksrpcEnv.toCPointer<CPointed>()?.asStableRef<KsrpcEnvironment<JniSerialized>>()?.get()
+        val nativeEnv = ksrpcEnv.toCPointer<CPointed>()
+            ?.asStableRef<KsrpcEnvironment<JniSerialized>>()?.get()
             ?: return -1
         val objectRef = threadJni.NewWeakGlobalRef!!.invoke(env, clazz)
         val connection = NativeConnection(nativeScope, objectRef!!, nativeEnv)

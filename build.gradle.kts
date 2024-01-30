@@ -82,7 +82,10 @@ allprojects {
     afterEvaluate {
         tasks.findByName("licenseCheckForKotlin")?.let {
             tasks.all {
-                if (this.name.startsWith("ktlint") && this.name.endsWith("Check")) {
+                if ((this.name.startsWith("ktlint") && this.name.endsWith("Check")) ||
+                    (this.name.startsWith("transform") && this.name.endsWith("Metadata")) ||
+                    (this.name.startsWith("compile") && this.name.contains("Kotlin"))
+                ) {
                     it.dependsOn(this)
                 }
             }
