@@ -79,6 +79,15 @@ allprojects {
         version.set("0.48.0")
         android.set(true)
     }
+    afterEvaluate {
+        tasks.findByName("licenseCheckForKotlin")?.let {
+            tasks.all {
+                if (this.name.startsWith("ktlint") && this.name.endsWith("Check")) {
+                    it.dependsOn(this)
+                }
+            }
+        }
+    }
 }
 
 tasks.dokkaHtmlMultiModule.configure {

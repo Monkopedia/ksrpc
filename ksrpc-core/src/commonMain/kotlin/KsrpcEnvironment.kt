@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2022 Jason Monk <monkopedia@gmail.com>
+ * Copyright (C) 2024 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,9 @@ interface CallDataSerializer<T> {
  * Creates a copy of the [KsrpcEnvironment] provided and allows changes to it before returning
  * it. This method does NOT modify the original [KsrpcEnvironment].
  */
-fun <T> KsrpcEnvironment<T>.reconfigure(builder: KsrpcEnvironmentBuilder<T>.() -> Unit): KsrpcEnvironment<T> {
+fun <T> KsrpcEnvironment<T>.reconfigure(
+    builder: KsrpcEnvironmentBuilder<T>.() -> Unit
+): KsrpcEnvironment<T> {
     val b = (this as? KsrpcEnvironmentBuilder)?.copy()
         ?: KsrpcEnvironmentBuilder(serialization, defaultScope, errorListener)
     b.builder()

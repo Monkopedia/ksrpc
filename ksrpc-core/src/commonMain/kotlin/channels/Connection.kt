@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2022 Jason Monk <monkopedia@gmail.com>
+ * Copyright (C) 2024 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,9 +51,11 @@ internal expect interface VoidService : RpcService
  * [defaultChannel] and [toStub] to create [R].
  */
 @OptIn(ExperimentalContracts::class)
-suspend inline fun <reified T : RpcService, reified R : RpcService, S> SingleChannelConnection<S>.connect(
-    crossinline host: suspend (R) -> T
-) {
+suspend inline fun <
+    reified T : RpcService,
+    reified R : RpcService,
+    S
+    > SingleChannelConnection<S>.connect(crossinline host: suspend (R) -> T) {
     contract {
         callsInPlace(host, InvocationKind.EXACTLY_ONCE)
     }

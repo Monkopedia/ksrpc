@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2022 Jason Monk <monkopedia@gmail.com>
+ * Copyright (C) 2024 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,7 +116,8 @@ interface SingleChannelClient<T> {
  * This could be a bidirectional conduit like a [Connection], or it could be a client only
  * service such as http client.
  */
-interface ChannelClient<T> : SerializedChannel<T>, SingleChannelClient<T>, KsrpcEnvironment.Element<T> {
+interface ChannelClient<T> :
+    SerializedChannel<T>, SingleChannelClient<T>, KsrpcEnvironment.Element<T> {
     /**
      * Takes a given channel id and creates a service wrapper to make calls on that channel.
      *
