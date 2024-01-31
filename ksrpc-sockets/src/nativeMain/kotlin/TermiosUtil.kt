@@ -53,10 +53,12 @@ fun initTermios(fd: Int = STDIN_FILENO, old: CPointer<termios>) {
         val current = alloc<termios>().ptr
         tcgetattr(fd, old)
         memcpy(current, old, sizeOf<termios>().toULong())
-        current.pointed.c_lflag = current.pointed.c_lflag and ICANON.inv().toUInt()
+        current.pointed.setICanon()
         tcsetattr(fd, TCSANOW, current)
     }
 }
+
+expect fun termios.setICanon()
 
 fun resetTermios(fd: Int = STDIN_FILENO, old: CPointer<termios>) {
     tcsetattr(fd, TCSANOW, old)
