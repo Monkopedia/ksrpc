@@ -27,7 +27,6 @@ import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.pointed
 import kotlinx.cinterop.ptr
 import kotlinx.cinterop.sizeOf
-import platform.posix.ICANON
 import platform.posix.STDIN_FILENO
 import platform.posix.TCSANOW
 import platform.posix.memcpy
