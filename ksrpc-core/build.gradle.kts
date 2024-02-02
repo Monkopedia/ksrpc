@@ -28,6 +28,7 @@ kotlin {
         api(libs.kotlinx.serialization.json)
         api(libs.kotlinx.coroutines)
         api(libs.kotlinx.atomicfu)
+        api(kotlin("stdlib"))
     }
     sourceSets["jvmMain"].dependencies {
         implementation(libs.jnanoid)
@@ -35,8 +36,6 @@ kotlin {
     }
     sourceSets["jsMain"].dependencies {
         implementation(npm("nanoid", libs.versions.nanoid.get()))
-    }
-    sourceSets["nativeMain"].dependencies {
     }
 //    linuxX64("native") {
 //        binaries {

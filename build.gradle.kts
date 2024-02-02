@@ -26,6 +26,7 @@ plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.android.library) apply false
     alias(libs.plugins.kotlin.android) apply false
+//    alias(libs.plugins.kotlin) apply false
     alias(libs.plugins.kotlin.kapt) apply false
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.dokka)
@@ -47,20 +48,20 @@ allprojects {
     }
 }
 
-allprojects {
-    if (name == "ksrpc-compiler-plugin-native") return@allprojects
+subprojects {
+    if (name == "ksrpc-compiler-plugin-native") return@subprojects
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
     apply(plugin = "com.github.hierynomus.license")
     tasks.register(
         "licenseCheckForKotlin",
-        com.hierynomus.gradle.license.tasks.LicenseCheck::class
+        com.hierynomus.gradle.license.tasks.LicenseCheck::class,
     ) {
         source = fileTree(project.projectDir) { include("**/*.kt") }
     }
     tasks["license"].dependsOn("licenseCheckForKotlin")
     tasks.register(
         "licenseFormatForKotlin",
-        com.hierynomus.gradle.license.tasks.LicenseFormat::class
+        com.hierynomus.gradle.license.tasks.LicenseFormat::class,
     ) {
         source = fileTree(project.projectDir) { include("**/*.kt") }
     }

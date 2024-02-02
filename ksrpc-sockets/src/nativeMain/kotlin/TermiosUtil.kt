@@ -23,10 +23,12 @@ import kotlin.contracts.contract
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.alloc
+import kotlinx.cinterop.convert
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.pointed
 import kotlinx.cinterop.ptr
 import kotlinx.cinterop.sizeOf
+import platform.posix.ICANON
 import platform.posix.STDIN_FILENO
 import platform.posix.TCSANOW
 import platform.posix.memcpy
@@ -57,7 +59,9 @@ fun initTermios(fd: Int = STDIN_FILENO, old: CPointer<termios>) {
     }
 }
 
-expect fun termios.setICanon()
+private fun termios.setICanon() {
+    c_lflag = c_lflag and ICANON.inv().convert()
+}
 
 fun resetTermios(fd: Int = STDIN_FILENO, old: CPointer<termios>) {
     tcsetattr(fd, TCSANOW, old)

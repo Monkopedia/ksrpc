@@ -2,17 +2,17 @@
 kotlin = "1.9.22"
 kotlin-coroutines = "1.7.3"
 kotlin-serialization = "1.6.0"
-ktor = "2.3.4"
+ktor = "2.3.8"
 slf4j = "2.0.9"
-clikt = "4.2.0"
+clikt = "4.2.2"
 gradleplugin = "8.1.1"
-kotlin-atomicfu = "0.22.0"
+kotlin-atomicfu = "0.23.2"
 kotlin-compiletesting = "1.5.0"
-dokka = "1.9.0"
+dokka = "1.9.10"
 googleautoservice = "1.1.1"
 jnanoid = "2.0.0"
 nanoid = "3.1.22"
-ksrpctest = "0.7.1"
+ksrpctest = "0.8.0"
 
 [libraries]
 dokka-base = { module = "org.jetbrains.dokka:dokka-base", version.ref = "dokka" }
