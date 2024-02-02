@@ -42,7 +42,7 @@ class JniTest {
 
     @Test
     fun testSerialization() {
-        NativeUtils.loadLibraryFromJar("/libs/libksrpc_test.so")
+        NativeUtils.loadLibraryFromJar("/libs/libksrpc_test.${extension()}")
         val encode = ComplexClass(
             5,
             listOf("test", "next", null, "bolu"),
@@ -59,7 +59,7 @@ class JniTest {
 
     @Test
     fun testContinuations() = runBlockingUnit {
-        NativeUtils.loadLibraryFromJar("/libs/libksrpc_test.so")
+        NativeUtils.loadLibraryFromJar("/libs/libksrpc_test.${extension()}")
         newTypeConverter<Any>()
         val results = List(2) { CompletableDeferred<String>() }
         val rec = results.toMutableList()
@@ -82,7 +82,7 @@ class JniTest {
 
     @Test
     fun testJvmContinuations() = runBlockingUnit {
-        NativeUtils.loadLibraryFromJar("/libs/libksrpc_test.so")
+        NativeUtils.loadLibraryFromJar("/libs/libksrpc_test.${extension()}")
         newTypeConverter<Any>()
         val result1 = CompletableDeferred<Int>()
         val result2 = CompletableDeferred<Int>()
@@ -160,8 +160,11 @@ class JniTest {
         )
     }
 
+    private fun extension(): String =
+        if (NativeUtils::class.java.getResourceAsStream("/libs/libksrpc_test.so") != null) "so" else "dylib"
+
     private suspend fun CoroutineScope.createService(): JniTestInterface {
-        NativeUtils.loadLibraryFromJar("/libs/libksrpc_test.so")
+        NativeUtils.loadLibraryFromJar("/libs/libksrpc_test.${extension()}")
         val env = ksrpcEnvironment(JniSerialization()) {}
         val nativeEnvironment = NativeHost().createEnv()
         val connection = JniConnection(this, env, nativeEnvironment)

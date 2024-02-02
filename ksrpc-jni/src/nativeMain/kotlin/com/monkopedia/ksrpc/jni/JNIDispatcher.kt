@@ -88,7 +88,6 @@ fun jniUpdateThreads(env: CPointer<JNIEnvVar>, clazz: jobject, threads: jint) {
         JNI.init(env)
         JNIDispatcher.updateThreads(threads)
     } catch (t: Throwable) {
-        println("Update caught exception: $t")
         t.printStackTrace()
     }
 }
@@ -99,7 +98,6 @@ fun jniExecuteThread(env: CPointer<JNIEnvVar>, clazz: jobject, id: jint) {
         JNI.init(env)
         JNIDispatcher.executeThread(id)
     } catch (t: Throwable) {
-        println("Execute caught exception: $t")
         t.printStackTrace()
         usleep(1000000u)
     }

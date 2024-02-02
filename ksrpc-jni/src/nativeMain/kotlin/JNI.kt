@@ -58,11 +58,6 @@ internal lateinit var env: CPointer<CPointerVarOf<CPointer<JNINativeInterface_>>
 
 val threadJni: JNINativeInterface_
     get() {
-        try {
-            println("Worker: ${Worker.current}")
-        } catch (t: Throwable) {
-            println("No worker")
-        }
         return jni
     }
 val threadEnv: CPointer<CPointerVarOf<CPointer<JNINativeInterface_>>>

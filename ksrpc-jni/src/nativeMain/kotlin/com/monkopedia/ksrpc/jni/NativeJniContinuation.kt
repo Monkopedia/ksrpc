@@ -41,9 +41,7 @@ class NativeJniContinuation<T>(
     internal val typeConverter: Converter<jobject?, T>
 ) {
     fun resumeWith(result: Result<T>) {
-        println("Start resume $result")
         continuation.resumeWith(result)
-        println("End resume $result")
     }
 
     companion object {
@@ -70,7 +68,6 @@ class NativeJniContinuationConverter<T>(env: CPointer<JNIEnvVar>) :
 
     override fun convertFrom(value: NativeJniContinuation<T>): jobject? {
         val input = StableRef.create(value).asCPointer().rawValue.toLong()
-        println("Calling new with $input")
         return JNI.NativeJniContinuation.new(input)
     }
 }

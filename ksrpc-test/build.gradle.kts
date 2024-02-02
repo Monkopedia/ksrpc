@@ -66,8 +66,9 @@ val copyLib = tasks.register("copyLib", Copy::class) {
             "Host OS '$hostOs' is not supported in Kotlin/Native $project."
         )
     }
+    val extension = if (hostTarget == "linuxX64") "so" else "dylib"
     dependsOn(tasks.findByName("linkDebugShared${hostTarget.capitalize()}"))
-    from(buildDir.resolve("bin/$hostTarget/debugShared/libksrpc_test.so"))
+    from(buildDir.resolve("bin/$hostTarget/debugShared/libksrpc_test.$extension"))
     destinationDir = buildDir.resolve("generated/lib/resources/libs/")
     doFirst {
     }
