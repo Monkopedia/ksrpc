@@ -5,6 +5,7 @@ plugins {
 }
 
 ksrpcModule(
+    supportLinuxArm64 = false,
     supportMingw = false,
     includePublications = false,
     nativeConfig = {

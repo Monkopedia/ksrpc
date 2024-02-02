@@ -23,40 +23,18 @@ ksrpcModule()
 
 kotlin {
     sourceSets["commonMain"].dependencies {
-        implementation(libs.ktor.client)
-        implementation(libs.ktor.client.websockets)
-        implementation(libs.ktor.http)
-        implementation(libs.ktor.kotlinx.serialization)
     }
     sourceSets["jvmMain"].dependencies {
-        compileOnly(libs.ktor.server)
-        compileOnly(libs.ktor.server.host.common)
-        compileOnly(libs.ktor.server.netty)
-        compileOnly(libs.ktor.websockets)
-        compileOnly(libs.ktor.server.websockets)
-        compileOnly(libs.ktor.client)
-        compileOnly(libs.ktor.server.cors)
 
         implementation(libs.kotlinx.serialization)
         implementation(libs.kotlinx.serialization.json)
     }
     sourceSets["jvmTest"].dependencies {
-        implementation(libs.ktor.server)
-        implementation(libs.ktor.server.netty)
-        implementation(libs.ktor.jackson.serialization)
-
-        implementation(libs.ktor.client)
-        implementation(libs.ktor.client.okhttp)
-        implementation(libs.ktor.server.websockets)
-        implementation(libs.ktor.client.websockets)
     }
     sourceSets["jsTest"].dependencies {
-        implementation(libs.ktor.client)
     }
     sourceSets["jsMain"].dependencies {
-        compileOnly(libs.ktor.client)
     }
     sourceSets["nativeMain"].dependencies {
-        implementation(libs.ktor.client.curl)
     }
 }

@@ -15,6 +15,9 @@
  */
 package com.monkopedia.ksrpc.sockets
 
-//actual fun termios.setICanon() {
-//    c_lflag = c_lflag and ICANON.inv().toULong()
-//}
+import platform.posix.ICANON
+import platform.posix.termios
+
+actual fun termios.setICanon() {
+    c_lflag = c_lflag and ICANON.inv().toULong()
+}

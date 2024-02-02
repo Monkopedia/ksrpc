@@ -19,7 +19,7 @@ plugins {
     kotlin("multiplatform")
 }
 
-ksrpcModule()
+ksrpcModule(supportLinuxArm64 = false)
 
 kotlin {
     sourceSets["commonMain"].dependencies {

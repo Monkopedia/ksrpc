@@ -47,9 +47,11 @@ fun Project.ksrpcModule(
     supportJvm: Boolean = true,
     supportJs: Boolean = true,
     supportNative: Boolean = true,
+    supportAndroidNative: Boolean = false,
+    supportLinuxArm64: Boolean = supportNative,
     supportMingw: Boolean = supportNative,
     includePublications: Boolean = true,
-    nativeConfig: KotlinNativeTargetWithTests<*>.() -> Unit = {}
+    nativeConfig: KotlinNativeTarget.() -> Unit = {}
 ) {
     group = "com.monkopedia.ksrpc"
 
@@ -84,9 +86,50 @@ fun Project.ksrpcModule(
                 binaries {}
                 nativeConfig()
             }
+            macosArm64 {
+                binaries {}
+                nativeConfig()
+            }
+            iosX64 {
+                binaries {}
+                nativeConfig()
+            }
+            iosArm64 {
+                binaries {}
+                nativeConfig()
+            }
+            iosSimulatorArm64 {
+                binaries {}
+                nativeConfig()
+            }
+
             linuxX64 {
                 binaries {}
                 nativeConfig()
+            }
+            if (supportLinuxArm64) {
+                linuxArm64 {
+                    binaries {}
+                    nativeConfig()
+                }
+            }
+            if (supportAndroidNative) {
+                androidNativeX64 {
+                    binaries {}
+                    nativeConfig()
+                }
+                androidNativeX86 {
+                    binaries {}
+                    nativeConfig()
+                }
+                androidNativeArm64 {
+                    binaries {}
+                    nativeConfig()
+                }
+                androidNativeArm32 {
+                    binaries {}
+                    nativeConfig()
+                }
             }
             if (supportMingw) {
                 mingwX64 {
@@ -115,9 +158,10 @@ fun Project.ksrpcModule(
         }
         if (supportJs) {
             sourceSets["jsMain"].dependencies {
+                implementation(kotlin("stdlib"))
             }
             sourceSets["jsTest"].dependencies {
-                implementation(kotlin("stdlib"))
+                implementation(kotlin("stdlib-js"))
                 implementation(kotlin("test"))
             }
         }

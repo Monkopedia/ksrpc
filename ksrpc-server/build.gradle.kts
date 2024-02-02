@@ -21,6 +21,7 @@ plugins {
 
 ksrpcModule(
     supportJs = false,
+    supportLinuxArm64 = false,
     supportMingw = false
 )
 
