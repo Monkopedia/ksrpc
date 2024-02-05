@@ -31,6 +31,7 @@ jnanoid = { module = "com.aventrix.jnanoid:jnanoid", version.ref = "jnanoid" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j"}
 ktor-client = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-curl = { module = "io.ktor:ktor-client-curl", version.ref = "ktor" }
+ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 ktor-client-websockets = { module = "io.ktor:ktor-client-websockets", version.ref = "ktor" }
 ktor-server = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }

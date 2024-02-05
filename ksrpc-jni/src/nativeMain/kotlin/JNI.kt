@@ -25,7 +25,6 @@ import com.monkopedia.jni.jobject
 import com.monkopedia.jni.jstring
 import com.monkopedia.jni.jvalue
 import kotlin.native.concurrent.ThreadLocal
-import kotlin.native.concurrent.Worker
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.CPointerVarOf
 import kotlinx.cinterop.ExperimentalForeignApi

@@ -58,18 +58,28 @@ kotlin {
 }
 val copyLib = tasks.register("copyLib", Copy::class) {
     val hostOs = System.getProperty("os.name")
-    val hostTarget = when {
-        hostOs == "Mac OS X" -> "macosX64"
-        hostOs == "Linux" -> "linuxX64"
-        hostOs.startsWith("Windows") -> "mingwX64"
+    val arch = System.getProperty("os.arch")
+    when {
+        hostOs == "Mac OS X" -> {
+            if (arch == "aarch64") {
+                dependsOn(tasks.findByName("linkReleaseSharedMacosArm64"))
+                from(buildDir.resolve("bin/macosArm64/releaseShared/libksrpc_test.dylib"))
+                destinationDir = buildDir.resolve("generated/lib/resources/libs/")
+            } else {
+                dependsOn(tasks.findByName("linkReleaseSharedMacosX64"))
+                from(buildDir.resolve("bin/macosX64/releaseShared/libksrpc_test.dylib"))
+                destinationDir = buildDir.resolve("generated/lib/resources/libs/")
+            }
+        }
+        hostOs == "Linux" -> {
+            dependsOn(tasks.findByName("linkDebugSharedLinuxX64"))
+            from(buildDir.resolve("bin/linuxX64/debugShared/libksrpc_test.so"))
+            destinationDir = buildDir.resolve("generated/lib/resources/libs/")
+        }
         else -> throw GradleException(
             "Host OS '$hostOs' is not supported in Kotlin/Native $project."
         )
     }
-    val extension = if (hostTarget == "linuxX64") "so" else "dylib"
-    dependsOn(tasks.findByName("linkDebugShared${hostTarget.capitalize()}"))
-    from(buildDir.resolve("bin/$hostTarget/debugShared/libksrpc_test.$extension"))
-    destinationDir = buildDir.resolve("generated/lib/resources/libs/")
     doFirst {
     }
 }

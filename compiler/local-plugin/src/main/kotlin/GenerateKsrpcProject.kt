@@ -48,6 +48,7 @@ fun Project.ksrpcModule(
     supportJs: Boolean = true,
     supportNative: Boolean = true,
     supportAndroidNative: Boolean = false,
+    supportIos: Boolean = supportNative,
     supportLinuxArm64: Boolean = supportNative,
     supportMingw: Boolean = supportNative,
     includePublications: Boolean = true,
@@ -90,27 +91,32 @@ fun Project.ksrpcModule(
                 binaries {}
                 nativeConfig()
             }
-            iosX64 {
-                binaries {}
-                nativeConfig()
-            }
-            iosArm64 {
-                binaries {}
-                nativeConfig()
-            }
-            iosSimulatorArm64 {
-                binaries {}
-                nativeConfig()
-            }
-
-            linuxX64 {
-                binaries {}
-                nativeConfig()
-            }
-            if (supportLinuxArm64) {
-                linuxArm64 {
+            if (supportIos) {
+                iosX64 {
                     binaries {}
                     nativeConfig()
+                }
+                iosArm64 {
+                    binaries {}
+                    nativeConfig()
+                }
+                iosSimulatorArm64 {
+                    binaries {}
+                    nativeConfig()
+                }
+            }
+
+            val hostOs = System.getProperty("os.name")
+            if (hostOs == "Linux") {
+                linuxX64 {
+                    binaries {}
+                    nativeConfig()
+                }
+                if (supportLinuxArm64) {
+                    linuxArm64 {
+                        binaries {}
+                        nativeConfig()
+                    }
                 }
             }
             if (supportAndroidNative) {

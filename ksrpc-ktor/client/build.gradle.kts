@@ -36,7 +36,18 @@ kotlin {
     sourceSets["jsMain"].dependencies {
         compileOnly(libs.ktor.client)
     }
-    sourceSets["nativeMain"].dependencies {
+    if (System.getProperty("os.name") == "Linux") {
+        sourceSets["linuxMain"].dependencies {
+            implementation(libs.ktor.client.curl)
+        }
+    }
+    sourceSets["mingwMain"].dependencies {
         implementation(libs.ktor.client.curl)
+    }
+    sourceSets["macosMain"].dependencies {
+        implementation(libs.ktor.client.curl)
+    }
+    sourceSets["iosMain"].dependencies {
+        implementation(libs.ktor.client.darwin)
     }
 }

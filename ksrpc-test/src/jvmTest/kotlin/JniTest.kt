@@ -161,7 +161,11 @@ class JniTest {
     }
 
     private fun extension(): String =
-        if (NativeUtils::class.java.getResourceAsStream("/libs/libksrpc_test.so") != null) "so" else "dylib"
+        if (NativeUtils::class.java.getResourceAsStream("/libs/libksrpc_test.so") != null) {
+            "so"
+        } else {
+            "dylib"
+        }
 
     private suspend fun CoroutineScope.createService(): JniTestInterface {
         NativeUtils.loadLibraryFromJar("/libs/libksrpc_test.${extension()}")
