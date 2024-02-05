@@ -45,7 +45,7 @@ kotlin {
         implementation(libs.ktor.client.curl)
     }
     sourceSets["macosMain"].dependencies {
-        implementation(libs.ktor.client.curl)
+        implementation(libs.ktor.client.darwin)
     }
     sourceSets["iosMain"].dependencies {
         implementation(libs.ktor.client.darwin)
