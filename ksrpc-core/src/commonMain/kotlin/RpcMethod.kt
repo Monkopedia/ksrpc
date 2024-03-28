@@ -92,7 +92,7 @@ internal class SubserviceTransformer<T : RpcService>(
         val client = client<S>() ?: error("Cannot untransform service type from non-client channel")
         unpackError(data, channel)
         val serviceId = channel.env.serialization.decodeCallData(String.serializer(), data)
-        channel.env.logger.info("Transformer", "Deserializing CallData(${serviceId}) to Stub")
+        channel.env.logger.info("Transformer", "Deserializing CallData($serviceId) to Stub")
         return serviceObj.createStub(client.wrapChannel(ChannelId(serviceId)))
     }
 }

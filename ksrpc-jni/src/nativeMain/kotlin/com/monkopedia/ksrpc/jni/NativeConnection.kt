@@ -42,7 +42,6 @@ import kotlinx.cinterop.toCPointer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
 
 class NativeConnection(
     scope: CoroutineScope,

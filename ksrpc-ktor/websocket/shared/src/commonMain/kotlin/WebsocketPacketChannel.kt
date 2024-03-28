@@ -26,7 +26,6 @@ import io.ktor.websocket.close
 import io.ktor.websocket.serialization.receiveDeserializedBase
 import io.ktor.websocket.serialization.sendSerializedBase
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.sync.Mutex
 import kotlinx.serialization.json.Json
 
 @OptIn(InternalAPI::class)

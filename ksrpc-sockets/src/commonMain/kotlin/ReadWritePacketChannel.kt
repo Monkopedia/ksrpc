@@ -25,7 +25,6 @@ import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.readFully
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.sync.Mutex
 import kotlinx.serialization.builtins.serializer
 
 internal class ReadWritePacketChannel(
