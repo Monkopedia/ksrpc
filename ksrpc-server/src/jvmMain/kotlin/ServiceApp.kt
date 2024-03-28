@@ -63,6 +63,7 @@ actual abstract class ServiceApp actual constructor(appName: String) : BaseServi
             exitProcess(1)
         }
         for (p in port) {
+            env.logger.info("ServiceApp", "Hosting socket on $p")
             thread(start = true) {
                 val socket = ServerSocket(p)
                 while (true) {
@@ -93,9 +94,14 @@ actual abstract class ServiceApp actual constructor(appName: String) : BaseServi
 
     override fun createRouting(routing: Routing) {
         if (!noHttp) {
+            env.logger.info("ServiceApp", "Disabling http endpoints")
             super.createRouting(routing)
         }
         if (enableWebsockets) {
+            env.logger.info(
+                "ServiceApp",
+                "Enabling websocket hosting on /${this.appName.decapitalize()}"
+            )
             routing.serveWebsocket(
                 "/${this.appName.decapitalize()}",
                 this.createChannel(),

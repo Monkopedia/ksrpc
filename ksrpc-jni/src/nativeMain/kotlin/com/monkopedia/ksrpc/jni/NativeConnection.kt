@@ -50,38 +50,26 @@ class NativeConnection(
     env: KsrpcEnvironment<JniSerialized>
 ) : PacketChannelBase<JniSerialized>(scope, env) {
     private val receiveChannel = Channel<Packet<JniSerialized>>()
-    private val sendLock = Mutex()
-    private val receiveLock = Mutex()
     private val typeConverter = newTypeConverter<Any?>()
 
-    override suspend fun send(packet: Packet<JniSerialized>) {
-        sendLock.lock()
-        try {
-            val serialized = env.serialization.createCallData(
-                Packet.serializer(JniSerialized),
-                packet
-            )
-            suspendCoroutine<Int> {
-                JNI.JniConnection.sendFromNative(
-                    objectRef,
-                    serialized.readSerialized().toJvm(threadEnv),
-                    NativeJniContinuationConverter<Int>(threadEnv).convertFrom(
-                        it.withConverter(typeConverter.int)
-                    )
+    override suspend fun sendLocked(packet: Packet<JniSerialized>) {
+        val serialized = env.serialization.createCallData(
+            Packet.serializer(JniSerialized),
+            packet
+        )
+        suspendCoroutine<Int> {
+            JNI.JniConnection.sendFromNative(
+                objectRef,
+                serialized.readSerialized().toJvm(threadEnv),
+                NativeJniContinuationConverter<Int>(threadEnv).convertFrom(
+                    it.withConverter(typeConverter.int)
                 )
-            }
-        } finally {
-            sendLock.unlock()
+            )
         }
     }
 
-    override suspend fun receive(): Packet<JniSerialized> {
-        receiveLock.lock()
-        try {
-            return receiveChannel.receive()
-        } finally {
-            receiveLock.unlock()
-        }
+    override suspend fun receiveLocked(): Packet<JniSerialized> {
+        return receiveChannel.receive()
     }
 
     override suspend fun close() {

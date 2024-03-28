@@ -15,6 +15,7 @@
  */
 package com.monkopedia.ksrpc.internal
 
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
@@ -26,7 +27,7 @@ class MultiChannel<T> {
     private var closeException: Throwable? = null
     private val lock = Mutex()
     private val pending = mutableListOf<Pair<String, CompletableDeferred<T>>>()
-    private var id = 1
+    private val id = atomic(1)
 
     private fun checkClosed() {
         if (isClosed) {
@@ -49,17 +50,12 @@ class MultiChannel<T> {
         }
     }
 
-    suspend fun allocateReceive(): Pair<Int, Deferred<T>> {
+    fun allocateReceive(): Pair<Int, Deferred<T>> {
         checkClosed()
-        lock.lock()
-        try {
-            val id = this.id++
-            val completable = CompletableDeferred<T>()
-            pending.add(id.toString() to completable)
-            return id to completable
-        } finally {
-            lock.unlock()
-        }
+        val id = this.id.getAndIncrement()
+        val completable = CompletableDeferred<T>()
+        pending.add(id.toString() to completable)
+        return id to completable
     }
 
     suspend fun close(t: CancellationException? = null) {

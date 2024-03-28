@@ -34,6 +34,7 @@ class SubserviceChannel<T>(
         get() = baseChannel.context
 
     override suspend fun call(endpoint: String, input: CallData<T>): CallData<T> {
+        env.logger.debug("SerializeService", "Calling from subservice ${serviceId.id}")
         return baseChannel.call(serviceId, endpoint, input)
     }
 

@@ -34,25 +34,13 @@ internal class ReadWritePacketChannel(
     private val write: ByteWriteChannel,
     env: KsrpcEnvironment<String>
 ) : PacketChannelBase<String>(scope, env) {
-    private val sendLock = Mutex()
-    private val receiveLock = Mutex()
 
-    override suspend fun send(packet: Packet<String>) {
-        sendLock.lock()
-        try {
-            write.send(packet, env.serialization)
-        } finally {
-            sendLock.unlock()
-        }
+    override suspend fun sendLocked(packet: Packet<String>) {
+        write.send(packet, env.serialization)
     }
 
-    override suspend fun receive(): Packet<String> {
-        receiveLock.lock()
-        try {
-            return read.readPacket(env.serialization)
-        } finally {
-            receiveLock.unlock()
-        }
+    override suspend fun receiveLocked(): Packet<String> {
+        return read.readPacket(env.serialization)
     }
 
     override suspend fun close() {

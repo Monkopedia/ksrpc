@@ -35,6 +35,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.ByteArraySerializer
 import kotlinx.serialization.builtins.serializer
@@ -109,6 +110,7 @@ abstract class PacketChannelBase<T>(
                 }
             }
         } catch (t: Throwable) {
+            env.logger.warn("MultiChannel", "Exception in multichannel", t)
             binaryChannels.values.forEach { it.channel.close(t) }
             multiChannel.close(CancellationException("Multi-channel failure", t))
         }
@@ -123,6 +125,10 @@ abstract class PacketChannelBase<T>(
     ) {
         if (response.isBinary) {
             val binaryChannel = randomUuid()
+            env.logger.debug(
+                "SerializedChannel",
+                "Beginning binary packetization for $binaryChannel"
+            )
             send(
                 Packet(
                     input = input,
@@ -173,6 +179,10 @@ abstract class PacketChannelBase<T>(
                         ).readSerialized()
                     )
                 )
+                env.logger.debug(
+                    "SerializedChannel",
+                    "Completed binary packetization for $binaryChannel"
+                )
             }
         } else {
             send(
@@ -205,6 +215,7 @@ abstract class PacketChannelBase<T>(
         if (!channel.isDone) {
             return
         }
+        env.logger.debug("SerializedChannel", "Removing complete channel ${channel.id}")
         binaryChannelLock.lock()
         try {
             binaryChannels.remove(channel.id)
@@ -217,6 +228,7 @@ abstract class PacketChannelBase<T>(
         binaryChannelLock.lock()
         try {
             return binaryChannels.getOrPut(id) {
+                env.logger.info("SerializedChannel", "Creating binary channel $id")
                 BinaryChannel(id, env)
             }
         } finally {
@@ -232,6 +244,7 @@ abstract class PacketChannelBase<T>(
     }
 
     override suspend fun wrapChannel(channelId: ChannelId): SerializedService<T> {
+        env.logger.debug("SerializedChannel", "Wrapping channel ${channelId.id}")
         return SubserviceChannel(this, channelId)
     }
 
@@ -241,6 +254,10 @@ abstract class PacketChannelBase<T>(
         data: CallData<T>
     ): CallData<T> {
         val (messageId, response) = multiChannel.allocateReceive()
+        env.logger.debug(
+            "SerializedChannel",
+            "Sending call ${channelId.id}/$endpoint -  $messageId"
+        )
         scope.sendPacket(true, channelId.id, messageId.toString(), endpoint, data)
         return getCallData(response.await())
     }
@@ -248,6 +265,7 @@ abstract class PacketChannelBase<T>(
     override suspend fun close(id: ChannelId) {
         val serviceChannel = serviceChannel
         serviceChannel.close(id)
+        env.logger.info("SerializedChannel", "Closing channel ${id.id}")
         call(id, "", env.serialization.createCallData(Unit.serializer(), Unit))
     }
 
@@ -319,6 +337,17 @@ abstract class PacketChannelBase<T>(
             return channel.also {
                 hasGottenChannel = true
             }
+        }
+    }
+    suspend fun send(packet: Packet<T>) {
+        return sendLock.withLock {
+            sendLocked(packet)
+        }
+    }
+
+    suspend fun receive(): Packet<T> {
+        return receiveLock.withLock {
+            receiveLocked()
         }
     }
 

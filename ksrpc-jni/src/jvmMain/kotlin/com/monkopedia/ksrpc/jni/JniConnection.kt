@@ -32,8 +32,6 @@ class JniConnection(
     private val nativeEnvironment: Long
 ) : PacketChannelBase<JniSerialized>(scope, env) {
     private val receiveChannel = Channel<Packet<JniSerialized>>()
-    private val sendLock = Mutex()
-    private val receiveLock = Mutex()
     private val nativeConnection = createConnection(scope.asNativeScope, nativeEnvironment)
 
     constructor(
@@ -48,32 +46,22 @@ class JniConnection(
         finalize(nativeConnection, nativeEnvironment)
     }
 
-    override suspend fun send(packet: Packet<JniSerialized>) {
-        sendLock.lock()
-        try {
-            val serialized = env.serialization.createCallData(
-                Packet.serializer(JniSerialized),
-                packet
+    override suspend fun sendLocked(packet: Packet<JniSerialized>) {
+        val serialized = env.serialization.createCallData(
+            Packet.serializer(JniSerialized),
+            packet
+        )
+        suspendCoroutine<Int> {
+            sendSerialized(
+                nativeConnection,
+                serialized.readSerialized(),
+                it.withConverter(newTypeConverter<Any?>().int)
             )
-            suspendCoroutine<Int> {
-                sendSerialized(
-                    nativeConnection,
-                    serialized.readSerialized(),
-                    it.withConverter(newTypeConverter<Any?>().int)
-                )
-            }
-        } finally {
-            sendLock.unlock()
         }
     }
 
-    override suspend fun receive(): Packet<JniSerialized> {
-        receiveLock.lock()
-        try {
-            return receiveChannel.receive()
-        } finally {
-            receiveLock.unlock()
-        }
+    override suspend fun receiveLocked(): Packet<JniSerialized> {
+        return receiveChannel.receive()
     }
 
     fun sendFromNative(packet: JniSerialized, continuation: NativeJniContinuation<Int>) {

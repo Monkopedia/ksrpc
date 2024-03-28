@@ -35,8 +35,6 @@ class WebsocketPacketChannel(
     private val socketSession: DefaultWebSocketSession,
     env: KsrpcEnvironment<String>
 ) : PacketChannelBase<String>(scope, env) {
-    private val sendLock = Mutex()
-    private val receiveLock = Mutex()
     private val converter = KotlinxWebsocketSerializationConverter(Json)
 
     // Use socket max frame with some room for padding.
@@ -44,26 +42,16 @@ class WebsocketPacketChannel(
     override val maxSize: Long
         get() = socketSession.maxFrameSize / 2 - 1024
 
-    override suspend fun send(packet: Packet<String>) {
-        sendLock.lock()
-        try {
-            socketSession.sendSerializedBase<Packet<String>>(packet, converter, Charsets.UTF_8)
-        } finally {
-            sendLock.unlock()
-        }
+    override suspend fun sendLocked(packet: Packet<String>) {
+        socketSession.sendSerializedBase<Packet<String>>(packet, converter, Charsets.UTF_8)
     }
 
-    override suspend fun receive(): Packet<String> {
-        receiveLock.lock()
-        try {
-            @Suppress("UNCHECKED_CAST")
-            return socketSession.receiveDeserializedBase<Packet<String>>(
-                converter,
-                Charsets.UTF_8
-            ) as Packet<String>
-        } finally {
-            receiveLock.unlock()
-        }
+    override suspend fun receiveLocked(): Packet<String> {
+        @Suppress("UNCHECKED_CAST")
+        return socketSession.receiveDeserializedBase<Packet<String>>(
+            converter,
+            Charsets.UTF_8
+        ) as Packet<String>
     }
 
     override suspend fun close() {

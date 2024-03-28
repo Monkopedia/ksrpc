@@ -56,6 +56,6 @@ data class Packet<T>(
 }
 
 internal interface PacketChannel<T> : SuspendCloseable {
-    suspend fun send(packet: Packet<T>)
-    suspend fun receive(): Packet<T>
+    suspend fun sendLocked(packet: Packet<T>)
+    suspend fun receiveLocked(): Packet<T>
 }

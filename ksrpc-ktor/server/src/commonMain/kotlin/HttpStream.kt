@@ -96,13 +96,22 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.execCall(
         CallData.create(call.receive<String>())
     }
     val channelId = call.request.headers[KSRPC_CHANNEL] ?: ChannelClient.DEFAULT
+    channel.env.logger.debug("HttpChannel", "Executing call $channelId/$method")
     val response = channel.call(ChannelId(channelId), method, content)
     if (response.isBinary) {
+        channel.env.logger.debug(
+            "HttpChannel",
+            "Responding to $channelId/$method with binary content"
+        )
         call.response.headers.append(KSRPC_BINARY, "true")
         call.respondBytesWriter {
             response.readBinary().copyTo(this)
         }
     } else {
+        channel.env.logger.debug(
+            "HttpChannel",
+            "Responding to $channelId/$method with serialized content"
+        )
         call.respond(response.readSerialized())
     }
 }

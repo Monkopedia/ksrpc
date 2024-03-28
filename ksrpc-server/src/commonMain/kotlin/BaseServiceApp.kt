@@ -58,6 +58,7 @@ abstract class BaseServiceApp internal constructor(val appName: String) : CliktC
     override fun run() {
         runBlocking {
             for (h in http) {
+                env.logger.info("ServiceApp", "Hosting http server on $h")
                 embeddedServer(h) {
                     configureHttp()
                     routing {
@@ -77,6 +78,7 @@ abstract class BaseServiceApp internal constructor(val appName: String) : CliktC
 
     open fun Application.configureHttp() {
         if (cors) {
+            env.logger.info("ServiceApp", "Configuring http for cors")
             install(CORS) {
                 anyHost()
             }

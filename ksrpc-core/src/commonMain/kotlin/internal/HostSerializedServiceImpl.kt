@@ -67,6 +67,7 @@ class HostSerializedChannelImpl<T>(
                 }
             }
         } catch (t: Throwable) {
+            env.logger.info("SerializedChannel", "Exception thrown during dispatching", t)
             env.errorListener.onError(t)
             env.serialization.createErrorCallData(
                 RpcFailure.serializer(),
@@ -76,6 +77,7 @@ class HostSerializedChannelImpl<T>(
     }
 
     override suspend fun close(id: ChannelId) {
+        env.logger.debug("SerializedChannel", "Closing channel ${id.id}")
         serviceMap.remove(id.id)?.let {
             it.trackingService?.onSerializationClosed(it)
             it.close()
@@ -83,6 +85,7 @@ class HostSerializedChannelImpl<T>(
     }
 
     override suspend fun close() {
+        env.logger.debug("SerializedChannel", "Closing entire channel")
         serviceMap.values.forEach {
             it.trackingService?.onSerializationClosed(it)
             it.close()
@@ -102,12 +105,14 @@ class HostSerializedChannelImpl<T>(
 
     override suspend fun registerHost(service: SerializedService<T>): ChannelId {
         val serviceId = ChannelId(randomUuid())
+        env.logger.debug("SerializedChannel", "Registered host service ${serviceId.id}")
         serviceMap[serviceId.id] = service
         service.trackingService?.onSerializationCreated(service)
         return serviceId
     }
 
     override suspend fun wrapChannel(channelId: ChannelId): SerializedService<T> {
+        env.logger.debug("SerializedChannel", "Wrapping (unmapping) local channel ${channelId.id}")
         return serviceMap[channelId.id] ?: error("Unknown service ${channelId.id}")
     }
 
@@ -118,6 +123,7 @@ class HostSerializedChannelImpl<T>(
 val <T> SerializedChannel<T>.asClient: ChannelClient<T>
     get() = object : ChannelClient<T>, SerializedChannel<T> by this {
         override suspend fun wrapChannel(channelId: ChannelId): SerializedService<T> {
+            env.logger.debug("SerializedChannel", "Wrapping channel ${channelId.id}")
             return SubserviceChannel(this, channelId)
         }
     }

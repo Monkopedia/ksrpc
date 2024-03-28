@@ -18,6 +18,7 @@ package com.monkopedia.ksrpc
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.ChannelId
 import com.monkopedia.ksrpc.channels.SerializedService
+import com.monkopedia.ksrpc.channels.randomUuid
 import com.monkopedia.ksrpc.channels.registerHost
 import com.monkopedia.ksrpc.internal.client
 import com.monkopedia.ksrpc.internal.host
@@ -35,7 +36,9 @@ internal sealed interface Transformer<T> {
 
     fun <S> unpackError(data: CallData<S>, channel: SerializedService<S>) {
         if (!data.isBinary && channel.env.serialization.isError(data)) {
-            throw channel.env.serialization.decodeErrorCallData(data)
+            throw channel.env.serialization.decodeErrorCallData(data).also {
+                channel.env.logger.info("Transformer", "Decoding Throwable form CallData", it)
+            }
         }
     }
 }
@@ -45,11 +48,13 @@ internal class SerializerTransformer<I>(private val serializer: KSerializer<I>) 
         get() = serializer != Unit.serializer()
 
     override suspend fun <T> transform(input: I, channel: SerializedService<T>): CallData<T> {
+        channel.env.logger.debug("Transformer", "Serializing input to CallData")
         return channel.env.serialization.createCallData(serializer, input)
     }
 
     override suspend fun <T> untransform(data: CallData<T>, channel: SerializedService<T>): I {
         unpackError(data, channel)
+        channel.env.logger.debug("Transformer", "Deserializing CallData to type")
         return channel.env.serialization.decodeCallData(serializer, data)
     }
 }
@@ -59,6 +64,7 @@ internal object BinaryTransformer : Transformer<ByteReadChannel> {
         input: ByteReadChannel,
         channel: SerializedService<T>
     ): CallData<T> {
+        channel.env.logger.debug("Transformer", "Serializing ByteReadChannel to CallData")
         return CallData.createBinary(input)
     }
 
@@ -67,6 +73,7 @@ internal object BinaryTransformer : Transformer<ByteReadChannel> {
         channel: SerializedService<T>
     ): ByteReadChannel {
         unpackError(data, channel)
+        channel.env.logger.debug("Transformer", "Deserializing ByteReadChannel to CallData")
         return data.readBinary()
     }
 }
@@ -77,6 +84,7 @@ internal class SubserviceTransformer<T : RpcService>(
     override suspend fun <S> transform(input: T, channel: SerializedService<S>): CallData<S> {
         val host = host<S>() ?: error("Cannot transform service type to non-hosting channel")
         val serviceId = host.registerHost(input, serviceObj)
+        channel.env.logger.info("Transformer", "Serializing Service to CallData(${serviceId.id})")
         return channel.env.serialization.createCallData(String.serializer(), serviceId.id)
     }
 
@@ -84,6 +92,7 @@ internal class SubserviceTransformer<T : RpcService>(
         val client = client<S>() ?: error("Cannot untransform service type from non-client channel")
         unpackError(data, channel)
         val serviceId = channel.env.serialization.decodeCallData(String.serializer(), data)
+        channel.env.logger.info("Transformer", "Deserializing CallData(${serviceId}) to Stub")
         return serviceObj.createStub(client.wrapChannel(ChannelId(serviceId)))
     }
 }
@@ -113,7 +122,10 @@ class RpcMethod<T : RpcService, I, O> internal constructor(
     ): CallData<S> {
         return withContext(channel.context) {
             val transformedInput = inputTransform.untransform(input, channel)
+            val id = randomUuid()
+            channel.env.logger.info("Transformer", "($id) Calling endpoint $endpoint")
             val output = method.invoke(service as T, transformedInput)
+            channel.env.logger.debug("Transformer", "($id) Completed endpoint $endpoint")
             outputTransform.transform(output as O, channel)
         }
     }
@@ -122,7 +134,10 @@ class RpcMethod<T : RpcService, I, O> internal constructor(
     internal suspend fun <S> callChannel(channel: SerializedService<S>, input: Any?): Any? {
         return withContext(channel.context) {
             val input = inputTransform.transform(input as I, channel)
+            val id = randomUuid()
+            channel.env.logger.info("Transformer", "($id) Calling remote endpoint $endpoint")
             val transformedOutput = channel.call(this@RpcMethod, input)
+            channel.env.logger.debug("Transformer", "($id) Completed remote endpoint $endpoint")
             outputTransform.untransform(transformedOutput, channel)
         }
     }

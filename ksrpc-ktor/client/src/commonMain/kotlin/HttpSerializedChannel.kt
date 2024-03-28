@@ -77,6 +77,7 @@ internal class HttpSerializedChannel(
     }
 
     override suspend fun wrapChannel(channelId: ChannelId): SerializedService<String> {
+        env.logger.debug("HttpChannel", "Wrapping channel ${channelId.id}")
         return SubserviceChannel(this, channelId)
     }
 

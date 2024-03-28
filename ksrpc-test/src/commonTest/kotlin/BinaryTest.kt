@@ -19,7 +19,6 @@ import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
 import io.ktor.util.toByteArray
 import io.ktor.utils.io.ByteReadChannel
-import io.ktor.utils.io.readRemaining
 import kotlin.test.assertEquals
 
 @KsService
