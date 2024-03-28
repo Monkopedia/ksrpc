@@ -33,9 +33,10 @@ $dokka.location:com.monkopedia.ksrpc.server/ServiceApp/embeddedServer/#kotlin.In
 $dokka.location:com.monkopedia.ksrpc.server/ServiceApp/run/#/PointingToDeclaration/ksrpc-server/com.monkopedia.ksrpc.server/-service-app/[native]run.html
 $dokka.location:com.monkopedia.ksrpc/RpcObjectKey///PointingToDeclaration/ksrpc-core/com.monkopedia.ksrpc/[native]-rpc-object-key/index.html
 $dokka.location:com.monkopedia.ksrpc/RpcObjectKey/rpcObject/#/PointingToDeclaration/ksrpc-core/com.monkopedia.ksrpc/[native]-rpc-object-key/rpc-object.html
+module:ksrpc-annotation
+com.monkopedia.ksrpc.annotation
 module:ksrpc-core
 com.monkopedia.ksrpc
-com.monkopedia.ksrpc.annotation
 com.monkopedia.ksrpc.channels
 module:ksrpc-jni
 com.monkopedia.jnitest
