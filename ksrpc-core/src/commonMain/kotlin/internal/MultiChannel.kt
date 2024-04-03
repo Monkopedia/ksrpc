@@ -20,6 +20,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 class MultiChannel<T> {
 
@@ -37,35 +38,34 @@ class MultiChannel<T> {
 
     suspend fun send(id: String, response: T) {
         checkClosed()
-        lock.lock()
-        try {
+        lock.withLock {
             val hasPending = pending.consume(matcher = { it.first == id }) { (_, pendingItem) ->
                 pendingItem.complete(response)
             }
             if (!hasPending) {
                 error("No pending receiver for $id and $response")
             }
-        } finally {
-            lock.unlock()
         }
     }
 
-    fun allocateReceive(): Pair<Int, Deferred<T>> {
+    suspend fun allocateReceive(): Pair<Int, Deferred<T>> {
         checkClosed()
         val id = this.id.getAndIncrement()
         val completable = CompletableDeferred<T>()
-        pending.add(id.toString() to completable)
+        lock.withLock {
+            pending.add(id.toString() to completable)
+        }
         return id to completable
     }
 
     suspend fun close(t: CancellationException? = null) {
-        lock.lock()
-        isClosed = true
-        closeException = t
-        pending.forEach {
-            it.second.completeExceptionally(t ?: CancellationException("Closing MultiChannel"))
+        lock.withLock {
+            isClosed = true
+            closeException = t
+            pending.forEach {
+                it.second.completeExceptionally(t ?: CancellationException("Closing MultiChannel"))
+            }
         }
-        lock.unlock()
     }
 }
 
