@@ -27,7 +27,7 @@ expect inline fun <reified T : RpcService> rpcObject(): RpcObject<T>
  * Convert a [T] into a [SerializedService] for hosting.
  */
 inline fun <reified T : RpcService, S> T.serialized(
-    env: KsrpcEnvironment<S>,
+    env: KsrpcEnvironment<S>
 ): SerializedService<S> {
     return serialized(rpcObject(), env)
 }
@@ -37,7 +37,7 @@ inline fun <reified T : RpcService, S> T.serialized(
  */
 fun <T : RpcService, S> T.serialized(
     rpcObject: RpcObject<T>,
-    env: KsrpcEnvironment<S>,
+    env: KsrpcEnvironment<S>
 ): SerializedService<S> {
     val rpcChannel = this
     return HostSerializedServiceImpl(rpcChannel, rpcObject, env)

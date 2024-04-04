@@ -25,6 +25,7 @@ interface SuspendCloseableObservable : SuspendCloseable {
      */
     suspend fun onClose(onClose: suspend () -> Unit)
 }
+
 /**
  * Helper that runs [usage] then invokes [SuspendCloseable.close] in the finally block.
  */
