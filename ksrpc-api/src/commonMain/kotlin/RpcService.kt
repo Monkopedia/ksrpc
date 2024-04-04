@@ -16,18 +16,8 @@
 package com.monkopedia.ksrpc
 
 /**
- * Interface used for handling any errors that occur during hosting.
+ * Super-interface of all services tagged with [KsService].
  */
-fun interface ErrorListener {
-    /**
-     * Called when an error has occured during a hosted (incoming) call.
-     *
-     * The error will also be passed back to the client, this is purely for
-     * monitoring purposes.
-     */
-    fun onError(t: Throwable)
+interface RpcService : SuspendCloseable {
+    override suspend fun close() = Unit
 }
-
-expect val Throwable.asString: String
-
-const val ERROR_PREFIX = "ERROR:"

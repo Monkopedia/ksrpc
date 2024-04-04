@@ -16,18 +16,22 @@
 package com.monkopedia.ksrpc
 
 /**
- * Interface used for handling any errors that occur during hosting.
+ * Used for implementations of [SuspendCloseable] that need observers attached to be notified
+ * when [SuspendCloseable.close] is called.
  */
-fun interface ErrorListener {
+interface SuspendCloseableObservable : SuspendCloseable {
     /**
-     * Called when an error has occured during a hosted (incoming) call.
-     *
-     * The error will also be passed back to the client, this is purely for
-     * monitoring purposes.
+     * Add a callback to be invoked when [SuspendCloseable.close] is called.
      */
-    fun onError(t: Throwable)
+    suspend fun onClose(onClose: suspend () -> Unit)
 }
-
-expect val Throwable.asString: String
-
-const val ERROR_PREFIX = "ERROR:"
+/**
+ * Helper that runs [usage] then invokes [SuspendCloseable.close] in the finally block.
+ */
+suspend inline fun <T : SuspendCloseable, R> T.use(usage: (T) -> R): R {
+    try {
+        return usage(this)
+    } finally {
+        close()
+    }
+}

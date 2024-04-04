@@ -1,5 +1,5 @@
-/*
- * Copyright 2021 Jason Monk
+/**
+ * Copyright (C) 2024 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import com.monkopedia.ksrpc.local.ksrpcModule
+package com.monkopedia.ksrpc
 
-plugins {
-    kotlin("multiplatform")
-}
+import kotlinx.serialization.Serializable
 
-ksrpcModule()
-
-kotlin {
-    sourceSets["commonMain"].dependencies {
-    }
-    sourceSets["jvmMain"].dependencies {
-    }
-    sourceSets["jsMain"].dependencies {
+/**
+ * Serializable wrapper around exceptions thrown in remote calls.
+ */
+@Serializable
+data class RpcFailure(val stack: String) {
+    fun toException(): RuntimeException {
+        return RpcException(stack)
     }
 }
+
+/**
+ * Wrapper around exceptions thrown in remote calls.
+ */
+class RpcException(override val message: String) : RuntimeException(message)

@@ -60,7 +60,7 @@ fun Project.ksrpcModule(
     plugins.apply("org.jetbrains.kotlin.plugin.serialization")
 
     plugins.apply("org.jetbrains.dokka")
-    if (name != "ksrpc-annotation") {
+    if (name != "ksrpc-api") {
         plugins.apply("com.monkopedia.ksrpc.plugin")
     }
     if (includePublications) {
@@ -148,9 +148,9 @@ fun Project.ksrpcModule(
         }
         applyDefaultHierarchyTemplate()
         sourceSets["commonMain"].dependencies {
-            if (name != "ksrpc-core" && name != "ksrpc-annotation") {
+            if (name != "ksrpc-core" && name != "ksrpc-api") {
                 api(project(":ksrpc-core"))
-                api(project(":ksrpc-annotation"))
+                api(project(":ksrpc-api"))
             }
         }
         sourceSets["commonTest"].dependencies {

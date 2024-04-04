@@ -21,7 +21,7 @@ pluginManagement {
     }
 }
 rootProject.name = "ksrpc"
-include(":ksrpc-annotation")
+include(":ksrpc-api")
 include(":ksrpc-core")
 
 include(":ksrpc-jsonrpc")

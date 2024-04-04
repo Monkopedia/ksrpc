@@ -23,23 +23,10 @@ ksrpcModule()
 
 kotlin {
     sourceSets["commonMain"].dependencies {
-        api(libs.ktor.io)
         api(libs.kotlinx.serialization)
-        api(libs.kotlinx.serialization.json)
-        api(libs.kotlinx.coroutines)
-        api(libs.kotlinx.atomicfu)
-        api(kotlin("stdlib"))
-        api(project(":ksrpc-api"))
     }
     sourceSets["jvmMain"].dependencies {
-        implementation(libs.jnanoid)
-        implementation(libs.slf4j.api)
     }
     sourceSets["jsMain"].dependencies {
-        implementation(npm("nanoid", libs.versions.nanoid.get()))
     }
-//    linuxX64("native") {
-//        binaries {
-//        }
-//    }
 }

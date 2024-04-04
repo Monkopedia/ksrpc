@@ -15,19 +15,12 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.channels.SerializedService
+
 /**
- * Interface used for handling any errors that occur during hosting.
+ * Interface for generated companions of [RpcService].
  */
-fun interface ErrorListener {
-    /**
-     * Called when an error has occured during a hosted (incoming) call.
-     *
-     * The error will also be passed back to the client, this is purely for
-     * monitoring purposes.
-     */
-    fun onError(t: Throwable)
+interface RpcObject<T : RpcService> {
+    fun <S> createStub(channel: SerializedService<S>): T
+    fun findEndpoint(endpoint: String): RpcMethod<*, *, *>
 }
-
-expect val Throwable.asString: String
-
-const val ERROR_PREFIX = "ERROR:"
