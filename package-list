@@ -29,7 +29,6 @@ $dokka.location:com.monkopedia.ksrpc.jni/NativeJniContinuation/resumeSuccess/#ko
 $dokka.location:com.monkopedia.ksrpc.jni/NativeJniContinuation/resumeWith/#com.monkopedia.ksrpc.jni.Converter[*,TypeParam(bounds=[kotlin.Any?])]#kotlin.Result[TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/ksrpc-jni/com.monkopedia.ksrpc.jni/[jvm]-native-jni-continuation/resume-with.html
 $dokka.location:com.monkopedia.ksrpc.jni/NativeJniContinuation/resumeWith/#kotlin.Result[TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/ksrpc-jni/com.monkopedia.ksrpc.jni/[native]-native-jni-continuation/resume-with.html
 $dokka.location:com.monkopedia.ksrpc.jni/NativeJniContinuation/ser/#/PointingToDeclaration/ksrpc-jni/com.monkopedia.ksrpc.jni/[jvm]-native-jni-continuation/ser.html
-$dokka.location:com.monkopedia.ksrpc.server/ServiceApp/embeddedServer/#kotlin.Int#kotlin.Function1[io.ktor.server.application.Application,kotlin.Unit]/PointingToDeclaration/ksrpc-server/com.monkopedia.ksrpc.server/-service-app/[native]embedded-server.html
 $dokka.location:com.monkopedia.ksrpc.server/ServiceApp/run/#/PointingToDeclaration/ksrpc-server/com.monkopedia.ksrpc.server/-service-app/[native]run.html
 $dokka.location:com.monkopedia.ksrpc/RpcObjectKey///PointingToDeclaration/ksrpc-core/com.monkopedia.ksrpc/[native]-rpc-object-key/index.html
 $dokka.location:com.monkopedia.ksrpc/RpcObjectKey/rpcObject/#/PointingToDeclaration/ksrpc-core/com.monkopedia.ksrpc/[native]-rpc-object-key/rpc-object.html
