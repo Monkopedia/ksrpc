@@ -53,14 +53,14 @@ subprojects {
     apply(plugin = "com.github.hierynomus.license")
     tasks.register(
         "licenseCheckForKotlin",
-        com.hierynomus.gradle.license.tasks.LicenseCheck::class,
+        com.hierynomus.gradle.license.tasks.LicenseCheck::class
     ) {
         source = fileTree(project.projectDir) { include("**/*.kt") }
     }
     tasks["license"].dependsOn("licenseCheckForKotlin")
     tasks.register(
         "licenseFormatForKotlin",
-        com.hierynomus.gradle.license.tasks.LicenseFormat::class,
+        com.hierynomus.gradle.license.tasks.LicenseFormat::class
     ) {
         source = fileTree(project.projectDir) { include("**/*.kt") }
     }

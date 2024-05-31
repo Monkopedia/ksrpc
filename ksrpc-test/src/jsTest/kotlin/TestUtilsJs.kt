@@ -60,7 +60,9 @@ external class RetPromise : Promise<Any?>
 actual typealias RunBlockingReturn = RetPromise
 
 @OptIn(DelicateCoroutinesApi::class)
-internal actual fun runBlockingUnit(function: suspend CoroutineScope.() -> Unit): RunBlockingReturn {
+internal actual fun runBlockingUnit(
+    function: suspend CoroutineScope.() -> Unit
+): RunBlockingReturn {
     @Suppress("UnsafeCastFromDynamic")
     return GlobalScope.promise {
         function()
