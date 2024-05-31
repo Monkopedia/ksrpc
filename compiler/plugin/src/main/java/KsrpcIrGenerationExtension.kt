@@ -15,72 +15,60 @@
  */
 package com.monkopedia.ksrpc.plugin
 
+import com.monkopedia.ksrpc.plugin.FqConstants.BYTE_READ_CHANNEL
+import com.monkopedia.ksrpc.plugin.FqConstants.FQRPC_SERVICE
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
+import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.ERROR
+import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.WARNING
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.expressions.IrConst
 import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
+import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.types.classFqName
-import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.kotlinFqName
-import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.ir.visitors.acceptChildrenVoid
 
 class KsrpcIrGenerationExtension(
-    private val messageCollector: MessageCollector
+    private val report: MessageCollector
 ) : IrGenerationExtension {
 
     override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
-        val classes = ServiceClass.findServices(messageCollector, moduleFragment)
-        KsrpcGenerationEnvironment.create(pluginContext, messageCollector) { env ->
-            for (cls in classes) {
-                val clsType = cls.irClass.typeWith()
-                messageCollector.report(
-                    CompilerMessageSeverity.INFO,
-                    "Generating for class ${
-                    cls.irClass.name.identifier
-                    } with ${cls.methods.size} methods"
-                )
-                if (env.validate(cls)) {
-                    val (stubCls, methods) = StubGeneration.generate(cls, clsType, env)
-                    CompanionGeneration.generate(cls, env, clsType, stubCls, methods)
-                }
-            }
+        val classes = ServiceClass.findServices(report, moduleFragment)
+        classes.values.removeIf { !validate(it) }
+
+        val env = KsrpcGenerationEnvironment(pluginContext, report)
+        val transformers = listOf(
+            StubGeneration(pluginContext, report, classes, env),
+            CompanionGeneration(pluginContext, classes, env)
+        )
+        for (transformer in transformers) {
+            moduleFragment.acceptChildrenVoid(transformer)
         }
     }
 
-    private fun KsrpcGenerationEnvironment.validate(cls: ServiceClass): Boolean {
-        var isValid = true
-        if (!validateClass(cls.irClass)) {
-            isValid = false
-        }
+    private fun validate(cls: ServiceClass): Boolean {
         val names = mutableSetOf<String>()
-        for ((method, annotation) in cls.methods) {
-            if (!validateMethod(cls.irClass, method, annotation, names)) {
-                isValid = false
-            }
+        return cls.methods.fold(validateClass(cls.irClass)) { current, (method, annotation) ->
+            validateMethod(cls.irClass, method, annotation, names) && current
         }
-        return isValid
     }
 
-    private val rpcServiceName = FqName("com.monkopedia.ksrpc.RpcService")
-
-    private fun KsrpcGenerationEnvironment.validateClass(irClass: IrClass): Boolean {
+    private fun validateClass(irClass: IrClass): Boolean {
         var isValid = true
-        if (!irClass.superTypes.map { it.classFqName }.contains(rpcServiceName)) {
-            messageCollector.report(
-                CompilerMessageSeverity.ERROR,
-                "${irClass.kotlinFqName.asString()} does not extend ${rpcServiceName.asString()}"
+        if (!irClass.superTypes.map { it.classFqName }.contains(FQRPC_SERVICE)) {
+            report.error(
+                "${irClass.kotlinFqName.asString()} does not extend ${FQRPC_SERVICE.asString()}"
             )
             isValid = false
         }
         return isValid
     }
 
-    private fun KsrpcGenerationEnvironment.validateMethod(
+    private fun validateMethod(
         irClass: IrClass,
         method: IrFunction,
         annotation: IrConstructorCall,
@@ -89,46 +77,33 @@ class KsrpcIrGenerationExtension(
         var isValid = true
         if (method.typeParameters.isNotEmpty()) {
             val fqName = irClass.kotlinFqName.asString()
-            messageCollector.report(
-                CompilerMessageSeverity.ERROR,
-                "$fqName.${method.name.asString()} cannot have type parameters"
-            )
+            report.error("$fqName.${method.name.asString()} cannot have type parameters")
             isValid = false
         }
         if (method.valueParameters.size > 1) {
             val fqName = irClass.kotlinFqName.asString()
-            messageCollector.report(
-                CompilerMessageSeverity.ERROR,
-                "$fqName.${method.name.asString()} cannot have more than 1 parameter"
-            )
+            report.error("$fqName.${method.name.asString()} cannot have more than 1 parameter")
             isValid = false
         }
-        val name = (annotation.getValueArgument(0) as? IrConst<String>)?.value
+        val annotationArg = annotation.getValueArgument(0)
+        val name = annotationArg.constString()
         if (name == null) {
             val fqName = irClass.kotlinFqName.asString()
             val methodName = method.name.asString()
-            val annotationArg = annotation.getValueArgument(0)
-            messageCollector.report(
-                CompilerMessageSeverity.ERROR,
-                "$fqName.$methodName: could not parse annotation argument $annotationArg"
-            )
+            report.error("$fqName.$methodName: could not parse annotation argument $annotationArg")
             isValid = false
         } else if (!names.add(name)) {
             val fqName = irClass.kotlinFqName.asString()
             val methodName = method.name.asString()
-            messageCollector.report(
-                CompilerMessageSeverity.ERROR,
-                "$fqName.$methodName: cannot use endpoint $name, it has already been used"
-            )
+            report.error("$fqName.$methodName: cannot use endpoint $name, it has already been used")
             isValid = false
         }
-        if (method.valueParameters[0].type.classFqName == byteReadChannel &&
-            method.returnType.classFqName == byteReadChannel
-        ) {
+        val inputType = method.valueParameters[0].type.classFqName
+        val outputType = method.returnType.classFqName
+        if (inputType == BYTE_READ_CHANNEL && outputType == BYTE_READ_CHANNEL) {
             val fqName = irClass.kotlinFqName.asString()
             val methodName = method.name.asString()
-            messageCollector.report(
-                CompilerMessageSeverity.ERROR,
+            report.error(
                 "$fqName.$methodName: ByteReadChannel not yet supported for both input and output"
             )
             isValid = false
@@ -136,3 +111,8 @@ class KsrpcIrGenerationExtension(
         return isValid
     }
 }
+
+fun MessageCollector.error(msg: String) = report(ERROR, msg)
+fun MessageCollector.warn(msg: String) = report(WARNING, msg)
+
+fun IrExpression?.constString() = (this as? IrConst<*>)?.value as? String

@@ -103,6 +103,7 @@ actual fun createPipe(): Pair<ByteWriteChannel, ByteReadChannel> {
 
 actual typealias Routing = io.ktor.server.routing.Routing
 
+actual typealias RunBlockingReturn = Unit
 internal actual fun runBlockingUnit(function: suspend CoroutineScope.() -> Unit) {
     try {
         runBlocking {

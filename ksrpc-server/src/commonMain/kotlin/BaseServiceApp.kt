@@ -102,4 +102,6 @@ abstract class BaseServiceApp internal constructor(val appName: String) : CliktC
     }
 }
 
-expect abstract class ServiceApp(appName: String) : BaseServiceApp
+expect abstract class ServiceApp(appName: String) : BaseServiceApp {
+    override fun embeddedServer(port: Int, function: Application.() -> Unit): BaseApplicationEngine
+}

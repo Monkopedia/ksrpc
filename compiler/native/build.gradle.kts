@@ -17,7 +17,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
-    kotlin("kapt")
+    alias(libs.plugins.ksp)
     id("org.jetbrains.dokka")
     `maven-publish`
     `signing`
@@ -35,13 +35,13 @@ java {
 dependencies {
     compileOnly("org.jetbrains.kotlin:kotlin-compiler")
 
-    kapt(libs.autoservice)
+    ksp(libs.autoservice)
     compileOnly(libs.autoservice.annotations)
 }
 
 afterEvaluate {
     tasks.named("compileKotlin") { dependsOn("syncSource") }
-    tasks.named("kaptGenerateStubsKotlin") { dependsOn("syncSource") }
+//    tasks.named("kaptGenerateStubsKotlin") { dependsOn("syncSource") }
     tasks.named("sourcesJar") { dependsOn("syncSource") }
 }
 val syncSource = tasks.register<Sync>("syncSource") {

@@ -133,7 +133,8 @@ abstract class RpcFunctionalityTest(
     protected open fun createEnv() = ksrpcEnvironment { }
 }
 
-internal expect fun runBlockingUnit(function: suspend CoroutineScope.() -> Unit)
+expect class RunBlockingReturn
+internal expect fun runBlockingUnit(function: suspend CoroutineScope.() -> Unit): RunBlockingReturn
 
 expect class Routing
 

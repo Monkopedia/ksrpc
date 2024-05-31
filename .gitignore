@@ -4,6 +4,7 @@ build/
 local.properties
 **/build
 **/*.swp
+**/.kotlin
 
 # Eclipse
 .classpath
