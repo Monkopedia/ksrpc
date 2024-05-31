@@ -19,6 +19,7 @@ plugins {
     id("java-gradle-plugin")
     kotlin("jvm")
     id("com.github.gmazzo.buildconfig")
+    alias(libs.plugins.gradle.publish)
     `maven-publish`
     `signing`
 }
@@ -38,13 +39,15 @@ java {
 }
 
 gradlePlugin {
-    plugins {
-        create("ksrpc-gradle-plugin") {
+    website = "https://github.com/monkopedia/ksrpc"
+    vcsUrl = "https://github.com/monkopedia/ksrpc"
+
+    plugins.create("ksrpc-gradle-plugin") {
             id = rootProject.extra["kotlin_plugin_id"]?.toString() ?: "com.monkopedia.ksrpc.plugin"
             implementationClass = "com.monkopedia.ksrpc.gradle.KsrpcGradlePlugin"
-            displayName = "ksrpc-gradle-plugin"
+            displayName = "KSRPC Gradle Plugin"
             description = "A simple kotlin rpc library"
-        }
+            tags = listOf("kotlin", "kotlin/native", "kotlin/js", "kotlin/jvm", "json", "rpc")
     }
 }
 

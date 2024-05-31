@@ -41,7 +41,7 @@ dependencies {
 
 afterEvaluate {
     tasks.named("compileKotlin") { dependsOn("syncSource") }
-//    tasks.named("kaptGenerateStubsKotlin") { dependsOn("syncSource") }
+    tasks.named("kspKotlin") { dependsOn("syncSource") }
     tasks.named("sourcesJar") { dependsOn("syncSource") }
 }
 val syncSource = tasks.register<Sync>("syncSource") {

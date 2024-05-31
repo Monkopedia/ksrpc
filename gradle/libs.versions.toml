@@ -6,15 +6,16 @@ ksp = "2.0.0-1.0.21"
 ktor = "2.3.11"
 slf4j = "2.0.9"
 clikt = "4.4.0"
-gradleplugin = "8.1.1"
+agp = "8.1.1"
 kotlin-atomicfu = "0.24.0"
 kotlin-compiletesting = "1.5.0"
-dokka = "1.9.20"
+dokka = "1.9.10"
 autoservice = "1.1.1"
 autoservice-ksp = "1.1.0"
 jnanoid = "2.0.0"
 nanoid = "3.1.22"
 ksrpctest = "0.8.4"
+gradleplugin = "1.1.0"
 
 [libraries]
 dokka-base = { module = "org.jetbrains.dokka:dokka-base", version.ref = "dokka" }
@@ -53,8 +54,8 @@ clikt = { module = "com.github.ajalt.clikt:clikt", version.ref = "clikt"}
 dokka = ["dokka-base", "dokka-gradle"]
 
 [plugins]
-android-application = { id = "com.android.application", version.ref = "gradleplugin" }
-android-library = { id = "com.android.library", version.ref = "gradleplugin" }
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
@@ -64,3 +65,4 @@ hierynomus-license = { id = "com.github.hierynomus.license", version = "0.16.1" 
 jlleitschuh-ktlint = { id = "org.jlleitschuh.gradle.ktlint", version = "12.1.1" }
 gmazzo-buildconfig = { id = "com.github.gmazzo.buildconfig", version = "5.3.5" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp"}
+gradle-publish = { id = "com.gradle.plugin-publish", version.ref = "gradleplugin" }
