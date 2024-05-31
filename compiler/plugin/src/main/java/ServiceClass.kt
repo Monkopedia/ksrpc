@@ -19,10 +19,14 @@ import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.declarations.IrClass
+import org.jetbrains.kotlin.ir.declarations.IrConstructor
+import org.jetbrains.kotlin.ir.declarations.IrField
+import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.types.classFqName
+import org.jetbrains.kotlin.ir.util.fqNameForIrSerialization
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
 import org.jetbrains.kotlin.name.FqName
 
@@ -44,7 +48,7 @@ private class Visitor(private val messageCollector: MessageCollector) : IrElemen
         }
         val ret = super.visitClass(declaration)
         if (annotation != null) {
-            classes[declaration.name.asString()] = currentService
+            classes[declaration.fqNameForIrSerialization.asString()] = currentService
                 ?: error("Internal error, lost service")
         }
         currentService = lastService
@@ -60,10 +64,11 @@ private class Visitor(private val messageCollector: MessageCollector) : IrElemen
             val current = currentService
             if (current != null) {
                 current.methods.add(declaration to annotation)
-            } else {
+            } else if (!declaration.isFakeOverride) {
                 messageCollector.report(
                     CompilerMessageSeverity.ERROR,
-                    "${declaration.name.asString()
+                    "${
+                        declaration.name.asString()
                     } declared as KsMethod but not inside a KsService"
                 )
             }
@@ -71,7 +76,8 @@ private class Visitor(private val messageCollector: MessageCollector) : IrElemen
             if (currentService != null) {
                 messageCollector.report(
                     CompilerMessageSeverity.WARNING,
-                    "${declaration.name.asString()
+                    "${
+                        declaration.name.asString()
                     } declared within KsService without KsMethod annotation"
                 )
             }
@@ -84,14 +90,38 @@ data class ServiceClass(
     val irClass: IrClass,
     val methods: MutableList<Pair<IrSimpleFunction, IrConstructorCall>> = mutableListOf()
 ) {
+    val endpoints = mutableMapOf<String, IrFunction>()
+    lateinit var channel: IrField
+        private set
+    lateinit var stubCompanion: IrClass
+        private set
+    lateinit var stubConstructor: IrConstructor
+        private set
+
+    fun addEndpoint(endpoint: String, methodField: IrFunction) {
+        endpoints[endpoint] = methodField
+    }
+
+    fun setChannel(it: IrField) {
+        channel = it
+    }
+
+    fun setStubCompanion(it: IrClass) {
+        stubCompanion = it
+    }
+
+    fun setStubConstructor(it: IrConstructor) {
+        stubConstructor = it
+    }
+
     companion object {
         fun findServices(
             messageCollector: MessageCollector,
             moduleFragment: IrModuleFragment
-        ): Collection<ServiceClass> {
+        ): MutableMap<String, ServiceClass> {
             val visitor = Visitor(messageCollector)
             visitor.visitElement(moduleFragment)
-            return visitor.classes.values
+            return visitor.classes
         }
     }
 }

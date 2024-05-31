@@ -13,20 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(UnsafeDuringIrConstructionAPI::class)
+
 package com.monkopedia.ksrpc.plugin
 
+import com.monkopedia.ksrpc.plugin.FqConstants.BYTE_READ_CHANNEL
+import com.monkopedia.ksrpc.plugin.FqConstants.INVOKE
+import org.jetbrains.kotlin.GeneratedDeclarationKey
+import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.ir.addDispatchReceiver
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.backend.common.lower.irIfThen
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
+import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.descriptors.Modality
+import org.jetbrains.kotlin.ir.builders.IrBlockBodyBuilder
 import org.jetbrains.kotlin.ir.builders.declarations.addConstructor
 import org.jetbrains.kotlin.ir.builders.declarations.addField
 import org.jetbrains.kotlin.ir.builders.declarations.addFunction
+import org.jetbrains.kotlin.ir.builders.declarations.addTypeParameter
 import org.jetbrains.kotlin.ir.builders.declarations.addValueParameter
 import org.jetbrains.kotlin.ir.builders.declarations.buildClass
+import org.jetbrains.kotlin.ir.builders.declarations.buildField
+import org.jetbrains.kotlin.ir.builders.declarations.buildFun
 import org.jetbrains.kotlin.ir.builders.irBlock
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irCall
@@ -41,14 +51,19 @@ import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irSetField
 import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.declarations.IrClass
+import org.jetbrains.kotlin.ir.declarations.IrConstructor
+import org.jetbrains.kotlin.ir.declarations.IrDeclaration
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
-import org.jetbrains.kotlin.ir.expressions.IrConst
+import org.jetbrains.kotlin.ir.expressions.IrBody
+import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
-import org.jetbrains.kotlin.ir.types.IrSimpleType
+import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
+import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.classFqName
+import org.jetbrains.kotlin.ir.types.classOrNull
 import org.jetbrains.kotlin.ir.types.getClass
 import org.jetbrains.kotlin.ir.types.makeNullable
 import org.jetbrains.kotlin.ir.types.starProjectedType
@@ -56,244 +71,222 @@ import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
 import org.jetbrains.kotlin.ir.util.addChild
 import org.jetbrains.kotlin.ir.util.companionObject
+import org.jetbrains.kotlin.ir.util.constructedClass
 import org.jetbrains.kotlin.ir.util.constructors
+import org.jetbrains.kotlin.ir.util.copyTo
 import org.jetbrains.kotlin.ir.util.createImplicitParameterDeclarationWithWrappedDescriptor
+import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.functions
 import org.jetbrains.kotlin.ir.util.kotlinFqName
+import org.jetbrains.kotlin.ir.util.parentAsClass
 import org.jetbrains.kotlin.ir.util.superTypes
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.util.capitalizeDecapitalize.capitalizeAsciiOnly
 
-object StubGeneration {
-    fun generate(
-        cls: ServiceClass,
-        clsType: IrSimpleType,
-        env: KsrpcGenerationEnvironment
-    ): Pair<IrClass, Map<String, IrFunction>> = with(env) {
-        val methods = mutableMapOf<String, IrFunction>()
-        val stubCls = pluginContext.irFactory.buildClass {
-            this.startOffset = SYNTHETIC_OFFSET
-            this.endOffset = SYNTHETIC_OFFSET
-            this.name = Name.identifier("${cls.irClass.name.asString()}Stub")
-            this.modality = Modality.FINAL
-            this.visibility = DescriptorVisibilities.PUBLIC
-            this.isCompanion = false
-            this.kind = ClassKind.CLASS
-        }.apply {
-            this.parent = cls.irClass
-            cls.irClass.addChild(this)
-        }.build {
-            origin = IrDeclarationOrigin.DELEGATE
-            superTypes = listOf(clsType, env.rpcService.typeWith())
-            createImplicitParameterDeclarationWithWrappedDescriptor()
-            val channelField = addField {
-                name = Name.identifier("channel")
-                type = env.serializedService.typeWith()
-                visibility = DescriptorVisibilities.PRIVATE
-                origin = IrDeclarationOrigin.DELEGATE
-                isFinal = true
-                startOffset = SYNTHETIC_OFFSET
-                endOffset = SYNTHETIC_OFFSET
-            }
-            val thisAsReceiverParameter = thisReceiver!!
-            addConstructor {
-                isPrimary = true
-                startOffset = SYNTHETIC_OFFSET
-                endOffset = SYNTHETIC_OFFSET
-            }.apply {
-                val parameter = addValueParameter {
-                    name = Name.identifier("channel")
-                    type = env.serializedService.typeWith()
-                    startOffset = SYNTHETIC_OFFSET
-                    endOffset = SYNTHETIC_OFFSET
-                }
-                body = pluginContext.createIrBuilder(symbol).irSynthBody {
-                    +irDelegatingConstructorCall(
-                        context.irBuiltIns.anyClass.owner.constructors.single()
-                    )
-                    +irSetField(irGet(thisAsReceiverParameter), channelField, irGet(parameter))
-                }
-            }
+class StubGeneration(
+    context: IrPluginContext,
+    private val messageCollector: MessageCollector,
+    private val classes: MutableMap<String, ServiceClass>,
+    private val env: KsrpcGenerationEnvironment
+) : AbstractTransformerForGenerator(context) {
 
-            val companion = pluginContext.irFactory.buildClass {
-                this.startOffset = SYNTHETIC_OFFSET
-                this.endOffset = SYNTHETIC_OFFSET
-                this.name = Name.identifier("Companion")
-                this.modality = Modality.FINAL
-                this.visibility = DescriptorVisibilities.PUBLIC
-                this.isCompanion = true
-                this.kind = ClassKind.OBJECT
-            }.apply {
-                this.parent = this@build
-                origin = IrDeclarationOrigin.DELEGATE
-                annotations = listOf(
-                    pluginContext.createIrBuilder(symbol).irCallConstructor(
-                        threadLocal.constructors.single(),
-                        listOf()
-                    )
-                )
-                createImplicitParameterDeclarationWithWrappedDescriptor()
-                addConstructor {
-                    startOffset = SYNTHETIC_OFFSET
-                    endOffset = SYNTHETIC_OFFSET
-                    isPrimary = true
-                }.apply {
-                    body = pluginContext.createIrBuilder(symbol).irBlockBody {
-                        +irDelegatingConstructorCall(
-                            context.irBuiltIns.anyClass.owner.constructors.single()
-                        )
-                    }
-                }
-                this@build.addChild(this)
+    override fun interestedIn(key: GeneratedDeclarationKey?): Boolean {
+        return key is FirKsrpcStubGenerator.Key
+    }
+
+    override fun generateChildrenForClass(
+        declaration: IrClass,
+        key: GeneratedDeclarationKey?
+    ): Collection<IrDeclaration> {
+        val target = (key as? FirKsrpcStubGenerator.Key)?.target
+        val service = classes[target] ?: return emptyList()
+        return buildList {
+            add(generateChannelField(service))
+            val companion = generateCompanion(service)
+            add(companion)
+            service.methods.map { (method, annotation) ->
+                add(declaration.generateMethodField(method, annotation, companion, service))
             }
-            for ((method, annotation) in cls.methods) {
-                val endpoint = (annotation.getValueArgument(0) as? IrConst<String>)?.value
-                    ?: error("Lost endpoint")
-                val methodField = generateRpcMethod(
-                    env,
-                    endpoint,
-                    method,
-                    this,
-                    cls.irClass,
-                    companion
+            add(declaration.generateCloseMethod(service))
+        }
+    }
+
+    override fun generateBodyForFunction(
+        function: IrSimpleFunction,
+        key: GeneratedDeclarationKey?
+    ): IrBody? = null
+
+    override fun generateBodyForConstructor(
+        constructor: IrConstructor,
+        key: GeneratedDeclarationKey?
+    ): IrBody? {
+        val target = (key as? FirKsrpcStubGenerator.Key)?.target
+        val service = classes[target] ?: return null
+        service.setStubConstructor(constructor)
+        return context.irBuilder(constructor.symbol).irSynthBody {
+            +irDelegatingConstructorCall(
+                context.irBuiltIns.anyClass.owner.constructors.single()
+            )
+            val cls = constructor.constructedClass
+            val channelField = service.channel
+            val parameter = constructor.valueParameters.first()
+            +irSetField(irGet(cls.thisReceiver!!), channelField, irGet(parameter))
+        }
+    }
+
+    private fun generateChannelField(cls: ServiceClass) = irFactory.buildField {
+        name = Name.identifier("channel")
+        type = env.serializedService.starProjectedType
+        visibility = DescriptorVisibilities.PRIVATE
+        origin = IrDeclarationOrigin.DELEGATE
+        isFinal = true
+        startOffset = SYNTHETIC_OFFSET
+        endOffset = SYNTHETIC_OFFSET
+    }.also {
+        cls.setChannel(it)
+    }
+
+    private fun generateCompanion(cls: ServiceClass) = context.irFactory.buildClass {
+        this.startOffset = SYNTHETIC_OFFSET
+        this.endOffset = SYNTHETIC_OFFSET
+        this.name = Name.identifier("Companion")
+        this.modality = Modality.FINAL
+        this.visibility = DescriptorVisibilities.PUBLIC
+        this.isCompanion = true
+        this.kind = ClassKind.OBJECT
+    }.apply {
+        origin = IrDeclarationOrigin.DELEGATE
+        annotations = listOf(createThreadLocalAnnotation())
+        createImplicitParameterDeclarationWithWrappedDescriptor()
+        addConstructor {
+            startOffset = SYNTHETIC_OFFSET
+            endOffset = SYNTHETIC_OFFSET
+            isPrimary = true
+        }.apply {
+            body = context.irBuilder(symbol).irBlockBody {
+                +irDelegatingConstructorCall(
+                    context.irBuiltIns.anyClass.owner.constructors.single()
                 )
-                methods[endpoint] = methodField
-                val callChannel = rpcMethod.functions.find {
-                    it.owner.name.asString() == FqConstants.CALL_CHANNEL
-                }
-                overrideMethod(method.symbol) { override ->
-                    +irReturn(
-                        irCall(callChannel!!).apply {
-                            this.type = method.returnType
-                            dispatchReceiver = irCall(methodField).apply {
-                                dispatchReceiver = irGetObject(companion.symbol)
-                            }
-                            putValueArgument(
-                                0,
-                                irGetField(
-                                    irGet(override.dispatchReceiverParameter!!),
-                                    channelField
-                                )
-                            )
-                            if (override.valueParameters.size != 1) {
-                                val overrideParams = override.valueParameters.map {
-                                    it.name.asString() to it.type.classFqName?.asString()
-                                }
-                                error(
-                                    "Unexpected override parameters $overrideParams"
-                                )
-                            }
-                            putValueArgument(1, irGet(override.valueParameters[0]))
-                        }
-                    )
-                }
-            }
-            val close = cls.irClass.functions.find {
-                it.name.asString() == FqConstants.CLOSE
-            } ?: error("Can't find close method")
-            val suspendClose = suspendCloseable.functions.find {
-                it.owner.name.asString() == FqConstants.CLOSE
-            } ?: error("Can't find close method")
-            overrideMethod(close.symbol, returnType = close.returnType) { override ->
-                +irCall(suspendClose).apply {
-                    dispatchReceiver =
-                        irGetField(irGet(override.dispatchReceiverParameter!!), channelField)
-                }
             }
         }
-        return stubCls to methods
+    }.also {
+        cls.setStubCompanion(it)
+    }
+
+    private fun IrClass.createThreadLocalAnnotation() = context.irBuilder(symbol)
+        .irCallConstructor(env.threadLocal.constructors.single(), listOf())
+
+    private fun IrClass.generateCloseMethod(serviceClass: ServiceClass): IrSimpleFunction {
+        val close = functions.find { it.name == FqConstants.CLOSE }
+            ?: error("Can't find close method")
+        val suspendClose = env.suspendCloseable.findMethod(FqConstants.CLOSE)
+
+        return context.overrideMethod(this, close.symbol, close.returnType) { override ->
+            +irCall(suspendClose).apply {
+                dispatchReceiver =
+                    irGetField(irGet(override.dispatchReceiverParameter!!), serviceClass.channel)
+            }
+        }
+    }
+
+    private fun IrClass.generateMethodField(
+        method: IrSimpleFunction,
+        annotation: IrConstructorCall,
+        companion: IrClass,
+        service: ServiceClass
+    ): IrFunction {
+        val endpoint = annotation.getValueArgument(0).constString() ?: error("Lost endpoint")
+        val methodField = generateRpcMethod(env, endpoint, method, this, companion)
+
+        service.addEndpoint(endpoint, methodField)
+        val callChannel = env.rpcMethod.findMethod(FqConstants.CALL_CHANNEL)
+
+        return context.overrideMethod(this, method.symbol) { override ->
+            +irReturn(
+                irCall(callChannel).apply {
+                    type = method.returnType
+                    dispatchReceiver = irCall(methodField).apply {
+                        dispatchReceiver = irGetObject(companion.symbol)
+                    }
+                    if (override.valueParameters.size != 1) {
+                        val overrideParams = override.valueParameters.map {
+                            it.name.asString() to it.type.classFqName?.asString()
+                        }
+                        error("Unexpected override parameters $overrideParams")
+                    }
+                    putArgs(
+                        irGetField(irGet(override.dispatchReceiverParameter!!), service.channel),
+                        irGet(override.valueParameters[0])
+                    )
+                }
+            )
+        }
     }
 
     private fun generateRpcMethod(
         env: KsrpcGenerationEnvironment,
         endpoint: String,
         method: IrSimpleFunction,
-        stubCls: IrClass,
         serviceInterface: IrClass,
         companion: IrClass
-    ): IrFunction = with(env) {
-        return with(companion) {
-            val inputType = method.valueParameters[0].type
-            val outputType = method.returnType
-            val inputRpcType = env.determineType(inputType)
-            val outputRpcType = env.determineType(outputType)
-            val field = addField {
-                startOffset = SYNTHETIC_OFFSET
-                endOffset = SYNTHETIC_OFFSET
-                this.name = Name.identifier(
-                    method.name.asString().capitalizeAsciiOnly() + "Backing"
-                )
-                origin = IrDeclarationOrigin.DELEGATE
-                this.visibility = DescriptorVisibilities.INTERNAL
-                this.type = rpcMethod.starProjectedType.makeNullable()
-                this.isFinal = false
-                this.isStatic = false
+    ): IrFunction {
+        val field = companion.addField {
+            startOffset = SYNTHETIC_OFFSET
+            endOffset = SYNTHETIC_OFFSET
+            this.name = Name.identifier(method.name.asString().capitalizeAsciiOnly() + "Backing")
+            origin = IrDeclarationOrigin.DELEGATE
+            this.visibility = DescriptorVisibilities.INTERNAL
+            this.type = env.rpcMethod.starProjectedType.makeNullable()
+            this.isFinal = false
+            this.isStatic = false
+        }
+        return companion.addFunction {
+            startOffset = SYNTHETIC_OFFSET
+            endOffset = SYNTHETIC_OFFSET
+            this.name = Name.identifier(method.name.asString().capitalizeAsciiOnly())
+            this.origin = IrDeclarationOrigin.DELEGATE
+            this.visibility = DescriptorVisibilities.INTERNAL
+            this.returnType = env.rpcMethod.starProjectedType
+        }.apply {
+            addDispatchReceiver {
+                this.type = companion.typeWith()
             }
-            addFunction {
-                startOffset = SYNTHETIC_OFFSET
-                endOffset = SYNTHETIC_OFFSET
-                this.name = Name.identifier(method.name.asString().capitalizeAsciiOnly())
-                this.origin = IrDeclarationOrigin.DELEGATE
-                this.visibility = DescriptorVisibilities.INTERNAL
-                this.returnType = rpcMethod.starProjectedType
-            }.apply {
-                addDispatchReceiver {
-                    this.type = companion.typeWith()
-                }
-                body = pluginContext.createIrBuilder(symbol).irBlockBody {
-                    +irIfThen(
-                        irEqualsNull(irGetField(irGet(dispatchReceiverParameter!!), field)),
-                        irSetField(
-                            irGet(dispatchReceiverParameter!!),
-                            field,
-                            irCreateRpcMethod(
-                                this@apply,
-                                serviceInterface,
-                                inputType,
-                                outputType,
-                                endpoint,
-                                inputRpcType,
-                                outputRpcType,
-                                method
-                            )
-                        )
+            val builder = context.irBuilder(symbol)
+            body = builder.irBlockBody {
+                +irIfThen(
+                    irEqualsNull(irGetField(irGet(dispatchReceiverParameter!!), field)),
+                    irSetField(
+                        irGet(dispatchReceiverParameter!!),
+                        field,
+                        builder.irCreateRpcMethod(serviceInterface, endpoint, method)
                     )
-                    +irReturn(irGetField(irGet(dispatchReceiverParameter!!), field))
-                }
+                )
+                +irReturn(irGetField(irGet(dispatchReceiverParameter!!), field))
             }
         }
     }
 
-    private fun KsrpcGenerationEnvironment.irCreateRpcMethod(
-        function: IrFunction,
+    private fun DeclarationIrBuilder.irCreateRpcMethod(
         serviceInterface: IrClass,
-        inputType: IrType,
-        outputType: IrType,
         endpoint: String,
-        inputRpcType: RpcType,
-        outputRpcType: RpcType,
         method: IrSimpleFunction
-    ) = with(pluginContext.createIrBuilder(function.symbol)) {
-        messageCollector.report(
-            CompilerMessageSeverity.INFO,
-            "generating ${serviceInterface.name.identifier}#${function.name.identifier}(\"${
-            endpoint.trimStart('/')
-            }\") with types: $inputRpcType(${
-            inputType.classFqName?.shortName()
-            }) $outputRpcType(${outputType.classFqName?.shortName()})"
-        )
-        irCallConstructor(
-            rpcMethod.constructors.first(),
+    ): IrConstructorCall {
+        val inputType = method.valueParameters[0].type
+        val outputType = method.returnType
+        val inputRpcType = determineType(inputType)
+        val outputRpcType = determineType(outputType)
+
+        return irCallConstructor(
+            env.rpcMethod.constructors.first(),
             listOf(serviceInterface.typeWith(), inputType, outputType)
         ).apply {
-            this.type = rpcMethod.typeWith(serviceInterface.typeWith(), inputType, outputType)
-            putValueArgument(0, irString(endpoint.trimStart('/')))
-            putValueArgument(1, createTypeConverter(inputRpcType, inputType, this@with))
-            putValueArgument(2, createTypeConverter(outputRpcType, outputType, this@with))
-            val createServiceExecutor = irCreateServiceExecutor(method, serviceInterface)
-            putValueArgument(
-                3,
+            this.type = env.rpcMethod.typeWith(serviceInterface.typeWith(), inputType, outputType)
+            putArgs(
+                irString(endpoint.trimStart('/')),
+                createTypeConverter(inputRpcType, inputType, this@irCreateRpcMethod),
+                createTypeConverter(outputRpcType, outputType, this@irCreateRpcMethod),
                 irBlock {
+                    val createServiceExecutor = irCreateServiceExecutor(method, serviceInterface)
                     +irCallConstructor(
                         createServiceExecutor.constructors.first().symbol,
                         emptyList()
@@ -305,41 +298,33 @@ object StubGeneration {
         }
     }
 
-    private fun KsrpcGenerationEnvironment.createTypeConverter(
+    private fun createTypeConverter(
         outputRpcType: RpcType,
         outputType: IrType,
         declarationIrBuilder: DeclarationIrBuilder
     ) = when (outputRpcType) {
-        RpcType.BINARY -> declarationIrBuilder.irGetObject(binaryTransformer)
-        RpcType.SERVICE ->
-            declarationIrBuilder.irCallConstructor(
-                subserviceTransformer.constructors.first(),
-                listOf(outputType)
-            ).apply {
-                this.type = subserviceTransformer.typeWith(outputType)
-                putValueArgument(
-                    0,
-                    declarationIrBuilder.irGetObject(
-                        outputType.getClass()?.companionObject()?.symbol
-                            ?: error("Missing companion")
-                    )
-                )
-            }
-        else ->
-            declarationIrBuilder.irCallConstructor(
-                serializerTransformer.constructors.first(),
-                listOf(outputType)
-            ).apply {
-                this.type = serializerTransformer.typeWith(outputType)
-                putValueArgument(0, getSerializer(declarationIrBuilder, outputType))
-            }
+        RpcType.BINARY -> declarationIrBuilder.irGetObject(env.binaryTransformer)
+        RpcType.SERVICE -> declarationIrBuilder.irCallConstructor(
+            env.subserviceTransformer.constructors.first(),
+            listOf(outputType)
+        ).apply {
+            type = env.subserviceTransformer.typeWith(outputType)
+            val companionSymbol = outputType.getClass()?.companionObject()?.symbol
+                ?: error("Missing companion ${outputType.classFqName?.asString()}")
+            putArgs(declarationIrBuilder.irGetObject(companionSymbol))
+        }
+
+        else -> declarationIrBuilder.irCallConstructor(
+            env.serializerTransformer.constructors.first(),
+            listOf(outputType)
+        ).apply {
+            type = env.serializerTransformer.typeWith(outputType)
+            putArgs(getSerializer(declarationIrBuilder, outputType))
+        }
     }
 
-    private fun KsrpcGenerationEnvironment.irCreateServiceExecutor(
-        referencedFunction: IrSimpleFunction,
-        receiver: IrClass
-    ) =
-        pluginContext.irFactory.buildClass {
+    private fun irCreateServiceExecutor(referencedFunction: IrSimpleFunction, receiver: IrClass) =
+        context.irFactory.buildClass {
             startOffset = referencedFunction.startOffset
             endOffset = referencedFunction.endOffset
             name = Name.identifier(
@@ -351,7 +336,7 @@ object StubGeneration {
             isCompanion = false
         }.apply {
             this.parent = receiver
-            superTypes = listOf(serviceExecutor.typeWith())
+            superTypes = listOf(env.serviceExecutor.typeWith())
             createImplicitParameterDeclarationWithWrappedDescriptor()
 
             addConstructor {
@@ -359,25 +344,24 @@ object StubGeneration {
                 endOffset = SYNTHETIC_OFFSET
                 isPrimary = true
             }.apply {
-                body = pluginContext.createIrBuilder(symbol).irBlockBody {
+                body = context.irBuilder(symbol).irBlockBody {
                     +irDelegatingConstructorCall(
                         context.irBuiltIns.anyClass.owner.constructors.single()
                     )
                 }
             }
-            val invoke = serviceExecutor.functions.find {
-                it.owner.name.asString() == FqConstants.INVOKE
-            } ?: error("Can't find invoke method")
-            overrideMethod(invoke, returnType = referencedFunction.returnType) { override ->
+            val invoke = env.serviceExecutor.findMethod(INVOKE)
+            val override = context.overrideMethod(
+                this,
+                invoke,
+                referencedFunction.returnType
+            ) { override ->
                 +irReturn(
                     irCall(referencedFunction).apply {
                         type = referencedFunction.returnType
-                        dispatchReceiver = irImplicitCast(
-                            irGet(override.valueParameters[0]),
-                            receiver.typeWith()
-                        )
-                        putValueArgument(
-                            0,
+                        dispatchReceiver =
+                            irImplicitCast(irGet(override.valueParameters[0]), receiver.typeWith())
+                        putArgs(
                             irImplicitCast(
                                 irGet(override.valueParameters[1]),
                                 referencedFunction.valueParameters[0].type
@@ -386,25 +370,20 @@ object StubGeneration {
                     }
                 )
             }
+            this.addChild(override)
             receiver.addChild(this)
         }
 
-    private fun KsrpcGenerationEnvironment.getSerializer(
-        irBlockBodyBuilder: DeclarationIrBuilder,
-        type: IrType
-    ) =
-        irBlockBodyBuilder.irCall(
-            serializerMethod
-                ?: error("Missing serializer")
-        ).apply {
+    private fun getSerializer(irBlockBodyBuilder: DeclarationIrBuilder, type: IrType) =
+        irBlockBodyBuilder.irCall(env.serializerMethod ?: error("Missing serializer")).apply {
             putTypeArgument(0, type)
-            this.type = kSerializer.typeWith(type)
+            this.type = env.kSerializer.typeWith(type)
         }
 
-    private fun KsrpcGenerationEnvironment.determineType(type: IrType): RpcType {
+    private fun determineType(type: IrType): RpcType {
         return when {
-            type.extends(rpcService) -> RpcType.SERVICE
-            type.classFqName == byteReadChannel -> RpcType.BINARY
+            type.extends(env.rpcService) -> RpcType.SERVICE
+            type.classFqName == BYTE_READ_CHANNEL -> RpcType.BINARY
             else -> RpcType.DEFAULT
         }
     }
@@ -422,5 +401,62 @@ object StubGeneration {
         DEFAULT,
         BINARY,
         SERVICE
+    }
+}
+
+inline fun IrPluginContext.overrideMethod(
+    irClass: IrClass,
+    method: IrSimpleFunctionSymbol,
+    returnType: IrType = method.owner.returnType,
+    body: IrBlockBodyBuilder.(IrSimpleFunction) -> Unit
+) = irFactory.buildFun {
+    this.name = method.owner.name
+    this.returnType = returnType
+    this.modality = Modality.FINAL
+    this.visibility = method.owner.visibility
+    this.isSuspend = method.owner.isSuspend
+    this.isFakeOverride = false
+    this.isInline = false
+    this.origin = IrDeclarationOrigin.DELEGATE
+}.apply {
+    val thisReceiver = irClass.thisReceiver!!
+    dispatchReceiverParameter = thisReceiver.copyTo(this, type = thisReceiver.type)
+    val baseFqName = method.owner.parentAsClass.fqNameWhenAvailable!!
+    overriddenSymbols = (irClass.superTypes.mapNotNull { it.classOrNull?.owner } + irClass)
+        .filter { superType ->
+            superType.isSubclassOfFqName(baseFqName.asString())
+        }.flatMap { superClass ->
+            superClass.functions
+        }.filter { function ->
+            function.name.asString() == method.owner.name.asString() &&
+                function.overridesFunctionIn(baseFqName)
+        }.map { it.symbol }
+        .toList()
+    method.owner.typeParameters.forEach {
+        addTypeParameter {
+            startOffset = SYNTHETIC_OFFSET
+            endOffset = SYNTHETIC_OFFSET
+            index = it.index
+            isReified = it.isReified
+            superTypes.addAll(it.superTypes)
+            variance = it.variance
+            name = it.name
+        }
+    }
+    method.owner.valueParameters.forEach {
+        addValueParameter {
+            startOffset = SYNTHETIC_OFFSET
+            endOffset = SYNTHETIC_OFFSET
+            name = it.name
+            type = it.type
+            index = it.index
+            isHidden = it.isHidden
+            isAssignable = it.isAssignable
+            isCrossInline = it.isCrossinline
+            varargElementType = it.varargElementType
+        }
+    }
+    this.body = irBuilder(symbol).irBlockBody {
+        body(this@apply)
     }
 }

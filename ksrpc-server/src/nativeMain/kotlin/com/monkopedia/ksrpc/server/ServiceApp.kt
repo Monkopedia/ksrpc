@@ -36,7 +36,7 @@ actual abstract class ServiceApp actual constructor(appName: String) : BaseServi
         super.run()
     }
 
-    override fun embeddedServer(
+    actual override fun embeddedServer(
         port: Int,
         function: Application.() -> Unit
     ): BaseApplicationEngine {

@@ -13,19 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+@file:OptIn(ExperimentalCompilerApi::class)
+
 package com.monkopedia.ksrpc.plugin
 
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
-import org.jetbrains.kotlin.compiler.plugin.ComponentRegistrar
+import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
+import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.junit.Test
 
 class IrPluginTest {
-    val sourceFile = SourceFile.kotlin(
-        "main.kt",
-        """
+    val sourceFile =
+        SourceFile.kotlin(
+            "main.kt",
+            """
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
 import com.monkopedia.ksrpc.RpcService
@@ -36,8 +41,8 @@ interface MyInterface: RpcService {
     @KsMethod("/serial_name")
     suspend fun doSomething(input: String): Int
 }
-"""
-    )
+""",
+        )
 
     @Test
     fun `IR plugin success`() {
@@ -57,26 +62,26 @@ interface MyInterface: RpcService {
         assertContains(
             result.messages,
             "generating MyInterface#DoSomething(\"serial_name\") with " +
-                "types: DEFAULT(String) DEFAULT(Int)"
+                "types: DEFAULT(String) DEFAULT(Int)",
         )
     }
 }
 
 fun compile(
     sourceFiles: List<SourceFile>,
-    plugin: ComponentRegistrar = KsrpcComponentRegistrar(),
+    plugin: CompilerPluginRegistrar = KsrpcComponentRegistrar(),
 ): KotlinCompilation.Result {
     return KotlinCompilation().apply {
         sources = sourceFiles
         useIR = true
-        compilerPlugins = listOf(plugin)
+        compilerPluginRegistrars = listOf(plugin)
         inheritClassPath = true
     }.compile()
 }
 
 fun compile(
     sourceFile: SourceFile,
-    plugin: ComponentRegistrar = KsrpcComponentRegistrar(),
+    plugin: CompilerPluginRegistrar = KsrpcComponentRegistrar(),
 ): KotlinCompilation.Result {
     return compile(listOf(sourceFile), plugin)
 }

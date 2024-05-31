@@ -17,7 +17,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
-    kotlin("kapt")
+    alias(libs.plugins.ksp)
     id("com.github.gmazzo.buildconfig")
     `maven-publish`
     `signing`
@@ -35,7 +35,7 @@ java {
 dependencies {
     compileOnly("org.jetbrains.kotlin:kotlin-compiler-embeddable")
 
-    kapt(libs.autoservice)
+    ksp(libs.autoservice)
     compileOnly(libs.autoservice.annotations)
 
     testImplementation(libs.ksrpctest)

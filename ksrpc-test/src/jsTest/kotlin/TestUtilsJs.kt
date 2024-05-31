@@ -19,6 +19,7 @@ import com.monkopedia.ksrpc.channels.SerializedService
 import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
+import kotlin.js.Promise
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -55,9 +56,13 @@ actual fun createPipe(): Pair<ByteWriteChannel, ByteReadChannel> {
 
 actual class Routing
 
+external class RetPromise : Promise<Any?>
+actual typealias RunBlockingReturn = RetPromise
+
 @OptIn(DelicateCoroutinesApi::class)
-internal actual fun runBlockingUnit(function: suspend CoroutineScope.() -> Unit): dynamic {
+internal actual fun runBlockingUnit(function: suspend CoroutineScope.() -> Unit): RunBlockingReturn {
+    @Suppress("UnsafeCastFromDynamic")
     return GlobalScope.promise {
         function()
-    }
+    }.asDynamic()
 }

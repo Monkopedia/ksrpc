@@ -93,6 +93,7 @@ actual fun createPipe(): Pair<ByteWriteChannel, ByteReadChannel> {
     return channel to channel
 }
 
+actual typealias RunBlockingReturn = Unit
 @OptIn(DelicateCoroutinesApi::class)
 internal actual fun runBlockingUnit(function: suspend CoroutineScope.() -> Unit) {
     val block = CountDownLatch(1)

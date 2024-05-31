@@ -1,25 +1,27 @@
 [versions]
-kotlin = "1.9.22"
-kotlin-coroutines = "1.7.3"
-kotlin-serialization = "1.6.0"
-ktor = "2.3.8"
+kotlin = "2.0.0"
+kotlin-coroutines = "1.8.1"
+kotlin-serialization = "1.7.0-RC"
+ksp = "2.0.0-1.0.21"
+ktor = "2.3.11"
 slf4j = "2.0.9"
-clikt = "4.2.2"
+clikt = "4.4.0"
 gradleplugin = "8.1.1"
-kotlin-atomicfu = "0.23.2"
+kotlin-atomicfu = "0.24.0"
 kotlin-compiletesting = "1.5.0"
-dokka = "1.9.10"
-googleautoservice = "1.1.1"
+dokka = "1.9.20"
+autoservice = "1.1.1"
+autoservice-ksp = "1.1.0"
 jnanoid = "2.0.0"
 nanoid = "3.1.22"
-ksrpctest = "0.8.0"
+ksrpctest = "0.8.4"
 
 [libraries]
 dokka-base = { module = "org.jetbrains.dokka:dokka-base", version.ref = "dokka" }
 dokka-gradle = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
 kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
-autoservice = { module = "com.google.auto.service:auto-service", version.ref = "googleautoservice" }
-autoservice-annotations = { module = "com.google.auto.service:auto-service-annotations", version.ref = "googleautoservice" }
+autoservice = { module = "dev.zacsweers.autoservice:auto-service-ksp", version.ref = "autoservice-ksp" }
+autoservice-annotations = { module = "com.google.auto.service:auto-service-annotations", version.ref = "autoservice" }
 ksrpctest = { module = "com.monkopedia.ksrpc:ksrpc-core", version.ref = "ksrpctest"}
 kotlin-compiletesting = { module = "com.github.tschuchortdev:kotlin-compile-testing", version.ref = "kotlin-compiletesting"}
 ktor-io = { module = "io.ktor:ktor-io", version.ref = "ktor" }
@@ -59,5 +61,6 @@ kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 hierynomus-license = { id = "com.github.hierynomus.license", version = "0.16.1" }
-jlleitschuh-ktlint = { id = "org.jlleitschuh.gradle.ktlint", version = "11.0.0" }
-gmazzo-buildconfig = { id = "com.github.gmazzo.buildconfig", version = "3.1.0" }
+jlleitschuh-ktlint = { id = "org.jlleitschuh.gradle.ktlint", version = "12.1.1" }
+gmazzo-buildconfig = { id = "com.github.gmazzo.buildconfig", version = "5.3.5" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp"}

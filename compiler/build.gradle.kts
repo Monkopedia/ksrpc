@@ -44,10 +44,16 @@ subprojects {
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
     apply(plugin = "com.github.hierynomus.license")
     tasks.register("licenseCheckForKotlin", com.hierynomus.gradle.license.tasks.LicenseCheck::class) {
+        dependsOn("generateBuildConfig")
+        dependsOn("processResources")
+        dependsOn("kspKotlin")
         source = fileTree(project.projectDir) { include("**/*.kt") }
     }
     tasks["license"].dependsOn("licenseCheckForKotlin")
     tasks.register("licenseFormatForKotlin", com.hierynomus.gradle.license.tasks.LicenseFormat::class) {
+        dependsOn("generateBuildConfig")
+        dependsOn("processResources")
+        dependsOn("kspKotlin")
         source = fileTree(project.projectDir) { include("**/*.kt") }
     }
     tasks["licenseFormat"].dependsOn("licenseFormatForKotlin")

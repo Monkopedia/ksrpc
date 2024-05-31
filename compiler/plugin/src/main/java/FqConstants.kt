@@ -16,33 +16,43 @@
 package com.monkopedia.ksrpc.plugin
 
 import org.jetbrains.kotlin.name.CallableId
+import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
 object FqConstants {
-    const val PKG = "com.monkopedia.ksrpc"
-    const val RPC_ENDPOINT_EXCEPTION = "$PKG.RpcEndpointException"
-    const val RPC_OBJECT = "$PKG.RpcObject"
-    const val RPC_OBJECT_KEY = "$PKG.RpcObjectKey"
-    const val RPC_SERVICE = "$PKG.RpcService"
-    const val SERIALIZED_SERVICE = "$PKG.channels.SerializedService"
-    const val RPC_METHOD = "$PKG.RpcMethod"
-    const val SERVICE_EXECUTOR = "$PKG.ServiceExecutor"
-    const val SERIALIZER_TRANSFORMER = "$PKG.SerializerTransformer"
-    const val BINARY_TRANSFORMER = "$PKG.BinaryTransformer"
-    const val SUBSERVICE_TRANSFORMER = "$PKG.SubserviceTransformer"
-    const val SUSPEND_CLOSEABLE = "$PKG.SuspendCloseable"
+    val FQPKG = FqName("com.monkopedia.ksrpc")
+    val RPC_ENDPOINT_EXCEPTION = ClassId(FQPKG, Name.identifier("RpcEndpointException"))
+    val RPC_OBJECT_KEY = ClassId(FQPKG, Name.identifier("RpcObjectKey"))
+    val RPC_SERVICE = ClassId(FQPKG, Name.identifier("RpcService"))
+    val FQRPC_SERVICE = FqName("com.monkopedia.ksrpc.RpcService")
 
-    const val CREATE_STUB = "createStub"
-    const val FIND_ENDPOINT = "findEndpoint"
-    const val CALL_CHANNEL = "callChannel"
-    const val CLOSE = "close"
-    const val INVOKE = "invoke"
+    val SERVICE_EXECUTOR = ClassId(FQPKG, Name.identifier("ServiceExecutor"))
+    val SERIALIZER_TRANSFORMER = ClassId(FQPKG, Name.identifier("SerializerTransformer"))
+    val BINARY_TRANSFORMER = ClassId(FQPKG, Name.identifier("BinaryTransformer"))
+    val SUBSERVICE_TRANSFORMER = ClassId(FQPKG, Name.identifier("SubserviceTransformer"))
+    val SUSPEND_CLOSEABLE = ClassId(FQPKG, Name.identifier("SuspendCloseable"))
 
-    const val KSERIALIZER = "kotlinx.serialization.KSerializer"
+    val CALL_CHANNEL = Name.identifier("callChannel")
+    val CLOSE = Name.identifier("close")
+    val INVOKE = Name.identifier("invoke")
+
+    val KSERIALIZER = ClassId(FqName("kotlinx.serialization"), Name.identifier("KSerializer"))
     val SERIALIZER_CALLABLE: CallableId =
         CallableId(FqName("kotlinx.serialization"), Name.identifier("serializer"))
-    const val TYPE_OF = "kotlin.reflect.typeOf"
-    const val BYTE_READ_CHANNEL = "io.ktor.utils.io.ByteReadChannel"
-    const val THREAD_LOCAL = "kotlin.native.concurrent.ThreadLocal"
+    val THREAD_LOCAL = ClassId(FqName("kotlin.native.concurrent"), Name.identifier("ThreadLocal"))
+
+    val BYTE_READ_CHANNEL = FqName("io.ktor.utils.io.ByteReadChannel")
+
+    val CREATE_STUB = Name.identifier("createStub")
+    val FIND_ENDPOINT = Name.identifier("findEndpoint")
+
+    val RPC_OBJECT = ClassId(FQPKG, Name.identifier("RpcObject"))
+    val RPC_METHOD = ClassId(FQPKG, Name.identifier("RpcMethod"))
+
+    val SERIALIZED_SERVICE =
+        ClassId(FqName("com.monkopedia.ksrpc.channels"), Name.identifier("SerializedService"))
+
+    val KS_METHOD = FqName("com.monkopedia.ksrpc.annotation.KsMethod")
+    val KS_SERVICE = FqName("com.monkopedia.ksrpc.annotation.KsService")
 }
