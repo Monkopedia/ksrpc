@@ -51,7 +51,7 @@ jobs:
         run: gradle build -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}' || gradle build -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}' || gradle build -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
 
       - name: Publish package
-        run: gradle publish -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
+        run: gradle publishIosArm64PublicationToOSSRHRepository publishIosSimulatorArm64PublicationToOSSRHRepository publishIosX64PublicationToOSSRHRepository publishMacosArm64PublicationToOSSRHRepository publishMacosX64PublicationToOSSRHRepository -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}

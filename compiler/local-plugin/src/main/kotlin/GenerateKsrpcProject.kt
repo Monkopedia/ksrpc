@@ -15,7 +15,7 @@
  */
 package com.monkopedia.ksrpc.local
 
-import org.gradle.api.GradleException
+import java.io.File
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
@@ -26,17 +26,14 @@ import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.maven
-import org.gradle.kotlin.dsl.provideDelegate
 import org.gradle.kotlin.dsl.withType
 import org.gradle.plugins.signing.SigningExtension
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.dokka.gradle.DokkaTaskPartial
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTargetWithTests
 import org.jetbrains.kotlin.gradle.targets.js.yarn.yarn
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.io.File
 
 class KsrpcDummyPlugin : Plugin<Project> {
     override fun apply(project: Project) {
@@ -108,17 +105,14 @@ fun Project.ksrpcModule(
                 }
             }
 
-            val hostOs = System.getProperty("os.name")
-            if (hostOs == "Linux") {
-                linuxX64 {
+            linuxX64 {
+                binaries {}
+                nativeConfig()
+            }
+            if (supportLinuxArm64) {
+                linuxArm64 {
                     binaries {}
                     nativeConfig()
-                }
-                if (supportLinuxArm64) {
-                    linuxArm64 {
-                        binaries {}
-                        nativeConfig()
-                    }
                 }
             }
             if (supportAndroidNative) {
@@ -290,11 +284,11 @@ fun Project.ksrpcModule(
     }
     project.afterEvaluate {
         tasks.withType(org.gradle.plugins.signing.Sign::class) { signingTask ->
-            tasks.withType(org.gradle.api.publish.maven.tasks.AbstractPublishToMaven::class) { publishTask ->
+            tasks.withType(
+                org.gradle.api.publish.maven.tasks.AbstractPublishToMaven::class
+            ) { publishTask ->
                 publishTask.dependsOn(signingTask)
             }
         }
-
-
     }
 }
