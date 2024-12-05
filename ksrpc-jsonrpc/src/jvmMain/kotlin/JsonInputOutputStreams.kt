@@ -19,6 +19,7 @@ import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.channels.SingleChannelConnection
 import com.monkopedia.ksrpc.sockets.internal.swallow
 import io.ktor.utils.io.jvm.javaio.toByteReadChannel
+import io.ktor.utils.io.read
 import io.ktor.utils.io.reader
 import java.io.InputStream
 import java.io.OutputStream

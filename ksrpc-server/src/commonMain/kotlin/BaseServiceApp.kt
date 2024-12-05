@@ -27,7 +27,7 @@ import com.monkopedia.ksrpc.ktor.serve
 import com.monkopedia.ksrpc.sockets.withStdInOut
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
-import io.ktor.server.engine.BaseApplicationEngine
+import io.ktor.server.engine.*
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.routing
@@ -85,7 +85,7 @@ abstract class BaseServiceApp internal constructor(val appName: String) : CliktC
         }
     }
 
-    abstract fun embeddedServer(port: Int, function: Application.() -> Unit): BaseApplicationEngine
+    abstract fun embeddedServer(port: Int, function: Application.() -> Unit): EmbeddedServer<*, *>
 
     protected open fun createRouting(routing: Routing) {
         routing.serve("/${appName.decapitalize()}", createChannel(), env)
@@ -103,5 +103,5 @@ abstract class BaseServiceApp internal constructor(val appName: String) : CliktC
 }
 
 expect abstract class ServiceApp(appName: String) : BaseServiceApp {
-    override fun embeddedServer(port: Int, function: Application.() -> Unit): BaseApplicationEngine
+    override fun embeddedServer(port: Int, function: Application.() -> Unit): EmbeddedServer<*, *>
 }

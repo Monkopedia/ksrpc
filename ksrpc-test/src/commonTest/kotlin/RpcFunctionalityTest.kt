@@ -25,6 +25,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
+import io.ktor.utils.io.close
 import kotlin.test.Test
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -136,7 +137,7 @@ abstract class RpcFunctionalityTest(
 expect class RunBlockingReturn
 internal expect fun runBlockingUnit(function: suspend CoroutineScope.() -> Unit): RunBlockingReturn
 
-expect class Routing
+expect interface Routing
 
 expect suspend inline fun httpTest(
     crossinline serve: suspend Routing.() -> Unit,

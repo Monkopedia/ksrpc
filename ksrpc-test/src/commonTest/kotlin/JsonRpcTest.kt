@@ -28,6 +28,7 @@ import com.monkopedia.ksrpc.jsonrpc.internal.jsonLine
 import com.monkopedia.ksrpc.sockets.internal.appendLine
 import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.close
+import io.ktor.utils.io.readFully
 import io.ktor.utils.io.readUTF8Line
 import kotlin.coroutines.coroutineContext
 import kotlin.test.Test

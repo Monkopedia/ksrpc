@@ -115,4 +115,4 @@ class KsrpcIrGenerationExtension(
 fun MessageCollector.error(msg: String) = report(ERROR, msg)
 fun MessageCollector.warn(msg: String) = report(WARNING, msg)
 
-fun IrExpression?.constString() = (this as? IrConst<*>)?.value as? String
+fun IrExpression?.constString() = (this as? IrConst)?.value as? String

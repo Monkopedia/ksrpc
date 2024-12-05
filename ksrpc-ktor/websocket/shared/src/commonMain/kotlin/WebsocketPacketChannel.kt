@@ -19,7 +19,7 @@ import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.packets.internal.Packet
 import com.monkopedia.ksrpc.packets.internal.PacketChannelBase
 import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
-import io.ktor.util.InternalAPI
+import io.ktor.utils.io.InternalAPI
 import io.ktor.utils.io.charsets.Charsets
 import io.ktor.websocket.DefaultWebSocketSession
 import io.ktor.websocket.close
@@ -41,6 +41,7 @@ class WebsocketPacketChannel(
     override val maxSize: Long
         get() = socketSession.maxFrameSize / 2 - 1024
 
+    @OptIn(InternalAPI::class)
     override suspend fun sendLocked(packet: Packet<String>) {
         socketSession.sendSerializedBase<Packet<String>>(packet, converter, Charsets.UTF_8)
     }

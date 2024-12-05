@@ -54,7 +54,7 @@ actual fun createPipe(): Pair<ByteWriteChannel, ByteReadChannel> {
     return channel to channel
 }
 
-actual class Routing
+actual interface Routing
 
 external class RetPromise : Promise<Any?>
 actual typealias RunBlockingReturn = RetPromise

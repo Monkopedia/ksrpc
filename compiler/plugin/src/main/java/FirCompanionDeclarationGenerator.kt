@@ -105,7 +105,7 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
         val retType = RPC_METHOD.createConeType(session, Array(3) { ConeStarProjection })
         val function = createMemberFunction(owner, ownerKey, callableId.callableName, retType) {
             modality = FINAL
-            valueParameter(Name.identifier("endpoint"), session.builtinTypes.stringType.type)
+            valueParameter(Name.identifier("endpoint"), session.builtinTypes.stringType.coneType)
         }
         return listOf(function.symbol)
     }

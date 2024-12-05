@@ -20,6 +20,7 @@ import com.monkopedia.ksrpc.annotation.KsService
 import com.monkopedia.ksrpc.channels.Connection
 import com.monkopedia.ksrpc.channels.registerDefault
 import com.monkopedia.ksrpc.sockets.asConnection
+import io.ktor.utils.io.close
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.CompletableDeferred

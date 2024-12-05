@@ -15,8 +15,8 @@
  */
 package com.monkopedia.ksrpc
 
-import io.ktor.util.toByteArray
 import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.toByteArray
 import kotlin.test.assertEquals
 
 class TestJniImpl : JniTestInterface {

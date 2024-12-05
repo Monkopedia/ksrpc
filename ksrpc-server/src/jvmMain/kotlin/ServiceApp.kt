@@ -23,8 +23,10 @@ import com.monkopedia.ksrpc.ktor.websocket.serveWebsocket
 import com.monkopedia.ksrpc.sockets.asConnection
 import io.ktor.server.application.Application
 import io.ktor.server.engine.BaseApplicationEngine
+import io.ktor.server.engine.EmbeddedServer
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.server.netty.NettyApplicationEngine
 import io.ktor.server.routing.Routing
 import java.net.ServerSocket
 import kotlin.concurrent.thread
@@ -86,7 +88,7 @@ actual abstract class ServiceApp actual constructor(appName: String) : BaseServi
     actual override fun embeddedServer(
         port: Int,
         function: Application.() -> Unit
-    ): BaseApplicationEngine {
+    ): EmbeddedServer<*, *> {
         return embeddedServer(Netty, port) {
             function()
         }

@@ -21,6 +21,7 @@ import com.monkopedia.ksrpc.ktor.websocket.serveWebsocket
 import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
 import io.ktor.server.application.install
 import io.ktor.server.engine.ApplicationEngine
+import io.ktor.server.engine.EmbeddedServer
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.routing.routing
@@ -49,7 +50,7 @@ actual suspend inline fun httpTest(
     isWebsocket: Boolean
 ) {
     val port = PORT++
-    val serverCompletion = CompletableDeferred<ApplicationEngine>()
+    val serverCompletion = CompletableDeferred<EmbeddedServer<*, *>>()
     GlobalScope.launch(Dispatchers.IO) {
         try {
             serverCompletion.complete(

@@ -20,18 +20,8 @@ package com.monkopedia.ksrpc.sockets
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.channels.Connection
 import com.monkopedia.ksrpc.sockets.internal.swallow
-import io.ktor.utils.io.ByteChannel
-import io.ktor.utils.io.ByteReadChannel
-import io.ktor.utils.io.ByteWriteChannel
-import io.ktor.utils.io.bits.copyTo
-import io.ktor.utils.io.close
-import io.ktor.utils.io.read
-import io.ktor.utils.io.reader
-import io.ktor.utils.io.writer
-import kotlinx.cinterop.ByteVar
-import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.allocArray
-import kotlinx.cinterop.memScoped
+import io.ktor.utils.io.*
+import kotlinx.cinterop.*
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -106,13 +96,11 @@ fun posixFileWriteChannel(fd: Int): ByteWriteChannel {
     val thread = newSingleThreadContext("write-channel-$fd")
     return GlobalScope.reader(thread, autoFlush = true) {
         memScoped {
-            val buffer = allocArray<ByteVar>(bufferSize)
             try {
                 while (!channel.isClosedForRead) {
                     channel.read { source, start, end ->
                         val size = end - start
-                        source.copyTo(buffer, start, size, 0)
-                        write(fd, buffer, size.toULong())
+                        write(fd, source.sliceArray(start until end).toCValues(), size.toULong())
                         fsync(fd)
                         fflush(null)
                         size.toInt()

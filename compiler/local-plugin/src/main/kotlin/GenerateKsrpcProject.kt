@@ -72,7 +72,7 @@ fun Project.ksrpcModule(
         }
         if (supportJs) {
             js(IR) {
-                yarn.version = "1.22.19"
+                yarn.version = "1.22.22"
                 browser {
                     testTask {
                         it.useMocha()

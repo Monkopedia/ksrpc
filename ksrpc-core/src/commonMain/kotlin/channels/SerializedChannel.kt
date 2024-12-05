@@ -26,6 +26,7 @@ import com.monkopedia.ksrpc.channels.ChannelClient.Companion.DEFAULT
 import com.monkopedia.ksrpc.internal.HostSerializedServiceImpl
 import com.monkopedia.ksrpc.rpcObject
 import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.availableForRead
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 

@@ -22,6 +22,7 @@ import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.jvm.javaio.toByteReadChannel
 import io.ktor.utils.io.pool.ByteArrayPool
+import io.ktor.utils.io.readAvailable
 import java.io.InputStream
 import java.io.OutputStream
 import kotlin.coroutines.coroutineContext

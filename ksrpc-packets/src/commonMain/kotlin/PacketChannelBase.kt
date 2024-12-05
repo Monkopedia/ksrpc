@@ -30,6 +30,8 @@ import com.monkopedia.ksrpc.internal.SubserviceChannel
 import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.close
 import io.ktor.utils.io.core.readBytes
+import io.ktor.utils.io.readRemaining
+import io.ktor.utils.io.writeFully
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope

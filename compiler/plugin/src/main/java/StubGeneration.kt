@@ -449,7 +449,6 @@ inline fun IrPluginContext.overrideMethod(
             endOffset = SYNTHETIC_OFFSET
             name = it.name
             type = it.type
-            index = it.index
             isHidden = it.isHidden
             isAssignable = it.isAssignable
             isCrossInline = it.isCrossinline

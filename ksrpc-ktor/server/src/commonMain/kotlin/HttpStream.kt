@@ -15,28 +15,17 @@
  */
 package com.monkopedia.ksrpc.ktor
 
-import com.monkopedia.ksrpc.ERROR_PREFIX
-import com.monkopedia.ksrpc.KsrpcEnvironment
-import com.monkopedia.ksrpc.RpcFailure
-import com.monkopedia.ksrpc.RpcService
-import com.monkopedia.ksrpc.asString
-import com.monkopedia.ksrpc.channels.CallData
-import com.monkopedia.ksrpc.channels.ChannelClient
-import com.monkopedia.ksrpc.channels.ChannelId
-import com.monkopedia.ksrpc.channels.SerializedChannel
-import com.monkopedia.ksrpc.channels.SerializedService
+import com.monkopedia.ksrpc.*
+import com.monkopedia.ksrpc.channels.*
 import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
-import com.monkopedia.ksrpc.serialized
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.decodeURLPart
-import io.ktor.server.application.ApplicationCall
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondBytesWriter
 import io.ktor.server.routing.Routing
+import io.ktor.server.routing.RoutingContext
 import io.ktor.server.routing.post
-import io.ktor.util.pipeline.PipelineContext
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.copyTo
 import kotlinx.coroutines.launch
@@ -86,7 +75,7 @@ fun Routing.serve(
     }
 }
 
-private suspend fun PipelineContext<Unit, ApplicationCall>.execCall(
+private suspend fun RoutingContext.execCall(
     channel: SerializedChannel<String>,
     method: String
 ) {
@@ -116,7 +105,7 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.execCall(
     }
 }
 
-private suspend inline fun PipelineContext<Unit, ApplicationCall>.runCatching(
+private suspend inline fun RoutingContext.runCatching(
     env: KsrpcEnvironment<String>,
     exec: suspend () -> Unit
 ) {
