@@ -17,7 +17,17 @@ package com.monkopedia.ksrpc
 
 import ComplexClass
 import OtherClass
-import com.monkopedia.ksrpc.jni.*
+import com.monkopedia.ksrpc.jni.JavaJniContinuation
+import com.monkopedia.ksrpc.jni.JniConnection
+import com.monkopedia.ksrpc.jni.JniSer
+import com.monkopedia.ksrpc.jni.JniSerialization
+import com.monkopedia.ksrpc.jni.JniSerialized
+import com.monkopedia.ksrpc.jni.NativeUtils
+import com.monkopedia.ksrpc.jni.asContinuation
+import com.monkopedia.ksrpc.jni.decodeFromJni
+import com.monkopedia.ksrpc.jni.encodeToJni
+import com.monkopedia.ksrpc.jni.newTypeConverter
+import com.monkopedia.ksrpc.jni.withConverter
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.readRemaining
 import io.ktor.utils.io.readText

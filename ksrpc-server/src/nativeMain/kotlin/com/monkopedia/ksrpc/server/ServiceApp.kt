@@ -17,7 +17,7 @@ package com.monkopedia.ksrpc.server
 
 import io.ktor.server.application.Application
 import io.ktor.server.cio.CIO
-import io.ktor.server.engine.BaseApplicationEngine
+import io.ktor.server.engine.EmbeddedServer
 import io.ktor.server.engine.embeddedServer
 import platform.posix.exit
 
@@ -39,7 +39,7 @@ actual abstract class ServiceApp actual constructor(appName: String) : BaseServi
     actual override fun embeddedServer(
         port: Int,
         function: Application.() -> Unit
-    ): BaseApplicationEngine {
+    ): EmbeddedServer<*, *> {
         return embeddedServer(CIO, port) {
             function()
         }

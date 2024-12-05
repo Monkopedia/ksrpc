@@ -20,7 +20,12 @@ import com.monkopedia.ksrpc.packets.internal.CONTENT_LENGTH
 import com.monkopedia.ksrpc.packets.internal.CONTENT_TYPE
 import com.monkopedia.ksrpc.sockets.internal.appendLine
 import com.monkopedia.ksrpc.sockets.internal.readFields
-import io.ktor.utils.io.*
+import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.ByteWriteChannel
+import io.ktor.utils.io.close
+import io.ktor.utils.io.readFully
+import io.ktor.utils.io.readUTF8Line
+import io.ktor.utils.io.writeFully
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
