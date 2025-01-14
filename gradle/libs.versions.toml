@@ -29,7 +29,6 @@ ktor-io = { module = "io.ktor:ktor-io", version.ref = "ktor" }
 kotlinx-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlin-serialization"}
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlin-serialization"}
 kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutines"}
-kotlinx-atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version.ref = "kotlin-atomicfu"}
 jnanoid = { module = "com.aventrix.jnanoid:jnanoid", version.ref = "jnanoid" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j"}
 ktor-client = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
@@ -60,6 +59,7 @@ kotlin = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+kotlin-atomicfu = { id = "org.jetbrains.kotlinx.atomicfu", version.ref = "kotlin-atomicfu"}
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 hierynomus-license = { id = "com.github.hierynomus.license", version = "0.16.1" }
 jlleitschuh-ktlint = { id = "org.jlleitschuh.gradle.ktlint", version = "12.1.1" }

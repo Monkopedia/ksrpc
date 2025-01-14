@@ -17,6 +17,7 @@ import com.monkopedia.ksrpc.local.ksrpcModule
 
 plugins {
     kotlin("multiplatform")
+    alias(libs.plugins.kotlin.atomicfu)
 }
 
 ksrpcModule()
@@ -27,7 +28,6 @@ kotlin {
         api(libs.kotlinx.serialization)
         api(libs.kotlinx.serialization.json)
         api(libs.kotlinx.coroutines)
-        api(libs.kotlinx.atomicfu)
         api(kotlin("stdlib"))
         api(project(":ksrpc-api"))
     }
