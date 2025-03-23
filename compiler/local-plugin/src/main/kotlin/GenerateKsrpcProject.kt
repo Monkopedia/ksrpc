@@ -194,7 +194,7 @@ fun Project.ksrpcModule(
 
     val dokkaJavadoc = tasks.create("dokkaJavadocCustom", DokkaTask::class) {
         it.project.dependencies {
-            it.plugins("org.jetbrains.dokka:kotlin-as-java-plugin:1.9.0")
+            it.plugins("org.jetbrains.dokka:kotlin-as-java-plugin:2.0.0")
         }
         // outputFormat = "javadoc"
         it.outputDirectory.set(File(project.buildDir, "javadoc"))

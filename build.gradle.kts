@@ -30,12 +30,12 @@ plugins {
     alias(libs.plugins.kotlin.kapt) apply false
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.dokka)
-    id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.15.1"
+    alias(libs.plugins.kotlin.bcv)
 
-    id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
-    id("com.github.hierynomus.license") version "0.16.1"
+    alias(libs.plugins.jlleitschuh.ktlint)
+    alias(libs.plugins.hierynomus.license)
 
-    id("com.github.gmazzo.buildconfig") version "3.1.0" apply false
+    alias(libs.plugins.gmazzo.buildconfig) apply false
     id("ksrpc-generate-module")
     id("com.monkopedia.ksrpc.plugin") apply false
 }
