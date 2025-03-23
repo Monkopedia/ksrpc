@@ -44,8 +44,8 @@ group = "com.monkopedia.ksrpc"
 
 allprojects {
     repositories {
-        mavenLocal()
         mavenCentral()
+        mavenLocal()
     }
 }
 
