@@ -1,0 +1,4 @@
+public final class com/monkopedia/ksrpc/ktor/HttpChannelsKt {
+	public static final fun asConnection (Lio/ktor/client/HttpClient;Ljava/lang/String;Lcom/monkopedia/ksrpc/KsrpcEnvironment;)Lcom/monkopedia/ksrpc/channels/ChannelClient;
+}
+

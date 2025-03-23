@@ -1,0 +1,7 @@
+public final class com/monkopedia/ksrpc/ktor/websocket/internal/WebsocketPacketChannel : com/monkopedia/ksrpc/packets/internal/PacketChannelBase {
+	public fun <init> (Lkotlinx/coroutines/CoroutineScope;Lio/ktor/websocket/DefaultWebSocketSession;Lcom/monkopedia/ksrpc/KsrpcEnvironment;)V
+	public fun close (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun receiveLocked (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun sendLocked (Lcom/monkopedia/ksrpc/packets/internal/Packet;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+

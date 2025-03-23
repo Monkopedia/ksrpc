@@ -1,0 +1,182 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, js, linuxArm64, linuxX64, macosArm64, macosX64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <com.monkopedia.ksrpc:ksrpc-jsonrpc>
+abstract interface com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcChannel : com.monkopedia.ksrpc/KsrpcEnvironment.Element<kotlin/String>, com.monkopedia.ksrpc/SuspendCloseable { // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcChannel|null[0]
+    abstract suspend fun execute(kotlin/String, kotlinx.serialization.json/JsonElement?, kotlin/Boolean): kotlinx.serialization.json/JsonElement? // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcChannel.execute|execute(kotlin.String;kotlinx.serialization.json.JsonElement?;kotlin.Boolean){}[0]
+}
+
+abstract class com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcTransformer { // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcTransformer|null[0]
+    constructor <init>() // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcTransformer.<init>|<init>(){}[0]
+
+    abstract val isOpen // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcTransformer.isOpen|{}isOpen[0]
+        abstract fun <get-isOpen>(): kotlin/Boolean // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcTransformer.isOpen.<get-isOpen>|<get-isOpen>(){}[0]
+
+    abstract fun close(kotlin/Throwable?) // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcTransformer.close|close(kotlin.Throwable?){}[0]
+    abstract suspend fun receive(): kotlinx.serialization.json/JsonElement? // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcTransformer.receive|receive(){}[0]
+    abstract suspend fun send(kotlinx.serialization.json/JsonElement) // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcTransformer.send|send(kotlinx.serialization.json.JsonElement){}[0]
+}
+
+final class com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError { // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError|null[0]
+    constructor <init>(kotlin/Int, kotlin/String, kotlinx.serialization.json/JsonElement? = ...) // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.<init>|<init>(kotlin.Int;kotlin.String;kotlinx.serialization.json.JsonElement?){}[0]
+
+    final val code // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.code|{}code[0]
+        final fun <get-code>(): kotlin/Int // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.code.<get-code>|<get-code>(){}[0]
+    final val data // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.data|{}data[0]
+        final fun <get-data>(): kotlinx.serialization.json/JsonElement? // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.data.<get-data>|<get-data>(){}[0]
+    final val message // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.message|{}message[0]
+        final fun <get-message>(): kotlin/String // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.message.<get-message>|<get-message>(){}[0]
+
+    final fun component1(): kotlin/Int // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.component1|component1(){}[0]
+    final fun component2(): kotlin/String // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.component2|component2(){}[0]
+    final fun component3(): kotlinx.serialization.json/JsonElement? // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.component3|component3(){}[0]
+    final fun copy(kotlin/Int = ..., kotlin/String = ..., kotlinx.serialization.json/JsonElement? = ...): com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.copy|copy(kotlin.Int;kotlin.String;kotlinx.serialization.json.JsonElement?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError> { // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.$serializer|null[0]
+        final val descriptor // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError) // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcError){}[0]
+    }
+
+    final object Companion { // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.Companion|null[0]
+        final const val INTERNAL_ERROR // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.Companion.INTERNAL_ERROR|{}INTERNAL_ERROR[0]
+            final fun <get-INTERNAL_ERROR>(): kotlin/Int // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.Companion.INTERNAL_ERROR.<get-INTERNAL_ERROR>|<get-INTERNAL_ERROR>(){}[0]
+        final const val INVALID_PARAMS // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.Companion.INVALID_PARAMS|{}INVALID_PARAMS[0]
+            final fun <get-INVALID_PARAMS>(): kotlin/Int // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.Companion.INVALID_PARAMS.<get-INVALID_PARAMS>|<get-INVALID_PARAMS>(){}[0]
+        final const val INVALID_REQUEST // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.Companion.INVALID_REQUEST|{}INVALID_REQUEST[0]
+            final fun <get-INVALID_REQUEST>(): kotlin/Int // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.Companion.INVALID_REQUEST.<get-INVALID_REQUEST>|<get-INVALID_REQUEST>(){}[0]
+        final const val MAX_SERVER_ERROR // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.Companion.MAX_SERVER_ERROR|{}MAX_SERVER_ERROR[0]
+            final fun <get-MAX_SERVER_ERROR>(): kotlin/Int // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.Companion.MAX_SERVER_ERROR.<get-MAX_SERVER_ERROR>|<get-MAX_SERVER_ERROR>(){}[0]
+        final const val METHOD_NOT_FOUND // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.Companion.METHOD_NOT_FOUND|{}METHOD_NOT_FOUND[0]
+            final fun <get-METHOD_NOT_FOUND>(): kotlin/Int // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.Companion.METHOD_NOT_FOUND.<get-METHOD_NOT_FOUND>|<get-METHOD_NOT_FOUND>(){}[0]
+        final const val MIN_SERVER_ERROR // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.Companion.MIN_SERVER_ERROR|{}MIN_SERVER_ERROR[0]
+            final fun <get-MIN_SERVER_ERROR>(): kotlin/Int // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.Companion.MIN_SERVER_ERROR.<get-MIN_SERVER_ERROR>|<get-MIN_SERVER_ERROR>(){}[0]
+        final const val PARSE_ERROR // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.Companion.PARSE_ERROR|{}PARSE_ERROR[0]
+            final fun <get-PARSE_ERROR>(): kotlin/Int // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.Companion.PARSE_ERROR.<get-PARSE_ERROR>|<get-PARSE_ERROR>(){}[0]
+
+        final fun serializer(): kotlinx.serialization/KSerializer<com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError> // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest { // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest|null[0]
+    constructor <init>(kotlin/String = ..., kotlin/String, kotlinx.serialization.json/JsonElement?, kotlinx.serialization.json/JsonPrimitive? = ...) // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest.<init>|<init>(kotlin.String;kotlin.String;kotlinx.serialization.json.JsonElement?;kotlinx.serialization.json.JsonPrimitive?){}[0]
+
+    final val id // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest.id|{}id[0]
+        final fun <get-id>(): kotlinx.serialization.json/JsonPrimitive? // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest.id.<get-id>|<get-id>(){}[0]
+    final val jsonrpc // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest.jsonrpc|{}jsonrpc[0]
+        final fun <get-jsonrpc>(): kotlin/String // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest.jsonrpc.<get-jsonrpc>|<get-jsonrpc>(){}[0]
+    final val method // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest.method|{}method[0]
+        final fun <get-method>(): kotlin/String // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest.method.<get-method>|<get-method>(){}[0]
+    final val params // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest.params|{}params[0]
+        final fun <get-params>(): kotlinx.serialization.json/JsonElement? // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest.params.<get-params>|<get-params>(){}[0]
+
+    final fun component1(): kotlin/String // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest.component1|component1(){}[0]
+    final fun component2(): kotlin/String // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest.component2|component2(){}[0]
+    final fun component3(): kotlinx.serialization.json/JsonElement? // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest.component3|component3(){}[0]
+    final fun component4(): kotlinx.serialization.json/JsonPrimitive? // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest.component4|component4(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., kotlinx.serialization.json/JsonElement? = ..., kotlinx.serialization.json/JsonPrimitive? = ...): com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest.copy|copy(kotlin.String;kotlin.String;kotlinx.serialization.json.JsonElement?;kotlinx.serialization.json.JsonPrimitive?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest> { // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest.$serializer|null[0]
+        final val descriptor // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest) // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcRequest){}[0]
+    }
+
+    final object Companion { // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest> // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse { // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse|null[0]
+    constructor <init>(kotlin/String = ..., kotlinx.serialization.json/JsonElement? = ..., com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError? = ..., kotlinx.serialization.json/JsonPrimitive? = ...) // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse.<init>|<init>(kotlin.String;kotlinx.serialization.json.JsonElement?;com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcError?;kotlinx.serialization.json.JsonPrimitive?){}[0]
+
+    final val error // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse.error|{}error[0]
+        final fun <get-error>(): com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError? // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse.error.<get-error>|<get-error>(){}[0]
+    final val id // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse.id|{}id[0]
+        final fun <get-id>(): kotlinx.serialization.json/JsonPrimitive? // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse.id.<get-id>|<get-id>(){}[0]
+    final val jsonrpc // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse.jsonrpc|{}jsonrpc[0]
+        final fun <get-jsonrpc>(): kotlin/String // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse.jsonrpc.<get-jsonrpc>|<get-jsonrpc>(){}[0]
+    final val result // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse.result|{}result[0]
+        final fun <get-result>(): kotlinx.serialization.json/JsonElement? // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse.result.<get-result>|<get-result>(){}[0]
+
+    final fun component1(): kotlin/String // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse.component1|component1(){}[0]
+    final fun component2(): kotlinx.serialization.json/JsonElement? // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse.component2|component2(){}[0]
+    final fun component3(): com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError? // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse.component3|component3(){}[0]
+    final fun component4(): kotlinx.serialization.json/JsonPrimitive? // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse.component4|component4(){}[0]
+    final fun copy(kotlin/String = ..., kotlinx.serialization.json/JsonElement? = ..., com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError? = ..., kotlinx.serialization.json/JsonPrimitive? = ...): com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse.copy|copy(kotlin.String;kotlinx.serialization.json.JsonElement?;com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcError?;kotlinx.serialization.json.JsonPrimitive?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse> { // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse.$serializer|null[0]
+        final val descriptor // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse) // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcResponse){}[0]
+    }
+
+    final object Companion { // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse> // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcResponse.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcSerializedChannel : com.monkopedia.ksrpc.channels/SerializedService<kotlin/String> { // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcSerializedChannel|null[0]
+    constructor <init>(kotlin.coroutines/CoroutineContext, com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcChannel, com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String>) // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcSerializedChannel.<init>|<init>(kotlin.coroutines.CoroutineContext;com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcChannel;com.monkopedia.ksrpc.KsrpcEnvironment<kotlin.String>){}[0]
+
+    final val context // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcSerializedChannel.context|{}context[0]
+        final fun <get-context>(): kotlin.coroutines/CoroutineContext // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcSerializedChannel.context.<get-context>|<get-context>(){}[0]
+    final val env // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcSerializedChannel.env|{}env[0]
+        final fun <get-env>(): com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String> // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcSerializedChannel.env.<get-env>|<get-env>(){}[0]
+
+    final suspend fun call(com.monkopedia.ksrpc/RpcMethod<*, *, *>, com.monkopedia.ksrpc.channels/CallData<kotlin/String>): com.monkopedia.ksrpc.channels/CallData<kotlin/String> // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcSerializedChannel.call|call(com.monkopedia.ksrpc.RpcMethod<*,*,*>;com.monkopedia.ksrpc.channels.CallData<kotlin.String>){}[0]
+    final suspend fun call(kotlin/String, com.monkopedia.ksrpc.channels/CallData<kotlin/String>): com.monkopedia.ksrpc.channels/CallData<kotlin/String> // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcSerializedChannel.call|call(kotlin.String;com.monkopedia.ksrpc.channels.CallData<kotlin.String>){}[0]
+    final suspend fun close() // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcSerializedChannel.close|close(){}[0]
+    final suspend fun onClose(kotlin.coroutines/SuspendFunction0<kotlin/Unit>) // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcSerializedChannel.onClose|onClose(kotlin.coroutines.SuspendFunction0<kotlin.Unit>){}[0]
+}
+
+final class com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcServiceWrapper : com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcChannel, com.monkopedia.ksrpc/KsrpcEnvironment.Element<kotlin/String> { // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcServiceWrapper|null[0]
+    constructor <init>(com.monkopedia.ksrpc.channels/SerializedService<kotlin/String>) // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcServiceWrapper.<init>|<init>(com.monkopedia.ksrpc.channels.SerializedService<kotlin.String>){}[0]
+
+    final val env // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcServiceWrapper.env|{}env[0]
+        final fun <get-env>(): com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String> // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcServiceWrapper.env.<get-env>|<get-env>(){}[0]
+
+    final suspend fun close() // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcServiceWrapper.close|close(){}[0]
+    final suspend fun execute(kotlin/String, kotlinx.serialization.json/JsonElement?, kotlin/Boolean): kotlinx.serialization.json/JsonElement? // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcServiceWrapper.execute|execute(kotlin.String;kotlinx.serialization.json.JsonElement?;kotlin.Boolean){}[0]
+}
+
+final class com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase : com.monkopedia.ksrpc.channels/SingleChannelConnection<kotlin/String>, com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcChannel { // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase|null[0]
+    constructor <init>(kotlinx.coroutines/CoroutineScope, kotlin.coroutines/CoroutineContext, com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String>, com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcTransformer) // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase.<init>|<init>(kotlinx.coroutines.CoroutineScope;kotlin.coroutines.CoroutineContext;com.monkopedia.ksrpc.KsrpcEnvironment<kotlin.String>;com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcTransformer){}[0]
+
+    final val env // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase.env|{}env[0]
+        final fun <get-env>(): com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String> // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase.env.<get-env>|<get-env>(){}[0]
+
+    final suspend fun close() // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase.close|close(){}[0]
+    final suspend fun defaultChannel(): com.monkopedia.ksrpc.channels/SerializedService<kotlin/String> // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase.defaultChannel|defaultChannel(){}[0]
+    final suspend fun execute(kotlin/String, kotlinx.serialization.json/JsonElement?, kotlin/Boolean): kotlinx.serialization.json/JsonElement? // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase.execute|execute(kotlin.String;kotlinx.serialization.json.JsonElement?;kotlin.Boolean){}[0]
+    final suspend fun registerDefault(com.monkopedia.ksrpc.channels/SerializedService<kotlin/String>) // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase.registerDefault|registerDefault(com.monkopedia.ksrpc.channels.SerializedService<kotlin.String>){}[0]
+}
+
+final const val com.monkopedia.ksrpc.jsonrpc.internal/DEFAULT_CONTENT_TYPE // com.monkopedia.ksrpc.jsonrpc.internal/DEFAULT_CONTENT_TYPE|{}DEFAULT_CONTENT_TYPE[0]
+    final fun <get-DEFAULT_CONTENT_TYPE>(): kotlin/String // com.monkopedia.ksrpc.jsonrpc.internal/DEFAULT_CONTENT_TYPE.<get-DEFAULT_CONTENT_TYPE>|<get-DEFAULT_CONTENT_TYPE>(){}[0]
+
+final fun (kotlin/Pair<io.ktor.utils.io/ByteReadChannel, io.ktor.utils.io/ByteWriteChannel>).com.monkopedia.ksrpc.jsonrpc.internal/jsonHeader(com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String>): com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcTransformer // com.monkopedia.ksrpc.jsonrpc.internal/jsonHeader|jsonHeader@kotlin.Pair<io.ktor.utils.io.ByteReadChannel,io.ktor.utils.io.ByteWriteChannel>(com.monkopedia.ksrpc.KsrpcEnvironment<kotlin.String>){}[0]
+final fun (kotlin/Pair<io.ktor.utils.io/ByteReadChannel, io.ktor.utils.io/ByteWriteChannel>).com.monkopedia.ksrpc.jsonrpc.internal/jsonLine(com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String>): com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcTransformer // com.monkopedia.ksrpc.jsonrpc.internal/jsonLine|jsonLine@kotlin.Pair<io.ktor.utils.io.ByteReadChannel,io.ktor.utils.io.ByteWriteChannel>(com.monkopedia.ksrpc.KsrpcEnvironment<kotlin.String>){}[0]
+final suspend fun (kotlin/Pair<io.ktor.utils.io/ByteReadChannel, io.ktor.utils.io/ByteWriteChannel>).com.monkopedia.ksrpc.jsonrpc/asJsonRpcConnection(com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String>, kotlin/Boolean = ...): com.monkopedia.ksrpc.channels/SingleChannelConnection<kotlin/String> // com.monkopedia.ksrpc.jsonrpc/asJsonRpcConnection|asJsonRpcConnection@kotlin.Pair<io.ktor.utils.io.ByteReadChannel,io.ktor.utils.io.ByteWriteChannel>(com.monkopedia.ksrpc.KsrpcEnvironment<kotlin.String>;kotlin.Boolean){}[0]

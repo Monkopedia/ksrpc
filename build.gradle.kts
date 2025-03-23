@@ -15,6 +15,7 @@
  */
 import org.jetbrains.dokka.base.DokkaBase
 import org.jetbrains.dokka.base.DokkaBaseConfiguration
+import kotlinx.validation.ExperimentalBCVApi
 
 buildscript {
     dependencies {
@@ -29,6 +30,7 @@ plugins {
     alias(libs.plugins.kotlin.kapt) apply false
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.dokka)
+    id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.15.1"
 
     id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
     id("com.github.hierynomus.license") version "0.16.1"
@@ -44,6 +46,15 @@ allprojects {
     repositories {
         mavenLocal()
         mavenCentral()
+    }
+}
+
+// == BCV setup ==
+apiValidation {
+    ignoredProjects.addAll(listOf("ksrpc-test"))
+    @OptIn(ExperimentalBCVApi::class)
+    klib {
+        enabled = true
     }
 }
 

@@ -1,0 +1,35 @@
+// Klib ABI Dump
+// Targets: [linuxX64, macosArm64, macosX64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <com.monkopedia.ksrpc:ksrpc-server>
+abstract class com.monkopedia.ksrpc.server/BaseServiceApp : com.github.ajalt.clikt.core/CliktCommand { // com.monkopedia.ksrpc.server/BaseServiceApp|null[0]
+    final val appName // com.monkopedia.ksrpc.server/BaseServiceApp.appName|{}appName[0]
+        final fun <get-appName>(): kotlin/String // com.monkopedia.ksrpc.server/BaseServiceApp.appName.<get-appName>|<get-appName>(){}[0]
+    final val cors // com.monkopedia.ksrpc.server/BaseServiceApp.cors|{}cors[0]
+        final fun <get-cors>(): kotlin/Boolean // com.monkopedia.ksrpc.server/BaseServiceApp.cors.<get-cors>|<get-cors>(){}[0]
+    final val http // com.monkopedia.ksrpc.server/BaseServiceApp.http|{}http[0]
+        final fun <get-http>(): kotlin.collections/List<kotlin/Int> // com.monkopedia.ksrpc.server/BaseServiceApp.http.<get-http>|<get-http>(){}[0]
+    final val stdOut // com.monkopedia.ksrpc.server/BaseServiceApp.stdOut|{}stdOut[0]
+        final fun <get-stdOut>(): kotlin/Boolean // com.monkopedia.ksrpc.server/BaseServiceApp.stdOut.<get-stdOut>|<get-stdOut>(){}[0]
+    open val env // com.monkopedia.ksrpc.server/BaseServiceApp.env|{}env[0]
+        open fun <get-env>(): com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String> // com.monkopedia.ksrpc.server/BaseServiceApp.env.<get-env>|<get-env>(){}[0]
+
+    abstract fun createChannel(): com.monkopedia.ksrpc.channels/SerializedService<kotlin/String> // com.monkopedia.ksrpc.server/BaseServiceApp.createChannel|createChannel(){}[0]
+    abstract fun embeddedServer(kotlin/Int, kotlin/Function1<io.ktor.server.application/Application, kotlin/Unit>): io.ktor.server.engine/BaseApplicationEngine // com.monkopedia.ksrpc.server/BaseServiceApp.embeddedServer|embeddedServer(kotlin.Int;kotlin.Function1<io.ktor.server.application.Application,kotlin.Unit>){}[0]
+    open fun (io.ktor.server.application/Application).configureHttp() // com.monkopedia.ksrpc.server/BaseServiceApp.configureHttp|configureHttp@io.ktor.server.application.Application(){}[0]
+    open fun createRouting(io.ktor.server.routing/Routing) // com.monkopedia.ksrpc.server/BaseServiceApp.createRouting|createRouting(io.ktor.server.routing.Routing){}[0]
+    open fun run() // com.monkopedia.ksrpc.server/BaseServiceApp.run|run(){}[0]
+
+    final object Companion // com.monkopedia.ksrpc.server/BaseServiceApp.Companion|null[0]
+}
+
+abstract class com.monkopedia.ksrpc.server/ServiceApp : com.monkopedia.ksrpc.server/BaseServiceApp { // com.monkopedia.ksrpc.server/ServiceApp|null[0]
+    constructor <init>(kotlin/String) // com.monkopedia.ksrpc.server/ServiceApp.<init>|<init>(kotlin.String){}[0]
+
+    open fun embeddedServer(kotlin/Int, kotlin/Function1<io.ktor.server.application/Application, kotlin/Unit>): io.ktor.server.engine/BaseApplicationEngine // com.monkopedia.ksrpc.server/ServiceApp.embeddedServer|embeddedServer(kotlin.Int;kotlin.Function1<io.ktor.server.application.Application,kotlin.Unit>){}[0]
+    open fun run() // com.monkopedia.ksrpc.server/ServiceApp.run|run(){}[0]
+}

@@ -1,0 +1,32 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, js, linuxArm64, linuxX64, macosArm64, macosX64]
+// Alias: native => [iosArm64, iosSimulatorArm64, iosX64, linuxArm64, linuxX64, macosArm64, macosX64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <com.monkopedia.ksrpc:ksrpc-sockets>
+final inline fun com.monkopedia.ksrpc.sockets.internal/swallow(kotlin/Function0<kotlin/Unit>) // com.monkopedia.ksrpc.sockets.internal/swallow|swallow(kotlin.Function0<kotlin.Unit>){}[0]
+final suspend fun (io.ktor.utils.io/ByteReadChannel).com.monkopedia.ksrpc.sockets.internal/readFields(): kotlin.collections/Map<kotlin/String, kotlin/String> // com.monkopedia.ksrpc.sockets.internal/readFields|readFields@io.ktor.utils.io.ByteReadChannel(){}[0]
+final suspend fun (io.ktor.utils.io/ByteWriteChannel).com.monkopedia.ksrpc.sockets.internal/appendLine(kotlin/String = ...) // com.monkopedia.ksrpc.sockets.internal/appendLine|appendLine@io.ktor.utils.io.ByteWriteChannel(kotlin.String){}[0]
+final suspend fun (kotlin/Pair<io.ktor.utils.io/ByteReadChannel, io.ktor.utils.io/ByteWriteChannel>).com.monkopedia.ksrpc.sockets/asConnection(com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String>): com.monkopedia.ksrpc.channels/Connection<kotlin/String> // com.monkopedia.ksrpc.sockets/asConnection|asConnection@kotlin.Pair<io.ktor.utils.io.ByteReadChannel,io.ktor.utils.io.ByteWriteChannel>(com.monkopedia.ksrpc.KsrpcEnvironment<kotlin.String>){}[0]
+final suspend inline fun com.monkopedia.ksrpc.sockets/withStdInOut(com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String>, kotlin/Function1<com.monkopedia.ksrpc.channels/Connection<kotlin/String>, kotlin/Unit>) // com.monkopedia.ksrpc.sockets/withStdInOut|withStdInOut(com.monkopedia.ksrpc.KsrpcEnvironment<kotlin.String>;kotlin.Function1<com.monkopedia.ksrpc.channels.Connection<kotlin.String>,kotlin.Unit>){}[0]
+
+// Targets: [native]
+final fun (platform.posix/termios).com.monkopedia.ksrpc.sockets/setICanon() // com.monkopedia.ksrpc.sockets/setICanon|setICanon@platform.posix.termios(){}[0]
+
+// Targets: [native]
+final fun com.monkopedia.ksrpc.sockets/initTermios(kotlin/Int = ..., kotlinx.cinterop/CPointer<platform.posix/termios>) // com.monkopedia.ksrpc.sockets/initTermios|initTermios(kotlin.Int;kotlinx.cinterop.CPointer<platform.posix.termios>){}[0]
+
+// Targets: [native]
+final fun com.monkopedia.ksrpc.sockets/posixFileReadChannel(kotlin/Int): io.ktor.utils.io/ByteReadChannel // com.monkopedia.ksrpc.sockets/posixFileReadChannel|posixFileReadChannel(kotlin.Int){}[0]
+
+// Targets: [native]
+final fun com.monkopedia.ksrpc.sockets/posixFileWriteChannel(kotlin/Int): io.ktor.utils.io/ByteWriteChannel // com.monkopedia.ksrpc.sockets/posixFileWriteChannel|posixFileWriteChannel(kotlin.Int){}[0]
+
+// Targets: [native]
+final fun com.monkopedia.ksrpc.sockets/resetTermios(kotlin/Int = ..., kotlinx.cinterop/CPointer<platform.posix/termios>) // com.monkopedia.ksrpc.sockets/resetTermios|resetTermios(kotlin.Int;kotlinx.cinterop.CPointer<platform.posix.termios>){}[0]
+
+// Targets: [native]
+final inline fun com.monkopedia.ksrpc.sockets/withoutIcanon(kotlin/Int = ..., kotlin/Function0<kotlin/Unit>) // com.monkopedia.ksrpc.sockets/withoutIcanon|withoutIcanon(kotlin.Int;kotlin.Function0<kotlin.Unit>){}[0]

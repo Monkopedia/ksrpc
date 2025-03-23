@@ -1,0 +1,15 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, js, linuxArm64, linuxX64, macosArm64, macosX64, mingwX64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <com.monkopedia.ksrpc:ksrpc-ktor-websocket-shared>
+final class com.monkopedia.ksrpc.ktor.websocket.internal/WebsocketPacketChannel : com.monkopedia.ksrpc.packets.internal/PacketChannelBase<kotlin/String> { // com.monkopedia.ksrpc.ktor.websocket.internal/WebsocketPacketChannel|null[0]
+    constructor <init>(kotlinx.coroutines/CoroutineScope, io.ktor.websocket/DefaultWebSocketSession, com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String>) // com.monkopedia.ksrpc.ktor.websocket.internal/WebsocketPacketChannel.<init>|<init>(kotlinx.coroutines.CoroutineScope;io.ktor.websocket.DefaultWebSocketSession;com.monkopedia.ksrpc.KsrpcEnvironment<kotlin.String>){}[0]
+
+    final suspend fun close() // com.monkopedia.ksrpc.ktor.websocket.internal/WebsocketPacketChannel.close|close(){}[0]
+    final suspend fun receiveLocked(): com.monkopedia.ksrpc.packets.internal/Packet<kotlin/String> // com.monkopedia.ksrpc.ktor.websocket.internal/WebsocketPacketChannel.receiveLocked|receiveLocked(){}[0]
+    final suspend fun sendLocked(com.monkopedia.ksrpc.packets.internal/Packet<kotlin/String>) // com.monkopedia.ksrpc.ktor.websocket.internal/WebsocketPacketChannel.sendLocked|sendLocked(com.monkopedia.ksrpc.packets.internal.Packet<kotlin.String>){}[0]
+}

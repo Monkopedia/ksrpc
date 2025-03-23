@@ -1,0 +1,163 @@
+public final class com/monkopedia/ksrpc/jsonrpc/JsonInputOutputStreamsKt {
+	public static final fun asJsonRpcConnection (Ljava/lang/ProcessBuilder;Lcom/monkopedia/ksrpc/KsrpcEnvironment;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun asJsonRpcConnection (Lkotlin/Pair;Lcom/monkopedia/ksrpc/KsrpcEnvironment;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun stdInJsonRpcConnection (Lcom/monkopedia/ksrpc/KsrpcEnvironment;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/monkopedia/ksrpc/jsonrpc/JsonRpcChannelsKt {
+	public static final fun asJsonRpcConnection (Lkotlin/Pair;Lcom/monkopedia/ksrpc/KsrpcEnvironment;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun asJsonRpcConnection$default (Lkotlin/Pair;Lcom/monkopedia/ksrpc/KsrpcEnvironment;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public abstract interface class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcChannel : com/monkopedia/ksrpc/KsrpcEnvironment$Element, com/monkopedia/ksrpc/SuspendCloseable {
+	public abstract fun execute (Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcError {
+	public static final field Companion Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcError$Companion;
+	public static final field INTERNAL_ERROR I
+	public static final field INVALID_PARAMS I
+	public static final field INVALID_REQUEST I
+	public static final field MAX_SERVER_ERROR I
+	public static final field METHOD_NOT_FOUND I
+	public static final field MIN_SERVER_ERROR I
+	public static final field PARSE_ERROR I
+	public fun <init> (ILjava/lang/String;Lkotlinx/serialization/json/JsonElement;)V
+	public synthetic fun <init> (ILjava/lang/String;Lkotlinx/serialization/json/JsonElement;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()I
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun copy (ILjava/lang/String;Lkotlinx/serialization/json/JsonElement;)Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcError;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcError;ILjava/lang/String;Lkotlinx/serialization/json/JsonElement;ILjava/lang/Object;)Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcError;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCode ()I
+	public final fun getData ()Lkotlinx/serialization/json/JsonElement;
+	public final fun getMessage ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public synthetic class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcError$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcError$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcError;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcError;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcError$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcRequest {
+	public static final field Companion Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcRequest$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonPrimitive;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonPrimitive;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun component4 ()Lkotlinx/serialization/json/JsonPrimitive;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonPrimitive;)Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcRequest;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcRequest;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonPrimitive;ILjava/lang/Object;)Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Lkotlinx/serialization/json/JsonPrimitive;
+	public final fun getJsonrpc ()Ljava/lang/String;
+	public final fun getMethod ()Ljava/lang/String;
+	public final fun getParams ()Lkotlinx/serialization/json/JsonElement;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public synthetic class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcRequest$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcRequest$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcRequest;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcRequest;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcRequest$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcResponse {
+	public static final field Companion Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcResponse$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcError;Lkotlinx/serialization/json/JsonPrimitive;)V
+	public synthetic fun <init> (Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcError;Lkotlinx/serialization/json/JsonPrimitive;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun component3 ()Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcError;
+	public final fun component4 ()Lkotlinx/serialization/json/JsonPrimitive;
+	public final fun copy (Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcError;Lkotlinx/serialization/json/JsonPrimitive;)Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcResponse;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcResponse;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcError;Lkotlinx/serialization/json/JsonPrimitive;ILjava/lang/Object;)Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcError;
+	public final fun getId ()Lkotlinx/serialization/json/JsonPrimitive;
+	public final fun getJsonrpc ()Ljava/lang/String;
+	public final fun getResult ()Lkotlinx/serialization/json/JsonElement;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public synthetic class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcResponse$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcResponse$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcResponse;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcResponse;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcResponse$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcSerializedChannel : com/monkopedia/ksrpc/channels/SerializedService {
+	public fun <init> (Lkotlin/coroutines/CoroutineContext;Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcChannel;Lcom/monkopedia/ksrpc/KsrpcEnvironment;)V
+	public fun call (Lcom/monkopedia/ksrpc/RpcMethod;Lcom/monkopedia/ksrpc/channels/CallData;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun call (Ljava/lang/String;Lcom/monkopedia/ksrpc/channels/CallData;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun close (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getContext ()Lkotlin/coroutines/CoroutineContext;
+	public fun getEnv ()Lcom/monkopedia/ksrpc/KsrpcEnvironment;
+	public fun onClose (Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcServiceWrapper : com/monkopedia/ksrpc/KsrpcEnvironment$Element, com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcChannel {
+	public fun <init> (Lcom/monkopedia/ksrpc/channels/SerializedService;)V
+	public fun close (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun execute (Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getEnv ()Lcom/monkopedia/ksrpc/KsrpcEnvironment;
+}
+
+public abstract class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcTransformer {
+	public fun <init> ()V
+	public abstract fun close (Ljava/lang/Throwable;)V
+	public abstract fun isOpen ()Z
+	public abstract fun receive (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun send (Lkotlinx/serialization/json/JsonElement;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcTransformerKt {
+	public static final field DEFAULT_CONTENT_TYPE Ljava/lang/String;
+	public static final fun jsonHeader (Lkotlin/Pair;Lcom/monkopedia/ksrpc/KsrpcEnvironment;)Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcTransformer;
+	public static final fun jsonLine (Lkotlin/Pair;Lcom/monkopedia/ksrpc/KsrpcEnvironment;)Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcTransformer;
+}
+
+public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcWriterBase : com/monkopedia/ksrpc/channels/SingleChannelConnection, com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcChannel {
+	public fun <init> (Lkotlinx/coroutines/CoroutineScope;Lkotlin/coroutines/CoroutineContext;Lcom/monkopedia/ksrpc/KsrpcEnvironment;Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcTransformer;)V
+	public fun close (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun defaultChannel (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun execute (Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getEnv ()Lcom/monkopedia/ksrpc/KsrpcEnvironment;
+	public fun registerDefault (Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+

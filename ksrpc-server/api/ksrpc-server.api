@@ -1,0 +1,27 @@
+public abstract class com/monkopedia/ksrpc/server/BaseServiceApp : com/github/ajalt/clikt/core/CliktCommand {
+	public static final field Companion Lcom/monkopedia/ksrpc/server/BaseServiceApp$Companion;
+	public fun configureHttp (Lio/ktor/server/application/Application;)V
+	public abstract fun createChannel ()Lcom/monkopedia/ksrpc/channels/SerializedService;
+	protected fun createRouting (Lio/ktor/server/routing/Routing;)V
+	public abstract fun embeddedServer (ILkotlin/jvm/functions/Function1;)Lio/ktor/server/engine/BaseApplicationEngine;
+	public final fun getAppName ()Ljava/lang/String;
+	public final fun getCors ()Z
+	public fun getEnv ()Lcom/monkopedia/ksrpc/KsrpcEnvironment;
+	public final fun getHttp ()Ljava/util/List;
+	public final fun getStdOut ()Z
+	public fun run ()V
+}
+
+public final class com/monkopedia/ksrpc/server/BaseServiceApp$Companion {
+}
+
+public abstract class com/monkopedia/ksrpc/server/ServiceApp : com/monkopedia/ksrpc/server/BaseServiceApp {
+	public fun <init> (Ljava/lang/String;)V
+	protected fun createRouting (Lio/ktor/server/routing/Routing;)V
+	public fun embeddedServer (ILkotlin/jvm/functions/Function1;)Lio/ktor/server/engine/BaseApplicationEngine;
+	public final fun getEnableWebsockets ()Z
+	public final fun getNoHttp ()Z
+	public final fun getPort ()Ljava/util/List;
+	public fun run ()V
+}
+

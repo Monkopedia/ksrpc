@@ -1,0 +1,88 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, js, linuxArm64, linuxX64, macosArm64, macosX64, mingwX64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <com.monkopedia.ksrpc:ksrpc-packets>
+abstract class <#A: kotlin/Any?> com.monkopedia.ksrpc.packets.internal/PacketChannelBase : com.monkopedia.ksrpc.channels/ChannelHost<#A>, com.monkopedia.ksrpc.channels/Connection<#A>, com.monkopedia.ksrpc.packets.internal/PacketChannel<#A> { // com.monkopedia.ksrpc.packets.internal/PacketChannelBase|null[0]
+    constructor <init>(kotlinx.coroutines/CoroutineScope, com.monkopedia.ksrpc/KsrpcEnvironment<#A>) // com.monkopedia.ksrpc.packets.internal/PacketChannelBase.<init>|<init>(kotlinx.coroutines.CoroutineScope;com.monkopedia.ksrpc.KsrpcEnvironment<1:0>){}[0]
+
+    final val env // com.monkopedia.ksrpc.packets.internal/PacketChannelBase.env|{}env[0]
+        final fun <get-env>(): com.monkopedia.ksrpc/KsrpcEnvironment<#A> // com.monkopedia.ksrpc.packets.internal/PacketChannelBase.env.<get-env>|<get-env>(){}[0]
+    final val scope // com.monkopedia.ksrpc.packets.internal/PacketChannelBase.scope|{}scope[0]
+        final fun <get-scope>(): kotlinx.coroutines/CoroutineScope // com.monkopedia.ksrpc.packets.internal/PacketChannelBase.scope.<get-scope>|<get-scope>(){}[0]
+    open val context // com.monkopedia.ksrpc.packets.internal/PacketChannelBase.context|{}context[0]
+        open fun <get-context>(): kotlin.coroutines/CoroutineContext // com.monkopedia.ksrpc.packets.internal/PacketChannelBase.context.<get-context>|<get-context>(){}[0]
+    open val maxSize // com.monkopedia.ksrpc.packets.internal/PacketChannelBase.maxSize|{}maxSize[0]
+        open fun <get-maxSize>(): kotlin/Long // com.monkopedia.ksrpc.packets.internal/PacketChannelBase.maxSize.<get-maxSize>|<get-maxSize>(){}[0]
+
+    final suspend fun receive(): com.monkopedia.ksrpc.packets.internal/Packet<#A> // com.monkopedia.ksrpc.packets.internal/PacketChannelBase.receive|receive(){}[0]
+    final suspend fun send(com.monkopedia.ksrpc.packets.internal/Packet<#A>) // com.monkopedia.ksrpc.packets.internal/PacketChannelBase.send|send(com.monkopedia.ksrpc.packets.internal.Packet<1:0>){}[0]
+    open suspend fun call(com.monkopedia.ksrpc.channels/ChannelId, kotlin/String, com.monkopedia.ksrpc.channels/CallData<#A>): com.monkopedia.ksrpc.channels/CallData<#A> // com.monkopedia.ksrpc.packets.internal/PacketChannelBase.call|call(com.monkopedia.ksrpc.channels.ChannelId;kotlin.String;com.monkopedia.ksrpc.channels.CallData<1:0>){}[0]
+    open suspend fun close() // com.monkopedia.ksrpc.packets.internal/PacketChannelBase.close|close(){}[0]
+    open suspend fun close(com.monkopedia.ksrpc.channels/ChannelId) // com.monkopedia.ksrpc.packets.internal/PacketChannelBase.close|close(com.monkopedia.ksrpc.channels.ChannelId){}[0]
+    open suspend fun onClose(kotlin.coroutines/SuspendFunction0<kotlin/Unit>) // com.monkopedia.ksrpc.packets.internal/PacketChannelBase.onClose|onClose(kotlin.coroutines.SuspendFunction0<kotlin.Unit>){}[0]
+    open suspend fun registerDefault(com.monkopedia.ksrpc.channels/SerializedService<#A>) // com.monkopedia.ksrpc.packets.internal/PacketChannelBase.registerDefault|registerDefault(com.monkopedia.ksrpc.channels.SerializedService<1:0>){}[0]
+    open suspend fun registerHost(com.monkopedia.ksrpc.channels/SerializedService<#A>): com.monkopedia.ksrpc.channels/ChannelId // com.monkopedia.ksrpc.packets.internal/PacketChannelBase.registerHost|registerHost(com.monkopedia.ksrpc.channels.SerializedService<1:0>){}[0]
+    open suspend fun wrapChannel(com.monkopedia.ksrpc.channels/ChannelId): com.monkopedia.ksrpc.channels/SerializedService<#A> // com.monkopedia.ksrpc.packets.internal/PacketChannelBase.wrapChannel|wrapChannel(com.monkopedia.ksrpc.channels.ChannelId){}[0]
+}
+
+final class <#A: kotlin/Any?> com.monkopedia.ksrpc.packets.internal/Packet { // com.monkopedia.ksrpc.packets.internal/Packet|null[0]
+    constructor <init>(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/String, kotlin/String, kotlin/String, #A) // com.monkopedia.ksrpc.packets.internal/Packet.<init>|<init>(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.String;kotlin.String;kotlin.String;1:0){}[0]
+    constructor <init>(kotlin/Int = ..., kotlin/String, kotlin/String, kotlin/String, #A) // com.monkopedia.ksrpc.packets.internal/Packet.<init>|<init>(kotlin.Int;kotlin.String;kotlin.String;kotlin.String;1:0){}[0]
+
+    final val binary // com.monkopedia.ksrpc.packets.internal/Packet.binary|{}binary[0]
+        final fun <get-binary>(): kotlin/Boolean // com.monkopedia.ksrpc.packets.internal/Packet.binary.<get-binary>|<get-binary>(){}[0]
+    final val data // com.monkopedia.ksrpc.packets.internal/Packet.data|{}data[0]
+        final fun <get-data>(): #A // com.monkopedia.ksrpc.packets.internal/Packet.data.<get-data>|<get-data>(){}[0]
+    final val endpoint // com.monkopedia.ksrpc.packets.internal/Packet.endpoint|{}endpoint[0]
+        final fun <get-endpoint>(): kotlin/String // com.monkopedia.ksrpc.packets.internal/Packet.endpoint.<get-endpoint>|<get-endpoint>(){}[0]
+    final val id // com.monkopedia.ksrpc.packets.internal/Packet.id|{}id[0]
+        final fun <get-id>(): kotlin/String // com.monkopedia.ksrpc.packets.internal/Packet.id.<get-id>|<get-id>(){}[0]
+    final val input // com.monkopedia.ksrpc.packets.internal/Packet.input|{}input[0]
+        final fun <get-input>(): kotlin/Boolean // com.monkopedia.ksrpc.packets.internal/Packet.input.<get-input>|<get-input>(){}[0]
+    final val messageId // com.monkopedia.ksrpc.packets.internal/Packet.messageId|{}messageId[0]
+        final fun <get-messageId>(): kotlin/String // com.monkopedia.ksrpc.packets.internal/Packet.messageId.<get-messageId>|<get-messageId>(){}[0]
+    final val startBinary // com.monkopedia.ksrpc.packets.internal/Packet.startBinary|{}startBinary[0]
+        final fun <get-startBinary>(): kotlin/Boolean // com.monkopedia.ksrpc.packets.internal/Packet.startBinary.<get-startBinary>|<get-startBinary>(){}[0]
+    final val type // com.monkopedia.ksrpc.packets.internal/Packet.type|{}type[0]
+        final fun <get-type>(): kotlin/Int // com.monkopedia.ksrpc.packets.internal/Packet.type.<get-type>|<get-type>(){}[0]
+
+    final fun component1(): kotlin/Int // com.monkopedia.ksrpc.packets.internal/Packet.component1|component1(){}[0]
+    final fun component2(): kotlin/String // com.monkopedia.ksrpc.packets.internal/Packet.component2|component2(){}[0]
+    final fun component3(): kotlin/String // com.monkopedia.ksrpc.packets.internal/Packet.component3|component3(){}[0]
+    final fun component4(): kotlin/String // com.monkopedia.ksrpc.packets.internal/Packet.component4|component4(){}[0]
+    final fun component5(): #A // com.monkopedia.ksrpc.packets.internal/Packet.component5|component5(){}[0]
+    final fun copy(kotlin/Int = ..., kotlin/String = ..., kotlin/String = ..., kotlin/String = ..., #A = ...): com.monkopedia.ksrpc.packets.internal/Packet<#A> // com.monkopedia.ksrpc.packets.internal/Packet.copy|copy(kotlin.Int;kotlin.String;kotlin.String;kotlin.String;1:0){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc.packets.internal/Packet.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc.packets.internal/Packet.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // com.monkopedia.ksrpc.packets.internal/Packet.toString|toString(){}[0]
+
+    final class <#A1: kotlin/Any?> $serializer : kotlinx.serialization.internal/GeneratedSerializer<com.monkopedia.ksrpc.packets.internal/Packet<#A1>> { // com.monkopedia.ksrpc.packets.internal/Packet.$serializer|null[0]
+        constructor <init>(kotlinx.serialization/KSerializer<#A1>) // com.monkopedia.ksrpc.packets.internal/Packet.$serializer.<init>|<init>(kotlinx.serialization.KSerializer<1:0>){}[0]
+
+        final val descriptor // com.monkopedia.ksrpc.packets.internal/Packet.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // com.monkopedia.ksrpc.packets.internal/Packet.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+        final val typeSerial0 // com.monkopedia.ksrpc.packets.internal/Packet.$serializer.typeSerial0|{}typeSerial0[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // com.monkopedia.ksrpc.packets.internal/Packet.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): com.monkopedia.ksrpc.packets.internal/Packet<#A1> // com.monkopedia.ksrpc.packets.internal/Packet.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, com.monkopedia.ksrpc.packets.internal/Packet<#A1>) // com.monkopedia.ksrpc.packets.internal/Packet.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;com.monkopedia.ksrpc.packets.internal.Packet<1:0>){}[0]
+        final fun typeParametersSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // com.monkopedia.ksrpc.packets.internal/Packet.$serializer.typeParametersSerializers|typeParametersSerializers(){}[0]
+    }
+
+    final object Companion : kotlinx.serialization.internal/SerializerFactory { // com.monkopedia.ksrpc.packets.internal/Packet.Companion|null[0]
+        final val $cachedDescriptor // com.monkopedia.ksrpc.packets.internal/Packet.Companion.$cachedDescriptor|{}$cachedDescriptor[0]
+            final fun <get-$cachedDescriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // com.monkopedia.ksrpc.packets.internal/Packet.Companion.$cachedDescriptor.<get-$cachedDescriptor>|<get-$cachedDescriptor>(){}[0]
+
+        final fun <#A2: kotlin/Any?> serializer(kotlinx.serialization/KSerializer<#A2>): kotlinx.serialization/KSerializer<com.monkopedia.ksrpc.packets.internal/Packet<#A2>> // com.monkopedia.ksrpc.packets.internal/Packet.Companion.serializer|serializer(kotlinx.serialization.KSerializer<0:0>){0§<kotlin.Any?>}[0]
+        final fun serializer(kotlin/Array<out kotlinx.serialization/KSerializer<*>>...): kotlinx.serialization/KSerializer<*> // com.monkopedia.ksrpc.packets.internal/Packet.Companion.serializer|serializer(kotlin.Array<out|kotlinx.serialization.KSerializer<*>>...){}[0]
+    }
+}
+
+final const val com.monkopedia.ksrpc.packets.internal/CONTENT_LENGTH // com.monkopedia.ksrpc.packets.internal/CONTENT_LENGTH|{}CONTENT_LENGTH[0]
+    final fun <get-CONTENT_LENGTH>(): kotlin/String // com.monkopedia.ksrpc.packets.internal/CONTENT_LENGTH.<get-CONTENT_LENGTH>|<get-CONTENT_LENGTH>(){}[0]
+final const val com.monkopedia.ksrpc.packets.internal/CONTENT_TYPE // com.monkopedia.ksrpc.packets.internal/CONTENT_TYPE|{}CONTENT_TYPE[0]
+    final fun <get-CONTENT_TYPE>(): kotlin/String // com.monkopedia.ksrpc.packets.internal/CONTENT_TYPE.<get-CONTENT_TYPE>|<get-CONTENT_TYPE>(){}[0]

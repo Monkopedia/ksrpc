@@ -1,0 +1,11 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, linuxArm64, linuxX64, macosArm64, macosX64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <com.monkopedia.ksrpc:ksrpc-ktor-server>
+final fun (io.ktor.server.routing/Routing).com.monkopedia.ksrpc.ktor/serve(kotlin/String, com.monkopedia.ksrpc.channels/SerializedChannel<kotlin/String>, com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String>) // com.monkopedia.ksrpc.ktor/serve|serve@io.ktor.server.routing.Routing(kotlin.String;com.monkopedia.ksrpc.channels.SerializedChannel<kotlin.String>;com.monkopedia.ksrpc.KsrpcEnvironment<kotlin.String>){}[0]
+final fun (io.ktor.server.routing/Routing).com.monkopedia.ksrpc.ktor/serve(kotlin/String, com.monkopedia.ksrpc.channels/SerializedService<kotlin/String>, com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String>) // com.monkopedia.ksrpc.ktor/serve|serve@io.ktor.server.routing.Routing(kotlin.String;com.monkopedia.ksrpc.channels.SerializedService<kotlin.String>;com.monkopedia.ksrpc.KsrpcEnvironment<kotlin.String>){}[0]
+final inline fun <#A: reified com.monkopedia.ksrpc/RpcService> (io.ktor.server.routing/Routing).com.monkopedia.ksrpc.ktor/serve(kotlin/String, #A, com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String>) // com.monkopedia.ksrpc.ktor/serve|serve@io.ktor.server.routing.Routing(kotlin.String;0:0;com.monkopedia.ksrpc.KsrpcEnvironment<kotlin.String>){0§<com.monkopedia.ksrpc.RpcService>}[0]

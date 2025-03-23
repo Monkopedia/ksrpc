@@ -1,0 +1,286 @@
+public abstract interface class com/monkopedia/ksrpc/jni/BasicList {
+	public abstract fun get (I)Ljava/lang/Object;
+	public abstract fun getAsSerialized ()Lcom/monkopedia/ksrpc/jni/JniSerialized;
+	public abstract fun getSize ()I
+}
+
+public abstract interface class com/monkopedia/ksrpc/jni/Converter {
+	public abstract fun convertFrom (Ljava/lang/Object;)Ljava/lang/Object;
+	public abstract fun convertTo (Ljava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class com/monkopedia/ksrpc/jni/JNIControl {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/jni/JNIControl;
+	public final fun ensureInit ()V
+	public final fun initJniDispatcher (I)V
+}
+
+public final class com/monkopedia/ksrpc/jni/JavaJniContinuation {
+	public static final field Companion Lcom/monkopedia/ksrpc/jni/JavaJniContinuation$Companion;
+	public fun <init> (Lcom/monkopedia/ksrpc/jni/Converter;Lkotlin/coroutines/Continuation;)V
+	public final fun getSer ()Lcom/monkopedia/ksrpc/jni/JniSer;
+	public final fun resumeFailure (Ljava/lang/Object;)V
+	public final fun resumeSuccess (Ljava/lang/Object;)V
+	public final fun setSer (Lcom/monkopedia/ksrpc/jni/JniSer;)V
+}
+
+public final class com/monkopedia/ksrpc/jni/JavaJniContinuation$Companion {
+}
+
+public final class com/monkopedia/ksrpc/jni/JavaJniContinuationKt {
+	public static final fun withConverter (Lkotlin/coroutines/Continuation;Lcom/monkopedia/ksrpc/jni/Converter;)Lcom/monkopedia/ksrpc/jni/JavaJniContinuation;
+}
+
+public final class com/monkopedia/ksrpc/jni/JavaListWrapperKt {
+	public static final fun newList ()Lcom/monkopedia/ksrpc/jni/MutableBasicList;
+	public static final fun toList (Lcom/monkopedia/ksrpc/jni/JniSerialized;)Ljava/util/List;
+	public static final fun toSerialized (Ljava/util/List;)Lcom/monkopedia/ksrpc/jni/JniSerialized;
+}
+
+public final class com/monkopedia/ksrpc/jni/JavaTypeConverter : com/monkopedia/ksrpc/jni/JniTypeConverter {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/jni/JavaTypeConverter;
+	public fun getBoolean ()Lcom/monkopedia/ksrpc/jni/Converter;
+	public fun getByte ()Lcom/monkopedia/ksrpc/jni/Converter;
+	public fun getChar ()Lcom/monkopedia/ksrpc/jni/Converter;
+	public fun getDouble ()Lcom/monkopedia/ksrpc/jni/Converter;
+	public fun getFloat ()Lcom/monkopedia/ksrpc/jni/Converter;
+	public fun getInt ()Lcom/monkopedia/ksrpc/jni/Converter;
+	public fun getLong ()Lcom/monkopedia/ksrpc/jni/Converter;
+	public fun getShort ()Lcom/monkopedia/ksrpc/jni/Converter;
+	public fun getString ()Lcom/monkopedia/ksrpc/jni/Converter;
+}
+
+public final class com/monkopedia/ksrpc/jni/JavaTypeConverter$BooleanConverter : com/monkopedia/ksrpc/jni/JavaTypeConverter$CastConverter {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/jni/JavaTypeConverter$BooleanConverter;
+}
+
+public final class com/monkopedia/ksrpc/jni/JavaTypeConverter$ByteConverter : com/monkopedia/ksrpc/jni/JavaTypeConverter$CastConverter {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/jni/JavaTypeConverter$ByteConverter;
+}
+
+public class com/monkopedia/ksrpc/jni/JavaTypeConverter$CastConverter : com/monkopedia/ksrpc/jni/Converter {
+	public fun <init> ()V
+	public fun convertFrom (Ljava/lang/Object;)Ljava/lang/Object;
+	public fun convertTo (Ljava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class com/monkopedia/ksrpc/jni/JavaTypeConverter$CharConverter : com/monkopedia/ksrpc/jni/JavaTypeConverter$CastConverter {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/jni/JavaTypeConverter$CharConverter;
+}
+
+public final class com/monkopedia/ksrpc/jni/JavaTypeConverter$DoubleConverter : com/monkopedia/ksrpc/jni/JavaTypeConverter$CastConverter {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/jni/JavaTypeConverter$DoubleConverter;
+}
+
+public final class com/monkopedia/ksrpc/jni/JavaTypeConverter$FloatConverter : com/monkopedia/ksrpc/jni/JavaTypeConverter$CastConverter {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/jni/JavaTypeConverter$FloatConverter;
+}
+
+public final class com/monkopedia/ksrpc/jni/JavaTypeConverter$IntConverter : com/monkopedia/ksrpc/jni/JavaTypeConverter$CastConverter {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/jni/JavaTypeConverter$IntConverter;
+}
+
+public final class com/monkopedia/ksrpc/jni/JavaTypeConverter$LongConverter : com/monkopedia/ksrpc/jni/JavaTypeConverter$CastConverter {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/jni/JavaTypeConverter$LongConverter;
+}
+
+public final class com/monkopedia/ksrpc/jni/JavaTypeConverter$ShortConverter : com/monkopedia/ksrpc/jni/JavaTypeConverter$CastConverter {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/jni/JavaTypeConverter$ShortConverter;
+}
+
+public final class com/monkopedia/ksrpc/jni/JavaTypeConverter$StringConverter : com/monkopedia/ksrpc/jni/JavaTypeConverter$CastConverter {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/jni/JavaTypeConverter$StringConverter;
+}
+
+public final class com/monkopedia/ksrpc/jni/JavaTypeConverterKt {
+	public static final fun converterOf (Lcom/monkopedia/ksrpc/jni/JniSer;Lkotlinx/serialization/KSerializer;)Lcom/monkopedia/ksrpc/jni/Converter;
+	public static final fun newTypeConverter ()Lcom/monkopedia/ksrpc/jni/JniTypeConverter;
+}
+
+public final class com/monkopedia/ksrpc/jni/JniBuilder {
+	public final fun getDecoder ()Lcom/monkopedia/ksrpc/jni/JniDecoder;
+	public final fun getEncoder ()Lcom/monkopedia/ksrpc/jni/JniEncoder;
+	public final fun getSerializersModule ()Lkotlinx/serialization/modules/SerializersModule;
+	public final fun getTypeConverter ()Lcom/monkopedia/ksrpc/jni/JniTypeConverter;
+	public final fun setSerializersModule (Lkotlinx/serialization/modules/SerializersModule;)V
+	public final fun setTypeConverter (Lcom/monkopedia/ksrpc/jni/JniTypeConverter;)V
+}
+
+public final class com/monkopedia/ksrpc/jni/JniConnection : com/monkopedia/ksrpc/packets/internal/PacketChannelBase {
+	public static final field Companion Lcom/monkopedia/ksrpc/jni/JniConnection$Companion;
+	public fun <init> (Lkotlinx/coroutines/CoroutineScope;Lcom/monkopedia/ksrpc/KsrpcEnvironment;J)V
+	public fun <init> (Lkotlinx/coroutines/CoroutineScope;Lcom/monkopedia/ksrpc/KsrpcEnvironment;Lcom/monkopedia/ksrpc/jni/NativeKsrpcEnvironmentFactory;)V
+	public final fun close (JLcom/monkopedia/ksrpc/jni/JavaJniContinuation;)V
+	public fun close (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun closeFromNative (Lcom/monkopedia/ksrpc/jni/NativeJniContinuation;)V
+	public final fun createConnection (JJ)J
+	public final fun finalize ()V
+	public final fun finalize (JJ)V
+	public final fun getNativeConnection ()J
+	public fun receiveLocked (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun sendFromNative (Lcom/monkopedia/ksrpc/jni/JniSerialized;Lcom/monkopedia/ksrpc/jni/NativeJniContinuation;)V
+	public fun sendLocked (Lcom/monkopedia/ksrpc/packets/internal/Packet;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun sendSerialized (JLcom/monkopedia/ksrpc/jni/JniSerialized;Lcom/monkopedia/ksrpc/jni/JavaJniContinuation;)V
+}
+
+public final class com/monkopedia/ksrpc/jni/JniConnection$Companion : com/monkopedia/ksrpc/jni/Converter {
+	public fun convertFrom (Lcom/monkopedia/ksrpc/jni/JniConnection;)Ljava/lang/Object;
+	public synthetic fun convertFrom (Ljava/lang/Object;)Ljava/lang/Object;
+	public fun convertTo (Ljava/lang/Object;)Lcom/monkopedia/ksrpc/jni/JniConnection;
+	public synthetic fun convertTo (Ljava/lang/Object;)Ljava/lang/Object;
+}
+
+public abstract interface class com/monkopedia/ksrpc/jni/JniContinuation {
+	public abstract fun resumeWith (Lcom/monkopedia/ksrpc/jni/Converter;Ljava/lang/Object;)V
+}
+
+public final class com/monkopedia/ksrpc/jni/JniContinuationKt {
+	public static final fun asContinuation (Lcom/monkopedia/ksrpc/jni/JniContinuation;Lcom/monkopedia/ksrpc/jni/Converter;)Lkotlin/coroutines/Continuation;
+}
+
+public final class com/monkopedia/ksrpc/jni/JniDecoder : kotlinx/serialization/encoding/AbstractDecoder {
+	public fun beginStructure (Lkotlinx/serialization/descriptors/SerialDescriptor;)Lkotlinx/serialization/encoding/CompositeDecoder;
+	public final fun component1 ()Lkotlinx/serialization/modules/SerializersModule;
+	public final fun copy (Lkotlinx/serialization/modules/SerializersModule;Lcom/monkopedia/ksrpc/jni/JniTypeConverter;Lcom/monkopedia/ksrpc/jni/BasicList;)Lcom/monkopedia/ksrpc/jni/JniDecoder;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/jni/JniDecoder;Lkotlinx/serialization/modules/SerializersModule;Lcom/monkopedia/ksrpc/jni/JniTypeConverter;Lcom/monkopedia/ksrpc/jni/BasicList;ILjava/lang/Object;)Lcom/monkopedia/ksrpc/jni/JniDecoder;
+	public fun decodeBoolean ()Z
+	public fun decodeByte ()B
+	public fun decodeChar ()C
+	public fun decodeDouble ()D
+	public fun decodeElementIndex (Lkotlinx/serialization/descriptors/SerialDescriptor;)I
+	public fun decodeEnum (Lkotlinx/serialization/descriptors/SerialDescriptor;)I
+	public fun decodeFloat ()F
+	public fun decodeInt ()I
+	public fun decodeLong ()J
+	public fun decodeNotNullMark ()Z
+	public fun decodeNull ()Ljava/lang/Void;
+	public final fun decodeSerialized ()Lcom/monkopedia/ksrpc/jni/JniSerialized;
+	public fun decodeShort ()S
+	public fun decodeString ()Ljava/lang/String;
+	public final fun decoderFor (Lcom/monkopedia/ksrpc/jni/JniSerialized;)Lcom/monkopedia/ksrpc/jni/JniDecoder;
+	public fun endStructure (Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getSerializersModule ()Lkotlinx/serialization/modules/SerializersModule;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/monkopedia/ksrpc/jni/JniEncoder : kotlinx/serialization/encoding/AbstractEncoder {
+	public fun beginStructure (Lkotlinx/serialization/descriptors/SerialDescriptor;)Lkotlinx/serialization/encoding/CompositeEncoder;
+	public final fun component1 ()Lkotlinx/serialization/modules/SerializersModule;
+	public final fun copy (Lkotlinx/serialization/modules/SerializersModule;Lcom/monkopedia/ksrpc/jni/JniTypeConverter;)Lcom/monkopedia/ksrpc/jni/JniEncoder;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/jni/JniEncoder;Lkotlinx/serialization/modules/SerializersModule;Lcom/monkopedia/ksrpc/jni/JniTypeConverter;ILjava/lang/Object;)Lcom/monkopedia/ksrpc/jni/JniEncoder;
+	public fun encodeBoolean (Z)V
+	public fun encodeByte (B)V
+	public fun encodeChar (C)V
+	public fun encodeDouble (D)V
+	public fun encodeElement (Lkotlinx/serialization/descriptors/SerialDescriptor;I)Z
+	public fun encodeEnum (Lkotlinx/serialization/descriptors/SerialDescriptor;I)V
+	public fun encodeFloat (F)V
+	public fun encodeInt (I)V
+	public fun encodeLong (J)V
+	public fun encodeNotNullMark ()V
+	public fun encodeNull ()V
+	public final fun encodeSerialized (Lcom/monkopedia/ksrpc/jni/JniSerialized;)V
+	public fun encodeShort (S)V
+	public fun encodeString (Ljava/lang/String;)V
+	public fun endStructure (Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSerialized ()Lcom/monkopedia/ksrpc/jni/JniSerialized;
+	public fun getSerializersModule ()Lkotlinx/serialization/modules/SerializersModule;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public class com/monkopedia/ksrpc/jni/JniSer {
+	public static final field Companion Lcom/monkopedia/ksrpc/jni/JniSer$Companion;
+	public fun <init> (Lcom/monkopedia/ksrpc/jni/JniEncoder;Lcom/monkopedia/ksrpc/jni/JniDecoder;)V
+	public fun <init> (Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun decodeFromJni (Lkotlinx/serialization/DeserializationStrategy;Lcom/monkopedia/ksrpc/jni/JniSerialized;)Ljava/lang/Object;
+	public final fun encodeToJni (Lkotlinx/serialization/SerializationStrategy;Ljava/lang/Object;)Lcom/monkopedia/ksrpc/jni/JniSerialized;
+	public final fun getDecoder ()Lcom/monkopedia/ksrpc/jni/JniDecoder;
+	public final fun getEncoder ()Lcom/monkopedia/ksrpc/jni/JniEncoder;
+}
+
+public final class com/monkopedia/ksrpc/jni/JniSer$Companion : com/monkopedia/ksrpc/jni/JniSer {
+}
+
+public final class com/monkopedia/ksrpc/jni/JniSerialization : com/monkopedia/ksrpc/CallDataSerializer {
+	public fun <init> ()V
+	public fun <init> (Lcom/monkopedia/ksrpc/jni/JniSer;)V
+	public synthetic fun <init> (Lcom/monkopedia/ksrpc/jni/JniSer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun createCallData (Lkotlinx/serialization/KSerializer;Ljava/lang/Object;)Lcom/monkopedia/ksrpc/channels/CallData;
+	public fun createErrorCallData (Lkotlinx/serialization/KSerializer;Ljava/lang/Object;)Lcom/monkopedia/ksrpc/channels/CallData;
+	public fun decodeCallData (Lkotlinx/serialization/KSerializer;Lcom/monkopedia/ksrpc/channels/CallData;)Ljava/lang/Object;
+	public fun decodeErrorCallData (Lcom/monkopedia/ksrpc/channels/CallData;)Ljava/lang/Throwable;
+	public fun isError (Lcom/monkopedia/ksrpc/channels/CallData;)Z
+}
+
+public final class com/monkopedia/ksrpc/jni/JniSerialized {
+	public static final field Companion Lcom/monkopedia/ksrpc/jni/JniSerialized$Companion;
+	public fun <init> (Lcom/monkopedia/ksrpc/jni/BasicList;)V
+	public final fun component1 ()Lcom/monkopedia/ksrpc/jni/BasicList;
+	public final fun copy (Lcom/monkopedia/ksrpc/jni/BasicList;)Lcom/monkopedia/ksrpc/jni/JniSerialized;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/jni/JniSerialized;Lcom/monkopedia/ksrpc/jni/BasicList;ILjava/lang/Object;)Lcom/monkopedia/ksrpc/jni/JniSerialized;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getList ()Lcom/monkopedia/ksrpc/jni/BasicList;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/monkopedia/ksrpc/jni/JniSerialized$Companion : kotlinx/serialization/KSerializer {
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/monkopedia/ksrpc/jni/JniSerialized;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/monkopedia/ksrpc/jni/JniSerialized;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+}
+
+public abstract interface class com/monkopedia/ksrpc/jni/JniTypeConverter {
+	public abstract fun getBoolean ()Lcom/monkopedia/ksrpc/jni/Converter;
+	public abstract fun getByte ()Lcom/monkopedia/ksrpc/jni/Converter;
+	public abstract fun getChar ()Lcom/monkopedia/ksrpc/jni/Converter;
+	public abstract fun getDouble ()Lcom/monkopedia/ksrpc/jni/Converter;
+	public abstract fun getFloat ()Lcom/monkopedia/ksrpc/jni/Converter;
+	public abstract fun getInt ()Lcom/monkopedia/ksrpc/jni/Converter;
+	public abstract fun getLong ()Lcom/monkopedia/ksrpc/jni/Converter;
+	public abstract fun getShort ()Lcom/monkopedia/ksrpc/jni/Converter;
+	public abstract fun getString ()Lcom/monkopedia/ksrpc/jni/Converter;
+}
+
+public abstract interface class com/monkopedia/ksrpc/jni/MutableBasicList : com/monkopedia/ksrpc/jni/BasicList {
+	public abstract fun add (Ljava/lang/Object;)V
+	public abstract fun set (ILjava/lang/Object;)V
+}
+
+public final class com/monkopedia/ksrpc/jni/NativeJniContinuation : com/monkopedia/ksrpc/jni/JniContinuation {
+	public fun <init> (J)V
+	public final fun finalize (J)V
+	public final fun getNativeObject ()J
+	public final fun getSer ()Lcom/monkopedia/ksrpc/jni/JniSer;
+	public final fun resumeFailure (JLcom/monkopedia/ksrpc/jni/JniSerialized;)V
+	public final fun resumeSuccess (JLjava/lang/Object;)V
+	public fun resumeWith (Lcom/monkopedia/ksrpc/jni/Converter;Ljava/lang/Object;)V
+	public final fun setSer (Lcom/monkopedia/ksrpc/jni/JniSer;)V
+}
+
+public abstract interface class com/monkopedia/ksrpc/jni/NativeKsrpcEnvironmentFactory {
+	public abstract fun createNativeEnvironment ()J
+}
+
+public final class com/monkopedia/ksrpc/jni/NativeScopeHandler {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/jni/NativeScopeHandler;
+	public final fun cancelScope (J)V
+	public final fun createNativeScope ()J
+}
+
+public final class com/monkopedia/ksrpc/jni/NativeScopeKt {
+	public static final fun getAsNativeScope (Lkotlinx/coroutines/CoroutineScope;)J
+}
+
+public final class com/monkopedia/ksrpc/jni/NativeUtils {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/jni/NativeUtils;
+	public final fun loadLibraryFromJar (Ljava/lang/String;)V
+}
+

@@ -1,0 +1,52 @@
+public final class com/monkopedia/ksrpc/RpcException : java/lang/RuntimeException {
+	public fun <init> (Ljava/lang/String;)V
+	public fun getMessage ()Ljava/lang/String;
+}
+
+public final class com/monkopedia/ksrpc/RpcFailure {
+	public static final field Companion Lcom/monkopedia/ksrpc/RpcFailure$Companion;
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/monkopedia/ksrpc/RpcFailure;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/RpcFailure;Ljava/lang/String;ILjava/lang/Object;)Lcom/monkopedia/ksrpc/RpcFailure;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getStack ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun toException ()Ljava/lang/RuntimeException;
+	public fun toString ()Ljava/lang/String;
+}
+
+public synthetic class com/monkopedia/ksrpc/RpcFailure$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/RpcFailure$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/monkopedia/ksrpc/RpcFailure;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/monkopedia/ksrpc/RpcFailure;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/monkopedia/ksrpc/RpcFailure$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public abstract interface class com/monkopedia/ksrpc/RpcService : com/monkopedia/ksrpc/SuspendCloseable {
+	public abstract fun close (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/monkopedia/ksrpc/RpcService$DefaultImpls {
+	public static fun close (Lcom/monkopedia/ksrpc/RpcService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class com/monkopedia/ksrpc/SuspendCloseable {
+	public abstract fun close (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface annotation class com/monkopedia/ksrpc/annotation/KsMethod : java/lang/annotation/Annotation {
+	public abstract fun name ()Ljava/lang/String;
+}
+
+public abstract interface annotation class com/monkopedia/ksrpc/annotation/KsService : java/lang/annotation/Annotation {
+}
+

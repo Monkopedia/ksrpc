@@ -1,0 +1,60 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, js, linuxArm64, linuxX64, macosArm64, macosX64, mingwX64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <com.monkopedia.ksrpc:ksrpc-api>
+open annotation class com.monkopedia.ksrpc.annotation/KsMethod : kotlin/Annotation { // com.monkopedia.ksrpc.annotation/KsMethod|null[0]
+    constructor <init>(kotlin/String) // com.monkopedia.ksrpc.annotation/KsMethod.<init>|<init>(kotlin.String){}[0]
+
+    final val name // com.monkopedia.ksrpc.annotation/KsMethod.name|{}name[0]
+        final fun <get-name>(): kotlin/String // com.monkopedia.ksrpc.annotation/KsMethod.name.<get-name>|<get-name>(){}[0]
+}
+
+open annotation class com.monkopedia.ksrpc.annotation/KsService : kotlin/Annotation { // com.monkopedia.ksrpc.annotation/KsService|null[0]
+    constructor <init>() // com.monkopedia.ksrpc.annotation/KsService.<init>|<init>(){}[0]
+}
+
+abstract interface com.monkopedia.ksrpc/RpcService : com.monkopedia.ksrpc/SuspendCloseable { // com.monkopedia.ksrpc/RpcService|null[0]
+    open suspend fun close() // com.monkopedia.ksrpc/RpcService.close|close(){}[0]
+}
+
+abstract interface com.monkopedia.ksrpc/SuspendCloseable { // com.monkopedia.ksrpc/SuspendCloseable|null[0]
+    abstract suspend fun close() // com.monkopedia.ksrpc/SuspendCloseable.close|close(){}[0]
+}
+
+final class com.monkopedia.ksrpc/RpcException : kotlin/RuntimeException { // com.monkopedia.ksrpc/RpcException|null[0]
+    constructor <init>(kotlin/String) // com.monkopedia.ksrpc/RpcException.<init>|<init>(kotlin.String){}[0]
+
+    final val message // com.monkopedia.ksrpc/RpcException.message|{}message[0]
+        final fun <get-message>(): kotlin/String // com.monkopedia.ksrpc/RpcException.message.<get-message>|<get-message>(){}[0]
+}
+
+final class com.monkopedia.ksrpc/RpcFailure { // com.monkopedia.ksrpc/RpcFailure|null[0]
+    constructor <init>(kotlin/String) // com.monkopedia.ksrpc/RpcFailure.<init>|<init>(kotlin.String){}[0]
+
+    final val stack // com.monkopedia.ksrpc/RpcFailure.stack|{}stack[0]
+        final fun <get-stack>(): kotlin/String // com.monkopedia.ksrpc/RpcFailure.stack.<get-stack>|<get-stack>(){}[0]
+
+    final fun component1(): kotlin/String // com.monkopedia.ksrpc/RpcFailure.component1|component1(){}[0]
+    final fun copy(kotlin/String = ...): com.monkopedia.ksrpc/RpcFailure // com.monkopedia.ksrpc/RpcFailure.copy|copy(kotlin.String){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc/RpcFailure.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc/RpcFailure.hashCode|hashCode(){}[0]
+    final fun toException(): kotlin/RuntimeException // com.monkopedia.ksrpc/RpcFailure.toException|toException(){}[0]
+    final fun toString(): kotlin/String // com.monkopedia.ksrpc/RpcFailure.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<com.monkopedia.ksrpc/RpcFailure> { // com.monkopedia.ksrpc/RpcFailure.$serializer|null[0]
+        final val descriptor // com.monkopedia.ksrpc/RpcFailure.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // com.monkopedia.ksrpc/RpcFailure.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // com.monkopedia.ksrpc/RpcFailure.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): com.monkopedia.ksrpc/RpcFailure // com.monkopedia.ksrpc/RpcFailure.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, com.monkopedia.ksrpc/RpcFailure) // com.monkopedia.ksrpc/RpcFailure.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;com.monkopedia.ksrpc.RpcFailure){}[0]
+    }
+
+    final object Companion { // com.monkopedia.ksrpc/RpcFailure.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<com.monkopedia.ksrpc/RpcFailure> // com.monkopedia.ksrpc/RpcFailure.Companion.serializer|serializer(){}[0]
+    }
+}

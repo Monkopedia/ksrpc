@@ -1,0 +1,4 @@
+public final class com/monkopedia/ksrpc/ktor/websocket/WebsocketClientChannelsKt {
+	public static final fun asWebsocketConnection (Lio/ktor/client/HttpClient;Ljava/lang/String;Lcom/monkopedia/ksrpc/KsrpcEnvironment;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+

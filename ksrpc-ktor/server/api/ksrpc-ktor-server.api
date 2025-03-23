@@ -1,0 +1,5 @@
+public final class com/monkopedia/ksrpc/ktor/HttpStreamKt {
+	public static final fun serve (Lio/ktor/server/routing/Routing;Ljava/lang/String;Lcom/monkopedia/ksrpc/channels/SerializedChannel;Lcom/monkopedia/ksrpc/KsrpcEnvironment;)V
+	public static final fun serve (Lio/ktor/server/routing/Routing;Ljava/lang/String;Lcom/monkopedia/ksrpc/channels/SerializedService;Lcom/monkopedia/ksrpc/KsrpcEnvironment;)V
+}
+

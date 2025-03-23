@@ -1,0 +1,311 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, linuxArm64, linuxX64, macosArm64, macosX64, mingwX64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <com.monkopedia.ksrpc:ksrpc-jni>
+abstract interface <#A: kotlin/Any?, #B: kotlin/Any?> com.monkopedia.ksrpc.jni/Converter { // com.monkopedia.ksrpc.jni/Converter|null[0]
+    abstract fun convertFrom(#B): #A? // com.monkopedia.ksrpc.jni/Converter.convertFrom|convertFrom(1:1){}[0]
+    abstract fun convertTo(#A?): #B // com.monkopedia.ksrpc.jni/Converter.convertTo|convertTo(1:0?){}[0]
+}
+
+abstract interface <#A: kotlin/Any?> com.monkopedia.ksrpc.jni/BasicList { // com.monkopedia.ksrpc.jni/BasicList|null[0]
+    abstract val asSerialized // com.monkopedia.ksrpc.jni/BasicList.asSerialized|{}asSerialized[0]
+        abstract fun <get-asSerialized>(): com.monkopedia.ksrpc.jni/JniSerialized // com.monkopedia.ksrpc.jni/BasicList.asSerialized.<get-asSerialized>|<get-asSerialized>(){}[0]
+    abstract val size // com.monkopedia.ksrpc.jni/BasicList.size|{}size[0]
+        abstract fun <get-size>(): kotlin/Int // com.monkopedia.ksrpc.jni/BasicList.size.<get-size>|<get-size>(){}[0]
+
+    abstract fun get(kotlin/Int): #A // com.monkopedia.ksrpc.jni/BasicList.get|get(kotlin.Int){}[0]
+}
+
+abstract interface <#A: kotlin/Any?> com.monkopedia.ksrpc.jni/JniContinuation { // com.monkopedia.ksrpc.jni/JniContinuation|null[0]
+    abstract fun resumeWith(com.monkopedia.ksrpc.jni/Converter<*, #A>, kotlin/Result<#A>) // com.monkopedia.ksrpc.jni/JniContinuation.resumeWith|resumeWith(com.monkopedia.ksrpc.jni.Converter<*,1:0>;kotlin.Result<1:0>){}[0]
+}
+
+abstract interface <#A: kotlin/Any?> com.monkopedia.ksrpc.jni/JniTypeConverter { // com.monkopedia.ksrpc.jni/JniTypeConverter|null[0]
+    abstract val boolean // com.monkopedia.ksrpc.jni/JniTypeConverter.boolean|{}boolean[0]
+        abstract fun <get-boolean>(): com.monkopedia.ksrpc.jni/Converter<#A, kotlin/Boolean> // com.monkopedia.ksrpc.jni/JniTypeConverter.boolean.<get-boolean>|<get-boolean>(){}[0]
+    abstract val byte // com.monkopedia.ksrpc.jni/JniTypeConverter.byte|{}byte[0]
+        abstract fun <get-byte>(): com.monkopedia.ksrpc.jni/Converter<#A, kotlin/Byte> // com.monkopedia.ksrpc.jni/JniTypeConverter.byte.<get-byte>|<get-byte>(){}[0]
+    abstract val char // com.monkopedia.ksrpc.jni/JniTypeConverter.char|{}char[0]
+        abstract fun <get-char>(): com.monkopedia.ksrpc.jni/Converter<#A, kotlin/Char> // com.monkopedia.ksrpc.jni/JniTypeConverter.char.<get-char>|<get-char>(){}[0]
+    abstract val double // com.monkopedia.ksrpc.jni/JniTypeConverter.double|{}double[0]
+        abstract fun <get-double>(): com.monkopedia.ksrpc.jni/Converter<#A, kotlin/Double> // com.monkopedia.ksrpc.jni/JniTypeConverter.double.<get-double>|<get-double>(){}[0]
+    abstract val float // com.monkopedia.ksrpc.jni/JniTypeConverter.float|{}float[0]
+        abstract fun <get-float>(): com.monkopedia.ksrpc.jni/Converter<#A, kotlin/Float> // com.monkopedia.ksrpc.jni/JniTypeConverter.float.<get-float>|<get-float>(){}[0]
+    abstract val int // com.monkopedia.ksrpc.jni/JniTypeConverter.int|{}int[0]
+        abstract fun <get-int>(): com.monkopedia.ksrpc.jni/Converter<#A, kotlin/Int> // com.monkopedia.ksrpc.jni/JniTypeConverter.int.<get-int>|<get-int>(){}[0]
+    abstract val long // com.monkopedia.ksrpc.jni/JniTypeConverter.long|{}long[0]
+        abstract fun <get-long>(): com.monkopedia.ksrpc.jni/Converter<#A, kotlin/Long> // com.monkopedia.ksrpc.jni/JniTypeConverter.long.<get-long>|<get-long>(){}[0]
+    abstract val short // com.monkopedia.ksrpc.jni/JniTypeConverter.short|{}short[0]
+        abstract fun <get-short>(): com.monkopedia.ksrpc.jni/Converter<#A, kotlin/Short> // com.monkopedia.ksrpc.jni/JniTypeConverter.short.<get-short>|<get-short>(){}[0]
+    abstract val string // com.monkopedia.ksrpc.jni/JniTypeConverter.string|{}string[0]
+        abstract fun <get-string>(): com.monkopedia.ksrpc.jni/Converter<#A, kotlin/String> // com.monkopedia.ksrpc.jni/JniTypeConverter.string.<get-string>|<get-string>(){}[0]
+}
+
+abstract interface <#A: kotlin/Any?> com.monkopedia.ksrpc.jni/MutableBasicList : com.monkopedia.ksrpc.jni/BasicList<#A> { // com.monkopedia.ksrpc.jni/MutableBasicList|null[0]
+    abstract fun add(#A) // com.monkopedia.ksrpc.jni/MutableBasicList.add|add(1:0){}[0]
+    abstract fun set(kotlin/Int, #A) // com.monkopedia.ksrpc.jni/MutableBasicList.set|set(kotlin.Int;1:0){}[0]
+}
+
+final class <#A: kotlin/Any?> com.monkopedia.jnitest.com.monkopedia.ksrpc.jni/JavaJniContinuation : com.monkopedia.ksrpc.jni/JniContinuation<#A> { // com.monkopedia.jnitest.com.monkopedia.ksrpc.jni/JavaJniContinuation|null[0]
+    constructor <init>(kotlinx.cinterop/CPointer<cnames.structs/_jobject>) // com.monkopedia.jnitest.com.monkopedia.ksrpc.jni/JavaJniContinuation.<init>|<init>(kotlinx.cinterop.CPointer<cnames.structs._jobject>){}[0]
+
+    final fun resumeWith(com.monkopedia.ksrpc.jni/Converter<*, #A>, kotlin/Result<#A>) // com.monkopedia.jnitest.com.monkopedia.ksrpc.jni/JavaJniContinuation.resumeWith|resumeWith(com.monkopedia.ksrpc.jni.Converter<*,1:0>;kotlin.Result<1:0>){}[0]
+}
+
+final class <#A: kotlin/Any?> com.monkopedia.jnitest.com.monkopedia.ksrpc.jni/JavaJniContinuationConverter : com.monkopedia.ksrpc.jni/Converter<kotlinx.cinterop/CPointer<cnames.structs/_jobject>?, com.monkopedia.jnitest.com.monkopedia.ksrpc.jni/JavaJniContinuation<#A>> { // com.monkopedia.jnitest.com.monkopedia.ksrpc.jni/JavaJniContinuationConverter|null[0]
+    constructor <init>(kotlinx.cinterop/CPointer<kotlinx.cinterop/CPointerVarOf<kotlinx.cinterop/CPointer<com.monkopedia.jni/JNINativeInterface_>>>) // com.monkopedia.jnitest.com.monkopedia.ksrpc.jni/JavaJniContinuationConverter.<init>|<init>(kotlinx.cinterop.CPointer<kotlinx.cinterop.CPointerVarOf<kotlinx.cinterop.CPointer<com.monkopedia.jni.JNINativeInterface_>>>){}[0]
+
+    final fun convertFrom(com.monkopedia.jnitest.com.monkopedia.ksrpc.jni/JavaJniContinuation<#A>): kotlinx.cinterop/CPointer<cnames.structs/_jobject>? // com.monkopedia.jnitest.com.monkopedia.ksrpc.jni/JavaJniContinuationConverter.convertFrom|convertFrom(com.monkopedia.jnitest.com.monkopedia.ksrpc.jni.JavaJniContinuation<1:0>){}[0]
+    final fun convertTo(kotlinx.cinterop/CPointer<cnames.structs/_jobject>?): com.monkopedia.jnitest.com.monkopedia.ksrpc.jni/JavaJniContinuation<#A> // com.monkopedia.jnitest.com.monkopedia.ksrpc.jni/JavaJniContinuationConverter.convertTo|convertTo(kotlinx.cinterop.CPointer<cnames.structs._jobject>?){}[0]
+}
+
+final class <#A: kotlin/Any?> com.monkopedia.ksrpc.jni/JniBuilder { // com.monkopedia.ksrpc.jni/JniBuilder|null[0]
+    final val decoder // com.monkopedia.ksrpc.jni/JniBuilder.decoder|{}decoder[0]
+        final fun <get-decoder>(): com.monkopedia.ksrpc.jni/JniDecoder<#A> // com.monkopedia.ksrpc.jni/JniBuilder.decoder.<get-decoder>|<get-decoder>(){}[0]
+    final val encoder // com.monkopedia.ksrpc.jni/JniBuilder.encoder|{}encoder[0]
+        final fun <get-encoder>(): com.monkopedia.ksrpc.jni/JniEncoder<#A> // com.monkopedia.ksrpc.jni/JniBuilder.encoder.<get-encoder>|<get-encoder>(){}[0]
+
+    final var serializersModule // com.monkopedia.ksrpc.jni/JniBuilder.serializersModule|{}serializersModule[0]
+        final fun <get-serializersModule>(): kotlinx.serialization.modules/SerializersModule // com.monkopedia.ksrpc.jni/JniBuilder.serializersModule.<get-serializersModule>|<get-serializersModule>(){}[0]
+        final fun <set-serializersModule>(kotlinx.serialization.modules/SerializersModule) // com.monkopedia.ksrpc.jni/JniBuilder.serializersModule.<set-serializersModule>|<set-serializersModule>(kotlinx.serialization.modules.SerializersModule){}[0]
+    final var typeConverter // com.monkopedia.ksrpc.jni/JniBuilder.typeConverter|{}typeConverter[0]
+        final fun <get-typeConverter>(): com.monkopedia.ksrpc.jni/JniTypeConverter<#A> // com.monkopedia.ksrpc.jni/JniBuilder.typeConverter.<get-typeConverter>|<get-typeConverter>(){}[0]
+        final fun <set-typeConverter>(com.monkopedia.ksrpc.jni/JniTypeConverter<#A>) // com.monkopedia.ksrpc.jni/JniBuilder.typeConverter.<set-typeConverter>|<set-typeConverter>(com.monkopedia.ksrpc.jni.JniTypeConverter<1:0>){}[0]
+}
+
+final class <#A: kotlin/Any?> com.monkopedia.ksrpc.jni/JniDecoder : kotlinx.serialization.encoding/AbstractDecoder { // com.monkopedia.ksrpc.jni/JniDecoder|null[0]
+    final val serializersModule // com.monkopedia.ksrpc.jni/JniDecoder.serializersModule|{}serializersModule[0]
+        final fun <get-serializersModule>(): kotlinx.serialization.modules/SerializersModule // com.monkopedia.ksrpc.jni/JniDecoder.serializersModule.<get-serializersModule>|<get-serializersModule>(){}[0]
+
+    final fun beginStructure(kotlinx.serialization.descriptors/SerialDescriptor): kotlinx.serialization.encoding/CompositeDecoder // com.monkopedia.ksrpc.jni/JniDecoder.beginStructure|beginStructure(kotlinx.serialization.descriptors.SerialDescriptor){}[0]
+    final fun component1(): kotlinx.serialization.modules/SerializersModule // com.monkopedia.ksrpc.jni/JniDecoder.component1|component1(){}[0]
+    final fun copy(kotlinx.serialization.modules/SerializersModule = ..., com.monkopedia.ksrpc.jni/JniTypeConverter<#A> = ..., com.monkopedia.ksrpc.jni/BasicList<#A> = ...): com.monkopedia.ksrpc.jni/JniDecoder<#A> // com.monkopedia.ksrpc.jni/JniDecoder.copy|copy(kotlinx.serialization.modules.SerializersModule;com.monkopedia.ksrpc.jni.JniTypeConverter<1:0>;com.monkopedia.ksrpc.jni.BasicList<1:0>){}[0]
+    final fun decodeBoolean(): kotlin/Boolean // com.monkopedia.ksrpc.jni/JniDecoder.decodeBoolean|decodeBoolean(){}[0]
+    final fun decodeByte(): kotlin/Byte // com.monkopedia.ksrpc.jni/JniDecoder.decodeByte|decodeByte(){}[0]
+    final fun decodeChar(): kotlin/Char // com.monkopedia.ksrpc.jni/JniDecoder.decodeChar|decodeChar(){}[0]
+    final fun decodeDouble(): kotlin/Double // com.monkopedia.ksrpc.jni/JniDecoder.decodeDouble|decodeDouble(){}[0]
+    final fun decodeElementIndex(kotlinx.serialization.descriptors/SerialDescriptor): kotlin/Int // com.monkopedia.ksrpc.jni/JniDecoder.decodeElementIndex|decodeElementIndex(kotlinx.serialization.descriptors.SerialDescriptor){}[0]
+    final fun decodeEnum(kotlinx.serialization.descriptors/SerialDescriptor): kotlin/Int // com.monkopedia.ksrpc.jni/JniDecoder.decodeEnum|decodeEnum(kotlinx.serialization.descriptors.SerialDescriptor){}[0]
+    final fun decodeFloat(): kotlin/Float // com.monkopedia.ksrpc.jni/JniDecoder.decodeFloat|decodeFloat(){}[0]
+    final fun decodeInt(): kotlin/Int // com.monkopedia.ksrpc.jni/JniDecoder.decodeInt|decodeInt(){}[0]
+    final fun decodeLong(): kotlin/Long // com.monkopedia.ksrpc.jni/JniDecoder.decodeLong|decodeLong(){}[0]
+    final fun decodeNotNullMark(): kotlin/Boolean // com.monkopedia.ksrpc.jni/JniDecoder.decodeNotNullMark|decodeNotNullMark(){}[0]
+    final fun decodeNull(): kotlin/Nothing? // com.monkopedia.ksrpc.jni/JniDecoder.decodeNull|decodeNull(){}[0]
+    final fun decodeSerialized(): com.monkopedia.ksrpc.jni/JniSerialized // com.monkopedia.ksrpc.jni/JniDecoder.decodeSerialized|decodeSerialized(){}[0]
+    final fun decodeShort(): kotlin/Short // com.monkopedia.ksrpc.jni/JniDecoder.decodeShort|decodeShort(){}[0]
+    final fun decodeString(): kotlin/String // com.monkopedia.ksrpc.jni/JniDecoder.decodeString|decodeString(){}[0]
+    final fun decoderFor(com.monkopedia.ksrpc.jni/JniSerialized): com.monkopedia.ksrpc.jni/JniDecoder<#A> // com.monkopedia.ksrpc.jni/JniDecoder.decoderFor|decoderFor(com.monkopedia.ksrpc.jni.JniSerialized){}[0]
+    final fun endStructure(kotlinx.serialization.descriptors/SerialDescriptor) // com.monkopedia.ksrpc.jni/JniDecoder.endStructure|endStructure(kotlinx.serialization.descriptors.SerialDescriptor){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc.jni/JniDecoder.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc.jni/JniDecoder.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // com.monkopedia.ksrpc.jni/JniDecoder.toString|toString(){}[0]
+}
+
+final class <#A: kotlin/Any?> com.monkopedia.ksrpc.jni/JniEncoder : kotlinx.serialization.encoding/AbstractEncoder { // com.monkopedia.ksrpc.jni/JniEncoder|null[0]
+    final val serialized // com.monkopedia.ksrpc.jni/JniEncoder.serialized|{}serialized[0]
+        final fun <get-serialized>(): com.monkopedia.ksrpc.jni/JniSerialized // com.monkopedia.ksrpc.jni/JniEncoder.serialized.<get-serialized>|<get-serialized>(){}[0]
+    final val serializersModule // com.monkopedia.ksrpc.jni/JniEncoder.serializersModule|{}serializersModule[0]
+        final fun <get-serializersModule>(): kotlinx.serialization.modules/SerializersModule // com.monkopedia.ksrpc.jni/JniEncoder.serializersModule.<get-serializersModule>|<get-serializersModule>(){}[0]
+
+    final fun beginStructure(kotlinx.serialization.descriptors/SerialDescriptor): kotlinx.serialization.encoding/CompositeEncoder // com.monkopedia.ksrpc.jni/JniEncoder.beginStructure|beginStructure(kotlinx.serialization.descriptors.SerialDescriptor){}[0]
+    final fun component1(): kotlinx.serialization.modules/SerializersModule // com.monkopedia.ksrpc.jni/JniEncoder.component1|component1(){}[0]
+    final fun copy(kotlinx.serialization.modules/SerializersModule = ..., com.monkopedia.ksrpc.jni/JniTypeConverter<#A> = ...): com.monkopedia.ksrpc.jni/JniEncoder<#A> // com.monkopedia.ksrpc.jni/JniEncoder.copy|copy(kotlinx.serialization.modules.SerializersModule;com.monkopedia.ksrpc.jni.JniTypeConverter<1:0>){}[0]
+    final fun encodeBoolean(kotlin/Boolean) // com.monkopedia.ksrpc.jni/JniEncoder.encodeBoolean|encodeBoolean(kotlin.Boolean){}[0]
+    final fun encodeByte(kotlin/Byte) // com.monkopedia.ksrpc.jni/JniEncoder.encodeByte|encodeByte(kotlin.Byte){}[0]
+    final fun encodeChar(kotlin/Char) // com.monkopedia.ksrpc.jni/JniEncoder.encodeChar|encodeChar(kotlin.Char){}[0]
+    final fun encodeDouble(kotlin/Double) // com.monkopedia.ksrpc.jni/JniEncoder.encodeDouble|encodeDouble(kotlin.Double){}[0]
+    final fun encodeElement(kotlinx.serialization.descriptors/SerialDescriptor, kotlin/Int): kotlin/Boolean // com.monkopedia.ksrpc.jni/JniEncoder.encodeElement|encodeElement(kotlinx.serialization.descriptors.SerialDescriptor;kotlin.Int){}[0]
+    final fun encodeEnum(kotlinx.serialization.descriptors/SerialDescriptor, kotlin/Int) // com.monkopedia.ksrpc.jni/JniEncoder.encodeEnum|encodeEnum(kotlinx.serialization.descriptors.SerialDescriptor;kotlin.Int){}[0]
+    final fun encodeFloat(kotlin/Float) // com.monkopedia.ksrpc.jni/JniEncoder.encodeFloat|encodeFloat(kotlin.Float){}[0]
+    final fun encodeInt(kotlin/Int) // com.monkopedia.ksrpc.jni/JniEncoder.encodeInt|encodeInt(kotlin.Int){}[0]
+    final fun encodeLong(kotlin/Long) // com.monkopedia.ksrpc.jni/JniEncoder.encodeLong|encodeLong(kotlin.Long){}[0]
+    final fun encodeNotNullMark() // com.monkopedia.ksrpc.jni/JniEncoder.encodeNotNullMark|encodeNotNullMark(){}[0]
+    final fun encodeNull() // com.monkopedia.ksrpc.jni/JniEncoder.encodeNull|encodeNull(){}[0]
+    final fun encodeSerialized(com.monkopedia.ksrpc.jni/JniSerialized) // com.monkopedia.ksrpc.jni/JniEncoder.encodeSerialized|encodeSerialized(com.monkopedia.ksrpc.jni.JniSerialized){}[0]
+    final fun encodeShort(kotlin/Short) // com.monkopedia.ksrpc.jni/JniEncoder.encodeShort|encodeShort(kotlin.Short){}[0]
+    final fun encodeString(kotlin/String) // com.monkopedia.ksrpc.jni/JniEncoder.encodeString|encodeString(kotlin.String){}[0]
+    final fun endStructure(kotlinx.serialization.descriptors/SerialDescriptor) // com.monkopedia.ksrpc.jni/JniEncoder.endStructure|endStructure(kotlinx.serialization.descriptors.SerialDescriptor){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc.jni/JniEncoder.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc.jni/JniEncoder.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // com.monkopedia.ksrpc.jni/JniEncoder.toString|toString(){}[0]
+}
+
+final class <#A: kotlin/Any?> com.monkopedia.ksrpc.jni/NativeJniContinuation { // com.monkopedia.ksrpc.jni/NativeJniContinuation|null[0]
+    constructor <init>(kotlin.coroutines/Continuation<#A>, com.monkopedia.ksrpc.jni/Converter<kotlinx.cinterop/CPointer<cnames.structs/_jobject>?, #A>) // com.monkopedia.ksrpc.jni/NativeJniContinuation.<init>|<init>(kotlin.coroutines.Continuation<1:0>;com.monkopedia.ksrpc.jni.Converter<kotlinx.cinterop.CPointer<cnames.structs._jobject>?,1:0>){}[0]
+
+    final fun resumeWith(kotlin/Result<#A>) // com.monkopedia.ksrpc.jni/NativeJniContinuation.resumeWith|resumeWith(kotlin.Result<1:0>){}[0]
+
+    final object Companion // com.monkopedia.ksrpc.jni/NativeJniContinuation.Companion|null[0]
+}
+
+final class <#A: kotlin/Any?> com.monkopedia.ksrpc.jni/NativeJniContinuationConverter : com.monkopedia.ksrpc.jni/Converter<kotlinx.cinterop/CPointer<cnames.structs/_jobject>?, com.monkopedia.ksrpc.jni/NativeJniContinuation<#A>> { // com.monkopedia.ksrpc.jni/NativeJniContinuationConverter|null[0]
+    constructor <init>(kotlinx.cinterop/CPointer<kotlinx.cinterop/CPointerVarOf<kotlinx.cinterop/CPointer<com.monkopedia.jni/JNINativeInterface_>>>) // com.monkopedia.ksrpc.jni/NativeJniContinuationConverter.<init>|<init>(kotlinx.cinterop.CPointer<kotlinx.cinterop.CPointerVarOf<kotlinx.cinterop.CPointer<com.monkopedia.jni.JNINativeInterface_>>>){}[0]
+
+    final fun convertFrom(com.monkopedia.ksrpc.jni/NativeJniContinuation<#A>): kotlinx.cinterop/CPointer<cnames.structs/_jobject>? // com.monkopedia.ksrpc.jni/NativeJniContinuationConverter.convertFrom|convertFrom(com.monkopedia.ksrpc.jni.NativeJniContinuation<1:0>){}[0]
+    final fun convertTo(kotlinx.cinterop/CPointer<cnames.structs/_jobject>?): com.monkopedia.ksrpc.jni/NativeJniContinuation<#A> // com.monkopedia.ksrpc.jni/NativeJniContinuationConverter.convertTo|convertTo(kotlinx.cinterop.CPointer<cnames.structs._jobject>?){}[0]
+}
+
+final class com.monkopedia.ksrpc.jni/JniSerialization : com.monkopedia.ksrpc/CallDataSerializer<com.monkopedia.ksrpc.jni/JniSerialized> { // com.monkopedia.ksrpc.jni/JniSerialization|null[0]
+    constructor <init>(com.monkopedia.ksrpc.jni/JniSer = ...) // com.monkopedia.ksrpc.jni/JniSerialization.<init>|<init>(com.monkopedia.ksrpc.jni.JniSer){}[0]
+
+    final fun <#A1: kotlin/Any?> createCallData(kotlinx.serialization/KSerializer<#A1>, #A1): com.monkopedia.ksrpc.channels/CallData<com.monkopedia.ksrpc.jni/JniSerialized> // com.monkopedia.ksrpc.jni/JniSerialization.createCallData|createCallData(kotlinx.serialization.KSerializer<0:0>;0:0){0§<kotlin.Any?>}[0]
+    final fun <#A1: kotlin/Any?> createErrorCallData(kotlinx.serialization/KSerializer<#A1>, #A1): com.monkopedia.ksrpc.channels/CallData<com.monkopedia.ksrpc.jni/JniSerialized> // com.monkopedia.ksrpc.jni/JniSerialization.createErrorCallData|createErrorCallData(kotlinx.serialization.KSerializer<0:0>;0:0){0§<kotlin.Any?>}[0]
+    final fun <#A1: kotlin/Any?> decodeCallData(kotlinx.serialization/KSerializer<#A1>, com.monkopedia.ksrpc.channels/CallData<com.monkopedia.ksrpc.jni/JniSerialized>): #A1 // com.monkopedia.ksrpc.jni/JniSerialization.decodeCallData|decodeCallData(kotlinx.serialization.KSerializer<0:0>;com.monkopedia.ksrpc.channels.CallData<com.monkopedia.ksrpc.jni.JniSerialized>){0§<kotlin.Any?>}[0]
+    final fun decodeErrorCallData(com.monkopedia.ksrpc.channels/CallData<com.monkopedia.ksrpc.jni/JniSerialized>): kotlin/Throwable // com.monkopedia.ksrpc.jni/JniSerialization.decodeErrorCallData|decodeErrorCallData(com.monkopedia.ksrpc.channels.CallData<com.monkopedia.ksrpc.jni.JniSerialized>){}[0]
+    final fun isError(com.monkopedia.ksrpc.channels/CallData<com.monkopedia.ksrpc.jni/JniSerialized>): kotlin/Boolean // com.monkopedia.ksrpc.jni/JniSerialization.isError|isError(com.monkopedia.ksrpc.channels.CallData<com.monkopedia.ksrpc.jni.JniSerialized>){}[0]
+}
+
+final class com.monkopedia.ksrpc.jni/JniSerialized { // com.monkopedia.ksrpc.jni/JniSerialized|null[0]
+    constructor <init>(com.monkopedia.ksrpc.jni/BasicList<*>) // com.monkopedia.ksrpc.jni/JniSerialized.<init>|<init>(com.monkopedia.ksrpc.jni.BasicList<*>){}[0]
+
+    final val list // com.monkopedia.ksrpc.jni/JniSerialized.list|{}list[0]
+        final fun <get-list>(): com.monkopedia.ksrpc.jni/BasicList<*> // com.monkopedia.ksrpc.jni/JniSerialized.list.<get-list>|<get-list>(){}[0]
+
+    final fun component1(): com.monkopedia.ksrpc.jni/BasicList<*> // com.monkopedia.ksrpc.jni/JniSerialized.component1|component1(){}[0]
+    final fun copy(com.monkopedia.ksrpc.jni/BasicList<*> = ...): com.monkopedia.ksrpc.jni/JniSerialized // com.monkopedia.ksrpc.jni/JniSerialized.copy|copy(com.monkopedia.ksrpc.jni.BasicList<*>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc.jni/JniSerialized.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc.jni/JniSerialized.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // com.monkopedia.ksrpc.jni/JniSerialized.toString|toString(){}[0]
+
+    final object Companion : kotlinx.serialization/KSerializer<com.monkopedia.ksrpc.jni/JniSerialized> { // com.monkopedia.ksrpc.jni/JniSerialized.Companion|null[0]
+        final val descriptor // com.monkopedia.ksrpc.jni/JniSerialized.Companion.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // com.monkopedia.ksrpc.jni/JniSerialized.Companion.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): com.monkopedia.ksrpc.jni/JniSerialized // com.monkopedia.ksrpc.jni/JniSerialized.Companion.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, com.monkopedia.ksrpc.jni/JniSerialized) // com.monkopedia.ksrpc.jni/JniSerialized.Companion.serialize|serialize(kotlinx.serialization.encoding.Encoder;com.monkopedia.ksrpc.jni.JniSerialized){}[0]
+    }
+}
+
+final class com.monkopedia.ksrpc.jni/NativeConnection : com.monkopedia.ksrpc.packets.internal/PacketChannelBase<com.monkopedia.ksrpc.jni/JniSerialized> { // com.monkopedia.ksrpc.jni/NativeConnection|null[0]
+    constructor <init>(kotlinx.coroutines/CoroutineScope, kotlinx.cinterop/CPointer<cnames.structs/_jobject>, com.monkopedia.ksrpc/KsrpcEnvironment<com.monkopedia.ksrpc.jni/JniSerialized>) // com.monkopedia.ksrpc.jni/NativeConnection.<init>|<init>(kotlinx.coroutines.CoroutineScope;kotlinx.cinterop.CPointer<cnames.structs._jobject>;com.monkopedia.ksrpc.KsrpcEnvironment<com.monkopedia.ksrpc.jni.JniSerialized>){}[0]
+
+    final fun sendFromJvm(com.monkopedia.ksrpc.jni/JniSerialized, com.monkopedia.jnitest.com.monkopedia.ksrpc.jni/JavaJniContinuation<kotlin/Int>) // com.monkopedia.ksrpc.jni/NativeConnection.sendFromJvm|sendFromJvm(com.monkopedia.ksrpc.jni.JniSerialized;com.monkopedia.jnitest.com.monkopedia.ksrpc.jni.JavaJniContinuation<kotlin.Int>){}[0]
+    final suspend fun close() // com.monkopedia.ksrpc.jni/NativeConnection.close|close(){}[0]
+    final suspend fun receiveLocked(): com.monkopedia.ksrpc.packets.internal/Packet<com.monkopedia.ksrpc.jni/JniSerialized> // com.monkopedia.ksrpc.jni/NativeConnection.receiveLocked|receiveLocked(){}[0]
+    final suspend fun sendLocked(com.monkopedia.ksrpc.packets.internal/Packet<com.monkopedia.ksrpc.jni/JniSerialized>) // com.monkopedia.ksrpc.jni/NativeConnection.sendLocked|sendLocked(com.monkopedia.ksrpc.packets.internal.Packet<com.monkopedia.ksrpc.jni.JniSerialized>){}[0]
+
+    final object Companion : com.monkopedia.ksrpc.jni/Converter<kotlinx.cinterop/CPointer<cnames.structs/_jobject>, com.monkopedia.ksrpc.jni/NativeConnection> { // com.monkopedia.ksrpc.jni/NativeConnection.Companion|null[0]
+        final fun convertFrom(com.monkopedia.ksrpc.jni/NativeConnection): kotlinx.cinterop/CPointer<cnames.structs/_jobject> // com.monkopedia.ksrpc.jni/NativeConnection.Companion.convertFrom|convertFrom(com.monkopedia.ksrpc.jni.NativeConnection){}[0]
+        final fun convertTo(kotlinx.cinterop/CPointer<cnames.structs/_jobject>?): com.monkopedia.ksrpc.jni/NativeConnection // com.monkopedia.ksrpc.jni/NativeConnection.Companion.convertTo|convertTo(kotlinx.cinterop.CPointer<cnames.structs._jobject>?){}[0]
+    }
+}
+
+final class com.monkopedia.ksrpc.jni/NativeTypeConverter : com.monkopedia.ksrpc.jni/JniTypeConverter<kotlinx.cinterop/CPointer<cnames.structs/_jobject>?> { // com.monkopedia.ksrpc.jni/NativeTypeConverter|null[0]
+    constructor <init>() // com.monkopedia.ksrpc.jni/NativeTypeConverter.<init>|<init>(){}[0]
+
+    final val boolean // com.monkopedia.ksrpc.jni/NativeTypeConverter.boolean|{}boolean[0]
+        final fun <get-boolean>(): com.monkopedia.ksrpc.jni/Converter<kotlinx.cinterop/CPointer<cnames.structs/_jobject>?, kotlin/Boolean> // com.monkopedia.ksrpc.jni/NativeTypeConverter.boolean.<get-boolean>|<get-boolean>(){}[0]
+    final val byte // com.monkopedia.ksrpc.jni/NativeTypeConverter.byte|{}byte[0]
+        final fun <get-byte>(): com.monkopedia.ksrpc.jni/Converter<kotlinx.cinterop/CPointer<cnames.structs/_jobject>?, kotlin/Byte> // com.monkopedia.ksrpc.jni/NativeTypeConverter.byte.<get-byte>|<get-byte>(){}[0]
+    final val char // com.monkopedia.ksrpc.jni/NativeTypeConverter.char|{}char[0]
+        final fun <get-char>(): com.monkopedia.ksrpc.jni/Converter<kotlinx.cinterop/CPointer<cnames.structs/_jobject>?, kotlin/Char> // com.monkopedia.ksrpc.jni/NativeTypeConverter.char.<get-char>|<get-char>(){}[0]
+    final val double // com.monkopedia.ksrpc.jni/NativeTypeConverter.double|{}double[0]
+        final fun <get-double>(): com.monkopedia.ksrpc.jni/Converter<kotlinx.cinterop/CPointer<cnames.structs/_jobject>?, kotlin/Double> // com.monkopedia.ksrpc.jni/NativeTypeConverter.double.<get-double>|<get-double>(){}[0]
+    final val float // com.monkopedia.ksrpc.jni/NativeTypeConverter.float|{}float[0]
+        final fun <get-float>(): com.monkopedia.ksrpc.jni/Converter<kotlinx.cinterop/CPointer<cnames.structs/_jobject>?, kotlin/Float> // com.monkopedia.ksrpc.jni/NativeTypeConverter.float.<get-float>|<get-float>(){}[0]
+    final val int // com.monkopedia.ksrpc.jni/NativeTypeConverter.int|{}int[0]
+        final fun <get-int>(): com.monkopedia.ksrpc.jni/Converter<kotlinx.cinterop/CPointer<cnames.structs/_jobject>?, kotlin/Int> // com.monkopedia.ksrpc.jni/NativeTypeConverter.int.<get-int>|<get-int>(){}[0]
+    final val long // com.monkopedia.ksrpc.jni/NativeTypeConverter.long|{}long[0]
+        final fun <get-long>(): com.monkopedia.ksrpc.jni/Converter<kotlinx.cinterop/CPointer<cnames.structs/_jobject>?, kotlin/Long> // com.monkopedia.ksrpc.jni/NativeTypeConverter.long.<get-long>|<get-long>(){}[0]
+    final val short // com.monkopedia.ksrpc.jni/NativeTypeConverter.short|{}short[0]
+        final fun <get-short>(): com.monkopedia.ksrpc.jni/Converter<kotlinx.cinterop/CPointer<cnames.structs/_jobject>?, kotlin/Short> // com.monkopedia.ksrpc.jni/NativeTypeConverter.short.<get-short>|<get-short>(){}[0]
+    final val string // com.monkopedia.ksrpc.jni/NativeTypeConverter.string|{}string[0]
+        final fun <get-string>(): com.monkopedia.ksrpc.jni/Converter<kotlinx.cinterop/CPointer<cnames.structs/_jobject>?, kotlin/String> // com.monkopedia.ksrpc.jni/NativeTypeConverter.string.<get-string>|<get-string>(){}[0]
+
+    final object BooleanConverter : com.monkopedia.ksrpc.jni/Converter<kotlinx.cinterop/CPointer<cnames.structs/_jobject>?, kotlin/Boolean> { // com.monkopedia.ksrpc.jni/NativeTypeConverter.BooleanConverter|null[0]
+        final fun convertFrom(kotlin/Boolean): kotlinx.cinterop/CPointer<cnames.structs/_jobject>? // com.monkopedia.ksrpc.jni/NativeTypeConverter.BooleanConverter.convertFrom|convertFrom(kotlin.Boolean){}[0]
+        final fun convertTo(kotlinx.cinterop/CPointer<cnames.structs/_jobject>?): kotlin/Boolean // com.monkopedia.ksrpc.jni/NativeTypeConverter.BooleanConverter.convertTo|convertTo(kotlinx.cinterop.CPointer<cnames.structs._jobject>?){}[0]
+    }
+
+    final object ByteConverter : com.monkopedia.ksrpc.jni/Converter<kotlinx.cinterop/CPointer<cnames.structs/_jobject>?, kotlin/Byte> { // com.monkopedia.ksrpc.jni/NativeTypeConverter.ByteConverter|null[0]
+        final fun convertFrom(kotlin/Byte): kotlinx.cinterop/CPointer<cnames.structs/_jobject>? // com.monkopedia.ksrpc.jni/NativeTypeConverter.ByteConverter.convertFrom|convertFrom(kotlin.Byte){}[0]
+        final fun convertTo(kotlinx.cinterop/CPointer<cnames.structs/_jobject>?): kotlin/Byte // com.monkopedia.ksrpc.jni/NativeTypeConverter.ByteConverter.convertTo|convertTo(kotlinx.cinterop.CPointer<cnames.structs._jobject>?){}[0]
+    }
+
+    final object CharConverter : com.monkopedia.ksrpc.jni/Converter<kotlinx.cinterop/CPointer<cnames.structs/_jobject>?, kotlin/Char> { // com.monkopedia.ksrpc.jni/NativeTypeConverter.CharConverter|null[0]
+        final fun convertFrom(kotlin/Char): kotlinx.cinterop/CPointer<cnames.structs/_jobject>? // com.monkopedia.ksrpc.jni/NativeTypeConverter.CharConverter.convertFrom|convertFrom(kotlin.Char){}[0]
+        final fun convertTo(kotlinx.cinterop/CPointer<cnames.structs/_jobject>?): kotlin/Char // com.monkopedia.ksrpc.jni/NativeTypeConverter.CharConverter.convertTo|convertTo(kotlinx.cinterop.CPointer<cnames.structs._jobject>?){}[0]
+    }
+
+    final object DoubleConverter : com.monkopedia.ksrpc.jni/Converter<kotlinx.cinterop/CPointer<cnames.structs/_jobject>?, kotlin/Double> { // com.monkopedia.ksrpc.jni/NativeTypeConverter.DoubleConverter|null[0]
+        final fun convertFrom(kotlin/Double): kotlinx.cinterop/CPointer<cnames.structs/_jobject>? // com.monkopedia.ksrpc.jni/NativeTypeConverter.DoubleConverter.convertFrom|convertFrom(kotlin.Double){}[0]
+        final fun convertTo(kotlinx.cinterop/CPointer<cnames.structs/_jobject>?): kotlin/Double // com.monkopedia.ksrpc.jni/NativeTypeConverter.DoubleConverter.convertTo|convertTo(kotlinx.cinterop.CPointer<cnames.structs._jobject>?){}[0]
+    }
+
+    final object FloatConverter : com.monkopedia.ksrpc.jni/Converter<kotlinx.cinterop/CPointer<cnames.structs/_jobject>?, kotlin/Float> { // com.monkopedia.ksrpc.jni/NativeTypeConverter.FloatConverter|null[0]
+        final fun convertFrom(kotlin/Float): kotlinx.cinterop/CPointer<cnames.structs/_jobject>? // com.monkopedia.ksrpc.jni/NativeTypeConverter.FloatConverter.convertFrom|convertFrom(kotlin.Float){}[0]
+        final fun convertTo(kotlinx.cinterop/CPointer<cnames.structs/_jobject>?): kotlin/Float // com.monkopedia.ksrpc.jni/NativeTypeConverter.FloatConverter.convertTo|convertTo(kotlinx.cinterop.CPointer<cnames.structs._jobject>?){}[0]
+    }
+
+    final object IntConverter : com.monkopedia.ksrpc.jni/Converter<kotlinx.cinterop/CPointer<cnames.structs/_jobject>?, kotlin/Int> { // com.monkopedia.ksrpc.jni/NativeTypeConverter.IntConverter|null[0]
+        final fun convertFrom(kotlin/Int): kotlinx.cinterop/CPointer<cnames.structs/_jobject>? // com.monkopedia.ksrpc.jni/NativeTypeConverter.IntConverter.convertFrom|convertFrom(kotlin.Int){}[0]
+        final fun convertTo(kotlinx.cinterop/CPointer<cnames.structs/_jobject>?): kotlin/Int // com.monkopedia.ksrpc.jni/NativeTypeConverter.IntConverter.convertTo|convertTo(kotlinx.cinterop.CPointer<cnames.structs._jobject>?){}[0]
+    }
+
+    final object LongConverter : com.monkopedia.ksrpc.jni/Converter<kotlinx.cinterop/CPointer<cnames.structs/_jobject>?, kotlin/Long> { // com.monkopedia.ksrpc.jni/NativeTypeConverter.LongConverter|null[0]
+        final fun convertFrom(kotlin/Long): kotlinx.cinterop/CPointer<cnames.structs/_jobject>? // com.monkopedia.ksrpc.jni/NativeTypeConverter.LongConverter.convertFrom|convertFrom(kotlin.Long){}[0]
+        final fun convertTo(kotlinx.cinterop/CPointer<cnames.structs/_jobject>?): kotlin/Long // com.monkopedia.ksrpc.jni/NativeTypeConverter.LongConverter.convertTo|convertTo(kotlinx.cinterop.CPointer<cnames.structs._jobject>?){}[0]
+    }
+
+    final object ShortConverter : com.monkopedia.ksrpc.jni/Converter<kotlinx.cinterop/CPointer<cnames.structs/_jobject>?, kotlin/Short> { // com.monkopedia.ksrpc.jni/NativeTypeConverter.ShortConverter|null[0]
+        final fun convertFrom(kotlin/Short): kotlinx.cinterop/CPointer<cnames.structs/_jobject>? // com.monkopedia.ksrpc.jni/NativeTypeConverter.ShortConverter.convertFrom|convertFrom(kotlin.Short){}[0]
+        final fun convertTo(kotlinx.cinterop/CPointer<cnames.structs/_jobject>?): kotlin/Short // com.monkopedia.ksrpc.jni/NativeTypeConverter.ShortConverter.convertTo|convertTo(kotlinx.cinterop.CPointer<cnames.structs._jobject>?){}[0]
+    }
+
+    final object StringConverter : com.monkopedia.ksrpc.jni/Converter<kotlinx.cinterop/CPointer<cnames.structs/_jobject>?, kotlin/String> { // com.monkopedia.ksrpc.jni/NativeTypeConverter.StringConverter|null[0]
+        final fun convertFrom(kotlin/String): kotlinx.cinterop/CPointer<cnames.structs/_jobject>? // com.monkopedia.ksrpc.jni/NativeTypeConverter.StringConverter.convertFrom|convertFrom(kotlin.String){}[0]
+        final fun convertTo(kotlinx.cinterop/CPointer<cnames.structs/_jobject>?): kotlin/String // com.monkopedia.ksrpc.jni/NativeTypeConverter.StringConverter.convertTo|convertTo(kotlinx.cinterop.CPointer<cnames.structs._jobject>?){}[0]
+    }
+}
+
+open class com.monkopedia.ksrpc.jni/JniSer { // com.monkopedia.ksrpc.jni/JniSer|null[0]
+    constructor <init>(com.monkopedia.ksrpc.jni/JniEncoder<*>, com.monkopedia.ksrpc.jni/JniDecoder<*>) // com.monkopedia.ksrpc.jni/JniSer.<init>|<init>(com.monkopedia.ksrpc.jni.JniEncoder<*>;com.monkopedia.ksrpc.jni.JniDecoder<*>){}[0]
+    constructor <init>(kotlin/Function1<com.monkopedia.ksrpc.jni/JniBuilder<*>, kotlin/Unit> = ...) // com.monkopedia.ksrpc.jni/JniSer.<init>|<init>(kotlin.Function1<com.monkopedia.ksrpc.jni.JniBuilder<*>,kotlin.Unit>){}[0]
+
+    final val decoder // com.monkopedia.ksrpc.jni/JniSer.decoder|{}decoder[0]
+        final fun <get-decoder>(): com.monkopedia.ksrpc.jni/JniDecoder<*> // com.monkopedia.ksrpc.jni/JniSer.decoder.<get-decoder>|<get-decoder>(){}[0]
+    final val encoder // com.monkopedia.ksrpc.jni/JniSer.encoder|{}encoder[0]
+        final fun <get-encoder>(): com.monkopedia.ksrpc.jni/JniEncoder<*> // com.monkopedia.ksrpc.jni/JniSer.encoder.<get-encoder>|<get-encoder>(){}[0]
+
+    final fun <#A1: kotlin/Any?> decodeFromJni(kotlinx.serialization/DeserializationStrategy<#A1>, com.monkopedia.ksrpc.jni/JniSerialized): #A1 // com.monkopedia.ksrpc.jni/JniSer.decodeFromJni|decodeFromJni(kotlinx.serialization.DeserializationStrategy<0:0>;com.monkopedia.ksrpc.jni.JniSerialized){0§<kotlin.Any?>}[0]
+    final fun <#A1: kotlin/Any?> encodeToJni(kotlinx.serialization/SerializationStrategy<#A1>, #A1): com.monkopedia.ksrpc.jni/JniSerialized // com.monkopedia.ksrpc.jni/JniSer.encodeToJni|encodeToJni(kotlinx.serialization.SerializationStrategy<0:0>;0:0){0§<kotlin.Any?>}[0]
+
+    final object Companion : com.monkopedia.ksrpc.jni/JniSer // com.monkopedia.ksrpc.jni/JniSer.Companion|null[0]
+}
+
+final object com.monkopedia.jnitest.com.monkopedia.ksrpc.jni/JNIDispatcher : kotlinx.coroutines/CoroutineDispatcher { // com.monkopedia.jnitest.com.monkopedia.ksrpc.jni/JNIDispatcher|null[0]
+    final fun dispatch(kotlin.coroutines/CoroutineContext, kotlinx.coroutines/Runnable) // com.monkopedia.jnitest.com.monkopedia.ksrpc.jni/JNIDispatcher.dispatch|dispatch(kotlin.coroutines.CoroutineContext;kotlinx.coroutines.Runnable){}[0]
+    final fun isDispatchNeeded(kotlin.coroutines/CoroutineContext): kotlin/Boolean // com.monkopedia.jnitest.com.monkopedia.ksrpc.jni/JNIDispatcher.isDispatchNeeded|isDispatchNeeded(kotlin.coroutines.CoroutineContext){}[0]
+}
+
+final val com.monkopedia.jnitest/threadEnv // com.monkopedia.jnitest/threadEnv|{}threadEnv[0]
+    final fun <get-threadEnv>(): kotlinx.cinterop/CPointer<kotlinx.cinterop/CPointerVarOf<kotlinx.cinterop/CPointer<com.monkopedia.jni/JNINativeInterface_>>> // com.monkopedia.jnitest/threadEnv.<get-threadEnv>|<get-threadEnv>(){}[0]
+final val com.monkopedia.jnitest/threadJni // com.monkopedia.jnitest/threadJni|{}threadJni[0]
+    final fun <get-threadJni>(): com.monkopedia.jni/JNINativeInterface_ // com.monkopedia.jnitest/threadJni.<get-threadJni>|<get-threadJni>(){}[0]
+
+final fun (com.monkopedia.ksrpc.jni/JniSerialized).com.monkopedia.ksrpc.jni/toJvm(kotlinx.cinterop/CPointer<kotlinx.cinterop/CPointerVarOf<kotlinx.cinterop/CPointer<com.monkopedia.jni/JNINativeInterface_>>>): kotlinx.cinterop/CPointer<cnames.structs/_jobject> // com.monkopedia.ksrpc.jni/toJvm|toJvm@com.monkopedia.ksrpc.jni.JniSerialized(kotlinx.cinterop.CPointer<kotlinx.cinterop.CPointerVarOf<kotlinx.cinterop.CPointer<com.monkopedia.jni.JNINativeInterface_>>>){}[0]
+final fun (com.monkopedia.ksrpc.jni/JniSerialized.Companion).com.monkopedia.ksrpc.jni/fromJvm(kotlinx.cinterop/CPointer<kotlinx.cinterop/CPointerVarOf<kotlinx.cinterop/CPointer<com.monkopedia.jni/JNINativeInterface_>>>, kotlinx.cinterop/CPointer<cnames.structs/_jobject>): com.monkopedia.ksrpc.jni/JniSerialized // com.monkopedia.ksrpc.jni/fromJvm|fromJvm@com.monkopedia.ksrpc.jni.JniSerialized.Companion(kotlinx.cinterop.CPointer<kotlinx.cinterop.CPointerVarOf<kotlinx.cinterop.CPointer<com.monkopedia.jni.JNINativeInterface_>>>;kotlinx.cinterop.CPointer<cnames.structs._jobject>){}[0]
+final fun <#A: kotlin/Any?> (com.monkopedia.ksrpc.jni/JniContinuation<#A>).com.monkopedia.ksrpc.jni/asContinuation(com.monkopedia.ksrpc.jni/Converter<*, #A>): kotlin.coroutines/Continuation<#A> // com.monkopedia.ksrpc.jni/asContinuation|asContinuation@com.monkopedia.ksrpc.jni.JniContinuation<0:0>(com.monkopedia.ksrpc.jni.Converter<*,0:0>){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (com.monkopedia.ksrpc.jni/JniSer).com.monkopedia.ksrpc.jni/converterOf(kotlinx.serialization/KSerializer<#A>): com.monkopedia.ksrpc.jni/Converter<*, #A> // com.monkopedia.ksrpc.jni/converterOf|converterOf@com.monkopedia.ksrpc.jni.JniSer(kotlinx.serialization.KSerializer<0:0>){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (kotlin.coroutines/Continuation<#A>).com.monkopedia.ksrpc.jni/withConverter(com.monkopedia.ksrpc.jni/Converter<*, #A>): com.monkopedia.ksrpc.jni/NativeJniContinuation<#A> // com.monkopedia.ksrpc.jni/withConverter|withConverter@kotlin.coroutines.Continuation<0:0>(com.monkopedia.ksrpc.jni.Converter<*,0:0>){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> com.monkopedia.ksrpc.jni/newList(): com.monkopedia.ksrpc.jni/MutableBasicList<#A> // com.monkopedia.ksrpc.jni/newList|newList(){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> com.monkopedia.ksrpc.jni/newTypeConverter(): com.monkopedia.ksrpc.jni/JniTypeConverter<#A> // com.monkopedia.ksrpc.jni/newTypeConverter|newTypeConverter(){0§<kotlin.Any?>}[0]
+final fun com.monkopedia.jnitest.com.monkopedia.ksrpc.jni/cancelScope(kotlinx.cinterop/CPointer<kotlinx.cinterop/CPointerVarOf<kotlinx.cinterop/CPointer<com.monkopedia.jni/JNINativeInterface_>>>, kotlinx.cinterop/CPointer<cnames.structs/_jobject>, kotlin/Long) // com.monkopedia.jnitest.com.monkopedia.ksrpc.jni/cancelScope|cancelScope(kotlinx.cinterop.CPointer<kotlinx.cinterop.CPointerVarOf<kotlinx.cinterop.CPointer<com.monkopedia.jni.JNINativeInterface_>>>;kotlinx.cinterop.CPointer<cnames.structs._jobject>;kotlin.Long){}[0]
+final fun com.monkopedia.jnitest.com.monkopedia.ksrpc.jni/createNativeScope(kotlinx.cinterop/CPointer<kotlinx.cinterop/CPointerVarOf<kotlinx.cinterop/CPointer<com.monkopedia.jni/JNINativeInterface_>>>, kotlinx.cinterop/CPointer<cnames.structs/_jobject>): kotlin/Long // com.monkopedia.jnitest.com.monkopedia.ksrpc.jni/createNativeScope|createNativeScope(kotlinx.cinterop.CPointer<kotlinx.cinterop.CPointerVarOf<kotlinx.cinterop.CPointer<com.monkopedia.jni.JNINativeInterface_>>>;kotlinx.cinterop.CPointer<cnames.structs._jobject>){}[0]
+final fun com.monkopedia.jnitest.com.monkopedia.ksrpc.jni/jniExecuteThread(kotlinx.cinterop/CPointer<kotlinx.cinterop/CPointerVarOf<kotlinx.cinterop/CPointer<com.monkopedia.jni/JNINativeInterface_>>>, kotlinx.cinterop/CPointer<cnames.structs/_jobject>, kotlin/Int) // com.monkopedia.jnitest.com.monkopedia.ksrpc.jni/jniExecuteThread|jniExecuteThread(kotlinx.cinterop.CPointer<kotlinx.cinterop.CPointerVarOf<kotlinx.cinterop.CPointer<com.monkopedia.jni.JNINativeInterface_>>>;kotlinx.cinterop.CPointer<cnames.structs._jobject>;kotlin.Int){}[0]
+final fun com.monkopedia.jnitest.com.monkopedia.ksrpc.jni/jniUpdateThreads(kotlinx.cinterop/CPointer<kotlinx.cinterop/CPointerVarOf<kotlinx.cinterop/CPointer<com.monkopedia.jni/JNINativeInterface_>>>, kotlinx.cinterop/CPointer<cnames.structs/_jobject>, kotlin/Int) // com.monkopedia.jnitest.com.monkopedia.ksrpc.jni/jniUpdateThreads|jniUpdateThreads(kotlinx.cinterop.CPointer<kotlinx.cinterop.CPointerVarOf<kotlinx.cinterop.CPointer<com.monkopedia.jni.JNINativeInterface_>>>;kotlinx.cinterop.CPointer<cnames.structs._jobject>;kotlin.Int){}[0]
+final fun com.monkopedia.jnitest/initThread(kotlinx.cinterop/CPointer<kotlinx.cinterop/CPointerVarOf<kotlinx.cinterop/CPointer<com.monkopedia.jni/JNINativeInterface_>>>) // com.monkopedia.jnitest/initThread|initThread(kotlinx.cinterop.CPointer<kotlinx.cinterop.CPointerVarOf<kotlinx.cinterop.CPointer<com.monkopedia.jni.JNINativeInterface_>>>){}[0]
+final fun com.monkopedia.ksrpc.jni/finalize(kotlinx.cinterop/CPointer<kotlinx.cinterop/CPointerVarOf<kotlinx.cinterop/CPointer<com.monkopedia.jni/JNINativeInterface_>>>, kotlinx.cinterop/CPointer<cnames.structs/_jobject>, kotlin/Long) // com.monkopedia.ksrpc.jni/finalize|finalize(kotlinx.cinterop.CPointer<kotlinx.cinterop.CPointerVarOf<kotlinx.cinterop.CPointer<com.monkopedia.jni.JNINativeInterface_>>>;kotlinx.cinterop.CPointer<cnames.structs._jobject>;kotlin.Long){}[0]
+final fun com.monkopedia.ksrpc.jni/jniConnectionClose(kotlinx.cinterop/CPointer<kotlinx.cinterop/CPointerVarOf<kotlinx.cinterop/CPointer<com.monkopedia.jni/JNINativeInterface_>>>, kotlinx.cinterop/CPointer<cnames.structs/_jobject>, kotlin/Long, kotlinx.cinterop/CPointer<cnames.structs/_jobject>) // com.monkopedia.ksrpc.jni/jniConnectionClose|jniConnectionClose(kotlinx.cinterop.CPointer<kotlinx.cinterop.CPointerVarOf<kotlinx.cinterop.CPointer<com.monkopedia.jni.JNINativeInterface_>>>;kotlinx.cinterop.CPointer<cnames.structs._jobject>;kotlin.Long;kotlinx.cinterop.CPointer<cnames.structs._jobject>){}[0]
+final fun com.monkopedia.ksrpc.jni/jniConnectionFinalize(kotlinx.cinterop/CPointer<kotlinx.cinterop/CPointerVarOf<kotlinx.cinterop/CPointer<com.monkopedia.jni/JNINativeInterface_>>>, kotlinx.cinterop/CPointer<cnames.structs/_jobject>, kotlin/Long, kotlin/Long) // com.monkopedia.ksrpc.jni/jniConnectionFinalize|jniConnectionFinalize(kotlinx.cinterop.CPointer<kotlinx.cinterop.CPointerVarOf<kotlinx.cinterop.CPointer<com.monkopedia.jni.JNINativeInterface_>>>;kotlinx.cinterop.CPointer<cnames.structs._jobject>;kotlin.Long;kotlin.Long){}[0]
+final fun com.monkopedia.ksrpc.jni/jniConnectionSendSerialized(kotlinx.cinterop/CPointer<kotlinx.cinterop/CPointerVarOf<kotlinx.cinterop/CPointer<com.monkopedia.jni/JNINativeInterface_>>>, kotlinx.cinterop/CPointer<cnames.structs/_jobject>, kotlin/Long, kotlinx.cinterop/CPointer<cnames.structs/_jobject>, kotlinx.cinterop/CPointer<cnames.structs/_jobject>) // com.monkopedia.ksrpc.jni/jniConnectionSendSerialized|jniConnectionSendSerialized(kotlinx.cinterop.CPointer<kotlinx.cinterop.CPointerVarOf<kotlinx.cinterop.CPointer<com.monkopedia.jni.JNINativeInterface_>>>;kotlinx.cinterop.CPointer<cnames.structs._jobject>;kotlin.Long;kotlinx.cinterop.CPointer<cnames.structs._jobject>;kotlinx.cinterop.CPointer<cnames.structs._jobject>){}[0]
+final fun com.monkopedia.ksrpc.jni/jniCreateConnection(kotlinx.cinterop/CPointer<kotlinx.cinterop/CPointerVarOf<kotlinx.cinterop/CPointer<com.monkopedia.jni/JNINativeInterface_>>>, kotlinx.cinterop/CPointer<cnames.structs/_jobject>, kotlin/Long, kotlin/Long): kotlin/Long // com.monkopedia.ksrpc.jni/jniCreateConnection|jniCreateConnection(kotlinx.cinterop.CPointer<kotlinx.cinterop.CPointerVarOf<kotlinx.cinterop.CPointer<com.monkopedia.jni.JNINativeInterface_>>>;kotlinx.cinterop.CPointer<cnames.structs._jobject>;kotlin.Long;kotlin.Long){}[0]
+final fun com.monkopedia.ksrpc.jni/resumeFailure(kotlinx.cinterop/CPointer<kotlinx.cinterop/CPointerVarOf<kotlinx.cinterop/CPointer<com.monkopedia.jni/JNINativeInterface_>>>, kotlinx.cinterop/CPointer<cnames.structs/_jobject>, kotlin/Long, kotlinx.cinterop/CPointer<cnames.structs/_jobject>) // com.monkopedia.ksrpc.jni/resumeFailure|resumeFailure(kotlinx.cinterop.CPointer<kotlinx.cinterop.CPointerVarOf<kotlinx.cinterop.CPointer<com.monkopedia.jni.JNINativeInterface_>>>;kotlinx.cinterop.CPointer<cnames.structs._jobject>;kotlin.Long;kotlinx.cinterop.CPointer<cnames.structs._jobject>){}[0]
+final fun com.monkopedia.ksrpc.jni/resumeSuccess(kotlinx.cinterop/CPointer<kotlinx.cinterop/CPointerVarOf<kotlinx.cinterop/CPointer<com.monkopedia.jni/JNINativeInterface_>>>, kotlinx.cinterop/CPointer<cnames.structs/_jobject>, kotlin/Long, kotlinx.cinterop/CPointer<cnames.structs/_jobject>) // com.monkopedia.ksrpc.jni/resumeSuccess|resumeSuccess(kotlinx.cinterop.CPointer<kotlinx.cinterop.CPointerVarOf<kotlinx.cinterop.CPointer<com.monkopedia.jni.JNINativeInterface_>>>;kotlinx.cinterop.CPointer<cnames.structs._jobject>;kotlin.Long;kotlinx.cinterop.CPointer<cnames.structs._jobject>){}[0]
+final inline fun <#A: reified kotlin/Any?> (com.monkopedia.ksrpc.jni/JniContinuation<#A>).com.monkopedia.ksrpc.jni/resumeWith(kotlin/Result<#A>, com.monkopedia.ksrpc.jni/JniSer = ...) // com.monkopedia.ksrpc.jni/resumeWith|resumeWith@com.monkopedia.ksrpc.jni.JniContinuation<0:0>(kotlin.Result<0:0>;com.monkopedia.ksrpc.jni.JniSer){0§<kotlin.Any?>}[0]
+final inline fun <#A: reified kotlin/Any?> (com.monkopedia.ksrpc.jni/JniSer).com.monkopedia.ksrpc.jni/decodeFromJni(com.monkopedia.ksrpc.jni/JniSerialized): #A // com.monkopedia.ksrpc.jni/decodeFromJni|decodeFromJni@com.monkopedia.ksrpc.jni.JniSer(com.monkopedia.ksrpc.jni.JniSerialized){0§<kotlin.Any?>}[0]
+final inline fun <#A: reified kotlin/Any?> (com.monkopedia.ksrpc.jni/JniSer).com.monkopedia.ksrpc.jni/encodeToJni(#A): com.monkopedia.ksrpc.jni/JniSerialized // com.monkopedia.ksrpc.jni/encodeToJni|encodeToJni@com.monkopedia.ksrpc.jni.JniSer(0:0){0§<kotlin.Any?>}[0]
