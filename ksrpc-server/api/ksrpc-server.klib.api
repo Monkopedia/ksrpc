@@ -19,7 +19,7 @@ abstract class com.monkopedia.ksrpc.server/BaseServiceApp : com.github.ajalt.cli
         open fun <get-env>(): com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String> // com.monkopedia.ksrpc.server/BaseServiceApp.env.<get-env>|<get-env>(){}[0]
 
     abstract fun createChannel(): com.monkopedia.ksrpc.channels/SerializedService<kotlin/String> // com.monkopedia.ksrpc.server/BaseServiceApp.createChannel|createChannel(){}[0]
-    abstract fun embeddedServer(kotlin/Int, kotlin/Function1<io.ktor.server.application/Application, kotlin/Unit>): io.ktor.server.engine/BaseApplicationEngine // com.monkopedia.ksrpc.server/BaseServiceApp.embeddedServer|embeddedServer(kotlin.Int;kotlin.Function1<io.ktor.server.application.Application,kotlin.Unit>){}[0]
+    abstract fun embeddedServer(kotlin/Int, kotlin/Function1<io.ktor.server.application/Application, kotlin/Unit>): io.ktor.server.engine/EmbeddedServer<*, *> // com.monkopedia.ksrpc.server/BaseServiceApp.embeddedServer|embeddedServer(kotlin.Int;kotlin.Function1<io.ktor.server.application.Application,kotlin.Unit>){}[0]
     open fun (io.ktor.server.application/Application).configureHttp() // com.monkopedia.ksrpc.server/BaseServiceApp.configureHttp|configureHttp@io.ktor.server.application.Application(){}[0]
     open fun createRouting(io.ktor.server.routing/Routing) // com.monkopedia.ksrpc.server/BaseServiceApp.createRouting|createRouting(io.ktor.server.routing.Routing){}[0]
     open fun run() // com.monkopedia.ksrpc.server/BaseServiceApp.run|run(){}[0]
@@ -30,6 +30,6 @@ abstract class com.monkopedia.ksrpc.server/BaseServiceApp : com.github.ajalt.cli
 abstract class com.monkopedia.ksrpc.server/ServiceApp : com.monkopedia.ksrpc.server/BaseServiceApp { // com.monkopedia.ksrpc.server/ServiceApp|null[0]
     constructor <init>(kotlin/String) // com.monkopedia.ksrpc.server/ServiceApp.<init>|<init>(kotlin.String){}[0]
 
-    open fun embeddedServer(kotlin/Int, kotlin/Function1<io.ktor.server.application/Application, kotlin/Unit>): io.ktor.server.engine/BaseApplicationEngine // com.monkopedia.ksrpc.server/ServiceApp.embeddedServer|embeddedServer(kotlin.Int;kotlin.Function1<io.ktor.server.application.Application,kotlin.Unit>){}[0]
+    open fun embeddedServer(kotlin/Int, kotlin/Function1<io.ktor.server.application/Application, kotlin/Unit>): io.ktor.server.engine/EmbeddedServer<*, *> // com.monkopedia.ksrpc.server/ServiceApp.embeddedServer|embeddedServer(kotlin.Int;kotlin.Function1<io.ktor.server.application.Application,kotlin.Unit>){}[0]
     open fun run() // com.monkopedia.ksrpc.server/ServiceApp.run|run(){}[0]
 }

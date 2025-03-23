@@ -45,7 +45,6 @@ public synthetic class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcError$$seria
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcError;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcError$Companion {
@@ -79,7 +78,6 @@ public synthetic class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcRequest$$ser
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcRequest;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcRequest$Companion {
@@ -114,7 +112,6 @@ public synthetic class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcResponse$$se
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcResponse;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcResponse$Companion {

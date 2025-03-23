@@ -3,7 +3,7 @@ public abstract class com/monkopedia/ksrpc/server/BaseServiceApp : com/github/aj
 	public fun configureHttp (Lio/ktor/server/application/Application;)V
 	public abstract fun createChannel ()Lcom/monkopedia/ksrpc/channels/SerializedService;
 	protected fun createRouting (Lio/ktor/server/routing/Routing;)V
-	public abstract fun embeddedServer (ILkotlin/jvm/functions/Function1;)Lio/ktor/server/engine/BaseApplicationEngine;
+	public abstract fun embeddedServer (ILkotlin/jvm/functions/Function1;)Lio/ktor/server/engine/EmbeddedServer;
 	public final fun getAppName ()Ljava/lang/String;
 	public final fun getCors ()Z
 	public fun getEnv ()Lcom/monkopedia/ksrpc/KsrpcEnvironment;
@@ -18,7 +18,7 @@ public final class com/monkopedia/ksrpc/server/BaseServiceApp$Companion {
 public abstract class com/monkopedia/ksrpc/server/ServiceApp : com/monkopedia/ksrpc/server/BaseServiceApp {
 	public fun <init> (Ljava/lang/String;)V
 	protected fun createRouting (Lio/ktor/server/routing/Routing;)V
-	public fun embeddedServer (ILkotlin/jvm/functions/Function1;)Lio/ktor/server/engine/BaseApplicationEngine;
+	public fun embeddedServer (ILkotlin/jvm/functions/Function1;)Lio/ktor/server/engine/EmbeddedServer;
 	public final fun getEnableWebsockets ()Z
 	public final fun getNoHttp ()Z
 	public final fun getPort ()Ljava/util/List;
