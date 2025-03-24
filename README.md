@@ -1,13 +1,12 @@
 # Kotlin Simple RPCs
 
 [![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](http://www.apache.org/licenses/LICENSE-2.0)
-[![Kotlin](https://img.shields.io/badge/kotlin-1.9.22-blue.svg?logo=kotlin)](http://kotlinlang.org)
-[![Maven Central](https://img.shields.io/maven-central/v/com.monkopedia.ksrpc/ksrpc-core/0.8.4)](https://search.maven.org/artifact/com.monkopedia.ksrpc/ksrpc-core/0.8.4/pom)
-[![KDoc link](https://img.shields.io/badge/API_reference-KDoc-blue)](https://monkopedia.github.io/ksrpc/ksrpc/)
+[![Kotlin](https://img.shields.io/badge/kotlin-2.1.20-blue.svg?logo=kotlin)](http://kotlinlang.org)
+[![Maven Central](https://img.shields.io/maven-central/v/com.monkopedia.ksrpc/ksrpc-core/0.9.4)](https://search.maven.org/artifact/com.monkopedia.ksrpc/ksrpc-core/0.9.4/pom)
+[![KDoc link](https://img.shields.io/badge/API_reference-KDoc-blue)](https://monkopedia.github.io/ksrpc/)
 
 This is a simple library that allows for json-like RPCs with a simple service declaration in kotlin
-common. Currently, hosting is mostly only supported in the JVM, but clients can be from
-JVM/JS/Native as needed.
+common.
 
 ## Why not protobuf or one of the 1000 other RPC projects?
 
@@ -42,12 +41,12 @@ as depending on the runtime library.
 plugins {
     `java`
     ...
-    id("com.monkopedia.ksrpc.plugin") version "0.7.0"
+    id("com.monkopedia.ksrpc.plugin") version "0.9.4"
 }
 
 dependencies {
     ...
-    implementation("com.monkopedia:ksrpc-core:0.7.0")
+    implementation("com.monkopedia:ksrpc-core:0.9.4")
 }
 ```
 
@@ -58,9 +57,9 @@ The compiler plugin then generates a stub implementation and companion object to
 for the service which use kotlinx serialization and the unique name to perform the RPCs over a variety
 of communication mechanisms.
 
-All KSRPC services start with an interface that extends [RpcService](https://monkopedia.github.io/ksrpc/ksrpc/com.monkopedia.ksrpc/-rpc-service/index.html)
-(for API access) and are annotated with [KsService](https://monkopedia.github.io/ksrpc/ksrpc/com.monkopedia.ksrpc.annotation/-ks-service/index.html)
-(to make it easier for the compiler plugin). Methods tagged with [KsMethod](https://monkopedia.github.io/ksrpc/ksrpc/com.monkopedia.ksrpc.annotation/-ks-method/index.html)
+All KSRPC services start with an interface that extends [RpcService](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc/-rpc-service/index.html)
+(for API access) and are annotated with [KsService](https://monkopedia.github.io/ksrpc/ksrpc-annotation/com.monkopedia.ksrpc.annotation/-ks-service/index.html)
+(to make it easier for the compiler plugin). Methods tagged with [KsMethod](https://monkopedia.github.io/ksrpc/ksrpc-annotation/com.monkopedia.ksrpc.annotation/-ks-method/index.html)
 get adapters/stubs generated for them by the compiler, and any non-tagged methods will spit out compiler warnings.
 
 ```kotlin
@@ -101,7 +100,7 @@ interface MyService : RpcService {
 
 ## Serializable types
 
-Any serializable class can be used as an input or output to [KsMethods](https://monkopedia.github.io/ksrpc/ksrpc/com.monkopedia.ksrpc.annotation/-ks-method/index.html).
+Any serializable class can be used as an input or output to [KsMethods](https://monkopedia.github.io/ksrpc/ksrpc-annotation/com.monkopedia.ksrpc.annotation/-ks-method/index.html).
 
 ```kotlin
 @Serializable
@@ -141,11 +140,11 @@ interface MyService : RpcService {
 
 ## Sub-services
 
-Sub-services provide a way to pass other [KsServices](https://monkopedia.github.io/ksrpc/ksrpc/com.monkopedia.ksrpc.annotation/-ks-service/index.html)
-as input or output to a [KsMethod](https://monkopedia.github.io/ksrpc/ksrpc/com.monkopedia.ksrpc.annotation/-ks-method/index.html).
-Note that they can only be called as input on channels that are a ChannelClient such as a [Connection](https://monkopedia.github.io/ksrpc/ksrpc/com.monkopedia.ksrpc.channels/-connection/index.html),
+Sub-services provide a way to pass other [KsServices](https://monkopedia.github.io/ksrpc/ksrpc-annotation/com.monkopedia.ksrpc.annotation/-ks-service/index.html)
+as input or output to a [KsMethod](https://monkopedia.github.io/ksrpc/ksrpc-annotation/com.monkopedia.ksrpc.annotation/-ks-method/index.html).
+Note that they can only be called as input on channels that are a ChannelClient such as a [Connection](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html),
 and returning services can only happen on channels that are a ChannelHost such as when hosting on HTTP
-or with a [Connection](https://monkopedia.github.io/ksrpc/ksrpc/com.monkopedia.ksrpc.channels/-connection/index.html).
+or with a [Connection](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html).
 
 ```kotlin
 @KsService
@@ -279,7 +278,7 @@ embeddedServer {
 
 ## Socket (ksrpc-sockets)
 
-Given an input and output stream (from a socket or otherwise), a [Connection](https://monkopedia.github.io/ksrpc/ksrpc/com.monkopedia.ksrpc.channels/-connection/index.html) can be created, and
+Given an input and output stream (from a socket or otherwise), a [Connection](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html) can be created, and
 then a service hosted on it. When communication goes over input/output streams, a Content-Length is
 sent in http header format, followed by the content encoded in json.
 
