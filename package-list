@@ -38,7 +38,6 @@ com.monkopedia.ksrpc.annotation
 module:ksrpc-core
 com.monkopedia.ksrpc
 com.monkopedia.ksrpc.channels
-nanoid
 module:ksrpc-jni
 com.monkopedia.jnitest
 com.monkopedia.jnitest.com.monkopedia.ksrpc.jni
