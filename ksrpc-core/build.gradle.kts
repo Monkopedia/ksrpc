@@ -38,6 +38,9 @@ kotlin {
     sourceSets["jsMain"].dependencies {
         implementation(npm("nanoid", libs.versions.nanoid.get()))
     }
+    sourceSets["wasmJsMain"].dependencies {
+        implementation(npm("nanoid", libs.versions.nanoid.get()))
+    }
 //    linuxX64("native") {
 //        binaries {
 //        }

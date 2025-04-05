@@ -50,6 +50,7 @@ import org.jetbrains.kotlin.ir.builders.irImplicitCast
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irSetField
 import org.jetbrains.kotlin.ir.builders.irString
+import org.jetbrains.kotlin.ir.builders.irTemporary
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrConstructor
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
@@ -359,8 +360,11 @@ class StubGeneration(
                 +irReturn(
                     irCall(referencedFunction).apply {
                         type = referencedFunction.returnType
-                        dispatchReceiver =
-                            irImplicitCast(irGet(override.valueParameters[0]), receiver.typeWith())
+                        dispatchReceiver = irImplicitCast(
+                            irGet(override.valueParameters[0]),
+                            referencedFunction.dispatchReceiverParameter?.type!!
+                        )
+
                         putArgs(
                             irImplicitCast(
                                 irGet(override.valueParameters[1]),

@@ -56,12 +56,16 @@ kotlin {
         implementation(kotlin("stdlib"))
         implementation(kotlin("test"))
     }
+    sourceSets["wasmJsTest"].dependencies {
+        implementation(kotlin("stdlib"))
+        implementation(kotlin("test"))
+    }
 }
 val copyLib = tasks.register("copyLib", Copy::class) {
     val hostOs = System.getProperty("os.name")
     val arch = System.getProperty("os.arch")
-    when {
-        hostOs == "Mac OS X" -> {
+    when (hostOs) {
+        "Mac OS X" -> {
             if (arch == "aarch64") {
                 dependsOn(tasks.findByName("linkReleaseSharedMacosArm64"))
                 from(buildDir.resolve("bin/macosArm64/releaseShared/libksrpc_test.dylib"))
@@ -72,7 +76,7 @@ val copyLib = tasks.register("copyLib", Copy::class) {
                 destinationDir = buildDir.resolve("generated/lib/resources/libs/")
             }
         }
-        hostOs == "Linux" -> {
+        "Linux" -> {
             dependsOn(tasks.findByName("linkDebugSharedLinuxX64"))
             from(buildDir.resolve("bin/linuxX64/debugShared/libksrpc_test.so"))
             destinationDir = buildDir.resolve("generated/lib/resources/libs/")

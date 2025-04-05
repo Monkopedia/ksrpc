@@ -79,6 +79,18 @@ fun Project.ksrpcModule(
                     }
                 }
             }
+            @Suppress("OPT_IN_USAGE")
+            wasmJs {
+                yarn.version = "1.22.22"
+                compilerOptions {
+                    freeCompilerArgs.add("-Xwasm-attach-js-exception")
+                }
+                browser {
+                    testTask {
+                        it.useMocha()
+                    }
+                }
+            }
         }
 
         if (supportNative) {
