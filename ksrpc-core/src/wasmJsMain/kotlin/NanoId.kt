@@ -17,4 +17,4 @@
 
 package nanoid
 
-external val nanoid: () -> String
+internal external val nanoid: () -> String
