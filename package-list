@@ -30,14 +30,15 @@ $dokka.location:com.monkopedia.ksrpc.jni/NativeJniContinuation/resumeWith/#com.m
 $dokka.location:com.monkopedia.ksrpc.jni/NativeJniContinuation/resumeWith/#kotlin.Result[TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/ksrpc-jni/com.monkopedia.ksrpc.jni/[native]-native-jni-continuation/resume-with.html
 $dokka.location:com.monkopedia.ksrpc.jni/NativeJniContinuation/ser/#/PointingToDeclaration/ksrpc-jni/com.monkopedia.ksrpc.jni/[jvm]-native-jni-continuation/ser.html
 $dokka.location:com.monkopedia.ksrpc.server/ServiceApp/run/#/PointingToDeclaration/ksrpc-server/com.monkopedia.ksrpc.server/-service-app/[native]run.html
-$dokka.location:com.monkopedia.ksrpc/RpcObjectKey///PointingToDeclaration/ksrpc-core/com.monkopedia.ksrpc/[native]-rpc-object-key/index.html
-$dokka.location:com.monkopedia.ksrpc/RpcObjectKey/rpcObject/#/PointingToDeclaration/ksrpc-core/com.monkopedia.ksrpc/[native]-rpc-object-key/rpc-object.html
+$dokka.location:com.monkopedia.ksrpc/RpcObjectKey///PointingToDeclaration/ksrpc-core/com.monkopedia.ksrpc/[wasm-js]-rpc-object-key/index.html
+$dokka.location:com.monkopedia.ksrpc/RpcObjectKey/rpcObject/#/PointingToDeclaration/ksrpc-core/com.monkopedia.ksrpc/[wasm-js]-rpc-object-key/rpc-object.html
 module:ksrpc-api
 com.monkopedia.ksrpc
 com.monkopedia.ksrpc.annotation
 module:ksrpc-core
 com.monkopedia.ksrpc
 com.monkopedia.ksrpc.channels
+nanoid
 module:ksrpc-jni
 com.monkopedia.jnitest
 com.monkopedia.jnitest.com.monkopedia.ksrpc.jni
