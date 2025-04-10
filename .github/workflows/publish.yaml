@@ -55,7 +55,7 @@ jobs:
           gpg --list-secret-keys --keyid-format LONG
 
       - name: Pre-build
-        run: gradle build -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}' || gradle build -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}' || gradle build -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
+        run: gradle publishToMavenLocal -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}' || gradle publishToMavenLocal -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}' || gradle publishToMavenLocal -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
 
       - name: Publish package
         run: gradle publishIosArm64PublicationToOSSRHRepository publishIosSimulatorArm64PublicationToOSSRHRepository publishIosX64PublicationToOSSRHRepository publishMacosArm64PublicationToOSSRHRepository publishMacosX64PublicationToOSSRHRepository -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
