@@ -10,12 +10,12 @@ import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin.GeneratedByPlugi
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.expressions.IrBody
 import org.jetbrains.kotlin.ir.util.addChild
-import org.jetbrains.kotlin.ir.visitors.IrElementVisitorVoid
+import org.jetbrains.kotlin.ir.visitors.IrVisitorVoid
 import org.jetbrains.kotlin.ir.visitors.acceptChildrenVoid
 
 abstract class AbstractTransformerForGenerator(
     protected val context: IrPluginContext
-) : IrElementVisitorVoid {
+) : IrVisitorVoid() {
     protected val irFactory = context.irFactory
 
     abstract fun interestedIn(key: GeneratedDeclarationKey?): Boolean

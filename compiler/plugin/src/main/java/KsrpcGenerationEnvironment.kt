@@ -45,28 +45,22 @@ class KsrpcGenerationEnvironment(
     val serializerMethod =
         context.referenceFunctions(FqConstants.SERIALIZER_CALLABLE).find {
             it.owner.dispatchReceiverParameter == null &&
-                it.owner.extensionReceiverParameter == null &&
                 it.owner.typeParameters.size == 1 &&
-                it.owner.valueParameters.isEmpty()
+                it.owner.parameters.isEmpty()
         }
 
     val threadLocal = referenceClass(FqConstants.THREAD_LOCAL)
 
-    private fun maybeReferenceClass(name: ClassId): IrClassSymbol? {
-        return context.referenceClass(name)
+    private fun maybeReferenceClass(name: ClassId): IrClassSymbol? = context.referenceClass(name)
+
+    private fun referenceClass(name: ClassId): IrClassSymbol = maybeReferenceClass(name) ?: run {
+        messageCollector.report(ERROR, "Can't find $name in dependencies")
+        error("Can't find $name in dependencies")
     }
 
-    private fun referenceClass(name: ClassId): IrClassSymbol {
-        return maybeReferenceClass(name) ?: run {
+    private fun referenceObject(name: ClassId): IrClassSymbol =
+        context.referenceClass(name) ?: run {
             messageCollector.report(ERROR, "Can't find $name in dependencies")
             error("Can't find $name in dependencies")
         }
-    }
-
-    private fun referenceObject(name: ClassId): IrClassSymbol {
-        return context.referenceClass(name) ?: run {
-            messageCollector.report(ERROR, "Can't find $name in dependencies")
-            error("Can't find $name in dependencies")
-        }
-    }
 }

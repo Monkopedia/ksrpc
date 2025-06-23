@@ -20,6 +20,7 @@ package com.monkopedia.ksrpc.plugin
 import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.irThrow
+import org.jetbrains.kotlin.ir.backend.js.utils.isDispatchReceiver
 import org.jetbrains.kotlin.ir.builders.IrBlockBodyBuilder
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irBranch
@@ -52,16 +53,16 @@ class CompanionGeneration(
     private val env: KsrpcGenerationEnvironment
 ) : AbstractTransformerForGenerator(context) {
 
-    override fun interestedIn(key: GeneratedDeclarationKey?): Boolean {
-        return key is FirCompanionDeclarationGenerator.Key
-    }
+    override fun interestedIn(key: GeneratedDeclarationKey?): Boolean =
+        key is FirCompanionDeclarationGenerator.Key
 
     override fun generateChildrenForClass(
         declaration: IrClass,
         key: GeneratedDeclarationKey?
     ): Collection<IrDeclaration> {
         val k = key as FirCompanionDeclarationGenerator.Key
-        val cls = classes[k.type] ?: error("Invalid synthetic declaration for ${k.type}")
+        val cls = classes[k.type]
+            ?: error("Invalid synthetic declaration for ${k.type} in ${classes.keys}")
         env.rpcObjectKey?.let {
             val objectReference = createClassReference(context, declaration)
             cls.irClass.annotations += createRpcObjectAnnotation(cls, it, objectReference)
@@ -86,7 +87,8 @@ class CompanionGeneration(
         key: GeneratedDeclarationKey?
     ): IrBody? {
         val k = key as FirCompanionDeclarationGenerator.Key
-        val cls = classes[k.type] ?: error("Invalid synthetic declaration for ${k.type}")
+        val cls = classes[k.type]
+            ?: error("Invalid synthetic declaration for ${k.type} in ${classes.keys}")
         return when (function.name) {
             FqConstants.CREATE_STUB -> buildCreateStubBody(function, cls)
             FqConstants.FIND_ENDPOINT -> buildFindEndpointBody(function, cls)
@@ -94,15 +96,15 @@ class CompanionGeneration(
         }
     }
 
-    private fun buildFindEndpointBody(function: IrSimpleFunction, cls: ServiceClass): IrBlockBody {
-        return context.irBuilder(function).irBlockBody {
-            val input = function.valueParameters[0]
+    private fun buildFindEndpointBody(function: IrSimpleFunction, cls: ServiceClass): IrBlockBody =
+        context.irBuilder(function).irBlockBody {
+            val input = function.parameters.first { !it.isDispatchReceiver }
             val branches = buildList {
                 for ((endpoint, method) in cls.endpoints) {
                     this += irBranch(
                         irEquals(irString(endpoint.trimStart('/')), irGet(input)),
                         irCall(method).apply {
-                            dispatchReceiver = irGetObject(cls.stubCompanion.symbol)
+                            putArgs(irGetObject(cls.stubCompanion.symbol))
                         }
                     )
                 }
@@ -115,7 +117,6 @@ class CompanionGeneration(
             }
             +irReturn(irWhen(function.returnType, branches))
         }
-    }
 
     private fun IrBlockBodyBuilder.irThrowIllegalArgument(message: IrExpression) = irThrow(
         irCallConstructor(env.illegalArgumentStrConstructor, emptyList()).apply {
@@ -127,9 +128,10 @@ class CompanionGeneration(
         context.irBuilder(function).irSynthBody {
             +irReturn(
                 irCallConstructor(cls.stubConstructor.symbol, emptyList()).apply {
-                    for (param in function.valueParameters) {
-                        putValueArgument(param.index, irGet(param))
-                    }
+                    putArgs(
+                        *function.parameters.filter { !it.isDispatchReceiver }.map { irGet(it) }
+                            .toTypedArray()
+                    )
                 }
             )
         }
@@ -137,7 +139,5 @@ class CompanionGeneration(
     override fun generateBodyForConstructor(
         constructor: IrConstructor,
         key: GeneratedDeclarationKey?
-    ): IrBody {
-        return context.irBuilder(constructor).irSynthBody { }
-    }
+    ): IrBody = context.irBuilder(constructor).irSynthBody { }
 }

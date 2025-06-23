@@ -22,6 +22,7 @@ import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.ERROR
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.WARNING
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
+import org.jetbrains.kotlin.ir.backend.js.utils.isDispatchReceiver
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
@@ -80,12 +81,12 @@ class KsrpcIrGenerationExtension(
             report.error("$fqName.${method.name.asString()} cannot have type parameters")
             isValid = false
         }
-        if (method.valueParameters.size > 1) {
+        if (method.parameters.filter { !it.isDispatchReceiver }.size > 1) {
             val fqName = irClass.kotlinFqName.asString()
             report.error("$fqName.${method.name.asString()} cannot have more than 1 parameter")
             isValid = false
         }
-        val annotationArg = annotation.getValueArgument(0)
+        val annotationArg = annotation.arguments[0]
         val name = annotationArg.constString()
         if (name == null) {
             val fqName = irClass.kotlinFqName.asString()
@@ -98,7 +99,7 @@ class KsrpcIrGenerationExtension(
             report.error("$fqName.$methodName: cannot use endpoint $name, it has already been used")
             isValid = false
         }
-        val inputType = method.valueParameters[0].type.classFqName
+        val inputType = method.parameters[0].type.classFqName
         val outputType = method.returnType.classFqName
         if (inputType == BYTE_READ_CHANNEL && outputType == BYTE_READ_CHANNEL) {
             val fqName = irClass.kotlinFqName.asString()

@@ -30,6 +30,7 @@ import org.gradle.kotlin.dsl.withType
 import org.gradle.plugins.signing.SigningExtension
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.dokka.gradle.DokkaTaskPartial
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.targets.js.yarn.yarn
@@ -72,7 +73,7 @@ fun Project.ksrpcModule(
         }
         if (supportJs) {
             js(IR) {
-                yarn.version = "1.22.22"
+                yarn.yarnLockAutoReplace = true
                 browser {
                     testTask {
                         it.useMocha()
@@ -81,7 +82,7 @@ fun Project.ksrpcModule(
             }
             @Suppress("OPT_IN_USAGE")
             wasmJs {
-                yarn.version = "1.22.22"
+                yarn.yarnLockAutoReplace = true
                 compilerOptions {
                     freeCompilerArgs.add("-Xwasm-attach-js-exception")
                 }
@@ -196,10 +197,10 @@ fun Project.ksrpcModule(
     }
 
     tasks.withType<KotlinCompile>().all {
-        it.kotlinOptions {
-            jvmTarget = "1.8"
-            freeCompilerArgs = freeCompilerArgs + "-Xskip-prerelease-check"
-            freeCompilerArgs = freeCompilerArgs + "-Xno-param-assertions"
+        it.compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_1_8)
+            freeCompilerArgs.add("-Xskip-prerelease-check")
+            freeCompilerArgs.add("-Xno-param-assertions")
         }
     }
     if (!includePublications) return

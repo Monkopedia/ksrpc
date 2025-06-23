@@ -2,7 +2,6 @@ package com.monkopedia.ksrpc.plugin
 
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
-import org.jetbrains.kotlin.backend.jvm.ir.erasedUpperBound
 import org.jetbrains.kotlin.ir.builders.IrBlockBodyBuilder
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.irBlockBody
@@ -22,6 +21,7 @@ import org.jetbrains.kotlin.ir.types.starProjectedType
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
 import org.jetbrains.kotlin.ir.util.allOverridden
 import org.jetbrains.kotlin.ir.util.defaultType
+import org.jetbrains.kotlin.ir.util.erasedUpperBound
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.functions
 import org.jetbrains.kotlin.ir.util.parentClassOrNull
@@ -85,6 +85,6 @@ fun IrSimpleFunction.overridesFunctionIn(fqName: FqName): Boolean =
 
 fun IrMemberAccessExpression<*>.putArgs(vararg args: IrExpression) {
     args.forEachIndexed { index, irExpression ->
-        putValueArgument(index, irExpression)
+        arguments[index] = irExpression
     }
 }
