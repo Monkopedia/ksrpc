@@ -27,8 +27,6 @@ plugins {
 group = "com.monkopedia.ksrpc"
 
 java {
-    withJavadocJar()
-    withSourcesJar()
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 }
@@ -88,4 +86,8 @@ tasks.withType<KotlinCompile> {
 signing {
     useGpgCmd()
     sign(publishing.publications)
+}
+
+afterEvaluate {
+    tasks["generateMetadataFileForMavenPublication"].dependsOn("plainJavadocJar")
 }
