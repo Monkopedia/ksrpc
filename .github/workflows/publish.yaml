@@ -58,7 +58,7 @@ jobs:
         run: gradle publishToMavenLocal -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}' || gradle publishToMavenLocal -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}' || gradle publishToMavenLocal -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
 
       - name: Publish package
-        run: gradle -PmavenCentralUsername=${{ secrets.OSSRH_USERNAME }} -PmavenCentralPassword=${{ secrets.OSSRH_TOKEN }} publishIosArm64PublicationToOSSRHRepository publishIosSimulatorArm64PublicationToOSSRHRepository publishIosX64PublicationToOSSRHRepository publishMacosArm64PublicationToOSSRHRepository publishMacosX64PublicationToOSSRHRepository -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
+        run: gradle -PmavenCentralUsername=${{ secrets.OSSRH_USERNAME }} -PmavenCentralPassword=${{ secrets.OSSRH_TOKEN }} publishIosArm64PublicationToMavenCentralRepository publishIosSimulatorArm64PublicationToMavenCentralRepository publishIosX64PublicationToMavenCentralRepository publishMacosArm64PublicationToMavenCentralRepository publishMacosX64PublicationToMavenCentralRepository -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
