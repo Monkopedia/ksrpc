@@ -21,7 +21,7 @@ plugins {
     kotlin("jvm")
     id("com.github.gmazzo.buildconfig")
     alias(libs.plugins.gradle.publish)
-    `maven-publish`
+    alias(libs.plugins.vannik.publish)
     `signing`
 }
 
@@ -44,11 +44,11 @@ gradlePlugin {
     vcsUrl = "https://github.com/monkopedia/ksrpc"
 
     plugins.create("ksrpc-gradle-plugin") {
-            id = rootProject.extra["kotlin_plugin_id"]?.toString() ?: "com.monkopedia.ksrpc.plugin"
-            implementationClass = "com.monkopedia.ksrpc.gradle.KsrpcGradlePlugin"
-            displayName = "KSRPC Gradle Plugin"
-            description = "A simple kotlin rpc library"
-            tags = listOf("kotlin", "kotlin/native", "kotlin/js", "kotlin/jvm", "json", "rpc")
+        id = rootProject.extra["kotlin_plugin_id"]?.toString() ?: "com.monkopedia.ksrpc.plugin"
+        implementationClass = "com.monkopedia.ksrpc.gradle.KsrpcGradlePlugin"
+        displayName = "KSRPC Gradle Plugin"
+        description = "A simple kotlin rpc library"
+        tags = listOf("kotlin", "kotlin/native", "kotlin/js", "kotlin/jvm", "json", "rpc")
     }
 }
 
@@ -67,42 +67,32 @@ tasks.withType<KotlinCompile> {
     }
 }
 
-publishing {
-    publications.all {
-        if (this !is MavenPublication) return@all
-        pom {
-            name.set("ksrpc-gradle-plugin")
-            description.set("A simple kotlin rpc library")
-            url.set("http://www.github.com/Monkopedia/ksrpc")
-            licenses {
-                license {
-                    name.set("The Apache License, Version 2.0")
-                    url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                }
-            }
-            developers {
-                developer {
-                    id.set("monkopedia")
-                    name.set("Jason Monk")
-                    email.set("monkopedia@gmail.com")
-                }
-            }
-            scm {
-                connection.set("scm:git:git://github.com/Monkopedia/ksrpc.git")
-                developerConnection.set("scm:git:ssh://github.com/Monkopedia/ksrpc.git")
-                url.set("http://github.com/Monkopedia/ksrpc/")
+mavenPublishing {
+    pom {
+        name.set("ksrpc-gradle-plugin")
+        description.set("A simple kotlin rpc library")
+        url.set("http://www.github.com/Monkopedia/ksrpc")
+        licenses {
+            license {
+                name.set("The Apache License, Version 2.0")
+                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
             }
         }
-    }
-    repositories {
-        maven(url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-            name = "OSSRH"
-            credentials {
-                username = System.getenv("MAVEN_USERNAME")
-                password = System.getenv("MAVEN_PASSWORD")
+        developers {
+            developer {
+                id.set("monkopedia")
+                name.set("Jason Monk")
+                email.set("monkopedia@gmail.com")
             }
         }
+        scm {
+            connection.set("scm:git:git://github.com/Monkopedia/ksrpc.git")
+            developerConnection.set("scm:git:ssh://github.com/Monkopedia/ksrpc.git")
+            url.set("http://github.com/Monkopedia/ksrpc/")
+        }
     }
+    publishToMavenCentral()
+    signAllPublications()
 }
 
 signing {

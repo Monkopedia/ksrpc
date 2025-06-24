@@ -20,7 +20,7 @@ plugins {
     kotlin("jvm")
     alias(libs.plugins.ksp)
     id("com.github.gmazzo.buildconfig")
-    `maven-publish`
+    alias(libs.plugins.vannik.publish)
     `signing`
 }
 
@@ -50,44 +50,32 @@ buildConfig {
     buildConfigField("String", "KOTLIN_PLUGIN_ID", "\"${rootProject.extra["kotlin_plugin_id"]}\"")
 }
 
-publishing {
-    publications {
-        create<MavenPublication>(name) {
-            from(components["java"])
-            pom {
-                name.set("ksrpc-compiler-plugin")
-                description.set("A simple kotlin rpc library")
-                url.set("http://www.github.com/Monkopedia/ksrpc")
-                licenses {
-                    license {
-                        name.set("The Apache License, Version 2.0")
-                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                    }
-                }
-                developers {
-                    developer {
-                        id.set("monkopedia")
-                        name.set("Jason Monk")
-                        email.set("monkopedia@gmail.com")
-                    }
-                }
-                scm {
-                    connection.set("scm:git:git://github.com/Monkopedia/ksrpc.git")
-                    developerConnection.set("scm:git:ssh://github.com/Monkopedia/ksrpc.git")
-                    url.set("http://github.com/Monkopedia/ksrpc/")
-                }
+mavenPublishing {
+    pom {
+        name.set("ksrpc-compiler-plugin")
+        description.set("A simple kotlin rpc library")
+        url.set("http://www.github.com/Monkopedia/ksrpc")
+        licenses {
+            license {
+                name.set("The Apache License, Version 2.0")
+                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
             }
         }
-    }
-    repositories {
-        maven(url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-            name = "OSSRH"
-            credentials {
-                username = System.getenv("MAVEN_USERNAME")
-                password = System.getenv("MAVEN_PASSWORD")
+        developers {
+            developer {
+                id.set("monkopedia")
+                name.set("Jason Monk")
+                email.set("monkopedia@gmail.com")
             }
         }
+        scm {
+            connection.set("scm:git:git://github.com/Monkopedia/ksrpc.git")
+            developerConnection.set("scm:git:ssh://github.com/Monkopedia/ksrpc.git")
+            url.set("http://github.com/Monkopedia/ksrpc/")
+        }
     }
+    publishToMavenCentral()
+    signAllPublications()
 }
 
 tasks.withType<KotlinCompile> {

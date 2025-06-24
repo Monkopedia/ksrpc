@@ -27,6 +27,7 @@ plugins {
     alias(libs.plugins.jlleitschuh.ktlint)
 
     alias(libs.plugins.gmazzo.buildconfig) apply false
+    alias(libs.plugins.vannik.publish) apply false
 }
 
 group = "com.monkopedia.ksrpc"
