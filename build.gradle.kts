@@ -36,6 +36,7 @@ plugins {
     alias(libs.plugins.hierynomus.license)
 
     alias(libs.plugins.gmazzo.buildconfig) apply false
+    alias(libs.plugins.vannik.publish) apply false
     id("ksrpc-generate-module")
     id("com.monkopedia.ksrpc.plugin") apply false
 }

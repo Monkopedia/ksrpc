@@ -20,6 +20,7 @@ hierynomus = "0.16.1"
 ktlint-plugin = "12.2.0"
 buildconfig = "5.6.7"
 bcv = "0.17.0"
+vannik = "0.31.0"
 
 [libraries]
 dokka-base = { module = "org.jetbrains.dokka:dokka-base", version.ref = "dokka" }
@@ -52,6 +53,7 @@ ktor-jackson-serialization = { module = "io.ktor:ktor-serialization-jackson", ve
 ktor-websockets = { module = "io.ktor:ktor-websockets", version.ref = "ktor" }
 ktor-websockets-serialization = { module = "io.ktor:ktor-websocket-serialization", version.ref = "ktor" }
 clikt = { module = "com.github.ajalt.clikt:clikt", version.ref = "clikt"}
+vannik-publish = { module = "com.vanniktech.maven.publish:com.vanniktech.maven.publish.gradle.plugin", version.ref = "vannik" }
 
 [bundles]
 dokka = ["dokka-base", "dokka-gradle"]
@@ -71,3 +73,4 @@ jlleitschuh-ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktli
 gmazzo-buildconfig = { id = "com.github.gmazzo.buildconfig", version.ref = "buildconfig" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp"}
 gradle-publish = { id = "com.gradle.plugin-publish", version.ref = "gradleplugin" }
+vannik-publish = { id = "com.vanniktech.maven.publish", version.ref = "vannik" }

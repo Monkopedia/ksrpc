@@ -27,6 +27,7 @@ dependencies {
     implementation(kotlin("stdlib"))
     implementation(kotlin("gradle-plugin-api"))
     implementation(gradleKotlinDsl())
+    implementation(libs.vannik.publish)
     api(libs.kotlin.gradle)
     api(libs.bundles.dokka)
 }
@@ -34,8 +35,8 @@ dependencies {
 java {
     withJavadocJar()
     withSourcesJar()
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 gradlePlugin {
@@ -51,6 +52,6 @@ gradlePlugin {
 
 tasks.withType<KotlinCompile> {
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_1_8)
+        jvmTarget.set(JvmTarget.JVM_11)
     }
 }
