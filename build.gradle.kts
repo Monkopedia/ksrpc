@@ -113,7 +113,7 @@ tasks.dokkaHtmlMultiModule.configure {
         customStyleSheets = file("dokka/styles").listFiles().toList()
     }
 
-    outputDirectory.set(buildDir.resolve("dokka"))
+    outputDirectory.set(projectDir.resolve("build/dokka"))
     rootProject.findProject(":ksrpc-packets")?.let { this.removeChildTasks(it) }
     rootProject.findProject(":ksrpc-ktor-websocket-shared")?.let { this.removeChildTasks(it) }
 }

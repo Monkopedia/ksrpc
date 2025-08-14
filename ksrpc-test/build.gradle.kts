@@ -28,7 +28,7 @@ kotlin {
         implementation(project(":ksrpc-packets"))
         implementation(libs.ktor.client)
     }
-    sourceSets["jvmTest"].resources.srcDir(buildDir.resolve("generated/lib/resources"))
+    sourceSets["jvmTest"].resources.srcDir(projectDir.resolve("build/generated/lib/resources"))
     sourceSets["jvmTest"].dependencies {
         implementation(project(":ksrpc-server"))
         implementation(project(":ksrpc-jni"))
@@ -67,19 +67,19 @@ val copyLib = tasks.register("copyLib", Copy::class) {
     when (hostOs) {
         "Mac OS X" -> {
             if (arch == "aarch64") {
-                dependsOn(tasks.findByName("linkReleaseSharedMacosArm64"))
-                from(buildDir.resolve("bin/macosArm64/releaseShared/libksrpc_test.dylib"))
-                destinationDir = buildDir.resolve("generated/lib/resources/libs/")
+                dependsOn(tasks.getByName("linkReleaseSharedMacosArm64"))
+                from(projectDir.resolve("build/bin/macosArm64/releaseShared/libksrpc_test.dylib"))
+                destinationDir = projectDir.resolve("build/generated/lib/resources/libs/")
             } else {
-                dependsOn(tasks.findByName("linkReleaseSharedMacosX64"))
-                from(buildDir.resolve("bin/macosX64/releaseShared/libksrpc_test.dylib"))
-                destinationDir = buildDir.resolve("generated/lib/resources/libs/")
+                dependsOn(tasks.getByName("linkReleaseSharedMacosX64"))
+                from(projectDir.resolve("build/bin/macosX64/releaseShared/libksrpc_test.dylib"))
+                destinationDir = projectDir.resolve("build/generated/lib/resources/libs/")
             }
         }
         "Linux" -> {
-            dependsOn(tasks.findByName("linkDebugSharedLinuxX64"))
-            from(buildDir.resolve("bin/linuxX64/debugShared/libksrpc_test.so"))
-            destinationDir = buildDir.resolve("generated/lib/resources/libs/")
+            dependsOn(tasks.getByName("linkDebugSharedLinuxX64"))
+            from(projectDir.resolve("build/bin/linuxX64/debugShared/libksrpc_test.so"))
+            destinationDir = projectDir.resolve("build/generated/lib/resources/libs/")
         }
         else -> throw GradleException(
             "Host OS '$hostOs' is not supported in Kotlin/Native $project."

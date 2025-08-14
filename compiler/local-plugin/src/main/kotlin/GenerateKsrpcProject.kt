@@ -210,7 +210,7 @@ fun Project.ksrpcModule(
             it.plugins("org.jetbrains.dokka:kotlin-as-java-plugin:2.0.0")
         }
         // outputFormat = "javadoc"
-        it.outputDirectory.set(File(project.buildDir, "javadoc"))
+        it.outputDirectory.set(File(File(project.projectDir, "build"), "javadoc"))
         it.inputs.dir("src/commonMain/kotlin")
     }
     afterEvaluate {
@@ -249,7 +249,7 @@ fun Project.ksrpcModule(
     val javadocJar = tasks.create("javadocJar", Jar::class) {
         it.dependsOn(dokkaJavadoc)
         it.archiveClassifier.set("javadoc")
-        it.from(File(project.buildDir, "javadoc"))
+        it.from(File(File(project.projectDir, "build"), "javadoc"))
     }
     val publishing = extensions.getByType<MavenPublishBaseExtension>()
     val pub = extensions.getByType<PublishingExtension>()
