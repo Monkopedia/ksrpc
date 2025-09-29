@@ -48,6 +48,7 @@ kotlin {
         implementation(libs.ktor.client)
     }
     sourceSets["nativeTest"].dependencies {
+        api(project(":ksrpc-jni"))
         implementation(project(":ksrpc-ktor-server"))
         implementation(project(":ksrpc-ktor-websocket-server"))
         implementation(libs.ktor.server.cio)
