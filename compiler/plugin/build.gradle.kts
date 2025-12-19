@@ -90,5 +90,5 @@ signing {
 
 afterEvaluate {
     tasks["generateMetadataFileForMavenPublication"].dependsOn("plainJavadocJar")
-    tasks["kspKotlin"].dependsOn("generateBuildConfig")
+    tasks["kspKotlin"].dependsOn("generateBuildConfigClasses")
 }

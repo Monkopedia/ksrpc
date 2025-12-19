@@ -27,6 +27,9 @@ import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrarAdapter
 @OptIn(ExperimentalCompilerApi::class)
 @AutoService(CompilerPluginRegistrar::class)
 class KsrpcComponentRegistrar : CompilerPluginRegistrar() {
+    override val pluginId: String
+        get() = "com.monkopedia.ksrpc.plugin"
+
     override val supportsK2: Boolean
         get() = true
 
