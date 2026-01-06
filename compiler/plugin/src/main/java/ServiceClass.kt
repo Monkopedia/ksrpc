@@ -73,7 +73,7 @@ private class Visitor(private val messageCollector: MessageCollector) : IrElemen
                 )
             }
         } else {
-            if (currentService != null) {
+            if (currentService != null && declaration.overriddenSymbols.isEmpty()) {
                 messageCollector.report(
                     CompilerMessageSeverity.WARNING,
                     "${
