@@ -15,6 +15,7 @@
  */
 package com.monkopedia.ksrpc.plugin
 
+import org.jetbrains.kotlin.backend.konan.ir.superClasses
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.ir.IrStatement
@@ -27,6 +28,7 @@ import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.util.fqNameForIrSerialization
+import org.jetbrains.kotlin.ir.util.getAllSuperclasses
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
 import org.jetbrains.kotlin.name.FqName
 
@@ -86,8 +88,28 @@ private class Visitor(private val messageCollector: MessageCollector) : IrElemen
     }
 }
 
+private class SubclassVisitor(
+    private val messageCollector: MessageCollector,
+    private val classes: Map<String, ServiceClass>
+) : IrElementTransformerVoid() {
+    override fun visitClass(declaration: IrClass): IrStatement {
+        declaration.getAllSuperclasses().mapNotNull {
+            classes[it.fqNameForIrSerialization.asString()]
+        }.also {
+            if (it.size > 1) {
+                messageCollector.error(
+                    "${declaration.fqNameForIrSerialization.asString()} has " +
+                        "multiple RPC super classes, which is not supported"
+                )
+            }
+        }.singleOrNull()?.irClassAndImpls?.add(declaration)
+        return super.visitClass(declaration)
+    }
+}
+
 data class ServiceClass(
     val irClass: IrClass,
+    val irClassAndImpls: MutableList<IrClass> = mutableListOf(irClass),
     val methods: MutableList<Pair<IrSimpleFunction, IrConstructorCall>> = mutableListOf()
 ) {
     val endpoints = mutableMapOf<String, IrFunction>()
@@ -121,7 +143,9 @@ data class ServiceClass(
         ): MutableMap<String, ServiceClass> {
             val visitor = Visitor(messageCollector)
             visitor.visitElement(moduleFragment)
+            SubclassVisitor(messageCollector, visitor.classes).visitElement(moduleFragment)
             return visitor.classes
         }
     }
 }
+

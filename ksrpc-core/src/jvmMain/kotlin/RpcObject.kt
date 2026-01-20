@@ -17,10 +17,22 @@ package com.monkopedia.ksrpc
 
 import java.io.PrintWriter
 import java.io.StringWriter
+import kotlin.reflect.full.allSuperclasses
 import kotlin.reflect.full.companionObjectInstance
+import kotlin.reflect.full.superclasses
 
+@Suppress("UNCHECKED_CAST")
 actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> {
-    return T::class.companionObjectInstance as RpcObject<T>
+    val klass = T::class
+    if (klass.companionObjectInstance is RpcObject<*>) {
+        return klass.companionObjectInstance as RpcObject<T>
+    }
+    klass.allSuperclasses.find {
+        it.companionObjectInstance is RpcObject<*>
+    }?.let {
+        return it.companionObjectInstance as RpcObject<T>
+    }
+    return error("Can't find rpc companion for $klass")
 }
 
 actual val Throwable.asString: String

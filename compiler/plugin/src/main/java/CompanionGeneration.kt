@@ -65,20 +65,22 @@ class CompanionGeneration(
             ?: error("Invalid synthetic declaration for ${k.type} in ${classes.keys}")
         env.rpcObjectKey?.let {
             val objectReference = createClassReference(context, declaration)
-            cls.irClass.annotations += createRpcObjectAnnotation(cls, it, objectReference)
+            cls.irClassAndImpls.forEach { irClass ->
+                irClass.annotations += createRpcObjectAnnotation(irClass, it, objectReference)
+            }
         }
         declaration.isCompanion = true
         return emptyList()
     }
 
     private fun createRpcObjectAnnotation(
-        cls: ServiceClass,
+        irClass: IrClass,
         rpcObjectKey: IrClassSymbol,
         objectReference: IrClassReference
     ): IrConstructorCall {
         val primaryConstructor = rpcObjectKey.constructors.find { it.owner.isPrimary }
             ?: error("No primary constructor")
-        return context.irBuilder(cls.irClass).irCallConstructor(primaryConstructor, emptyList())
+        return context.irBuilder(irClass).irCallConstructor(primaryConstructor, emptyList())
             .apply { putArgs(objectReference) }
     }
 

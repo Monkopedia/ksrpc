@@ -53,7 +53,7 @@ class ConnectionTest {
     @Test
     fun testForward() = executePipe(
         serviceJob = { c ->
-            c.registerDefault<PrimaryInterface, String>(object : PrimaryInterface {
+            c.registerDefault(object : PrimaryInterface {
                 override suspend fun basicCall(input: String): String {
                     return "Respond: $input"
                 }
@@ -83,7 +83,7 @@ class ConnectionTest {
         clientJob = { c ->
             val callComplete = CompletableDeferred<String>()
             pendingFinish = CompletableDeferred()
-            c.registerDefault<PrimaryInterface, String>(object : PrimaryInterface {
+            c.registerDefault(object : PrimaryInterface {
                 override suspend fun basicCall(input: String): String {
                     callComplete.complete(input)
                     return "Respond: $input"
@@ -104,7 +104,7 @@ class ConnectionTest {
     fun testOverlapForward() = executePipe(
         serviceJob = { c ->
             val clientService = c.defaultChannel().toStub<PrimaryInterface, String>()
-            c.registerDefault<PrimaryInterface, String>(object : PrimaryInterface {
+            c.registerDefault(object : PrimaryInterface {
                 override suspend fun basicCall(input: String): String {
                     return "Respond: ${clientService.basicCall(input)}"
                 }
@@ -118,7 +118,7 @@ class ConnectionTest {
         },
         clientJob = { c ->
             val service = c.defaultChannel().toStub<PrimaryInterface, String>()
-            c.registerDefault<PrimaryInterface, String>(object : PrimaryInterface {
+            c.registerDefault(object : PrimaryInterface {
                 override suspend fun basicCall(input: String): String {
                     return "Client: $input"
                 }
@@ -137,7 +137,7 @@ class ConnectionTest {
     fun testOverlapReverse() = executePipe(
         serviceJob = { c ->
             val clientService = c.defaultChannel().toStub<PrimaryInterface, String>()
-            c.registerDefault<PrimaryInterface, String>(object : PrimaryInterface {
+            c.registerDefault(object : PrimaryInterface {
                 override suspend fun basicCall(input: String): String {
                     return "Respond: $input"
                 }
@@ -155,7 +155,7 @@ class ConnectionTest {
             val service = c.defaultChannel().toStub<PrimaryInterface, String>()
             val callComplete = CompletableDeferred<String>()
             pendingFinish = CompletableDeferred()
-            c.registerDefault<PrimaryInterface, String>(object : PrimaryInterface {
+            c.registerDefault(object : PrimaryInterface {
                 override suspend fun basicCall(input: String): String {
                     return "Client: ${service.basicCall(input)}".also { callComplete.complete(it) }
                 }
@@ -174,7 +174,7 @@ class ConnectionTest {
     @Test
     fun testServiceOverlapForward() = executePipe(
         serviceJob = { c ->
-            c.registerDefault<PrimaryInterface, String>(object : PrimaryInterface {
+            c.registerDefault(object : PrimaryInterface {
                 override suspend fun basicCall(input: String): String = error("Not implemented")
 
                 override suspend fun childInput(input: ChildInterface): String =
@@ -211,7 +211,7 @@ class ConnectionTest {
         clientJob = { c ->
             val callComplete = CompletableDeferred<String>()
             pendingFinish = CompletableDeferred()
-            c.registerDefault<PrimaryInterface, String>(object : PrimaryInterface {
+            c.registerDefault(object : PrimaryInterface {
                 override suspend fun basicCall(input: String): String = error("Not implemented")
 
                 override suspend fun childInput(input: ChildInterface): String =
@@ -230,7 +230,7 @@ class ConnectionTest {
     @Test
     fun testReturnServiceForward() = executePipe(
         serviceJob = { c ->
-            c.registerDefault<PrimaryInterface, String>(object : PrimaryInterface {
+            c.registerDefault(object : PrimaryInterface {
                 override suspend fun basicCall(input: String): String = error("Not implemented")
 
                 override suspend fun childInput(input: ChildInterface): String =
@@ -269,7 +269,7 @@ class ConnectionTest {
         clientJob = { c ->
             val callComplete = CompletableDeferred<String>()
             pendingFinish = CompletableDeferred()
-            c.registerDefault<PrimaryInterface, String>(object : PrimaryInterface {
+            c.registerDefault(object : PrimaryInterface {
                 override suspend fun basicCall(input: String): String =
                     input.also { callComplete.complete(input) }
 
