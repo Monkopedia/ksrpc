@@ -31,7 +31,7 @@ data class JsonRpcRequest(
     @Required
     val jsonrpc: String = "2.0",
     val method: String,
-    val params: JsonElement?,
+    val params: JsonElement? = null,
     val id: JsonPrimitive? = null
 )
 
