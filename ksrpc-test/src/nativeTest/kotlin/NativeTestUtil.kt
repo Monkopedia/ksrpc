@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ import kotlinx.coroutines.withContext
 import platform.posix.pipe
 import platform.posix.pthread_self
 
-var PORT = 9181
+var port = 9181
 val serverDispatcher = newFixedThreadPoolContext(8, "server-threads")
 
 actual suspend inline fun httpTest(
@@ -54,7 +54,7 @@ actual suspend inline fun httpTest(
     isWebsocket: Boolean
 ) {
     if (isWebsocket) return
-    val port = PORT++
+    val port = port++
     val serverCompletion = CompletableDeferred<EmbeddedServer<*, *>>()
     GlobalScope.launch(serverDispatcher) {
         try {

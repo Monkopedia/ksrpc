@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,25 +18,25 @@ package com.monkopedia.ksrpc
 import kotlin.test.assertTrue
 import kotlin.test.fail
 
-class RpcErrorTest : RpcFunctionalityTest(
-    serializedChannel = {
-        val channel: TestInterface = object : TestInterface {
-            override suspend fun rpc(u: Pair<String, String>): String {
-                throw IllegalArgumentException("Failure")
+class RpcErrorTest :
+    RpcFunctionalityTest(
+        serializedChannel = {
+            val channel: TestInterface = object : TestInterface {
+                override suspend fun rpc(u: Pair<String, String>): String =
+                    throw IllegalArgumentException("Failure")
+            }
+            channel.serialized(ksrpcEnvironment { })
+        },
+        verifyOnChannel = { serializedChannel ->
+            val stub = serializedChannel.toStub<TestInterface, String>()
+            try {
+                stub.rpc("Hello" to "world")
+                fail("Expected crash")
+            } catch (t: Throwable) {
+                assertTrue(
+                    t is RpcException,
+                    "Expect an RpcException back, not ${t.stackTraceToString()}"
+                )
             }
         }
-        channel.serialized(ksrpcEnvironment { })
-    },
-    verifyOnChannel = { serializedChannel ->
-        val stub = serializedChannel.toStub<TestInterface, String>()
-        try {
-            stub.rpc("Hello" to "world")
-            fail("Expected crash")
-        } catch (t: Throwable) {
-            assertTrue(
-                t is RpcException,
-                "Expect an RpcException back, not ${t.stackTraceToString()}"
-            )
-        }
-    }
-)
+    )

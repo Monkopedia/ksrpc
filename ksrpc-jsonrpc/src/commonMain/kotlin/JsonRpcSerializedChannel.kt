@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,13 +36,10 @@ class JsonRpcSerializedChannel(
     override suspend fun call(
         endpoint: RpcMethod<*, *, *>,
         input: CallData<String>
-    ): CallData<String> {
-        return call(endpoint.endpoint, input, !endpoint.hasReturnType)
-    }
+    ): CallData<String> = call(endpoint.endpoint, input, !endpoint.hasReturnType)
 
-    override suspend fun call(endpoint: String, input: CallData<String>): CallData<String> {
-        return call(endpoint, input, false)
-    }
+    override suspend fun call(endpoint: String, input: CallData<String>): CallData<String> =
+        call(endpoint, input, false)
 
     private suspend fun call(
         endpoint: String,

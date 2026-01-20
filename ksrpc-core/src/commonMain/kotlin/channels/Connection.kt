@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,17 @@ import kotlin.jvm.JvmName
  *
  * (Meaning @KsServices can be used for both input and output of any @KsMethod)
  */
-interface Connection<T> : ChannelHost<T>, ChannelClient<T>, SingleChannelConnection<T>
+interface Connection<T> :
+    ChannelHost<T>,
+    ChannelClient<T>,
+    SingleChannelConnection<T>
 
 /**
  * A bidirectional channel that can host one service in each direction (1 host and 1 client).
  */
-interface SingleChannelConnection<T> : SingleChannelHost<T>, SingleChannelClient<T>
+interface SingleChannelConnection<T> :
+    SingleChannelHost<T>,
+    SingleChannelClient<T>
 
 // Problems with JS compiler and serialization
 data class ChannelId(val id: String)
@@ -55,7 +60,9 @@ suspend inline fun <
     reified T : RpcService,
     reified R : RpcService,
     S
-    > SingleChannelConnection<S>.connect(crossinline host: suspend (R) -> T) {
+    > SingleChannelConnection<S>.connect(
+    crossinline host: suspend (R) -> T
+) {
     contract {
         callsInPlace(host, InvocationKind.EXACTLY_ONCE)
     }

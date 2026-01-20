@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,9 +54,7 @@ class ConnectionTest {
     fun testForward() = executePipe(
         serviceJob = { c ->
             c.registerDefault(object : PrimaryInterface {
-                override suspend fun basicCall(input: String): String {
-                    return "Respond: $input"
-                }
+                override suspend fun basicCall(input: String): String = "Respond: $input"
 
                 override suspend fun childInput(input: ChildInterface): String =
                     error("Not implemented")
@@ -105,9 +103,8 @@ class ConnectionTest {
         serviceJob = { c ->
             val clientService = c.defaultChannel().toStub<PrimaryInterface, String>()
             c.registerDefault(object : PrimaryInterface {
-                override suspend fun basicCall(input: String): String {
-                    return "Respond: ${clientService.basicCall(input)}"
-                }
+                override suspend fun basicCall(input: String): String =
+                    "Respond: ${clientService.basicCall(input)}"
 
                 override suspend fun childInput(input: ChildInterface): String =
                     error("Not implemented")
@@ -119,9 +116,7 @@ class ConnectionTest {
         clientJob = { c ->
             val service = c.defaultChannel().toStub<PrimaryInterface, String>()
             c.registerDefault(object : PrimaryInterface {
-                override suspend fun basicCall(input: String): String {
-                    return "Client: $input"
-                }
+                override suspend fun basicCall(input: String): String = "Client: $input"
 
                 override suspend fun childInput(input: ChildInterface): String =
                     error("Not implemented")
@@ -138,9 +133,7 @@ class ConnectionTest {
         serviceJob = { c ->
             val clientService = c.defaultChannel().toStub<PrimaryInterface, String>()
             c.registerDefault(object : PrimaryInterface {
-                override suspend fun basicCall(input: String): String {
-                    return "Respond: $input"
-                }
+                override suspend fun basicCall(input: String): String = "Respond: $input"
 
                 override suspend fun childInput(input: ChildInterface): String =
                     error("Not implemented")
@@ -156,9 +149,8 @@ class ConnectionTest {
             val callComplete = CompletableDeferred<String>()
             pendingFinish = CompletableDeferred()
             c.registerDefault(object : PrimaryInterface {
-                override suspend fun basicCall(input: String): String {
-                    return "Client: ${service.basicCall(input)}".also { callComplete.complete(it) }
-                }
+                override suspend fun basicCall(input: String): String =
+                    "Client: ${service.basicCall(input)}".also { callComplete.complete(it) }
 
                 override suspend fun childInput(input: ChildInterface): String =
                     error("Not implemented")
@@ -189,9 +181,7 @@ class ConnectionTest {
             assertEquals(
                 "Client: Hello world",
                 service.childInput(object : ChildInterface {
-                    override suspend fun rpc(input: String): String {
-                        return "Client: $input"
-                    }
+                    override suspend fun rpc(input: String): String = "Client: $input"
                 })
             )
         }
@@ -202,9 +192,7 @@ class ConnectionTest {
         serviceJob = { c ->
             val clientService = c.defaultChannel().toStub<PrimaryInterface, String>()
             clientService.childInput(object : ChildInterface {
-                override suspend fun rpc(input: String): String {
-                    return "Respond: $input"
-                }
+                override suspend fun rpc(input: String): String = "Respond: $input"
             })
             pendingFinish?.complete(Unit)
         },
@@ -238,9 +226,7 @@ class ConnectionTest {
 
                 override suspend fun childOutput(prefix: String): ChildInterface =
                     object : ChildInterface {
-                        override suspend fun rpc(input: String): String {
-                            return "$prefix: $input"
-                        }
+                        override suspend fun rpc(input: String): String = "$prefix: $input"
                     }
             })
         },
@@ -278,9 +264,7 @@ class ConnectionTest {
 
                 override suspend fun childOutput(prefix: String): ChildInterface =
                     object : ChildInterface {
-                        override suspend fun rpc(input: String): String {
-                            return "$prefix: $input"
-                        }
+                        override suspend fun rpc(input: String): String = "$prefix: $input"
                     }
             })
             assertEquals("Done", callComplete.await())

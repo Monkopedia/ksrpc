@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,13 +72,11 @@ class MultiChannel<T> {
 internal inline fun <T> MutableList<T>.consume(
     crossinline matcher: (T) -> Boolean,
     crossinline consumer: (T) -> Unit
-): Boolean {
-    return removeAll {
-        if (matcher(it)) {
-            consumer(it)
-            true
-        } else {
-            false
-        }
+): Boolean = removeAll {
+    if (matcher(it)) {
+        consumer(it)
+        true
+    } else {
+        false
     }
 }

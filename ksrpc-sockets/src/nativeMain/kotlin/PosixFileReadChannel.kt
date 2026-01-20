@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ import platform.posix.fsync
 import platform.posix.read
 import platform.posix.write
 
-private const val bufferSize = 4096
+private const val BUFFER_SIZE = 4096
 
 actual suspend inline fun withStdInOut(
     ksrpcEnvironment: KsrpcEnvironment<String>,
@@ -75,10 +75,10 @@ fun posixFileReadChannel(fd: Int): ByteReadChannel {
     val thread = newSingleThreadContext("read-channel-$fd")
     return GlobalScope.writer(thread, autoFlush = true) {
         memScoped {
-            val buffer = allocArray<ByteVar>(bufferSize)
+            val buffer = allocArray<ByteVar>(BUFFER_SIZE)
             try {
                 while (true) {
-                    val readCount = read(fd, buffer, bufferSize.toULong())
+                    val readCount = read(fd, buffer, BUFFER_SIZE.toULong())
                     if (readCount < 0) break
                     if (readCount == 0L) continue
 

@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,8 @@ class JsonRpcWriterBase(
     private val context: CoroutineContext,
     override val env: KsrpcEnvironment<String>,
     private val comm: JsonRpcTransformer
-) : JsonRpcChannel, SingleChannelConnection<String> {
+) : JsonRpcChannel,
+    SingleChannelConnection<String> {
     private val json = (env.serialization as? Json) ?: Json
 
     private var baseChannel = CompletableDeferred<JsonRpcChannel>()
@@ -140,7 +141,6 @@ class JsonRpcWriterBase(
         baseChannel.complete(JsonRpcServiceWrapper(service))
     }
 
-    override suspend fun defaultChannel(): SerializedService<String> {
-        return JsonRpcSerializedChannel(context, this, env)
-    }
+    override suspend fun defaultChannel(): SerializedService<String> =
+        JsonRpcSerializedChannel(context, this, env)
 }

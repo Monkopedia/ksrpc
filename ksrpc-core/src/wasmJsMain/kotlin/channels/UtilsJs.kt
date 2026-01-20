@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,16 +22,13 @@ import com.monkopedia.ksrpc.RpcObjectKey
 import com.monkopedia.ksrpc.RpcService
 import nanoid.nanoid
 
-actual fun randomUuid(): String {
-    return nanoid()
-}
+actual fun randomUuid(): String = nanoid()
 
 @RpcObjectKey(VoidService.Companion::class)
 internal actual interface VoidService : RpcService {
     companion object : RpcObject<VoidService> {
-        override fun <T> createStub(channel: SerializedService<T>): VoidService {
-            return object : VoidService {}
-        }
+        override fun <T> createStub(channel: SerializedService<T>): VoidService =
+            object : VoidService {}
 
         override fun findEndpoint(endpoint: String): RpcMethod<*, *, *> =
             throw RpcEndpointException("VoidService has no endpoints")

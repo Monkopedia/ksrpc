@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,8 @@ import kotlin.reflect.findAssociatedObject
 annotation class RpcObjectKey(val rpcObject: KClass<out RpcObject<*>>)
 
 @OptIn(ExperimentalAssociatedObjects::class)
-actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> {
-    return T::class.findAssociatedObject<RpcObjectKey>() as RpcObject<T>
-}
+actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> =
+    T::class.findAssociatedObject<RpcObjectKey>() as RpcObject<T>
 
 @OptIn(ExperimentalNativeApi::class)
 actual val Throwable.asString: String

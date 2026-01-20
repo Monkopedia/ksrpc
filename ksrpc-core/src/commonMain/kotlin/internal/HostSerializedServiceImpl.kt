@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,29 +51,27 @@ class HostSerializedChannelImpl<T>(
         channelId: ChannelId,
         endpoint: String,
         data: CallData<T>
-    ): CallData<T> {
-        return try {
-            val channel = if (channelId.id.isEmpty()) {
-                baseChannel.await()
-            } else {
-                serviceMap[channelId.id] ?: error("Cannot find service ${channelId.id}")
-            }
-            withContext(context) {
-                if (endpoint.isEmpty()) {
-                    close(channelId)
-                    env.serialization.createCallData(Unit.serializer(), Unit)
-                } else {
-                    channel.call(endpoint, data)
-                }
-            }
-        } catch (t: Throwable) {
-            env.logger.info("SerializedChannel", "Exception thrown during dispatching", t)
-            env.errorListener.onError(t)
-            env.serialization.createErrorCallData(
-                RpcFailure.serializer(),
-                RpcFailure(t.asString)
-            )
+    ): CallData<T> = try {
+        val channel = if (channelId.id.isEmpty()) {
+            baseChannel.await()
+        } else {
+            serviceMap[channelId.id] ?: error("Cannot find service ${channelId.id}")
         }
+        withContext(context) {
+            if (endpoint.isEmpty()) {
+                close(channelId)
+                env.serialization.createCallData(Unit.serializer(), Unit)
+            } else {
+                channel.call(endpoint, data)
+            }
+        }
+    } catch (t: Throwable) {
+        env.logger.info("SerializedChannel", "Exception thrown during dispatching", t)
+        env.errorListener.onError(t)
+        env.serialization.createErrorCallData(
+            RpcFailure.serializer(),
+            RpcFailure(t.asString)
+        )
     }
 
     override suspend fun close(id: ChannelId) {

@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,24 +28,19 @@ class TestJniImpl : JniTestInterface {
         return ByteReadChannel(str.encodeToByteArray())
     }
 
-    override suspend fun inputRpc(u: ByteReadChannel): String {
-        return "Input: " + u.toByteArray().decodeToString()
-    }
+    override suspend fun inputRpc(u: ByteReadChannel): String =
+        "Input: " + u.toByteArray().decodeToString()
 
     override suspend fun ping(input: String): String {
         assertEquals("ping", input)
         return "pong"
     }
 
-    override suspend fun rpc(u: Pair<String, String>): String {
-        return "${u.first} ${u.second}"
-    }
+    override suspend fun rpc(u: Pair<String, String>): String = "${u.first} ${u.second}"
 
-    override suspend fun subservice(prefix: String): JniTestSubInterface {
-        return object : JniTestSubInterface {
-            override suspend fun rpc(u: Pair<String, String>): String {
-                return "$prefix ${u.first} ${u.second}"
-            }
+    override suspend fun subservice(prefix: String): JniTestSubInterface =
+        object : JniTestSubInterface {
+            override suspend fun rpc(u: Pair<String, String>): String =
+                "$prefix ${u.first} ${u.second}"
         }
-    }
 }

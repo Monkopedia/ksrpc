@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,10 +84,7 @@ fun Routing.serve(
     }
 }
 
-private suspend fun RoutingContext.execCall(
-    channel: SerializedChannel<String>,
-    method: String
-) {
+private suspend fun RoutingContext.execCall(channel: SerializedChannel<String>, method: String) {
     val content = if (call.request.headers[KSRPC_BINARY]?.toBoolean() == true) {
         CallData.createBinary(call.receive<ByteReadChannel>())
     } else {

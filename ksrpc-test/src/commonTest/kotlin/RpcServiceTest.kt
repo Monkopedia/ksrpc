@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,23 +36,22 @@ interface TestInterface : RpcService {
     suspend fun rpc(u: Pair<String, String>): String
 }
 
-class RpcServiceTest : RpcFunctionalityTest(
-    serializedChannel = {
-        val channel: TestInterface = object : TestInterface {
-            override suspend fun rpc(u: Pair<String, String>): String {
-                return "${u.first} ${u.second}"
+class RpcServiceTest :
+    RpcFunctionalityTest(
+        serializedChannel = {
+            val channel: TestInterface = object : TestInterface {
+                override suspend fun rpc(u: Pair<String, String>): String = "${u.first} ${u.second}"
             }
+            channel.serialized(ksrpcEnvironment { })
+        },
+        verifyOnChannel = { serializedChannel ->
+            val stub = serializedChannel.toStub<TestInterface, String>()
+            assertEquals(
+                "Hello world",
+                stub.rpc("Hello" to "world")
+            )
         }
-        channel.serialized(ksrpcEnvironment { })
-    },
-    verifyOnChannel = { serializedChannel ->
-        val stub = serializedChannel.toStub<TestInterface, String>()
-        assertEquals(
-            "Hello world",
-            stub.rpc("Hello" to "world")
-        )
-    }
-) {
+    ) {
     @Test
     fun testCreateInfo() = runBlockingUnit {
         assertNotNull(rpcObject<TestInterface>().findEndpoint("rpc"))
@@ -110,9 +109,7 @@ class RpcServiceTest : RpcFunctionalityTest(
     @Test
     fun testCreateChannel() = runBlockingUnit {
         val channel = object : TestInterface {
-            override suspend fun rpc(u: Pair<String, String>): String {
-                return "${u.first} ${u.second}"
-            }
+            override suspend fun rpc(u: Pair<String, String>): String = "${u.first} ${u.second}"
         }.serialized<TestInterface, String>(ksrpcEnvironment { })
         assertEquals(
             "Hello world",
@@ -169,65 +166,65 @@ class RpcServiceTest : RpcFunctionalityTest(
     }
 }
 
-class RpcServiceTwoCallsTest : RpcFunctionalityTest(
-    serializedChannel = {
-        val channel: TestInterface = object : TestInterface {
-            override suspend fun rpc(u: Pair<String, String>): String {
-                return "${u.first} ${u.second}"
+class RpcServiceTwoCallsTest :
+    RpcFunctionalityTest(
+        serializedChannel = {
+            val channel: TestInterface = object : TestInterface {
+                override suspend fun rpc(u: Pair<String, String>): String = "${u.first} ${u.second}"
             }
-        }
-        channel.serialized(ksrpcEnvironment { })
-    },
-    verifyOnChannel = { serializedChannel ->
-        val stub = serializedChannel.toStub<TestInterface, String>()
-        stub.rpc("Hello" to "world")
-        assertEquals(
-            "Hello world",
+            channel.serialized(ksrpcEnvironment { })
+        },
+        verifyOnChannel = { serializedChannel ->
+            val stub = serializedChannel.toStub<TestInterface, String>()
             stub.rpc("Hello" to "world")
-        )
-    }
-)
+            assertEquals(
+                "Hello world",
+                stub.rpc("Hello" to "world")
+            )
+        }
+    )
 
 private var cancelSignal: CompletableDeferred<CompletableDeferred<Unit>>? = null
 
-class RpcServiceCancelTest : RpcFunctionalityTest(
-    serializedChannel = {
-        val channel: TestInterface = object : TestInterface {
-            override suspend fun rpc(u: Pair<String, String>): String {
-                val completion = CompletableDeferred<Unit>()
-                cancelSignal?.complete(completion)
-                completion.await()
-                return "${u.first} ${u.second}"
+class RpcServiceCancelTest :
+    RpcFunctionalityTest(
+        serializedChannel = {
+            val channel: TestInterface = object : TestInterface {
+                override suspend fun rpc(u: Pair<String, String>): String {
+                    val completion = CompletableDeferred<Unit>()
+                    cancelSignal?.complete(completion)
+                    completion.await()
+                    return "${u.first} ${u.second}"
+                }
             }
-        }
-        channel.serialized(ksrpcEnvironment { })
-    },
-    verifyOnChannel = { serializedChannel ->
-        val stub = serializedChannel.toStub<TestInterface, String>()
-        val rpcJob = launch {
-            try {
+            channel.serialized(ksrpcEnvironment { })
+        },
+        verifyOnChannel = { serializedChannel ->
+            val stub = serializedChannel.toStub<TestInterface, String>()
+            val rpcJob = launch {
+                try {
+                    stub.rpc("Hello" to "world")
+                    cancelSignal!!.completeExceptionally(RuntimeException("Test failure"))
+                } finally {
+                }
+            }
+            val continueSignal = cancelSignal!!.await()
+            rpcJob.cancel()
+            continueSignal.complete(Unit)
+
+            cancelSignal = CompletableDeferred<CompletableDeferred<Unit>>().also {
+                launch {
+                    it.await().complete(Unit)
+                }
+            }
+
+            assertEquals(
+                "Hello world",
                 stub.rpc("Hello" to "world")
-                cancelSignal!!.completeExceptionally(RuntimeException("Test failure"))
-            } finally {
-            }
-        }
-        val continueSignal = cancelSignal!!.await()
-        rpcJob.cancel()
-        continueSignal.complete(Unit)
-
-        cancelSignal = CompletableDeferred<CompletableDeferred<Unit>>().also {
-            launch {
-                it.await().complete(Unit)
-            }
-        }
-
-        assertEquals(
-            "Hello world",
-            stub.rpc("Hello" to "world")
-        )
-    },
-    supportedTypes = TestType.values().toList() - TestType.SERIALIZE
-) {
+            )
+        },
+        supportedTypes = TestType.values().toList() - TestType.SERIALIZE
+    ) {
     @BeforeTest
     fun setup() {
         cancelSignal = CompletableDeferred()

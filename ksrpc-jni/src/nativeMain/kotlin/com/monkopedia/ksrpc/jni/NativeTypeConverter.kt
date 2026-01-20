@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,101 +25,74 @@ import kotlinx.serialization.KSerializer
 class NativeTypeConverter : JniTypeConverter<jobject?> {
 
     object BooleanConverter : Converter<jobject?, Boolean> {
-        override fun convertTo(rawValue: jobject?): Boolean {
-            return JNI.Bool.get(rawValue ?: error("convertBoolean"))
-        }
+        override fun convertTo(rawValue: jobject?): Boolean =
+            JNI.Bool.get(rawValue ?: error("convertBoolean"))
 
-        override fun convertFrom(value: Boolean): jobject? {
-            return JNI.Bool.new(value)
-        }
+        override fun convertFrom(value: Boolean): jobject? = JNI.Bool.new(value)
     }
 
     object ByteConverter : Converter<jobject?, Byte> {
-        override fun convertTo(rawValue: jobject?): Byte {
-            return JNI.Byte.get(rawValue ?: error("convertByte"))
-        }
+        override fun convertTo(rawValue: jobject?): Byte =
+            JNI.Byte.get(rawValue ?: error("convertByte"))
 
-        override fun convertFrom(value: Byte): jobject? {
-            return JNI.Byte.new(value)
-        }
+        override fun convertFrom(value: Byte): jobject? = JNI.Byte.new(value)
     }
 
     object ShortConverter : Converter<jobject?, Short> {
 
-        override fun convertTo(rawValue: jobject?): Short {
-            return JNI.Short.get(rawValue ?: error("convertShort"))
-        }
+        override fun convertTo(rawValue: jobject?): Short =
+            JNI.Short.get(rawValue ?: error("convertShort"))
 
-        override fun convertFrom(value: Short): jobject? {
-            return JNI.Short.new(value)
-        }
+        override fun convertFrom(value: Short): jobject? = JNI.Short.new(value)
     }
 
     object IntConverter : Converter<jobject?, Int> {
 
-        override fun convertTo(rawValue: jobject?): Int {
-            return JNI.Int.get(rawValue ?: error("convertInt"))
-        }
+        override fun convertTo(rawValue: jobject?): Int =
+            JNI.Int.get(rawValue ?: error("convertInt"))
 
-        override fun convertFrom(value: Int): jobject? {
-            return JNI.Int.new(value)
-        }
+        override fun convertFrom(value: Int): jobject? = JNI.Int.new(value)
     }
 
     object LongConverter : Converter<jobject?, Long> {
 
-        override fun convertTo(rawValue: jobject?): Long {
-            return JNI.Long.get(rawValue ?: error("convertLong"))
-        }
+        override fun convertTo(rawValue: jobject?): Long =
+            JNI.Long.get(rawValue ?: error("convertLong"))
 
-        override fun convertFrom(value: Long): jobject? {
-            return JNI.Long.new(value)
-        }
+        override fun convertFrom(value: Long): jobject? = JNI.Long.new(value)
     }
 
     object FloatConverter : Converter<jobject?, Float> {
 
-        override fun convertTo(rawValue: jobject?): Float {
-            return JNI.Float.get(rawValue ?: error("convertFloat"))
-        }
+        override fun convertTo(rawValue: jobject?): Float =
+            JNI.Float.get(rawValue ?: error("convertFloat"))
 
-        override fun convertFrom(value: Float): jobject? {
-            return JNI.Float.new(value)
-        }
+        override fun convertFrom(value: Float): jobject? = JNI.Float.new(value)
     }
 
     object DoubleConverter : Converter<jobject?, Double> {
 
-        override fun convertTo(rawValue: jobject?): Double {
-            return JNI.Double.get(rawValue ?: error("convertDouble"))
-        }
+        override fun convertTo(rawValue: jobject?): Double =
+            JNI.Double.get(rawValue ?: error("convertDouble"))
 
-        override fun convertFrom(value: Double): jobject? {
-            return JNI.Double.new(value)
-        }
+        override fun convertFrom(value: Double): jobject? = JNI.Double.new(value)
     }
 
     object CharConverter : Converter<jobject?, Char> {
 
-        override fun convertTo(rawValue: jobject?): Char {
-            return JNI.Char.get(rawValue ?: error("convertChar"))
-        }
+        override fun convertTo(rawValue: jobject?): Char =
+            JNI.Char.get(rawValue ?: error("convertChar"))
 
-        override fun convertFrom(value: Char): jobject? {
-            return JNI.Char.new(value)
-        }
+        override fun convertFrom(value: Char): jobject? = JNI.Char.new(value)
     }
 
     object StringConverter : Converter<jobject?, String> {
 
-        override fun convertTo(rawValue: jobject?): String {
-            return JNI.getString(rawValue ?: error("convertToString"))
+        override fun convertTo(rawValue: jobject?): String =
+            JNI.getString(rawValue ?: error("convertToString"))
                 ?: error("convertToStringReturn")
-        }
 
-        override fun convertFrom(value: String): jobject? {
-            return JNI.newString(value)
-        }
+        override fun convertFrom(value: String): jobject? = JNI.newString(value)
     }
 
     override val boolean: Converter<jobject?, Boolean> = BooleanConverter
@@ -143,8 +116,8 @@ actual fun <V> JniSer.converterOf(serializer: KSerializer<V>): Converter<*, V> {
             } as V
         }
 
-        override fun convertFrom(value: V): jobject? {
-            return value?.let { encodeToJni(serializer, it).toJvm(threadEnv) }
+        override fun convertFrom(value: V): jobject? = value?.let {
+            encodeToJni(serializer, it).toJvm(threadEnv)
         }
     }
 }

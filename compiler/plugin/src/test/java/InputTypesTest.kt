@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2024 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ package com.monkopedia.ksrpc.plugin
 
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
-import org.junit.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
+import org.junit.Test
 
 class InputTypesTest {
     val sourceFile =
@@ -53,7 +53,7 @@ interface MyInterface: RpcService {
     @KsMethod("/service_input")
     suspend fun do4(input: MyInterface): Int
 }
-""",
+"""
         )
 
     @Test
@@ -67,7 +67,7 @@ interface MyInterface: RpcService {
         val result = compile(sourceFile = sourceFile)
         assertContains(
             result.messages,
-            "generating MyInterface#Do1(\"native_input\") with types: DEFAULT(String) DEFAULT(Int)",
+            "generating MyInterface#Do1(\"native_input\") with types: DEFAULT(String) DEFAULT(Int)"
         )
     }
 
@@ -77,7 +77,7 @@ interface MyInterface: RpcService {
         assertContains(
             result.messages,
             "generating MyInterface#Do2(\"default_input\") " +
-                "with types: DEFAULT(CustomType) DEFAULT(Int)",
+                "with types: DEFAULT(CustomType) DEFAULT(Int)"
         )
     }
 
@@ -87,7 +87,7 @@ interface MyInterface: RpcService {
         assertContains(
             result.messages,
             "generating MyInterface#Do3(\"binary_input\") with " +
-                "types: BINARY(ByteReadChannel) DEFAULT(Int)",
+                "types: BINARY(ByteReadChannel) DEFAULT(Int)"
         )
     }
 
@@ -97,7 +97,7 @@ interface MyInterface: RpcService {
         assertContains(
             result.messages,
             "generating MyInterface#Do4(\"service_input\") with " +
-                "types: SERVICE(MyInterface) DEFAULT(Int)",
+                "types: SERVICE(MyInterface) DEFAULT(Int)"
         )
     }
 }

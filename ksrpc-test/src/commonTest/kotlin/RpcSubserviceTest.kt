@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,95 +39,88 @@ interface TestRootInterface : RpcService {
 
 private val basicImpl: TestRootInterface
     get() = object : TestRootInterface {
-        override suspend fun rpc(u: Pair<String, String>): String {
-            return "${u.first} ${u.second}"
-        }
+        override suspend fun rpc(u: Pair<String, String>): String = "${u.first} ${u.second}"
 
-        override suspend fun subservice(prefix: String): TestSubInterface {
-            return object : TestSubInterface {
-                override suspend fun rpc(u: Pair<String, String>): String {
-                    return "$prefix ${u.first} ${u.second}"
-                }
+        override suspend fun subservice(prefix: String): TestSubInterface =
+            object : TestSubInterface {
+                override suspend fun rpc(u: Pair<String, String>): String =
+                    "$prefix ${u.first} ${u.second}"
             }
-        }
     }
 
-class RpcSubserviceTest : RpcFunctionalityTest(
-    serializedChannel = {
-        val channel: TestRootInterface = basicImpl
-        channel.serialized(ksrpcEnvironment { })
-    },
-    verifyOnChannel = { serializedChannel ->
-        val stub = serializedChannel.toStub<TestRootInterface, String>()
-        assertEquals(
-            "oh, Hello world",
-            stub.subservice("oh,").rpc("Hello" to "world")
-        )
-    }
-) {
+class RpcSubserviceTest :
+    RpcFunctionalityTest(
+        serializedChannel = {
+            val channel: TestRootInterface = basicImpl
+            channel.serialized(ksrpcEnvironment { })
+        },
+        verifyOnChannel = { serializedChannel ->
+            val stub = serializedChannel.toStub<TestRootInterface, String>()
+            assertEquals(
+                "oh, Hello world",
+                stub.subservice("oh,").rpc("Hello" to "world")
+            )
+        }
+    ) {
     @Test
     fun testCreateInfo() = runBlockingUnit {
         assertNotNull(rpcObject<TestRootInterface>().findEndpoint("rpc"))
     }
 }
 
-class RpcSubserviceTwoCallsTest : RpcFunctionalityTest(
-    serializedChannel = {
-        val channel: TestRootInterface = basicImpl
-        channel.serialized(ksrpcEnvironment { })
-    },
-    verifyOnChannel = { serializedChannel ->
-        val stub = serializedChannel.toStub<TestRootInterface, String>()
-        stub.subservice("oh,").rpc("Hello" to "world")
-        assertEquals(
-            "oh, Hello world",
+class RpcSubserviceTwoCallsTest :
+    RpcFunctionalityTest(
+        serializedChannel = {
+            val channel: TestRootInterface = basicImpl
+            channel.serialized(ksrpcEnvironment { })
+        },
+        verifyOnChannel = { serializedChannel ->
+            val stub = serializedChannel.toStub<TestRootInterface, String>()
             stub.subservice("oh,").rpc("Hello" to "world")
-        )
-    }
-)
+            assertEquals(
+                "oh, Hello world",
+                stub.subservice("oh,").rpc("Hello" to "world")
+            )
+        }
+    )
 
 private var closeCompletion: CompletableDeferred<Unit>? = null
 
-class RpcSubserviceCloseTest : RpcFunctionalityTest(
-    serializedChannel = {
-        val channel: TestRootInterface = object : TestRootInterface {
-            override suspend fun rpc(u: Pair<String, String>): String {
-                return "${u.first} ${u.second}"
-            }
+class RpcSubserviceCloseTest :
+    RpcFunctionalityTest(
+        serializedChannel = {
+            val channel: TestRootInterface = object : TestRootInterface {
+                override suspend fun rpc(u: Pair<String, String>): String = "${u.first} ${u.second}"
 
-            override suspend fun subservice(prefix: String): TestSubInterface {
-                return object : TestSubInterface {
-                    override suspend fun rpc(u: Pair<String, String>): String {
-                        return "$prefix ${u.first} ${u.second}"
+                override suspend fun subservice(prefix: String): TestSubInterface =
+                    object : TestSubInterface {
+                        override suspend fun rpc(u: Pair<String, String>): String =
+                            "$prefix ${u.first} ${u.second}"
+
+                        override suspend fun close() {
+                            closeCompletion?.complete(Unit)
+                        }
                     }
-
-                    override suspend fun close() {
-                        closeCompletion?.complete(Unit)
+            }
+            channel.serialized(ksrpcEnvironment { })
+        },
+        verifyOnChannel = { serializedChannel ->
+            val stub = serializedChannel.toStub<TestRootInterface, String>()
+            closeCompletion = CompletableDeferred()
+            assertEquals(
+                "oh, Hello world",
+                stub.subservice("oh,").run {
+                    rpc("Hello" to "world").also {
+                        close()
                     }
                 }
-            }
+            )
+            closeCompletion?.await()
         }
-        channel.serialized(ksrpcEnvironment { })
-    },
-    verifyOnChannel = { serializedChannel ->
-        val stub = serializedChannel.toStub<TestRootInterface, String>()
-        closeCompletion = CompletableDeferred()
-        assertEquals(
-            "oh, Hello world",
-            stub.subservice("oh,").run {
-                rpc("Hello" to "world").also {
-                    close()
-                }
-            }
-        )
-        closeCompletion?.await()
-    }
-) {
-    override fun createEnv(): KsrpcEnvironment<String> {
-        return ksrpcEnvironment {
-            errorListener = ErrorListener {
-                closeCompletion?.completeExceptionally(it)
-            }
+    ) {
+    override fun createEnv(): KsrpcEnvironment<String> = ksrpcEnvironment {
+        errorListener = ErrorListener {
+            closeCompletion?.completeExceptionally(it)
         }
     }
 }

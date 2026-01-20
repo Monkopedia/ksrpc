@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,15 +24,14 @@ interface JniContinuation<T> {
     fun resumeWith(converter: Converter<*, T>, result: Result<T>)
 }
 
-fun <T> JniContinuation<T>.asContinuation(int: Converter<*, T>): Continuation<T> {
-    return object : Continuation<T> {
+fun <T> JniContinuation<T>.asContinuation(int: Converter<*, T>): Continuation<T> =
+    object : Continuation<T> {
         override val context: CoroutineContext = EmptyCoroutineContext
 
         override fun resumeWith(result: Result<T>) {
             resumeWith(int, result)
         }
     }
-}
 
 inline fun <reified T> JniContinuation<T>.resumeWith(result: Result<T>, jniSer: JniSer = JniSer) {
     resumeWith(jniSer.converterOf(serializer()), result)

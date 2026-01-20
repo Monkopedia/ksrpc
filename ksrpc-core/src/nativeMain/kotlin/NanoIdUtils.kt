@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,14 @@
  */
 package nanoid
 
+import kotlin.collections.random
 import kotlin.math.E
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.log
 import kotlin.random.Random
+import kotlin.ranges.random
+import kotlin.text.random
 
 /**
  * A class for generating unique String IDs.
@@ -48,16 +51,7 @@ internal object NanoIdUtils {
      * Creates NanoId Strings with slightly more unique values than UUID v4.
      */
     const val DEFAULT_SIZE = 21
-    /**
-     * Static factory to retrieve a NanoId String.
-     *
-     * The string is generated using the given random number generator.
-     *
-     * @param random   The random number generator.
-     * @param alphabet The symbols used in the NanoId String.
-     * @param size     The number of symbols in the NanoId String.
-     * @return A randomly generated NanoId String.
-     */
+
     /**
      * Static factory to retrieve a url-friendly, pseudo randomly generated, NanoId String.
      *
@@ -66,6 +60,9 @@ internal object NanoIdUtils {
      * The NanoId String is generated using a cryptographically strong pseudo random number
      * generator.
      *
+     * @param random   The random number generator.
+     * @param alphabet The symbols used in the NanoId String.
+     * @param size     The number of symbols in the NanoId String.
      * @return A randomly generated NanoId String.
      */
     fun randomNanoId(

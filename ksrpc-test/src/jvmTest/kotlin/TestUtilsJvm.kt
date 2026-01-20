@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 
-var PORT = 8081
+var port = 8081
 
 actual typealias Routing = io.ktor.server.routing.Routing
 
@@ -48,7 +48,7 @@ actual suspend inline fun httpTest(
     test: suspend (Int) -> Unit,
     isWebsocket: Boolean
 ) {
-    val port = PORT++
+    val port = port++
     val serverCompletion = CompletableDeferred<EmbeddedServer<*, *>>()
     GlobalScope.launch(Dispatchers.IO) {
         try {

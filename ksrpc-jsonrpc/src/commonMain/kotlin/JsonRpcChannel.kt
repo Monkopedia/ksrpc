@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,9 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
 
-interface JsonRpcChannel : SuspendCloseable, Element<String> {
+interface JsonRpcChannel :
+    SuspendCloseable,
+    Element<String> {
     suspend fun execute(method: String, message: JsonElement?, isNotify: Boolean): JsonElement?
 }
 
@@ -45,11 +47,7 @@ data class JsonRpcResponse(
 )
 
 @Serializable
-data class JsonRpcError(
-    val code: Int,
-    val message: String,
-    val data: JsonElement? = null
-) {
+data class JsonRpcError(val code: Int, val message: String, val data: JsonElement? = null) {
     companion object {
         /**
          * Invalid JSON was received by the server.

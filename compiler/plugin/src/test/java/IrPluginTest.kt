@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2024 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 @file:OptIn(ExperimentalCompilerApi::class)
 
 package com.monkopedia.ksrpc.plugin
@@ -41,7 +40,7 @@ interface MyInterface: RpcService {
     @KsMethod("/serial_name")
     suspend fun doSomething(input: String): Int
 }
-""",
+"""
         )
 
     @Test
@@ -62,26 +61,22 @@ interface MyInterface: RpcService {
         assertContains(
             result.messages,
             "generating MyInterface#DoSomething(\"serial_name\") with " +
-                "types: DEFAULT(String) DEFAULT(Int)",
+                "types: DEFAULT(String) DEFAULT(Int)"
         )
     }
 }
 
 fun compile(
     sourceFiles: List<SourceFile>,
-    plugin: CompilerPluginRegistrar = KsrpcComponentRegistrar(),
-): KotlinCompilation.Result {
-    return KotlinCompilation().apply {
-        sources = sourceFiles
-        useIR = true
-        compilerPluginRegistrars = listOf(plugin)
-        inheritClassPath = true
-    }.compile()
-}
+    plugin: CompilerPluginRegistrar = KsrpcComponentRegistrar()
+): KotlinCompilation.Result = KotlinCompilation().apply {
+    sources = sourceFiles
+    useIR = true
+    compilerPluginRegistrars = listOf(plugin)
+    inheritClassPath = true
+}.compile()
 
 fun compile(
     sourceFile: SourceFile,
-    plugin: CompilerPluginRegistrar = KsrpcComponentRegistrar(),
-): KotlinCompilation.Result {
-    return compile(listOf(sourceFile), plugin)
-}
+    plugin: CompilerPluginRegistrar = KsrpcComponentRegistrar()
+): KotlinCompilation.Result = compile(listOf(sourceFile), plugin)

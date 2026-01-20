@@ -1,5 +1,6 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+@file:Suppress("ktlint:standard:no-empty-file")
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

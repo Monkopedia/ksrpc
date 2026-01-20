@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,9 +40,7 @@ internal class ReadWritePacketChannel(
         write.send(packet, env.serialization)
     }
 
-    override suspend fun receiveLocked(): Packet<String> {
-        return read.readPacket(env.serialization)
-    }
+    override suspend fun receiveLocked(): Packet<String> = read.readPacket(env.serialization)
 
     override suspend fun close() {
         super.close()
@@ -74,9 +72,7 @@ private suspend fun ByteReadChannel.readPacket(
     return serialization.decodeCallData(Packet.serializer(String.serializer()), callData)
 }
 
-private suspend fun ByteReadChannel.readContent(
-    params: Map<String, String>
-): String? {
+private suspend fun ByteReadChannel.readContent(params: Map<String, String>): String? {
     val length = params[CONTENT_LENGTH]?.toIntOrNull() ?: return null
     val byteArray = ByteArray(length)
     readFully(byteArray)

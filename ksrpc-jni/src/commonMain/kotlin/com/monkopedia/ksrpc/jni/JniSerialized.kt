@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,8 @@ data class JniSerialized(val list: BasicList<*>) {
                 PrimitiveKind.STRING
             )
 
-        override fun deserialize(decoder: Decoder): JniSerialized {
-            return (decoder as JniDecoder<*>).decodeSerialized()
-        }
+        override fun deserialize(decoder: Decoder): JniSerialized =
+            (decoder as JniDecoder<*>).decodeSerialized()
 
         override fun serialize(encoder: Encoder, value: JniSerialized) {
             (encoder as JniEncoder<*>).encodeSerialized(value)

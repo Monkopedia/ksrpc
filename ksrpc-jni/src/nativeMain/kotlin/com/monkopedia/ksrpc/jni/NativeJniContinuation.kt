@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,9 +49,8 @@ class NativeJniContinuation<T>(
     }
 }
 
-fun <T> Continuation<T>.withConverter(converter: Converter<*, T>): NativeJniContinuation<T> {
-    return NativeJniContinuation(this, converter.native)
-}
+fun <T> Continuation<T>.withConverter(converter: Converter<*, T>): NativeJniContinuation<T> =
+    NativeJniContinuation(this, converter.native)
 
 class NativeJniContinuationConverter<T>(env: CPointer<JNIEnvVar>) :
     Converter<jobject?, NativeJniContinuation<T>> {

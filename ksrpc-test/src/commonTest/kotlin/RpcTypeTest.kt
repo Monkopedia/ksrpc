@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,94 +126,102 @@ object RpcTypeTest {
         }
     )
 
-    class PairStrTest : RpcTypeFunctionalityTest(
-        verifyOnChannel = { channel, service ->
-            val stub = channel.toStub<TestTypesInterface, String>()
-            service.nextReturn = ""
-            stub.rpc("Hello" to "world")
-            assertEquals("rpc", service.lastCall)
-            assertEquals("Hello" to "world", service.lastInput)
-        }
-    )
+    class PairStrTest :
+        RpcTypeFunctionalityTest(
+            verifyOnChannel = { channel, service ->
+                val stub = channel.toStub<TestTypesInterface, String>()
+                service.nextReturn = ""
+                stub.rpc("Hello" to "world")
+                assertEquals("rpc", service.lastCall)
+                assertEquals("Hello" to "world", service.lastInput)
+            }
+        )
 
-    class MapTest : RpcTypeFunctionalityTest(
-        verifyOnChannel = { channel, service ->
-            val stub = channel.toStub<TestTypesInterface, String>()
-            service.nextReturn = Unit
-            stub.mapRpc(
-                mutableMapOf(
-                    "First" to MyJson("first", 1, null),
-                    "Second" to MyJson("second", 2, 1.2f)
+    class MapTest :
+        RpcTypeFunctionalityTest(
+            verifyOnChannel = { channel, service ->
+                val stub = channel.toStub<TestTypesInterface, String>()
+                service.nextReturn = Unit
+                stub.mapRpc(
+                    mutableMapOf(
+                        "First" to MyJson("first", 1, null),
+                        "Second" to MyJson("second", 2, 1.2f)
+                    )
                 )
-            )
-            assertEquals("mapRpc", service.lastCall)
-            assertEquals(
-                mutableMapOf(
-                    "First" to MyJson("first", 1, null),
-                    "Second" to MyJson("second", 2, 1.2f)
-                ),
-                service.lastInput
-            )
-        }
-    )
+                assertEquals("mapRpc", service.lastCall)
+                assertEquals(
+                    mutableMapOf(
+                        "First" to MyJson("first", 1, null),
+                        "Second" to MyJson("second", 2, 1.2f)
+                    ),
+                    service.lastInput
+                )
+            }
+        )
 
-    class InputIntTest : RpcTypeFunctionalityTest(
-        verifyOnChannel = { channel, service ->
-            val stub = channel.toStub<TestTypesInterface, String>()
-            service.nextReturn = Unit
-            stub.inputInt(42)
-            assertEquals("inputInt", service.lastCall)
-            assertEquals(42, service.lastInput)
-        }
-    )
+    class InputIntTest :
+        RpcTypeFunctionalityTest(
+            verifyOnChannel = { channel, service ->
+                val stub = channel.toStub<TestTypesInterface, String>()
+                service.nextReturn = Unit
+                stub.inputInt(42)
+                assertEquals("inputInt", service.lastCall)
+                assertEquals(42, service.lastInput)
+            }
+        )
 
-    class InputIntListTest : RpcTypeFunctionalityTest(
-        verifyOnChannel = { channel, service ->
-            val stub = channel.toStub<TestTypesInterface, String>()
-            service.nextReturn = Unit
-            stub.inputIntList(listOf(42))
-            assertEquals("inputIntList", service.lastCall)
-            assertEquals(listOf(42), service.lastInput)
-        }
-    )
+    class InputIntListTest :
+        RpcTypeFunctionalityTest(
+            verifyOnChannel = { channel, service ->
+                val stub = channel.toStub<TestTypesInterface, String>()
+                service.nextReturn = Unit
+                stub.inputIntList(listOf(42))
+                assertEquals("inputIntList", service.lastCall)
+                assertEquals(listOf(42), service.lastInput)
+            }
+        )
 
-    class InputIntNullableTest : RpcTypeFunctionalityTest(
-        verifyOnChannel = { channel, service ->
-            val stub = channel.toStub<TestTypesInterface, String>()
-            service.nextReturn = Unit
-            stub.inputIntNullable(null)
-            assertEquals("inputIntNullable", service.lastCall)
-            assertEquals(null, service.lastInput)
-        }
-    )
+    class InputIntNullableTest :
+        RpcTypeFunctionalityTest(
+            verifyOnChannel = { channel, service ->
+                val stub = channel.toStub<TestTypesInterface, String>()
+                service.nextReturn = Unit
+                stub.inputIntNullable(null)
+                assertEquals("inputIntNullable", service.lastCall)
+                assertEquals(null, service.lastInput)
+            }
+        )
 
-    class OutputIntTest : RpcTypeFunctionalityTest(
-        verifyOnChannel = { channel, service ->
-            val stub = channel.toStub<TestTypesInterface, String>()
-            service.nextReturn = 42
-            assertEquals(42, stub.outputInt(Unit))
-            assertEquals("outputInt", service.lastCall)
-            assertEquals(Unit, service.lastInput)
-        }
-    )
+    class OutputIntTest :
+        RpcTypeFunctionalityTest(
+            verifyOnChannel = { channel, service ->
+                val stub = channel.toStub<TestTypesInterface, String>()
+                service.nextReturn = 42
+                assertEquals(42, stub.outputInt(Unit))
+                assertEquals("outputInt", service.lastCall)
+                assertEquals(Unit, service.lastInput)
+            }
+        )
 
-    class OutputIntNullableTest : RpcTypeFunctionalityTest(
-        verifyOnChannel = { channel, service ->
-            val stub = channel.toStub<TestTypesInterface, String>()
-            service.nextReturn = null
-            assertEquals(null, stub.outputIntNullable(Unit))
-            assertEquals("outputIntNullable", service.lastCall)
-            assertEquals(Unit, service.lastInput)
-        }
-    )
+    class OutputIntNullableTest :
+        RpcTypeFunctionalityTest(
+            verifyOnChannel = { channel, service ->
+                val stub = channel.toStub<TestTypesInterface, String>()
+                service.nextReturn = null
+                assertEquals(null, stub.outputIntNullable(Unit))
+                assertEquals("outputIntNullable", service.lastCall)
+                assertEquals(Unit, service.lastInput)
+            }
+        )
 
-    class ReturnTypeTest : RpcTypeFunctionalityTest(
-        verifyOnChannel = { channel, service ->
-            val stub = channel.toStub<TestTypesInterface, String>()
-            service.nextReturn = MyJson("second", 2, 1.2f)
-            assertEquals(MyJson("second", 2, 1.2f), stub.returnType(Unit))
-            assertEquals("returnType", service.lastCall)
-            assertEquals(Unit, service.lastInput)
-        }
-    )
+    class ReturnTypeTest :
+        RpcTypeFunctionalityTest(
+            verifyOnChannel = { channel, service ->
+                val stub = channel.toStub<TestTypesInterface, String>()
+                service.nextReturn = MyJson("second", 2, 1.2f)
+                assertEquals(MyJson("second", 2, 1.2f), stub.returnType(Unit))
+                assertEquals("returnType", service.lastCall)
+                assertEquals(Unit, service.lastInput)
+            }
+        )
 }

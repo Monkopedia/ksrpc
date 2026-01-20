@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,9 +69,7 @@ object JNIDispatcher : CoroutineDispatcher() {
         }
     }
 
-    override fun isDispatchNeeded(context: CoroutineContext): Boolean {
-        return !dispatchThread
-    }
+    override fun isDispatchNeeded(context: CoroutineContext): Boolean = !dispatchThread
 
     override fun dispatch(context: CoroutineContext, block: Runnable) {
         GlobalScope.launch(sendThread) {

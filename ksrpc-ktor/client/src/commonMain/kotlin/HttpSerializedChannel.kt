@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,8 @@ internal class HttpSerializedChannel(
     private val httpClient: HttpClient,
     private val baseStripped: String,
     override val env: KsrpcEnvironment<String>
-) : SerializedChannel<String>, ChannelClient<String> {
+) : SerializedChannel<String>,
+    ChannelClient<String> {
 
     private val onCloseHandlers = mutableSetOf<suspend () -> Unit>()
     override val context: CoroutineContext =

@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2024 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,7 @@ import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.util.kotlinFqName
 import org.jetbrains.kotlin.ir.visitors.acceptChildrenVoid
 
-class KsrpcIrGenerationExtension(
-    private val report: MessageCollector
-) : IrGenerationExtension {
+class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGenerationExtension {
 
     override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
         val classes = ServiceClass.findServices(report, moduleFragment)

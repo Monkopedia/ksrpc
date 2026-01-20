@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,9 @@ private const val DEFAULT_MAX_SIZE = 16 * 1024L
 abstract class PacketChannelBase<T>(
     protected val scope: CoroutineScope,
     final override val env: KsrpcEnvironment<T>
-) : PacketChannel<T>, Connection<T>, ChannelHost<T> {
+) : PacketChannel<T>,
+    Connection<T>,
+    ChannelHost<T> {
     private val sendLock = Mutex()
     private val receiveLock = Mutex()
     private var isClosed = false
@@ -201,16 +203,14 @@ abstract class PacketChannelBase<T>(
         }
     }
 
-    private suspend fun getCallData(packet: Packet<T>): CallData<T> {
-        return if (packet.startBinary) {
-            val callData = CallData.create(packet.data)
-            val decoded = env.serialization.decodeCallData(String.serializer(), callData)
-            CallData.createBinary(getByteChannel(decoded))
-        } else if (packet.binary) {
-            error("Unexpected binary packet")
-        } else {
-            CallData.create(packet.data)
-        }
+    private suspend fun getCallData(packet: Packet<T>): CallData<T> = if (packet.startBinary) {
+        val callData = CallData.create(packet.data)
+        val decoded = env.serialization.decodeCallData(String.serializer(), callData)
+        CallData.createBinary(getByteChannel(decoded))
+    } else if (packet.binary) {
+        error("Unexpected binary packet")
+    } else {
+        CallData.create(packet.data)
     }
 
     private suspend fun removeBinaryChannelIfDone(channel: BinaryChannel<T>) {
@@ -335,26 +335,17 @@ abstract class PacketChannelBase<T>(
             return false
         }
 
-        fun getByteChannel(): ByteChannel {
-            return channel.also {
-                hasGottenChannel = true
-            }
+        fun getByteChannel(): ByteChannel = channel.also {
+            hasGottenChannel = true
         }
     }
-    suspend fun send(packet: Packet<T>) {
-        return sendLock.withLock {
-            sendLocked(packet)
-        }
+    suspend fun send(packet: Packet<T>) = sendLock.withLock {
+        sendLocked(packet)
     }
 
-    suspend fun receive(): Packet<T> {
-        return receiveLock.withLock {
-            receiveLocked()
-        }
+    suspend fun receive(): Packet<T> = receiveLock.withLock {
+        receiveLocked()
     }
 
-    private data class PendingPacket<T>(
-        val receivedAt: Long,
-        val packet: Packet<T>
-    )
+    private data class PendingPacket<T>(val receivedAt: Long, val packet: Packet<T>)
 }

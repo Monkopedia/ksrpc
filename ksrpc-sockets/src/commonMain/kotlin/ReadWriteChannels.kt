@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,11 +32,9 @@ internal const val MESSAGE = "Message"
  */
 suspend fun Pair<ByteReadChannel, ByteWriteChannel>.asConnection(
     env: KsrpcEnvironment<String>
-): Connection<String> {
-    return ReadWritePacketChannel(
-        CoroutineScope(coroutineContext),
-        first,
-        second,
-        env
-    )
-}
+): Connection<String> = ReadWritePacketChannel(
+    CoroutineScope(coroutineContext),
+    first,
+    second,
+    env
+)

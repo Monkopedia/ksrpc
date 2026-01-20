@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,61 +49,39 @@ data class JniDecoder<T> internal constructor(
         structEnds.removeLast()
     }
 
-    override fun decodeElementIndex(descriptor: SerialDescriptor): Int {
-        return if (index < structEnds.last()) {
+    override fun decodeElementIndex(descriptor: SerialDescriptor): Int =
+        if (index < structEnds.last()) {
             typeConverter.int.convertTo(next())
         } else {
             CompositeDecoder.DECODE_DONE
         }
-    }
 
-    override fun decodeNotNullMark(): Boolean {
-        return next()?.let { typeConverter.boolean.convertTo(it) } ?: false
-    }
+    override fun decodeNotNullMark(): Boolean = next()?.let {
+        typeConverter.boolean.convertTo(it)
+    } ?: false
 
-    override fun decodeNull(): Nothing? {
-        return null
-    }
+    override fun decodeNull(): Nothing? = null
 
-    override fun decodeBoolean(): Boolean {
-        return typeConverter.boolean.convertTo(next())
-    }
+    override fun decodeBoolean(): Boolean = typeConverter.boolean.convertTo(next())
 
-    override fun decodeByte(): Byte {
-        return typeConverter.byte.convertTo(next())
-    }
+    override fun decodeByte(): Byte = typeConverter.byte.convertTo(next())
 
-    override fun decodeShort(): Short {
-        return typeConverter.short.convertTo(next())
-    }
+    override fun decodeShort(): Short = typeConverter.short.convertTo(next())
 
-    override fun decodeInt(): Int {
-        return typeConverter.int.convertTo(next())
-    }
+    override fun decodeInt(): Int = typeConverter.int.convertTo(next())
 
-    override fun decodeLong(): Long {
-        return typeConverter.long.convertTo(next())
-    }
+    override fun decodeLong(): Long = typeConverter.long.convertTo(next())
 
-    override fun decodeFloat(): Float {
-        return typeConverter.float.convertTo(next())
-    }
+    override fun decodeFloat(): Float = typeConverter.float.convertTo(next())
 
-    override fun decodeDouble(): Double {
-        return typeConverter.double.convertTo(next())
-    }
+    override fun decodeDouble(): Double = typeConverter.double.convertTo(next())
 
-    override fun decodeChar(): Char {
-        return typeConverter.char.convertTo(next())
-    }
+    override fun decodeChar(): Char = typeConverter.char.convertTo(next())
 
-    override fun decodeString(): String {
-        return typeConverter.string.convertTo(next())
-    }
+    override fun decodeString(): String = typeConverter.string.convertTo(next())
 
-    override fun decodeEnum(enumDescriptor: SerialDescriptor): Int {
-        return typeConverter.int.convertTo(next())
-    }
+    override fun decodeEnum(enumDescriptor: SerialDescriptor): Int =
+        typeConverter.int.convertTo(next())
 
     fun decodeSerialized(): JniSerialized {
         val list = newList<T>()

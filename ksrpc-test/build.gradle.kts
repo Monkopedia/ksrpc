@@ -77,11 +77,13 @@ val copyLib = tasks.register("copyLib", Copy::class) {
                 destinationDir = projectDir.resolve("build/generated/lib/resources/libs/")
             }
         }
+
         "Linux" -> {
             dependsOn(tasks.getByName("linkDebugSharedLinuxX64"))
             from(projectDir.resolve("build/bin/linuxX64/debugShared/libksrpc_test.so"))
             destinationDir = projectDir.resolve("build/generated/lib/resources/libs/")
         }
+
         else -> throw GradleException(
             "Host OS '$hostOs' is not supported in Kotlin/Native $project."
         )

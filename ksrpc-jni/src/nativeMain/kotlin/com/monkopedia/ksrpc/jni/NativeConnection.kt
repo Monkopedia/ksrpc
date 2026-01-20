@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,9 +67,7 @@ class NativeConnection(
         }
     }
 
-    override suspend fun receiveLocked(): Packet<JniSerialized> {
-        return receiveChannel.receive()
-    }
+    override suspend fun receiveLocked(): Packet<JniSerialized> = receiveChannel.receive()
 
     override suspend fun close() {
         suspendCoroutine {
@@ -115,9 +113,7 @@ class NativeConnection(
             return connection?.get() ?: error("No connection found")
         }
 
-        override fun convertFrom(value: NativeConnection): jobject {
-            return value.objectRef
-        }
+        override fun convertFrom(value: NativeConnection): jobject = value.objectRef
     }
 }
 

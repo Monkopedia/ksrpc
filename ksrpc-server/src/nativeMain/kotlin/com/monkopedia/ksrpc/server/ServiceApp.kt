@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +39,7 @@ actual abstract class ServiceApp actual constructor(appName: String) : BaseServi
     actual override fun embeddedServer(
         port: Int,
         function: Application.() -> Unit
-    ): EmbeddedServer<*, *> {
-        return embeddedServer(CIO, port) {
-            function()
-        }
+    ): EmbeddedServer<*, *> = embeddedServer(CIO, port) {
+        function()
     }
 }

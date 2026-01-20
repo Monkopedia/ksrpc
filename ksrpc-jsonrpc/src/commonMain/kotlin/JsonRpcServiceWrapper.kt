@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 
-class JsonRpcServiceWrapper(
-    private val channel: SerializedService<String>
-) : JsonRpcChannel, Element<String> by channel {
+class JsonRpcServiceWrapper(private val channel: SerializedService<String>) :
+    JsonRpcChannel,
+    Element<String> by channel {
     private val json = (channel.env.serialization as? Json) ?: Json
     override suspend fun execute(
         method: String,

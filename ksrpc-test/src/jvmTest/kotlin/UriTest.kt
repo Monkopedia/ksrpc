@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,7 @@ import kotlin.test.assertEquals
 class UriTest {
 
     class Implementation : TestInterface {
-        override suspend fun rpc(u: Pair<String, String>): String {
-            return u.second + " " + u.first
-        }
+        override suspend fun rpc(u: Pair<String, String>): String = u.second + " " + u.first
     }
 
     @Test

@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,9 +78,8 @@ internal object BinaryTransformer : Transformer<ByteReadChannel> {
     }
 }
 
-internal class SubserviceTransformer<T : RpcService>(
-    private val serviceObj: RpcObject<T>
-) : Transformer<T> {
+internal class SubserviceTransformer<T : RpcService>(private val serviceObj: RpcObject<T>) :
+    Transformer<T> {
     override suspend fun <S> transform(input: T, channel: SerializedService<S>): CallData<S> {
         val host = host<S>() ?: error("Cannot transform service type to non-hosting channel")
         val serviceId = host.registerHost(input, serviceObj)
@@ -119,20 +118,18 @@ class RpcMethod<T : RpcService, I, O> internal constructor(
         channel: SerializedService<S>,
         service: RpcService,
         input: CallData<S>
-    ): CallData<S> {
-        return withContext(channel.context) {
-            val transformedInput = inputTransform.untransform(input, channel)
-            val id = randomUuid()
-            channel.env.logger.info("Transformer", "($id) Calling endpoint $endpoint")
-            val output = method.invoke(service as T, transformedInput)
-            channel.env.logger.debug("Transformer", "($id) Completed endpoint $endpoint")
-            outputTransform.transform(output as O, channel)
-        }
+    ): CallData<S> = withContext(channel.context) {
+        val transformedInput = inputTransform.untransform(input, channel)
+        val id = randomUuid()
+        channel.env.logger.info("Transformer", "($id) Calling endpoint $endpoint")
+        val output = method.invoke(service as T, transformedInput)
+        channel.env.logger.debug("Transformer", "($id) Completed endpoint $endpoint")
+        outputTransform.transform(output as O, channel)
     }
 
     @Suppress("UNCHECKED_CAST")
-    internal suspend fun <S> callChannel(channel: SerializedService<S>, input: Any?): Any? {
-        return withContext(channel.context) {
+    internal suspend fun <S> callChannel(channel: SerializedService<S>, input: Any?): Any? =
+        withContext(channel.context) {
             val input = inputTransform.transform(input as I, channel)
             val id = randomUuid()
             channel.env.logger.info("Transformer", "($id) Calling remote endpoint $endpoint")
@@ -140,5 +137,4 @@ class RpcMethod<T : RpcService, I, O> internal constructor(
             channel.env.logger.debug("Transformer", "($id) Completed remote endpoint $endpoint")
             outputTransform.untransform(transformedOutput, channel)
         }
-    }
 }

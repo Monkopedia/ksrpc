@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,13 +24,12 @@ internal open class JavaListWrapper<T>(val list: List<T>) : BasicList<T> {
     override val asSerialized: JniSerialized
         get() = JniSerialized(this)
 
-    override fun toString(): String {
-        return list.toString()
-    }
+    override fun toString(): String = list.toString()
 }
 
 internal class JavaMutableListWrapper<T>(val mutableList: MutableList<T>) :
-    JavaListWrapper<T>(mutableList), MutableBasicList<T> {
+    JavaListWrapper<T>(mutableList),
+    MutableBasicList<T> {
     override fun set(index: Int, value: T) {
         mutableList[index] = value
     }
@@ -39,19 +38,11 @@ internal class JavaMutableListWrapper<T>(val mutableList: MutableList<T>) :
         mutableList.add(value)
     }
 
-    override fun toString(): String {
-        return list.toString()
-    }
+    override fun toString(): String = list.toString()
 }
 
-actual fun <T> newList(): MutableBasicList<T> {
-    return JavaMutableListWrapper(mutableListOf())
-}
+actual fun <T> newList(): MutableBasicList<T> = JavaMutableListWrapper(mutableListOf())
 
-fun toSerialized(list: List<Any?>): JniSerialized {
-    return JniSerialized(JavaListWrapper(list))
-}
+fun toSerialized(list: List<Any?>): JniSerialized = JniSerialized(JavaListWrapper(list))
 
-fun toList(serialized: JniSerialized): List<Any?> {
-    return (serialized.list as JavaListWrapper<*>).list
-}
+fun toList(serialized: JniSerialized): List<Any?> = (serialized.list as JavaListWrapper<*>).list

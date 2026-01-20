@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,19 +30,15 @@ internal open class NativeListWrapper(val list: jobject) : BasicList<jobject?> {
     override val size: Int
         get() = JNI.List.size(list)
 
-    override fun get(index: Int): jobject? {
-        return JNI.List.get(list, index)
-    }
+    override fun get(index: Int): jobject? = JNI.List.get(list, index)
 
-    override fun toString(): String {
-        return JNI.Obj.toString(list) ?: "null"
-    }
+    override fun toString(): String = JNI.Obj.toString(list) ?: "null"
 }
 
 internal class NativeMutableListWrapper(
     list: jobject = JNI.ArrayList.new() ?: error("Failed to initialize list")
-) :
-    NativeListWrapper(list), MutableBasicList<jobject?> {
+) : NativeListWrapper(list),
+    MutableBasicList<jobject?> {
 
     override fun set(index: Int, value: jobject?) {
         JNI.ArrayList.set(list, index, value)
@@ -52,9 +48,7 @@ internal class NativeMutableListWrapper(
         JNI.ArrayList.add(list, value)
     }
 
-    override fun toString(): String {
-        return JNI.Obj.toString(list) ?: "null"
-    }
+    override fun toString(): String = JNI.Obj.toString(list) ?: "null"
 }
 
 actual fun <T> newList(): MutableBasicList<T> {

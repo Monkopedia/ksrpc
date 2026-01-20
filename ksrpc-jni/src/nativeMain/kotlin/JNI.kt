@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -188,11 +188,8 @@ internal object JNI {
     open class JvmClass(private val str: String) {
         val cls get() = findClass(str)
 
-        inner class Method0<R>(
-            name: String,
-            sig: String,
-            private val invoker: JniInvoker<R>
-        ) : (jobject) -> R {
+        inner class Method0<R>(name: String, sig: String, private val invoker: JniInvoker<R>) :
+            (jobject) -> R {
             val method by lazy { cls.findMethod(name, sig) }
 
             override fun invoke(obj: jobject): R = memScoped {
@@ -253,11 +250,8 @@ internal object JNI {
             }
         }
 
-        inner class Constructor0<R>(
-            name: String,
-            sig: String,
-            private val invoker: JniInvoker<R>
-        ) : () -> R {
+        inner class Constructor0<R>(name: String, sig: String, private val invoker: JniInvoker<R>) :
+            () -> R {
             val method by lazy { cls.findMethod(name, sig) }
 
             override fun invoke(): R = memScoped {

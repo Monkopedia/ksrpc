@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,9 +58,7 @@ actual fun <V> JniSer.converterOf(serializer: KSerializer<V>): Converter<*, V> {
             return rawValue?.let { decodeFromJni(serializer, it) } as V
         }
 
-        override fun convertFrom(value: V): JniSerialized {
-            return encodeToJni(serializer, value)
-        }
+        override fun convertFrom(value: V): JniSerialized = encodeToJni(serializer, value)
     }
 }
 

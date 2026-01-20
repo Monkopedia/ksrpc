@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,16 +35,14 @@ import kotlin.coroutines.EmptyCoroutineContext
  * is returned. Generally this should not be called directly, as it will happen
  * automatically when services are returned from [KsMethod] tagged methods.
  */
-suspend inline fun <reified T : RpcService, S> ChannelHost<S>.registerHost(
-    service: T
-): ChannelId = registerHost(service, rpcObject())
+suspend inline fun <reified T : RpcService, S> ChannelHost<S>.registerHost(service: T): ChannelId =
+    registerHost(service, rpcObject())
 
 /**
  * Register a service to be hosted on the default channel.
  */
-suspend inline fun <reified T : RpcService, S> SingleChannelHost<S>.registerDefault(
-    service: T
-) = registerDefault(service, rpcObject())
+suspend inline fun <reified T : RpcService, S> SingleChannelHost<S>.registerDefault(service: T) =
+    registerDefault(service, rpcObject())
 
 /**
  * Register a service to be hosted, the [ChannelId] ollocated to this service
@@ -54,9 +52,7 @@ suspend inline fun <reified T : RpcService, S> SingleChannelHost<S>.registerDefa
 suspend fun <T : RpcService, S> ChannelHost<S>.registerHost(
     service: T,
     obj: RpcObject<T>
-): ChannelId {
-    return registerHost(HostSerializedServiceImpl(service, obj, env))
-}
+): ChannelId = registerHost(HostSerializedServiceImpl(service, obj, env))
 
 /**
  * Register a service to be hosted on the default channel.
@@ -88,7 +84,10 @@ interface SingleChannelHost<T> : KsrpcEnvironment.Element<T> {
  * This could be a bidirectional conduit like a [Connection], or it could be a hosting only
  * service such as http hosting.
  */
-interface ChannelHost<T> : SerializedChannel<T>, SingleChannelHost<T>, KsrpcEnvironment.Element<T> {
+interface ChannelHost<T> :
+    SerializedChannel<T>,
+    SingleChannelHost<T>,
+    KsrpcEnvironment.Element<T> {
     /**
      * Add a serialized service that can receive calls on this channel with the returned
      * [ChannelId]. The calls will be allowed until [close] is called.
@@ -118,7 +117,9 @@ interface SingleChannelClient<T> {
  * service such as http client.
  */
 interface ChannelClient<T> :
-    SerializedChannel<T>, SingleChannelClient<T>, KsrpcEnvironment.Element<T> {
+    SerializedChannel<T>,
+    SingleChannelClient<T>,
+    KsrpcEnvironment.Element<T> {
     /**
      * Takes a given channel id and creates a service wrapper to make calls on that channel.
      *
@@ -201,31 +202,24 @@ sealed class CallData<T> private constructor() {
         override val isBinary: Boolean
             get() = true
 
-        override fun readSerialized(): T =
-            error("Cannot read serialization out of binary data.")
+        override fun readSerialized(): T = error("Cannot read serialization out of binary data.")
 
         override fun readBinary(): ByteReadChannel = value
 
-        override fun toString(): String {
-            return "binary(${(value as? ByteReadChannel)?.availableForRead})"
-        }
+        override fun toString(): String = "binary(${(value as? ByteReadChannel)?.availableForRead})"
     }
 
     data class Serialized<T>(private val value: T) : CallData<T>() {
         override val isBinary: Boolean
             get() = false
 
-        override fun readSerialized(): T {
-            return value
-        }
+        override fun readSerialized(): T = value
 
         override fun readBinary(): ByteReadChannel {
             error("Cannot read binary data out of serialized content.")
         }
 
-        override fun toString(): String {
-            return value.toString()
-        }
+        override fun toString(): String = value.toString()
     }
 
     companion object {

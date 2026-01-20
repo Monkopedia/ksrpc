@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,7 @@ expect inline fun <reified T : RpcService> rpcObject(): RpcObject<T>
  */
 inline fun <reified T : RpcService, S> T.serialized(
     env: KsrpcEnvironment<S>
-): SerializedService<S> {
-    return serialized(rpcObject(), env)
-}
+): SerializedService<S> = serialized(rpcObject(), env)
 
 /**
  * Convert a [T] into a [SerializedService] for hosting.
@@ -46,9 +44,8 @@ fun <T : RpcService, S> T.serialized(
 /**
  * Convert a [SerializedService] to a [T] for use as a client.
  */
-inline fun <reified T : RpcService, S> SerializedService<S>.toStub(): T {
-    return rpcObject<T>().createStub(this)
-}
+inline fun <reified T : RpcService, S> SerializedService<S>.toStub(): T =
+    rpcObject<T>().createStub(this)
 
 /**
  * Thrown when an endpoint cannot be found.

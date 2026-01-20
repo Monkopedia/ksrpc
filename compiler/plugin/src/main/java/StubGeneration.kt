@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2024 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -216,7 +216,7 @@ class StubGeneration(
                             putArgs(irGetObject(companion.symbol))
                         },
                         irGetField(irGet(override.parameters[0]), service.channel),
-                        irGet(override.parameters[1]),
+                        irGet(override.parameters[1])
                     )
                 }
             )
@@ -304,6 +304,7 @@ class StubGeneration(
         declarationIrBuilder: DeclarationIrBuilder
     ) = when (outputRpcType) {
         RpcType.BINARY -> declarationIrBuilder.irGetObject(env.binaryTransformer)
+
         RpcType.SERVICE -> declarationIrBuilder.irCallConstructor(
             env.subserviceTransformer.constructors.first(),
             listOf(outputType)

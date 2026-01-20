@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,7 @@ import kotlinx.serialization.modules.EmptySerializersModule
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.serializer
 
-open class JniSer(
-    val encoder: JniEncoder<*>,
-    val decoder: JniDecoder<*>
-) {
+open class JniSer(val encoder: JniEncoder<*>, val decoder: JniDecoder<*>) {
 
     private constructor(jniBuilder: JniBuilder<Any>) : this(jniBuilder.encoder, jniBuilder.decoder)
     constructor(builder: JniBuilder<*>.() -> Unit = {}) : this(JniBuilder<Any>().also(builder))
@@ -32,26 +29,21 @@ open class JniSer(
     fun <T> decodeFromJni(
         serializationStrategy: DeserializationStrategy<T>,
         jniSerialized: JniSerialized
-    ): T {
-        return serializationStrategy.deserialize(decoder.decoderFor(jniSerialized))
-    }
+    ): T = serializationStrategy.deserialize(decoder.decoderFor(jniSerialized))
 
-    fun <T> encodeToJni(serializationStrategy: SerializationStrategy<T>, input: T): JniSerialized {
-        return encoder.copy().also {
+    fun <T> encodeToJni(serializationStrategy: SerializationStrategy<T>, input: T): JniSerialized =
+        encoder.copy().also {
             serializationStrategy.serialize(it, input)
         }.serialized
-    }
 
     companion object : JniSer()
 }
 
-inline fun <reified T> JniSer.decodeFromJni(jniSerialized: JniSerialized): T {
-    return decodeFromJni(serializer(), jniSerialized)
-}
+inline fun <reified T> JniSer.decodeFromJni(jniSerialized: JniSerialized): T =
+    decodeFromJni(serializer(), jniSerialized)
 
-inline fun <reified T> JniSer.encodeToJni(value: T): JniSerialized {
-    return encodeToJni(serializer(), value)
-}
+inline fun <reified T> JniSer.encodeToJni(value: T): JniSerialized =
+    encodeToJni(serializer(), value)
 
 class JniBuilder<T> internal constructor() {
 

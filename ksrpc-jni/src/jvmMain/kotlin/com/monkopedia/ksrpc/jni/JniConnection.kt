@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,9 +59,7 @@ class JniConnection(
         }
     }
 
-    override suspend fun receiveLocked(): Packet<JniSerialized> {
-        return receiveChannel.receive()
-    }
+    override suspend fun receiveLocked(): Packet<JniSerialized> = receiveChannel.receive()
 
     fun sendFromNative(packet: JniSerialized, continuation: NativeJniContinuation<Int>) {
         scope.launch {
@@ -113,8 +111,6 @@ class JniConnection(
             return (this as JniConnection)
         }
 
-        override fun convertFrom(value: JniConnection): Any {
-            return value
-        }
+        override fun convertFrom(value: JniConnection): Any = value
     }
 }

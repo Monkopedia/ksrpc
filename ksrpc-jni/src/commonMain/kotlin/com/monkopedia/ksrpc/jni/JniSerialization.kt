@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2025 Jason Monk <monkopedia@gmail.com>
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,26 +25,23 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 
 class JniSerialization(private val jniSer: JniSer = JniSer) : CallDataSerializer<JniSerialized> {
-    override fun <I> createCallData(serializer: KSerializer<I>, input: I): CallData<JniSerialized> {
-        return CallData.create(
+    override fun <I> createCallData(serializer: KSerializer<I>, input: I): CallData<JniSerialized> =
+        CallData.create(
             jniSer.encodeToJni(
                 Wrapper.serializer(),
                 Wrapper(false, jniSer.encodeToJni(serializer, input))
             )
         )
-    }
 
     override fun <I> createErrorCallData(
         serializer: KSerializer<I>,
         input: I
-    ): CallData<JniSerialized> {
-        return CallData.create(
-            jniSer.encodeToJni(
-                Wrapper.serializer(),
-                Wrapper(true, jniSer.encodeToJni(serializer, input))
-            )
+    ): CallData<JniSerialized> = CallData.create(
+        jniSer.encodeToJni(
+            Wrapper.serializer(),
+            Wrapper(true, jniSer.encodeToJni(serializer, input))
         )
-    }
+    )
 
     override fun isError(data: CallData<JniSerialized>): Boolean {
         val wrapper = jniSer.decodeFromJni(Wrapper.serializer(), data.readSerialized())
@@ -62,8 +59,5 @@ class JniSerialization(private val jniSer: JniSer = JniSer) : CallDataSerializer
     }
 
     @Serializable
-    private data class Wrapper(
-        val isError: Boolean,
-        val content: JniSerialized
-    )
+    private data class Wrapper(val isError: Boolean, val content: JniSerialized)
 }
