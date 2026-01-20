@@ -82,13 +82,16 @@ subprojects {
         header = rootProject.file("license-header.txt")
         includes(listOf("**/*.kt"))
         strictCheck = true
+        useDefaultMappings = false
+        mapping("kts", "PHP")
+        mapping("kt", "PHP")
         ext["year"] = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)
         ext["name"] = "Jason Monk"
         ext["email"] = "monkopedia@gmail.com"
     }
 
     configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
-        version.set("0.48.0")
+        version.set("1.8.0")
         android.set(true)
     }
     afterEvaluate {

@@ -44,17 +44,19 @@ subprojects {
     if (name == "ksrpc-compiler-plugin-native") return@subprojects
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
     apply(plugin = "com.github.hierynomus.license")
-    tasks.register("licenseCheckForKotlin", com.hierynomus.gradle.license.tasks.LicenseCheck::class) {
-        dependsOn("generateBuildConfigClasses")
+    tasks.register(
+        "licenseCheckForKotlin",
+        com.hierynomus.gradle.license.tasks.LicenseCheck::class
+    ) {
         dependsOn("processResources")
-        dependsOn("kspKotlin")
         source = fileTree(project.projectDir) { include("**/*.kt") }
     }
     tasks["license"].dependsOn("licenseCheckForKotlin")
-    tasks.register("licenseFormatForKotlin", com.hierynomus.gradle.license.tasks.LicenseFormat::class) {
-        dependsOn("generateBuildConfigClasses")
+    tasks.register(
+        "licenseFormatForKotlin",
+        com.hierynomus.gradle.license.tasks.LicenseFormat::class
+    ) {
         dependsOn("processResources")
-        dependsOn("kspKotlin")
         source = fileTree(project.projectDir) { include("**/*.kt") }
     }
     tasks["licenseFormat"].dependsOn("licenseFormatForKotlin")
@@ -63,12 +65,35 @@ subprojects {
         header = rootProject.file("../license-header.txt")
         includes(listOf("**/*.kt"))
         strictCheck = true
+        useDefaultMappings = false
+        mapping("kts", "PHP")
+        mapping("kt", "PHP")
         ext["year"] = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)
         ext["name"] = "Jason Monk"
         ext["email"] = "monkopedia@gmail.com"
     }
 
     configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
+        version.set("1.8.0")
         android.set(true)
+    }
+    afterEvaluate {
+        listOfNotNull(
+            tasks.findByName("licenseCheckForKotlin"),
+            tasks.findByName("licenseFormatForKotlin")
+        ).forEach {
+            tasks.all {
+                if ((this.name.startsWith("ktlint") && this.name.endsWith("Check")) ||
+                    (this.name.startsWith("transform") && this.name.endsWith("Metadata")) ||
+                    (this.name.startsWith("compile") && this.name.contains("Kotlin")) ||
+                    this.name.startsWith("link") ||
+                    this.name == "copyLib" ||
+                    this.name.endsWith("Test") ||
+                    this.name.endsWith("Tests")
+                ) {
+                    it.dependsOn(this)
+                }
+            }
+        }
     }
 }
