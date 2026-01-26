@@ -23,6 +23,8 @@ import org.jetbrains.kotlin.name.Name
 object FqConstants {
     val FQPKG = FqName("com.monkopedia.ksrpc")
     val RPC_ENDPOINT_EXCEPTION = ClassId(FQPKG, Name.identifier("RpcEndpointException"))
+    val RPC_ENDPOINT_NOT_FOUND_EXCEPTION =
+        ClassId(FQPKG, Name.identifier("RpcEndpointNotFoundException"))
     val RPC_OBJECT_KEY = ClassId(FQPKG, Name.identifier("RpcObjectKey"))
     val RPC_SERVICE = ClassId(FQPKG, Name.identifier("RpcService"))
     val FQRPC_SERVICE = FqName("com.monkopedia.ksrpc.RpcService")

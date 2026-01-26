@@ -115,13 +115,13 @@ class CompanionGeneration(
                     irGet(input),
                     irString(" in service " + cls.irClass.kotlinFqName.asString())
                 )
-                this += irElseBranch(irThrowIllegalArgument(message))
+                this += irElseBranch(irThrowEndpointNotFound(message))
             }
             +irReturn(irWhen(function.returnType, branches))
         }
 
-    private fun IrBlockBodyBuilder.irThrowIllegalArgument(message: IrExpression) = irThrow(
-        irCallConstructor(env.illegalArgumentStrConstructor, emptyList()).apply {
+    private fun IrBlockBodyBuilder.irThrowEndpointNotFound(message: IrExpression) = irThrow(
+        irCallConstructor(env.endpointNotFoundStrConstructor, emptyList()).apply {
             putArgs(message)
         }
     )

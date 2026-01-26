@@ -29,8 +29,9 @@ class KsrpcGenerationEnvironment(
     private val context: IrPluginContext,
     private val messageCollector: MessageCollector
 ) {
-    private val illegalArgument = referenceClass(FqConstants.RPC_ENDPOINT_EXCEPTION)
-    val illegalArgumentStrConstructor = illegalArgument.constructors.first()
+    private val endpointNotFoundException =
+        referenceClass(FqConstants.RPC_ENDPOINT_NOT_FOUND_EXCEPTION)
+    val endpointNotFoundStrConstructor = endpointNotFoundException.constructors.first()
     val rpcService = referenceClass(FqConstants.RPC_SERVICE)
     val serializedService = referenceClass(FqConstants.SERIALIZED_SERVICE)
     val rpcMethod = referenceClass(FqConstants.RPC_METHOD)

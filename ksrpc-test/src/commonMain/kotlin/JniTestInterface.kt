@@ -42,6 +42,12 @@ interface JniTestInterface : RpcService {
 }
 
 @KsService
+interface MissingEndpointTestInterface : RpcService {
+    @KsMethod("/missing_rpc")
+    suspend fun rpc(u: Pair<String, String>): String
+}
+
+@KsService
 interface JniTestSubInterface : RpcService {
     @KsMethod("/rpc")
     suspend fun rpc(u: Pair<String, String>): String

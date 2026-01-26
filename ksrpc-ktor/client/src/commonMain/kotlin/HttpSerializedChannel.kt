@@ -15,9 +15,11 @@
  */
 package com.monkopedia.ksrpc.ktor.internal
 
+import com.monkopedia.ksrpc.ENDPOINT_NOT_FOUND_PREFIX
 import com.monkopedia.ksrpc.ERROR_PREFIX
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.RpcEndpointException
+import com.monkopedia.ksrpc.RpcEndpointNotFoundException
 import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.ChannelClient
@@ -94,13 +96,21 @@ internal class HttpSerializedChannel(
 internal suspend fun HttpResponse.checkErrors() {
     if (status == HttpStatusCode.InternalServerError) {
         val text = body<String>()
-        if (text.startsWith(ERROR_PREFIX)) {
-            throw Json.decodeFromString(
-                RpcFailure.serializer(),
-                text.substring(ERROR_PREFIX.length)
-            ).toException()
-        } else {
-            throw IllegalStateException("Can't parse error $this")
+        return when {
+            text.startsWith(ENDPOINT_NOT_FOUND_PREFIX) -> {
+                val failure = Json.decodeFromString(
+                    RpcFailure.serializer(),
+                    text.substring(ENDPOINT_NOT_FOUND_PREFIX.length)
+                )
+                throw RpcEndpointNotFoundException(failure.stack)
+            }
+            text.startsWith(ERROR_PREFIX) -> {
+                throw Json.decodeFromString(
+                    RpcFailure.serializer(),
+                    text.substring(ERROR_PREFIX.length)
+                ).toException()
+            }
+            else -> throw IllegalStateException("Can't parse error $this")
         }
     } else if (status == HttpStatusCode.NotFound) {
         throw RpcEndpointException("Url not found $this")

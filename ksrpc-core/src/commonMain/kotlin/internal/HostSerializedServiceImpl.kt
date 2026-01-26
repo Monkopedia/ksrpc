@@ -16,6 +16,7 @@
 package com.monkopedia.ksrpc.internal
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
+import com.monkopedia.ksrpc.RpcEndpointNotFoundException
 import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.RpcObject
 import com.monkopedia.ksrpc.RpcService
@@ -68,10 +69,12 @@ class HostSerializedChannelImpl<T>(
     } catch (t: Throwable) {
         env.logger.info("SerializedChannel", "Exception thrown during dispatching", t)
         env.errorListener.onError(t)
-        env.serialization.createErrorCallData(
-            RpcFailure.serializer(),
-            RpcFailure(t.asString)
-        )
+        val failure = RpcFailure(t.asString)
+        if (t is RpcEndpointNotFoundException) {
+            env.serialization.createEndpointNotFoundCallData(RpcFailure.serializer(), failure)
+        } else {
+            env.serialization.createErrorCallData(RpcFailure.serializer(), failure)
+        }
     }
 
     override suspend fun close(id: ChannelId) {

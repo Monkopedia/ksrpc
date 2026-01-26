@@ -41,6 +41,7 @@ interface KsrpcEnvironment<T> {
 interface CallDataSerializer<T> {
     fun <I> createCallData(serializer: KSerializer<I>, input: I): CallData<T>
     fun <I> createErrorCallData(serializer: KSerializer<I>, input: I): CallData<T>
+    fun <I> createEndpointNotFoundCallData(serializer: KSerializer<I>, input: I): CallData<T>
     fun <I> decodeCallData(serializer: KSerializer<I>, data: CallData<T>): I
     fun decodeErrorCallData(callData: CallData<T>): Throwable
     fun isError(data: CallData<T>): Boolean
@@ -86,17 +87,36 @@ private class StringSerializer(val stringFormat: StringFormat = Json) : CallData
     override fun <I> createErrorCallData(serializer: KSerializer<I>, input: I): CallData<String> =
         CallData.createError(stringFormat.encodeToString(serializer, input))
 
+    override fun <I> createEndpointNotFoundCallData(
+        serializer: KSerializer<I>,
+        input: I
+    ): CallData<String> =
+        CallData.createEndpointNotFoundError(stringFormat.encodeToString(serializer, input))
+
     override fun <I> decodeCallData(serializer: KSerializer<I>, data: CallData<String>): I =
         stringFormat.decodeFromString(serializer, data.readSerialized())
 
     override fun decodeErrorCallData(callData: CallData<String>): Throwable {
-        val errorStr = callData.readSerialized().substring(ERROR_PREFIX.length)
-        return stringFormat.decodeFromString(RpcFailure.serializer(), errorStr)
-            .toException()
+        val serialized = callData.readSerialized()
+        return when {
+            serialized.startsWith(ENDPOINT_NOT_FOUND_PREFIX) -> {
+                val errorStr = serialized.substring(ENDPOINT_NOT_FOUND_PREFIX.length)
+                val failure = stringFormat.decodeFromString(RpcFailure.serializer(), errorStr)
+                RpcEndpointNotFoundException(failure.stack)
+            }
+
+            serialized.startsWith(ERROR_PREFIX) -> {
+                val errorStr = serialized.substring(ERROR_PREFIX.length)
+                stringFormat.decodeFromString(RpcFailure.serializer(), errorStr).toException()
+            }
+
+            else -> RpcException("Unknown error payload: $serialized")
+        }
     }
 
     override fun isError(data: CallData<String>): Boolean =
-        data.readSerialized().startsWith(ERROR_PREFIX)
+        data.readSerialized().startsWith(ERROR_PREFIX) ||
+            data.readSerialized().startsWith(ENDPOINT_NOT_FOUND_PREFIX)
 }
 
 data class KsrpcEnvironmentBuilder<T> internal constructor(

@@ -15,6 +15,7 @@
  */
 package com.monkopedia.ksrpc.channels
 
+import com.monkopedia.ksrpc.ENDPOINT_NOT_FOUND_PREFIX
 import com.monkopedia.ksrpc.ERROR_PREFIX
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.RpcMethod
@@ -229,6 +230,8 @@ sealed class CallData<T> private constructor() {
         fun <T> create(str: T) = Serialized(str)
 
         fun createError(str: String) = Serialized(ERROR_PREFIX + str)
+
+        fun createEndpointNotFoundError(str: String) = Serialized(ENDPOINT_NOT_FOUND_PREFIX + str)
 
         /**
          * Create a CallData wrapping a [ByteReadChannel] for reading binary data.

@@ -18,6 +18,7 @@
 package com.monkopedia.ksrpc.jni
 
 import com.monkopedia.ksrpc.CallDataSerializer
+import com.monkopedia.ksrpc.RpcEndpointNotFoundException
 import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.channels.CallData
 import kotlinx.serialization.KSerializer
@@ -43,6 +44,16 @@ class JniSerialization(private val jniSer: JniSer = JniSer) : CallDataSerializer
         )
     )
 
+    override fun <I> createEndpointNotFoundCallData(
+        serializer: KSerializer<I>,
+        input: I
+    ): CallData<JniSerialized> = CallData.create(
+        jniSer.encodeToJni(
+            Wrapper.serializer(),
+            Wrapper(true, jniSer.encodeToJni(serializer, input), isEndpointMissing = true)
+        )
+    )
+
     override fun isError(data: CallData<JniSerialized>): Boolean {
         val wrapper = jniSer.decodeFromJni(Wrapper.serializer(), data.readSerialized())
         return wrapper.isError
@@ -50,7 +61,12 @@ class JniSerialization(private val jniSer: JniSer = JniSer) : CallDataSerializer
 
     override fun decodeErrorCallData(callData: CallData<JniSerialized>): Throwable {
         val wrapper = jniSer.decodeFromJni(Wrapper.serializer(), callData.readSerialized())
-        return jniSer.decodeFromJni(RpcFailure.serializer(), wrapper.content).toException()
+        return if (wrapper.isEndpointMissing) {
+            val failure = jniSer.decodeFromJni(RpcFailure.serializer(), wrapper.content)
+            RpcEndpointNotFoundException(failure.stack)
+        } else {
+            jniSer.decodeFromJni(RpcFailure.serializer(), wrapper.content).toException()
+        }
     }
 
     override fun <I> decodeCallData(serializer: KSerializer<I>, data: CallData<JniSerialized>): I {
@@ -59,5 +75,9 @@ class JniSerialization(private val jniSer: JniSer = JniSer) : CallDataSerializer
     }
 
     @Serializable
-    private data class Wrapper(val isError: Boolean, val content: JniSerialized)
+    private data class Wrapper(
+        val isError: Boolean,
+        val content: JniSerialized,
+        val isEndpointMissing: Boolean = false
+    )
 }

@@ -35,6 +35,8 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -161,6 +163,17 @@ class JniTest {
         )
     }
 
+    @Test
+    fun testMissingEndpoint() = runBlockingUnit {
+        val stub = createMissingEpService()
+        val exception = assertFailsWith<RpcEndpointNotFoundException> {
+            stub.rpc("Hello" to "world")
+        }
+        val message = exception.message ?: ""
+        assertTrue(message.contains("Unknown endpoint: missing_rpc"), message)
+        assertTrue(message.contains("JniTestInterface"), message)
+    }
+
     private fun extension(): String =
         if (NativeUtils::class.java.getResourceAsStream("/libs/libksrpc_test.so") != null) {
             "so"
@@ -177,5 +190,16 @@ class JniTest {
             NativeHost().registerService(connection, it.withConverter(newTypeConverter<Any?>().int))
         }
         return connection.defaultChannel().toStub<JniTestInterface, JniSerialized>()
+    }
+
+    private suspend fun CoroutineScope.createMissingEpService(): MissingEndpointTestInterface {
+        NativeUtils.loadLibraryFromJar("/libs/libksrpc_test.${extension()}")
+        val env = ksrpcEnvironment(JniSerialization()) {}
+        val nativeEnvironment = NativeHost().createEnv()
+        val connection = JniConnection(this, env, nativeEnvironment)
+        suspendCoroutine<Int> {
+            NativeHost().registerService(connection, it.withConverter(newTypeConverter<Any?>().int))
+        }
+        return connection.defaultChannel().toStub<MissingEndpointTestInterface, JniSerialized>()
     }
 }
