@@ -129,6 +129,16 @@ class RpcServiceTest :
     }
 
     @Test
+    fun testIntrospectionServiceName() = runBlockingUnit {
+        val channel = object : TestInterface {
+            override suspend fun rpc(u: Pair<String, String>): String = "${u.first} ${u.second}"
+        }.serialized<TestInterface, String>(ksrpcEnvironment { })
+        val stub = channel.toStub<TestInterface, String>()
+        val name = stub.getIntrospection().getServiceName()
+        assertEquals("com.monkopedia.ksrpc.TestInterface", name)
+    }
+
+    @Test
     fun testStubClosesChannel() = runBlockingUnit {
         var hasCalledClose = false
         val service = object : SerializedService<String> {

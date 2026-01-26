@@ -24,6 +24,7 @@ import kotlin.reflect.full.superclasses
 @Suppress("UNCHECKED_CAST")
 actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> {
     val klass = T::class
+    specialRpcObject(klass)?.let { return it }
     if (klass.companionObjectInstance is RpcObject<*>) {
         return klass.companionObjectInstance as RpcObject<T>
     }

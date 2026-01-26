@@ -16,19 +16,5 @@
 package com.monkopedia.ksrpc.channels
 
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
-import com.monkopedia.ksrpc.RpcEndpointException
-import com.monkopedia.ksrpc.RpcMethod
-import com.monkopedia.ksrpc.RpcObject
-import com.monkopedia.ksrpc.RpcService
 
 actual fun randomUuid(): String = NanoIdUtils.randomNanoId()
-
-internal actual interface VoidService : RpcService {
-    companion object : RpcObject<VoidService> {
-        override fun <T> createStub(channel: SerializedService<T>): VoidService =
-            object : VoidService {}
-
-        override fun findEndpoint(endpoint: String): RpcMethod<*, *, *> =
-            throw RpcEndpointException("VoidService has no endpoints")
-    }
-}

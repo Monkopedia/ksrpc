@@ -20,6 +20,7 @@ import com.monkopedia.ksrpc.RpcEndpointNotFoundException
 import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.RpcObject
 import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.SERVICE_NAME_ENDPOINT
 import com.monkopedia.ksrpc.SuspendCloseable
 import com.monkopedia.ksrpc.TrackingService
 import com.monkopedia.ksrpc.asString
@@ -132,11 +133,15 @@ val <T> SerializedChannel<T>.asClient: ChannelClient<T>
 internal class HostSerializedServiceImpl<T : RpcService, S>(
     internal val service: T,
     private val rpcObject: RpcObject<T>,
-    override val env: KsrpcEnvironment<S>
+    override val env: KsrpcEnvironment<S>,
+    private val serviceName: String = rpcObject.serviceName
 ) : SerializedService<S> {
     private val onCloseCallbacks = mutableSetOf<suspend () -> Unit>()
 
     override suspend fun call(endpoint: String, input: CallData<S>): CallData<S> {
+        if (endpoint == SERVICE_NAME_ENDPOINT) {
+            return env.serialization.createCallData(String.serializer(), serviceName)
+        }
         val rpcEndpoint = rpcObject.findEndpoint(endpoint)
         return rpcEndpoint.call(this, service, input)
     }

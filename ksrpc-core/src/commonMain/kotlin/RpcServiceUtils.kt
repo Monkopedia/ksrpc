@@ -17,11 +17,20 @@ package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.internal.HostSerializedServiceImpl
+import kotlin.reflect.KClass
 
 /**
  * Helper to get [RpcObject] for a given [RpcService]
  */
 expect inline fun <reified T : RpcService> rpcObject(): RpcObject<T>
+
+@PublishedApi
+@Suppress("UNCHECKED_CAST")
+internal fun <T : RpcService> specialRpcObject(serviceClass: KClass<T>): RpcObject<T>? =
+    when (serviceClass) {
+        IntrospectionService::class -> IntrospectionServiceRpcObject as RpcObject<T>
+        else -> null
+    }
 
 /**
  * Convert a [T] into a [SerializedService] for hosting.

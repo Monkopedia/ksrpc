@@ -15,13 +15,21 @@
  */
 package com.monkopedia.ksrpc
 
-import com.monkopedia.ksrpc.channels.SerializedService
+import kotlin.reflect.KClass
 
-/**
- * Interface for generated companions of [RpcService].
- */
-interface RpcObject<T : RpcService> {
-    val serviceName: String
-    fun <S> createStub(channel: SerializedService<S>): T
-    fun findEndpoint(endpoint: String): RpcMethod<*, *, *>
-}
+@PublishedApi
+internal actual fun serviceNameFor(serviceClass: KClass<*>): String =
+    serviceClass.qualifiedName?.stripKClassPrefix()
+        ?: serviceClass.toString().stripKClassPrefix()
+
+@PublishedApi
+internal actual fun RpcObject<*>.serviceInterfaceName(): String =
+    (this::class.qualifiedName?.stripKClassPrefix()
+        ?: this::class.toString().stripKClassPrefix())
+        .removeSuffix(".Companion")
+        .removeSuffix("\$Companion")
+
+private fun String.stripKClassPrefix(): String =
+    removePrefix("class ")
+        .removePrefix("interface ")
+        .removePrefix("object ")

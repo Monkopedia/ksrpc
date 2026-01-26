@@ -21,6 +21,7 @@ import com.monkopedia.ksrpc.plugin.FqConstants.KS_METHOD
 import com.monkopedia.ksrpc.plugin.FqConstants.KS_SERVICE
 import com.monkopedia.ksrpc.plugin.FqConstants.RPC_METHOD
 import com.monkopedia.ksrpc.plugin.FqConstants.RPC_OBJECT
+import com.monkopedia.ksrpc.plugin.FqConstants.SERVICE_NAME
 import com.monkopedia.ksrpc.plugin.FqConstants.SERIALIZED_SERVICE
 import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.descriptors.ClassKind
@@ -37,12 +38,14 @@ import org.jetbrains.kotlin.fir.plugin.createCompanionObject
 import org.jetbrains.kotlin.fir.plugin.createConeType
 import org.jetbrains.kotlin.fir.plugin.createDefaultPrivateConstructor
 import org.jetbrains.kotlin.fir.plugin.createMemberFunction
+import org.jetbrains.kotlin.fir.plugin.createMemberProperty
 import org.jetbrains.kotlin.fir.resolve.defaultType
 import org.jetbrains.kotlin.fir.scopes.impl.toConeType
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassLikeSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirConstructorSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirNamedFunctionSymbol
+import org.jetbrains.kotlin.fir.symbols.impl.FirPropertySymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirRegularClassSymbol
 import org.jetbrains.kotlin.fir.types.ConeStarProjection
 import org.jetbrains.kotlin.name.CallableId
@@ -94,6 +97,17 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
         }
     }
 
+    override fun generateProperties(
+        callableId: CallableId,
+        context: MemberGenerationContext?
+    ): List<FirPropertySymbol> {
+        val ownerKey = context?.let(::checkOwnerKey) ?: return emptyList()
+        return when (callableId.callableName) {
+            SERVICE_NAME -> createServiceName(callableId, context.owner, ownerKey)
+            else -> emptyList()
+        }
+    }
+
     private fun createCreateStub(
         callableId: CallableId,
         owner: FirClassSymbol<*>,
@@ -124,6 +138,24 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
         return listOf(function.symbol)
     }
 
+    private fun createServiceName(
+        callableId: CallableId,
+        owner: FirClassSymbol<*>,
+        ownerKey: Key
+    ): List<FirPropertySymbol> {
+        val property = createMemberProperty(
+            owner,
+            ownerKey,
+            callableId.callableName,
+            session.builtinTypes.stringType.coneType,
+            isVal = true,
+            hasBackingField = false
+        ) {
+            modality = FINAL
+        }
+        return listOf(property.symbol)
+    }
+
     override fun getCallableNamesForClass(
         classSymbol: FirClassSymbol<*>,
         context: MemberGenerationContext
@@ -136,9 +168,9 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
 
         val origin = classSymbol.origin as? FirDeclarationOrigin.Plugin
         return if (origin?.key is Key) {
-            setOf(FIND_ENDPOINT, CREATE_STUB, SpecialNames.INIT)
+            setOf(FIND_ENDPOINT, CREATE_STUB, SERVICE_NAME, SpecialNames.INIT)
         } else {
-            setOf(FIND_ENDPOINT, CREATE_STUB)
+            setOf(FIND_ENDPOINT, CREATE_STUB, SERVICE_NAME)
         }
     }
 

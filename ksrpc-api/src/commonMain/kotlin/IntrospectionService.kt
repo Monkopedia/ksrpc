@@ -15,13 +15,9 @@
  */
 package com.monkopedia.ksrpc
 
-import com.monkopedia.ksrpc.channels.SerializedService
-
 /**
- * Interface for generated companions of [RpcService].
+ * Returns metadata about a service.
  */
-interface RpcObject<T : RpcService> {
-    val serviceName: String
-    fun <S> createStub(channel: SerializedService<S>): T
-    fun findEndpoint(endpoint: String): RpcMethod<*, *, *>
+interface IntrospectionService : RpcService {
+    suspend fun getServiceName(u: Unit = Unit): String
 }

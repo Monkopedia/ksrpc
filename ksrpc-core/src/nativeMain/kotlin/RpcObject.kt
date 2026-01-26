@@ -26,12 +26,19 @@ import kotlin.reflect.findAssociatedObject
  */
 @OptIn(ExperimentalAssociatedObjects::class)
 @AssociatedObjectKey
+@Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.BINARY)
-annotation class RpcObjectKey(val rpcObject: KClass<out RpcObject<*>>)
+actual annotation class RpcObjectKey actual constructor(
+    actual val rpcObject: KClass<out RpcObject<*>>
+)
 
 @OptIn(ExperimentalAssociatedObjects::class)
-actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> =
-    T::class.findAssociatedObject<RpcObjectKey>() as RpcObject<T>
+actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> {
+    specialRpcObject(T::class)?.let { return it }
+    val obj = T::class.findAssociatedObject<RpcObjectKey>()
+    if (obj != null) return obj as RpcObject<T>
+    return error("Can't find rpc companion for ${T::class}")
+}
 
 @OptIn(ExperimentalNativeApi::class)
 actual val Throwable.asString: String

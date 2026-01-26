@@ -38,7 +38,6 @@ object FqConstants {
     val CALL_CHANNEL = Name.identifier("callChannel")
     val CLOSE = Name.identifier("close")
     val INVOKE = Name.identifier("invoke")
-
     val KSERIALIZER = ClassId(FqName("kotlinx.serialization"), Name.identifier("KSerializer"))
     val SERIALIZER_CALLABLE: CallableId =
         CallableId(FqName("kotlinx.serialization"), Name.identifier("serializer"))
@@ -48,6 +47,7 @@ object FqConstants {
 
     val CREATE_STUB = Name.identifier("createStub")
     val FIND_ENDPOINT = Name.identifier("findEndpoint")
+    val SERVICE_NAME = Name.identifier("serviceName")
 
     val RPC_OBJECT = ClassId(FQPKG, Name.identifier("RpcObject"))
     val RPC_METHOD = ClassId(FQPKG, Name.identifier("RpcMethod"))

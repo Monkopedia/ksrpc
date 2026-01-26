@@ -37,6 +37,7 @@ import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrConstructor
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
+import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.expressions.IrBlockBody
 import org.jetbrains.kotlin.ir.expressions.IrBody
 import org.jetbrains.kotlin.ir.expressions.IrClassReference
@@ -44,6 +45,7 @@ import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
+import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
 import org.jetbrains.kotlin.ir.util.constructors
 import org.jetbrains.kotlin.ir.util.kotlinFqName
 
@@ -69,6 +71,21 @@ class CompanionGeneration(
                 irClass.annotations += createRpcObjectAnnotation(irClass, it, objectReference)
             }
         }
+        declaration.declarations
+            .filterIsInstance<IrProperty>()
+            .firstOrNull { it.name == FqConstants.SERVICE_NAME }
+            ?.let { property ->
+                val fqName = cls.irClass.kotlinFqName.asString()
+                property.backingField?.initializer =
+                    irFactory.createExpressionBody(
+                        SYNTHETIC_OFFSET,
+                        SYNTHETIC_OFFSET,
+                        context.irBuilder(property).irString(fqName)
+                    )
+                property.getter?.body = context.irBuilder(property.getter!!).irSynthBody {
+                    +irReturn(irString(fqName))
+                }
+            }
         declaration.isCompanion = true
         return emptyList()
     }
@@ -91,6 +108,13 @@ class CompanionGeneration(
         val k = key as FirCompanionDeclarationGenerator.Key
         val cls = classes[k.type]
             ?: error("Invalid synthetic declaration for ${k.type} in ${classes.keys}")
+        function.correspondingPropertySymbol?.owner?.name?.let { propertyName ->
+            if (propertyName == FqConstants.SERVICE_NAME) {
+                return context.irBuilder(function).irSynthBody {
+                    +irReturn(irString(cls.irClass.kotlinFqName.asString()))
+                }
+            }
+        }
         return when (function.name) {
             FqConstants.CREATE_STUB -> buildCreateStubBody(function, cls)
             FqConstants.FIND_ENDPOINT -> buildFindEndpointBody(function, cls)

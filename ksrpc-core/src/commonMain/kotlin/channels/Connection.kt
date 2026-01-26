@@ -43,8 +43,6 @@ interface SingleChannelConnection<T> :
 // Problems with JS compiler and serialization
 data class ChannelId(val id: String)
 
-internal expect interface VoidService : RpcService
-
 /**
  * Connects both default channels for a connection (incoming and outgoing).
  *
