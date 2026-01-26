@@ -29,6 +29,7 @@ depending on the platform being targeted.
  - Local class instantiation (JVM)
  - Web sockets (JVM, Native, JS (Client only))
  - jsonrpc 2.0 (JVM, Native\*)
+ - Service workers (JS, experimental)
 
  \* Not implemented but expected soon
 
@@ -469,6 +470,36 @@ service.createTask(object : MyCallbackService {
         println("$taskName complete")
     }
 }).start(TaskParams(taskName))
+```
+
+## Service workers (JS, experimental)
+
+This is experimental and the API may change. For browser JS, you can host a default service inside
+a service worker and connect to it from the main thread.
+
+Worker entry (service worker script):
+
+```kotlin
+import com.monkopedia.ksrpc.ksrpcEnvironment
+import com.monkopedia.ksrpc.webworker.registerServiceWorkerConnection
+
+fun main() {
+    val env = ksrpcEnvironment { }
+    registerServiceWorkerConnection(MyServiceImpl(), env)
+}
+```
+
+Client entry (main thread):
+
+```kotlin
+import com.monkopedia.ksrpc.ksrpcEnvironment
+import com.monkopedia.ksrpc.webworker.createServiceWorkerWithConnection
+
+suspend fun connect(): MyService {
+    val env = ksrpcEnvironment { }
+    val connection = createServiceWorkerWithConnection("/worker.js", env)
+    return connection.defaultChannel().toStub<MyService>()
+}
 ```
 
 # API Docs

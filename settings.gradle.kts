@@ -29,6 +29,8 @@ include(":ksrpc-jsonrpc")
 include(":ksrpc-packets")
 include(":ksrpc-server")
 include(":ksrpc-sockets")
+include(":ksrpc-web-worker")
+include(":ksrpc-web-worker-test")
 include(":ksrpc-jni")
 include(":ksrpc-test")
 

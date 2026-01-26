@@ -48,6 +48,7 @@ fun Project.ksrpcModule(
     supportIos: Boolean = supportNative,
     supportLinuxArm64: Boolean = supportNative,
     supportMingw: Boolean = supportNative,
+    supportWasm: Boolean = supportJs,
     includePublications: Boolean = true,
     nativeConfig: KotlinNativeTarget.() -> Unit = {}
 ) {
@@ -80,6 +81,8 @@ fun Project.ksrpcModule(
                     }
                 }
             }
+        }
+        if (supportWasm) {
             @Suppress("OPT_IN_USAGE")
             wasmJs {
                 yarn.yarnLockAutoReplace = true

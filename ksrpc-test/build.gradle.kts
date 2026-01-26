@@ -1,4 +1,8 @@
+@file:OptIn(ExternalKotlinTargetApi::class)
+
 import com.monkopedia.ksrpc.local.ksrpcModule
+import org.jetbrains.kotlin.gradle.ExternalKotlinTargetApi
+import org.jetbrains.kotlin.gradle.targets.js.testing.karma.KarmaConfig
 
 plugins {
     kotlin("multiplatform")
@@ -18,7 +22,57 @@ ksrpcModule(
     }
 )
 
+data class KarmaFileConfig(
+    val pattern: String,
+    val included: Boolean = true,
+    val served: Boolean = true,
+    val watched: Boolean = false
+)
 kotlin {
+    js {
+        browser {
+            testTask {
+                useKarma {
+                    val config = this::class.java.getDeclaredField("config").also {
+                        it.isAccessible = true
+                    }.get(this) as KarmaConfig
+
+                    config.files.add(
+                        KarmaFileConfig(
+                            pattern = rootProject.projectDir.absolutePath +
+                                "/build/js/packages/ksrpc-ksrpc-test-test/kotlin/ksrpc-web-worker-test.js",
+                            included = false,
+                            served = true,
+                            watched = true
+                        )
+                    )
+                    useChromeHeadless()
+                }
+            }
+        }
+    }
+    wasmJs {
+        browser {
+            testTask {
+                useKarma {
+                    val config = this::class.java.getDeclaredField("config").also {
+                        it.isAccessible = true
+                    }.get(this) as KarmaConfig
+
+                    config.files.add(
+                        KarmaFileConfig(
+                            pattern = rootProject.projectDir.absolutePath +
+                                "/build/wasm/packages/ksrpc-ksrpc-test-test/kotlin/ksrpc-web-worker-test.js",
+                            included = false,
+                            served = true,
+                            watched = true
+                        )
+                    )
+                    useChromeHeadless()
+                }
+            }
+        }
+    }
     sourceSets["commonTest"].dependencies {
         implementation(project(":ksrpc-core"))
         implementation(project(":ksrpc-jsonrpc"))
@@ -53,14 +107,21 @@ kotlin {
         implementation(project(":ksrpc-ktor-websocket-server"))
         implementation(libs.ktor.server.cio)
     }
+    sourceSets["jsMain"].dependencies {
+        implementation(devNpm("copy-webpack-plugin", "13.0.1"))
+    }
     sourceSets["jsTest"].dependencies {
+        implementation(project(":ksrpc-web-worker-test"))
         implementation(kotlin("stdlib"))
         implementation(kotlin("test"))
     }
+    sourceSets["jsTest"].resources.srcDir(projectDir.resolve("build/generated/web-worker/js"))
     sourceSets["wasmJsTest"].dependencies {
+        implementation(project(":ksrpc-web-worker-test"))
         implementation(kotlin("stdlib"))
         implementation(kotlin("test"))
     }
+    sourceSets["wasmJsTest"].resources.srcDir(projectDir.resolve("build/generated/web-worker/wasm"))
 }
 val copyLib = tasks.register("copyLib", Copy::class) {
     val hostOs = System.getProperty("os.name")
@@ -92,7 +153,47 @@ val copyLib = tasks.register("copyLib", Copy::class) {
     }
 }
 
+val copyWebWorkerJs = tasks.register("copyWebWorkerJs", Copy::class) {
+    dependsOn(
+        project(":ksrpc-web-worker-test").tasks.matching {
+            it.name.startsWith("js") && it.name.endsWith("BrowserDistribution")
+        }
+    )
+    from(
+        project(":ksrpc-web-worker-test").layout.buildDirectory.dir("dist/js/productionExecutable")
+    ) {
+        include("*.js")
+        include("*.map")
+    }
+    destinationDir = projectDir.resolve("build/generated/web-worker/js")
+}
+
+val copyWebWorkerWasm = tasks.register("copyWebWorkerWasm", Copy::class) {
+    dependsOn(
+        project(":ksrpc-web-worker-test").tasks.matching {
+            it.name.startsWith("js") && it.name.endsWith("BrowserDistribution")
+        }
+    )
+    from(
+        project(":ksrpc-web-worker-test").layout.buildDirectory.dir("dist/js/productionExecutable")
+    ) {
+        include("*.js")
+        include("*.map")
+    }
+    destinationDir = projectDir.resolve("build/generated/web-worker/wasm")
+}
+
 afterEvaluate {
     tasks["jvmTestProcessResources"].dependsOn(copyLib)
-    tasks.findByName("jsBrowserTest")?.dependsOn(tasks["jsTestTestProductionExecutableCompileSync"])
+    tasks.findByName("jsTestProcessResources")?.dependsOn(copyWebWorkerJs)
+    tasks.findByName("wasmJsTestProcessResources")?.dependsOn(copyWebWorkerWasm)
+    val jsBrowserTest = tasks["jsBrowserTest"]
+    project(":ksrpc-web-worker-test").afterEvaluate {
+        jsBrowserTest.dependsOn(this@afterEvaluate.tasks["jsProductionExecutableCompileSync"])
+        jsBrowserTest.mustRunAfter(this@afterEvaluate.tasks["jsProductionExecutableCompileSync"])
+        jsBrowserTest.dependsOn(copyWebWorkerJs)
+        println(
+            "Setup dependencies $jsBrowserTest on ${this@afterEvaluate.tasks["jsProductionExecutableCompileSync"]}"
+        )
+    }
 }
