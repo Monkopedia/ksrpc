@@ -38,6 +38,9 @@ class ServiceWorkerTest {
         val sub = service.subservice("sub")
         assertEquals("sub a b", sub.rpc("a" to "b"))
 
+        val serviceName = service.getIntrospection().getServiceName()
+        assertEquals("com.monkopedia.ksrpc.webworker.test.WebWorkerTestService", serviceName)
+
         connection.close()
         null
     }

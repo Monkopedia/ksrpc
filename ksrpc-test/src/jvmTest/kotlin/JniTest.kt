@@ -120,6 +120,13 @@ class JniTest {
     }
 
     @Test
+    fun testIntrospectionServiceName() = runBlockingUnit {
+        val service = createService()
+        val name = service.getIntrospection().getServiceName()
+        assertEquals("com.monkopedia.ksrpc.JniTestInterface", name)
+    }
+
+    @Test
     fun testBinaryTest() = runBlockingUnit {
         val stub = createService()
         val response = stub.binaryRpc("Hello" to "world")
