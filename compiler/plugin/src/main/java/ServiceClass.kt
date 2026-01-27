@@ -143,8 +143,8 @@ data class ServiceClass(
         ): MutableMap<String, ServiceClass> {
             val visitor = Visitor(messageCollector)
             visitor.visitElement(moduleFragment)
-            SubclassVisitor(messageCollector, visitor.classes).visitElement(moduleFragment)
-            return visitor.classes
+        SubclassVisitor(messageCollector, visitor.classes).visitElement(moduleFragment)
+        return visitor.classes
         }
     }
 }

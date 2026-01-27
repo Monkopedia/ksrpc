@@ -33,7 +33,6 @@ actual annotation class RpcObjectKey actual constructor(
 
 @OptIn(ExperimentalAssociatedObjects::class)
 actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> {
-    specialRpcObject(T::class)?.let { return it }
     val obj = T::class.findAssociatedObject<RpcObjectKey>()
     if (obj != null) return obj as RpcObject<T>
     return error("Can't find rpc companion for ${T::class}")

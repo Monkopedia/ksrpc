@@ -15,6 +15,7 @@
  */
 package com.monkopedia.ksrpc.plugin
 
+import com.monkopedia.ksrpc.plugin.FqConstants.KS_INTROSPECTABLE
 import com.monkopedia.ksrpc.plugin.FqConstants.KS_METHOD
 import com.monkopedia.ksrpc.plugin.FqConstants.KS_SERVICE
 import org.jetbrains.kotlin.GeneratedDeclarationKey

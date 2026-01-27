@@ -28,7 +28,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.serializer
 
-internal sealed interface Transformer<T> {
+sealed interface Transformer<T> {
     val hasContent: Boolean
         get() = true
     val rpcDataType: RpcDataType
@@ -45,7 +45,7 @@ internal sealed interface Transformer<T> {
     }
 }
 
-internal class SerializerTransformer<I>(private val serializer: KSerializer<I>) : Transformer<I> {
+class SerializerTransformer<I>(private val serializer: KSerializer<I>) : Transformer<I> {
     override val hasContent: Boolean
         get() = serializer != Unit.serializer()
     override val rpcDataType: RpcDataType
@@ -63,7 +63,7 @@ internal class SerializerTransformer<I>(private val serializer: KSerializer<I>) 
     }
 }
 
-internal object BinaryTransformer : Transformer<ByteReadChannel> {
+object BinaryTransformer : Transformer<ByteReadChannel> {
     override val rpcDataType: RpcDataType
         get() = RpcDataType.BinaryData
     override suspend fun <T> transform(
@@ -84,7 +84,7 @@ internal object BinaryTransformer : Transformer<ByteReadChannel> {
     }
 }
 
-internal class SubserviceTransformer<T : RpcService>(private val serviceObj: RpcObject<T>) :
+class SubserviceTransformer<T : RpcService>(private val serviceObj: RpcObject<T>) :
     Transformer<T> {
     override val rpcDataType: RpcDataType
         get() = RpcDataType.Service(serviceObj.serviceName)
@@ -104,14 +104,14 @@ internal class SubserviceTransformer<T : RpcService>(private val serviceObj: Rpc
     }
 }
 
-internal interface ServiceExecutor {
+interface ServiceExecutor {
     suspend fun invoke(service: RpcService, input: Any?): Any?
 }
 
 /**
  * A wrapper around calling into or from stubs/serialization.
  */
-class RpcMethod<T : RpcService, I, O> internal constructor(
+class RpcMethod<T : RpcService, I, O> constructor(
     val endpoint: String,
     private val inputTransform: Transformer<I>,
     private val outputTransform: Transformer<O>,
@@ -122,7 +122,7 @@ class RpcMethod<T : RpcService, I, O> internal constructor(
         get() = outputTransform.hasContent
 
     @Suppress("UNCHECKED_CAST")
-    internal suspend fun <S> call(
+    suspend fun <S> call(
         channel: SerializedService<S>,
         service: RpcService,
         input: CallData<S>
@@ -136,7 +136,7 @@ class RpcMethod<T : RpcService, I, O> internal constructor(
     }
 
     @Suppress("UNCHECKED_CAST")
-    internal suspend fun <S> callChannel(channel: SerializedService<S>, input: Any?): Any? =
+    suspend fun <S> callChannel(channel: SerializedService<S>, input: Any?): Any? =
         withContext(channel.context) {
             val input = inputTransform.transform(input as I, channel)
             val id = randomUuid()
@@ -146,6 +146,6 @@ class RpcMethod<T : RpcService, I, O> internal constructor(
             outputTransform.untransform(transformedOutput, channel)
         }
 
-    internal fun inputRpcDataType(): RpcDataType = inputTransform.rpcDataType
-    internal fun outputRpcDataType(): RpcDataType = outputTransform.rpcDataType
+    fun inputRpcDataType(): RpcDataType = inputTransform.rpcDataType
+    fun outputRpcDataType(): RpcDataType = outputTransform.rpcDataType
 }

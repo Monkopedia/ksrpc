@@ -15,6 +15,7 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.annotation.KsIntrospectable
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
 import io.ktor.utils.io.ByteReadChannel
@@ -24,7 +25,8 @@ val jniTestContent = List(2048) {
 }.joinToString { "" }
 
 @KsService
-interface JniTestInterface : RpcService {
+@KsIntrospectable
+interface JniTestInterface : IntrospectableRpcService {
     @KsMethod("/binary_rpc")
     suspend fun binaryRpc(u: Pair<String, String>): ByteReadChannel
 
@@ -48,7 +50,8 @@ interface MissingEndpointTestInterface : RpcService {
 }
 
 @KsService
-interface JniTestSubInterface : RpcService {
+@KsIntrospectable
+interface JniTestSubInterface : IntrospectableRpcService {
     @KsMethod("/rpc")
     suspend fun rpc(u: Pair<String, String>): String
 }

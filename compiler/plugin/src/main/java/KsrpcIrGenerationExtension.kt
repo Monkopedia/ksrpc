@@ -17,6 +17,7 @@ package com.monkopedia.ksrpc.plugin
 
 import com.monkopedia.ksrpc.plugin.FqConstants.BYTE_READ_CHANNEL
 import com.monkopedia.ksrpc.plugin.FqConstants.FQRPC_SERVICE
+import com.monkopedia.ksrpc.plugin.FqConstants.INTROSPECTABLE_RPC_SERVICE
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.ERROR
@@ -42,7 +43,8 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
         val env = KsrpcGenerationEnvironment(pluginContext, report)
         val transformers = listOf(
             StubGeneration(pluginContext, report, classes, env),
-            CompanionGeneration(pluginContext, classes, env)
+            CompanionGeneration(pluginContext, classes, env),
+            IntrospectionGeneration(pluginContext, classes, env)
         )
         for (transformer in transformers) {
             moduleFragment.acceptChildrenVoid(transformer)
@@ -58,7 +60,11 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
 
     private fun validateClass(irClass: IrClass): Boolean {
         var isValid = true
-        if (!irClass.superTypes.map { it.classFqName }.contains(FQRPC_SERVICE)) {
+        val superTypeNames = irClass.superTypes.map { it.classFqName }
+        val hasRpcServiceSuper = superTypeNames.contains(FQRPC_SERVICE)
+        val hasIntrospectableSuper =
+            superTypeNames.contains(INTROSPECTABLE_RPC_SERVICE.asSingleFqName())
+        if (!hasRpcServiceSuper && !hasIntrospectableSuper) {
             report.error(
                 "${irClass.kotlinFqName.asString()} does not extend ${FQRPC_SERVICE.asString()}"
             )

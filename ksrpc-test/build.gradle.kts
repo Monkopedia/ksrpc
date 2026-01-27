@@ -73,6 +73,9 @@ kotlin {
             }
         }
     }
+    sourceSets["commonMain"].dependencies {
+        implementation(project(":ksrpc-introspection"))
+    }
     sourceSets["commonTest"].dependencies {
         implementation(project(":ksrpc-core"))
         implementation(project(":ksrpc-jsonrpc"))
@@ -80,6 +83,7 @@ kotlin {
         implementation(project(":ksrpc-ktor-websocket-client"))
         implementation(project(":ksrpc-sockets"))
         implementation(project(":ksrpc-packets"))
+        implementation(project(":ksrpc-introspection"))
         implementation(libs.ktor.client)
     }
     sourceSets["jvmTest"].resources.srcDir(projectDir.resolve("build/generated/lib/resources"))

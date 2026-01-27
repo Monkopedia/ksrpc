@@ -29,8 +29,6 @@ import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.Modality.FINAL
 import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.declarations.FirDeclarationOrigin
-import org.jetbrains.kotlin.fir.declarations.builder.buildReceiverParameter
-import org.jetbrains.kotlin.fir.declarations.utils.isSuspend
 import org.jetbrains.kotlin.fir.extensions.FirDeclarationGenerationExtension
 import org.jetbrains.kotlin.fir.extensions.FirDeclarationPredicateRegistrar
 import org.jetbrains.kotlin.fir.extensions.MemberGenerationContext
@@ -43,7 +41,6 @@ import org.jetbrains.kotlin.fir.plugin.createDefaultPrivateConstructor
 import org.jetbrains.kotlin.fir.plugin.createMemberFunction
 import org.jetbrains.kotlin.fir.plugin.createMemberProperty
 import org.jetbrains.kotlin.fir.resolve.defaultType
-import org.jetbrains.kotlin.fir.scopes.impl.overrides
 import org.jetbrains.kotlin.fir.scopes.impl.toConeType
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassLikeSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassSymbol
@@ -51,6 +48,7 @@ import org.jetbrains.kotlin.fir.symbols.impl.FirConstructorSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirNamedFunctionSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirPropertySymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirRegularClassSymbol
+import org.jetbrains.kotlin.fir.types.ConeClassLikeType
 import org.jetbrains.kotlin.fir.types.ConeStarProjection
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
@@ -93,9 +91,6 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
         callableId: CallableId,
         context: MemberGenerationContext?
     ): List<FirNamedFunctionSymbol> {
-        if (callableId.callableName == FqConstants.GET_INTROSPECTION) {
-            return createIntrospectionStub(callableId, context?.owner)
-        }
         val ownerKey = context?.let(::checkOwnerKey) ?: return emptyList()
         return when (callableId.callableName) {
             FIND_ENDPOINT -> createFindEndpoint(callableId, context.owner, ownerKey)
@@ -146,30 +141,6 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
         return listOf(function.symbol)
     }
 
-    private fun createIntrospectionStub(
-        callableId: CallableId,
-        owner: FirClassSymbol<*>?
-    ): List<FirNamedFunctionSymbol> {
-        val owner = owner ?: return emptyList()
-        val retType = FqConstants.INTROSPECTION_SERVICE.createConeType(session, arrayOf())
-        val function =
-            createMemberFunction(
-                owner,
-                Key(owner.classId),
-                callableId.callableName,
-                retType
-            ) {
-                modality = FINAL
-                this.visibility
-                status {
-                    this.isSuspend = true
-                    this.isOverride = true
-                }
-                valueParameter(Name.identifier("u"), session.builtinTypes.unitType.coneType)
-            }
-        return listOf(function.symbol)
-    }
-
     private fun createServiceName(
         callableId: CallableId,
         owner: FirClassSymbol<*>,
@@ -215,9 +186,6 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
         context: MemberGenerationContext
     ): Set<Name> {
         if (classSymbol.classKind != ClassKind.OBJECT) {
-            if (session.predicateBasedProvider.matches(predicates, classSymbol)) {
-                return setOf(FqConstants.GET_INTROSPECTION)
-            }
             return emptySet()
         }
         (classSymbol as? FirRegularClassSymbol)?.classId

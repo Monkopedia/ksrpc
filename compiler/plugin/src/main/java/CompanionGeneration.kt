@@ -49,7 +49,6 @@ import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
-import org.jetbrains.kotlin.ir.util.companionObject
 import org.jetbrains.kotlin.ir.util.constructors
 import org.jetbrains.kotlin.ir.util.kotlinFqName
 
@@ -144,23 +143,9 @@ class CompanionGeneration(
         return when (function.name) {
             FqConstants.CREATE_STUB -> buildCreateStubBody(function, cls)
             FqConstants.FIND_ENDPOINT -> buildFindEndpointBody(function, cls)
-            FqConstants.GET_INTROSPECTION -> buildIntrospectionBody(function, cls)
             else -> null
         }
     }
-
-    private fun buildIntrospectionBody(function: IrSimpleFunction, cls: ServiceClass): IrBlockBody =
-        context.irBuilder(function).irBlockBody {
-            +irReturn(
-                irCallConstructor(env.introspectionConstructor, emptyList()).apply {
-                    putArgs(
-                        irGetObject(
-                            cls.irClass.companionObject()?.symbol ?: error("Companion is missing")
-                        )
-                    )
-                }
-            )
-        }
 
     private fun buildFindEndpointBody(function: IrSimpleFunction, cls: ServiceClass): IrBlockBody =
         context.irBuilder(function).irBlockBody {

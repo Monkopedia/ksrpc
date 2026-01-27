@@ -15,12 +15,14 @@
  */
 package com.monkopedia.ksrpc.webworker.test
 
-import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.IntrospectableRpcService
+import com.monkopedia.ksrpc.annotation.KsIntrospectable
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
 
 @KsService
-interface WebWorkerTestService : RpcService {
+@KsIntrospectable
+interface WebWorkerTestService : IntrospectableRpcService {
     @KsMethod("/ping")
     suspend fun ping(input: String): String
 
@@ -32,7 +34,8 @@ interface WebWorkerTestService : RpcService {
 }
 
 @KsService
-interface WebWorkerTestSubService : RpcService {
+@KsIntrospectable
+interface WebWorkerTestSubService : IntrospectableRpcService {
     @KsMethod("/rpc")
     suspend fun rpc(u: Pair<String, String>): String
 }

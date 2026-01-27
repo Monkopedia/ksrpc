@@ -22,6 +22,7 @@ import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.ERROR
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.ir.declarations.IrParameterKind
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
+import org.jetbrains.kotlin.ir.symbols.IrConstructorSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.util.constructors
 import org.jetbrains.kotlin.name.CallableId
@@ -42,9 +43,15 @@ class KsrpcGenerationEnvironment(
     val serviceExecutor = referenceClass(FqConstants.SERVICE_EXECUTOR)
     val serializerTransformer = referenceClass(FqConstants.SERIALIZER_TRANSFORMER)
     val binaryTransformer = referenceObject(FqConstants.BINARY_TRANSFORMER)
-    val introspectionRpcObject = referenceObject(FqConstants.INTROSPECTION_SERVICE_RPC_OBJECT)
-    val introspectionImpl = referenceClass(FqConstants.INTROSPECTION_SERVICE_IMPL)
-    val introspectionConstructor = introspectionImpl.constructors.first()
+    val introspectionRpcObject: IrClassSymbol by lazy {
+        referenceObject(FqConstants.INTROSPECTION_SERVICE_RPC_OBJECT)
+    }
+    val introspectionImpl: IrClassSymbol by lazy {
+        referenceClass(FqConstants.INTROSPECTION_SERVICE_IMPL)
+    }
+    val introspectionConstructor: IrConstructorSymbol by lazy {
+        introspectionImpl.constructors.first()
+    }
     val subserviceTransformer = referenceClass(FqConstants.SUBSERVICE_TRANSFORMER)
     val rpcObjectKey = maybeReferenceClass(FqConstants.RPC_OBJECT_KEY)
     val suspendCloseable = referenceClass(FqConstants.SUSPEND_CLOSEABLE)

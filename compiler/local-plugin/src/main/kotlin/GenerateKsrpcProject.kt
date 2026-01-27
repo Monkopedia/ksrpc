@@ -50,6 +50,7 @@ fun Project.ksrpcModule(
     supportMingw: Boolean = supportNative,
     supportWasm: Boolean = supportJs,
     includePublications: Boolean = true,
+    applyKsrpcPlugin: Boolean = true,
     nativeConfig: KotlinNativeTarget.() -> Unit = {}
 ) {
     group = "com.monkopedia.ksrpc"
@@ -58,7 +59,7 @@ fun Project.ksrpcModule(
     plugins.apply("org.jetbrains.kotlin.plugin.serialization")
 
     plugins.apply("org.jetbrains.dokka")
-    if (name != "ksrpc-api") {
+    if (applyKsrpcPlugin && name != "ksrpc-api") {
         plugins.apply("com.monkopedia.ksrpc.plugin")
     }
     if (includePublications) {

@@ -16,6 +16,7 @@
 package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.RpcDataType
+import com.monkopedia.ksrpc.annotation.KsIntrospectable
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
 import com.monkopedia.ksrpc.channels.CallData
@@ -32,7 +33,8 @@ import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 
 @KsService
-interface TestInterface : RpcService {
+@KsIntrospectable
+interface TestInterface : IntrospectableRpcService {
     @KsMethod("/rpc")
     suspend fun rpc(u: Pair<String, String>): String
 }

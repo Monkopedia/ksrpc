@@ -1,0 +1,46 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, js, linuxArm64, linuxX64, macosArm64, macosX64, mingwX64, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <com.monkopedia.ksrpc:ksrpc-introspection>
+abstract interface com.monkopedia.ksrpc/IntrospectableRpcService : com.monkopedia.ksrpc/RpcService { // com.monkopedia.ksrpc/IntrospectableRpcService|null[0]
+    abstract suspend fun getIntrospection(kotlin/Unit = ...): com.monkopedia.ksrpc/IntrospectionService // com.monkopedia.ksrpc/IntrospectableRpcService.getIntrospection|getIntrospection(kotlin.Unit){}[0]
+}
+
+abstract interface com.monkopedia.ksrpc/IntrospectionService : com.monkopedia.ksrpc/IntrospectableRpcService { // com.monkopedia.ksrpc/IntrospectionService|null[0]
+    abstract suspend fun getEndpointInfo(kotlin/String): com.monkopedia.ksrpc/RpcEndpointInfo // com.monkopedia.ksrpc/IntrospectionService.getEndpointInfo|getEndpointInfo(kotlin.String){}[0]
+    abstract suspend fun getEndpoints(kotlin/Unit = ...): kotlin.collections/List<kotlin/String> // com.monkopedia.ksrpc/IntrospectionService.getEndpoints|getEndpoints(kotlin.Unit){}[0]
+    abstract suspend fun getServiceName(kotlin/Unit = ...): kotlin/String // com.monkopedia.ksrpc/IntrospectionService.getServiceName|getServiceName(kotlin.Unit){}[0]
+
+    final object Companion : com.monkopedia.ksrpc/RpcObject<com.monkopedia.ksrpc/IntrospectionService> { // com.monkopedia.ksrpc/IntrospectionService.Companion|null[0]
+        final val endpoints // com.monkopedia.ksrpc/IntrospectionService.Companion.endpoints|{}endpoints[0]
+            final fun <get-endpoints>(): kotlin.collections/List<kotlin/String> // com.monkopedia.ksrpc/IntrospectionService.Companion.endpoints.<get-endpoints>|<get-endpoints>(){}[0]
+        final val serviceName // com.monkopedia.ksrpc/IntrospectionService.Companion.serviceName|{}serviceName[0]
+            final fun <get-serviceName>(): kotlin/String // com.monkopedia.ksrpc/IntrospectionService.Companion.serviceName.<get-serviceName>|<get-serviceName>(){}[0]
+
+        final fun <#A2: kotlin/Any?> createStub(com.monkopedia.ksrpc.channels/SerializedService<#A2>): com.monkopedia.ksrpc/IntrospectionService // com.monkopedia.ksrpc/IntrospectionService.Companion.createStub|createStub(com.monkopedia.ksrpc.channels.SerializedService<0:0>){0§<kotlin.Any?>}[0]
+        final fun findEndpoint(kotlin/String): com.monkopedia.ksrpc/RpcMethod<*, *, *> // com.monkopedia.ksrpc/IntrospectionService.Companion.findEndpoint|findEndpoint(kotlin.String){}[0]
+    }
+}
+
+final class com.monkopedia.ksrpc/IntrospectionServiceImpl : com.monkopedia.ksrpc/IntrospectionService { // com.monkopedia.ksrpc/IntrospectionServiceImpl|null[0]
+    constructor <init>(com.monkopedia.ksrpc/RpcObject<*>) // com.monkopedia.ksrpc/IntrospectionServiceImpl.<init>|<init>(com.monkopedia.ksrpc.RpcObject<*>){}[0]
+
+    final suspend fun getEndpointInfo(kotlin/String): com.monkopedia.ksrpc/RpcEndpointInfo // com.monkopedia.ksrpc/IntrospectionServiceImpl.getEndpointInfo|getEndpointInfo(kotlin.String){}[0]
+    final suspend fun getEndpoints(kotlin/Unit): kotlin.collections/List<kotlin/String> // com.monkopedia.ksrpc/IntrospectionServiceImpl.getEndpoints|getEndpoints(kotlin.Unit){}[0]
+    final suspend fun getIntrospection(kotlin/Unit): com.monkopedia.ksrpc/IntrospectionService // com.monkopedia.ksrpc/IntrospectionServiceImpl.getIntrospection|getIntrospection(kotlin.Unit){}[0]
+    final suspend fun getServiceName(kotlin/Unit): kotlin/String // com.monkopedia.ksrpc/IntrospectionServiceImpl.getServiceName|getServiceName(kotlin.Unit){}[0]
+}
+
+final object com.monkopedia.ksrpc/IntrospectionServiceRpcObject : com.monkopedia.ksrpc/RpcObject<com.monkopedia.ksrpc/IntrospectionService> { // com.monkopedia.ksrpc/IntrospectionServiceRpcObject|null[0]
+    final val endpoints // com.monkopedia.ksrpc/IntrospectionServiceRpcObject.endpoints|{}endpoints[0]
+        final fun <get-endpoints>(): kotlin.collections/List<kotlin/String> // com.monkopedia.ksrpc/IntrospectionServiceRpcObject.endpoints.<get-endpoints>|<get-endpoints>(){}[0]
+    final val serviceName // com.monkopedia.ksrpc/IntrospectionServiceRpcObject.serviceName|{}serviceName[0]
+        final fun <get-serviceName>(): kotlin/String // com.monkopedia.ksrpc/IntrospectionServiceRpcObject.serviceName.<get-serviceName>|<get-serviceName>(){}[0]
+
+    final fun <#A1: kotlin/Any?> createStub(com.monkopedia.ksrpc.channels/SerializedService<#A1>): com.monkopedia.ksrpc/IntrospectionService // com.monkopedia.ksrpc/IntrospectionServiceRpcObject.createStub|createStub(com.monkopedia.ksrpc.channels.SerializedService<0:0>){0§<kotlin.Any?>}[0]
+    final fun findEndpoint(kotlin/String): com.monkopedia.ksrpc/RpcMethod<*, *, *> // com.monkopedia.ksrpc/IntrospectionServiceRpcObject.findEndpoint|findEndpoint(kotlin.String){}[0]
+}

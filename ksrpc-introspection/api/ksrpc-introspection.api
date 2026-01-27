@@ -1,0 +1,51 @@
+public abstract interface class com/monkopedia/ksrpc/IntrospectableRpcService : com/monkopedia/ksrpc/RpcService {
+	public abstract fun getIntrospection (Lkotlin/Unit;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun getIntrospection$default (Lcom/monkopedia/ksrpc/IntrospectableRpcService;Lkotlin/Unit;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class com/monkopedia/ksrpc/IntrospectableRpcService$DefaultImpls {
+	public static fun close (Lcom/monkopedia/ksrpc/IntrospectableRpcService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun getIntrospection$default (Lcom/monkopedia/ksrpc/IntrospectableRpcService;Lkotlin/Unit;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public abstract interface class com/monkopedia/ksrpc/IntrospectionService : com/monkopedia/ksrpc/IntrospectableRpcService {
+	public static final field Companion Lcom/monkopedia/ksrpc/IntrospectionService$Companion;
+	public abstract fun getEndpointInfo (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun getEndpoints (Lkotlin/Unit;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun getEndpoints$default (Lcom/monkopedia/ksrpc/IntrospectionService;Lkotlin/Unit;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public abstract fun getServiceName (Lkotlin/Unit;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun getServiceName$default (Lcom/monkopedia/ksrpc/IntrospectionService;Lkotlin/Unit;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class com/monkopedia/ksrpc/IntrospectionService$Companion : com/monkopedia/ksrpc/RpcObject {
+	public fun createStub (Lcom/monkopedia/ksrpc/channels/SerializedService;)Lcom/monkopedia/ksrpc/IntrospectionService;
+	public synthetic fun createStub (Lcom/monkopedia/ksrpc/channels/SerializedService;)Lcom/monkopedia/ksrpc/RpcService;
+	public fun findEndpoint (Ljava/lang/String;)Lcom/monkopedia/ksrpc/RpcMethod;
+	public fun getEndpoints ()Ljava/util/List;
+	public fun getServiceName ()Ljava/lang/String;
+}
+
+public final class com/monkopedia/ksrpc/IntrospectionService$DefaultImpls {
+	public static fun close (Lcom/monkopedia/ksrpc/IntrospectionService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun getEndpoints$default (Lcom/monkopedia/ksrpc/IntrospectionService;Lkotlin/Unit;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static synthetic fun getServiceName$default (Lcom/monkopedia/ksrpc/IntrospectionService;Lkotlin/Unit;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class com/monkopedia/ksrpc/IntrospectionServiceImpl : com/monkopedia/ksrpc/IntrospectionService {
+	public fun <init> (Lcom/monkopedia/ksrpc/RpcObject;)V
+	public fun close (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getEndpointInfo (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getEndpoints (Lkotlin/Unit;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getIntrospection (Lkotlin/Unit;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getServiceName (Lkotlin/Unit;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/monkopedia/ksrpc/IntrospectionServiceRpcObject : com/monkopedia/ksrpc/RpcObject {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/IntrospectionServiceRpcObject;
+	public fun createStub (Lcom/monkopedia/ksrpc/channels/SerializedService;)Lcom/monkopedia/ksrpc/IntrospectionService;
+	public synthetic fun createStub (Lcom/monkopedia/ksrpc/channels/SerializedService;)Lcom/monkopedia/ksrpc/RpcService;
+	public fun findEndpoint (Ljava/lang/String;)Lcom/monkopedia/ksrpc/RpcMethod;
+	public fun getEndpoints ()Ljava/util/List;
+	public fun getServiceName ()Ljava/lang/String;
+}
+

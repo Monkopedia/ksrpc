@@ -31,6 +31,7 @@ kotlin {
     }
     sourceSets["commonMain"].dependencies {
         api(project(":ksrpc-web-worker"))
+        implementation(project(":ksrpc-introspection"))
     }
     sourceSets["jsMain"].dependencies {
         implementation(npm("webpack", "5.101.3"))

@@ -21,5 +21,6 @@ class FirKsrpcRegistrar : FirExtensionRegistrar() {
     override fun ExtensionRegistrarContext.configurePlugin() {
         +::FirKsrpcStubGenerator
         +::FirCompanionDeclarationGenerator
+        +::FirKsrpcIntrospectionGenerator
     }
 }
