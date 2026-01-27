@@ -59,36 +59,27 @@ actual fun createServiceWorkerWithConnection(
 }
 
 /**
- * Registers [defaultService] and listens for "ksrpc-connect" to attach a port.
+ * Listens for "ksrpc-connect" to attach a port and provides callback to initialize a [Connection].
  */
-fun registerServiceWorkerConnection(
-    defaultService: SerializedService<String>,
-    env: KsrpcEnvironment<String>
-): Connection<String> {
-    val connection = ServiceWorkerPacketChannel(env.defaultScope, env)
-    env.defaultScope.launch {
-        connection.registerDefault(defaultService)
-    }
+fun onServiceWorkerConnection(
+    env: KsrpcEnvironment<String>,
+    onConnection: suspend (Connection<String>) -> Unit
+) {
     val global = js("self")
     val handler: (MessageEvent) -> Unit = handler@{ event ->
         val message = event.data as? String
         if (message != "ksrpc-connect") return@handler
+        val connection = ServiceWorkerPacketChannel(env.defaultScope, env)
         val port = event.ports.getOrNull(0)
         if (port != null) {
             connection.attachPort(port)
         }
+        env.defaultScope.launch {
+            onConnection(connection)
+        }
     }
     global.addEventListener("message", handler)
-    return connection
 }
-
-/**
- * Convenience overload for registering a concrete service instance.
- */
-inline fun <reified T : RpcService> registerServiceWorkerConnection(
-    service: T,
-    env: KsrpcEnvironment<String>
-): Connection<String> = registerServiceWorkerConnection(service.serialized(env), env)
 
 private fun ServiceWorkerPacketChannel.attachPort(port: MessagePort) {
     if (!setPort(port)) return

@@ -15,10 +15,13 @@
  */
 package com.monkopedia.ksrpc.webworker.test
 
+import com.monkopedia.ksrpc.channels.registerDefault
 import com.monkopedia.ksrpc.ksrpcEnvironment
-import com.monkopedia.ksrpc.webworker.registerServiceWorkerConnection
+import com.monkopedia.ksrpc.webworker.onServiceWorkerConnection
 
 fun main() {
     val env = ksrpcEnvironment { }
-    registerServiceWorkerConnection(WebWorkerTestServiceImpl("js"), env)
+    onServiceWorkerConnection(env) { connection ->
+        connection.registerDefault(WebWorkerTestServiceImpl("js"))
+    }
 }

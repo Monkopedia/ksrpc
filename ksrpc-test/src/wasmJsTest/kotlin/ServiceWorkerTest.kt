@@ -24,33 +24,76 @@ import kotlin.test.assertTrue
 
 class ServiceWorkerTest {
     @Test
-    fun wasmServiceWorkerConnection() = runBlockingUnit {
+    fun wasmServiceWorkerConnection_methods() = runBlockingUnit {
+        if (!hasWindow()) return@runBlockingUnit
+
+        useWebWorkerService { service ->
+            assertEquals("pong:ping:js", service.ping("ping"))
+            assertEquals("hello world", service.rpc("hello" to "world"))
+        }
+
+        null
+    }
+
+    @Test
+    fun wasmServiceWorkerConnection_subservice() = runBlockingUnit {
+        if (!hasWindow()) return@runBlockingUnit
+        useWebWorkerService { service ->
+            service.subservice("sub").use { sub ->
+                assertEquals("sub a b", sub.rpc("a" to "b"))
+            }
+        }
+        null
+    }
+
+    @Test
+    fun wasmServiceWorkerConnection_introspection() = runBlockingUnit {
+        if (!hasWindow()) return@runBlockingUnit
+        useWebWorkerService { service ->
+            service.getIntrospection().use { introspection ->
+                val serviceName = introspection.getServiceName()
+                assertEquals(
+                    "com.monkopedia.ksrpc.webworker.test.WebWorkerTestService",
+                    serviceName
+                )
+
+                val endpoints = introspection.getEndpoints()
+                assertTrue("ping" in endpoints)
+                assertTrue("rpc" in endpoints)
+                assertTrue("service" in endpoints)
+            }
+        }
+
+        null
+    }
+
+    @Test
+    fun wasmServiceWorkerConnection_introspection_introspection() = runBlockingUnit {
         if (!hasWindow()) {
             println("No window found")
             return@runBlockingUnit
         }
-        val env = ksrpcEnvironment { }
-        val connection = createServiceWorkerWithConnection(wasmWorkerUrl(), env)
-        val service = connection.defaultChannel().toStub<WebWorkerTestService, String>()
+        useWebWorkerService { service ->
+            service.getIntrospection().getIntrospection().use { introspection ->
+                val serviceName = introspection.getServiceName()
+                assertEquals("com.monkopedia.ksrpc.IntrospectionService", serviceName)
 
-        assertEquals("pong:ping:js", service.ping("ping"))
-        assertEquals("hello world", service.rpc("hello" to "world"))
+                val endpoints = introspection.getEndpoints()
 
-        val sub = service.subservice("sub")
-        assertEquals("sub a b", sub.rpc("a" to "b"))
-
-        val serviceName = service.getIntrospection().getServiceName()
-        assertEquals("com.monkopedia.ksrpc.webworker.test.WebWorkerTestService", serviceName)
-
-        val endpoints = service.getIntrospection().getEndpoints()
-        assertTrue("ping" in endpoints)
-        assertTrue("rpc" in endpoints)
-        assertTrue("service" in endpoints)
-        assertTrue("service_name" in endpoints)
-        assertTrue("endpoints" in endpoints)
-
-        connection.close()
+                assertTrue("service_name" in endpoints)
+                assertTrue("endpoints" in endpoints)
+            }
+        }
         null
+    }
+
+    suspend fun useWebWorkerService(exec: suspend (WebWorkerTestService) -> Unit) {
+        val env = ksrpcEnvironment { }
+        createServiceWorkerWithConnection(wasmWorkerUrl(), env).use { connection ->
+            connection.defaultChannel().toStub<WebWorkerTestService, String>().use { service ->
+                exec(service)
+            }
+        }
     }
 }
 
