@@ -24,6 +24,7 @@ import com.monkopedia.ksrpc.channels.registerHost
 import com.monkopedia.ksrpc.internal.client
 import com.monkopedia.ksrpc.internal.host
 import io.ktor.utils.io.ByteReadChannel
+import kotlin.sequences.sequence
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.serializer
@@ -86,6 +87,8 @@ object BinaryTransformer : Transformer<ByteReadChannel> {
 
 class SubserviceTransformer<T : RpcService>(private val serviceObj: RpcObject<T>) :
     Transformer<T> {
+    val serviceObject: RpcObject<T>
+        get() = serviceObj
     override val rpcDataType: RpcDataType
         get() = RpcDataType.Service(serviceObj.serviceName)
     override suspend fun <S> transform(input: T, channel: SerializedService<S>): CallData<S> {
@@ -148,4 +151,9 @@ class RpcMethod<T : RpcService, I, O> constructor(
 
     fun inputRpcDataType(): RpcDataType = inputTransform.rpcDataType
     fun outputRpcDataType(): RpcDataType = outputTransform.rpcDataType
+
+    fun findSubserviceTransformers(): List<SubserviceTransformer<out RpcService>> = listOfNotNull(
+        inputTransform as? SubserviceTransformer<*>,
+        outputTransform as? SubserviceTransformer<*>
+    )
 }

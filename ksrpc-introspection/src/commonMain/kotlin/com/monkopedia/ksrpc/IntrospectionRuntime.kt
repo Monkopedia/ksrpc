@@ -22,9 +22,10 @@ import kotlinx.serialization.builtins.serializer
 internal const val SERVICE_NAME_ENDPOINT = "service_name"
 internal const val ENDPOINTS_ENDPOINT = "endpoints"
 internal const val ENDPOINT_INFO_ENDPOINT = "endpoint_info"
+internal const val INTROSPECTION_FOR_ENDPOINT = "introspection_for"
 
 @PublishedApi
-internal class IntrospectionServiceImpl(private val rpcObject: RpcObject<*>) :
+internal data class IntrospectionServiceImpl(private val rpcObject: RpcObject<*>) :
     IntrospectionService {
     override suspend fun getServiceName(u: Unit): String = rpcObject.serviceName
 
@@ -40,76 +41,19 @@ internal class IntrospectionServiceImpl(private val rpcObject: RpcObject<*>) :
         )
     }
 
-    override suspend fun getIntrospection(u: Unit): IntrospectionService =
-        IntrospectionServiceImpl(IntrospectionServiceRpcObject)
-}
-
-@PublishedApi
-internal object IntrospectionServiceRpcObject : RpcObject<IntrospectionService> {
-    override val serviceName: String = "com.monkopedia.ksrpc.IntrospectionService"
-    override val endpoints: List<String> =
-        listOf(SERVICE_NAME_ENDPOINT, ENDPOINTS_ENDPOINT, ENDPOINT_INFO_ENDPOINT)
-    private var getServiceNameMethod: RpcMethod<IntrospectionService, Unit, String>? = null
-    private var getEndpointsMethod: RpcMethod<IntrospectionService, Unit, List<String>>? = null
-    private var getEndpointInfoMethod: RpcMethod<IntrospectionService, String, RpcEndpointInfo>? =
-        null
-
-    private fun serviceNameMethod(): RpcMethod<IntrospectionService, Unit, String> =
-        getServiceNameMethod
-            ?: RpcMethod<IntrospectionService, Unit, String>(
-                SERVICE_NAME_ENDPOINT,
-                SerializerTransformer(Unit.serializer()),
-                SerializerTransformer(String.serializer()),
-                object : ServiceExecutor {
-                    override suspend fun invoke(service: RpcService, input: Any?): Any? =
-                        (service as IntrospectionService).getServiceName(input as Unit)
-                }
-            ).also { getServiceNameMethod = it }
-
-    private fun endpointsMethod(): RpcMethod<IntrospectionService, Unit, List<String>> =
-        getEndpointsMethod
-            ?: RpcMethod<IntrospectionService, Unit, List<String>>(
-                ENDPOINTS_ENDPOINT,
-                SerializerTransformer(Unit.serializer()),
-                SerializerTransformer(ListSerializer(String.serializer())),
-                object : ServiceExecutor {
-                    override suspend fun invoke(service: RpcService, input: Any?): Any? =
-                        (service as IntrospectionService).getEndpoints(input as Unit)
-                }
-            ).also { getEndpointsMethod = it }
-
-    private fun endpointInfoMethod(): RpcMethod<IntrospectionService, String, RpcEndpointInfo> =
-        getEndpointInfoMethod
-            ?: RpcMethod<IntrospectionService, String, RpcEndpointInfo>(
-                ENDPOINT_INFO_ENDPOINT,
-                SerializerTransformer(String.serializer()),
-                SerializerTransformer(RpcEndpointInfo.serializer()),
-                object : ServiceExecutor {
-                    override suspend fun invoke(service: RpcService, input: Any?): Any? =
-                        (service as IntrospectionService).getEndpointInfo(input as String)
-                }
-            ).also { getEndpointInfoMethod = it }
-
-    override fun <S> createStub(channel: SerializedService<S>): IntrospectionService =
-        object : IntrospectionService {
-            override suspend fun getServiceName(u: Unit): String =
-                serviceNameMethod().callChannel(channel, u) as String
-            override suspend fun getEndpoints(u: Unit): List<String> =
-                endpointsMethod().callChannel(channel, u) as List<String>
-            override suspend fun getEndpointInfo(endpoint: String): RpcEndpointInfo =
-                endpointInfoMethod().callChannel(channel, endpoint) as RpcEndpointInfo
-
-            override suspend fun getIntrospection(u: Unit): IntrospectionService = this
-
-            override suspend fun close() {
-                channel.close()
-            }
+    private val subserviceRpcObjects: Map<String, RpcObject<*>> by lazy {
+        rpcObject.endpoints.flatMap { endpoint ->
+            val method = rpcObject.findEndpoint(endpoint)
+            method.findSubserviceTransformers()
+        }.associate {
+            it.serviceObject.serviceName to it.serviceObject
         }
+    }
 
-    override fun findEndpoint(endpoint: String): RpcMethod<*, *, *> = when (endpoint) {
-        SERVICE_NAME_ENDPOINT -> serviceNameMethod()
-        ENDPOINTS_ENDPOINT -> endpointsMethod()
-        ENDPOINT_INFO_ENDPOINT -> endpointInfoMethod()
-        else -> throw RpcEndpointException("Unknown endpoint $endpoint")
+    override suspend fun getIntrospectionFor(service: String): IntrospectionService {
+        val normalized = service.trim()
+        val serviceObject = subserviceRpcObjects[normalized]
+            ?: throw RpcEndpointException("Unknown introspection target $service")
+        return IntrospectionServiceImpl(serviceObject)
     }
 }

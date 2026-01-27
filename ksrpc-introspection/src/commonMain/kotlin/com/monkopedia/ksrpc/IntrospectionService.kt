@@ -35,9 +35,15 @@ interface IntrospectableRpcService : RpcService {
 @KsService
 @KsIntrospectable
 interface IntrospectionService : IntrospectableRpcService {
+    @KsMethod("/service_name")
     suspend fun getServiceName(u: Unit = Unit): String
+
+    @KsMethod("/endpoints")
     suspend fun getEndpoints(u: Unit = Unit): List<String>
+
+    @KsMethod("/endpoint_info")
     suspend fun getEndpointInfo(endpoint: String): RpcEndpointInfo
 
-    companion object : RpcObject<IntrospectionService> by IntrospectionServiceRpcObject
+    @KsMethod("/introspection_for")
+    suspend fun getIntrospectionFor(service: String): IntrospectionService
 }

@@ -24,6 +24,7 @@ import com.monkopedia.ksrpc.channels.SerializedService
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.CompletableDeferred
@@ -38,6 +39,28 @@ interface TestInterface : IntrospectableRpcService {
     @KsMethod("/rpc")
     suspend fun rpc(u: Pair<String, String>): String
 }
+
+@KsService
+@KsIntrospectable
+interface TestIntrospectionChild : IntrospectableRpcService {
+    @KsMethod("/echo")
+    suspend fun echo(u: String): String
+}
+
+@KsService
+@KsIntrospectable
+interface TestIntrospectionParent : IntrospectableRpcService {
+    @KsMethod("/child_service")
+    suspend fun childService(prefix: String): TestIntrospectionChild
+}
+
+private val testIntrospectionParentImpl: TestIntrospectionParent
+    get() = object : TestIntrospectionParent {
+        override suspend fun childService(prefix: String): TestIntrospectionChild =
+            object : TestIntrospectionChild {
+                override suspend fun echo(u: String): String = "$prefix $u"
+            }
+    }
 
 class RpcServiceTest :
     RpcFunctionalityTest(
@@ -171,6 +194,39 @@ class RpcServiceTest :
         val endpoints = stub.getIntrospection().getIntrospection().getEndpoints()
         assertTrue("service_name" in endpoints, "Expected 'service_name' in $endpoints")
         assertTrue("endpoints" in endpoints, "Expected 'endpoints' in $endpoints")
+    }
+
+    @Test
+    fun testIntrospectionForSubservice() = runBlockingUnit {
+        val channel =
+            testIntrospectionParentImpl.serialized<TestIntrospectionParent, String>(
+                ksrpcEnvironment {
+                }
+            )
+        val stub = channel.toStub<TestIntrospectionParent, String>()
+        val introspection = stub.getIntrospection()
+        val childIntrospection =
+            introspection.getIntrospectionFor("com.monkopedia.ksrpc.TestIntrospectionChild")
+        assertEquals(
+            "com.monkopedia.ksrpc.TestIntrospectionChild",
+            childIntrospection.getServiceName()
+        )
+        val endpoints = childIntrospection.getEndpoints()
+        assertTrue("echo" in endpoints, "Expected 'echo' in $endpoints")
+    }
+
+    @Test
+    fun testIntrospectionForServiceMissing() = runBlockingUnit {
+        val channel =
+            testIntrospectionParentImpl.serialized<TestIntrospectionParent, String>(
+                ksrpcEnvironment {
+                }
+            )
+        val stub = channel.toStub<TestIntrospectionParent, String>()
+        val introspection = stub.getIntrospection()
+        assertFailsWith<RpcEndpointException> {
+            introspection.getIntrospectionFor("com.monkopedia.ksrpc.DoesNotExist")
+        }
     }
 
     @Test
