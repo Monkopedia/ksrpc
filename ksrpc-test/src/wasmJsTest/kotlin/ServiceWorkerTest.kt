@@ -15,8 +15,6 @@
  */
 package com.monkopedia.ksrpc
 
-import com.monkopedia.ksrpc.toStub
-import com.monkopedia.ksrpc.RpcDataType
 import com.monkopedia.ksrpc.webworker.createServiceWorkerWithConnection
 import com.monkopedia.ksrpc.webworker.test.WebWorkerTestService
 import kotlin.test.Test
@@ -94,11 +92,28 @@ class ServiceWorkerTest {
         useWebWorkerService { service ->
             service.getIntrospection().use { introspection ->
                 val rpcInfo = introspection.getEndpointInfo("rpc")
-                assertEquals(RpcDataType.DataStructure, rpcInfo.input)
-                assertEquals(RpcDataType.DataStructure, rpcInfo.output)
+                assertEquals(
+                    RpcDescriptor(
+                        RpcDescriptorType.CLASS,
+                        "kotlin.Pair",
+                        mapOf(
+                            "first" to
+                                RpcDescriptor(RpcDescriptorType.STRING, "kotlin.String", id = 1),
+                            "second" to
+                                RpcDescriptor(RpcDescriptorType.STRING, "kotlin.String", id = 1)
+                        )
+                    ),
+                    (rpcInfo.input as? RpcDataType.DataStructure)?.schema
+                )
+                assertEquals(
+                    RpcDescriptor(RpcDescriptorType.STRING, "kotlin.String"),
+                    (rpcInfo.output as? RpcDataType.DataStructure)?.schema
+                )
                 val serviceInfo = introspection.getEndpointInfo("service")
                 assertEquals(
-                    RpcDataType.Service("com.monkopedia.ksrpc.webworker.test.WebWorkerTestSubService"),
+                    RpcDataType.Service(
+                        "com.monkopedia.ksrpc.webworker.test.WebWorkerTestSubService"
+                    ),
                     serviceInfo.output
                 )
             }

@@ -50,7 +50,7 @@ class SerializerTransformer<I>(private val serializer: KSerializer<I>) : Transfo
     override val hasContent: Boolean
         get() = serializer != Unit.serializer()
     override val rpcDataType: RpcDataType
-        get() = RpcDataType.DataStructure
+        get() = RpcDataType.DataStructure(serializer)
 
     override suspend fun <T> transform(input: I, channel: SerializedService<T>): CallData<T> {
         channel.env.logger.debug("Transformer", "Serializing input to CallData")

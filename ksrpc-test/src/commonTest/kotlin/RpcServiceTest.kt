@@ -15,7 +15,6 @@
  */
 package com.monkopedia.ksrpc
 
-import com.monkopedia.ksrpc.RpcDataType
 import com.monkopedia.ksrpc.annotation.KsIntrospectable
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
@@ -181,8 +180,21 @@ class RpcServiceTest :
         }.serialized<TestInterface, String>(ksrpcEnvironment { })
         val stub = channel.toStub<TestInterface, String>()
         val rpcInfo = stub.getIntrospection().getEndpointInfo("rpc")
-        assertEquals(RpcDataType.DataStructure, rpcInfo.input)
-        assertEquals(RpcDataType.DataStructure, rpcInfo.output)
+        assertEquals(
+            RpcDescriptor(
+                RpcDescriptorType.CLASS,
+                "kotlin.Pair",
+                mapOf(
+                    "first" to RpcDescriptor(RpcDescriptorType.STRING, "kotlin.String", id = 1),
+                    "second" to RpcDescriptor(RpcDescriptorType.STRING, "kotlin.String", id = 1)
+                )
+            ),
+            (rpcInfo.input as? RpcDataType.DataStructure)?.schema
+        )
+        assertEquals(
+            RpcDescriptor(RpcDescriptorType.STRING, "kotlin.String"),
+            (rpcInfo.output as? RpcDataType.DataStructure)?.schema
+        )
     }
 
     @Test

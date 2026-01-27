@@ -149,8 +149,21 @@ class JniTest {
     fun testIntrospectionEndpointInfo() = runBlockingUnit {
         val service = createService()
         val rpcInfo = service.getIntrospection().getEndpointInfo("rpc")
-        assertEquals(RpcDataType.DataStructure, rpcInfo.input)
-        assertEquals(RpcDataType.DataStructure, rpcInfo.output)
+        assertEquals(
+            RpcDescriptor(
+                RpcDescriptorType.CLASS,
+                "kotlin.Pair",
+                mapOf(
+                    "first" to RpcDescriptor(RpcDescriptorType.STRING, "kotlin.String", id = 1),
+                    "second" to RpcDescriptor(RpcDescriptorType.STRING, "kotlin.String", id = 1)
+                )
+            ),
+            (rpcInfo.input as? RpcDataType.DataStructure)?.schema
+        )
+        assertEquals(
+            RpcDescriptor(RpcDescriptorType.STRING, "kotlin.String"),
+            (rpcInfo.output as? RpcDataType.DataStructure)?.schema
+        )
 
         val binaryRpcInfo = service.getIntrospection().getEndpointInfo("binary_rpc")
         assertEquals(RpcDataType.BinaryData, binaryRpcInfo.output)
