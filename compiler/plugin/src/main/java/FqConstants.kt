@@ -30,9 +30,8 @@ object FqConstants {
     val INTROSPECTION_SERVICE_FQ = FqName("com.monkopedia.ksrpc.IntrospectionService")
     val INTROSPECTION_SERVICE = ClassId(FQPKG, Name.identifier("IntrospectionService"))
     val INTROSPECTABLE_RPC_SERVICE = ClassId(FQPKG, Name.identifier("IntrospectableRpcService"))
+    val FQ_INTROSPECTABLE_RPC_SERVICE = FqName("com.monkopedia.ksrpc.IntrospectableRpcService")
     val INTROSPECTION_SERVICE_IMPL = ClassId(FQPKG, Name.identifier("IntrospectionServiceImpl"))
-    val INTROSPECTION_SERVICE_RPC_OBJECT =
-        ClassId(FQPKG, Name.identifier("IntrospectionServiceRpcObject"))
     val FQRPC_SERVICE = FqName("com.monkopedia.ksrpc.RpcService")
 
     val SERVICE_EXECUTOR = ClassId(FQPKG, Name.identifier("ServiceExecutor"))

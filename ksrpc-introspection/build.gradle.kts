@@ -5,4 +5,4 @@ plugins {
     alias(libs.plugins.kotlin.atomicfu)
 }
 
-ksrpcModule(applyKsrpcPlugin = false)
+ksrpcModule()

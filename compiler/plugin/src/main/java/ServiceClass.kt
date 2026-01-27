@@ -67,12 +67,16 @@ private class Visitor(private val messageCollector: MessageCollector) : IrElemen
             if (current != null) {
                 current.methods.add(declaration to annotation)
             } else if (!declaration.isFakeOverride) {
-                messageCollector.report(
-                    CompilerMessageSeverity.ERROR,
-                    "${
-                        declaration.name.asString()
-                    } declared as KsMethod but not inside a KsService"
-                )
+                if (declaration.dispatchReceiverParameter?.type?.classFqName !=
+                    FqConstants.FQ_INTROSPECTABLE_RPC_SERVICE
+                ) {
+                    messageCollector.report(
+                        CompilerMessageSeverity.ERROR,
+                        "${
+                            declaration.name.asString()
+                        } declared as KsMethod but not inside a KsService (${declaration.dispatchReceiverParameter?.type?.classFqName})"
+                    )
+                }
             }
         } else {
             if (currentService != null && declaration.overriddenSymbols.isEmpty()) {
@@ -143,8 +147,8 @@ data class ServiceClass(
         ): MutableMap<String, ServiceClass> {
             val visitor = Visitor(messageCollector)
             visitor.visitElement(moduleFragment)
-        SubclassVisitor(messageCollector, visitor.classes).visitElement(moduleFragment)
-        return visitor.classes
+            SubclassVisitor(messageCollector, visitor.classes).visitElement(moduleFragment)
+            return visitor.classes
         }
     }
 }

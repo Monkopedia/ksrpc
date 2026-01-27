@@ -407,11 +407,8 @@ class StubGeneration(
 
 fun KsrpcGenerationEnvironment.companionSymbol(outputType: IrType): IrClassSymbol {
     val clazz = outputType.getClass()
-    val companionSymbol = if (clazz?.kotlinFqName == FqConstants.INTROSPECTION_SERVICE_FQ) {
-        introspectionRpcObject
-    } else {
-        clazz?.companionObject()?.symbol
-    } ?: error("Missing companion ${outputType.classFqName?.asString()}")
+    val companionSymbol = clazz?.companionObject()?.symbol
+        ?: error("Missing companion ${outputType.classFqName?.asString()}")
     return companionSymbol
 }
 

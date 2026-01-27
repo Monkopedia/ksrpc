@@ -43,9 +43,6 @@ class KsrpcGenerationEnvironment(
     val serviceExecutor = referenceClass(FqConstants.SERVICE_EXECUTOR)
     val serializerTransformer = referenceClass(FqConstants.SERIALIZER_TRANSFORMER)
     val binaryTransformer = referenceObject(FqConstants.BINARY_TRANSFORMER)
-    val introspectionRpcObject: IrClassSymbol by lazy {
-        referenceObject(FqConstants.INTROSPECTION_SERVICE_RPC_OBJECT)
-    }
     val introspectionImpl: IrClassSymbol by lazy {
         referenceClass(FqConstants.INTROSPECTION_SERVICE_IMPL)
     }
