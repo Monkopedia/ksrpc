@@ -22,6 +22,7 @@ import com.monkopedia.ksrpc.channels.SerializedService
  */
 interface RpcObject<T : RpcService> {
     val serviceName: String
+    val endpoints: List<String>
     fun <S> createStub(channel: SerializedService<S>): T
     fun findEndpoint(endpoint: String): RpcMethod<*, *, *>
 }

@@ -15,9 +15,14 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.annotation.KsMethod
+
 /**
  * Super-interface of all services tagged with [KsService].
  */
 interface RpcService : SuspendCloseable {
+    @KsMethod("/introspection")
+    suspend fun getIntrospection(u: Unit = Unit): IntrospectionService
+
     override suspend fun close() = Unit
 }

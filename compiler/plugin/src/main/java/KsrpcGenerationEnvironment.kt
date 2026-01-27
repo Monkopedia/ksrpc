@@ -20,10 +20,14 @@ package com.monkopedia.ksrpc.plugin
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.ERROR
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
+import org.jetbrains.kotlin.ir.declarations.IrParameterKind
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.util.constructors
+import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
+import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.name.Name
 
 class KsrpcGenerationEnvironment(
     private val context: IrPluginContext,
@@ -38,6 +42,9 @@ class KsrpcGenerationEnvironment(
     val serviceExecutor = referenceClass(FqConstants.SERVICE_EXECUTOR)
     val serializerTransformer = referenceClass(FqConstants.SERIALIZER_TRANSFORMER)
     val binaryTransformer = referenceObject(FqConstants.BINARY_TRANSFORMER)
+    val introspectionRpcObject = referenceObject(FqConstants.INTROSPECTION_SERVICE_RPC_OBJECT)
+    val introspectionImpl = referenceClass(FqConstants.INTROSPECTION_SERVICE_IMPL)
+    val introspectionConstructor = introspectionImpl.constructors.first()
     val subserviceTransformer = referenceClass(FqConstants.SUBSERVICE_TRANSFORMER)
     val rpcObjectKey = maybeReferenceClass(FqConstants.RPC_OBJECT_KEY)
     val suspendCloseable = referenceClass(FqConstants.SUSPEND_CLOSEABLE)
@@ -51,6 +58,17 @@ class KsrpcGenerationEnvironment(
         }
 
     val threadLocal = referenceClass(FqConstants.THREAD_LOCAL)
+    val listOfFunction =
+        context.referenceFunctions(
+            CallableId(FqName("kotlin.collections"), Name.identifier("listOf"))
+        ).firstOrNull { fn ->
+            val regularParams = fn.owner.parameters.filter { it.kind == IrParameterKind.Regular }
+            regularParams.size == 1 && regularParams.single().varargElementType != null
+        }
+            ?: run {
+                messageCollector.report(ERROR, "Can't find kotlin.collections.listOf")
+                error("Can't find kotlin.collections.listOf")
+            }
 
     private fun maybeReferenceClass(name: ClassId): IrClassSymbol? = context.referenceClass(name)
 

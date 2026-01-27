@@ -15,20 +15,46 @@
  */
 package com.monkopedia.ksrpc.channels
 
+import com.monkopedia.ksrpc.IntrospectionService
+import com.monkopedia.ksrpc.IntrospectionServiceImpl
 import com.monkopedia.ksrpc.RpcEndpointException
 import com.monkopedia.ksrpc.RpcMethod
 import com.monkopedia.ksrpc.RpcObject
 import com.monkopedia.ksrpc.RpcObjectKey
 import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.SerializerTransformer
+import com.monkopedia.ksrpc.ServiceExecutor
+import com.monkopedia.ksrpc.SubserviceTransformer
+import com.monkopedia.ksrpc.rpcObject
+import kotlinx.serialization.builtins.serializer
 
 @RpcObjectKey(VoidService.Companion::class)
 internal interface VoidService : RpcService {
     companion object : RpcObject<VoidService> {
+        private val introspection = RpcMethod<VoidService, Unit, IntrospectionService>(
+            "introspection",
+            SerializerTransformer(Unit.serializer()),
+            SubserviceTransformer(rpcObject<IntrospectionService>()),
+            object : ServiceExecutor {
+                override suspend fun invoke(service: RpcService, input: Any?): Any? =
+                    IntrospectionServiceImpl(Companion)
+            }
+        )
         override val serviceName: String = "com.monkopedia.ksrpc.channels.VoidService"
+        override val endpoints: List<String> = listOf(introspection.endpoint)
+
         override fun <T> createStub(channel: SerializedService<T>): VoidService =
-            object : VoidService {}
+            object : VoidService {
+
+                override suspend fun getIntrospection(u: Unit): IntrospectionService =
+                    introspection.callChannel(channel, u) as IntrospectionService
+            }
 
         override fun findEndpoint(endpoint: String): RpcMethod<*, *, *> =
-            throw RpcEndpointException("VoidService has no endpoints")
+            if (endpoint == introspection.endpoint) {
+                introspection
+            } else {
+                throw RpcEndpointException("VoidService has no endpoints")
+            }
     }
 }

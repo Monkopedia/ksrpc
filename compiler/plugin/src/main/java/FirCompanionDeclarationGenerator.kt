@@ -16,18 +16,21 @@
 package com.monkopedia.ksrpc.plugin
 
 import com.monkopedia.ksrpc.plugin.FqConstants.CREATE_STUB
+import com.monkopedia.ksrpc.plugin.FqConstants.ENDPOINTS
 import com.monkopedia.ksrpc.plugin.FqConstants.FIND_ENDPOINT
 import com.monkopedia.ksrpc.plugin.FqConstants.KS_METHOD
 import com.monkopedia.ksrpc.plugin.FqConstants.KS_SERVICE
 import com.monkopedia.ksrpc.plugin.FqConstants.RPC_METHOD
 import com.monkopedia.ksrpc.plugin.FqConstants.RPC_OBJECT
-import com.monkopedia.ksrpc.plugin.FqConstants.SERVICE_NAME
 import com.monkopedia.ksrpc.plugin.FqConstants.SERIALIZED_SERVICE
+import com.monkopedia.ksrpc.plugin.FqConstants.SERVICE_NAME
 import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.Modality.FINAL
 import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.declarations.FirDeclarationOrigin
+import org.jetbrains.kotlin.fir.declarations.builder.buildReceiverParameter
+import org.jetbrains.kotlin.fir.declarations.utils.isSuspend
 import org.jetbrains.kotlin.fir.extensions.FirDeclarationGenerationExtension
 import org.jetbrains.kotlin.fir.extensions.FirDeclarationPredicateRegistrar
 import org.jetbrains.kotlin.fir.extensions.MemberGenerationContext
@@ -40,6 +43,7 @@ import org.jetbrains.kotlin.fir.plugin.createDefaultPrivateConstructor
 import org.jetbrains.kotlin.fir.plugin.createMemberFunction
 import org.jetbrains.kotlin.fir.plugin.createMemberProperty
 import org.jetbrains.kotlin.fir.resolve.defaultType
+import org.jetbrains.kotlin.fir.scopes.impl.overrides
 import org.jetbrains.kotlin.fir.scopes.impl.toConeType
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassLikeSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassSymbol
@@ -89,6 +93,9 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
         callableId: CallableId,
         context: MemberGenerationContext?
     ): List<FirNamedFunctionSymbol> {
+        if (callableId.callableName == FqConstants.GET_INTROSPECTION) {
+            return createIntrospectionStub(callableId, context?.owner)
+        }
         val ownerKey = context?.let(::checkOwnerKey) ?: return emptyList()
         return when (callableId.callableName) {
             FIND_ENDPOINT -> createFindEndpoint(callableId, context.owner, ownerKey)
@@ -104,6 +111,7 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
         val ownerKey = context?.let(::checkOwnerKey) ?: return emptyList()
         return when (callableId.callableName) {
             SERVICE_NAME -> createServiceName(callableId, context.owner, ownerKey)
+            ENDPOINTS -> createEndpoints(callableId, context.owner, ownerKey)
             else -> emptyList()
         }
     }
@@ -138,6 +146,30 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
         return listOf(function.symbol)
     }
 
+    private fun createIntrospectionStub(
+        callableId: CallableId,
+        owner: FirClassSymbol<*>?
+    ): List<FirNamedFunctionSymbol> {
+        val owner = owner ?: return emptyList()
+        val retType = FqConstants.INTROSPECTION_SERVICE.createConeType(session, arrayOf())
+        val function =
+            createMemberFunction(
+                owner,
+                Key(owner.classId),
+                callableId.callableName,
+                retType
+            ) {
+                modality = FINAL
+                this.visibility
+                status {
+                    this.isSuspend = true
+                    this.isOverride = true
+                }
+                valueParameter(Name.identifier("u"), session.builtinTypes.unitType.coneType)
+            }
+        return listOf(function.symbol)
+    }
+
     private fun createServiceName(
         callableId: CallableId,
         owner: FirClassSymbol<*>,
@@ -156,11 +188,38 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
         return listOf(property.symbol)
     }
 
+    private fun createEndpoints(
+        callableId: CallableId,
+        owner: FirClassSymbol<*>,
+        ownerKey: Key
+    ): List<FirPropertySymbol> {
+        val listType = ClassId(
+            org.jetbrains.kotlin.name.FqName("kotlin.collections"),
+            Name.identifier("List")
+        ).createConeType(session, arrayOf(session.builtinTypes.stringType.coneType))
+        val property = createMemberProperty(
+            owner,
+            ownerKey,
+            callableId.callableName,
+            listType,
+            isVal = true,
+            hasBackingField = false
+        ) {
+            modality = FINAL
+        }
+        return listOf(property.symbol)
+    }
+
     override fun getCallableNamesForClass(
         classSymbol: FirClassSymbol<*>,
         context: MemberGenerationContext
     ): Set<Name> {
-        if (classSymbol.classKind != ClassKind.OBJECT) return emptySet()
+        if (classSymbol.classKind != ClassKind.OBJECT) {
+            if (session.predicateBasedProvider.matches(predicates, classSymbol)) {
+                return setOf(FqConstants.GET_INTROSPECTION)
+            }
+            return emptySet()
+        }
         (classSymbol as? FirRegularClassSymbol)?.classId
             ?.takeIf { it.isNestedClass }
             ?.takeIf { it.shortClassName == SpecialNames.DEFAULT_NAME_FOR_COMPANION_OBJECT }
@@ -168,9 +227,9 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
 
         val origin = classSymbol.origin as? FirDeclarationOrigin.Plugin
         return if (origin?.key is Key) {
-            setOf(FIND_ENDPOINT, CREATE_STUB, SERVICE_NAME, SpecialNames.INIT)
+            setOf(FIND_ENDPOINT, CREATE_STUB, SERVICE_NAME, ENDPOINTS, SpecialNames.INIT)
         } else {
-            setOf(FIND_ENDPOINT, CREATE_STUB, SERVICE_NAME)
+            setOf(FIND_ENDPOINT, CREATE_STUB, SERVICE_NAME, ENDPOINTS)
         }
     }
 

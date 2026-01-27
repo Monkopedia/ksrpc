@@ -22,6 +22,7 @@ import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.irThrow
 import org.jetbrains.kotlin.ir.backend.js.utils.isDispatchReceiver
 import org.jetbrains.kotlin.ir.builders.IrBlockBodyBuilder
+import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irBranch
 import org.jetbrains.kotlin.ir.builders.irCall
@@ -32,12 +33,14 @@ import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.builders.irGetObject
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irString
+import org.jetbrains.kotlin.ir.builders.irVararg
 import org.jetbrains.kotlin.ir.builders.irWhen
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrConstructor
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
-import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
+import org.jetbrains.kotlin.ir.declarations.IrParameterKind
 import org.jetbrains.kotlin.ir.declarations.IrProperty
+import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.expressions.IrBlockBody
 import org.jetbrains.kotlin.ir.expressions.IrBody
 import org.jetbrains.kotlin.ir.expressions.IrClassReference
@@ -46,6 +49,7 @@ import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
+import org.jetbrains.kotlin.ir.util.companionObject
 import org.jetbrains.kotlin.ir.util.constructors
 import org.jetbrains.kotlin.ir.util.kotlinFqName
 
@@ -86,6 +90,22 @@ class CompanionGeneration(
                     +irReturn(irString(fqName))
                 }
             }
+        declaration.declarations
+            .filterIsInstance<IrProperty>()
+            .firstOrNull { it.name == FqConstants.ENDPOINTS }
+            ?.let { property ->
+                val endpoints = cls.endpoints.keys.map { it.trimStart('/') }
+                val listExpr = context.irBuilder(property).irListOfStrings(endpoints)
+                property.backingField?.initializer =
+                    irFactory.createExpressionBody(
+                        SYNTHETIC_OFFSET,
+                        SYNTHETIC_OFFSET,
+                        listExpr
+                    )
+                property.getter?.body = context.irBuilder(property.getter!!).irSynthBody {
+                    +irReturn(irListOfStrings(endpoints))
+                }
+            }
         declaration.isCompanion = true
         return emptyList()
     }
@@ -114,13 +134,33 @@ class CompanionGeneration(
                     +irReturn(irString(cls.irClass.kotlinFqName.asString()))
                 }
             }
+            if (propertyName == FqConstants.ENDPOINTS) {
+                val endpoints = cls.endpoints.keys.map { it.trimStart('/') }
+                return context.irBuilder(function).irSynthBody {
+                    +irReturn(irListOfStrings(endpoints))
+                }
+            }
         }
         return when (function.name) {
             FqConstants.CREATE_STUB -> buildCreateStubBody(function, cls)
             FqConstants.FIND_ENDPOINT -> buildFindEndpointBody(function, cls)
+            FqConstants.GET_INTROSPECTION -> buildIntrospectionBody(function, cls)
             else -> null
         }
     }
+
+    private fun buildIntrospectionBody(function: IrSimpleFunction, cls: ServiceClass): IrBlockBody =
+        context.irBuilder(function).irBlockBody {
+            +irReturn(
+                irCallConstructor(env.introspectionConstructor, emptyList()).apply {
+                    putArgs(
+                        irGetObject(
+                            cls.irClass.companionObject()?.symbol ?: error("Companion is missing")
+                        )
+                    )
+                }
+            )
+        }
 
     private fun buildFindEndpointBody(function: IrSimpleFunction, cls: ServiceClass): IrBlockBody =
         context.irBuilder(function).irBlockBody {
@@ -161,6 +201,16 @@ class CompanionGeneration(
                 }
             )
         }
+
+    private fun IrBuilderWithScope.irListOfStrings(values: List<String>) =
+        irCall(env.listOfFunction)
+            .apply {
+                typeArguments[0] = context.irBuiltIns.stringType
+                val varargParameter = env.listOfFunction.owner.parameters
+                    .single { it.kind == IrParameterKind.Regular }
+                arguments[varargParameter] =
+                    irVararg(context.irBuiltIns.stringType, values.map { irString(it) })
+            }
 
     override fun generateBodyForConstructor(
         constructor: IrConstructor,

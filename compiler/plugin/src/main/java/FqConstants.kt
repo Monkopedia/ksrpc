@@ -22,11 +22,16 @@ import org.jetbrains.kotlin.name.Name
 
 object FqConstants {
     val FQPKG = FqName("com.monkopedia.ksrpc")
-    val RPC_ENDPOINT_EXCEPTION = ClassId(FQPKG, Name.identifier("RpcEndpointException"))
     val RPC_ENDPOINT_NOT_FOUND_EXCEPTION =
         ClassId(FQPKG, Name.identifier("RpcEndpointNotFoundException"))
     val RPC_OBJECT_KEY = ClassId(FQPKG, Name.identifier("RpcObjectKey"))
     val RPC_SERVICE = ClassId(FQPKG, Name.identifier("RpcService"))
+    val CONTINUATION = ClassId(FqName("kotlin.coroutines"), Name.identifier("Continuation"))
+    val INTROSPECTION_SERVICE_FQ = FqName("com.monkopedia.ksrpc.IntrospectionService")
+    val INTROSPECTION_SERVICE = ClassId(FQPKG, Name.identifier("IntrospectionService"))
+    val INTROSPECTION_SERVICE_IMPL = ClassId(FQPKG, Name.identifier("IntrospectionServiceImpl"))
+    val INTROSPECTION_SERVICE_RPC_OBJECT =
+        ClassId(FQPKG, Name.identifier("IntrospectionServiceRpcObject"))
     val FQRPC_SERVICE = FqName("com.monkopedia.ksrpc.RpcService")
 
     val SERVICE_EXECUTOR = ClassId(FQPKG, Name.identifier("ServiceExecutor"))
@@ -38,6 +43,7 @@ object FqConstants {
     val CALL_CHANNEL = Name.identifier("callChannel")
     val CLOSE = Name.identifier("close")
     val INVOKE = Name.identifier("invoke")
+    val GET_INTROSPECTION = Name.identifier("getIntrospection")
     val KSERIALIZER = ClassId(FqName("kotlinx.serialization"), Name.identifier("KSerializer"))
     val SERIALIZER_CALLABLE: CallableId =
         CallableId(FqName("kotlinx.serialization"), Name.identifier("serializer"))
@@ -48,6 +54,7 @@ object FqConstants {
     val CREATE_STUB = Name.identifier("createStub")
     val FIND_ENDPOINT = Name.identifier("findEndpoint")
     val SERVICE_NAME = Name.identifier("serviceName")
+    val ENDPOINTS = Name.identifier("endpoints")
 
     val RPC_OBJECT = ClassId(FQPKG, Name.identifier("RpcObject"))
     val RPC_METHOD = ClassId(FQPKG, Name.identifier("RpcMethod"))

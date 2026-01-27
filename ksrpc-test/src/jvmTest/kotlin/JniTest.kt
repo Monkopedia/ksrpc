@@ -127,6 +127,25 @@ class JniTest {
     }
 
     @Test
+    fun testIntrospectionEndpoints() = runBlockingUnit {
+        val service = createService()
+        val endpoints = service.getIntrospection().getEndpoints()
+        assertTrue("rpc" in endpoints, "Expected 'rpc' in $endpoints")
+        assertTrue("binary_rpc" in endpoints, "Expected 'binary_rpc' in $endpoints")
+        assertTrue("input" in endpoints, "Expected 'input' in $endpoints")
+        assertTrue("ping" in endpoints, "Expected 'ping' in $endpoints")
+        assertTrue("service" in endpoints, "Expected 'service' in $endpoints")
+    }
+
+    @Test
+    fun testIntrospectionIntrospectionEndpoints() = runBlockingUnit {
+        val service = createService()
+        val endpoints = service.getIntrospection().getIntrospection().getEndpoints()
+        assertTrue("service_name" in endpoints, "Expected 'service_name' in $endpoints")
+        assertTrue("endpoints" in endpoints, "Expected 'endpoints' in $endpoints")
+    }
+
+    @Test
     fun testBinaryTest() = runBlockingUnit {
         val stub = createService()
         val response = stub.binaryRpc("Hello" to "world")

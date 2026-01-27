@@ -20,6 +20,7 @@ import com.monkopedia.ksrpc.webworker.createServiceWorkerWithConnection
 import com.monkopedia.ksrpc.webworker.test.WebWorkerTestService
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class ServiceWorkerTest {
     @Test
@@ -40,6 +41,13 @@ class ServiceWorkerTest {
 
         val serviceName = service.getIntrospection().getServiceName()
         assertEquals("com.monkopedia.ksrpc.webworker.test.WebWorkerTestService", serviceName)
+
+        val endpoints = service.getIntrospection().getEndpoints()
+        assertTrue("ping" in endpoints)
+        assertTrue("rpc" in endpoints)
+        assertTrue("service" in endpoints)
+        assertTrue("service_name" in endpoints)
+        assertTrue("endpoints" in endpoints)
 
         connection.close()
         null

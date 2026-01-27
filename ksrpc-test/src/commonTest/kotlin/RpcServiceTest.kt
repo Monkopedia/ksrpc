@@ -139,6 +139,27 @@ class RpcServiceTest :
     }
 
     @Test
+    fun testIntrospectionEndpoints() = runBlockingUnit {
+        val channel = object : TestInterface {
+            override suspend fun rpc(u: Pair<String, String>): String = "${u.first} ${u.second}"
+        }.serialized<TestInterface, String>(ksrpcEnvironment { })
+        val stub = channel.toStub<TestInterface, String>()
+        val endpoints = stub.getIntrospection().getEndpoints()
+        assertTrue("rpc" in endpoints, "Expected 'rpc' in $endpoints")
+    }
+
+    @Test
+    fun testIntrospectionIntrospectionEndpoints() = runBlockingUnit {
+        val channel = object : TestInterface {
+            override suspend fun rpc(u: Pair<String, String>): String = "${u.first} ${u.second}"
+        }.serialized<TestInterface, String>(ksrpcEnvironment { })
+        val stub = channel.toStub<TestInterface, String>()
+        val endpoints = stub.getIntrospection().getIntrospection().getEndpoints()
+        assertTrue("service_name" in endpoints, "Expected 'service_name' in $endpoints")
+        assertTrue("endpoints" in endpoints, "Expected 'endpoints' in $endpoints")
+    }
+
+    @Test
     fun testStubClosesChannel() = runBlockingUnit {
         var hasCalledClose = false
         val service = object : SerializedService<String> {

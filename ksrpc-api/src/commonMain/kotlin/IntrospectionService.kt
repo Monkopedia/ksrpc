@@ -20,4 +20,5 @@ package com.monkopedia.ksrpc
  */
 interface IntrospectionService : RpcService {
     suspend fun getServiceName(u: Unit = Unit): String
+    suspend fun getEndpoints(u: Unit = Unit): List<String>
 }
