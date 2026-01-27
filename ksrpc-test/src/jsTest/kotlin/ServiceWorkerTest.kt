@@ -15,6 +15,7 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.RpcDataType
 import com.monkopedia.ksrpc.webworker.createServiceWorkerWithConnection
 import com.monkopedia.ksrpc.webworker.test.WebWorkerTestService
 import kotlin.test.Test
@@ -81,6 +82,24 @@ class ServiceWorkerTest {
 
                 assertTrue("service_name" in endpoints)
                 assertTrue("endpoints" in endpoints)
+            }
+        }
+        null
+    }
+
+    @Test
+    fun wasmServiceWorkerConnection_introspection_endpointInfo() = runBlockingUnit {
+        if (!hasWindow()) return@runBlockingUnit
+        useWebWorkerService { service ->
+            service.getIntrospection().use { introspection ->
+                val rpcInfo = introspection.getEndpointInfo("rpc")
+                assertEquals(RpcDataType.DataStructure, rpcInfo.input)
+                assertEquals(RpcDataType.DataStructure, rpcInfo.output)
+                val serviceInfo = introspection.getEndpointInfo("service")
+                assertEquals(
+                    RpcDataType.Service("com.monkopedia.ksrpc.webworker.test.WebWorkerTestSubService"),
+                    serviceInfo.output
+                )
             }
         }
         null

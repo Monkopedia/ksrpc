@@ -15,6 +15,7 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.RpcDataType
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
 import com.monkopedia.ksrpc.channels.CallData
@@ -146,6 +147,17 @@ class RpcServiceTest :
         val stub = channel.toStub<TestInterface, String>()
         val endpoints = stub.getIntrospection().getEndpoints()
         assertTrue("rpc" in endpoints, "Expected 'rpc' in $endpoints")
+    }
+
+    @Test
+    fun testIntrospectionEndpointInfo() = runBlockingUnit {
+        val channel = object : TestInterface {
+            override suspend fun rpc(u: Pair<String, String>): String = "${u.first} ${u.second}"
+        }.serialized<TestInterface, String>(ksrpcEnvironment { })
+        val stub = channel.toStub<TestInterface, String>()
+        val rpcInfo = stub.getIntrospection().getEndpointInfo("rpc")
+        assertEquals(RpcDataType.DataStructure, rpcInfo.input)
+        assertEquals(RpcDataType.DataStructure, rpcInfo.output)
     }
 
     @Test

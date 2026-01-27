@@ -15,13 +15,29 @@
  */
 package com.monkopedia.ksrpc
 
-import com.monkopedia.ksrpc.RpcEndpointInfo
+import kotlinx.serialization.Serializable
 
 /**
- * Returns metadata about a service.
+ * Metadata about the RPC-level representations of inputs/outputs.
  */
-interface IntrospectionService : RpcService {
-    suspend fun getServiceName(u: Unit = Unit): String
-    suspend fun getEndpoints(u: Unit = Unit): List<String>
-    suspend fun getEndpointInfo(endpoint: String): RpcEndpointInfo
+@Serializable
+sealed class RpcDataType {
+    @Serializable
+    object DataStructure : RpcDataType()
+
+    @Serializable
+    object BinaryData : RpcDataType()
+
+    @Serializable
+    data class Service(val qualifiedName: String) : RpcDataType()
 }
+
+/**
+ * Introspection payload describing a single endpoint.
+ */
+@Serializable
+data class RpcEndpointInfo(
+    val endpoint: String,
+    val input: RpcDataType,
+    val output: RpcDataType
+)

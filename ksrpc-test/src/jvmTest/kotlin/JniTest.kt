@@ -146,6 +146,26 @@ class JniTest {
     }
 
     @Test
+    fun testIntrospectionEndpointInfo() = runBlockingUnit {
+        val service = createService()
+        val rpcInfo = service.getIntrospection().getEndpointInfo("rpc")
+        assertEquals(RpcDataType.DataStructure, rpcInfo.input)
+        assertEquals(RpcDataType.DataStructure, rpcInfo.output)
+
+        val binaryRpcInfo = service.getIntrospection().getEndpointInfo("binary_rpc")
+        assertEquals(RpcDataType.BinaryData, binaryRpcInfo.output)
+
+        val inputInfo = service.getIntrospection().getEndpointInfo("input")
+        assertEquals(RpcDataType.BinaryData, inputInfo.input)
+
+        val serviceInfo = service.getIntrospection().getEndpointInfo("service")
+        assertEquals(
+            RpcDataType.Service("com.monkopedia.ksrpc.JniTestSubInterface"),
+            serviceInfo.output
+        )
+    }
+
+    @Test
     fun testBinaryTest() = runBlockingUnit {
         val stub = createService()
         val response = stub.binaryRpc("Hello" to "world")

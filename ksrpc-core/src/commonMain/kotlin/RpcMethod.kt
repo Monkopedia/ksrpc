@@ -15,6 +15,7 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.RpcDataType
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.ChannelId
 import com.monkopedia.ksrpc.channels.SerializedService
@@ -30,6 +31,7 @@ import kotlinx.serialization.builtins.serializer
 internal sealed interface Transformer<T> {
     val hasContent: Boolean
         get() = true
+    val rpcDataType: RpcDataType
 
     suspend fun <S> transform(input: T, channel: SerializedService<S>): CallData<S>
     suspend fun <S> untransform(data: CallData<S>, channel: SerializedService<S>): T
@@ -46,6 +48,8 @@ internal sealed interface Transformer<T> {
 internal class SerializerTransformer<I>(private val serializer: KSerializer<I>) : Transformer<I> {
     override val hasContent: Boolean
         get() = serializer != Unit.serializer()
+    override val rpcDataType: RpcDataType
+        get() = RpcDataType.DataStructure
 
     override suspend fun <T> transform(input: I, channel: SerializedService<T>): CallData<T> {
         channel.env.logger.debug("Transformer", "Serializing input to CallData")
@@ -60,6 +64,8 @@ internal class SerializerTransformer<I>(private val serializer: KSerializer<I>) 
 }
 
 internal object BinaryTransformer : Transformer<ByteReadChannel> {
+    override val rpcDataType: RpcDataType
+        get() = RpcDataType.BinaryData
     override suspend fun <T> transform(
         input: ByteReadChannel,
         channel: SerializedService<T>
@@ -80,6 +86,8 @@ internal object BinaryTransformer : Transformer<ByteReadChannel> {
 
 internal class SubserviceTransformer<T : RpcService>(private val serviceObj: RpcObject<T>) :
     Transformer<T> {
+    override val rpcDataType: RpcDataType
+        get() = RpcDataType.Service(serviceObj.serviceName)
     override suspend fun <S> transform(input: T, channel: SerializedService<S>): CallData<S> {
         val host = host<S>() ?: error("Cannot transform service type to non-hosting channel")
         val serviceId = host.registerHost(input, serviceObj)
@@ -137,4 +145,7 @@ class RpcMethod<T : RpcService, I, O> internal constructor(
             channel.env.logger.debug("Transformer", "($id) Completed remote endpoint $endpoint")
             outputTransform.untransform(transformedOutput, channel)
         }
+
+    internal fun inputRpcDataType(): RpcDataType = inputTransform.rpcDataType
+    internal fun outputRpcDataType(): RpcDataType = outputTransform.rpcDataType
 }
