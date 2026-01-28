@@ -47,7 +47,7 @@ plugins {
 
 dependencies {
     ...
-    implementation("com.monkopedia:ksrpc-core:0.9.4")
+    implementation("com.monkopedia:ksrpc-core:0.10.0")
 }
 ```
 
