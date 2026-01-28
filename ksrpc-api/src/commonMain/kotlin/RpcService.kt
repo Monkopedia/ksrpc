@@ -16,7 +16,7 @@
 package com.monkopedia.ksrpc
 
 /**
- * Super-interface of all services tagged with [KsService].
+ * Super-interface of all services tagged with [com.monkopedia.ksrpc.annotation.KsService].
  */
 interface RpcService : SuspendCloseable {
     override suspend fun close() = Unit

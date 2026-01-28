@@ -23,13 +23,13 @@ The result after a little work was ksrpc. Its not perfect, but it fits my situat
 has a relatively simple way to declare services and supports a number of connection mechanisms
 depending on the platform being targeted.
 
- - HTTP (JVM, Native, JS (Client only))
+ - HTTP (JVM, Native, JS/WASM (Client only))
  - Socket (JVM, Native)
  - Stdin/out (JVM, Native)
  - Local class instantiation (JVM)
- - Web sockets (JVM, Native, JS (Client only))
- - jsonrpc 2.0 (JVM, Native\*)
- - Service workers (JS, experimental)
+ - Web sockets (JVM, Native, JS/WASM (Client only))
+ - jsonrpc 2.0 (JVM, Native)
+ - Service workers (JS host/client, WASM client, experimental)
 
  \* Not implemented but expected soon
 
@@ -480,12 +480,15 @@ a service worker and connect to it from the main thread.
 Worker entry (service worker script):
 
 ```kotlin
+import com.monkopedia.ksrpc.channels.registerDefault
 import com.monkopedia.ksrpc.ksrpcEnvironment
-import com.monkopedia.ksrpc.webworker.registerServiceWorkerConnection
+import com.monkopedia.ksrpc.webworker.onServiceWorkerConnection
 
 fun main() {
     val env = ksrpcEnvironment { }
-    registerServiceWorkerConnection(MyServiceImpl(), env)
+    onServiceWorkerConnection(env) { connection ->
+        connection.registerDefault(MyServiceImpl())
+    }
 }
 ```
 
@@ -502,6 +505,34 @@ suspend fun connect(): MyService {
 }
 ```
 
+## Introspection (opt-in)
+
+Annotate services with `@KsIntrospectable` and extend `IntrospectableRpcService` to opt in to the
+new `ksrpc-introspection` module. The compiler plugin generates endpoint data in the companion, and
+every `IntrospectableRpcService` exposes a `getIntrospection()` endpoint so clients can fetch
+metadata about service names, endpoints, input/output schemas, and nested sub-services.
+
+```kotlin
+@KsService
+@KsIntrospectable
+interface MyService : IntrospectableRpcService {
+    @KsMethod("/rpc")
+    suspend fun rpc(input: String): String
+}
+
+val introspection = service.getIntrospection()
+val name = introspection.getServiceName() // fully qualified service name
+val endpoints = introspection.getEndpoints()
+val info = introspection.getEndpointInfo("/rpc")
+```
+
+`RpcEndpointInfo` holds a pair of `RpcDataType` values; `RpcDataType.DataStructure` has a recursive
+`RpcDescriptor` tree (`dataType`, `serialName`, `elements`, optional `id`) that mirrors the
+serializer structure, while `RpcDataType.Service` names the target service for nested sub-services
+and `RpcDataType.BinaryData` describes raw binary payloads. Call `getIntrospectionFor(serviceName)`
+with one of the `serviceName` strings returned by a `SubserviceTransformer` to inspect an exported
+sub-service.
+
 # API Docs
 
 For further information, see the API docs, which are hosted on [monkopedia.github.io](https://monkopedia.github.io/ksrpc/).
@@ -510,9 +541,7 @@ For further information, see the API docs, which are hosted on [monkopedia.githu
 
 Unranked list of things I know I want to implement:
 
-- Stdin/out native methods that use the above implementation
-- jsonrpc native support (much like above)
 - Additional annotations and parsing in compiler plugin to have support for things like notifications not just requests
 - Finish testing [TrackingService](ksrpc/src/commonMain/kotlin/TrackingService.kt) and publish it as API
 - Add tests to ensure no leaks around sub-service usage and cleanup
-- Support building mac/windows binaries in github release workflow
+- Support building windows binaries in github release workflow

@@ -19,13 +19,10 @@ package com.monkopedia.ksrpc.webworker
 
 import com.monkopedia.ksrpc.CallDataSerializer
 import com.monkopedia.ksrpc.KsrpcEnvironment
-import com.monkopedia.ksrpc.RpcService
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.Connection
-import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.packets.internal.Packet
 import com.monkopedia.ksrpc.packets.internal.PacketChannelBase
-import com.monkopedia.ksrpc.serialized
 import kotlinx.browser.window
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope

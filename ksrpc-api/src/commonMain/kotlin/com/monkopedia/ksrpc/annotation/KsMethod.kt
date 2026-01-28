@@ -18,8 +18,8 @@ package com.monkopedia.ksrpc.annotation
 /**
  * Annotation tagging an interface for processing by the compiler plugin.
  *
- * interfaces tagged with this are expected to extend [RpcService], and will
- * have a companion generated for them that implements [RpcObject] for itself.
+ * interfaces tagged with this are expected to extend [com.monkopedia.ksrpc.RpcService], and will
+ * have a companion generated for them that implements [com.monkopedia.ksrpc.RpcObject] for itself.
  */
 annotation class KsService
 
