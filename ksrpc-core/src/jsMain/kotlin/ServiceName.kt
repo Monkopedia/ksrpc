@@ -19,16 +19,16 @@ import kotlin.js.js
 import kotlin.reflect.KClass
 
 @PublishedApi
-internal actual fun serviceNameFor(serviceClass: KClass<*>): String =
-    serviceClass.jsQualifiedName()
-        ?: serviceClass.toString().stripKClassPrefix()
+internal actual fun serviceNameFor(serviceClass: KClass<*>): String = serviceClass.jsQualifiedName()
+    ?: serviceClass.toString().stripKClassPrefix()
 
 @PublishedApi
-internal actual fun RpcObject<*>.serviceInterfaceName(): String =
-    (this::class.jsQualifiedName()
-        ?: this::class.toString().stripKClassPrefix())
-        .removeSuffix(".Companion")
-        .removeSuffix("\$Companion")
+internal actual fun RpcObject<*>.serviceInterfaceName(): String = (
+    this::class.jsQualifiedName()
+        ?: this::class.toString().stripKClassPrefix()
+    )
+    .removeSuffix(".Companion")
+    .removeSuffix("\$Companion")
 
 private fun KClass<*>.jsQualifiedName(): String? {
     val metadata = this.js.asDynamic().`$metadata$`
@@ -41,7 +41,6 @@ private fun KClass<*>.jsQualifiedName(): String? {
     }
 }
 
-private fun String.stripKClassPrefix(): String =
-    removePrefix("class ")
-        .removePrefix("interface ")
-        .removePrefix("object ")
+private fun String.stripKClassPrefix(): String = removePrefix("class ")
+    .removePrefix("interface ")
+    .removePrefix("object ")

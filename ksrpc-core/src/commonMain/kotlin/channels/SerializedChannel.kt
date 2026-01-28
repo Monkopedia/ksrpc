@@ -65,7 +65,6 @@ suspend fun <T : RpcService, S> SingleChannelHost<S>.registerDefault(
     registerDefault(HostSerializedServiceImpl(service, obj, env))
 }
 
-
 /**
  * A wrapper around a communication pathway that can be turned into a primary
  * SerializedService.

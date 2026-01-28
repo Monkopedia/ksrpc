@@ -23,13 +23,13 @@ internal actual fun serviceNameFor(serviceClass: KClass<*>): String =
         ?: serviceClass.toString().stripKClassPrefix()
 
 @PublishedApi
-internal actual fun RpcObject<*>.serviceInterfaceName(): String =
-    (this::class.qualifiedName?.stripKClassPrefix()
-        ?: this::class.toString().stripKClassPrefix())
-        .removeSuffix(".Companion")
-        .removeSuffix("\$Companion")
+internal actual fun RpcObject<*>.serviceInterfaceName(): String = (
+    this::class.qualifiedName?.stripKClassPrefix()
+        ?: this::class.toString().stripKClassPrefix()
+    )
+    .removeSuffix(".Companion")
+    .removeSuffix("\$Companion")
 
-private fun String.stripKClassPrefix(): String =
-    removePrefix("class ")
-        .removePrefix("interface ")
-        .removePrefix("object ")
+private fun String.stripKClassPrefix(): String = removePrefix("class ")
+    .removePrefix("interface ")
+    .removePrefix("object ")
