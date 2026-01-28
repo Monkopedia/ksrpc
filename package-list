@@ -1,27 +1,10 @@
 $dokka.format:html-v1
 $dokka.linkExtension:html
-$dokka.location:////PointingToDeclaration/ksrpc-test/[root]/index.html
-$dokka.location://createContinuationRelay/#kotlinx.cinterop.CPointer[kotlinx.cinterop.CPointerVarOf[kotlinx.cinterop.CPointer[com.monkopedia.jni.JNINativeInterface_]]]#kotlinx.cinterop.CPointer[cnames.structs._jobject]#kotlinx.cinterop.CPointer[cnames.structs._jobject]/PointingToDeclaration/ksrpc-test/[root]/create-continuation-relay.html
-$dokka.location://createContinuations/#kotlinx.cinterop.CPointer[kotlinx.cinterop.CPointerVarOf[kotlinx.cinterop.CPointer[com.monkopedia.jni.JNINativeInterface_]]]#kotlinx.cinterop.CPointer[cnames.structs._jobject]#kotlinx.cinterop.CPointer[cnames.structs._jobject]#kotlinx.cinterop.CPointer[cnames.structs._jobject]/PointingToDeclaration/ksrpc-test/[root]/create-continuations.html
-$dokka.location://createEnv/#kotlinx.cinterop.CPointer[kotlinx.cinterop.CPointerVarOf[kotlinx.cinterop.CPointer[com.monkopedia.jni.JNINativeInterface_]]]#kotlinx.cinterop.CPointer[cnames.structs._jobject]/PointingToDeclaration/ksrpc-test/[root]/create-env.html
-$dokka.location://createReceiver/#kotlinx.cinterop.CPointer[cnames.structs._jobject]/PointingToDeclaration/ksrpc-test/[root]/create-receiver.html
-$dokka.location://registerService/#kotlinx.cinterop.CPointer[kotlinx.cinterop.CPointerVarOf[kotlinx.cinterop.CPointer[com.monkopedia.jni.JNINativeInterface_]]]#kotlinx.cinterop.CPointer[cnames.structs._jobject]#kotlinx.cinterop.CPointer[cnames.structs._jobject]#kotlinx.cinterop.CPointer[cnames.structs._jobject]/PointingToDeclaration/ksrpc-test/[root]/register-service.html
-$dokka.location://serializeDeserialize/#kotlinx.cinterop.CPointer[kotlinx.cinterop.CPointerVarOf[kotlinx.cinterop.CPointer[com.monkopedia.jni.JNINativeInterface_]]]#kotlinx.cinterop.CPointer[cnames.structs._jobject]#kotlinx.cinterop.CPointer[cnames.structs._jobject]/PointingToDeclaration/ksrpc-test/[root]/serialize-deserialize.html
-$dokka.location:/ComplexClass///PointingToDeclaration/ksrpc-test/[root]/-complex-class/index.html
-$dokka.location:/ComplexClass/ComplexClass/#kotlin.Int?#kotlin.collections.List[kotlin.String?]?#ComplexClass?#kotlin.collections.Map[kotlin.String,OtherClass]/PointingToDeclaration/ksrpc-test/[root]/-complex-class/-complex-class.html
-$dokka.location:/ComplexClass/child/#/PointingToDeclaration/ksrpc-test/[root]/-complex-class/child.html
-$dokka.location:/ComplexClass/intValue/#/PointingToDeclaration/ksrpc-test/[root]/-complex-class/int-value.html
-$dokka.location:/ComplexClass/otherValues/#/PointingToDeclaration/ksrpc-test/[root]/-complex-class/other-values.html
-$dokka.location:/ComplexClass/stringsValue/#/PointingToDeclaration/ksrpc-test/[root]/-complex-class/strings-value.html
-$dokka.location:/OtherClass///PointingToDeclaration/ksrpc-test/[root]/-other-class/index.html
-$dokka.location:/OtherClass/OtherClass/#kotlin.Boolean#kotlin.Float/PointingToDeclaration/ksrpc-test/[root]/-other-class/-other-class.html
-$dokka.location:/OtherClass/bool/#/PointingToDeclaration/ksrpc-test/[root]/-other-class/bool.html
-$dokka.location:/OtherClass/float/#/PointingToDeclaration/ksrpc-test/[root]/-other-class/float.html
 $dokka.location:com.monkopedia.ksrpc.jni//withConverter/kotlin.coroutines.Continuation[TypeParam(bounds=[kotlin.Any?])]#com.monkopedia.ksrpc.jni.Converter[*,TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/ksrpc-jni/com.monkopedia.ksrpc.jni/[native]with-converter.html
 $dokka.location:com.monkopedia.ksrpc.jni/NativeJniContinuation.Companion///PointingToDeclaration/ksrpc-jni/com.monkopedia.ksrpc.jni/[native]-native-jni-continuation/-companion/index.html
 $dokka.location:com.monkopedia.ksrpc.jni/NativeJniContinuation///PointingToDeclaration/ksrpc-jni/com.monkopedia.ksrpc.jni/[native]-native-jni-continuation/index.html
 $dokka.location:com.monkopedia.ksrpc.jni/NativeJniContinuation/NativeJniContinuation/#kotlin.Long/PointingToDeclaration/ksrpc-jni/com.monkopedia.ksrpc.jni/[jvm]-native-jni-continuation/-native-jni-continuation.html
-$dokka.location:com.monkopedia.ksrpc.jni/NativeJniContinuation/NativeJniContinuation/#kotlin.coroutines.Continuation[TypeParam(bounds=[kotlin.Any?])]#com.monkopedia.ksrpc.jni.Converter[kotlinx.cinterop.CPointer[cnames.structs._jobject]?,TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/ksrpc-jni/com.monkopedia.ksrpc.jni/[native]-native-jni-continuation/-native-jni-continuation.html
+$dokka.location:com.monkopedia.ksrpc.jni/NativeJniContinuation/NativeJniContinuation/#kotlin.coroutines.Continuation[TypeParam(bounds=[kotlin.Any?])]#com.monkopedia.ksrpc.jni.Converter[kotlinx.cinterop.CPointer[<ERROR CLASS> cnames/structs/_jobject]?,TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/ksrpc-jni/com.monkopedia.ksrpc.jni/[native]-native-jni-continuation/-native-jni-continuation.html
 $dokka.location:com.monkopedia.ksrpc.jni/NativeJniContinuation/finalize/#kotlin.Long/PointingToDeclaration/ksrpc-jni/com.monkopedia.ksrpc.jni/[jvm]-native-jni-continuation/finalize.html
 $dokka.location:com.monkopedia.ksrpc.jni/NativeJniContinuation/nativeObject/#/PointingToDeclaration/ksrpc-jni/com.monkopedia.ksrpc.jni/[jvm]-native-jni-continuation/native-object.html
 $dokka.location:com.monkopedia.ksrpc.jni/NativeJniContinuation/resumeFailure/#kotlin.Long#com.monkopedia.ksrpc.jni.JniSerialized/PointingToDeclaration/ksrpc-jni/com.monkopedia.ksrpc.jni/[jvm]-native-jni-continuation/resume-failure.html
@@ -30,14 +13,15 @@ $dokka.location:com.monkopedia.ksrpc.jni/NativeJniContinuation/resumeWith/#com.m
 $dokka.location:com.monkopedia.ksrpc.jni/NativeJniContinuation/resumeWith/#kotlin.Result[TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/ksrpc-jni/com.monkopedia.ksrpc.jni/[native]-native-jni-continuation/resume-with.html
 $dokka.location:com.monkopedia.ksrpc.jni/NativeJniContinuation/ser/#/PointingToDeclaration/ksrpc-jni/com.monkopedia.ksrpc.jni/[jvm]-native-jni-continuation/ser.html
 $dokka.location:com.monkopedia.ksrpc.server/ServiceApp/run/#/PointingToDeclaration/ksrpc-server/com.monkopedia.ksrpc.server/-service-app/[native]run.html
-$dokka.location:com.monkopedia.ksrpc/RpcObjectKey///PointingToDeclaration/ksrpc-core/com.monkopedia.ksrpc/[wasm-js]-rpc-object-key/index.html
-$dokka.location:com.monkopedia.ksrpc/RpcObjectKey/rpcObject/#/PointingToDeclaration/ksrpc-core/com.monkopedia.ksrpc/[wasm-js]-rpc-object-key/rpc-object.html
 module:ksrpc-api
 com.monkopedia.ksrpc
 com.monkopedia.ksrpc.annotation
 module:ksrpc-core
 com.monkopedia.ksrpc
 com.monkopedia.ksrpc.channels
+module:ksrpc-introspection
+com.monkopedia.ksrpc
+com.monkopedia.ksrpc.annotation
 module:ksrpc-jni
 com.monkopedia.jnitest
 com.monkopedia.jnitest.com.monkopedia.ksrpc.jni
@@ -54,7 +38,7 @@ module:ksrpc-ktor-websocket-server
 com.monkopedia.ksrpc.ktor.websocket
 module:ksrpc-server
 com.monkopedia.ksrpc.server
+module:ksrpc-service-worker
+com.monkopedia.ksrpc.webworker
 module:ksrpc-sockets
 com.monkopedia.ksrpc.sockets
-module:ksrpc-test
-com.monkopedia.ksrpc

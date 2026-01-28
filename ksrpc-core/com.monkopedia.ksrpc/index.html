@@ -1,22 +1,22 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <title>com.monkopedia.ksrpc</title>
-<link href="../../images/logo-icon.svg" rel="icon" type="image/svg">    <script>var pathToRoot = "../../";</script>
-    <script>document.documentElement.classList.replace("no-js","js");</script>
+<link href="../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
-    if (storage == null) {
+      if (storage == null) {
         const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
         if (osDarkSchemePreferred === true) {
-            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
         }
-    } else {
+      } else {
         const savedDarkMode = JSON.parse(storage)
-        if(savedDarkMode === true) {
-            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
         }
-    }
+      }
     </script>
 <script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async></script>
 <script type="text/javascript" src="../../scripts/sourceset_dependencies.js" async></script>
@@ -24,71 +24,69 @@
 <link href="../../styles/main.css" rel="Stylesheet">
 <link href="../../styles/prism.css" rel="Stylesheet">
 <link href="../../styles/logo-styles.css" rel="Stylesheet">
-<link href="../../styles/font-jb-sans-auto.css" rel="Stylesheet">
 <link href="../../ui-kit/ui-kit.min.css" rel="Stylesheet">
-<script type="text/javascript" src="../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../scripts/safe-local-storage_blocking.js"></script>
 <script type="text/javascript" src="../../scripts/navigation-loader.js" async></script>
 <script type="text/javascript" src="../../scripts/platform-content-handler.js" async></script>
 <script type="text/javascript" src="../../scripts/main.js" defer></script>
 <script type="text/javascript" src="../../scripts/prism.js" async></script>
-<script type="text/javascript" src="../../ui-kit/ui-kit.min.js" defer></script>
-<script type="text/javascript" src="../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<script type="text/javascript" src="../../ui-kit/ui-kit.min.js" defer></script></head>
 <body>
-    <div class="root">
-    <nav class="navigation theme-dark" id="navigation-wrapper">
-<a class="library-name--link" href="../../index.html">
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../index.html" tabindex="1">
                     ksrpc
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">0.9.6
+        <div class="library-version" id="library-version">0.10.0
         </div>
         <div class="navigation-controls">
-        <div class="filter-section filter-section_loading" id="filter-section">
-                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":ksrpc-core:dokkaHtmlPartial/commonMain">common</button>
-                <button class="platform-tag platform-selector js-like" data-active="" data-filter=":ksrpc-core:dokkaHtmlPartial/jsMain">js</button>
-                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":ksrpc-core:dokkaHtmlPartial/jvmMain">jvm</button>
-                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":ksrpc-core:dokkaHtmlPartial/nativeMain">native</button>
-                <button class="platform-tag platform-selector wasm-like" data-active="" data-filter=":ksrpc-core:dokkaHtmlPartial/wasmJsMain">wasmJs</button>
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":ksrpc-core/commonMain">common</button>
+                <button class="platform-tag platform-selector js-like" data-active="" aria-pressed="true" data-filter=":ksrpc-core/jsMain">js</button>
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":ksrpc-core/jvmMain">jvm</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":ksrpc-core/nativeMain">native</button>
+                <button class="platform-tag platform-selector wasm-like" data-active="" aria-pressed="true" data-filter=":ksrpc-core/wasmJsMain">wasmJs</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
-                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox">
-                    <div class="dropdown--header"><span>Platform filter</span>
-                        <button class="button" data-role="dropdown-toggle" aria-label="Close platform filter">
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
                             <i class="ui-kit-icon ui-kit-icon_cross"></i>
                         </button>
                     </div>
                         <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
                             <label class="checkbox">
-                                <input type="checkbox" class="checkbox--input" id=":ksrpc-core:dokkaHtmlPartial/commonMain" data-filter=":ksrpc-core:dokkaHtmlPartial/commonMain">
+                                <input type="checkbox" class="checkbox--input" id=":ksrpc-core/commonMain" data-filter=":ksrpc-core/commonMain">
                                 <span class="checkbox--icon"></span>
                                 common
                             </label>
                         </li>
                         <li role="option" class="dropdown--option platform-selector-option js-like" tabindex="0">
                             <label class="checkbox">
-                                <input type="checkbox" class="checkbox--input" id=":ksrpc-core:dokkaHtmlPartial/jsMain" data-filter=":ksrpc-core:dokkaHtmlPartial/jsMain">
+                                <input type="checkbox" class="checkbox--input" id=":ksrpc-core/jsMain" data-filter=":ksrpc-core/jsMain">
                                 <span class="checkbox--icon"></span>
                                 js
                             </label>
                         </li>
                         <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
                             <label class="checkbox">
-                                <input type="checkbox" class="checkbox--input" id=":ksrpc-core:dokkaHtmlPartial/jvmMain" data-filter=":ksrpc-core:dokkaHtmlPartial/jvmMain">
+                                <input type="checkbox" class="checkbox--input" id=":ksrpc-core/jvmMain" data-filter=":ksrpc-core/jvmMain">
                                 <span class="checkbox--icon"></span>
                                 jvm
                             </label>
                         </li>
                         <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
                             <label class="checkbox">
-                                <input type="checkbox" class="checkbox--input" id=":ksrpc-core:dokkaHtmlPartial/nativeMain" data-filter=":ksrpc-core:dokkaHtmlPartial/nativeMain">
+                                <input type="checkbox" class="checkbox--input" id=":ksrpc-core/nativeMain" data-filter=":ksrpc-core/nativeMain">
                                 <span class="checkbox--icon"></span>
                                 native
                             </label>
                         </li>
                         <li role="option" class="dropdown--option platform-selector-option wasm-like" tabindex="0">
                             <label class="checkbox">
-                                <input type="checkbox" class="checkbox--input" id=":ksrpc-core:dokkaHtmlPartial/wasmJsMain" data-filter=":ksrpc-core:dokkaHtmlPartial/wasmJsMain">
+                                <input type="checkbox" class="checkbox--input" id=":ksrpc-core/wasmJsMain" data-filter=":ksrpc-core/wasmJsMain">
                                 <span class="checkbox--icon"></span>
                                 wasmJs
                             </label>
@@ -96,193 +94,270 @@
                 </ul>
                 <div class="dropdown--overlay"></div>
             </div>
-        </div>
+        </ul>
             <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
             </button>
             <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
                 API
             </div>
         </div>
-    </nav>
-        <div id="container">
-            <div class="sidebar" id="leftColumn">
-                <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
-                    <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox">
-                        <div class="dropdown--header">
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
                             <span>
                                     ksrpc
                             </span>
-                            <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
-                                <i class="ui-kit-icon ui-kit-icon_cross"></i>
-                            </button>
-                        </div>
-                        <div class="sidebar--inner" id="sideMenu"></div>
-                    </ul>
-                    <div class="dropdown--overlay"></div>
-                </div>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
             </div>
-            <div id="main">
-<div class="main-content" data-page-type="package" id="content" pageids="ksrpc-core::com.monkopedia.ksrpc////PointingToDeclaration//-631740997">
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="package" id="content" pageids="ksrpc-core::com.monkopedia.ksrpc////PointingToDeclaration//-911231231">
   <div class="breadcrumbs"><a href="../index.html">ksrpc-core</a><span class="delimiter">/</span><span class="current">com.monkopedia.ksrpc</span></div>
   <div class="cover ">
     <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
     <div class="platform-hinted UnderCoverText with-platform-tabs" data-platform-hinted="data-platform-hinted">
-      <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain" data-active="" data-toggle=":ksrpc-core:dokkaHtmlPartial/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/jsMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/jsMain" data-toggle=":ksrpc-core:dokkaHtmlPartial/jsMain">js</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/jvmMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/jvmMain" data-toggle=":ksrpc-core:dokkaHtmlPartial/jvmMain">jvm</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/nativeMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/nativeMain" data-toggle=":ksrpc-core:dokkaHtmlPartial/nativeMain">native</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/wasmJsMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/wasmJsMain" data-toggle=":ksrpc-core:dokkaHtmlPartial/wasmJsMain">wasmJs</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><p class="paragraph">Contains Core definitions of for configuring and constructing ksrpc services and stubs.</p></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core:dokkaHtmlPartial/jsMain"><p class="paragraph">Contains Core definitions of for configuring and constructing ksrpc services and stubs.</p></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core:dokkaHtmlPartial/jvmMain"><p class="paragraph">Contains Core definitions of for configuring and constructing ksrpc services and stubs.</p></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core:dokkaHtmlPartial/nativeMain"><p class="paragraph">Contains Core definitions of for configuring and constructing ksrpc services and stubs.</p></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core:dokkaHtmlPartial/wasmJsMain"><p class="paragraph">Contains Core definitions of for configuring and constructing ksrpc services and stubs.</p></div>    </div>
+      <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":ksrpc-core/commonMain" data-filterable-set=":ksrpc-core/commonMain" data-active="" data-toggle=":ksrpc-core/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core/jsMain" data-filterable-set=":ksrpc-core/jsMain" data-toggle=":ksrpc-core/jsMain">js</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core/jvmMain" data-filterable-set=":ksrpc-core/jvmMain" data-toggle=":ksrpc-core/jvmMain">jvm</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core/nativeMain" data-filterable-set=":ksrpc-core/nativeMain" data-toggle=":ksrpc-core/nativeMain">native</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core/wasmJsMain" data-filterable-set=":ksrpc-core/wasmJsMain" data-toggle=":ksrpc-core/wasmJsMain">wasmJs</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><p class="paragraph">Contains Core definitions of for configuring and constructing ksrpc services and stubs.</p></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core/jsMain"><p class="paragraph">Contains Core definitions of for configuring and constructing ksrpc services and stubs.</p></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core/jvmMain"><p class="paragraph">Contains Core definitions of for configuring and constructing ksrpc services and stubs.</p></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core/nativeMain"><p class="paragraph">Contains Core definitions of for configuring and constructing ksrpc services and stubs.</p></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core/wasmJsMain"><p class="paragraph">Contains Core definitions of for configuring and constructing ksrpc services and stubs.</p></div>    </div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button><button class="section-tab" data-togglable="FUNCTION,EXTENSION_FUNCTION">Functions</button><button class="section-tab" data-togglable="PROPERTY,EXTENSION_PROPERTY">Properties</button></div>
     <div class="tabs-section-body">
       <div data-togglable="TYPE">
-        <h2 class="">Types</h2>
-        <div class="table"><a data-name="-507712773%2FClasslikes%2F-1379736828" anchor-label="CallDataSerializer" id="-507712773%2FClasslikes%2F-1379736828" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="-175524875%2FClasslikes%2F1567993722" anchor-label="BinaryTransformer" id="-175524875%2FClasslikes%2F1567993722" data-filterable-set=":ksrpc-core/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":ksrpc-core/commonMain" data-filterable-set=":ksrpc-core/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-binary-transformer/index.html"><span>Binary</span><wbr><span><span>Transformer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-175524875%2FClasslikes%2F1567993722"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-binary-transformer/index.html">BinaryTransformer</a> : <a href="-transformer/index.html">Transformer</a><span class="token operator">&lt;</span><span data-unresolved-link="io.ktor.utils.io/ByteReadChannel///PointingToDeclaration/">ByteReadChannel</span><span class="token operator">&gt; </span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-507712773%2FClasslikes%2F1567993722" anchor-label="CallDataSerializer" id="-507712773%2FClasslikes%2F1567993722" data-filterable-set=":ksrpc-core/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":ksrpc-core/commonMain" data-filterable-set=":ksrpc-core/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-call-data-serializer/index.html"><span>Call</span><wbr><span>Data</span><wbr><span><span>Serializer</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-507712773%2FClasslikes%2F-1379736828"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-507712773%2FClasslikes%2F1567993722"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-call-data-serializer/index.html">CallDataSerializer</a><span class="token operator">&lt;</span><a href="-call-data-serializer/index.html">T</a><span class="token operator">&gt;</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-call-data-serializer/index.html">CallDataSerializer</a><span class="token operator">&lt;</span><a href="-call-data-serializer/index.html">T</a><span class="token operator">&gt;</span></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-204760591%2FClasslikes%2F-1379736828" anchor-label="ErrorListener" id="-204760591%2FClasslikes%2F-1379736828" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain">
+<a data-name="-204760591%2FClasslikes%2F1567993722" anchor-label="ErrorListener" id="-204760591%2FClasslikes%2F1567993722" data-filterable-set=":ksrpc-core/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":ksrpc-core/commonMain" data-filterable-set=":ksrpc-core/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-error-listener/index.html"><span>Error</span><wbr><span><span>Listener</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-204760591%2FClasslikes%2F-1379736828"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-204760591%2FClasslikes%2F1567993722"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token keyword">interface </span><a href="-error-listener/index.html">ErrorListener</a></div><div class="brief "><p class="paragraph">Interface used for handling any errors that occur during hosting.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token keyword">interface </span><a href="-error-listener/index.html">ErrorListener</a></div><div class="brief "><p class="paragraph">Interface used for handling any errors that occur during hosting.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-388861953%2FClasslikes%2F-1379736828" anchor-label="KsrpcEnvironment" id="-388861953%2FClasslikes%2F-1379736828" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain">
+<a data-name="-388861953%2FClasslikes%2F1567993722" anchor-label="KsrpcEnvironment" id="-388861953%2FClasslikes%2F1567993722" data-filterable-set=":ksrpc-core/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":ksrpc-core/commonMain" data-filterable-set=":ksrpc-core/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-ksrpc-environment/index.html"><span>Ksrpc</span><wbr><span><span>Environment</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-388861953%2FClasslikes%2F-1379736828"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-388861953%2FClasslikes%2F1567993722"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token operator">&lt;</span><a href="-ksrpc-environment/index.html">T</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Global configuration for KSRPC channels and services.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token operator">&lt;</span><a href="-ksrpc-environment/index.html">T</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Global configuration for KSRPC channels and services.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-614825592%2FClasslikes%2F-1379736828" anchor-label="KsrpcEnvironmentBuilder" id="-614825592%2FClasslikes%2F-1379736828" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain">
+<a data-name="-614825592%2FClasslikes%2F1567993722" anchor-label="KsrpcEnvironmentBuilder" id="-614825592%2FClasslikes%2F1567993722" data-filterable-set=":ksrpc-core/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":ksrpc-core/commonMain" data-filterable-set=":ksrpc-core/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-ksrpc-environment-builder/index.html"><span>Ksrpc</span><wbr><span>Environment</span><wbr><span><span>Builder</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-614825592%2FClasslikes%2F-1379736828"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-614825592%2FClasslikes%2F1567993722"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-ksrpc-environment-builder/index.html">KsrpcEnvironmentBuilder</a><span class="token operator">&lt;</span><a href="-ksrpc-environment-builder/index.html">T</a><span class="token operator">&gt;</span> : <a href="-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token operator">&lt;</span><a href="-ksrpc-environment-builder/index.html">T</a><span class="token operator">&gt; </span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-ksrpc-environment-builder/index.html">KsrpcEnvironmentBuilder</a><span class="token operator">&lt;</span><a href="-ksrpc-environment-builder/index.html">T</a><span class="token operator">&gt;</span> : <a href="-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token operator">&lt;</span><a href="-ksrpc-environment-builder/index.html">T</a><span class="token operator">&gt; </span></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="136135429%2FClasslikes%2F-1379736828" anchor-label="Logger" id="136135429%2FClasslikes%2F-1379736828" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain">
+<a data-name="136135429%2FClasslikes%2F1567993722" anchor-label="Logger" id="136135429%2FClasslikes%2F1567993722" data-filterable-set=":ksrpc-core/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":ksrpc-core/commonMain" data-filterable-set=":ksrpc-core/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-logger/index.html"><span><span>Logger</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="136135429%2FClasslikes%2F-1379736828"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="136135429%2FClasslikes%2F1567993722"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-logger/index.html">Logger</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-logger/index.html">Logger</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1994126752%2FClasslikes%2F-1379736828" anchor-label="RpcEndpointException" id="-1994126752%2FClasslikes%2F-1379736828" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain">
+<a data-name="-1994126752%2FClasslikes%2F1567993722" anchor-label="RpcEndpointException" id="-1994126752%2FClasslikes%2F1567993722" data-filterable-set=":ksrpc-core/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":ksrpc-core/commonMain" data-filterable-set=":ksrpc-core/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-rpc-endpoint-exception/index.html"><span>Rpc</span><wbr><span>Endpoint</span><wbr><span><span>Exception</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1994126752%2FClasslikes%2F-1379736828"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1994126752%2FClasslikes%2F1567993722"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-rpc-endpoint-exception/index.html">RpcEndpointException</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">str<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-illegal-argument-exception/index.html">IllegalArgumentException</a></div><div class="brief "><p class="paragraph">Thrown when an endpoint cannot be found. Could happen from version mismatch or other programmer errors.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="-rpc-endpoint-exception/index.html">RpcEndpointException</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">str<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-illegal-argument-exception/index.html">IllegalArgumentException</a></div><div class="brief "><p class="paragraph">Thrown when an endpoint cannot be found. Could happen from version mismatch or other programmer errors.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="686213863%2FClasslikes%2F-1379736828" anchor-label="RpcMethod" id="686213863%2FClasslikes%2F-1379736828" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain">
+<a data-name="686213863%2FClasslikes%2F1567993722" anchor-label="RpcMethod" id="686213863%2FClasslikes%2F1567993722" data-filterable-set=":ksrpc-core/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":ksrpc-core/commonMain" data-filterable-set=":ksrpc-core/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-rpc-method/index.html"><span>Rpc</span><wbr><span><span>Method</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="686213863%2FClasslikes%2F-1379736828"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="686213863%2FClasslikes%2F1567993722"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-rpc-method/index.html">RpcMethod</a><span class="token operator">&lt;</span><a href="-rpc-method/index.html">T</a><span class="token operator"> : </span><a href="../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token punctuation">, </span><a href="-rpc-method/index.html">I</a><span class="token punctuation">, </span><a href="-rpc-method/index.html">O</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">A wrapper around calling into or from stubs/serialization.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-rpc-method/index.html">RpcMethod</a><span class="token operator">&lt;</span><a href="-rpc-method/index.html">T</a><span class="token operator"> : </span><a href="../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token punctuation">, </span><a href="-rpc-method/index.html">I</a><span class="token punctuation">, </span><a href="-rpc-method/index.html">O</a><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>endpoint<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>inputTransform<span class="token operator">: </span><a href="-transformer/index.html">Transformer</a><span class="token operator">&lt;</span><a href="-rpc-method/index.html">I</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>outputTransform<span class="token operator">: </span><a href="-transformer/index.html">Transformer</a><span class="token operator">&lt;</span><a href="-rpc-method/index.html">O</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">method<span class="token operator">: </span><a href="-service-executor/index.html">ServiceExecutor</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">A wrapper around calling into or from stubs/serialization.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1323875913%2FClasslikes%2F-1379736828" anchor-label="RpcObject" id="1323875913%2FClasslikes%2F-1379736828" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain">
+<a data-name="1323875913%2FClasslikes%2F1567993722" anchor-label="RpcObject" id="1323875913%2FClasslikes%2F1567993722" data-filterable-set=":ksrpc-core/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":ksrpc-core/commonMain" data-filterable-set=":ksrpc-core/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-rpc-object/index.html"><span>Rpc</span><wbr><span><span>Object</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1323875913%2FClasslikes%2F-1379736828"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1323875913%2FClasslikes%2F1567993722"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-rpc-object/index.html">RpcObject</a><span class="token operator">&lt;</span><a href="-rpc-object/index.html">T</a><span class="token operator"> : </span><a href="../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Interface for generated companions of <a href="../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a>.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-rpc-object/index.html">RpcObject</a><span class="token operator">&lt;</span><a href="-rpc-object/index.html">T</a><span class="token operator"> : </span><a href="../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Interface for generated companions of <a href="../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a>.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1164895674%2FClasslikes%2F-1656675123" anchor-label="RpcObjectKey" id="1164895674%2FClasslikes%2F-1656675123" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/jsMain,:ksrpc-core:dokkaHtmlPartial/nativeMain,:ksrpc-core:dokkaHtmlPartial/wasmJsMain"></a>
-          <div class="table-row" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/jsMain,:ksrpc-core:dokkaHtmlPartial/nativeMain,:ksrpc-core:dokkaHtmlPartial/wasmJsMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/jsMain,:ksrpc-core:dokkaHtmlPartial/nativeMain,:ksrpc-core:dokkaHtmlPartial/wasmJsMain">
+<a data-name="1164895674%2FClasslikes%2F-911231231" anchor-label="RpcObjectKey" id="1164895674%2FClasslikes%2F-911231231" data-filterable-set=":ksrpc-core/commonMain,:ksrpc-core/jsMain,:ksrpc-core/jvmMain,:ksrpc-core/nativeMain,:ksrpc-core/wasmJsMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":ksrpc-core/commonMain,:ksrpc-core/jsMain,:ksrpc-core/jvmMain,:ksrpc-core/nativeMain,:ksrpc-core/wasmJsMain" data-filterable-set=":ksrpc-core/commonMain,:ksrpc-core/jsMain,:ksrpc-core/jvmMain,:ksrpc-core/nativeMain,:ksrpc-core/wasmJsMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="../../ksrpc-core/com.monkopedia.ksrpc/[wasm-js]-rpc-object-key/index.html"><span>Rpc</span><wbr><span>Object</span><wbr><span><span>Key</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1164895674%2FClasslikes%2F-1656675123"></span>
+                  <div><a href="-rpc-object-key/index.html"><span>Rpc</span><wbr><span>Object</span><wbr><span><span>Key</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1164895674%2FClasslikes%2F-911231231"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/jsMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/jsMain" data-active="" data-toggle=":ksrpc-core:dokkaHtmlPartial/jsMain">js</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/nativeMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/nativeMain" data-toggle=":ksrpc-core:dokkaHtmlPartial/nativeMain">native</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/wasmJsMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/wasmJsMain" data-toggle=":ksrpc-core:dokkaHtmlPartial/wasmJsMain">wasmJs</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/jsMain"><div class="symbol monospace"><span class="token keyword">annotation class </span><a href="[js]-rpc-object-key/index.html">RpcObjectKey</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>rpcObject<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="-rpc-object/index.html">RpcObject</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Used to find <a href="-rpc-object/index.html">RpcObject</a> of services in js implementations.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core:dokkaHtmlPartial/nativeMain"><div class="symbol monospace"><span class="token keyword">annotation class </span><a href="[native]-rpc-object-key/index.html">RpcObjectKey</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>rpcObject<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="-rpc-object/index.html">RpcObject</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Used to find <a href="-rpc-object/index.html">RpcObject</a> of services in native implementations.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core:dokkaHtmlPartial/wasmJsMain"><div class="symbol monospace"><span class="token keyword">annotation class </span><a href="[wasm-js]-rpc-object-key/index.html">RpcObjectKey</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>rpcObject<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="-rpc-object/index.html">RpcObject</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Used to find <a href="-rpc-object/index.html">RpcObject</a> of services in js implementations.</p></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":ksrpc-core/commonMain" data-filterable-set=":ksrpc-core/commonMain" data-active="" data-toggle=":ksrpc-core/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core/jsMain" data-filterable-set=":ksrpc-core/jsMain" data-toggle=":ksrpc-core/jsMain">js</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core/jvmMain" data-filterable-set=":ksrpc-core/jvmMain" data-toggle=":ksrpc-core/jvmMain">jvm</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core/nativeMain" data-filterable-set=":ksrpc-core/nativeMain" data-toggle=":ksrpc-core/nativeMain">native</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core/wasmJsMain" data-filterable-set=":ksrpc-core/wasmJsMain" data-toggle=":ksrpc-core/wasmJsMain">wasmJs</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.annotation/-target/index.html"><span class="token annotation builtin">Target</span></a><span class="token punctuation">(</span><span>allowedTargets<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.annotation/-annotation-target/-c-l-a-s-s/index.html">AnnotationTarget.CLASS</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">expect </span><span class="token keyword">annotation class </span><a href="-rpc-object-key/index.html">RpcObjectKey</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>rpcObject<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="-rpc-object/index.html">RpcObject</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core/jsMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.annotation/-target/index.html"><span class="token annotation builtin">Target</span></a><span class="token punctuation">(</span><span>allowedTargets<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.annotation/-annotation-target/-c-l-a-s-s/index.html">AnnotationTarget.CLASS</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">actual </span><span class="token keyword">annotation class </span><a href="-rpc-object-key/index.html">RpcObjectKey</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>rpcObject<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="../../ksrpc-core/com.monkopedia.ksrpc/-rpc-object/index.html">RpcObject</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Used to find <a href="../../ksrpc-core/com.monkopedia.ksrpc/-rpc-object/index.html">RpcObject</a> of services in js implementations.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core/jvmMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.annotation/-target/index.html"><span class="token annotation builtin">Target</span></a><span class="token punctuation">(</span><span>allowedTargets<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.annotation/-annotation-target/-c-l-a-s-s/index.html">AnnotationTarget.CLASS</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">actual </span><span class="token keyword">annotation class </span><a href="-rpc-object-key/index.html">RpcObjectKey</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>rpcObject<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="-rpc-object/index.html">RpcObject</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core/nativeMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.annotation/-target/index.html"><span class="token annotation builtin">Target</span></a><span class="token punctuation">(</span><span>allowedTargets<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.annotation/-annotation-target/-c-l-a-s-s/index.html">AnnotationTarget.CLASS</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">actual </span><span class="token keyword">annotation class </span><a href="-rpc-object-key/index.html">RpcObjectKey</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>rpcObject<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="-rpc-object/index.html">RpcObject</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Used to find <a href="-rpc-object/index.html">RpcObject</a> of services in native implementations.</p></div></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core/wasmJsMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.annotation/-target/index.html"><span class="token annotation builtin">Target</span></a><span class="token punctuation">(</span><span>allowedTargets<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.annotation/-annotation-target/-c-l-a-s-s/index.html">AnnotationTarget.CLASS</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">actual </span><span class="token keyword">annotation class </span><a href="-rpc-object-key/index.html">RpcObjectKey</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>rpcObject<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="../../ksrpc-core/com.monkopedia.ksrpc/-rpc-object/index.html">RpcObject</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Used to find <a href="../../ksrpc-core/com.monkopedia.ksrpc/-rpc-object/index.html">RpcObject</a> of services in js implementations.</p></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1169764956%2FClasslikes%2F-1379736828" anchor-label="SuspendCloseableObservable" id="1169764956%2FClasslikes%2F-1379736828" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain">
+<a data-name="80968454%2FClasslikes%2F1567993722" anchor-label="SerializerTransformer" id="80968454%2FClasslikes%2F1567993722" data-filterable-set=":ksrpc-core/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":ksrpc-core/commonMain" data-filterable-set=":ksrpc-core/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-suspend-closeable-observable/index.html"><span>Suspend</span><wbr><span>Closeable</span><wbr><span><span>Observable</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1169764956%2FClasslikes%2F-1379736828"></span>
+                  <div><a href="-serializer-transformer/index.html"><span>Serializer</span><wbr><span><span>Transformer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="80968454%2FClasslikes%2F1567993722"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-suspend-closeable-observable/index.html">SuspendCloseableObservable</a> : <a href="../../ksrpc-api/com.monkopedia.ksrpc/-suspend-closeable/index.html">SuspendCloseable</a></div><div class="brief "><p class="paragraph">Used for implementations of <a href="../../ksrpc-api/com.monkopedia.ksrpc/-suspend-closeable/index.html">SuspendCloseable</a> that need observers attached to be notified when <a href="../com.monkopedia.ksrpc.channels/-serialized-service/index.html#-1927979038%2FFunctions%2F-1379736828">SuspendCloseable.close</a> is called.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-serializer-transformer/index.html">SerializerTransformer</a><span class="token operator">&lt;</span><a href="-serializer-transformer/index.html">I</a><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>serializer<span class="token operator">: </span><span data-unresolved-link="kotlinx.serialization/KSerializer///PointingToDeclaration/">KSerializer</span><span class="token operator">&lt;</span><a href="-serializer-transformer/index.html">I</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span> : <a href="-transformer/index.html">Transformer</a><span class="token operator">&lt;</span><a href="-serializer-transformer/index.html">I</a><span class="token operator">&gt; </span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-342379355%2FClasslikes%2F1567993722" anchor-label="ServiceExecutor" id="-342379355%2FClasslikes%2F1567993722" data-filterable-set=":ksrpc-core/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":ksrpc-core/commonMain" data-filterable-set=":ksrpc-core/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-service-executor/index.html"><span>Service</span><wbr><span><span>Executor</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-342379355%2FClasslikes%2F1567993722"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-service-executor/index.html">ServiceExecutor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="793186409%2FClasslikes%2F1567993722" anchor-label="SubserviceTransformer" id="793186409%2FClasslikes%2F1567993722" data-filterable-set=":ksrpc-core/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":ksrpc-core/commonMain" data-filterable-set=":ksrpc-core/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-subservice-transformer/index.html"><span>Subservice</span><wbr><span><span>Transformer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="793186409%2FClasslikes%2F1567993722"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-subservice-transformer/index.html">SubserviceTransformer</a><span class="token operator">&lt;</span><a href="-subservice-transformer/index.html">T</a><span class="token operator"> : </span><a href="../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">serviceObj<span class="token operator">: </span><a href="-rpc-object/index.html">RpcObject</a><span class="token operator">&lt;</span><a href="-subservice-transformer/index.html">T</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span> : <a href="-transformer/index.html">Transformer</a><span class="token operator">&lt;</span><a href="-subservice-transformer/index.html">T</a><span class="token operator">&gt; </span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1169764956%2FClasslikes%2F1567993722" anchor-label="SuspendCloseableObservable" id="1169764956%2FClasslikes%2F1567993722" data-filterable-set=":ksrpc-core/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":ksrpc-core/commonMain" data-filterable-set=":ksrpc-core/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-suspend-closeable-observable/index.html"><span>Suspend</span><wbr><span>Closeable</span><wbr><span><span>Observable</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1169764956%2FClasslikes%2F1567993722"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-suspend-closeable-observable/index.html">SuspendCloseableObservable</a> : <a href="../../ksrpc-api/com.monkopedia.ksrpc/-suspend-closeable/index.html">SuspendCloseable</a></div><div class="brief "><p class="paragraph">Used for implementations of <a href="../../ksrpc-api/com.monkopedia.ksrpc/-suspend-closeable/index.html">SuspendCloseable</a> that need observers attached to be notified when <a href="../com.monkopedia.ksrpc.channels/-serialized-service/index.html#-1927979038%2FFunctions%2F1567993722">SuspendCloseable.close</a> is called.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2046237356%2FClasslikes%2F1567993722" anchor-label="Transformer" id="-2046237356%2FClasslikes%2F1567993722" data-filterable-set=":ksrpc-core/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":ksrpc-core/commonMain" data-filterable-set=":ksrpc-core/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-transformer/index.html"><span><span>Transformer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2046237356%2FClasslikes%2F1567993722"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">sealed </span><span class="token keyword">interface </span><a href="-transformer/index.html">Transformer</a><span class="token operator">&lt;</span><a href="-transformer/index.html">T</a><span class="token operator">&gt;</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -290,35 +365,50 @@
         </div>
       </div>
       <div data-togglable="PROPERTY">
-        <h2 class="">Properties</h2>
-        <div class="table"><a data-name="294798938%2FProperties%2F-631740997" anchor-label="asString" id="294798938%2FProperties%2F-631740997" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain,:ksrpc-core:dokkaHtmlPartial/jsMain,:ksrpc-core:dokkaHtmlPartial/jvmMain,:ksrpc-core:dokkaHtmlPartial/nativeMain,:ksrpc-core:dokkaHtmlPartial/wasmJsMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_PROPERTY" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/commonMain,:ksrpc-core:dokkaHtmlPartial/jsMain,:ksrpc-core:dokkaHtmlPartial/jvmMain,:ksrpc-core:dokkaHtmlPartial/nativeMain,:ksrpc-core:dokkaHtmlPartial/wasmJsMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain,:ksrpc-core:dokkaHtmlPartial/jsMain,:ksrpc-core:dokkaHtmlPartial/jvmMain,:ksrpc-core:dokkaHtmlPartial/nativeMain,:ksrpc-core:dokkaHtmlPartial/wasmJsMain">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="294798938%2FProperties%2F-911231231" anchor-label="asString" id="294798938%2FProperties%2F-911231231" data-filterable-set=":ksrpc-core/commonMain,:ksrpc-core/jsMain,:ksrpc-core/jvmMain,:ksrpc-core/nativeMain,:ksrpc-core/wasmJsMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_PROPERTY" data-filterable-current=":ksrpc-core/commonMain,:ksrpc-core/jsMain,:ksrpc-core/jvmMain,:ksrpc-core/nativeMain,:ksrpc-core/wasmJsMain" data-filterable-set=":ksrpc-core/commonMain,:ksrpc-core/jsMain,:ksrpc-core/jvmMain,:ksrpc-core/nativeMain,:ksrpc-core/wasmJsMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="as-string.html"><span>as</span><wbr><span><span>String</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="294798938%2FProperties%2F-631740997"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="294798938%2FProperties%2F-911231231"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain" data-active="" data-toggle=":ksrpc-core:dokkaHtmlPartial/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/jsMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/jsMain" data-toggle=":ksrpc-core:dokkaHtmlPartial/jsMain">js</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/jvmMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/jvmMain" data-toggle=":ksrpc-core:dokkaHtmlPartial/jvmMain">jvm</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/nativeMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/nativeMain" data-toggle=":ksrpc-core:dokkaHtmlPartial/nativeMain">native</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/wasmJsMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/wasmJsMain" data-toggle=":ksrpc-core:dokkaHtmlPartial/wasmJsMain">wasmJs</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">val </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">.</span><a href="as-string.html">asString</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core:dokkaHtmlPartial/jsMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">val </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">.</span><a href="as-string.html">asString</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core:dokkaHtmlPartial/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">val </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">.</span><a href="as-string.html">asString</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core:dokkaHtmlPartial/nativeMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">val </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">.</span><a href="as-string.html">asString</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core:dokkaHtmlPartial/wasmJsMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">val </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">.</span><a href="as-string.html">asString</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":ksrpc-core/commonMain" data-filterable-set=":ksrpc-core/commonMain" data-active="" data-toggle=":ksrpc-core/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core/jsMain" data-filterable-set=":ksrpc-core/jsMain" data-toggle=":ksrpc-core/jsMain">js</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core/jvmMain" data-filterable-set=":ksrpc-core/jvmMain" data-toggle=":ksrpc-core/jvmMain">jvm</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core/nativeMain" data-filterable-set=":ksrpc-core/nativeMain" data-toggle=":ksrpc-core/nativeMain">native</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core/wasmJsMain" data-filterable-set=":ksrpc-core/wasmJsMain" data-toggle=":ksrpc-core/wasmJsMain">wasmJs</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">val </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">.</span><a href="as-string.html">asString</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core/jsMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">val </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">.</span><a href="as-string.html">asString</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">val </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">.</span><a href="as-string.html">asString</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core/nativeMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">val </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">.</span><a href="as-string.html">asString</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core/wasmJsMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">val </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">.</span><a href="as-string.html">asString</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="925265729%2FProperties%2F-1379736828" anchor-label="ERROR_PREFIX" id="925265729%2FProperties%2F-1379736828" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain">
+<a data-name="1772793547%2FProperties%2F1567993722" anchor-label="ENDPOINT_NOT_FOUND_PREFIX" id="1772793547%2FProperties%2F1567993722" data-filterable-set=":ksrpc-core/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":ksrpc-core/commonMain" data-filterable-set=":ksrpc-core/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-e-r-r-o-r_-p-r-e-f-i-x.html"><span>ERROR_</span><wbr><span>PREFIX</span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="925265729%2FProperties%2F-1379736828"></span>
+                  <div><a href="-e-n-d-p-o-i-n-t_-n-o-t_-f-o-u-n-d_-p-r-e-f-i-x.html"><span>ENDPOINT_</span><wbr><span>NOT_</span><wbr><span>FOUND_</span><wbr><span>PREFIX</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1772793547%2FProperties%2F1567993722"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-e-r-r-o-r_-p-r-e-f-i-x.html">ERROR_PREFIX</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-e-n-d-p-o-i-n-t_-n-o-t_-f-o-u-n-d_-p-r-e-f-i-x.html">ENDPOINT_NOT_FOUND_PREFIX</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="925265729%2FProperties%2F1567993722" anchor-label="ERROR_PREFIX" id="925265729%2FProperties%2F1567993722" data-filterable-set=":ksrpc-core/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":ksrpc-core/commonMain" data-filterable-set=":ksrpc-core/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-e-r-r-o-r_-p-r-e-f-i-x.html"><span>ERROR_</span><wbr><span>PREFIX</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="925265729%2FProperties%2F1567993722"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-e-r-r-o-r_-p-r-e-f-i-x.html">ERROR_PREFIX</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -326,110 +416,110 @@
         </div>
       </div>
       <div data-togglable="FUNCTION">
-        <h2 class="">Functions</h2>
-        <div class="table"><a data-name="-404194092%2FFunctions%2F-1379736828" anchor-label="ksrpcEnvironment" id="-404194092%2FFunctions%2F-1379736828" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-404194092%2FFunctions%2F1567993722" anchor-label="ksrpcEnvironment" id="-404194092%2FFunctions%2F1567993722" data-filterable-set=":ksrpc-core/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":ksrpc-core/commonMain" data-filterable-set=":ksrpc-core/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="ksrpc-environment.html"><span>ksrpc</span><wbr><span><span>Environment</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-404194092%2FFunctions%2F-1379736828"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-404194092%2FFunctions%2F1567993722"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="ksrpc-environment.html">T</a><span class="token operator">&gt; </span><a href="ksrpc-environment.html"><span class="token function">ksrpcEnvironment</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">serializer<span class="token operator">: </span><a href="-call-data-serializer/index.html">CallDataSerializer</a><span class="token operator">&lt;</span><a href="ksrpc-environment.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">builder<span class="token operator">: </span><a href="-ksrpc-environment-builder/index.html">KsrpcEnvironmentBuilder</a><span class="token operator">&lt;</span><a href="ksrpc-environment.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token operator">&lt;</span><a href="ksrpc-environment.html">T</a><span class="token operator">&gt;</span></div><div class="symbol monospace"><span class="token keyword">fun </span><a href="ksrpc-environment.html"><span class="token function">ksrpcEnvironment</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">stringFormat<span class="token operator">: </span><span data-unresolved-link="kotlinx.serialization/StringFormat///PointingToDeclaration/">StringFormat</span><span class="token operator"> = </span>Json<span class="token punctuation">, </span></span><span class="parameter ">builder<span class="token operator">: </span><a href="-ksrpc-environment-builder/index.html">KsrpcEnvironmentBuilder</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="ksrpc-environment.html">T</a><span class="token operator">&gt; </span><a href="ksrpc-environment.html"><span class="token function">ksrpcEnvironment</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">serializer<span class="token operator">: </span><a href="-call-data-serializer/index.html">CallDataSerializer</a><span class="token operator">&lt;</span><a href="ksrpc-environment.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">builder<span class="token operator">: </span><a href="-ksrpc-environment-builder/index.html">KsrpcEnvironmentBuilder</a><span class="token operator">&lt;</span><a href="ksrpc-environment.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token operator">&lt;</span><a href="ksrpc-environment.html">T</a><span class="token operator">&gt;</span></div><div class="symbol monospace"><span class="token keyword">fun </span><a href="ksrpc-environment.html"><span class="token function">ksrpcEnvironment</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">stringFormat<span class="token operator">: </span><span data-unresolved-link="kotlinx.serialization/StringFormat///PointingToDeclaration/">StringFormat</span><span class="token operator"> = </span>Json<span class="token punctuation">, </span></span><span class="parameter ">builder<span class="token operator">: </span><a href="-ksrpc-environment-builder/index.html">KsrpcEnvironmentBuilder</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-430762615%2FFunctions%2F-1379736828" anchor-label="onError" id="-430762615%2FFunctions%2F-1379736828" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain">
+<a data-name="-430762615%2FFunctions%2F1567993722" anchor-label="onError" id="-430762615%2FFunctions%2F1567993722" data-filterable-set=":ksrpc-core/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":ksrpc-core/commonMain" data-filterable-set=":ksrpc-core/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="on-error.html"><span>on</span><wbr><span><span>Error</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-430762615%2FFunctions%2F-1379736828"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-430762615%2FFunctions%2F1567993722"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="on-error.html">T</a><span class="token operator">&gt; </span><a href="-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token operator">&lt;</span><a href="on-error.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="on-error.html"><span class="token function">onError</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">listener<span class="token operator">: </span><a href="-error-listener/index.html">ErrorListener</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token operator">&lt;</span><a href="on-error.html">T</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Convenience method for easily creating a copy of <a href="-ksrpc-environment/index.html">KsrpcEnvironment</a> with a local error listener.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="on-error.html">T</a><span class="token operator">&gt; </span><a href="-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token operator">&lt;</span><a href="on-error.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="on-error.html"><span class="token function">onError</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">listener<span class="token operator">: </span><a href="-error-listener/index.html">ErrorListener</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token operator">&lt;</span><a href="on-error.html">T</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Convenience method for easily creating a copy of <a href="-ksrpc-environment/index.html">KsrpcEnvironment</a> with a local error listener.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1342057925%2FFunctions%2F-1379736828" anchor-label="reconfigure" id="1342057925%2FFunctions%2F-1379736828" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain">
+<a data-name="1342057925%2FFunctions%2F1567993722" anchor-label="reconfigure" id="1342057925%2FFunctions%2F1567993722" data-filterable-set=":ksrpc-core/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":ksrpc-core/commonMain" data-filterable-set=":ksrpc-core/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="reconfigure.html"><span><span>reconfigure</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1342057925%2FFunctions%2F-1379736828"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1342057925%2FFunctions%2F1567993722"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="reconfigure.html">T</a><span class="token operator">&gt; </span><a href="-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token operator">&lt;</span><a href="reconfigure.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="reconfigure.html"><span class="token function">reconfigure</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">builder<span class="token operator">: </span><a href="-ksrpc-environment-builder/index.html">KsrpcEnvironmentBuilder</a><span class="token operator">&lt;</span><a href="reconfigure.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token operator">&lt;</span><a href="reconfigure.html">T</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Creates a copy of the <a href="-ksrpc-environment/index.html">KsrpcEnvironment</a> provided and allows changes to it before returning it. This method does NOT modify the original <a href="-ksrpc-environment/index.html">KsrpcEnvironment</a>.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="reconfigure.html">T</a><span class="token operator">&gt; </span><a href="-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token operator">&lt;</span><a href="reconfigure.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="reconfigure.html"><span class="token function">reconfigure</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">builder<span class="token operator">: </span><a href="-ksrpc-environment-builder/index.html">KsrpcEnvironmentBuilder</a><span class="token operator">&lt;</span><a href="reconfigure.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token operator">&lt;</span><a href="reconfigure.html">T</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Creates a copy of the <a href="-ksrpc-environment/index.html">KsrpcEnvironment</a> provided and allows changes to it before returning it. This method does NOT modify the original <a href="-ksrpc-environment/index.html">KsrpcEnvironment</a>.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="2090463660%2FFunctions%2F-631740997" anchor-label="rpcObject" id="2090463660%2FFunctions%2F-631740997" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain,:ksrpc-core:dokkaHtmlPartial/jsMain,:ksrpc-core:dokkaHtmlPartial/jvmMain,:ksrpc-core:dokkaHtmlPartial/nativeMain,:ksrpc-core:dokkaHtmlPartial/wasmJsMain"></a>
-          <div class="table-row" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/commonMain,:ksrpc-core:dokkaHtmlPartial/jsMain,:ksrpc-core:dokkaHtmlPartial/jvmMain,:ksrpc-core:dokkaHtmlPartial/nativeMain,:ksrpc-core:dokkaHtmlPartial/wasmJsMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain,:ksrpc-core:dokkaHtmlPartial/jsMain,:ksrpc-core:dokkaHtmlPartial/jvmMain,:ksrpc-core:dokkaHtmlPartial/nativeMain,:ksrpc-core:dokkaHtmlPartial/wasmJsMain">
+<a data-name="2090463660%2FFunctions%2F-911231231" anchor-label="rpcObject" id="2090463660%2FFunctions%2F-911231231" data-filterable-set=":ksrpc-core/commonMain,:ksrpc-core/jsMain,:ksrpc-core/jvmMain,:ksrpc-core/nativeMain,:ksrpc-core/wasmJsMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":ksrpc-core/commonMain,:ksrpc-core/jsMain,:ksrpc-core/jvmMain,:ksrpc-core/nativeMain,:ksrpc-core/wasmJsMain" data-filterable-set=":ksrpc-core/commonMain,:ksrpc-core/jsMain,:ksrpc-core/jvmMain,:ksrpc-core/nativeMain,:ksrpc-core/wasmJsMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="rpc-object.html"><span>rpc</span><wbr><span><span>Object</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2090463660%2FFunctions%2F-631740997"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2090463660%2FFunctions%2F-911231231"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
-                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain" data-active="" data-toggle=":ksrpc-core:dokkaHtmlPartial/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/jsMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/jsMain" data-toggle=":ksrpc-core:dokkaHtmlPartial/jsMain">js</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/jvmMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/jvmMain" data-toggle=":ksrpc-core:dokkaHtmlPartial/jvmMain">jvm</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/nativeMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/nativeMain" data-toggle=":ksrpc-core:dokkaHtmlPartial/nativeMain">native</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/wasmJsMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/wasmJsMain" data-toggle=":ksrpc-core:dokkaHtmlPartial/wasmJsMain">wasmJs</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="rpc-object.html">T</a><span class="token operator"> : </span><a href="../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token operator">&gt; </span><a href="rpc-object.html"><span class="token function">rpcObject</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-rpc-object/index.html">RpcObject</a><span class="token operator">&lt;</span><a href="rpc-object.html">T</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Helper to get <a href="-rpc-object/index.html">RpcObject</a> for a given <a href="../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a></p></div></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core:dokkaHtmlPartial/jsMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="rpc-object.html">T</a><span class="token operator"> : </span><a href="../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token operator">&gt; </span><a href="rpc-object.html"><span class="token function">rpcObject</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-rpc-object/index.html">RpcObject</a><span class="token operator">&lt;</span><a href="rpc-object.html">T</a><span class="token operator">&gt;</span></div></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core:dokkaHtmlPartial/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="rpc-object.html">T</a><span class="token operator"> : </span><a href="../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token operator">&gt; </span><a href="rpc-object.html"><span class="token function">rpcObject</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-rpc-object/index.html">RpcObject</a><span class="token operator">&lt;</span><a href="rpc-object.html">T</a><span class="token operator">&gt;</span></div></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core:dokkaHtmlPartial/nativeMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="rpc-object.html">T</a><span class="token operator"> : </span><a href="../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token operator">&gt; </span><a href="rpc-object.html"><span class="token function">rpcObject</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-rpc-object/index.html">RpcObject</a><span class="token operator">&lt;</span><a href="rpc-object.html">T</a><span class="token operator">&gt;</span></div></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core:dokkaHtmlPartial/wasmJsMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="rpc-object.html">T</a><span class="token operator"> : </span><a href="../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token operator">&gt; </span><a href="rpc-object.html"><span class="token function">rpcObject</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-rpc-object/index.html">RpcObject</a><span class="token operator">&lt;</span><a href="rpc-object.html">T</a><span class="token operator">&gt;</span></div></div>                  </div>
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":ksrpc-core/commonMain" data-filterable-set=":ksrpc-core/commonMain" data-active="" data-toggle=":ksrpc-core/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core/jsMain" data-filterable-set=":ksrpc-core/jsMain" data-toggle=":ksrpc-core/jsMain">js</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core/jvmMain" data-filterable-set=":ksrpc-core/jvmMain" data-toggle=":ksrpc-core/jvmMain">jvm</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core/nativeMain" data-filterable-set=":ksrpc-core/nativeMain" data-toggle=":ksrpc-core/nativeMain">native</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core/wasmJsMain" data-filterable-set=":ksrpc-core/wasmJsMain" data-toggle=":ksrpc-core/wasmJsMain">wasmJs</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="rpc-object.html">T</a><span class="token operator"> : </span><a href="../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token operator">&gt; </span><a href="rpc-object.html"><span class="token function">rpcObject</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-rpc-object/index.html">RpcObject</a><span class="token operator">&lt;</span><a href="rpc-object.html">T</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Helper to get <a href="-rpc-object/index.html">RpcObject</a> for a given <a href="../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a></p></div></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core/jsMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="rpc-object.html">T</a><span class="token operator"> : </span><a href="../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token operator">&gt; </span><a href="rpc-object.html"><span class="token function">rpcObject</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../ksrpc-core/com.monkopedia.ksrpc/-rpc-object/index.html">RpcObject</a><span class="token operator">&lt;</span><a href="rpc-object.html">T</a><span class="token operator">&gt;</span></div></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="rpc-object.html">T</a><span class="token operator"> : </span><a href="../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token operator">&gt; </span><a href="rpc-object.html"><span class="token function">rpcObject</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-rpc-object/index.html">RpcObject</a><span class="token operator">&lt;</span><a href="rpc-object.html">T</a><span class="token operator">&gt;</span></div></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core/nativeMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="rpc-object.html">T</a><span class="token operator"> : </span><a href="../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token operator">&gt; </span><a href="rpc-object.html"><span class="token function">rpcObject</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-rpc-object/index.html">RpcObject</a><span class="token operator">&lt;</span><a href="rpc-object.html">T</a><span class="token operator">&gt;</span></div></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core/wasmJsMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="rpc-object.html">T</a><span class="token operator"> : </span><a href="../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token operator">&gt; </span><a href="rpc-object.html"><span class="token function">rpcObject</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../ksrpc-core/com.monkopedia.ksrpc/-rpc-object/index.html">RpcObject</a><span class="token operator">&lt;</span><a href="rpc-object.html">T</a><span class="token operator">&gt;</span></div></div>                  </div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1703431861%2FFunctions%2F-1379736828" anchor-label="serialized" id="1703431861%2FFunctions%2F-1379736828" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain">
+<a data-name="1703431861%2FFunctions%2F1567993722" anchor-label="serialized" id="1703431861%2FFunctions%2F1567993722" data-filterable-set=":ksrpc-core/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":ksrpc-core/commonMain" data-filterable-set=":ksrpc-core/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="serialized.html"><span><span>serialized</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1703431861%2FFunctions%2F-1379736828"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1703431861%2FFunctions%2F1567993722"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="serialized.html">T</a><span class="token operator"> : </span><a href="../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token punctuation">, </span><a href="serialized.html">S</a><span class="token operator">&gt; </span><a href="serialized.html">T</a><span class="token punctuation">.</span><a href="serialized.html"><span class="token function">serialized</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">env<span class="token operator">: </span><a href="-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token operator">&lt;</span><a href="serialized.html">S</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.monkopedia.ksrpc.channels/-serialized-service/index.html">SerializedService</a><span class="token operator">&lt;</span><a href="serialized.html">S</a><span class="token operator">&gt;</span></div><div class="symbol monospace"><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="serialized.html">T</a><span class="token operator"> : </span><a href="../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token punctuation">, </span><a href="serialized.html">S</a><span class="token operator">&gt; </span><a href="serialized.html">T</a><span class="token punctuation">.</span><a href="serialized.html"><span class="token function">serialized</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">rpcObject<span class="token operator">: </span><a href="-rpc-object/index.html">RpcObject</a><span class="token operator">&lt;</span><a href="serialized.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">env<span class="token operator">: </span><a href="-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token operator">&lt;</span><a href="serialized.html">S</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.monkopedia.ksrpc.channels/-serialized-service/index.html">SerializedService</a><span class="token operator">&lt;</span><a href="serialized.html">S</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Convert a <a href="serialized.html">T</a> into a <a href="../com.monkopedia.ksrpc.channels/-serialized-service/index.html">SerializedService</a> for hosting.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="serialized.html">T</a><span class="token operator"> : </span><a href="../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token punctuation">, </span><a href="serialized.html">S</a><span class="token operator">&gt; </span><a href="serialized.html">T</a><span class="token punctuation">.</span><a href="serialized.html"><span class="token function">serialized</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">env<span class="token operator">: </span><a href="-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token operator">&lt;</span><a href="serialized.html">S</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.monkopedia.ksrpc.channels/-serialized-service/index.html">SerializedService</a><span class="token operator">&lt;</span><a href="serialized.html">S</a><span class="token operator">&gt;</span></div><div class="symbol monospace"><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="serialized.html">T</a><span class="token operator"> : </span><a href="../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token punctuation">, </span><a href="serialized.html">S</a><span class="token operator">&gt; </span><a href="serialized.html">T</a><span class="token punctuation">.</span><a href="serialized.html"><span class="token function">serialized</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">rpcObject<span class="token operator">: </span><a href="-rpc-object/index.html">RpcObject</a><span class="token operator">&lt;</span><a href="serialized.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">env<span class="token operator">: </span><a href="-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token operator">&lt;</span><a href="serialized.html">S</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../com.monkopedia.ksrpc.channels/-serialized-service/index.html">SerializedService</a><span class="token operator">&lt;</span><a href="serialized.html">S</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Convert a <a href="serialized.html">T</a> into a <a href="../com.monkopedia.ksrpc.channels/-serialized-service/index.html">SerializedService</a> for hosting.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1282175271%2FFunctions%2F-1379736828" anchor-label="toStub" id="1282175271%2FFunctions%2F-1379736828" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain">
+<a data-name="1282175271%2FFunctions%2F1567993722" anchor-label="toStub" id="1282175271%2FFunctions%2F1567993722" data-filterable-set=":ksrpc-core/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":ksrpc-core/commonMain" data-filterable-set=":ksrpc-core/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="to-stub.html"><span>to</span><wbr><span><span>Stub</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1282175271%2FFunctions%2F-1379736828"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1282175271%2FFunctions%2F1567993722"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="to-stub.html">T</a><span class="token operator"> : </span><a href="../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token punctuation">, </span><a href="to-stub.html">S</a><span class="token operator">&gt; </span><a href="../com.monkopedia.ksrpc.channels/-serialized-service/index.html">SerializedService</a><span class="token operator">&lt;</span><a href="to-stub.html">S</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="to-stub.html"><span class="token function">toStub</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="to-stub.html">T</a></div><div class="brief "><p class="paragraph">Convert a <a href="../com.monkopedia.ksrpc.channels/-serialized-service/index.html">SerializedService</a> to a <a href="to-stub.html">T</a> for use as a client.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="to-stub.html">T</a><span class="token operator"> : </span><a href="../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token punctuation">, </span><a href="to-stub.html">S</a><span class="token operator">&gt; </span><a href="../com.monkopedia.ksrpc.channels/-serialized-service/index.html">SerializedService</a><span class="token operator">&lt;</span><a href="to-stub.html">S</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="to-stub.html"><span class="token function">toStub</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="to-stub.html">T</a></div><div class="brief "><p class="paragraph">Convert a <a href="../com.monkopedia.ksrpc.channels/-serialized-service/index.html">SerializedService</a> to a <a href="to-stub.html">T</a> for use as a client.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1361244869%2FFunctions%2F-1379736828" anchor-label="use" id="-1361244869%2FFunctions%2F-1379736828" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":ksrpc-core:dokkaHtmlPartial/commonMain" data-filterable-set=":ksrpc-core:dokkaHtmlPartial/commonMain">
+<a data-name="-1361244869%2FFunctions%2F1567993722" anchor-label="use" id="-1361244869%2FFunctions%2F1567993722" data-filterable-set=":ksrpc-core/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":ksrpc-core/commonMain" data-filterable-set=":ksrpc-core/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="use.html"><span><span>use</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1361244869%2FFunctions%2F-1379736828"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1361244869%2FFunctions%2F1567993722"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="use.html">T</a><span class="token operator"> : </span><a href="../../ksrpc-api/com.monkopedia.ksrpc/-suspend-closeable/index.html">SuspendCloseable</a><span class="token punctuation">, </span><a href="use.html">R</a><span class="token operator">&gt; </span><a href="use.html">T</a><span class="token punctuation">.</span><a href="use.html"><span class="token function">use</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">usage<span class="token operator">: </span><span class="token punctuation">(</span><a href="use.html">T</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="use.html">R</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="use.html">R</a></div><div class="brief "><p class="paragraph">Helper that runs <a href="use.html">usage</a> then invokes <a href="../com.monkopedia.ksrpc.channels/-serialized-service/index.html#-1927979038%2FFunctions%2F-1379736828">SuspendCloseable.close</a> in the finally block.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="use.html">T</a><span class="token operator"> : </span><a href="../../ksrpc-api/com.monkopedia.ksrpc/-suspend-closeable/index.html">SuspendCloseable</a><span class="token punctuation">, </span><a href="use.html">R</a><span class="token operator">&gt; </span><a href="use.html">T</a><span class="token punctuation">.</span><a href="use.html"><span class="token function">use</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">usage<span class="token operator">: </span><span class="token punctuation">(</span><a href="use.html">T</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="use.html">R</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="use.html">R</a></div><div class="brief "><p class="paragraph">Helper that runs <a href="use.html">usage</a> then invokes <a href="../com.monkopedia.ksrpc.channels/-serialized-service/index.html#-1927979038%2FFunctions%2F1567993722">SuspendCloseable.close</a> in the finally block.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -440,17 +530,21 @@
   </div>
 </div>
     <div class="footer">
-        <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
-        <span>© 2025 Copyright</span>
-        <span class="pull-right">
-            <span>Generated by </span>
-            <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
-                <span>dokka</span>
-            </a>
-        </span>
-    </div>
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
             </div>
         </div>
     </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
