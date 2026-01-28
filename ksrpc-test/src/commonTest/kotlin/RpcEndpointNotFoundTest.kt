@@ -55,7 +55,7 @@ class RpcEndpointNotFoundTransportTest :
 class RpcEndpointNotFoundLocalTest {
     @Test
     fun testFindEndpointThrows() {
-        assertFailsWith<RpcEndpointNotFoundException> {
+        assertFailsWith<RpcEndpointException> {
             rpcObject<EndpointNotFoundLegacy>().findEndpoint("missing")
         }
     }
@@ -86,7 +86,7 @@ class RpcEndpointNotFoundTransportVariationTest :
         },
         verifyOnChannel = { channel ->
             val stub = channel.toStub<EndpointNotFoundExtended, String>()
-            val exception = assertFailsWith<RpcEndpointNotFoundException> {
+            val exception = assertFailsWith<RpcEndpointException> {
                 stub.extra(Unit)
             }
             val message = exception.message ?: ""

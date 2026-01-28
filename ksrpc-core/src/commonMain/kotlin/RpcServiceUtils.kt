@@ -52,8 +52,3 @@ inline fun <reified T : RpcService, S> SerializedService<S>.toStub(): T =
  * Could happen from version mismatch or other programmer errors.
  */
 open class RpcEndpointException(str: String) : IllegalArgumentException(str)
-
-/**
- * Thrown when a specific endpoint cannot be found.
- */
-class RpcEndpointNotFoundException(str: String) : RpcEndpointException(str)

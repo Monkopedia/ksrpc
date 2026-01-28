@@ -18,7 +18,7 @@
 package com.monkopedia.ksrpc.jni
 
 import com.monkopedia.ksrpc.CallDataSerializer
-import com.monkopedia.ksrpc.RpcEndpointNotFoundException
+import com.monkopedia.ksrpc.RpcEndpointException
 import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.channels.CallData
 import kotlinx.serialization.KSerializer
@@ -63,7 +63,7 @@ class JniSerialization(private val jniSer: JniSer = JniSer) : CallDataSerializer
         val wrapper = jniSer.decodeFromJni(Wrapper.serializer(), callData.readSerialized())
         return if (wrapper.isEndpointMissing) {
             val failure = jniSer.decodeFromJni(RpcFailure.serializer(), wrapper.content)
-            RpcEndpointNotFoundException(failure.stack)
+            RpcEndpointException(failure.stack)
         } else {
             jniSer.decodeFromJni(RpcFailure.serializer(), wrapper.content).toException()
         }

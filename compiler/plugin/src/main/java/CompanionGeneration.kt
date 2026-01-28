@@ -170,7 +170,7 @@ class CompanionGeneration(
         }
 
     private fun IrBlockBodyBuilder.irThrowEndpointNotFound(message: IrExpression) = irThrow(
-        irCallConstructor(env.endpointNotFoundStrConstructor, emptyList()).apply {
+        irCallConstructor(env.endpointStrConstructor, emptyList()).apply {
             putArgs(message)
         }
     )

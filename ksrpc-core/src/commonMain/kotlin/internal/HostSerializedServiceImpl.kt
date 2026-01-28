@@ -16,7 +16,7 @@
 package com.monkopedia.ksrpc.internal
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
-import com.monkopedia.ksrpc.RpcEndpointNotFoundException
+import com.monkopedia.ksrpc.RpcEndpointException
 import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.RpcObject
 import com.monkopedia.ksrpc.RpcService
@@ -70,7 +70,7 @@ class HostSerializedChannelImpl<T>(
         env.logger.info("SerializedChannel", "Exception thrown during dispatching", t)
         env.errorListener.onError(t)
         val failure = RpcFailure(t.asString)
-        if (t is RpcEndpointNotFoundException) {
+        if (t is RpcEndpointException) {
             env.serialization.createEndpointNotFoundCallData(RpcFailure.serializer(), failure)
         } else {
             env.serialization.createErrorCallData(RpcFailure.serializer(), failure)

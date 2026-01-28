@@ -196,8 +196,5 @@ afterEvaluate {
         jsBrowserTest.dependsOn(this@afterEvaluate.tasks["jsProductionExecutableCompileSync"])
         jsBrowserTest.mustRunAfter(this@afterEvaluate.tasks["jsProductionExecutableCompileSync"])
         jsBrowserTest.dependsOn(copyWebWorkerJs)
-        println(
-            "Setup dependencies $jsBrowserTest on ${this@afterEvaluate.tasks["jsProductionExecutableCompileSync"]}"
-        )
     }
 }

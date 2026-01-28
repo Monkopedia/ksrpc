@@ -18,7 +18,7 @@ package com.monkopedia.ksrpc.ktor
 import com.monkopedia.ksrpc.ENDPOINT_NOT_FOUND_PREFIX
 import com.monkopedia.ksrpc.ERROR_PREFIX
 import com.monkopedia.ksrpc.KsrpcEnvironment
-import com.monkopedia.ksrpc.RpcEndpointNotFoundException
+import com.monkopedia.ksrpc.RpcEndpointException
 import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.RpcService
 import com.monkopedia.ksrpc.asString
@@ -121,7 +121,7 @@ private suspend inline fun RoutingContext.runCatching(
         exec()
     } catch (t: Throwable) {
         env.errorListener.onError(t)
-        val prefix = if (t is RpcEndpointNotFoundException) {
+        val prefix = if (t is RpcEndpointException) {
             ENDPOINT_NOT_FOUND_PREFIX
         } else {
             ERROR_PREFIX

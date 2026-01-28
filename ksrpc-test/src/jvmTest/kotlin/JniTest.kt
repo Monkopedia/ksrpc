@@ -225,7 +225,7 @@ class JniTest {
     @Test
     fun testMissingEndpoint() = runBlockingUnit {
         val stub = createMissingEpService()
-        val exception = assertFailsWith<RpcEndpointNotFoundException> {
+        val exception = assertFailsWith<RpcEndpointException> {
             stub.rpc("Hello" to "world")
         }
         val message = exception.message ?: ""

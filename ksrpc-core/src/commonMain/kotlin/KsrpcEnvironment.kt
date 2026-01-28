@@ -102,7 +102,7 @@ private class StringSerializer(val stringFormat: StringFormat = Json) : CallData
             serialized.startsWith(ENDPOINT_NOT_FOUND_PREFIX) -> {
                 val errorStr = serialized.substring(ENDPOINT_NOT_FOUND_PREFIX.length)
                 val failure = stringFormat.decodeFromString(RpcFailure.serializer(), errorStr)
-                RpcEndpointNotFoundException(failure.stack)
+                RpcEndpointException(failure.stack)
             }
 
             serialized.startsWith(ERROR_PREFIX) -> {
