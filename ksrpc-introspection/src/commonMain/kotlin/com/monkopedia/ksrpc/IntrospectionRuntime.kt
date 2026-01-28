@@ -15,10 +15,6 @@
  */
 package com.monkopedia.ksrpc
 
-import com.monkopedia.ksrpc.channels.SerializedService
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.builtins.serializer
-
 internal const val SERVICE_NAME_ENDPOINT = "service_name"
 internal const val ENDPOINTS_ENDPOINT = "endpoints"
 internal const val ENDPOINT_INFO_ENDPOINT = "endpoint_info"

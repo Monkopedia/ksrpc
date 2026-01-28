@@ -142,3 +142,16 @@ private val SerialKind.rpcType: RpcDescriptorType
         StructureKind.OBJECT -> RpcDescriptorType.OBJECT
         else -> RpcDescriptorType.UNKNOWN
     }
+
+internal fun RpcMethod<*, *, *>.inputRpcDataType(): RpcDataType = inputTransform.rpcDataType
+
+internal fun RpcMethod<*, *, *>.outputRpcDataType(): RpcDataType = outputTransform.rpcDataType
+
+internal val Transformer<*>.rpcDataType: RpcDataType
+    get() {
+        return when (this) {
+            BinaryTransformer -> RpcDataType.BinaryData
+            is SerializerTransformer<*> -> RpcDataType.DataStructure(serializer)
+            is SubserviceTransformer<*> -> RpcDataType.Service(serviceObject.serviceName)
+        }
+    }

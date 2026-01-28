@@ -15,7 +15,6 @@
  */
 package com.monkopedia.ksrpc
 
-import com.monkopedia.ksrpc.RpcDataType
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.ChannelId
 import com.monkopedia.ksrpc.channels.SerializedService
@@ -24,7 +23,6 @@ import com.monkopedia.ksrpc.channels.registerHost
 import com.monkopedia.ksrpc.internal.client
 import com.monkopedia.ksrpc.internal.host
 import io.ktor.utils.io.ByteReadChannel
-import kotlin.sequences.sequence
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.serializer
@@ -32,7 +30,6 @@ import kotlinx.serialization.builtins.serializer
 sealed interface Transformer<T> {
     val hasContent: Boolean
         get() = true
-    val rpcDataType: RpcDataType
 
     suspend fun <S> transform(input: T, channel: SerializedService<S>): CallData<S>
     suspend fun <S> untransform(data: CallData<S>, channel: SerializedService<S>): T
@@ -46,11 +43,9 @@ sealed interface Transformer<T> {
     }
 }
 
-class SerializerTransformer<I>(private val serializer: KSerializer<I>) : Transformer<I> {
+class SerializerTransformer<I>(val serializer: KSerializer<I>) : Transformer<I> {
     override val hasContent: Boolean
         get() = serializer != Unit.serializer()
-    override val rpcDataType: RpcDataType
-        get() = RpcDataType.DataStructure(serializer)
 
     override suspend fun <T> transform(input: I, channel: SerializedService<T>): CallData<T> {
         channel.env.logger.debug("Transformer", "Serializing input to CallData")
@@ -65,8 +60,6 @@ class SerializerTransformer<I>(private val serializer: KSerializer<I>) : Transfo
 }
 
 object BinaryTransformer : Transformer<ByteReadChannel> {
-    override val rpcDataType: RpcDataType
-        get() = RpcDataType.BinaryData
     override suspend fun <T> transform(
         input: ByteReadChannel,
         channel: SerializedService<T>
@@ -85,12 +78,9 @@ object BinaryTransformer : Transformer<ByteReadChannel> {
     }
 }
 
-class SubserviceTransformer<T : RpcService>(private val serviceObj: RpcObject<T>) :
-    Transformer<T> {
+class SubserviceTransformer<T : RpcService>(private val serviceObj: RpcObject<T>) : Transformer<T> {
     val serviceObject: RpcObject<T>
         get() = serviceObj
-    override val rpcDataType: RpcDataType
-        get() = RpcDataType.Service(serviceObj.serviceName)
     override suspend fun <S> transform(input: T, channel: SerializedService<S>): CallData<S> {
         val host = host<S>() ?: error("Cannot transform service type to non-hosting channel")
         val serviceId = host.registerHost(input, serviceObj)
@@ -116,8 +106,8 @@ interface ServiceExecutor {
  */
 class RpcMethod<T : RpcService, I, O> constructor(
     val endpoint: String,
-    private val inputTransform: Transformer<I>,
-    private val outputTransform: Transformer<O>,
+    val inputTransform: Transformer<I>,
+    val outputTransform: Transformer<O>,
     private val method: ServiceExecutor
 ) {
 
@@ -148,9 +138,6 @@ class RpcMethod<T : RpcService, I, O> constructor(
             channel.env.logger.debug("Transformer", "($id) Completed remote endpoint $endpoint")
             outputTransform.untransform(transformedOutput, channel)
         }
-
-    fun inputRpcDataType(): RpcDataType = inputTransform.rpcDataType
-    fun outputRpcDataType(): RpcDataType = outputTransform.rpcDataType
 
     fun findSubserviceTransformers(): List<SubserviceTransformer<out RpcService>> = listOfNotNull(
         inputTransform as? SubserviceTransformer<*>,
