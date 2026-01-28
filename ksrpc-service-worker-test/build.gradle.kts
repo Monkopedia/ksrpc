@@ -30,7 +30,7 @@ kotlin {
         binaries.executable()
     }
     sourceSets["commonMain"].dependencies {
-        api(project(":ksrpc-web-worker"))
+        api(project(":ksrpc-service-worker"))
         implementation(project(":ksrpc-introspection"))
     }
     sourceSets["jsMain"].dependencies {

@@ -1,0 +1,12 @@
+// Klib ABI Dump
+// Targets: [js, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <com.monkopedia.ksrpc:ksrpc-service-worker>
+final fun com.monkopedia.ksrpc.webworker/createServiceWorkerWithConnection(kotlin/String, com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String>): com.monkopedia.ksrpc.channels/Connection<kotlin/String> // com.monkopedia.ksrpc.webworker/createServiceWorkerWithConnection|createServiceWorkerWithConnection(kotlin.String;com.monkopedia.ksrpc.KsrpcEnvironment<kotlin.String>){}[0]
+
+// Targets: [js]
+final fun com.monkopedia.ksrpc.webworker/onServiceWorkerConnection(com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String>, kotlin.coroutines/SuspendFunction1<com.monkopedia.ksrpc.channels/Connection<kotlin/String>, kotlin/Unit>) // com.monkopedia.ksrpc.webworker/onServiceWorkerConnection|onServiceWorkerConnection(com.monkopedia.ksrpc.KsrpcEnvironment<kotlin.String>;kotlin.coroutines.SuspendFunction1<com.monkopedia.ksrpc.channels.Connection<kotlin.String>,kotlin.Unit>){}[0]

@@ -40,7 +40,7 @@ kotlin {
                     config.files.add(
                         KarmaFileConfig(
                             pattern = rootProject.projectDir.absolutePath +
-                                "/build/js/packages/ksrpc-ksrpc-test-test/kotlin/ksrpc-web-worker-test.js",
+                                "/build/js/packages/ksrpc-ksrpc-test-test/kotlin/ksrpc-service-worker-test.js",
                             included = false,
                             served = true,
                             watched = true
@@ -62,7 +62,7 @@ kotlin {
                     config.files.add(
                         KarmaFileConfig(
                             pattern = rootProject.projectDir.absolutePath +
-                                "/build/wasm/packages/ksrpc-ksrpc-test-test/kotlin/ksrpc-web-worker-test.js",
+                                "/build/wasm/packages/ksrpc-ksrpc-test-test/kotlin/ksrpc-service-worker-test.js",
                             included = false,
                             served = true,
                             watched = true
@@ -115,17 +115,17 @@ kotlin {
         implementation(devNpm("copy-webpack-plugin", "13.0.1"))
     }
     sourceSets["jsTest"].dependencies {
-        implementation(project(":ksrpc-web-worker-test"))
+        implementation(project(":ksrpc-service-worker-test"))
         implementation(kotlin("stdlib"))
         implementation(kotlin("test"))
     }
-    sourceSets["jsTest"].resources.srcDir(projectDir.resolve("build/generated/web-worker/js"))
+    sourceSets["jsTest"].resources.srcDir(projectDir.resolve("build/generated/service-worker/js"))
     sourceSets["wasmJsTest"].dependencies {
-        implementation(project(":ksrpc-web-worker-test"))
+        implementation(project(":ksrpc-service-worker-test"))
         implementation(kotlin("stdlib"))
         implementation(kotlin("test"))
     }
-    sourceSets["wasmJsTest"].resources.srcDir(projectDir.resolve("build/generated/web-worker/wasm"))
+    sourceSets["wasmJsTest"].resources.srcDir(projectDir.resolve("build/generated/service-worker/wasm"))
 }
 val copyLib = tasks.register("copyLib", Copy::class) {
     val hostOs = System.getProperty("os.name")
@@ -159,32 +159,32 @@ val copyLib = tasks.register("copyLib", Copy::class) {
 
 val copyWebWorkerJs = tasks.register("copyWebWorkerJs", Copy::class) {
     dependsOn(
-        project(":ksrpc-web-worker-test").tasks.matching {
+        project(":ksrpc-service-worker-test").tasks.matching {
             it.name.startsWith("js") && it.name.endsWith("BrowserDistribution")
         }
     )
     from(
-        project(":ksrpc-web-worker-test").layout.buildDirectory.dir("dist/js/productionExecutable")
+        project(":ksrpc-service-worker-test").layout.buildDirectory.dir("dist/js/productionExecutable")
     ) {
         include("*.js")
         include("*.map")
     }
-    destinationDir = projectDir.resolve("build/generated/web-worker/js")
+    destinationDir = projectDir.resolve("build/generated/service-worker/js")
 }
 
 val copyWebWorkerWasm = tasks.register("copyWebWorkerWasm", Copy::class) {
     dependsOn(
-        project(":ksrpc-web-worker-test").tasks.matching {
+        project(":ksrpc-service-worker-test").tasks.matching {
             it.name.startsWith("js") && it.name.endsWith("BrowserDistribution")
         }
     )
     from(
-        project(":ksrpc-web-worker-test").layout.buildDirectory.dir("dist/js/productionExecutable")
+        project(":ksrpc-service-worker-test").layout.buildDirectory.dir("dist/js/productionExecutable")
     ) {
         include("*.js")
         include("*.map")
     }
-    destinationDir = projectDir.resolve("build/generated/web-worker/wasm")
+    destinationDir = projectDir.resolve("build/generated/service-worker/wasm")
 }
 
 afterEvaluate {
@@ -192,9 +192,7 @@ afterEvaluate {
     tasks.findByName("jsTestProcessResources")?.dependsOn(copyWebWorkerJs)
     tasks.findByName("wasmJsTestProcessResources")?.dependsOn(copyWebWorkerWasm)
     val jsBrowserTest = tasks["jsBrowserTest"]
-    project(":ksrpc-web-worker-test").afterEvaluate {
-        jsBrowserTest.dependsOn(this@afterEvaluate.tasks["jsProductionExecutableCompileSync"])
-        jsBrowserTest.mustRunAfter(this@afterEvaluate.tasks["jsProductionExecutableCompileSync"])
-        jsBrowserTest.dependsOn(copyWebWorkerJs)
-    }
+    jsBrowserTest.dependsOn(project(":ksrpc-service-worker-test").tasks["jsProductionExecutableCompileSync"])
+    jsBrowserTest.mustRunAfter(project(":ksrpc-service-worker-test").tasks["jsProductionExecutableCompileSync"])
+    jsBrowserTest.dependsOn(copyWebWorkerJs)
 }

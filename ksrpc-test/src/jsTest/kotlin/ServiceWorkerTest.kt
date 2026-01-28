@@ -131,6 +131,6 @@ class ServiceWorkerTest {
     }
 }
 
-private fun jsWorkerUrl(): String = "base/kotlin/ksrpc-web-worker-test.js"
+private fun jsWorkerUrl(): String = "base/kotlin/ksrpc-service-worker-test.js"
 
 private fun hasWindow(): Boolean = js("typeof window !== 'undefined'") as Boolean

@@ -131,7 +131,7 @@ class ServiceWorkerTest {
     }
 }
 
-private fun wasmWorkerUrl(): String = "base/kotlin/ksrpc-web-worker-test.js"
+private fun wasmWorkerUrl(): String = "base/kotlin/ksrpc-service-worker-test.js"
 
 private val hasWindow: () -> Boolean =
     js("() => typeof window !== 'undefined'")

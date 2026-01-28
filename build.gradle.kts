@@ -122,3 +122,20 @@ tasks.dokkaHtmlMultiModule.configure {
     rootProject.findProject(":ksrpc-packets")?.let { this.removeChildTasks(it) }
     rootProject.findProject(":ksrpc-ktor-websocket-shared")?.let { this.removeChildTasks(it) }
 }
+
+dependencies {
+    dokka(project(":ksrpc-api"))
+    dokka(project(":ksrpc-core"))
+    dokka(project(":ksrpc-introspection"))
+    dokka(project(":ksrpc-jni"))
+    dokka(project(":ksrpc-jsonrpc"))
+    dokka(project(":ksrpc-ktor-client"))
+    dokka(project(":ksrpc-ktor-server"))
+    dokka(project(":ksrpc-ktor-websocket-client"))
+    dokka(project(":ksrpc-ktor-websocket-server"))
+    dokka(project(":ksrpc-ktor-websocket-shared"))
+    dokka(project(":ksrpc-packets"))
+    dokka(project(":ksrpc-server"))
+    dokka(project(":ksrpc-sockets"))
+    dokka(project(":ksrpc-service-worker"))
+}
