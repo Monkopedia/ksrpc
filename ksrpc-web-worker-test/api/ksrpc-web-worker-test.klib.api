@@ -1,0 +1,74 @@
+// Klib ABI Dump
+// Targets: [js, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <com.monkopedia.ksrpc:ksrpc-web-worker-test>
+abstract interface com.monkopedia.ksrpc.webworker.test/WebWorkerTestService : com.monkopedia.ksrpc/IntrospectableRpcService { // com.monkopedia.ksrpc.webworker.test/WebWorkerTestService|null[0]
+    abstract suspend fun ping(kotlin/String): kotlin/String // com.monkopedia.ksrpc.webworker.test/WebWorkerTestService.ping|ping(kotlin.String){}[0]
+    abstract suspend fun rpc(kotlin/Pair<kotlin/String, kotlin/String>): kotlin/String // com.monkopedia.ksrpc.webworker.test/WebWorkerTestService.rpc|rpc(kotlin.Pair<kotlin.String,kotlin.String>){}[0]
+    abstract suspend fun subservice(kotlin/String): com.monkopedia.ksrpc.webworker.test/WebWorkerTestSubService // com.monkopedia.ksrpc.webworker.test/WebWorkerTestService.subservice|subservice(kotlin.String){}[0]
+    final suspend fun getIntrospection(kotlin/Unit): com.monkopedia.ksrpc/IntrospectionService // com.monkopedia.ksrpc.webworker.test/WebWorkerTestService.getIntrospection|getIntrospection(kotlin.Unit){}[0]
+
+    final class Stub : com.monkopedia.ksrpc.webworker.test/WebWorkerTestService, com.monkopedia.ksrpc/RpcService { // com.monkopedia.ksrpc.webworker.test/WebWorkerTestService.Stub|null[0]
+        constructor <init>(com.monkopedia.ksrpc.channels/SerializedService<*>) // com.monkopedia.ksrpc.webworker.test/WebWorkerTestService.Stub.<init>|<init>(com.monkopedia.ksrpc.channels.SerializedService<*>){}[0]
+
+        final suspend fun close() // com.monkopedia.ksrpc.webworker.test/WebWorkerTestService.Stub.close|close(){}[0]
+        final suspend fun ping(kotlin/String): kotlin/String // com.monkopedia.ksrpc.webworker.test/WebWorkerTestService.Stub.ping|ping(kotlin.String){}[0]
+        final suspend fun rpc(kotlin/Pair<kotlin/String, kotlin/String>): kotlin/String // com.monkopedia.ksrpc.webworker.test/WebWorkerTestService.Stub.rpc|rpc(kotlin.Pair<kotlin.String,kotlin.String>){}[0]
+        final suspend fun subservice(kotlin/String): com.monkopedia.ksrpc.webworker.test/WebWorkerTestSubService // com.monkopedia.ksrpc.webworker.test/WebWorkerTestService.Stub.subservice|subservice(kotlin.String){}[0]
+
+        final object Companion { // com.monkopedia.ksrpc.webworker.test/WebWorkerTestService.Stub.Companion|null[0]
+            constructor <init>() // com.monkopedia.ksrpc.webworker.test/WebWorkerTestService.Stub.Companion.<init>|<init>(){}[0]
+        }
+    }
+
+    final object Companion : com.monkopedia.ksrpc/RpcObject<com.monkopedia.ksrpc.webworker.test/WebWorkerTestService> { // com.monkopedia.ksrpc.webworker.test/WebWorkerTestService.Companion|null[0]
+        final val endpoints // com.monkopedia.ksrpc.webworker.test/WebWorkerTestService.Companion.endpoints|{}endpoints[0]
+            final fun <get-endpoints>(): kotlin.collections/List<kotlin/String> // com.monkopedia.ksrpc.webworker.test/WebWorkerTestService.Companion.endpoints.<get-endpoints>|<get-endpoints>(){}[0]
+        final val serviceName // com.monkopedia.ksrpc.webworker.test/WebWorkerTestService.Companion.serviceName|{}serviceName[0]
+            final fun <get-serviceName>(): kotlin/String // com.monkopedia.ksrpc.webworker.test/WebWorkerTestService.Companion.serviceName.<get-serviceName>|<get-serviceName>(){}[0]
+
+        final fun <#A2: kotlin/Any?> createStub(com.monkopedia.ksrpc.channels/SerializedService<#A2>): com.monkopedia.ksrpc.webworker.test/WebWorkerTestService // com.monkopedia.ksrpc.webworker.test/WebWorkerTestService.Companion.createStub|createStub(com.monkopedia.ksrpc.channels.SerializedService<0:0>){0§<kotlin.Any?>}[0]
+        final fun findEndpoint(kotlin/String): com.monkopedia.ksrpc/RpcMethod<*, *, *> // com.monkopedia.ksrpc.webworker.test/WebWorkerTestService.Companion.findEndpoint|findEndpoint(kotlin.String){}[0]
+    }
+}
+
+abstract interface com.monkopedia.ksrpc.webworker.test/WebWorkerTestSubService : com.monkopedia.ksrpc/IntrospectableRpcService { // com.monkopedia.ksrpc.webworker.test/WebWorkerTestSubService|null[0]
+    abstract suspend fun rpc(kotlin/Pair<kotlin/String, kotlin/String>): kotlin/String // com.monkopedia.ksrpc.webworker.test/WebWorkerTestSubService.rpc|rpc(kotlin.Pair<kotlin.String,kotlin.String>){}[0]
+    final suspend fun getIntrospection(kotlin/Unit): com.monkopedia.ksrpc/IntrospectionService // com.monkopedia.ksrpc.webworker.test/WebWorkerTestSubService.getIntrospection|getIntrospection(kotlin.Unit){}[0]
+
+    final class Stub : com.monkopedia.ksrpc.webworker.test/WebWorkerTestSubService, com.monkopedia.ksrpc/RpcService { // com.monkopedia.ksrpc.webworker.test/WebWorkerTestSubService.Stub|null[0]
+        constructor <init>(com.monkopedia.ksrpc.channels/SerializedService<*>) // com.monkopedia.ksrpc.webworker.test/WebWorkerTestSubService.Stub.<init>|<init>(com.monkopedia.ksrpc.channels.SerializedService<*>){}[0]
+
+        final suspend fun close() // com.monkopedia.ksrpc.webworker.test/WebWorkerTestSubService.Stub.close|close(){}[0]
+        final suspend fun rpc(kotlin/Pair<kotlin/String, kotlin/String>): kotlin/String // com.monkopedia.ksrpc.webworker.test/WebWorkerTestSubService.Stub.rpc|rpc(kotlin.Pair<kotlin.String,kotlin.String>){}[0]
+
+        final object Companion { // com.monkopedia.ksrpc.webworker.test/WebWorkerTestSubService.Stub.Companion|null[0]
+            constructor <init>() // com.monkopedia.ksrpc.webworker.test/WebWorkerTestSubService.Stub.Companion.<init>|<init>(){}[0]
+        }
+    }
+
+    final object Companion : com.monkopedia.ksrpc/RpcObject<com.monkopedia.ksrpc.webworker.test/WebWorkerTestSubService> { // com.monkopedia.ksrpc.webworker.test/WebWorkerTestSubService.Companion|null[0]
+        final val endpoints // com.monkopedia.ksrpc.webworker.test/WebWorkerTestSubService.Companion.endpoints|{}endpoints[0]
+            final fun <get-endpoints>(): kotlin.collections/List<kotlin/String> // com.monkopedia.ksrpc.webworker.test/WebWorkerTestSubService.Companion.endpoints.<get-endpoints>|<get-endpoints>(){}[0]
+        final val serviceName // com.monkopedia.ksrpc.webworker.test/WebWorkerTestSubService.Companion.serviceName|{}serviceName[0]
+            final fun <get-serviceName>(): kotlin/String // com.monkopedia.ksrpc.webworker.test/WebWorkerTestSubService.Companion.serviceName.<get-serviceName>|<get-serviceName>(){}[0]
+
+        final fun <#A2: kotlin/Any?> createStub(com.monkopedia.ksrpc.channels/SerializedService<#A2>): com.monkopedia.ksrpc.webworker.test/WebWorkerTestSubService // com.monkopedia.ksrpc.webworker.test/WebWorkerTestSubService.Companion.createStub|createStub(com.monkopedia.ksrpc.channels.SerializedService<0:0>){0§<kotlin.Any?>}[0]
+        final fun findEndpoint(kotlin/String): com.monkopedia.ksrpc/RpcMethod<*, *, *> // com.monkopedia.ksrpc.webworker.test/WebWorkerTestSubService.Companion.findEndpoint|findEndpoint(kotlin.String){}[0]
+    }
+}
+
+final class com.monkopedia.ksrpc.webworker.test/WebWorkerTestServiceImpl : com.monkopedia.ksrpc.webworker.test/WebWorkerTestService { // com.monkopedia.ksrpc.webworker.test/WebWorkerTestServiceImpl|null[0]
+    constructor <init>(kotlin/String) // com.monkopedia.ksrpc.webworker.test/WebWorkerTestServiceImpl.<init>|<init>(kotlin.String){}[0]
+
+    final suspend fun ping(kotlin/String): kotlin/String // com.monkopedia.ksrpc.webworker.test/WebWorkerTestServiceImpl.ping|ping(kotlin.String){}[0]
+    final suspend fun rpc(kotlin/Pair<kotlin/String, kotlin/String>): kotlin/String // com.monkopedia.ksrpc.webworker.test/WebWorkerTestServiceImpl.rpc|rpc(kotlin.Pair<kotlin.String,kotlin.String>){}[0]
+    final suspend fun subservice(kotlin/String): com.monkopedia.ksrpc.webworker.test/WebWorkerTestSubService // com.monkopedia.ksrpc.webworker.test/WebWorkerTestServiceImpl.subservice|subservice(kotlin.String){}[0]
+}
+
+// Targets: [js]
+final fun com.monkopedia.ksrpc.webworker.test/main() // com.monkopedia.ksrpc.webworker.test/main|main(){}[0]

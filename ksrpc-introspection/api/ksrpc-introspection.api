@@ -1,10 +1,11 @@
 public abstract interface class com/monkopedia/ksrpc/IntrospectableRpcService : com/monkopedia/ksrpc/RpcService {
-	public abstract fun getIntrospection (Lkotlin/Unit;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getIntrospection (Lkotlin/Unit;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun getIntrospection$default (Lcom/monkopedia/ksrpc/IntrospectableRpcService;Lkotlin/Unit;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
 public final class com/monkopedia/ksrpc/IntrospectableRpcService$DefaultImpls {
 	public static fun close (Lcom/monkopedia/ksrpc/IntrospectableRpcService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun getIntrospection (Lcom/monkopedia/ksrpc/IntrospectableRpcService;Lkotlin/Unit;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun getIntrospection$default (Lcom/monkopedia/ksrpc/IntrospectableRpcService;Lkotlin/Unit;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
@@ -13,39 +14,243 @@ public abstract interface class com/monkopedia/ksrpc/IntrospectionService : com/
 	public abstract fun getEndpointInfo (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun getEndpoints (Lkotlin/Unit;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun getEndpoints$default (Lcom/monkopedia/ksrpc/IntrospectionService;Lkotlin/Unit;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun getIntrospection (Lkotlin/Unit;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun getIntrospectionFor (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun getServiceName (Lkotlin/Unit;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun getServiceName$default (Lcom/monkopedia/ksrpc/IntrospectionService;Lkotlin/Unit;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
 public final class com/monkopedia/ksrpc/IntrospectionService$Companion : com/monkopedia/ksrpc/RpcObject {
-	public fun createStub (Lcom/monkopedia/ksrpc/channels/SerializedService;)Lcom/monkopedia/ksrpc/IntrospectionService;
+	public final fun createStub (Lcom/monkopedia/ksrpc/channels/SerializedService;)Lcom/monkopedia/ksrpc/IntrospectionService;
 	public synthetic fun createStub (Lcom/monkopedia/ksrpc/channels/SerializedService;)Lcom/monkopedia/ksrpc/RpcService;
-	public fun findEndpoint (Ljava/lang/String;)Lcom/monkopedia/ksrpc/RpcMethod;
-	public fun getEndpoints ()Ljava/util/List;
-	public fun getServiceName ()Ljava/lang/String;
+	public final fun findEndpoint (Ljava/lang/String;)Lcom/monkopedia/ksrpc/RpcMethod;
+	public final fun getEndpoints ()Ljava/util/List;
+	public final fun getServiceName ()Ljava/lang/String;
 }
 
 public final class com/monkopedia/ksrpc/IntrospectionService$DefaultImpls {
 	public static fun close (Lcom/monkopedia/ksrpc/IntrospectionService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun getEndpoints$default (Lcom/monkopedia/ksrpc/IntrospectionService;Lkotlin/Unit;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static fun getIntrospection (Lcom/monkopedia/ksrpc/IntrospectionService;Lkotlin/Unit;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun getServiceName$default (Lcom/monkopedia/ksrpc/IntrospectionService;Lkotlin/Unit;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class com/monkopedia/ksrpc/IntrospectionService$Stub : com/monkopedia/ksrpc/IntrospectionService, com/monkopedia/ksrpc/RpcService {
+	public static final field Companion Lcom/monkopedia/ksrpc/IntrospectionService$Stub$Companion;
+	public fun <init> (Lcom/monkopedia/ksrpc/channels/SerializedService;)V
+	public final synthetic fun close (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final synthetic fun getEndpointInfo (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final synthetic fun getEndpoints (Lkotlin/Unit;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final synthetic fun getIntrospectionFor (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final synthetic fun getServiceName (Lkotlin/Unit;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/monkopedia/ksrpc/IntrospectionService$Stub$AnonymousGetEndpointInfo : com/monkopedia/ksrpc/ServiceExecutor {
+	public fun <init> ()V
+	public final synthetic fun invoke (Lcom/monkopedia/ksrpc/RpcService;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/monkopedia/ksrpc/IntrospectionService$Stub$AnonymousGetEndpoints : com/monkopedia/ksrpc/ServiceExecutor {
+	public fun <init> ()V
+	public final synthetic fun invoke (Lcom/monkopedia/ksrpc/RpcService;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/monkopedia/ksrpc/IntrospectionService$Stub$AnonymousGetIntrospectionFor : com/monkopedia/ksrpc/ServiceExecutor {
+	public fun <init> ()V
+	public final synthetic fun invoke (Lcom/monkopedia/ksrpc/RpcService;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/monkopedia/ksrpc/IntrospectionService$Stub$AnonymousGetServiceName : com/monkopedia/ksrpc/ServiceExecutor {
+	public fun <init> ()V
+	public final synthetic fun invoke (Lcom/monkopedia/ksrpc/RpcService;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final synthetic class com/monkopedia/ksrpc/IntrospectionService$Stub$Companion {
+	public fun <init> ()V
+	public final synthetic fun GetEndpointInfo$ksrpc_introspection ()Lcom/monkopedia/ksrpc/RpcMethod;
+	public final synthetic fun GetEndpoints$ksrpc_introspection ()Lcom/monkopedia/ksrpc/RpcMethod;
+	public final synthetic fun GetIntrospectionFor$ksrpc_introspection ()Lcom/monkopedia/ksrpc/RpcMethod;
+	public final synthetic fun GetServiceName$ksrpc_introspection ()Lcom/monkopedia/ksrpc/RpcMethod;
 }
 
 public final class com/monkopedia/ksrpc/IntrospectionServiceImpl : com/monkopedia/ksrpc/IntrospectionService {
 	public fun <init> (Lcom/monkopedia/ksrpc/RpcObject;)V
 	public fun close (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun copy (Lcom/monkopedia/ksrpc/RpcObject;)Lcom/monkopedia/ksrpc/IntrospectionServiceImpl;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/IntrospectionServiceImpl;Lcom/monkopedia/ksrpc/RpcObject;ILjava/lang/Object;)Lcom/monkopedia/ksrpc/IntrospectionServiceImpl;
+	public fun equals (Ljava/lang/Object;)Z
 	public fun getEndpointInfo (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun getEndpoints (Lkotlin/Unit;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun getIntrospection (Lkotlin/Unit;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getIntrospection (Lkotlin/Unit;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getIntrospectionFor (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun getServiceName (Lkotlin/Unit;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
-public final class com/monkopedia/ksrpc/IntrospectionServiceRpcObject : com/monkopedia/ksrpc/RpcObject {
-	public static final field INSTANCE Lcom/monkopedia/ksrpc/IntrospectionServiceRpcObject;
-	public fun createStub (Lcom/monkopedia/ksrpc/channels/SerializedService;)Lcom/monkopedia/ksrpc/IntrospectionService;
-	public synthetic fun createStub (Lcom/monkopedia/ksrpc/channels/SerializedService;)Lcom/monkopedia/ksrpc/RpcService;
-	public fun findEndpoint (Ljava/lang/String;)Lcom/monkopedia/ksrpc/RpcMethod;
-	public fun getEndpoints ()Ljava/util/List;
-	public fun getServiceName ()Ljava/lang/String;
+public abstract class com/monkopedia/ksrpc/RpcDataType {
+	public static final field Companion Lcom/monkopedia/ksrpc/RpcDataType$Companion;
+	public synthetic fun <init> (ILkotlinx/serialization/internal/SerializationConstructorMarker;)V
+	public static final synthetic fun write$Self (Lcom/monkopedia/ksrpc/RpcDataType;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+}
+
+public final class com/monkopedia/ksrpc/RpcDataType$BinaryData : com/monkopedia/ksrpc/RpcDataType {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/RpcDataType$BinaryData;
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/monkopedia/ksrpc/RpcDataType$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/monkopedia/ksrpc/RpcDataType$DataStructure : com/monkopedia/ksrpc/RpcDataType {
+	public static final field Companion Lcom/monkopedia/ksrpc/RpcDataType$DataStructure$Companion;
+	public fun <init> (Lcom/monkopedia/ksrpc/RpcDescriptor;)V
+	public fun <init> (Lkotlinx/serialization/KSerializer;)V
+	public final fun component1 ()Lcom/monkopedia/ksrpc/RpcDescriptor;
+	public final fun copy (Lcom/monkopedia/ksrpc/RpcDescriptor;)Lcom/monkopedia/ksrpc/RpcDataType$DataStructure;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/RpcDataType$DataStructure;Lcom/monkopedia/ksrpc/RpcDescriptor;ILjava/lang/Object;)Lcom/monkopedia/ksrpc/RpcDataType$DataStructure;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSchema ()Lcom/monkopedia/ksrpc/RpcDescriptor;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class com/monkopedia/ksrpc/RpcDataType$DataStructure$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/RpcDataType$DataStructure$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/monkopedia/ksrpc/RpcDataType$DataStructure;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/monkopedia/ksrpc/RpcDataType$DataStructure;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/monkopedia/ksrpc/RpcDataType$DataStructure$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/monkopedia/ksrpc/RpcDataType$Service : com/monkopedia/ksrpc/RpcDataType {
+	public static final field Companion Lcom/monkopedia/ksrpc/RpcDataType$Service$Companion;
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/monkopedia/ksrpc/RpcDataType$Service;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/RpcDataType$Service;Ljava/lang/String;ILjava/lang/Object;)Lcom/monkopedia/ksrpc/RpcDataType$Service;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getQualifiedName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class com/monkopedia/ksrpc/RpcDataType$Service$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/RpcDataType$Service$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/monkopedia/ksrpc/RpcDataType$Service;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/monkopedia/ksrpc/RpcDataType$Service;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/monkopedia/ksrpc/RpcDataType$Service$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/monkopedia/ksrpc/RpcDescriptor {
+	public static final field Companion Lcom/monkopedia/ksrpc/RpcDescriptor$Companion;
+	public fun <init> (Lcom/monkopedia/ksrpc/RpcDescriptorType;Ljava/lang/String;Ljava/util/Map;Ljava/lang/Integer;)V
+	public synthetic fun <init> (Lcom/monkopedia/ksrpc/RpcDescriptorType;Ljava/lang/String;Ljava/util/Map;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/monkopedia/ksrpc/RpcDescriptorType;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/util/Map;
+	public final fun component4 ()Ljava/lang/Integer;
+	public final fun copy (Lcom/monkopedia/ksrpc/RpcDescriptorType;Ljava/lang/String;Ljava/util/Map;Ljava/lang/Integer;)Lcom/monkopedia/ksrpc/RpcDescriptor;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/RpcDescriptor;Lcom/monkopedia/ksrpc/RpcDescriptorType;Ljava/lang/String;Ljava/util/Map;Ljava/lang/Integer;ILjava/lang/Object;)Lcom/monkopedia/ksrpc/RpcDescriptor;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDataType ()Lcom/monkopedia/ksrpc/RpcDescriptorType;
+	public final fun getElements ()Ljava/util/Map;
+	public final fun getId ()Ljava/lang/Integer;
+	public final fun getSerialName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class com/monkopedia/ksrpc/RpcDescriptor$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/RpcDescriptor$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/monkopedia/ksrpc/RpcDescriptor;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/monkopedia/ksrpc/RpcDescriptor;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/monkopedia/ksrpc/RpcDescriptor$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/monkopedia/ksrpc/RpcDescriptorType : java/lang/Enum {
+	public static final field BOOLEAN Lcom/monkopedia/ksrpc/RpcDescriptorType;
+	public static final field BYTE Lcom/monkopedia/ksrpc/RpcDescriptorType;
+	public static final field CHAR Lcom/monkopedia/ksrpc/RpcDescriptorType;
+	public static final field CLASS Lcom/monkopedia/ksrpc/RpcDescriptorType;
+	public static final field CONTEXTUAL Lcom/monkopedia/ksrpc/RpcDescriptorType;
+	public static final field DOUBLE Lcom/monkopedia/ksrpc/RpcDescriptorType;
+	public static final field ENUM Lcom/monkopedia/ksrpc/RpcDescriptorType;
+	public static final field FLOAT Lcom/monkopedia/ksrpc/RpcDescriptorType;
+	public static final field INT Lcom/monkopedia/ksrpc/RpcDescriptorType;
+	public static final field LIST Lcom/monkopedia/ksrpc/RpcDescriptorType;
+	public static final field LONG Lcom/monkopedia/ksrpc/RpcDescriptorType;
+	public static final field MAP Lcom/monkopedia/ksrpc/RpcDescriptorType;
+	public static final field OBJECT Lcom/monkopedia/ksrpc/RpcDescriptorType;
+	public static final field OPEN Lcom/monkopedia/ksrpc/RpcDescriptorType;
+	public static final field SEALED Lcom/monkopedia/ksrpc/RpcDescriptorType;
+	public static final field SHORT Lcom/monkopedia/ksrpc/RpcDescriptorType;
+	public static final field STRING Lcom/monkopedia/ksrpc/RpcDescriptorType;
+	public static final field UNKNOWN Lcom/monkopedia/ksrpc/RpcDescriptorType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/monkopedia/ksrpc/RpcDescriptorType;
+	public static fun values ()[Lcom/monkopedia/ksrpc/RpcDescriptorType;
+}
+
+public final class com/monkopedia/ksrpc/RpcEndpointInfo {
+	public static final field Companion Lcom/monkopedia/ksrpc/RpcEndpointInfo$Companion;
+	public fun <init> (Ljava/lang/String;Lcom/monkopedia/ksrpc/RpcDataType;Lcom/monkopedia/ksrpc/RpcDataType;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lcom/monkopedia/ksrpc/RpcDataType;
+	public final fun component3 ()Lcom/monkopedia/ksrpc/RpcDataType;
+	public final fun copy (Ljava/lang/String;Lcom/monkopedia/ksrpc/RpcDataType;Lcom/monkopedia/ksrpc/RpcDataType;)Lcom/monkopedia/ksrpc/RpcEndpointInfo;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/RpcEndpointInfo;Ljava/lang/String;Lcom/monkopedia/ksrpc/RpcDataType;Lcom/monkopedia/ksrpc/RpcDataType;ILjava/lang/Object;)Lcom/monkopedia/ksrpc/RpcEndpointInfo;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEndpoint ()Ljava/lang/String;
+	public final fun getInput ()Lcom/monkopedia/ksrpc/RpcDataType;
+	public final fun getOutput ()Lcom/monkopedia/ksrpc/RpcDataType;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class com/monkopedia/ksrpc/RpcEndpointInfo$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/RpcEndpointInfo$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/monkopedia/ksrpc/RpcEndpointInfo;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/monkopedia/ksrpc/RpcEndpointInfo;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/monkopedia/ksrpc/RpcEndpointInfo$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/monkopedia/ksrpc/RpcEndpointInfoKt {
+	public static final fun dataSchema (Lkotlinx/serialization/KSerializer;)Lcom/monkopedia/ksrpc/RpcDescriptor;
+}
+
+public abstract interface annotation class com/monkopedia/ksrpc/annotation/KsIntrospectable : java/lang/annotation/Annotation {
 }
 

@@ -29,7 +29,7 @@ public final class com/monkopedia/ksrpc/packets/internal/Packet {
 	public fun toString ()Ljava/lang/String;
 }
 
-public synthetic class com/monkopedia/ksrpc/packets/internal/Packet$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class com/monkopedia/ksrpc/packets/internal/Packet$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public fun <init> (Lkotlinx/serialization/KSerializer;)V
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/monkopedia/ksrpc/packets/internal/Packet;

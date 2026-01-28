@@ -16,7 +16,7 @@ public final class com/monkopedia/ksrpc/RpcFailure {
 	public fun toString ()Ljava/lang/String;
 }
 
-public synthetic class com/monkopedia/ksrpc/RpcFailure$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class com/monkopedia/ksrpc/RpcFailure$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/monkopedia/ksrpc/RpcFailure$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/monkopedia/ksrpc/RpcFailure;
@@ -24,6 +24,7 @@ public synthetic class com/monkopedia/ksrpc/RpcFailure$$serializer : kotlinx/ser
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/monkopedia/ksrpc/RpcFailure;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/monkopedia/ksrpc/RpcFailure$Companion {
@@ -31,7 +32,7 @@ public final class com/monkopedia/ksrpc/RpcFailure$Companion {
 }
 
 public abstract interface class com/monkopedia/ksrpc/RpcService : com/monkopedia/ksrpc/SuspendCloseable {
-	public abstract fun close (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun close (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class com/monkopedia/ksrpc/RpcService$DefaultImpls {

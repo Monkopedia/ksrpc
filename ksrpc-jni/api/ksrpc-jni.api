@@ -211,6 +211,7 @@ public final class com/monkopedia/ksrpc/jni/JniSerialization : com/monkopedia/ks
 	public fun <init> (Lcom/monkopedia/ksrpc/jni/JniSer;)V
 	public synthetic fun <init> (Lcom/monkopedia/ksrpc/jni/JniSer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun createCallData (Lkotlinx/serialization/KSerializer;Ljava/lang/Object;)Lcom/monkopedia/ksrpc/channels/CallData;
+	public fun createEndpointNotFoundCallData (Lkotlinx/serialization/KSerializer;Ljava/lang/Object;)Lcom/monkopedia/ksrpc/channels/CallData;
 	public fun createErrorCallData (Lkotlinx/serialization/KSerializer;Ljava/lang/Object;)Lcom/monkopedia/ksrpc/channels/CallData;
 	public fun decodeCallData (Lkotlinx/serialization/KSerializer;Lcom/monkopedia/ksrpc/channels/CallData;)Ljava/lang/Object;
 	public fun decodeErrorCallData (Lcom/monkopedia/ksrpc/channels/CallData;)Ljava/lang/Throwable;

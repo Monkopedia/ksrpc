@@ -37,7 +37,7 @@ public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcError {
 	public fun toString ()Ljava/lang/String;
 }
 
-public synthetic class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcError$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcError$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcError$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcError;
@@ -45,6 +45,7 @@ public synthetic class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcError$$seria
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcError;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcError$Companion {
@@ -70,7 +71,7 @@ public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcRequest {
 	public fun toString ()Ljava/lang/String;
 }
 
-public synthetic class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcRequest$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcRequest$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcRequest$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcRequest;
@@ -78,6 +79,7 @@ public synthetic class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcRequest$$ser
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcRequest;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcRequest$Companion {
@@ -104,7 +106,7 @@ public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcResponse {
 	public fun toString ()Ljava/lang/String;
 }
 
-public synthetic class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcResponse$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcResponse$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcResponse$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcResponse;
@@ -112,6 +114,7 @@ public synthetic class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcResponse$$se
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcResponse;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcResponse$Companion {

@@ -69,7 +69,7 @@ final class com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcError { // com.monkoped
 }
 
 final class com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest { // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest|null[0]
-    constructor <init>(kotlin/String = ..., kotlin/String, kotlinx.serialization.json/JsonElement?, kotlinx.serialization.json/JsonPrimitive? = ...) // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest.<init>|<init>(kotlin.String;kotlin.String;kotlinx.serialization.json.JsonElement?;kotlinx.serialization.json.JsonPrimitive?){}[0]
+    constructor <init>(kotlin/String = ..., kotlin/String, kotlinx.serialization.json/JsonElement? = ..., kotlinx.serialization.json/JsonPrimitive? = ...) // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest.<init>|<init>(kotlin.String;kotlin.String;kotlinx.serialization.json.JsonElement?;kotlinx.serialization.json.JsonPrimitive?){}[0]
 
     final val id // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest.id|{}id[0]
         final fun <get-id>(): kotlinx.serialization.json/JsonPrimitive? // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcRequest.id.<get-id>|<get-id>(){}[0]

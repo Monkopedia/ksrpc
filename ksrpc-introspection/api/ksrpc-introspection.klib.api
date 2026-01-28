@@ -6,14 +6,61 @@
 // - Show declarations: true
 
 // Library unique name: <com.monkopedia.ksrpc:ksrpc-introspection>
+open annotation class com.monkopedia.ksrpc.annotation/KsIntrospectable : kotlin/Annotation { // com.monkopedia.ksrpc.annotation/KsIntrospectable|null[0]
+    constructor <init>() // com.monkopedia.ksrpc.annotation/KsIntrospectable.<init>|<init>(){}[0]
+}
+
+final enum class com.monkopedia.ksrpc/RpcDescriptorType : kotlin/Enum<com.monkopedia.ksrpc/RpcDescriptorType> { // com.monkopedia.ksrpc/RpcDescriptorType|null[0]
+    enum entry BOOLEAN // com.monkopedia.ksrpc/RpcDescriptorType.BOOLEAN|null[0]
+    enum entry BYTE // com.monkopedia.ksrpc/RpcDescriptorType.BYTE|null[0]
+    enum entry CHAR // com.monkopedia.ksrpc/RpcDescriptorType.CHAR|null[0]
+    enum entry CLASS // com.monkopedia.ksrpc/RpcDescriptorType.CLASS|null[0]
+    enum entry CONTEXTUAL // com.monkopedia.ksrpc/RpcDescriptorType.CONTEXTUAL|null[0]
+    enum entry DOUBLE // com.monkopedia.ksrpc/RpcDescriptorType.DOUBLE|null[0]
+    enum entry ENUM // com.monkopedia.ksrpc/RpcDescriptorType.ENUM|null[0]
+    enum entry FLOAT // com.monkopedia.ksrpc/RpcDescriptorType.FLOAT|null[0]
+    enum entry INT // com.monkopedia.ksrpc/RpcDescriptorType.INT|null[0]
+    enum entry LIST // com.monkopedia.ksrpc/RpcDescriptorType.LIST|null[0]
+    enum entry LONG // com.monkopedia.ksrpc/RpcDescriptorType.LONG|null[0]
+    enum entry MAP // com.monkopedia.ksrpc/RpcDescriptorType.MAP|null[0]
+    enum entry OBJECT // com.monkopedia.ksrpc/RpcDescriptorType.OBJECT|null[0]
+    enum entry OPEN // com.monkopedia.ksrpc/RpcDescriptorType.OPEN|null[0]
+    enum entry SEALED // com.monkopedia.ksrpc/RpcDescriptorType.SEALED|null[0]
+    enum entry SHORT // com.monkopedia.ksrpc/RpcDescriptorType.SHORT|null[0]
+    enum entry STRING // com.monkopedia.ksrpc/RpcDescriptorType.STRING|null[0]
+    enum entry UNKNOWN // com.monkopedia.ksrpc/RpcDescriptorType.UNKNOWN|null[0]
+
+    final val entries // com.monkopedia.ksrpc/RpcDescriptorType.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<com.monkopedia.ksrpc/RpcDescriptorType> // com.monkopedia.ksrpc/RpcDescriptorType.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): com.monkopedia.ksrpc/RpcDescriptorType // com.monkopedia.ksrpc/RpcDescriptorType.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<com.monkopedia.ksrpc/RpcDescriptorType> // com.monkopedia.ksrpc/RpcDescriptorType.values|values#static(){}[0]
+}
+
 abstract interface com.monkopedia.ksrpc/IntrospectableRpcService : com.monkopedia.ksrpc/RpcService { // com.monkopedia.ksrpc/IntrospectableRpcService|null[0]
-    abstract suspend fun getIntrospection(kotlin/Unit = ...): com.monkopedia.ksrpc/IntrospectionService // com.monkopedia.ksrpc/IntrospectableRpcService.getIntrospection|getIntrospection(kotlin.Unit){}[0]
+    open suspend fun getIntrospection(kotlin/Unit = ...): com.monkopedia.ksrpc/IntrospectionService // com.monkopedia.ksrpc/IntrospectableRpcService.getIntrospection|getIntrospection(kotlin.Unit){}[0]
 }
 
 abstract interface com.monkopedia.ksrpc/IntrospectionService : com.monkopedia.ksrpc/IntrospectableRpcService { // com.monkopedia.ksrpc/IntrospectionService|null[0]
     abstract suspend fun getEndpointInfo(kotlin/String): com.monkopedia.ksrpc/RpcEndpointInfo // com.monkopedia.ksrpc/IntrospectionService.getEndpointInfo|getEndpointInfo(kotlin.String){}[0]
     abstract suspend fun getEndpoints(kotlin/Unit = ...): kotlin.collections/List<kotlin/String> // com.monkopedia.ksrpc/IntrospectionService.getEndpoints|getEndpoints(kotlin.Unit){}[0]
+    abstract suspend fun getIntrospectionFor(kotlin/String): com.monkopedia.ksrpc/IntrospectionService // com.monkopedia.ksrpc/IntrospectionService.getIntrospectionFor|getIntrospectionFor(kotlin.String){}[0]
     abstract suspend fun getServiceName(kotlin/Unit = ...): kotlin/String // com.monkopedia.ksrpc/IntrospectionService.getServiceName|getServiceName(kotlin.Unit){}[0]
+    final suspend fun getIntrospection(kotlin/Unit): com.monkopedia.ksrpc/IntrospectionService // com.monkopedia.ksrpc/IntrospectionService.getIntrospection|getIntrospection(kotlin.Unit){}[0]
+
+    final class Stub : com.monkopedia.ksrpc/IntrospectionService, com.monkopedia.ksrpc/RpcService { // com.monkopedia.ksrpc/IntrospectionService.Stub|null[0]
+        constructor <init>(com.monkopedia.ksrpc.channels/SerializedService<*>) // com.monkopedia.ksrpc/IntrospectionService.Stub.<init>|<init>(com.monkopedia.ksrpc.channels.SerializedService<*>){}[0]
+
+        final suspend fun close() // com.monkopedia.ksrpc/IntrospectionService.Stub.close|close(){}[0]
+        final suspend fun getEndpointInfo(kotlin/String): com.monkopedia.ksrpc/RpcEndpointInfo // com.monkopedia.ksrpc/IntrospectionService.Stub.getEndpointInfo|getEndpointInfo(kotlin.String){}[0]
+        final suspend fun getEndpoints(kotlin/Unit): kotlin.collections/List<kotlin/String> // com.monkopedia.ksrpc/IntrospectionService.Stub.getEndpoints|getEndpoints(kotlin.Unit){}[0]
+        final suspend fun getIntrospectionFor(kotlin/String): com.monkopedia.ksrpc/IntrospectionService // com.monkopedia.ksrpc/IntrospectionService.Stub.getIntrospectionFor|getIntrospectionFor(kotlin.String){}[0]
+        final suspend fun getServiceName(kotlin/Unit): kotlin/String // com.monkopedia.ksrpc/IntrospectionService.Stub.getServiceName|getServiceName(kotlin.Unit){}[0]
+
+        final object Companion { // com.monkopedia.ksrpc/IntrospectionService.Stub.Companion|null[0]
+            constructor <init>() // com.monkopedia.ksrpc/IntrospectionService.Stub.Companion.<init>|<init>(){}[0]
+        }
+    }
 
     final object Companion : com.monkopedia.ksrpc/RpcObject<com.monkopedia.ksrpc/IntrospectionService> { // com.monkopedia.ksrpc/IntrospectionService.Companion|null[0]
         final val endpoints // com.monkopedia.ksrpc/IntrospectionService.Companion.endpoints|{}endpoints[0]
@@ -29,18 +76,150 @@ abstract interface com.monkopedia.ksrpc/IntrospectionService : com.monkopedia.ks
 final class com.monkopedia.ksrpc/IntrospectionServiceImpl : com.monkopedia.ksrpc/IntrospectionService { // com.monkopedia.ksrpc/IntrospectionServiceImpl|null[0]
     constructor <init>(com.monkopedia.ksrpc/RpcObject<*>) // com.monkopedia.ksrpc/IntrospectionServiceImpl.<init>|<init>(com.monkopedia.ksrpc.RpcObject<*>){}[0]
 
+    final fun copy(com.monkopedia.ksrpc/RpcObject<*> = ...): com.monkopedia.ksrpc/IntrospectionServiceImpl // com.monkopedia.ksrpc/IntrospectionServiceImpl.copy|copy(com.monkopedia.ksrpc.RpcObject<*>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc/IntrospectionServiceImpl.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc/IntrospectionServiceImpl.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // com.monkopedia.ksrpc/IntrospectionServiceImpl.toString|toString(){}[0]
     final suspend fun getEndpointInfo(kotlin/String): com.monkopedia.ksrpc/RpcEndpointInfo // com.monkopedia.ksrpc/IntrospectionServiceImpl.getEndpointInfo|getEndpointInfo(kotlin.String){}[0]
     final suspend fun getEndpoints(kotlin/Unit): kotlin.collections/List<kotlin/String> // com.monkopedia.ksrpc/IntrospectionServiceImpl.getEndpoints|getEndpoints(kotlin.Unit){}[0]
-    final suspend fun getIntrospection(kotlin/Unit): com.monkopedia.ksrpc/IntrospectionService // com.monkopedia.ksrpc/IntrospectionServiceImpl.getIntrospection|getIntrospection(kotlin.Unit){}[0]
+    final suspend fun getIntrospectionFor(kotlin/String): com.monkopedia.ksrpc/IntrospectionService // com.monkopedia.ksrpc/IntrospectionServiceImpl.getIntrospectionFor|getIntrospectionFor(kotlin.String){}[0]
     final suspend fun getServiceName(kotlin/Unit): kotlin/String // com.monkopedia.ksrpc/IntrospectionServiceImpl.getServiceName|getServiceName(kotlin.Unit){}[0]
 }
 
-final object com.monkopedia.ksrpc/IntrospectionServiceRpcObject : com.monkopedia.ksrpc/RpcObject<com.monkopedia.ksrpc/IntrospectionService> { // com.monkopedia.ksrpc/IntrospectionServiceRpcObject|null[0]
-    final val endpoints // com.monkopedia.ksrpc/IntrospectionServiceRpcObject.endpoints|{}endpoints[0]
-        final fun <get-endpoints>(): kotlin.collections/List<kotlin/String> // com.monkopedia.ksrpc/IntrospectionServiceRpcObject.endpoints.<get-endpoints>|<get-endpoints>(){}[0]
-    final val serviceName // com.monkopedia.ksrpc/IntrospectionServiceRpcObject.serviceName|{}serviceName[0]
-        final fun <get-serviceName>(): kotlin/String // com.monkopedia.ksrpc/IntrospectionServiceRpcObject.serviceName.<get-serviceName>|<get-serviceName>(){}[0]
+final class com.monkopedia.ksrpc/RpcDescriptor { // com.monkopedia.ksrpc/RpcDescriptor|null[0]
+    constructor <init>(com.monkopedia.ksrpc/RpcDescriptorType, kotlin/String, kotlin.collections/Map<kotlin/String, com.monkopedia.ksrpc/RpcDescriptor> = ..., kotlin/Int? = ...) // com.monkopedia.ksrpc/RpcDescriptor.<init>|<init>(com.monkopedia.ksrpc.RpcDescriptorType;kotlin.String;kotlin.collections.Map<kotlin.String,com.monkopedia.ksrpc.RpcDescriptor>;kotlin.Int?){}[0]
 
-    final fun <#A1: kotlin/Any?> createStub(com.monkopedia.ksrpc.channels/SerializedService<#A1>): com.monkopedia.ksrpc/IntrospectionService // com.monkopedia.ksrpc/IntrospectionServiceRpcObject.createStub|createStub(com.monkopedia.ksrpc.channels.SerializedService<0:0>){0§<kotlin.Any?>}[0]
-    final fun findEndpoint(kotlin/String): com.monkopedia.ksrpc/RpcMethod<*, *, *> // com.monkopedia.ksrpc/IntrospectionServiceRpcObject.findEndpoint|findEndpoint(kotlin.String){}[0]
+    final val dataType // com.monkopedia.ksrpc/RpcDescriptor.dataType|{}dataType[0]
+        final fun <get-dataType>(): com.monkopedia.ksrpc/RpcDescriptorType // com.monkopedia.ksrpc/RpcDescriptor.dataType.<get-dataType>|<get-dataType>(){}[0]
+    final val elements // com.monkopedia.ksrpc/RpcDescriptor.elements|{}elements[0]
+        final fun <get-elements>(): kotlin.collections/Map<kotlin/String, com.monkopedia.ksrpc/RpcDescriptor> // com.monkopedia.ksrpc/RpcDescriptor.elements.<get-elements>|<get-elements>(){}[0]
+    final val id // com.monkopedia.ksrpc/RpcDescriptor.id|{}id[0]
+        final fun <get-id>(): kotlin/Int? // com.monkopedia.ksrpc/RpcDescriptor.id.<get-id>|<get-id>(){}[0]
+    final val serialName // com.monkopedia.ksrpc/RpcDescriptor.serialName|{}serialName[0]
+        final fun <get-serialName>(): kotlin/String // com.monkopedia.ksrpc/RpcDescriptor.serialName.<get-serialName>|<get-serialName>(){}[0]
+
+    final fun component1(): com.monkopedia.ksrpc/RpcDescriptorType // com.monkopedia.ksrpc/RpcDescriptor.component1|component1(){}[0]
+    final fun component2(): kotlin/String // com.monkopedia.ksrpc/RpcDescriptor.component2|component2(){}[0]
+    final fun component3(): kotlin.collections/Map<kotlin/String, com.monkopedia.ksrpc/RpcDescriptor> // com.monkopedia.ksrpc/RpcDescriptor.component3|component3(){}[0]
+    final fun component4(): kotlin/Int? // com.monkopedia.ksrpc/RpcDescriptor.component4|component4(){}[0]
+    final fun copy(com.monkopedia.ksrpc/RpcDescriptorType = ..., kotlin/String = ..., kotlin.collections/Map<kotlin/String, com.monkopedia.ksrpc/RpcDescriptor> = ..., kotlin/Int? = ...): com.monkopedia.ksrpc/RpcDescriptor // com.monkopedia.ksrpc/RpcDescriptor.copy|copy(com.monkopedia.ksrpc.RpcDescriptorType;kotlin.String;kotlin.collections.Map<kotlin.String,com.monkopedia.ksrpc.RpcDescriptor>;kotlin.Int?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc/RpcDescriptor.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc/RpcDescriptor.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // com.monkopedia.ksrpc/RpcDescriptor.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<com.monkopedia.ksrpc/RpcDescriptor> { // com.monkopedia.ksrpc/RpcDescriptor.$serializer|null[0]
+        final val descriptor // com.monkopedia.ksrpc/RpcDescriptor.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // com.monkopedia.ksrpc/RpcDescriptor.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // com.monkopedia.ksrpc/RpcDescriptor.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): com.monkopedia.ksrpc/RpcDescriptor // com.monkopedia.ksrpc/RpcDescriptor.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, com.monkopedia.ksrpc/RpcDescriptor) // com.monkopedia.ksrpc/RpcDescriptor.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;com.monkopedia.ksrpc.RpcDescriptor){}[0]
+    }
+
+    final object Companion { // com.monkopedia.ksrpc/RpcDescriptor.Companion|null[0]
+        final val $childSerializers // com.monkopedia.ksrpc/RpcDescriptor.Companion.$childSerializers|{}$childSerializers[0]
+
+        final fun serializer(): kotlinx.serialization/KSerializer<com.monkopedia.ksrpc/RpcDescriptor> // com.monkopedia.ksrpc/RpcDescriptor.Companion.serializer|serializer(){}[0]
+    }
 }
+
+final class com.monkopedia.ksrpc/RpcEndpointInfo { // com.monkopedia.ksrpc/RpcEndpointInfo|null[0]
+    constructor <init>(kotlin/String, com.monkopedia.ksrpc/RpcDataType, com.monkopedia.ksrpc/RpcDataType) // com.monkopedia.ksrpc/RpcEndpointInfo.<init>|<init>(kotlin.String;com.monkopedia.ksrpc.RpcDataType;com.monkopedia.ksrpc.RpcDataType){}[0]
+
+    final val endpoint // com.monkopedia.ksrpc/RpcEndpointInfo.endpoint|{}endpoint[0]
+        final fun <get-endpoint>(): kotlin/String // com.monkopedia.ksrpc/RpcEndpointInfo.endpoint.<get-endpoint>|<get-endpoint>(){}[0]
+    final val input // com.monkopedia.ksrpc/RpcEndpointInfo.input|{}input[0]
+        final fun <get-input>(): com.monkopedia.ksrpc/RpcDataType // com.monkopedia.ksrpc/RpcEndpointInfo.input.<get-input>|<get-input>(){}[0]
+    final val output // com.monkopedia.ksrpc/RpcEndpointInfo.output|{}output[0]
+        final fun <get-output>(): com.monkopedia.ksrpc/RpcDataType // com.monkopedia.ksrpc/RpcEndpointInfo.output.<get-output>|<get-output>(){}[0]
+
+    final fun component1(): kotlin/String // com.monkopedia.ksrpc/RpcEndpointInfo.component1|component1(){}[0]
+    final fun component2(): com.monkopedia.ksrpc/RpcDataType // com.monkopedia.ksrpc/RpcEndpointInfo.component2|component2(){}[0]
+    final fun component3(): com.monkopedia.ksrpc/RpcDataType // com.monkopedia.ksrpc/RpcEndpointInfo.component3|component3(){}[0]
+    final fun copy(kotlin/String = ..., com.monkopedia.ksrpc/RpcDataType = ..., com.monkopedia.ksrpc/RpcDataType = ...): com.monkopedia.ksrpc/RpcEndpointInfo // com.monkopedia.ksrpc/RpcEndpointInfo.copy|copy(kotlin.String;com.monkopedia.ksrpc.RpcDataType;com.monkopedia.ksrpc.RpcDataType){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc/RpcEndpointInfo.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc/RpcEndpointInfo.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // com.monkopedia.ksrpc/RpcEndpointInfo.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<com.monkopedia.ksrpc/RpcEndpointInfo> { // com.monkopedia.ksrpc/RpcEndpointInfo.$serializer|null[0]
+        final val descriptor // com.monkopedia.ksrpc/RpcEndpointInfo.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // com.monkopedia.ksrpc/RpcEndpointInfo.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // com.monkopedia.ksrpc/RpcEndpointInfo.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): com.monkopedia.ksrpc/RpcEndpointInfo // com.monkopedia.ksrpc/RpcEndpointInfo.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, com.monkopedia.ksrpc/RpcEndpointInfo) // com.monkopedia.ksrpc/RpcEndpointInfo.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;com.monkopedia.ksrpc.RpcEndpointInfo){}[0]
+    }
+
+    final object Companion { // com.monkopedia.ksrpc/RpcEndpointInfo.Companion|null[0]
+        final val $childSerializers // com.monkopedia.ksrpc/RpcEndpointInfo.Companion.$childSerializers|{}$childSerializers[0]
+
+        final fun serializer(): kotlinx.serialization/KSerializer<com.monkopedia.ksrpc/RpcEndpointInfo> // com.monkopedia.ksrpc/RpcEndpointInfo.Companion.serializer|serializer(){}[0]
+    }
+}
+
+sealed class com.monkopedia.ksrpc/RpcDataType { // com.monkopedia.ksrpc/RpcDataType|null[0]
+    final class DataStructure : com.monkopedia.ksrpc/RpcDataType { // com.monkopedia.ksrpc/RpcDataType.DataStructure|null[0]
+        constructor <init>(com.monkopedia.ksrpc/RpcDescriptor) // com.monkopedia.ksrpc/RpcDataType.DataStructure.<init>|<init>(com.monkopedia.ksrpc.RpcDescriptor){}[0]
+        constructor <init>(kotlinx.serialization/KSerializer<*>) // com.monkopedia.ksrpc/RpcDataType.DataStructure.<init>|<init>(kotlinx.serialization.KSerializer<*>){}[0]
+
+        final val schema // com.monkopedia.ksrpc/RpcDataType.DataStructure.schema|{}schema[0]
+            final fun <get-schema>(): com.monkopedia.ksrpc/RpcDescriptor // com.monkopedia.ksrpc/RpcDataType.DataStructure.schema.<get-schema>|<get-schema>(){}[0]
+
+        final fun component1(): com.monkopedia.ksrpc/RpcDescriptor // com.monkopedia.ksrpc/RpcDataType.DataStructure.component1|component1(){}[0]
+        final fun copy(com.monkopedia.ksrpc/RpcDescriptor = ...): com.monkopedia.ksrpc/RpcDataType.DataStructure // com.monkopedia.ksrpc/RpcDataType.DataStructure.copy|copy(com.monkopedia.ksrpc.RpcDescriptor){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc/RpcDataType.DataStructure.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc/RpcDataType.DataStructure.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.monkopedia.ksrpc/RpcDataType.DataStructure.toString|toString(){}[0]
+
+        final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<com.monkopedia.ksrpc/RpcDataType.DataStructure> { // com.monkopedia.ksrpc/RpcDataType.DataStructure.$serializer|null[0]
+            final val descriptor // com.monkopedia.ksrpc/RpcDataType.DataStructure.$serializer.descriptor|{}descriptor[0]
+                final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // com.monkopedia.ksrpc/RpcDataType.DataStructure.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+            final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // com.monkopedia.ksrpc/RpcDataType.DataStructure.$serializer.childSerializers|childSerializers(){}[0]
+            final fun deserialize(kotlinx.serialization.encoding/Decoder): com.monkopedia.ksrpc/RpcDataType.DataStructure // com.monkopedia.ksrpc/RpcDataType.DataStructure.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+            final fun serialize(kotlinx.serialization.encoding/Encoder, com.monkopedia.ksrpc/RpcDataType.DataStructure) // com.monkopedia.ksrpc/RpcDataType.DataStructure.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;com.monkopedia.ksrpc.RpcDataType.DataStructure){}[0]
+        }
+
+        final object Companion { // com.monkopedia.ksrpc/RpcDataType.DataStructure.Companion|null[0]
+            final fun serializer(): kotlinx.serialization/KSerializer<com.monkopedia.ksrpc/RpcDataType.DataStructure> // com.monkopedia.ksrpc/RpcDataType.DataStructure.Companion.serializer|serializer(){}[0]
+        }
+    }
+
+    final class Service : com.monkopedia.ksrpc/RpcDataType { // com.monkopedia.ksrpc/RpcDataType.Service|null[0]
+        constructor <init>(kotlin/String) // com.monkopedia.ksrpc/RpcDataType.Service.<init>|<init>(kotlin.String){}[0]
+
+        final val qualifiedName // com.monkopedia.ksrpc/RpcDataType.Service.qualifiedName|{}qualifiedName[0]
+            final fun <get-qualifiedName>(): kotlin/String // com.monkopedia.ksrpc/RpcDataType.Service.qualifiedName.<get-qualifiedName>|<get-qualifiedName>(){}[0]
+
+        final fun component1(): kotlin/String // com.monkopedia.ksrpc/RpcDataType.Service.component1|component1(){}[0]
+        final fun copy(kotlin/String = ...): com.monkopedia.ksrpc/RpcDataType.Service // com.monkopedia.ksrpc/RpcDataType.Service.copy|copy(kotlin.String){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc/RpcDataType.Service.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc/RpcDataType.Service.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.monkopedia.ksrpc/RpcDataType.Service.toString|toString(){}[0]
+
+        final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<com.monkopedia.ksrpc/RpcDataType.Service> { // com.monkopedia.ksrpc/RpcDataType.Service.$serializer|null[0]
+            final val descriptor // com.monkopedia.ksrpc/RpcDataType.Service.$serializer.descriptor|{}descriptor[0]
+                final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // com.monkopedia.ksrpc/RpcDataType.Service.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+            final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // com.monkopedia.ksrpc/RpcDataType.Service.$serializer.childSerializers|childSerializers(){}[0]
+            final fun deserialize(kotlinx.serialization.encoding/Decoder): com.monkopedia.ksrpc/RpcDataType.Service // com.monkopedia.ksrpc/RpcDataType.Service.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+            final fun serialize(kotlinx.serialization.encoding/Encoder, com.monkopedia.ksrpc/RpcDataType.Service) // com.monkopedia.ksrpc/RpcDataType.Service.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;com.monkopedia.ksrpc.RpcDataType.Service){}[0]
+        }
+
+        final object Companion { // com.monkopedia.ksrpc/RpcDataType.Service.Companion|null[0]
+            final fun serializer(): kotlinx.serialization/KSerializer<com.monkopedia.ksrpc/RpcDataType.Service> // com.monkopedia.ksrpc/RpcDataType.Service.Companion.serializer|serializer(){}[0]
+        }
+    }
+
+    final object BinaryData : com.monkopedia.ksrpc/RpcDataType, kotlinx.serialization.internal/SerializerFactory { // com.monkopedia.ksrpc/RpcDataType.BinaryData|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<com.monkopedia.ksrpc/RpcDataType.BinaryData> // com.monkopedia.ksrpc/RpcDataType.BinaryData.serializer|serializer(){}[0]
+        final fun serializer(kotlin/Array<out kotlinx.serialization/KSerializer<*>>...): kotlinx.serialization/KSerializer<*> // com.monkopedia.ksrpc/RpcDataType.BinaryData.serializer|serializer(kotlin.Array<out|kotlinx.serialization.KSerializer<*>>...){}[0]
+    }
+
+    final object Companion : kotlinx.serialization.internal/SerializerFactory { // com.monkopedia.ksrpc/RpcDataType.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<com.monkopedia.ksrpc/RpcDataType> // com.monkopedia.ksrpc/RpcDataType.Companion.serializer|serializer(){}[0]
+        final fun serializer(kotlin/Array<out kotlinx.serialization/KSerializer<*>>...): kotlinx.serialization/KSerializer<*> // com.monkopedia.ksrpc/RpcDataType.Companion.serializer|serializer(kotlin.Array<out|kotlinx.serialization.KSerializer<*>>...){}[0]
+    }
+}
+
+final fun com.monkopedia.ksrpc/dataSchema(kotlinx.serialization/KSerializer<*>): com.monkopedia.ksrpc/RpcDescriptor // com.monkopedia.ksrpc/dataSchema|dataSchema(kotlinx.serialization.KSerializer<*>){}[0]
