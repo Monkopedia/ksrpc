@@ -21,14 +21,16 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.jvm.tasks.Jar
+import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.withType
 import org.gradle.plugins.signing.SigningExtension
+import org.jetbrains.dokka.DokkaDefaults.skipEmptyPackages
+import org.jetbrains.dokka.gradle.DokkaExtension
 import org.jetbrains.dokka.gradle.DokkaTask
-import org.jetbrains.dokka.gradle.DokkaTaskPartial
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
@@ -217,33 +219,20 @@ fun Project.ksrpcModule(
         it.outputDirectory.set(File(File(project.projectDir, "build"), "javadoc"))
         it.inputs.dir("src/commonMain/kotlin")
     }
-    afterEvaluate {
-        (tasks["dokkaHtmlPartial"] as DokkaTaskPartial).apply {
-            dokkaSourceSets.configureEach {
-                it.includes.from(rootProject.file("dokka/moduledoc.md").path)
-                it.skipEmptyPackages.set(true)
-                it.perPackageOption {
-                    it.matchingRegex.set("com.monkopedia.ksrpc.internal")
-                    it.suppress.set(true)
-                }
-                it.perPackageOption {
-                    it.matchingRegex.set("com.monkopedia.ksrpc.jsonrpc.internal")
-                    it.suppress.set(true)
-                }
-                it.perPackageOption {
-                    it.matchingRegex.set("com.monkopedia.ksrpc.ktor.internal")
-                    it.suppress.set(true)
-                }
-                it.perPackageOption {
-                    it.matchingRegex.set("com.monkopedia.ksrpc.ktor.websocket.internal")
-                    it.suppress.set(true)
-                }
-                it.perPackageOption {
-                    it.matchingRegex.set("com.monkopedia.ksrpc.packets.internal")
-                    it.suppress.set(true)
-                }
-                it.perPackageOption {
-                    it.matchingRegex.set("com.monkopedia.ksrpc.sockets.internal")
+    extensions.configure<DokkaExtension> {
+        dokkaSourceSets.configureEach { sourceSet ->
+            sourceSet.includes.from(rootProject.file("dokka/moduledoc.md"))
+            sourceSet.skipEmptyPackages.set(true)
+            listOf(
+                "com.monkopedia.ksrpc.internal",
+                "com.monkopedia.ksrpc.jsonrpc.internal",
+                "com.monkopedia.ksrpc.ktor.internal",
+                "com.monkopedia.ksrpc.ktor.websocket.internal",
+                "com.monkopedia.ksrpc.packets.internal",
+                "com.monkopedia.ksrpc.sockets.internal"
+            ).forEach { regex ->
+                sourceSet.perPackageOption {
+                    it.matchingRegex.set(regex)
                     it.suppress.set(true)
                 }
             }

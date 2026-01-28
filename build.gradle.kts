@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 import kotlinx.validation.ExperimentalBCVApi
-import org.jetbrains.dokka.base.DokkaBase
-import org.jetbrains.dokka.base.DokkaBaseConfiguration
 
 buildscript {
     dependencies {
@@ -112,15 +110,17 @@ subprojects {
     }
 }
 
-tasks.dokkaHtmlMultiModule.configure {
-    pluginConfiguration<DokkaBase, DokkaBaseConfiguration> {
-        customAssets = file("dokka/assets").listFiles().toList()
-        customStyleSheets = file("dokka/styles").listFiles().toList()
-    }
+val dokkaAssets = rootProject.file("dokka/assets").listFiles()?.toList().orEmpty()
+val dokkaStyleSheets = rootProject.file("dokka/styles").listFiles()?.toList().orEmpty()
 
-    outputDirectory.set(projectDir.resolve("build/dokka"))
-    rootProject.findProject(":ksrpc-packets")?.let { this.removeChildTasks(it) }
-    rootProject.findProject(":ksrpc-ktor-websocket-shared")?.let { this.removeChildTasks(it) }
+dokka {
+    dokkaPublications.named("html") {
+        outputDirectory.set(projectDir.resolve("build/dokka"))
+    }
+    pluginsConfiguration.html {
+        customAssets.from(dokkaAssets)
+        customStyleSheets.from(dokkaStyleSheets)
+    }
 }
 
 dependencies {
