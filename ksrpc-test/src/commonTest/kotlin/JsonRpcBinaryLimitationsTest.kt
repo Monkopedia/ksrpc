@@ -24,6 +24,7 @@ import io.ktor.utils.io.ByteReadChannel
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -99,5 +100,62 @@ class JsonRpcBinaryLimitationsTest {
             }
 
         assertTrue((exception.message ?: "").contains("JsonRpc does not support binary data"))
+    }
+
+    @Test
+    fun testJsonRpcServiceWrapperForwardsEndpointAndNullPayload() = runBlockingUnit {
+        var calledEndpoint: String? = null
+        var calledPayload: String? = null
+        val service =
+            object : SerializedService<String> {
+                override val env = ksrpcEnvironment { }
+                override val context: CoroutineContext = EmptyCoroutineContext
+
+                override suspend fun call(
+                    endpoint: String,
+                    input: CallData<String>
+                ): CallData<String> {
+                    calledEndpoint = endpoint
+                    calledPayload = input.readSerialized()
+                    return CallData.create("\"ok\"")
+                }
+
+                override suspend fun close() {}
+
+                override suspend fun onClose(onClose: suspend () -> Unit) {}
+            }
+
+        val wrapper = JsonRpcServiceWrapper(service)
+        val response = wrapper.execute(method = "ping", message = null, isNotify = true)
+
+        assertEquals("ping", calledEndpoint)
+        assertEquals("null", calledPayload)
+        assertEquals(JsonPrimitive("ok"), response)
+    }
+
+    @Test
+    fun testJsonRpcServiceWrapperCloseDelegatesToService() = runBlockingUnit {
+        var closeCalled = false
+        val service =
+            object : SerializedService<String> {
+                override val env = ksrpcEnvironment { }
+                override val context: CoroutineContext = EmptyCoroutineContext
+
+                override suspend fun call(
+                    endpoint: String,
+                    input: CallData<String>
+                ): CallData<String> = error("unused")
+
+                override suspend fun close() {
+                    closeCalled = true
+                }
+
+                override suspend fun onClose(onClose: suspend () -> Unit) {}
+            }
+
+        val wrapper = JsonRpcServiceWrapper(service)
+        wrapper.close()
+
+        assertTrue(closeCalled)
     }
 }

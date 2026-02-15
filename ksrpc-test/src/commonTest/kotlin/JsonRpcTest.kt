@@ -193,8 +193,55 @@ class JsonRpcTest {
         val expectedRequest =
             Json.encodeToJsonElement(
                 JsonRpcResponse(result = Json.decodeFromString("-19"), id = JsonPrimitive(1))
-            )
+        )
         assertEquals(expectedRequest, sender.receive())
+    }
+
+    @Test
+    fun testHeaderReceiver_receiveWithoutContentLengthReturnsNull() = runBlockingUnit {
+        val outputChannel = ByteChannel()
+        val inputChannel = ByteChannel()
+        inputChannel.appendLine("Content-Type: $DEFAULT_CONTENT_TYPE")
+        inputChannel.appendLine()
+        inputChannel.appendLine("""{"jsonrpc":"2.0","result":-19,"id":1}""")
+        inputChannel.flush()
+        val sender = (inputChannel to outputChannel).jsonHeader(ksrpcEnvironment { })
+        assertEquals(null, sender.receive())
+    }
+
+    @Test
+    fun testHeaderReceiver_receiveWithInvalidContentLengthReturnsNull() = runBlockingUnit {
+        val outputChannel = ByteChannel()
+        val inputChannel = ByteChannel()
+        inputChannel.appendLine("Content-Length: abc")
+        inputChannel.appendLine("Content-Type: $DEFAULT_CONTENT_TYPE")
+        inputChannel.appendLine()
+        inputChannel.appendLine("""{"jsonrpc":"2.0","result":-19,"id":1}""")
+        inputChannel.flush()
+        val sender = (inputChannel to outputChannel).jsonHeader(ksrpcEnvironment { })
+        assertEquals(null, sender.receive())
+    }
+
+    @Test
+    fun testLineSender_closeClosesOutputChannel() = runBlockingUnit {
+        val outputChannel = ByteChannel()
+        val inputChannel = ByteChannel()
+        val sender = (inputChannel to outputChannel).jsonLine(ksrpcEnvironment { })
+
+        sender.close(IllegalStateException("closing for test"))
+
+        assertTrue(outputChannel.isClosedForWrite)
+    }
+
+    @Test
+    fun testHeaderSender_closeClosesOutputChannel() = runBlockingUnit {
+        val outputChannel = ByteChannel()
+        val inputChannel = ByteChannel()
+        val sender = (inputChannel to outputChannel).jsonHeader(ksrpcEnvironment { })
+
+        sender.close(IllegalStateException("closing for test"))
+
+        assertTrue(outputChannel.isClosedForWrite)
     }
 
     @Test

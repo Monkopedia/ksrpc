@@ -186,6 +186,48 @@ class JsonRpcErrorEnvelopeTest {
         writer.close()
     }
 
+    @Test
+    fun testWriterNotifySuccessDoesNotSendResponseEnvelope() = runBlockingUnit {
+        val request =
+            Json.encodeToJsonElement(
+                JsonRpcRequest.serializer(),
+                JsonRpcRequest(
+                    method = "notify-success",
+                    params = JsonPrimitive("input"),
+                    id = null
+                )
+            )
+        val transformer = QueuedTransformer(request)
+        val callSeen = CompletableDeferred<Unit>()
+        val writer =
+            JsonRpcWriterBase(
+                scope = CoroutineScope(coroutineContext + SupervisorJob()),
+                context = coroutineContext,
+                env = ksrpcEnvironment { },
+                comm = transformer
+            )
+
+        writer.registerDefault(
+            object : SerializedService<String> {
+                override val env = ksrpcEnvironment { }
+                override val context: CoroutineContext = EmptyCoroutineContext
+
+                override suspend fun call(endpoint: String, input: CallData<String>): CallData<String> {
+                    callSeen.complete(Unit)
+                    return input
+                }
+
+                override suspend fun close() {}
+
+                override suspend fun onClose(onClose: suspend () -> Unit) {}
+            }
+        )
+
+        withTimeout(2_000) { callSeen.await() }
+        assertEquals(0, transformer.sendCount)
+        writer.close()
+    }
+
     private class QueuedTransformer(vararg incoming: JsonElement) : JsonRpcTransformer() {
         private val queue = ArrayDeque(incoming.toList())
         val firstSent = CompletableDeferred<JsonElement>()
