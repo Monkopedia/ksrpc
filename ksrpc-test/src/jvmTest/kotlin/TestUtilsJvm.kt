@@ -29,6 +29,7 @@ import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
 import java.util.concurrent.CountDownLatch
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -39,7 +40,8 @@ import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 
-var port = 8081
+@PublishedApi
+internal val nextPort = atomic(8081)
 
 actual typealias Routing = io.ktor.server.routing.Routing
 
@@ -51,7 +53,7 @@ actual suspend inline fun httpTest(
     test: suspend (Int) -> Unit,
     isWebsocket: Boolean
 ) {
-    val port = port++
+    val port = nextPort.getAndIncrement()
     val serverCompletion = CompletableDeferred<EmbeddedServer<*, *>>()
     GlobalScope.launch(Dispatchers.IO) {
         try {
@@ -75,7 +77,7 @@ actual suspend inline fun httpTest(
     try {
         test(port)
     } finally {
-        server.stop(500, 500)
+        server.stop(1_000, 3_000)
     }
 }
 

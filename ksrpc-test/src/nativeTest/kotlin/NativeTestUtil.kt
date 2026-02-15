@@ -34,6 +34,7 @@ import kotlinx.cinterop.IntVar
 import kotlinx.cinterop.allocArray
 import kotlinx.cinterop.get
 import kotlinx.cinterop.memScoped
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
@@ -45,7 +46,8 @@ import kotlinx.coroutines.withContext
 import platform.posix.pipe
 import platform.posix.pthread_self
 
-var port = 9181
+@PublishedApi
+internal val nextPort = atomic(9181)
 val serverDispatcher = newFixedThreadPoolContext(8, "server-threads")
 
 internal actual fun platformSupportedTestTypes(): Set<RpcFunctionalityTest.TestType> = setOf(
@@ -60,7 +62,7 @@ actual suspend inline fun httpTest(
     isWebsocket: Boolean
 ) {
     if (isWebsocket) return
-    val port = port++
+    val port = nextPort.getAndIncrement()
     val serverCompletion = CompletableDeferred<EmbeddedServer<*, *>>()
     GlobalScope.launch(serverDispatcher) {
         try {
@@ -81,7 +83,7 @@ actual suspend inline fun httpTest(
     try {
         test(port)
     } finally {
-        server.stop(500, 500)
+        server.stop(1_000, 3_000)
     }
 }
 
