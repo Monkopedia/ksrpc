@@ -37,8 +37,10 @@ class MultiChannel<T> {
     }
 
     suspend fun send(id: String, response: T) {
-        checkClosed()
         lock.withLock {
+            if (isClosed) {
+                return@withLock
+            }
             val hasPending = pending.consume(matcher = { it.first == id }) { (_, pendingItem) ->
                 pendingItem.complete(response)
             }
@@ -49,22 +51,26 @@ class MultiChannel<T> {
     }
 
     suspend fun allocateReceive(): Pair<Int, Deferred<T>> {
-        checkClosed()
-        val id = this.id.getAndIncrement()
-        val completable = CompletableDeferred<T>()
         lock.withLock {
+            checkClosed()
+            val id = this.id.getAndIncrement()
+            val completable = CompletableDeferred<T>()
             pending.add(id.toString() to completable)
+            return id to completable
         }
-        return id to completable
     }
 
     suspend fun close(t: CancellationException? = null) {
         lock.withLock {
+            if (isClosed) {
+                return@withLock
+            }
             isClosed = true
             closeException = t
             pending.forEach {
                 it.second.completeExceptionally(t ?: CancellationException("Closing MultiChannel"))
             }
+            pending.clear()
         }
     }
 }

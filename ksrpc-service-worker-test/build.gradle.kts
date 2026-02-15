@@ -39,3 +39,9 @@ kotlin {
         implementation(npm("source-map-loader", "5.0.0"))
     }
 }
+
+tasks.configureEach {
+    if (name == "jsBrowserProductionWebpack") {
+        dependsOn(":ksrpc-service-worker:jsTestTestDevelopmentExecutableCompileSync")
+    }
+}
