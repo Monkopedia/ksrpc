@@ -32,10 +32,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 abstract class RpcFunctionalityTest(
-    private val supportedTypes: List<TestType> = TestType.values().toList(),
+    supportedTypes: List<TestType> = TestType.values().toList(),
     private val serializedChannel: suspend CoroutineScope.() -> SerializedService<String>,
     private val verifyOnChannel: suspend CoroutineScope.(SerializedService<String>) -> Unit
 ) {
+    private val supportedTypes = supportedTypes.toSet() intersect platformSupportedTestTypes()
+
     enum class TestType {
         SERIALIZE,
         PIPE,
@@ -138,6 +140,8 @@ expect class RunBlockingReturn
 internal expect fun runBlockingUnit(function: suspend CoroutineScope.() -> Unit): RunBlockingReturn
 
 expect interface Routing
+
+internal expect fun platformSupportedTestTypes(): Set<RpcFunctionalityTest.TestType>
 
 expect suspend inline fun httpTest(
     crossinline serve: suspend Routing.() -> Unit,

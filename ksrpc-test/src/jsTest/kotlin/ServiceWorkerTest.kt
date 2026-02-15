@@ -15,10 +15,12 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.webworker.createServiceWorkerWithConnection
 import com.monkopedia.ksrpc.webworker.test.WebWorkerTestService
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class ServiceWorkerTest {
@@ -117,6 +119,35 @@ class ServiceWorkerTest {
                     serviceInfo.output
                 )
             }
+        }
+        null
+    }
+
+    @Test
+    fun wasmServiceWorkerConnection_missingEndpoint() = runBlockingUnit {
+        if (!hasWindow()) return@runBlockingUnit
+        createServiceWorkerWithConnection(jsWorkerUrl(), ksrpcEnvironment { }).use { connection ->
+            val stub = connection.defaultChannel().toStub<EndpointNotFoundExtended, String>()
+            val exception = assertFailsWith<RpcEndpointException> {
+                stub.extra(Unit)
+            }
+            val message = exception.message ?: ""
+            assertTrue(message.contains("Unknown endpoint: extra"), message)
+        }
+        null
+    }
+
+    @Test
+    fun wasmServiceWorkerConnection_remoteDecodeFailureIsRpcException() = runBlockingUnit {
+        if (!hasWindow()) return@runBlockingUnit
+        createServiceWorkerWithConnection(jsWorkerUrl(), ksrpcEnvironment { }).use { connection ->
+            val channel = connection.defaultChannel()
+            val response = channel.call("ping", CallData.create("123"))
+            assertTrue(connection.env.serialization.isError(response))
+
+            val error = connection.env.serialization.decodeErrorCallData(response)
+            assertTrue(error is RpcException, "Expected RpcException, but got: $error")
+            assertTrue((error.message ?: "").isNotBlank())
         }
         null
     }

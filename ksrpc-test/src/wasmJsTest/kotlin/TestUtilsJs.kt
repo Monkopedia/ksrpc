@@ -25,6 +25,11 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.promise
 
+internal actual fun platformSupportedTestTypes(): Set<RpcFunctionalityTest.TestType> = setOf(
+    RpcFunctionalityTest.TestType.SERIALIZE,
+    RpcFunctionalityTest.TestType.PIPE
+)
+
 actual suspend inline fun httpTest(
     crossinline serve: suspend Routing.() -> Unit,
     test: suspend (Int) -> Unit,

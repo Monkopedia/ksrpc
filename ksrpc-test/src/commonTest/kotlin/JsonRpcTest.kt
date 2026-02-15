@@ -32,7 +32,10 @@ import io.ktor.utils.io.readFully
 import io.ktor.utils.io.readUTF8Line
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFails
+import kotlin.test.assertTrue
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.SupervisorJob
@@ -344,117 +347,192 @@ abstract class JsonRpcFunctionalityTest(
 }
 
 object JsonRpcTypeTest {
+    abstract class JsonRpcTypeFunctionalityTest(
+        verifyOnChannel: suspend (SerializedService<String>, FakeTestTypes) -> Unit,
+        private val service: FakeTestTypes = FakeTestTypes()
+    ) : JsonRpcFunctionalityTest(
+        serializedChannel = { service.serialized<TestTypesInterface, String>(ksrpcEnvironment { }) },
+        verifyOnChannel = { channel ->
+            verifyOnChannel(channel, service)
+        }
+    )
 
-    // abstract class JsonRpcTypeFunctionalityTest(
-    // verifyOnChannel: suspend (SerializedService, FakeTestTypes) -> Unit,
-    // private val service: FakeTestTypes = FakeTestTypes()
-    // ) : JsonRpcFunctionalityTest(
-    // serializedChannel = { service.serialized<TestTypesInterface>(ksrpcEnvironment { }) },
-    // verifyOnChannel = { channel ->
-    // verifyOnChannel(channel, service)
-    // }
-    // )
+    class PairStrTest :
+        JsonRpcTypeFunctionalityTest(
+            verifyOnChannel = { channel, service ->
+                val stub = channel.toStub<TestTypesInterface, String>()
+                service.nextReturn = ""
+                stub.rpc("Hello" to "world")
+                assertEquals("rpc", service.lastCall)
+                assertEquals("Hello" to "world", service.lastInput)
+            }
+        )
 
-    // class PairStrTest : JsonRpcTypeFunctionalityTest(
-    // verifyOnChannel = { channel, service ->
-    // val stub = channel.toStub<TestTypesInterface>()
-    // service.nextReturn.value = ""
-    // stub.rpc("Hello" to "world")
-    // assertEquals("rpc", service.lastCall.value)
-    // assertEquals("Hello" to "world", service.lastInput.value)
-    // }
-    // )
+    class MapTest :
+        JsonRpcTypeFunctionalityTest(
+            verifyOnChannel = { channel, service ->
+                val stub = channel.toStub<TestTypesInterface, String>()
+                val completion = CompletableDeferred<Unit>()
+                service.callComplete = completion
+                service.nextReturn = Unit
+                stub.mapRpc(
+                    mutableMapOf(
+                        "First" to MyJson("first", 1, null),
+                        "Second" to MyJson("second", 2, 1.2f)
+                    )
+                )
+                completion.await()
+                assertEquals("mapRpc", service.lastCall)
+                assertEquals(
+                    mutableMapOf(
+                        "First" to MyJson("first", 1, null),
+                        "Second" to MyJson("second", 2, 1.2f)
+                    ),
+                    service.lastInput
+                )
+            }
+        )
 
-    // class MapTest : JsonRpcTypeFunctionalityTest(
-    // verifyOnChannel = { channel, service ->
-    // val stub = channel.toStub<TestTypesInterface>()
-    // val completion = CompletableDeferred<Unit>()
-    // service.callComplete.value = completion
-    // service.nextReturn.value = Unit
-    // stub.mapRpc(
-    // mutableMapOf(
-    // "First" to MyJson("first", 1, null),
-    // "Second" to MyJson("second", 2, 1.2f),
-    // )
-    // )
-    // completion.await()
-    // assertEquals("mapRpc", service.lastCall.value)
-    // assertEquals(
-    // mutableMapOf(
-    // "First" to MyJson("first", 1, null),
-    // "Second" to MyJson("second", 2, 1.2f),
-    // ),
-    // service.lastInput.value
-    // )
-    // }
-    // )
+    class InputIntTest :
+        JsonRpcTypeFunctionalityTest(
+            verifyOnChannel = { channel, service ->
+                val stub = channel.toStub<TestTypesInterface, String>()
+                val completion = CompletableDeferred<Unit>()
+                service.callComplete = completion
+                service.nextReturn = Unit
+                stub.inputInt(42)
+                completion.await()
+                assertEquals("inputInt", service.lastCall)
+                assertEquals(42, service.lastInput)
+            }
+        )
 
-    // class InputIntTest : JsonRpcTypeFunctionalityTest(
-    // verifyOnChannel = { channel, service ->
-    // val stub = channel.toStub<TestTypesInterface>()
-    // val completion = CompletableDeferred<Unit>()
-    // service.callComplete.value = completion
-    // service.nextReturn.value = Unit
-    // stub.inputInt(42)
-    // completion.await()
-    // assertEquals("inputInt", service.lastCall.value)
-    // assertEquals(42, service.lastInput.value)
-    // }
-    // )
+    class InputIntListTest :
+        JsonRpcTypeFunctionalityTest(
+            verifyOnChannel = { channel, service ->
+                val stub = channel.toStub<TestTypesInterface, String>()
+                val completion = CompletableDeferred<Unit>()
+                service.callComplete = completion
+                service.nextReturn = Unit
+                stub.inputIntList(listOf(42))
+                completion.await()
+                assertEquals("inputIntList", service.lastCall)
+                assertEquals(listOf(42), service.lastInput)
+            }
+        )
 
-    // class InputIntListTest : JsonRpcTypeFunctionalityTest(
-    // verifyOnChannel = { channel, service ->
-    // val stub = channel.toStub<TestTypesInterface>()
-    // val completion = CompletableDeferred<Unit>()
-    // service.callComplete.value = completion
-    // service.nextReturn.value = Unit
-    // stub.inputIntList(listOf(42))
-    // completion.await()
-    // assertEquals("inputIntList", service.lastCall.value)
-    // assertEquals(listOf(42), service.lastInput.value)
-    // }
-    // )
+    class InputIntNullableTest :
+        JsonRpcTypeFunctionalityTest(
+            verifyOnChannel = { channel, service ->
+                val stub = channel.toStub<TestTypesInterface, String>()
+                val completion = CompletableDeferred<Unit>()
+                service.callComplete = completion
+                service.nextReturn = Unit
+                stub.inputIntNullable(null)
+                completion.await()
+                assertEquals("inputIntNullable", service.lastCall)
+                assertEquals(null, service.lastInput)
+            }
+        )
 
-    // class InputIntNullableTest : JsonRpcTypeFunctionalityTest(
-    // verifyOnChannel = { channel, service ->
-    // val stub = channel.toStub<TestTypesInterface>()
-    // val completion = CompletableDeferred<Unit>()
-    // service.callComplete.value = completion
-    // service.nextReturn.value = Unit
-    // stub.inputIntNullable(null)
-    // completion.await()
-    // assertEquals("inputIntNullable", service.lastCall.value)
-    // assertEquals(null, service.lastInput.value)
-    // }
-    // )
+    class OutputIntTest :
+        JsonRpcTypeFunctionalityTest(
+            verifyOnChannel = { channel, service ->
+                val stub = channel.toStub<TestTypesInterface, String>()
+                service.nextReturn = 42
+                assertEquals(42, stub.outputInt(Unit))
+                assertEquals("outputInt", service.lastCall)
+                assertEquals(Unit, service.lastInput)
+            }
+        )
 
-    // class OutputIntTest : JsonRpcTypeFunctionalityTest(
-    // verifyOnChannel = { channel, service ->
-    // val stub = channel.toStub<TestTypesInterface>()
-    // service.nextReturn.value = 42
-    // assertEquals(42, stub.outputInt(Unit))
-    // assertEquals("outputInt", service.lastCall.value)
-    // assertEquals(Unit, service.lastInput.value)
-    // }
-    // )
+    class OutputIntNullableTest :
+        JsonRpcTypeFunctionalityTest(
+            verifyOnChannel = { channel, service ->
+                val stub = channel.toStub<TestTypesInterface, String>()
+                service.nextReturn = null
+                assertEquals(null, stub.outputIntNullable(Unit))
+                assertEquals("outputIntNullable", service.lastCall)
+                assertEquals(Unit, service.lastInput)
+            }
+        )
 
-    // class OutputIntNullableTest : JsonRpcTypeFunctionalityTest(
-    // verifyOnChannel = { channel, service ->
-    // val stub = channel.toStub<TestTypesInterface>()
-    // service.nextReturn.value = null
-    // assertEquals(null, stub.outputIntNullable(Unit))
-    // assertEquals("outputIntNullable", service.lastCall.value)
-    // assertEquals(Unit, service.lastInput.value)
-    // }
-    // )
-
-    // class ReturnTypeTest : JsonRpcTypeFunctionalityTest(
-    // verifyOnChannel = { channel, service ->
-    // val stub = channel.toStub<TestTypesInterface>()
-    // service.nextReturn.value = MyJson("second", 2, 1.2f)
-    // assertEquals(MyJson("second", 2, 1.2f), stub.returnType(Unit))
-    // assertEquals("returnType", service.lastCall.value)
-    // assertEquals(Unit, service.lastInput.value)
-    // }
-    // )
+    class ReturnTypeTest :
+        JsonRpcTypeFunctionalityTest(
+            verifyOnChannel = { channel, service ->
+                val stub = channel.toStub<TestTypesInterface, String>()
+                service.nextReturn = MyJson("second", 2, 1.2f)
+                assertEquals(MyJson("second", 2, 1.2f), stub.returnType(Unit))
+                assertEquals("returnType", service.lastCall)
+                assertEquals(Unit, service.lastInput)
+            }
+        )
 }
+
+class JsonRpcEndpointNotFoundTest :
+    JsonRpcFunctionalityTest(
+        serializedChannel = {
+            val service: EndpointNotFoundBase = object : EndpointNotFoundBase {
+                override suspend fun rpc(u: Pair<String, String>): String = "${u.first} ${u.second}"
+            }
+            service.serialized(ksrpcEnvironment { })
+        },
+        verifyOnChannel = { channel ->
+            val stub = channel.toStub<EndpointNotFoundExtended, String>()
+            val exception = assertFails {
+                stub.extra(Unit)
+            }
+            val message = exception.message ?: ""
+            assertTrue(
+                exception is RpcEndpointException || exception is IllegalStateException,
+                "Unexpected exception type ${exception::class}: $message"
+            )
+            assertTrue(
+                message.contains("Unknown endpoint: extra") ||
+                    message.contains("JsonRpcError") ||
+                    message.contains("RpcEndpointException"),
+                message
+            )
+        }
+    )
+
+class JsonRpcErrorTransportTest :
+    JsonRpcFunctionalityTest(
+        serializedChannel = {
+            val service: TestInterface = object : TestInterface {
+                override suspend fun rpc(u: Pair<String, String>): String =
+                    throw IllegalArgumentException("Failure")
+            }
+            service.serialized(ksrpcEnvironment { })
+        },
+        verifyOnChannel = { channel ->
+            val stub = channel.toStub<TestInterface, String>()
+            assertFails {
+                stub.rpc("Hello" to "world")
+            }
+        }
+    )
+
+class JsonRpcSubserviceTransportTest :
+    JsonRpcFunctionalityTest(
+        serializedChannel = {
+            val service: TestRootInterface = object : TestRootInterface {
+                override suspend fun rpc(u: Pair<String, String>): String = "${u.first} ${u.second}"
+
+                override suspend fun subservice(prefix: String): TestSubInterface =
+                    object : TestSubInterface {
+                        override suspend fun rpc(u: Pair<String, String>): String =
+                            "$prefix ${u.first} ${u.second}"
+                    }
+            }
+            service.serialized(ksrpcEnvironment { })
+        },
+        verifyOnChannel = { channel ->
+            val stub = channel.toStub<TestRootInterface, String>()
+            assertFails {
+                stub.subservice("oh,").use { sub ->
+                    sub.rpc("Hello" to "world")
+                }
+            }
+        }
+    )

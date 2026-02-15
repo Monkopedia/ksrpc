@@ -43,6 +43,9 @@ var port = 8081
 
 actual typealias Routing = io.ktor.server.routing.Routing
 
+internal actual fun platformSupportedTestTypes(): Set<RpcFunctionalityTest.TestType> =
+    RpcFunctionalityTest.TestType.values().toSet()
+
 actual suspend inline fun httpTest(
     crossinline serve: suspend Routing.() -> Unit,
     test: suspend (Int) -> Unit,

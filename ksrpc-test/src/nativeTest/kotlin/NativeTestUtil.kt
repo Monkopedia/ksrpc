@@ -48,6 +48,12 @@ import platform.posix.pthread_self
 var port = 9181
 val serverDispatcher = newFixedThreadPoolContext(8, "server-threads")
 
+internal actual fun platformSupportedTestTypes(): Set<RpcFunctionalityTest.TestType> = setOf(
+    RpcFunctionalityTest.TestType.SERIALIZE,
+    RpcFunctionalityTest.TestType.PIPE,
+    RpcFunctionalityTest.TestType.HTTP
+)
+
 actual suspend inline fun httpTest(
     crossinline serve: suspend Routing.() -> Unit,
     test: suspend (Int) -> Unit,
