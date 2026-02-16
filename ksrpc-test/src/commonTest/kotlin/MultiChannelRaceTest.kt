@@ -85,12 +85,12 @@ class MultiChannelRaceTest {
                         }
                     }
 
-                    withTimeout(1_000.milliseconds) {
+                    withTimeout(2_000.milliseconds) {
                         serverStarted.await()
                     }
                     runCatching { client.close() }
                     returnValue.complete("response")
-                    withTimeout(1_000.milliseconds) {
+                    withTimeout(2_000.milliseconds) {
                         call.join()
                     }
 

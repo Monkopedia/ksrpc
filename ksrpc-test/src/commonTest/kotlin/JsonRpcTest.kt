@@ -531,7 +531,9 @@ class JsonRpcEndpointNotFoundTest :
             }
             val message = exception.message ?: ""
             assertTrue(
-                exception is RpcEndpointException || exception is IllegalStateException,
+                exception is RpcEndpointException ||
+                    exception is IllegalStateException ||
+                    exception is RpcException,
                 "Unexpected exception type ${exception::class}: $message"
             )
             assertTrue(
@@ -554,11 +556,48 @@ class JsonRpcErrorTransportTest :
         },
         verifyOnChannel = { channel ->
             val stub = channel.toStub<TestInterface, String>()
-            assertFails {
+            val error = assertFails {
                 stub.rpc("Hello" to "world")
             }
+            assertTrue((error.message ?: "").contains("Failure"))
         }
     )
+
+class JsonRpcErrorPipeRpcExceptionTest {
+    @Test
+    fun testPipeTransportThrowsRpcException() = runBlockingUnit {
+        val (output, input) = createPipe()
+        val (so, si) = createPipe()
+        GlobalScope.launch(Dispatchers.Default) {
+            val service: TestInterface = object : TestInterface {
+                override suspend fun rpc(u: Pair<String, String>): String =
+                    throw IllegalArgumentException("Failure")
+            }
+            val connection = (input to so).asJsonRpcConnection(ksrpcEnvironment { }, true)
+            connection.registerDefault(service.serialized(ksrpcEnvironment { }))
+        }
+        try {
+            val channel = (si to output).asJsonRpcConnection(ksrpcEnvironment { }, true)
+            val stub = channel.defaultChannel().toStub<TestInterface, String>()
+            val error = assertFails {
+                stub.rpc("Hello" to "world")
+            }
+            assertTrue(error is RpcException, "Expected RpcException, got ${error::class}")
+            assertTrue((error.message ?: "").contains("Failure"))
+        } finally {
+            try {
+                input.cancel(null)
+            } catch (t: Throwable) {
+            }
+            try {
+                si.cancel(null)
+            } catch (t: Throwable) {
+            }
+            output.close(null)
+            so.close(null)
+        }
+    }
+}
 
 class JsonRpcSubserviceTransportTest :
     JsonRpcFunctionalityTest(

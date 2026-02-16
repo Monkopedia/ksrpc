@@ -16,7 +16,7 @@
 package com.monkopedia.ksrpc.jsonrpc.internal
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
-import com.monkopedia.ksrpc.RpcException
+import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.asString
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.channels.SingleChannelConnection
@@ -90,7 +90,11 @@ class JsonRpcWriterBase(
                     comm.send(
                         json.encodeToJsonElement(
                             JsonRpcResponse(
-                                error = JsonRpcError(JsonRpcError.INTERNAL_ERROR, t.asString),
+                                error = JsonRpcError(
+                                    JsonRpcError.INTERNAL_ERROR,
+                                    t.asString,
+                                    json.encodeToJsonElement(RpcFailure(t.asString))
+                                ),
                                 id = message.id
                             )
                         )
@@ -115,7 +119,11 @@ class JsonRpcWriterBase(
         val response = pending?.await() ?: return null
         if (response.error != null) {
             val error = response.error.data?.let {
-                json.decodeFromJsonElement<RpcException>(it)
+                try {
+                    json.decodeFromJsonElement<RpcFailure>(it).toException()
+                } catch (_: Throwable) {
+                    null
+                }
             } ?: IllegalStateException(
                 "JsonRpcError(${response.error.code}): ${response.error.message}"
             )

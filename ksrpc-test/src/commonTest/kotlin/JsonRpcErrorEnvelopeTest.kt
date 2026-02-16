@@ -107,6 +107,54 @@ class JsonRpcErrorEnvelopeTest {
     }
 
     @Test
+    fun testExecuteThrowsRpcExceptionFromErrorData() = runBlockingUnit {
+        val transformer =
+            RequestAwareErrorTransformer(
+                errorMessage = "server exploded",
+                errorData = Json.encodeToJsonElement(RpcFailure.serializer(), RpcFailure("remote stack"))
+            )
+        val writer =
+            JsonRpcWriterBase(
+                scope = CoroutineScope(coroutineContext + SupervisorJob()),
+                context = coroutineContext,
+                env = ksrpcEnvironment { },
+                comm = transformer
+            )
+
+        val thrown =
+            assertFailsWith<RpcException> {
+                writer.execute("explode", JsonPrimitive("input"), isNotify = false)
+            }
+
+        assertTrue(thrown.message.contains("remote stack"))
+        writer.close()
+    }
+
+    @Test
+    fun testExecuteFallsBackToJsonRpcErrorWhenErrorDataIsMalformed() = runBlockingUnit {
+        val transformer =
+            RequestAwareErrorTransformer(
+                errorMessage = "server exploded",
+                errorData = JsonPrimitive("not-an-rpc-failure")
+            )
+        val writer =
+            JsonRpcWriterBase(
+                scope = CoroutineScope(coroutineContext + SupervisorJob()),
+                context = coroutineContext,
+                env = ksrpcEnvironment { },
+                comm = transformer
+            )
+
+        val thrown =
+            assertFailsWith<IllegalStateException> {
+                writer.execute("explode", JsonPrimitive("input"), isNotify = false)
+            }
+
+        assertTrue(thrown.message?.contains("JsonRpcError(-32603): server exploded") == true)
+        writer.close()
+    }
+
+    @Test
     fun testExecuteReturnsJsonRpcResultOnSuccess() = runBlockingUnit {
         val transformer = RequestAwareSuccessTransformer(result = JsonPrimitive("ok"))
         val writer =
