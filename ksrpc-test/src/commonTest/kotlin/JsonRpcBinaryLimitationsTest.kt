@@ -103,6 +103,37 @@ class JsonRpcBinaryLimitationsTest {
     }
 
     @Test
+    fun testJsonRpcServiceWrapperRejectsBinaryResponseForNotify() = runBlockingUnit {
+        val service =
+            object : SerializedService<String> {
+                override val env = ksrpcEnvironment { }
+                override val context: CoroutineContext = EmptyCoroutineContext
+
+                override suspend fun call(
+                    endpoint: String,
+                    input: CallData<String>
+                ): CallData<String> = CallData.createBinary(ByteReadChannel(byteArrayOf(7, 7, 7)))
+
+                override suspend fun close() {}
+
+                override suspend fun onClose(onClose: suspend () -> Unit) {}
+            }
+
+        val wrapper = JsonRpcServiceWrapper(service)
+
+        val exception =
+            assertFailsWith<IllegalArgumentException> {
+                wrapper.execute(
+                    method = "binaryEndpoint",
+                    message = JsonPrimitive("message"),
+                    isNotify = true
+                )
+            }
+
+        assertTrue((exception.message ?: "").contains("JsonRpc does not support binary data"))
+    }
+
+    @Test
     fun testJsonRpcServiceWrapperForwardsEndpointAndNullPayload() = runBlockingUnit {
         var calledEndpoint: String? = null
         var calledPayload: String? = null
@@ -134,6 +165,68 @@ class JsonRpcBinaryLimitationsTest {
     }
 
     @Test
+    fun testJsonRpcServiceWrapperForwardsEndpointAndNonNullPayload() = runBlockingUnit {
+        var calledEndpoint: String? = null
+        var calledPayload: String? = null
+        val service =
+            object : SerializedService<String> {
+                override val env = ksrpcEnvironment { }
+                override val context: CoroutineContext = EmptyCoroutineContext
+
+                override suspend fun call(
+                    endpoint: String,
+                    input: CallData<String>
+                ): CallData<String> {
+                    calledEndpoint = endpoint
+                    calledPayload = input.readSerialized()
+                    return CallData.create("\"ok\"")
+                }
+
+                override suspend fun close() {}
+
+                override suspend fun onClose(onClose: suspend () -> Unit) {}
+            }
+
+        val wrapper = JsonRpcServiceWrapper(service)
+        val response = wrapper.execute(method = "ping", message = JsonPrimitive("hello"), isNotify = false)
+
+        assertEquals("ping", calledEndpoint)
+        assertEquals("\"hello\"", calledPayload)
+        assertEquals(JsonPrimitive("ok"), response)
+    }
+
+    @Test
+    fun testJsonRpcServiceWrapperForwardsNotifyPayload() = runBlockingUnit {
+        var calledEndpoint: String? = null
+        var calledPayload: String? = null
+        val service =
+            object : SerializedService<String> {
+                override val env = ksrpcEnvironment { }
+                override val context: CoroutineContext = EmptyCoroutineContext
+
+                override suspend fun call(
+                    endpoint: String,
+                    input: CallData<String>
+                ): CallData<String> {
+                    calledEndpoint = endpoint
+                    calledPayload = input.readSerialized()
+                    return CallData.create("\"ok\"")
+                }
+
+                override suspend fun close() {}
+
+                override suspend fun onClose(onClose: suspend () -> Unit) {}
+            }
+
+        val wrapper = JsonRpcServiceWrapper(service)
+        val response = wrapper.execute(method = "notifyPing", message = JsonPrimitive("hello"), isNotify = true)
+
+        assertEquals("notifyPing", calledEndpoint)
+        assertEquals("\"hello\"", calledPayload)
+        assertEquals(JsonPrimitive("ok"), response)
+    }
+
+    @Test
     fun testJsonRpcServiceWrapperCloseDelegatesToService() = runBlockingUnit {
         var closeCalled = false
         val service =
@@ -157,5 +250,29 @@ class JsonRpcBinaryLimitationsTest {
         wrapper.close()
 
         assertTrue(closeCalled)
+    }
+
+    @Test
+    fun testJsonRpcServiceWrapperThrowsForMalformedSerializedResponse() = runBlockingUnit {
+        val service =
+            object : SerializedService<String> {
+                override val env = ksrpcEnvironment { }
+                override val context: CoroutineContext = EmptyCoroutineContext
+
+                override suspend fun call(
+                    endpoint: String,
+                    input: CallData<String>
+                ): CallData<String> = CallData.create("{")
+
+                override suspend fun close() {}
+
+                override suspend fun onClose(onClose: suspend () -> Unit) {}
+            }
+
+        val wrapper = JsonRpcServiceWrapper(service)
+
+        assertFailsWith<Throwable> {
+            wrapper.execute(method = "ping", message = JsonPrimitive("input"), isNotify = false)
+        }
     }
 }

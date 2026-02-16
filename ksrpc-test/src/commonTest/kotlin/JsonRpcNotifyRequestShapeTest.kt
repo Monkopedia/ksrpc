@@ -53,6 +53,28 @@ class JsonRpcNotifyRequestShapeTest {
         writer.close()
     }
 
+    @Test
+    fun testNotifySupportsNullParams() = runBlockingUnit {
+        val transformer = CaptureNotifyRequestTransformer()
+        val writer =
+            JsonRpcWriterBase(
+                scope = CoroutineScope(coroutineContext + SupervisorJob()),
+                context = coroutineContext,
+                env = ksrpcEnvironment { },
+                comm = transformer
+            )
+
+        val response = writer.execute("notify-null", null, isNotify = true)
+        assertEquals(null, response)
+
+        val request = withTimeout(2_000) { transformer.sentRequest.await() }
+        assertEquals("notify-null", request.method)
+        assertEquals(null, request.params)
+        assertEquals(null, request.id)
+        assertFalse(transformer.receiveCalled)
+        writer.close()
+    }
+
     private class CaptureNotifyRequestTransformer : JsonRpcTransformer() {
         val sentRequest = CompletableDeferred<JsonRpcRequest>()
         var receiveCalled = false

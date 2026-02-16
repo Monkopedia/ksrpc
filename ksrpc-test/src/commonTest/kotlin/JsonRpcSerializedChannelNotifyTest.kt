@@ -112,6 +112,25 @@ class JsonRpcSerializedChannelNotifyTest {
     }
 
     @Test
+    fun testDuplicateOnCloseCallbackRunsOnce() = runBlockingUnit {
+        val jsonChannel = CapturingJsonRpcChannel(response = JsonPrimitive("unused"))
+        val serializedChannel =
+            JsonRpcSerializedChannel(
+                context = coroutineContext,
+                channel = jsonChannel,
+                env = ksrpcEnvironment { }
+            )
+        var callbackCount = 0
+        val callback: suspend () -> Unit = { callbackCount++ }
+
+        serializedChannel.onClose(callback)
+        serializedChannel.onClose(callback)
+        serializedChannel.close()
+
+        assertEquals(1, callbackCount)
+    }
+
+    @Test
     fun testStringEndpointCallUsesRequestResponsePath() = runBlockingUnit {
         val jsonChannel = CapturingJsonRpcChannel(response = JsonPrimitive("pong"))
         val serializedChannel =
@@ -163,6 +182,32 @@ class JsonRpcSerializedChannelNotifyTest {
 
         assertFailsWith<Throwable> {
             serializedChannel.call("bad-json", CallData.create("{"))
+        }
+        assertEquals(null, jsonChannel.method)
+    }
+
+    @Test
+    fun testRpcMethodCallRejectsMalformedJsonPayload() = runBlockingUnit {
+        val jsonChannel = CapturingJsonRpcChannel(response = JsonPrimitive("unused"))
+        val serializedChannel =
+            JsonRpcSerializedChannel(
+                context = coroutineContext,
+                channel = jsonChannel,
+                env = ksrpcEnvironment { }
+            )
+        val method =
+            RpcMethod<RpcService, String, String>(
+                endpoint = "bad-method",
+                inputTransform = SerializerTransformer(String.serializer()),
+                outputTransform = SerializerTransformer(String.serializer()),
+                method =
+                    object : ServiceExecutor {
+                        override suspend fun invoke(service: RpcService, input: Any?): Any? = "unused"
+                    }
+            )
+
+        assertFailsWith<Throwable> {
+            serializedChannel.call(method, CallData.create("{"))
         }
         assertEquals(null, jsonChannel.method)
     }

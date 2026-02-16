@@ -176,6 +176,61 @@ class JsonRpcErrorEnvelopeTest {
     }
 
     @Test
+    fun testSecondRegisterDefaultIsIgnored() = runBlockingUnit {
+        val request =
+            Json.encodeToJsonElement(
+                JsonRpcRequest.serializer(),
+                JsonRpcRequest(
+                    method = "echo",
+                    params = JsonPrimitive("input"),
+                    id = JsonPrimitive(101)
+                )
+            )
+        val transformer = QueuedTransformer(request)
+        val writer =
+            JsonRpcWriterBase(
+                scope = CoroutineScope(coroutineContext + SupervisorJob()),
+                context = coroutineContext,
+                env = ksrpcEnvironment { },
+                comm = transformer
+            )
+        val firstService =
+            object : SerializedService<String> {
+                override val env = ksrpcEnvironment { }
+                override val context: CoroutineContext = EmptyCoroutineContext
+
+                override suspend fun call(endpoint: String, input: CallData<String>): CallData<String> =
+                    CallData.create("first")
+
+                override suspend fun close() {}
+
+                override suspend fun onClose(onClose: suspend () -> Unit) {}
+            }
+        val secondService =
+            object : SerializedService<String> {
+                override val env = ksrpcEnvironment { }
+                override val context: CoroutineContext = EmptyCoroutineContext
+
+                override suspend fun call(endpoint: String, input: CallData<String>): CallData<String> =
+                    CallData.create("second")
+
+                override suspend fun close() {}
+
+                override suspend fun onClose(onClose: suspend () -> Unit) {}
+            }
+
+        writer.registerDefault(firstService)
+        writer.registerDefault(secondService)
+
+        val sent = withTimeout(2_000) { transformer.firstSent.await() }
+        val response = Json.decodeFromJsonElement(JsonRpcResponse.serializer(), sent)
+        assertEquals(JsonPrimitive("first"), response.result)
+        assertEquals(JsonPrimitive(101), response.id)
+
+        writer.close()
+    }
+
+    @Test
     fun testExecuteThrowsWithJsonRpcErrorCodeAndMessage() = runBlockingUnit {
         val transformer = RequestAwareErrorTransformer()
         val writer =
@@ -261,6 +316,42 @@ class JsonRpcErrorEnvelopeTest {
         assertEquals("ping", request.method)
         assertEquals(JsonPrimitive("input"), request.params)
         assertNotNull(request.id)
+        writer.close()
+    }
+
+    @Test
+    fun testExecuteReturnsNullWhenResponseHasNoResultOrError() = runBlockingUnit {
+        val transformer = EmptySuccessTransformer()
+        val writer =
+            JsonRpcWriterBase(
+                scope = CoroutineScope(coroutineContext + SupervisorJob()),
+                context = coroutineContext,
+                env = ksrpcEnvironment { },
+                comm = transformer
+            )
+
+        val response = writer.execute("ping", JsonPrimitive("input"), isNotify = false)
+        assertNull(response)
+        writer.close()
+    }
+
+    @Test
+    fun testExecutePrefersErrorWhenResponseHasResultAndError() = runBlockingUnit {
+        val transformer = ResultAndErrorTransformer()
+        val writer =
+            JsonRpcWriterBase(
+                scope = CoroutineScope(coroutineContext + SupervisorJob()),
+                context = coroutineContext,
+                env = ksrpcEnvironment { },
+                comm = transformer
+            )
+
+        val thrown =
+            assertFailsWith<IllegalStateException> {
+                writer.execute("ping", JsonPrimitive("input"), isNotify = false)
+            }
+
+        assertTrue(thrown.message?.contains("JsonRpcError(-32603): mixed response") == true)
         writer.close()
     }
 
@@ -470,6 +561,64 @@ class JsonRpcErrorEnvelopeTest {
         writer.close()
     }
 
+    @Test
+    fun testDuplicateResponseIdReportsNoPendingReceiverError() = runBlockingUnit {
+        val observedError = CompletableDeferred<Throwable>()
+        val transformer = DuplicateResponseTransformer()
+        val writer =
+            JsonRpcWriterBase(
+                scope = CoroutineScope(coroutineContext + SupervisorJob()),
+                context = coroutineContext,
+                env =
+                    ksrpcEnvironment {
+                        errorListener =
+                            ErrorListener { t ->
+                                if (!observedError.isCompleted) {
+                                    observedError.complete(t)
+                                }
+                            }
+                    },
+                comm = transformer
+            )
+
+        val response = writer.execute("dup-id", JsonPrimitive("input"), isNotify = false)
+        assertEquals(JsonPrimitive("ok"), response)
+
+        val error = withTimeout(2_000) { observedError.await() }
+        assertTrue(error is IllegalStateException)
+        assertTrue(error.message?.contains("No pending receiver") == true)
+        writer.close()
+    }
+
+    @Test
+    fun testNullResponseIdReportsNoPendingReceiverError() = runBlockingUnit {
+        val observedError = CompletableDeferred<Throwable>()
+        val transformer = NullIdResponseTransformer()
+        val writer =
+            JsonRpcWriterBase(
+                scope = CoroutineScope(coroutineContext + SupervisorJob()),
+                context = coroutineContext,
+                env =
+                    ksrpcEnvironment {
+                        errorListener =
+                            ErrorListener { t ->
+                                if (!observedError.isCompleted) {
+                                    observedError.complete(t)
+                                }
+                            }
+                    },
+                comm = transformer
+            )
+
+        val response = writer.execute("null-id", JsonPrimitive("input"), isNotify = false)
+        assertEquals(JsonPrimitive("ok"), response)
+
+        val error = withTimeout(2_000) { observedError.await() }
+        assertTrue(error is IllegalStateException)
+        assertTrue(error.message?.contains("No pending receiver") == true)
+        writer.close()
+    }
+
     private class QueuedTransformer(vararg incoming: JsonElement) : JsonRpcTransformer() {
         private val queue = ArrayDeque(incoming.toList())
         val firstSent = CompletableDeferred<JsonElement>()
@@ -559,6 +708,70 @@ class JsonRpcErrorEnvelopeTest {
         }
     }
 
+    private class ResultAndErrorTransformer : JsonRpcTransformer() {
+        private val request = CompletableDeferred<JsonRpcRequest>()
+        private var emitted = false
+
+        override val isOpen: Boolean
+            get() = !emitted
+
+        override suspend fun send(message: JsonElement) {
+            if (!request.isCompleted) {
+                request.complete(Json.decodeFromJsonElement(JsonRpcRequest.serializer(), message))
+            }
+        }
+
+        override suspend fun receive(): JsonElement? {
+            if (emitted) return null
+            emitted = true
+            val req = request.await()
+            return Json.encodeToJsonElement(
+                JsonRpcResponse.serializer(),
+                JsonRpcResponse(
+                    result = JsonPrimitive("ok"),
+                    error = JsonRpcError(JsonRpcError.INTERNAL_ERROR, "mixed response", null),
+                    id = req.id
+                )
+            )
+        }
+
+        override fun close(cause: Throwable?) {
+            emitted = true
+        }
+    }
+
+    private class EmptySuccessTransformer : JsonRpcTransformer() {
+        private val request = CompletableDeferred<JsonRpcRequest>()
+        private var emitted = false
+
+        override val isOpen: Boolean
+            get() = !emitted
+
+        override suspend fun send(message: JsonElement) {
+            if (!request.isCompleted) {
+                request.complete(Json.decodeFromJsonElement(JsonRpcRequest.serializer(), message))
+            }
+        }
+
+        override suspend fun receive(): JsonElement? {
+            if (emitted) return null
+            val req = request.await()
+            emitted = true
+            return Json.encodeToJsonElement(
+                JsonRpcResponse.serializer(),
+                JsonRpcResponse(
+                    result = null,
+                    error = null,
+                    id = req.id
+                )
+            )
+        }
+
+        override fun close(cause: Throwable?) {
+            emitted = true
+        }
+    }
+
     private class NotifyTransformer : JsonRpcTransformer() {
         var receiveCalled = false
         var sentRequest: JsonRpcRequest? = null
@@ -615,6 +828,78 @@ class JsonRpcErrorEnvelopeTest {
 
         override fun close(cause: Throwable?) {
             throw IllegalStateException("already closed")
+        }
+    }
+
+    private class DuplicateResponseTransformer : JsonRpcTransformer() {
+        private val request = CompletableDeferred<JsonRpcRequest>()
+        private var emitted = 0
+
+        override val isOpen: Boolean
+            get() = emitted < 2
+
+        override suspend fun send(message: JsonElement) {
+            if (!request.isCompleted) {
+                request.complete(Json.decodeFromJsonElement(JsonRpcRequest.serializer(), message))
+            }
+        }
+
+        override suspend fun receive(): JsonElement? {
+            val req = request.await()
+            if (emitted >= 2) return null
+            emitted++
+            return Json.encodeToJsonElement(
+                JsonRpcResponse.serializer(),
+                JsonRpcResponse(
+                    result = JsonPrimitive("ok"),
+                    id = req.id
+                )
+            )
+        }
+
+        override fun close(cause: Throwable?) {
+            emitted = 2
+        }
+    }
+
+    private class NullIdResponseTransformer : JsonRpcTransformer() {
+        private val request = CompletableDeferred<JsonRpcRequest>()
+        private var emitted = 0
+
+        override val isOpen: Boolean
+            get() = emitted < 2
+
+        override suspend fun send(message: JsonElement) {
+            if (!request.isCompleted) {
+                request.complete(Json.decodeFromJsonElement(JsonRpcRequest.serializer(), message))
+            }
+        }
+
+        override suspend fun receive(): JsonElement? {
+            val req = request.await()
+            return when (emitted++) {
+                0 ->
+                    Json.encodeToJsonElement(
+                        JsonRpcResponse.serializer(),
+                        JsonRpcResponse(
+                            result = JsonPrimitive("ok"),
+                            id = req.id
+                        )
+                    )
+                1 ->
+                    Json.encodeToJsonElement(
+                        JsonRpcResponse.serializer(),
+                        JsonRpcResponse(
+                            result = JsonPrimitive("ignored"),
+                            id = null
+                        )
+                    )
+                else -> null
+            }
+        }
+
+        override fun close(cause: Throwable?) {
+            emitted = 2
         }
     }
 }
