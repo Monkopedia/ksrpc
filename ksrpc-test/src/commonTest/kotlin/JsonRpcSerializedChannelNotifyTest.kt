@@ -20,6 +20,7 @@ import com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcChannel
 import com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcSerializedChannel
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlinx.serialization.builtins.serializer
@@ -57,6 +58,36 @@ class JsonRpcSerializedChannelNotifyTest {
         assertTrue(jsonChannel.isNotify)
         assertFalse(output.isBinary)
         Json.decodeFromString(Unit.serializer(), output.readSerialized())
+    }
+
+    @Test
+    fun testMethodWithReturnTypeUsesRequestResponsePath() = runBlockingUnit {
+        val jsonChannel = CapturingJsonRpcChannel(response = JsonPrimitive("pong"))
+        val serializedChannel =
+            JsonRpcSerializedChannel(
+                context = coroutineContext,
+                channel = jsonChannel,
+                env = ksrpcEnvironment { }
+            )
+        val method =
+            RpcMethod<RpcService, String, String>(
+                endpoint = "request-endpoint",
+                inputTransform = SerializerTransformer(String.serializer()),
+                outputTransform = SerializerTransformer(String.serializer()),
+                method =
+                    object : ServiceExecutor {
+                        override suspend fun invoke(service: RpcService, input: Any?): Any? = "unused"
+                    }
+            )
+        val input = CallData.create(Json.encodeToString(String.serializer(), "payload"))
+
+        val output = serializedChannel.call(method, input)
+
+        assertEquals("request-endpoint", jsonChannel.method)
+        assertEquals(JsonPrimitive("payload"), jsonChannel.message)
+        assertFalse(jsonChannel.isNotify)
+        assertFalse(output.isBinary)
+        assertEquals("pong", Json.decodeFromString(String.serializer(), output.readSerialized()))
     }
 
     @Test
@@ -100,8 +131,44 @@ class JsonRpcSerializedChannelNotifyTest {
         assertEquals("pong", Json.decodeFromString(String.serializer(), output.readSerialized()))
     }
 
+    @Test
+    fun testStringEndpointCallSerializesNullResponse() = runBlockingUnit {
+        val jsonChannel = CapturingJsonRpcChannel(response = null)
+        val serializedChannel =
+            JsonRpcSerializedChannel(
+                context = coroutineContext,
+                channel = jsonChannel,
+                env = ksrpcEnvironment { }
+            )
+        val input = CallData.create(Json.encodeToString(String.serializer(), "ping"))
+
+        val output = serializedChannel.call("nullable", input)
+
+        assertEquals("nullable", jsonChannel.method)
+        assertEquals(JsonPrimitive("ping"), jsonChannel.message)
+        assertFalse(jsonChannel.isNotify)
+        assertFalse(output.isBinary)
+        assertEquals("null", output.readSerialized())
+    }
+
+    @Test
+    fun testStringEndpointCallRejectsMalformedJsonPayload() = runBlockingUnit {
+        val jsonChannel = CapturingJsonRpcChannel(response = JsonPrimitive("unused"))
+        val serializedChannel =
+            JsonRpcSerializedChannel(
+                context = coroutineContext,
+                channel = jsonChannel,
+                env = ksrpcEnvironment { }
+            )
+
+        assertFailsWith<Throwable> {
+            serializedChannel.call("bad-json", CallData.create("{"))
+        }
+        assertEquals(null, jsonChannel.method)
+    }
+
     private class CapturingJsonRpcChannel(
-        private val response: JsonElement
+        private val response: JsonElement?
     ) : JsonRpcChannel {
         override val env = ksrpcEnvironment { }
         var method: String? = null

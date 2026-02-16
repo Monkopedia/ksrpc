@@ -15,12 +15,14 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcError
 import com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcRequest
 import com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcResponse
 import com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcTransformer
 import com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcWriterBase
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -47,6 +49,28 @@ class JsonRpcOutOfOrderResponseTest {
 
         assertEquals(JsonPrimitive("first-result"), first.await())
         assertEquals(JsonPrimitive("second-result"), second.await())
+        writer.close()
+    }
+
+    @Test
+    fun testExecuteMatchesOutOfOrderMixedSuccessAndErrorById() = runBlockingUnit {
+        val transformer = OutOfOrderMixedResponseTransformer()
+        val writer =
+            JsonRpcWriterBase(
+                scope = CoroutineScope(coroutineContext + SupervisorJob()),
+                context = coroutineContext,
+                env = ksrpcEnvironment { },
+                comm = transformer
+            )
+
+        val first = async { runCatching { writer.execute("first", JsonPrimitive("a"), isNotify = false) } }
+        val second = async { runCatching { writer.execute("second", JsonPrimitive("b"), isNotify = false) } }
+
+        val firstResult = first.await()
+        val secondResult = second.await()
+        assertTrue(firstResult.isFailure)
+        assertTrue(firstResult.exceptionOrNull()?.message?.contains("first failed") == true)
+        assertEquals(JsonPrimitive("second-result"), secondResult.getOrThrow())
         writer.close()
     }
 
@@ -80,6 +104,56 @@ class JsonRpcOutOfOrderResponseTest {
                     1 ->
                         JsonRpcResponse(
                             result = JsonPrimitive("first-result"),
+                            id = first.id
+                        )
+                    else -> return null
+                }
+            return Json.encodeToJsonElement(JsonRpcResponse.serializer(), response)
+        }
+
+        override fun close(cause: Throwable?) {
+            emitted = 2
+        }
+    }
+
+    private class OutOfOrderMixedResponseTransformer : JsonRpcTransformer() {
+        private val firstRequest = CompletableDeferred<JsonRpcRequest>()
+        private val secondRequest = CompletableDeferred<JsonRpcRequest>()
+        private var emitted = 0
+
+        override val isOpen: Boolean
+            get() = emitted < 2
+
+        override suspend fun send(message: JsonElement) {
+            val request = Json.decodeFromJsonElement(JsonRpcRequest.serializer(), message)
+            if (!firstRequest.isCompleted) {
+                firstRequest.complete(request)
+            } else if (!secondRequest.isCompleted) {
+                secondRequest.complete(request)
+            }
+        }
+
+        override suspend fun receive(): JsonElement? {
+            val first = firstRequest.await()
+            val second = secondRequest.await()
+            val response =
+                when (emitted++) {
+                    0 ->
+                        JsonRpcResponse(
+                            result = JsonPrimitive("second-result"),
+                            id = second.id
+                        )
+                    1 ->
+                        JsonRpcResponse(
+                            error =
+                                JsonRpcError(
+                                    JsonRpcError.INTERNAL_ERROR,
+                                    "first exploded",
+                                    Json.encodeToJsonElement(
+                                        RpcFailure.serializer(),
+                                        RpcFailure("first failed")
+                                    )
+                                ),
                             id = first.id
                         )
                     else -> return null
