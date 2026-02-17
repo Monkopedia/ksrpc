@@ -42,6 +42,12 @@ kotlin {
 
 tasks.configureEach {
     if (name == "jsBrowserProductionWebpack") {
+        dependsOn("jsDevelopmentExecutableCompileSync")
         dependsOn(":ksrpc-service-worker:jsTestTestDevelopmentExecutableCompileSync")
+        dependsOn(":ksrpc-service-worker:jsTestTestProductionExecutableCompileSync")
+    }
+    if (name == "licenseCheckForKotlin") {
+        mustRunAfter("jsBrowserProductionWebpack")
+        mustRunAfter("jsBrowserDistribution")
     }
 }

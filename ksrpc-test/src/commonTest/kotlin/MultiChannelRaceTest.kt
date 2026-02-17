@@ -28,8 +28,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.supervisorScope
+import kotlinx.coroutines.withTimeout
 
 @KsService
 interface MultiChannelRaceService : RpcService {
@@ -69,17 +69,21 @@ class MultiChannelRaceTest {
 
                 try {
                     server.registerDefault(
-                        (object : MultiChannelRaceService {
-                            override suspend fun slow(input: String): String {
-                                serverStarted.complete(Unit)
-                                return returnValue.await()
+                        (
+                            object : MultiChannelRaceService {
+                                override suspend fun slow(input: String): String {
+                                    serverStarted.complete(Unit)
+                                    return returnValue.await()
+                                }
                             }
-                        }).serialized(env)
+                            ).serialized(env)
                     )
 
                     val call = launch(Dispatchers.Default) {
                         try {
-                            client.defaultChannel().toStub<MultiChannelRaceService, String>().slow("payload")
+                            client.defaultChannel().toStub<MultiChannelRaceService, String>().slow(
+                                "payload"
+                            )
                         } catch (_: CancellationException) {
                         } catch (_: Throwable) {
                         }
@@ -96,12 +100,16 @@ class MultiChannelRaceTest {
 
                     val captured = mutableListOf<Throwable>()
                     while (true) {
-                        val error = connectionErrors.tryReceive().getOrNull() ?: break
+                        val error = connectionErrors
+                            .tryReceive()
+                            .getOrNull() ?: break
                         captured.add(error)
                     }
                     if (captured.any {
-                        it is IllegalStateException && it.message?.contains("MultiChannel") == true
-                    }) {
+                            it is IllegalStateException &&
+                                it.message?.contains("MultiChannel") == true
+                        }
+                    ) {
                         observedLegacyFailure = true
                     }
                 } finally {

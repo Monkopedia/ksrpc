@@ -34,9 +34,7 @@ public interface HostExtensionTestService : RpcService {
     suspend fun echo(input: String): String
 }
 
-private class CapturingHost(
-    override val env: KsrpcEnvironment<String>
-) : ChannelHost<String> {
+private class CapturingHost(override val env: KsrpcEnvironment<String>) : ChannelHost<String> {
     var hostedService: SerializedService<String>? = null
     var defaultService: SerializedService<String>? = null
 

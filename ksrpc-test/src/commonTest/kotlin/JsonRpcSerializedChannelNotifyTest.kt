@@ -76,7 +76,8 @@ class JsonRpcSerializedChannelNotifyTest {
                 outputTransform = SerializerTransformer(String.serializer()),
                 method =
                     object : ServiceExecutor {
-                        override suspend fun invoke(service: RpcService, input: Any?): Any? = "unused"
+                        override suspend fun invoke(service: RpcService, input: Any?): Any? =
+                            "unused"
                     }
             )
         val input = CallData.create(Json.encodeToString(String.serializer(), "payload"))
@@ -202,7 +203,8 @@ class JsonRpcSerializedChannelNotifyTest {
                 outputTransform = SerializerTransformer(String.serializer()),
                 method =
                     object : ServiceExecutor {
-                        override suspend fun invoke(service: RpcService, input: Any?): Any? = "unused"
+                        override suspend fun invoke(service: RpcService, input: Any?): Any? =
+                            "unused"
                     }
             )
 
@@ -212,9 +214,7 @@ class JsonRpcSerializedChannelNotifyTest {
         assertEquals(null, jsonChannel.method)
     }
 
-    private class CapturingJsonRpcChannel(
-        private val response: JsonElement?
-    ) : JsonRpcChannel {
+    private class CapturingJsonRpcChannel(private val response: JsonElement?) : JsonRpcChannel {
         override val env = ksrpcEnvironment { }
         var method: String? = null
         var message: JsonElement? = null

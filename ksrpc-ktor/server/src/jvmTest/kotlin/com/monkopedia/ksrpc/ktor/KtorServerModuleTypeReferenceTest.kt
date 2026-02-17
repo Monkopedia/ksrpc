@@ -24,8 +24,15 @@ import kotlin.test.assertNotNull
 class KtorServerModuleTypeReferenceTest {
     @Test
     fun ktorServerTopLevelFunctionIsReachableWithoutReflection() {
-        val function: Routing.(String, SerializedService<String>, KsrpcEnvironment<String>) -> Unit =
-            ::serve
+        val function:
+            (
+                Routing,
+                String,
+                SerializedService<String>,
+                KsrpcEnvironment<String>
+            ) -> Unit = { routing, basePath, service, env ->
+                routing.serve(basePath, service, env)
+            }
 
         assertNotNull(function)
     }

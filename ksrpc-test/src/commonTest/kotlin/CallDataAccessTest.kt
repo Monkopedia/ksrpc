@@ -21,8 +21,8 @@ import io.ktor.utils.io.core.readBytes
 import io.ktor.utils.io.readRemaining
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class CallDataAccessTest {

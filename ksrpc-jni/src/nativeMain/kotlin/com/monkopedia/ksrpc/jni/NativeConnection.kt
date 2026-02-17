@@ -51,6 +51,10 @@ class NativeConnection(
     private val receiveChannel = Channel<Packet<JniSerialized>>()
     private val typeConverter = newTypeConverter<Any?>()
 
+    init {
+        startReceiveLoop()
+    }
+
     override suspend fun sendLocked(packet: Packet<JniSerialized>) {
         val serialized = env.serialization.createCallData(
             Packet.serializer(JniSerialized),

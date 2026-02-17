@@ -84,7 +84,9 @@ class JsonRpcNotifyRequestShapeTest {
 
         override suspend fun send(message: JsonElement) {
             if (!sentRequest.isCompleted) {
-                sentRequest.complete(Json.decodeFromJsonElement(JsonRpcRequest.serializer(), message))
+                sentRequest.complete(
+                    Json.decodeFromJsonElement(JsonRpcRequest.serializer(), message)
+                )
             }
         }
 

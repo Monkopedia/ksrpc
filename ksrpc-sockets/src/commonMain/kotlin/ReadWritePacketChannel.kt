@@ -35,6 +35,9 @@ internal class ReadWritePacketChannel(
     private val write: ByteWriteChannel,
     env: KsrpcEnvironment<String>
 ) : PacketChannelBase<String>(scope, env) {
+    init {
+        startReceiveLoop()
+    }
 
     override suspend fun sendLocked(packet: Packet<String>) {
         write.send(packet, env.serialization)

@@ -33,6 +33,10 @@ class JniConnection(
     private val receiveChannel = Channel<Packet<JniSerialized>>()
     private val nativeConnection = createConnection(scope.asNativeScope, nativeEnvironment)
 
+    init {
+        startReceiveLoop()
+    }
+
     constructor(
         scope: CoroutineScope,
         env: KsrpcEnvironment<JniSerialized>,

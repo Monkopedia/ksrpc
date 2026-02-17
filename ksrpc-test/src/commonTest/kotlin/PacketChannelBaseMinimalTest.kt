@@ -22,10 +22,8 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 
-private class MinimalPacketChannelBase(
-    scope: CoroutineScope,
-    env: KsrpcEnvironment<String>
-) : PacketChannelBase<String>(scope, env) {
+private class MinimalPacketChannelBase(scope: CoroutineScope, env: KsrpcEnvironment<String>) :
+    PacketChannelBase<String>(scope, env) {
     init {
         startReceiveLoop()
     }

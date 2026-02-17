@@ -24,8 +24,15 @@ import kotlin.test.assertNotNull
 class KtorWebsocketServerModuleTypeReferenceTest {
     @Test
     fun websocketServerTopLevelFunctionIsReachableWithoutReflection() {
-        val function: Routing.(String, SerializedService<String>, KsrpcEnvironment<String>) -> Unit =
-            ::serveWebsocket
+        val function:
+            (
+                Routing,
+                String,
+                SerializedService<String>,
+                KsrpcEnvironment<String>
+            ) -> Unit = { routing, basePath, service, env ->
+                routing.serveWebsocket(basePath, service, env)
+            }
 
         assertNotNull(function)
     }

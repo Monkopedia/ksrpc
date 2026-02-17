@@ -34,8 +34,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
 import kotlin.test.assertTrue
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.SupervisorJob
@@ -193,7 +193,7 @@ class JsonRpcTest {
         val expectedRequest =
             Json.encodeToJsonElement(
                 JsonRpcResponse(result = Json.decodeFromString("-19"), id = JsonPrimitive(1))
-        )
+            )
         assertEquals(expectedRequest, sender.receive())
     }
 
@@ -398,7 +398,9 @@ object JsonRpcTypeTest {
         verifyOnChannel: suspend (SerializedService<String>, FakeTestTypes) -> Unit,
         private val service: FakeTestTypes = FakeTestTypes()
     ) : JsonRpcFunctionalityTest(
-        serializedChannel = { service.serialized<TestTypesInterface, String>(ksrpcEnvironment { }) },
+        serializedChannel = {
+            service.serialized<TestTypesInterface, String>(ksrpcEnvironment { })
+        },
         verifyOnChannel = { channel ->
             verifyOnChannel(channel, service)
         }

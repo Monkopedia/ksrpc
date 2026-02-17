@@ -23,9 +23,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
 
-private class ClientDefaultChannelService(
-    override val env: KsrpcEnvironment<String>
-) : SerializedService<String> {
+private class ClientDefaultChannelService(override val env: KsrpcEnvironment<String>) :
+    SerializedService<String> {
     override suspend fun call(endpoint: String, input: CallData<String>): CallData<String> = input
 
     override suspend fun close() = Unit

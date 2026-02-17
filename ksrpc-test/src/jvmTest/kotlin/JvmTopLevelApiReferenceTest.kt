@@ -38,5 +38,4 @@ class JvmTopLevelApiReferenceTest {
 
         assertNotNull(function)
     }
-
 }

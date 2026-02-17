@@ -64,6 +64,10 @@ private fun ServiceWorkerPacketChannel.attachPort(port: JsAny) {
 
 private class ServiceWorkerPacketChannel(scope: CoroutineScope, env: KsrpcEnvironment<String>) :
     PacketChannelBase<String>(scope, env) {
+    init {
+        startReceiveLoop()
+    }
+
     private val incoming = Channel<Packet<String>>(Channel.UNLIMITED)
     private val portDeferred = CompletableDeferred<JsAny>()
 

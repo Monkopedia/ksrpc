@@ -119,13 +119,17 @@ kotlin {
         implementation(kotlin("stdlib"))
         implementation(kotlin("test"))
     }
-    sourceSets["jsTest"].resources.srcDir(projectDir.resolve("build/generated/service-worker/js"))
+    sourceSets["jsTest"].resources.srcDir(
+        projectDir.resolve("build/generated/service-worker/js")
+    )
     sourceSets["wasmJsTest"].dependencies {
         implementation(project(":ksrpc-service-worker-test"))
         implementation(kotlin("stdlib"))
         implementation(kotlin("test"))
     }
-    sourceSets["wasmJsTest"].resources.srcDir(projectDir.resolve("build/generated/service-worker/wasm"))
+    sourceSets["wasmJsTest"].resources.srcDir(
+        projectDir.resolve("build/generated/service-worker/wasm")
+    )
 }
 val copyLib = tasks.register("copyLib", Copy::class) {
     val hostOs = System.getProperty("os.name")
@@ -160,11 +164,14 @@ val copyLib = tasks.register("copyLib", Copy::class) {
 val copyWebWorkerJs = tasks.register("copyWebWorkerJs", Copy::class) {
     dependsOn(
         project(":ksrpc-service-worker-test").tasks.matching {
-            it.name.startsWith("js") && it.name.endsWith("BrowserDistribution")
+            it.name.startsWith("js") &&
+                it.name.endsWith("BrowserDistribution")
         }
     )
     from(
-        project(":ksrpc-service-worker-test").layout.buildDirectory.dir("dist/js/productionExecutable")
+        project(
+            ":ksrpc-service-worker-test"
+        ).layout.buildDirectory.dir("dist/js/productionExecutable")
     ) {
         include("*.js")
         include("*.map")
@@ -175,11 +182,14 @@ val copyWebWorkerJs = tasks.register("copyWebWorkerJs", Copy::class) {
 val copyWebWorkerWasm = tasks.register("copyWebWorkerWasm", Copy::class) {
     dependsOn(
         project(":ksrpc-service-worker-test").tasks.matching {
-            it.name.startsWith("js") && it.name.endsWith("BrowserDistribution")
+            it.name.startsWith("js") &&
+                it.name.endsWith("BrowserDistribution")
         }
     )
     from(
-        project(":ksrpc-service-worker-test").layout.buildDirectory.dir("dist/js/productionExecutable")
+        project(
+            ":ksrpc-service-worker-test"
+        ).layout.buildDirectory.dir("dist/js/productionExecutable")
     ) {
         include("*.js")
         include("*.map")
@@ -192,7 +202,15 @@ afterEvaluate {
     tasks.findByName("jsTestProcessResources")?.dependsOn(copyWebWorkerJs)
     tasks.findByName("wasmJsTestProcessResources")?.dependsOn(copyWebWorkerWasm)
     val jsBrowserTest = tasks["jsBrowserTest"]
-    jsBrowserTest.dependsOn(project(":ksrpc-service-worker-test").tasks["jsProductionExecutableCompileSync"])
-    jsBrowserTest.mustRunAfter(project(":ksrpc-service-worker-test").tasks["jsProductionExecutableCompileSync"])
+    jsBrowserTest.dependsOn("jsTestTestProductionExecutableCompileSync")
+    jsBrowserTest.dependsOn(
+        project(":ksrpc-service-worker-test").tasks["jsProductionExecutableCompileSync"]
+    )
+    jsBrowserTest.mustRunAfter(
+        project(":ksrpc-service-worker-test").tasks["jsProductionExecutableCompileSync"]
+    )
     jsBrowserTest.dependsOn(copyWebWorkerJs)
+    val wasmJsBrowserTest = tasks["wasmJsBrowserTest"]
+    wasmJsBrowserTest.dependsOn("wasmJsTestTestProductionExecutableCompileSync")
+    wasmJsBrowserTest.dependsOn(copyWebWorkerWasm)
 }

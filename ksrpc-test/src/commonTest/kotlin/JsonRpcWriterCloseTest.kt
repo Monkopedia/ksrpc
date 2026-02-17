@@ -36,9 +36,8 @@ class JsonRpcWriterCloseTest {
 
                 override suspend fun receive(): JsonElement? = null
 
-                override fun close(cause: Throwable?) {
+                override fun close(cause: Throwable?): Unit =
                     throw IllegalStateException("already closed")
-                }
             }
         val writer =
             JsonRpcWriterBase(

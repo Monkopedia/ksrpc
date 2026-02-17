@@ -34,15 +34,18 @@ import io.ktor.utils.io.readRemaining
 import io.ktor.utils.io.writeFully
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.builtins.ByteArraySerializer
 import kotlinx.serialization.builtins.serializer
 
 private const val DEFAULT_MAX_SIZE = 16 * 1024L
+private const val RECEIVE_LOOP_START_GRACE_MS = 500L
 
 abstract class PacketChannelBase<T>(
     protected val scope: CoroutineScope,
@@ -69,10 +72,23 @@ abstract class PacketChannelBase<T>(
     private val binaryChannels = mutableMapOf<String, BinaryChannel<T>>()
 
     private val multiChannel = MultiChannel<Packet<T>>()
+    private val receiveLoopStart = CompletableDeferred<Unit>()
 
     init {
         scope.launch {
             withContext(context) {
+                val hasStarted = withTimeoutOrNull(RECEIVE_LOOP_START_GRACE_MS) {
+                    receiveLoopStart.await()
+                } != null
+                if (!hasStarted) {
+                    env.logger.warn(
+                        "PacketChannel",
+                        "startReceiveLoop() was not called within " +
+                            "${RECEIVE_LOOP_START_GRACE_MS}ms. " +
+                            "Falling back to legacy startup behavior; " +
+                            "explicit startup will be required in a future release."
+                    )
+                }
                 executeReceive(this)
             }
         }.also {
@@ -118,6 +134,15 @@ abstract class PacketChannelBase<T>(
             binaryChannels.values.forEach { it.channel.close(t) }
             multiChannel.close(CancellationException("Multi-channel failure", t))
         }
+    }
+
+    /**
+     * Starts the receive loop for this packet channel.
+     *
+     * Subclasses should call this from their own initialization once their state is ready.
+     */
+    protected fun startReceiveLoop() {
+        receiveLoopStart.complete(Unit)
     }
 
     private suspend fun CoroutineScope.sendPacket(

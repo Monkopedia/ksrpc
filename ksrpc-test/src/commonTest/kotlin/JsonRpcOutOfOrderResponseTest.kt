@@ -63,8 +63,10 @@ class JsonRpcOutOfOrderResponseTest {
                 comm = transformer
             )
 
-        val first = async { runCatching { writer.execute("first", JsonPrimitive("a"), isNotify = false) } }
-        val second = async { runCatching { writer.execute("second", JsonPrimitive("b"), isNotify = false) } }
+        val first =
+            async { runCatching { writer.execute("first", JsonPrimitive("a"), isNotify = false) } }
+        val second =
+            async { runCatching { writer.execute("second", JsonPrimitive("b"), isNotify = false) } }
 
         val firstResult = first.await()
         val secondResult = second.await()
@@ -101,11 +103,13 @@ class JsonRpcOutOfOrderResponseTest {
                             result = JsonPrimitive("second-result"),
                             id = second.id
                         )
+
                     1 ->
                         JsonRpcResponse(
                             result = JsonPrimitive("first-result"),
                             id = first.id
                         )
+
                     else -> return null
                 }
             return Json.encodeToJsonElement(JsonRpcResponse.serializer(), response)
@@ -143,6 +147,7 @@ class JsonRpcOutOfOrderResponseTest {
                             result = JsonPrimitive("second-result"),
                             id = second.id
                         )
+
                     1 ->
                         JsonRpcResponse(
                             error =
@@ -156,6 +161,7 @@ class JsonRpcOutOfOrderResponseTest {
                                 ),
                             id = first.id
                         )
+
                     else -> return null
                 }
             return Json.encodeToJsonElement(JsonRpcResponse.serializer(), response)

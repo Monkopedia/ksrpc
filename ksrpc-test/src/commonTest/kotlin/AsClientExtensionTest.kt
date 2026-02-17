@@ -22,9 +22,8 @@ import com.monkopedia.ksrpc.internal.asClient
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-private class CapturingSerializedChannel(
-    override val env: KsrpcEnvironment<String>
-) : SerializedChannel<String> {
+private class CapturingSerializedChannel(override val env: KsrpcEnvironment<String>) :
+    SerializedChannel<String> {
     var lastCallChannelId: ChannelId? = null
     var lastEndpoint: String? = null
     var closedChannelId: ChannelId? = null

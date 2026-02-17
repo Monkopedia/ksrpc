@@ -188,7 +188,11 @@ class JsonRpcBinaryLimitationsTest {
             }
 
         val wrapper = JsonRpcServiceWrapper(service)
-        val response = wrapper.execute(method = "ping", message = JsonPrimitive("hello"), isNotify = false)
+        val response = wrapper.execute(
+            method = "ping",
+            message = JsonPrimitive("hello"),
+            isNotify = false
+        )
 
         assertEquals("ping", calledEndpoint)
         assertEquals("\"hello\"", calledPayload)
@@ -219,7 +223,11 @@ class JsonRpcBinaryLimitationsTest {
             }
 
         val wrapper = JsonRpcServiceWrapper(service)
-        val response = wrapper.execute(method = "notifyPing", message = JsonPrimitive("hello"), isNotify = true)
+        val response = wrapper.execute(
+            method = "notifyPing",
+            message = JsonPrimitive("hello"),
+            isNotify = true
+        )
 
         assertEquals("notifyPing", calledEndpoint)
         assertEquals("\"hello\"", calledPayload)

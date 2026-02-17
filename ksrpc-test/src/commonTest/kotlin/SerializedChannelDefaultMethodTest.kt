@@ -23,9 +23,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.serialization.builtins.serializer
 
-private class CapturingSerializedService(
-    override val env: KsrpcEnvironment<String>
-) : SerializedService<String> {
+private class CapturingSerializedService(override val env: KsrpcEnvironment<String>) :
+    SerializedService<String> {
     var lastEndpoint: String? = null
     var lastPayload: String? = null
 

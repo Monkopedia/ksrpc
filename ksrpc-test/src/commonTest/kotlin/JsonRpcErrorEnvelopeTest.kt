@@ -26,8 +26,8 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -69,9 +69,10 @@ class JsonRpcErrorEnvelopeTest {
                 override val env = ksrpcEnvironment { }
                 override val context: CoroutineContext = EmptyCoroutineContext
 
-                override suspend fun call(endpoint: String, input: CallData<String>): CallData<String> {
-                    throw IllegalStateException("boom")
-                }
+                override suspend fun call(
+                    endpoint: String,
+                    input: CallData<String>
+                ): CallData<String> = throw IllegalStateException("boom")
 
                 override suspend fun close() {}
 
@@ -115,7 +116,10 @@ class JsonRpcErrorEnvelopeTest {
                 override val env = ksrpcEnvironment { }
                 override val context: CoroutineContext = EmptyCoroutineContext
 
-                override suspend fun call(endpoint: String, input: CallData<String>): CallData<String> = input
+                override suspend fun call(
+                    endpoint: String,
+                    input: CallData<String>
+                ): CallData<String> = input
 
                 override suspend fun close() {}
 
@@ -160,7 +164,10 @@ class JsonRpcErrorEnvelopeTest {
                 override val env = ksrpcEnvironment { }
                 override val context: CoroutineContext = EmptyCoroutineContext
 
-                override suspend fun call(endpoint: String, input: CallData<String>): CallData<String> = input
+                override suspend fun call(
+                    endpoint: String,
+                    input: CallData<String>
+                ): CallData<String> = input
 
                 override suspend fun close() {}
 
@@ -199,8 +206,10 @@ class JsonRpcErrorEnvelopeTest {
                 override val env = ksrpcEnvironment { }
                 override val context: CoroutineContext = EmptyCoroutineContext
 
-                override suspend fun call(endpoint: String, input: CallData<String>): CallData<String> =
-                    CallData.create("first")
+                override suspend fun call(
+                    endpoint: String,
+                    input: CallData<String>
+                ): CallData<String> = CallData.create("first")
 
                 override suspend fun close() {}
 
@@ -211,8 +220,10 @@ class JsonRpcErrorEnvelopeTest {
                 override val env = ksrpcEnvironment { }
                 override val context: CoroutineContext = EmptyCoroutineContext
 
-                override suspend fun call(endpoint: String, input: CallData<String>): CallData<String> =
-                    CallData.create("second")
+                override suspend fun call(
+                    endpoint: String,
+                    input: CallData<String>
+                ): CallData<String> = CallData.create("second")
 
                 override suspend fun close() {}
 
@@ -255,7 +266,10 @@ class JsonRpcErrorEnvelopeTest {
         val transformer =
             RequestAwareErrorTransformer(
                 errorMessage = "server exploded",
-                errorData = Json.encodeToJsonElement(RpcFailure.serializer(), RpcFailure("remote stack"))
+                errorData = Json.encodeToJsonElement(
+                    RpcFailure.serializer(),
+                    RpcFailure("remote stack")
+                )
             )
         val writer =
             JsonRpcWriterBase(
@@ -423,7 +437,10 @@ class JsonRpcErrorEnvelopeTest {
                 override val env = ksrpcEnvironment { }
                 override val context: CoroutineContext = EmptyCoroutineContext
 
-                override suspend fun call(endpoint: String, input: CallData<String>): CallData<String> {
+                override suspend fun call(
+                    endpoint: String,
+                    input: CallData<String>
+                ): CallData<String> {
                     callSeen.complete(Unit)
                     throw IllegalStateException("boom notify")
                 }
@@ -465,7 +482,10 @@ class JsonRpcErrorEnvelopeTest {
                 override val env = ksrpcEnvironment { }
                 override val context: CoroutineContext = EmptyCoroutineContext
 
-                override suspend fun call(endpoint: String, input: CallData<String>): CallData<String> {
+                override suspend fun call(
+                    endpoint: String,
+                    input: CallData<String>
+                ): CallData<String> {
                     callSeen.complete(Unit)
                     return input
                 }
@@ -493,9 +513,7 @@ class JsonRpcErrorEnvelopeTest {
 
                 override suspend fun send(message: JsonElement) {}
 
-                override suspend fun receive(): JsonElement? {
-                    throw receiveFailure
-                }
+                override suspend fun receive(): JsonElement? = throw receiveFailure
 
                 override fun close(cause: Throwable?) {
                     if (!closeCause.isCompleted) {
@@ -800,7 +818,9 @@ class JsonRpcErrorEnvelopeTest {
 
         override suspend fun send(message: JsonElement) {
             if (!sentRequest.isCompleted) {
-                sentRequest.complete(Json.decodeFromJsonElement(JsonRpcRequest.serializer(), message))
+                sentRequest.complete(
+                    Json.decodeFromJsonElement(JsonRpcRequest.serializer(), message)
+                )
             }
         }
 
@@ -826,9 +846,7 @@ class JsonRpcErrorEnvelopeTest {
 
         override suspend fun receive(): JsonElement? = null
 
-        override fun close(cause: Throwable?) {
-            throw IllegalStateException("already closed")
-        }
+        override fun close(cause: Throwable?): Unit = throw IllegalStateException("already closed")
     }
 
     private class DuplicateResponseTransformer : JsonRpcTransformer() {
@@ -886,6 +904,7 @@ class JsonRpcErrorEnvelopeTest {
                             id = req.id
                         )
                     )
+
                 1 ->
                     Json.encodeToJsonElement(
                         JsonRpcResponse.serializer(),
@@ -894,6 +913,7 @@ class JsonRpcErrorEnvelopeTest {
                             id = null
                         )
                     )
+
                 else -> null
             }
         }

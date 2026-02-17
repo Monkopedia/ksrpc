@@ -22,9 +22,8 @@ import kotlin.test.Test
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
-private class BinaryTransformerTestService(
-    override val env: KsrpcEnvironment<String>
-) : SerializedService<String> {
+private class BinaryTransformerTestService(override val env: KsrpcEnvironment<String>) :
+    SerializedService<String> {
     override suspend fun call(endpoint: String, input: CallData<String>): CallData<String> = input
 
     override suspend fun close() = Unit

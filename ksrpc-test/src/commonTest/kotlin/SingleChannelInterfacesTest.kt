@@ -23,9 +23,8 @@ import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertSame
 
-private class SingleChannelTestService(
-    override val env: KsrpcEnvironment<String>
-) : SerializedService<String> {
+private class SingleChannelTestService(override val env: KsrpcEnvironment<String>) :
+    SerializedService<String> {
     override suspend fun call(endpoint: String, input: CallData<String>): CallData<String> = input
 
     override suspend fun close() = Unit
@@ -33,9 +32,8 @@ private class SingleChannelTestService(
     override suspend fun onClose(onClose: suspend () -> Unit) = Unit
 }
 
-private class CapturingSingleHost(
-    override val env: KsrpcEnvironment<String>
-) : SingleChannelHost<String> {
+private class CapturingSingleHost(override val env: KsrpcEnvironment<String>) :
+    SingleChannelHost<String> {
     var service: SerializedService<String>? = null
 
     override suspend fun registerDefault(service: SerializedService<String>) {
@@ -43,9 +41,8 @@ private class CapturingSingleHost(
     }
 }
 
-private class CapturingSingleClient(
-    private val service: SerializedService<String>
-) : SingleChannelClient<String> {
+private class CapturingSingleClient(private val service: SerializedService<String>) :
+    SingleChannelClient<String> {
     override suspend fun defaultChannel(): SerializedService<String> = service
 }
 
