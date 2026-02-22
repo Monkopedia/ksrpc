@@ -340,6 +340,30 @@ Status values:
   - Effect size is within noise; no meaningful transport-level gain.
 - Decision: reverted.
 
+### Ktor websocket packet conversion: direct `Json` + frame codec
+- Area: `ksrpc-ktor/websocket/shared` `WebsocketPacketChannel`.
+- Status: `Not useful`
+- Change attempt:
+  - Replaced `KotlinxWebsocketSerializationConverter` + `typeInfo` path with direct encode/decode:
+    - send: `Packet<String>` -> `Json.encodeToString(...)` -> `Frame.Text`
+    - receive: `Frame.Text`/`Frame.Binary` payload -> `Json.decodeFromString(...)`
+- Benchmark evidence:
+  - Full run (`WebsocketTransportBenchmark.websocket(RoundTrip|BinaryRoundTrip)`,
+    `payloadSize=32,256,2048`, `-wi 3 -i 8 -w 1s -r 2s -f 1`):
+    - `websocketBinaryRoundTrip`: `-1.46%` (32), `-0.28%` (256), `+6.81%` (2048)
+    - `websocketRoundTrip`: `-13.78%` (32, noisy outlier run), `+3.98%` (256), `+8.12%` (2048)
+    - Results:
+      - `/tmp/websocket-codec-before.json`
+      - `/tmp/websocket-codec-after.json`
+  - Focused confirmation (`payloadSize=32`, same settings):
+    - `websocketBinaryRoundTrip`: `5882.202 -> 5813.033` ops/s (`-1.18%`)
+    - `websocketRoundTrip`: `11070.559 -> 11046.626` ops/s (`-0.22%`)
+    - Result:
+      - `/tmp/websocket-codec-after-32-r2.json`
+- Observation:
+  - Mixed full-run results and near-flat focused confirmation; no consistent measurable gain.
+- Decision: reverted.
+
 ## 2026-02-22 (Backlog)
 
 ### Prioritized optimization candidates (not tested)
