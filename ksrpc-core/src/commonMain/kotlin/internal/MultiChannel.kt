@@ -27,7 +27,7 @@ class MultiChannel<T> {
     private var isClosed: Boolean = false
     private var closeException: Throwable? = null
     private val lock = Mutex()
-    private val pending = mutableListOf<Pair<String, CompletableDeferred<T>>>()
+    private val pending = mutableMapOf<String, CompletableDeferred<T>>()
     private val id = atomic(1)
 
     private fun checkClosed() {
@@ -41,15 +41,7 @@ class MultiChannel<T> {
             if (isClosed) {
                 return@withLock
             }
-            var pendingItem: CompletableDeferred<T>? = null
-            for (index in pending.indices) {
-                val item = pending[index]
-                if (item.first == id) {
-                    pendingItem = item.second
-                    pending.removeAt(index)
-                    break
-                }
-            }
+            val pendingItem = pending.remove(id)
             if (pendingItem == null) {
                 error("No pending receiver for $id and $response")
             }
@@ -62,7 +54,7 @@ class MultiChannel<T> {
             checkClosed()
             val id = this.id.getAndIncrement()
             val completable = CompletableDeferred<T>()
-            pending.add(id.toString() to completable)
+            pending[id.toString()] = completable
             return id to completable
         }
     }
@@ -74,8 +66,8 @@ class MultiChannel<T> {
             }
             isClosed = true
             closeException = t
-            pending.forEach {
-                it.second.completeExceptionally(t ?: CancellationException("Closing MultiChannel"))
+            pending.values.forEach {
+                it.completeExceptionally(t ?: CancellationException("Closing MultiChannel"))
             }
             pending.clear()
         }
