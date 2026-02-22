@@ -125,6 +125,35 @@ Status values:
 - Decision:
   - Reverted benchmark scaffolding; defer this optimization until scope/lifecycle semantics are addressed.
 
+### JVM stream bridge: detach connection scope and remove per-chunk dispatcher hops
+- Area: `ksrpc-sockets` JVM stream bridge (`InputOutputStreams.kt`).
+- Status: `Useful`
+- Change:
+  - Reworked `Pair<InputStream, OutputStream>.asConnection` to use a dedicated `connectionScope`
+    (`coroutineContext + SupervisorJob()`) and pass it explicitly into the packet connection.
+  - Removed per-connection `newFixedThreadPoolContext` usage.
+  - Removed per-chunk `withContext(Dispatchers.IO)` in `copyToAndFlush`; writes now run directly in
+    the writer coroutine launched on `Dispatchers.IO`.
+  - Added benchmark coverage:
+    - `ksrpc-bench/src/jvmMain/kotlin/com/monkopedia/ksrpc/bench/InputOutputStreamTransportBenchmark.kt`
+  - Added regression coverage for short-lived setup contexts:
+    - `ksrpc-test/src/jvmTest/kotlin/SocketInputOutputStreamsJvmTest.kt`
+- Benchmark evidence:
+  - Before (previous state): benchmark setup timed out for all methods with
+    `InputOutputStreamTransportBenchmark timed out after 10000ms` and no throughput results.
+    - `/tmp/inputstream-transport-baseline-256.json`
+  - After (`InputOutputStreamTransportBenchmark`, `payloadSize=32,256,2048`,
+    `-wi 3 -i 8 -w 1s -r 2s -f 1`):
+    - `inputOutputRoundTrip`: `20878.579` (32), `18832.399` (256), `15718.995` (2048) ops/s
+    - `inputOutputComplexRoundTrip`: `16942.289` (32), `15776.211` (256), `10665.194` (2048) ops/s
+    - `inputOutputBinaryRoundTrip`: `15527.994` (32), `13511.438` (256), `5652.652` (2048) ops/s
+    - `/tmp/inputstream-transport-after-fix.json`
+- Validation:
+  - `./gradlew allTests` passed (`BUILD SUCCESSFUL`).
+  - `./gradlew :ksrpc-sockets:ktlintJvmMainSourceSetCheck :ksrpc-test:ktlintJvmTestSourceSetCheck :ksrpc-bench:ktlintJvmMainSourceSetCheck`
+    passed (`BUILD SUCCESSFUL`).
+- Decision: keep.
+
 ### JNI connection bridge: cache packet serializer and int converter in `JniConnection`
 - Area: `ksrpc-jni` JVM bridge hot path (`JniConnection.kt`).
 - Status: `Not useful`
@@ -240,22 +269,59 @@ Status values:
 - Decision:
   - Reverted immediately; no benchmark run performed.
 
+### MultiChannel locking: replace `Mutex` with atomicfu `SynchronizedObject`
+- Area: `ksrpc-core` pending-response synchronization in `MultiChannel`.
+- Status: `Not useful`
+- Change attempt:
+  - Replaced suspend `Mutex.withLock` critical sections with `SynchronizedObject` + `synchronized`.
+  - Kept API and behavior unchanged (`send`, `allocateReceive`, `allocateReceiveString`, `close`).
+- Benchmark evidence:
+  - `MultiChannelBenchmark` (`-wi 3 -i 8 -w 1s -r 2s -f 1`):
+    - `allocateSendReceive`: `10,191,351.908 -> 8,227,590.185` ops/s (`-19.27%`)
+    - `allocateSendReceiveStringId`: `6,950,871.569 -> 9,176,377.135` ops/s (`+32.02%`)
+    - Results:
+      - `/tmp/multichannel-intmap-before.json` (baseline)
+      - `/tmp/multichannel-sync-lock-after.json` (attempt)
+  - End-to-end socket transport check (`payloadSize=256`, same settings):
+    - `socketBinaryRoundTrip`: `15,745.216 -> 13,817.144` ops/s (`-12.25%`)
+    - `socketRoundTrip`: `33,028.545 -> 32,730.424` ops/s (`-0.90%`)
+    - Results:
+      - `/tmp/socket-transport-sync-lock-before-256.json`
+      - `/tmp/socket-transport-sync-lock-after-256.json`
+- Observation:
+  - Despite one microbenchmark improving, transport-level checks regressed.
+- Decision: reverted.
+
+### PacketChannel serializer caching: reuse `String`/`ByteArray`/`Unit` serializers
+- Area: `ksrpc-packets` hot path serializer lookups in `PacketChannelBase`.
+- Status: `Not useful`
+- Change attempt:
+  - Added top-level cached serializer vals and replaced repeated calls to:
+    - `String.serializer()`
+    - `ByteArraySerializer()`
+    - `Unit.serializer()`
+  - Updated binary send/decode and control-message call sites to reuse cached serializers.
+- Benchmark evidence:
+  - Full run (`SocketTransportBenchmark.socket(RoundTrip|BinaryRoundTrip)`, `payloadSize=32,256,2048`):
+    - Mixed results with wins in some cases and regressions in others.
+    - Results:
+      - `/tmp/socket-transport-before-packet-serializer-cache.json`
+      - `/tmp/socket-transport-after-packet-serializer-cache.json`
+  - Focused confirmation (`payloadSize=256`, same settings):
+    - `socketBinaryRoundTrip`: `16,405.831 -> 18,577.316` ops/s (`+13.24%`)
+    - `socketRoundTrip`: `35,521.874 -> 33,822.955` ops/s (`-4.78%`)
+    - Results:
+      - `/tmp/socket-transport-before-packet-serializer-cache-256-r2.json`
+      - `/tmp/socket-transport-after-packet-serializer-cache-256-r2.json`
+- Observation:
+  - Binary path improved, but non-binary round-trip regressed in confirmation runs.
+- Decision: reverted.
+
 ## 2026-02-22 (Backlog)
 
 ### Prioritized optimization candidates (not tested)
 
 #### P1
-
-### JVM stream bridge: remove per-chunk context switching and aggressive flush
-- Status: `Not tested`
-- Area:
-  - `ksrpc-sockets/src/jvmMain/kotlin/InputOutputStreams.kt`
-- Why:
-  - `copyToAndFlush()` does `withContext(Dispatchers.IO)` and `flush()` for each chunk.
-  - `newFixedThreadPoolContext` is created per connection.
-- Try:
-  - Write/flush policy tuning (flush on boundaries / close, not every chunk).
-  - Replace per-connection fixed pool with shared dispatcher or dedicated single writer context.
 
 ### Native POSIX write path: avoid fsync/fflush and sliceArray per chunk
 - Status: `Not tested`

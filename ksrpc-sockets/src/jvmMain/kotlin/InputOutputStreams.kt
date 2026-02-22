@@ -27,33 +27,32 @@ import java.io.InputStream
 import java.io.OutputStream
 import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.newFixedThreadPoolContext
-import kotlinx.coroutines.withContext
 
 /**
  * Helper that calls into Pair<ByteReadChannel, ByteWriteChannel>.asConnection.
  */
-@OptIn(DelicateCoroutinesApi::class)
 suspend fun Pair<InputStream, OutputStream>.asConnection(
     env: KsrpcEnvironment<String>
 ): Connection<String> {
     val (input, output) = this
     val channel = ByteChannel(autoFlush = true)
-    val threadExecutor = newFixedThreadPoolContext(2, "ServeThreads")
-    CoroutineScope(coroutineContext).launch(threadExecutor) {
+    val connectionScope = CoroutineScope(coroutineContext + SupervisorJob())
+    connectionScope.launch(Dispatchers.IO) {
         channel.copyToAndFlush(output)
-        withContext(Dispatchers.IO) {
-            threadExecutor.close()
-        }
     }
-    return (input.toByteReadChannel(Dispatchers.IO) to channel).asConnection(env).also {
-        it.onClose {
-            swallow { threadExecutor.close() }
+    return (input.toByteReadChannel(Dispatchers.IO) to channel)
+        .asConnection(connectionScope, env)
+        .also {
+            it.onClose {
+                swallow { connectionScope.cancel() }
+                swallow { input.close() }
+                swallow { output.close() }
+            }
         }
-    }
 }
 
 /**
@@ -78,10 +77,8 @@ private suspend fun ByteReadChannel.copyToAndFlush(
                 val rc = readAvailable(buffer, 0, minOf(limit - copied, bufferSize).toInt())
                 if (rc == -1 && isClosedForRead) break
                 if (rc > 0) {
-                    withContext(Dispatchers.IO) {
-                        out.write(buffer, 0, rc)
-                        out.flush()
-                    }
+                    out.write(buffer, 0, rc)
+                    out.flush()
                     copied += rc
                 }
             } catch (t: Throwable) {
