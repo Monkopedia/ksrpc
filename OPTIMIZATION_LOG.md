@@ -59,6 +59,20 @@ Status values:
   - `./gradlew allTests` passed (`BUILD SUCCESSFUL`).
 - Decision: keep.
 
+### Packet receive loop: inline response dispatch fast path
+- Area: `ksrpc-packets` receive loop scheduling in `PacketChannelBase.executeReceive`.
+- Status: `Not useful`
+- Change attempt:
+  - Inlined non-input/non-binary response delivery (`multiChannel.send`) to avoid one coroutine launch per response packet.
+  - Kept coroutine launches for binary packets and input endpoint execution.
+- Benchmark evidence (JMH, `SocketTransportBenchmark.socket(RoundTrip|BinaryRoundTrip)`, `payloadSize=256`, `-wi 3 -i 8 -w 1s -r 2s -f 1`):
+  - `socketRoundTrip`: `32,646.470 -> 32,553.229` ops/s (`-0.29%`, essentially flat)
+  - `socketBinaryRoundTrip`: `15,845.345 -> 9,812.347` ops/s (`-38.07%`, with high variance and worse central tendency)
+  - Results saved:
+    - `/tmp/socket-before.json`
+    - `/tmp/socket-after-inline.json`
+- Decision: reverted.
+
 ## 2026-02-22 (Backlog)
 
 ### Prioritized optimization candidates (not tested)
