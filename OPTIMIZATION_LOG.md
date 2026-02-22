@@ -179,6 +179,67 @@ Status values:
   - `./gradlew allTests` passed (`BUILD SUCCESSFUL`).
 - Decision: keep.
 
+### Binary sender chunk reads: reusable buffer via `readAvailable`
+- Area: `ksrpc-packets` binary send loop in `PacketChannelBase.sendPacket`.
+- Status: `Not useful`
+- Change attempt:
+  - Replaced `readRemaining(maxSize).readBytes()` loop with:
+    - reusable `ByteArray` buffer
+    - `readAvailable(buffer, ...)`
+    - per-chunk `copyOf(...)` before serialization.
+- Benchmark evidence (`SocketTransportBenchmark.socketBinaryRoundTrip`, `payloadSize=32,256,2048`, `-wi 3 -i 8 -w 1s -r 2s -f 1`):
+  - `payloadSize=32`: `20,653.205 -> 18,212.470` ops/s (`-11.82%`)
+  - `payloadSize=256`: `16,268.445 -> 13,041.752` ops/s (`-19.83%`)
+  - `payloadSize=2048`: `5,582.306 -> 2,636.383` ops/s (`-52.77%`)
+  - Results saved:
+    - `/tmp/socket-binary-before-send-readavail.json`
+    - `/tmp/socket-binary-after-send-readavail.json`
+- Decision: reverted.
+
+### JsonRpc writer: cache serializers in `JsonRpcWriterBase`
+- Area: `ksrpc-jsonrpc` request/response encode/decode hot path.
+- Status: `Not useful`
+- Change attempt:
+  - Added cached serializers for `JsonRpcRequest`, `JsonRpcResponse`, and `RpcFailure`.
+  - Replaced reified `encodeToJsonElement` / `decodeFromJsonElement` calls with explicit serializer overloads.
+- Benchmark evidence (`JsonRpcWriterBenchmark.executeLoopbackRoundTrip`, `payloadSize=32,256,2048`, `-wi 3 -i 8 -w 1s -r 2s -f 1`):
+  - `payloadSize=32`: `100,801.269 -> 83,100.628` ops/s (`-17.56%`)
+  - `payloadSize=256`: `88,770.432 -> 90,274.516` ops/s (`+1.69%`)
+  - `payloadSize=2048`: `86,083.598 -> 86,905.826` ops/s (`+0.96%`)
+  - Results saved:
+    - `/tmp/jsonrpc-writer-before-serializer-cache.json`
+    - `/tmp/jsonrpc-writer-after-serializer-cache.json`
+- Observation:
+  - Mixed and noisy results, but a clear small-payload regression makes this change unsafe to keep.
+- Decision: reverted.
+
+### MultiChannel pending map: int-key storage + `send(Int, ...)` fast path
+- Area: `ksrpc-core` pending response routing (`MultiChannel`).
+- Status: `Not useful`
+- Change attempt:
+  - Switched pending map key type from `String` to `Int`.
+  - Added `send(id: Int, response: T)` overload and `send(String, ...)` fallback parse.
+  - Updated benchmark path to use the new int overload for `allocateSendReceive`.
+- Benchmark evidence (`MultiChannelBenchmark`, `-wi 3 -i 8 -w 1s -r 2s -f 1`):
+  - `allocateSendReceive`: `10,191,351.908 -> 9,869,011.604` ops/s (`-3.16%`)
+  - `allocateSendReceiveStringId`: `6,950,871.569 -> 7,125,453.735` ops/s (`+2.51%`)
+  - Results saved:
+    - `/tmp/multichannel-intmap-before.json`
+    - `/tmp/multichannel-intmap-after.json`
+- Observation:
+  - Mixed result with a regression in the core int-id benchmark path; not a clear win.
+- Decision: reverted.
+
+### Binary sender chunk extraction: swap `readBytes()` to `readByteArray()`
+- Area: `ksrpc-packets` binary send loop in `PacketChannelBase.sendPacket`.
+- Status: `Inconclusive`
+- Change attempt:
+  - Replaced `readRemaining(maxSize).readBytes()` with `readByteArray()`.
+- Outcome:
+  - Compilation failed: `Unresolved reference 'readByteArray'` for current source-set API.
+- Decision:
+  - Reverted immediately; no benchmark run performed.
+
 ## 2026-02-22 (Backlog)
 
 ### Prioritized optimization candidates (not tested)
