@@ -25,8 +25,10 @@ import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.close
 import io.ktor.utils.io.readFully
+import io.ktor.utils.io.writeStringUtf8
 import io.ktor.utils.io.writeFully
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.serializer
 
 internal class ReadWritePacketChannel(
@@ -35,15 +37,18 @@ internal class ReadWritePacketChannel(
     private val write: ByteWriteChannel,
     env: KsrpcEnvironment<String>
 ) : PacketChannelBase<String>(scope, env) {
+    private val packetSerializer = Packet.serializer(String.serializer())
+
     init {
         startReceiveLoop()
     }
 
     override suspend fun sendLocked(packet: Packet<String>) {
-        write.send(packet, env.serialization)
+        write.send(packet, env.serialization, packetSerializer)
     }
 
-    override suspend fun receiveLocked(): Packet<String> = read.readPacket(env.serialization)
+    override suspend fun receiveLocked(): Packet<String> =
+        read.readPacket(env.serialization, packetSerializer)
 
     override suspend fun close() {
         super.close()
@@ -54,25 +59,31 @@ internal class ReadWritePacketChannel(
 
 private suspend fun ByteWriteChannel.send(
     packet: Packet<String>,
-    serialization: CallDataSerializer<String>
+    serialization: CallDataSerializer<String>,
+    packetSerializer: KSerializer<Packet<String>>
 ) {
     val content =
-        serialization.createCallData(Packet.serializer(String.serializer()), packet)
+        serialization.createCallData(packetSerializer, packet)
             .readSerialized()
-            .encodeToByteArray(throwOnInvalidSequence = true)
-    appendLine("$CONTENT_LENGTH: ${content.size}")
-    appendLine()
+            .encodeToByteArray()
+    writeStringUtf8(CONTENT_LENGTH)
+    writeStringUtf8(": ")
+    writeStringUtf8(content.size.toString())
+    writeStringUtf8("\r\n\r\n")
     writeFully(content, 0, content.size)
     flush()
 }
 
 private suspend fun ByteReadChannel.readPacket(
-    serialization: CallDataSerializer<String>
+    serialization: CallDataSerializer<String>,
+    packetSerializer: KSerializer<Packet<String>>
 ): Packet<String> {
-    val params = readFields()
-    val data = readContent(params) ?: return readPacket(serialization)
-    val callData = CallData.create(data)
-    return serialization.decodeCallData(Packet.serializer(String.serializer()), callData)
+    while (true) {
+        val params = readFields()
+        val data = readContent(params) ?: continue
+        val callData = CallData.create(data)
+        return serialization.decodeCallData(packetSerializer, callData)
+    }
 }
 
 private suspend fun ByteReadChannel.readContent(params: Map<String, String>): String? {

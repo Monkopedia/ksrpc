@@ -28,27 +28,24 @@ inline fun swallow(function: () -> Unit) {
     }
 }
 
-suspend fun ByteWriteChannel.appendLine(s: String = "") = writeStringUtf8("$s\r\n")
+suspend fun ByteWriteChannel.appendLine(s: String = "") {
+    writeStringUtf8(s)
+    writeStringUtf8("\r\n")
+}
 
 suspend fun ByteReadChannel.readFields(): Map<String, String> {
-    val fields = mutableListOf<String>()
-    var line = readUTF8Line() ?: throw IOException("$this is closed for reading")
-    while (line.isNotEmpty()) {
-        fields.add(line)
-        line = readUTF8Line() ?: ""
+    val fields = LinkedHashMap<String, String>()
+    while (true) {
+        val line = readUTF8Line() ?: throw IOException("$this is closed for reading")
+        if (line.isEmpty()) {
+            return fields
+        }
+        val separatorIndex = line.indexOf(':')
+        if (separatorIndex < 0) {
+            continue
+        }
+        val key = line.substring(0, separatorIndex).trim()
+        val value = line.substring(separatorIndex + 1).trim()
+        fields[key] = value
     }
-    return parseParams(fields)
-}
-
-private fun parseParams(fields: List<String>): Map<String, String> {
-    return fields.filter { it.contains(":") }.map {
-        val (first, second) = it.splitSingle(':')
-        return@map first.trim() to second.trim()
-    }.toMap()
-}
-
-private fun String.splitSingle(s: Char): Pair<String, String> {
-    val index = indexOf(s)
-    if (index < 0) throw IllegalArgumentException("Can't find param")
-    return substring(0, index) to substring(index + 1, length)
 }
