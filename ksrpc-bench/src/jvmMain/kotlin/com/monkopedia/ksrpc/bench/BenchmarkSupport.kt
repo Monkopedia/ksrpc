@@ -18,6 +18,8 @@ package com.monkopedia.ksrpc.bench
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.SerializedService
+import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.toByteArray
 import java.net.InetSocketAddress
 import java.net.Socket
 import java.util.concurrent.ExecutionException
@@ -26,6 +28,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.serializer
 
 internal class EchoSerializedService(override val env: KsrpcEnvironment<String>) :
@@ -51,6 +54,61 @@ internal suspend fun callEcho(
     val input = env.serialization.createCallData(String.serializer(), payload)
     val output = service.call("echo", input)
     return env.serialization.decodeCallData(String.serializer(), output)
+}
+
+internal suspend fun callComplexEcho(
+    service: SerializedService<String>,
+    env: KsrpcEnvironment<String>,
+    payload: ComplexEchoPayload
+): ComplexEchoPayload {
+    val input = env.serialization.createCallData(ComplexEchoPayload.serializer(), payload)
+    val output = service.call("complexEcho", input)
+    return env.serialization.decodeCallData(ComplexEchoPayload.serializer(), output)
+}
+
+internal suspend fun callBinaryEcho(
+    service: SerializedService<String>,
+    payload: ByteArray
+): ByteArray {
+    val input = CallData.createBinary<String>(ByteReadChannel(payload))
+    val output = service.call("binaryEcho", input)
+    return output.readBinary().toByteArray()
+}
+
+internal fun createComplexPayload(payloadSize: Int): ComplexEchoPayload {
+    val payload = "x".repeat(payloadSize)
+    val values = List(8) { payloadSize + it }
+    return ComplexEchoPayload(
+        title = "payload-$payloadSize",
+        text = payload,
+        values = values,
+        nested = ComplexEchoPayload.NestedPayload(
+            enabled = (payloadSize % 2 == 0),
+            ratio = payloadSize / 100.0,
+            tags = mapOf(
+                "size" to payloadSize.toString(),
+                "prefix" to payload.take(4)
+            )
+        ),
+        children = List(4) { index ->
+            ComplexEchoPayload.ChildPayload(
+                name = "child-$index",
+                score = index + payloadSize,
+                active = (index % 2 == 0)
+            )
+        }
+    )
+}
+
+internal fun createBinaryPayload(payloadSize: Int): ByteArray =
+    ByteArray(payloadSize) { index -> ((index * 31 + payloadSize) and 0xFF).toByte() }
+
+internal fun binaryDigest(payload: ByteArray): Int {
+    var hash = 1
+    payload.forEach {
+        hash = (hash * 31) xor (it.toInt() and 0xFF)
+    }
+    return hash
 }
 
 internal fun waitForPortOpen(
@@ -105,4 +163,20 @@ internal class TimedRunner(name: String) : AutoCloseable {
     override fun close() {
         executor.shutdownNow()
     }
+}
+
+@Serializable
+internal data class ComplexEchoPayload(
+    val title: String,
+    val text: String,
+    val values: List<Int>,
+    val nested: NestedPayload,
+    val children: List<ChildPayload>
+) {
+
+    @Serializable
+    data class NestedPayload(val enabled: Boolean, val ratio: Double, val tags: Map<String, String>)
+
+    @Serializable
+    data class ChildPayload(val name: String, val score: Int, val active: Boolean)
 }

@@ -42,6 +42,8 @@ open class HttpTransportBenchmark {
 
     private val env = ksrpcEnvironment { }
     private lateinit var payload: String
+    private lateinit var complexPayload: ComplexEchoPayload
+    private lateinit var binaryPayload: ByteArray
     private lateinit var server: EmbeddedServer<*, *>
     private lateinit var client: HttpClient
     private lateinit var connection: ChannelClient<String>
@@ -51,6 +53,8 @@ open class HttpTransportBenchmark {
     @Setup
     fun setup() {
         payload = "x".repeat(payloadSize)
+        complexPayload = createComplexPayload(payloadSize)
+        binaryPayload = createBinaryPayload(payloadSize)
         timedRunner = TimedRunner("HttpTransportBenchmark")
         timedRunner.run(timeoutMillis = 15_000) {
             server = embeddedServer(Netty, 0) {
@@ -75,6 +79,18 @@ open class HttpTransportBenchmark {
     @Benchmark
     fun httpRoundTrip(): String = timedRunner.run(timeoutMillis = 5_000) {
         callEcho(clientChannel, env, payload)
+    }
+
+    @Benchmark
+    fun httpComplexRoundTrip(): Int = timedRunner.run(timeoutMillis = 5_000) {
+        val response = callComplexEcho(clientChannel, env, complexPayload)
+        response.values.size + response.children.size + response.text.length
+    }
+
+    @Benchmark
+    fun httpBinaryRoundTrip(): Int = timedRunner.run(timeoutMillis = 5_000) {
+        val response = callBinaryEcho(clientChannel, binaryPayload)
+        binaryDigest(response)
     }
 
     @TearDown

@@ -42,6 +42,8 @@ open class SocketTransportBenchmark {
 
     private val env = ksrpcEnvironment { }
     private lateinit var payload: String
+    private lateinit var complexPayload: ComplexEchoPayload
+    private lateinit var binaryPayload: ByteArray
     private lateinit var clientConnection: Connection<String>
     private lateinit var serverConnection: Connection<String>
     private lateinit var timedRunner: TimedRunner
@@ -51,6 +53,8 @@ open class SocketTransportBenchmark {
     @Setup
     fun setup() {
         payload = "x".repeat(payloadSize)
+        complexPayload = createComplexPayload(payloadSize)
+        binaryPayload = createBinaryPayload(payloadSize)
         timedRunner = TimedRunner("SocketTransportBenchmark")
         scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
         timedRunner.run(timeoutMillis = 10_000) {
@@ -58,7 +62,9 @@ open class SocketTransportBenchmark {
             val serverToClient = ByteChannel(autoFlush = true)
             clientConnection = (serverToClient to clientToServer).asConnection(scope, env)
             serverConnection = (clientToServer to serverToClient).asConnection(scope, env)
-            serverJob = scope.launch { serverConnection.registerDefault(EchoSerializedService(env)) }
+            serverJob = scope.launch {
+                serverConnection.registerDefault(EchoSerializedService(env))
+            }
         }
     }
 
@@ -66,6 +72,20 @@ open class SocketTransportBenchmark {
     fun socketRoundTrip(): String = timedRunner.run(timeoutMillis = 5_000) {
         val clientChannel: SerializedService<String> = clientConnection.defaultChannel()
         callEcho(clientChannel, env, payload)
+    }
+
+    @Benchmark
+    fun socketComplexRoundTrip(): Int = timedRunner.run(timeoutMillis = 5_000) {
+        val clientChannel: SerializedService<String> = clientConnection.defaultChannel()
+        val response = callComplexEcho(clientChannel, env, complexPayload)
+        response.values.size + response.children.size + response.text.length
+    }
+
+    @Benchmark
+    fun socketBinaryRoundTrip(): Int = timedRunner.run(timeoutMillis = 5_000) {
+        val clientChannel: SerializedService<String> = clientConnection.defaultChannel()
+        val response = callBinaryEcho(clientChannel, binaryPayload)
+        binaryDigest(response)
     }
 
     @TearDown

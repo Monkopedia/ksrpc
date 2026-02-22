@@ -15,8 +15,11 @@
 - `jvmMain`: MultiChannel allocate/send/await routing overhead
 - `jvmMain`: JsonRpcWriter execute loopback overhead (transport removed)
 - `jvmMain`: socket transport round-trip over packet channel (`SocketTransportBenchmark`)
+- `jvmMain`: socket transport complex input/output and binary input/output round-trips
 - `jvmMain`: HTTP transport round-trip (`HttpTransportBenchmark`)
+- `jvmMain`: HTTP transport complex input/output and binary input/output round-trips
 - `jvmMain`: websocket transport round-trip (`WebsocketTransportBenchmark`)
+- `jvmMain`: websocket transport complex input/output and binary input/output round-trips
 - `jvmMain`: JNI serialization encode/decode (`JniSerializationBenchmark`)
 - `jvmMain`: JNI RPC round-trip (`JniCommunicationBenchmark`)
 

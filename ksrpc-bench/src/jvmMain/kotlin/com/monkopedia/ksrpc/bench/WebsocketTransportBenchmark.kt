@@ -52,6 +52,8 @@ open class WebsocketTransportBenchmark {
 
     private val env = ksrpcEnvironment { }
     private lateinit var payload: String
+    private lateinit var complexPayload: ComplexEchoPayload
+    private lateinit var binaryPayload: ByteArray
     private lateinit var server: EmbeddedServer<*, *>
     private lateinit var client: HttpClient
     private lateinit var connection: Connection<String>
@@ -62,6 +64,8 @@ open class WebsocketTransportBenchmark {
     @Setup
     fun setup() {
         payload = "x".repeat(payloadSize)
+        complexPayload = createComplexPayload(payloadSize)
+        binaryPayload = createBinaryPayload(payloadSize)
         timedRunner = TimedRunner("WebsocketTransportBenchmark")
         scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
         timedRunner.run(timeoutMillis = 15_000) {
@@ -94,6 +98,22 @@ open class WebsocketTransportBenchmark {
     fun websocketRoundTrip(): String = timedRunner.run(timeoutMillis = 5_000) {
         withContext(scope.coroutineContext) {
             callEcho(clientChannel, env, payload)
+        }
+    }
+
+    @Benchmark
+    fun websocketComplexRoundTrip(): Int = timedRunner.run(timeoutMillis = 5_000) {
+        withContext(scope.coroutineContext) {
+            val response = callComplexEcho(clientChannel, env, complexPayload)
+            response.values.size + response.children.size + response.text.length
+        }
+    }
+
+    @Benchmark
+    fun websocketBinaryRoundTrip(): Int = timedRunner.run(timeoutMillis = 5_000) {
+        withContext(scope.coroutineContext) {
+            val response = callBinaryEcho(clientChannel, binaryPayload)
+            binaryDigest(response)
         }
     }
 
