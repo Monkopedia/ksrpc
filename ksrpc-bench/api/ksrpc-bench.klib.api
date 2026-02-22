@@ -1,0 +1,33 @@
+// Klib ABI Dump
+// Targets: [js]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <ksrpc:ksrpc-bench>
+open class com.monkopedia.ksrpc.bench/PacketCodecBenchmark { // com.monkopedia.ksrpc.bench/PacketCodecBenchmark|null[0]
+    constructor <init>() // com.monkopedia.ksrpc.bench/PacketCodecBenchmark.<init>|<init>(){}[0]
+
+    final var payloadSize // com.monkopedia.ksrpc.bench/PacketCodecBenchmark.payloadSize|{}payloadSize[0]
+        final fun <get-payloadSize>(): kotlin/Int // com.monkopedia.ksrpc.bench/PacketCodecBenchmark.payloadSize.<get-payloadSize>|<get-payloadSize>(){}[0]
+        final fun <set-payloadSize>(kotlin/Int) // com.monkopedia.ksrpc.bench/PacketCodecBenchmark.payloadSize.<set-payloadSize>|<set-payloadSize>(kotlin.Int){}[0]
+
+    final fun decodePacket(): com.monkopedia.ksrpc.packets.internal/Packet<kotlin/String> // com.monkopedia.ksrpc.bench/PacketCodecBenchmark.decodePacket|decodePacket(){}[0]
+    final fun encodePacket(): kotlin/String // com.monkopedia.ksrpc.bench/PacketCodecBenchmark.encodePacket|encodePacket(){}[0]
+    final fun encodeThenDecodePacket(): com.monkopedia.ksrpc.packets.internal/Packet<kotlin/String> // com.monkopedia.ksrpc.bench/PacketCodecBenchmark.encodeThenDecodePacket|encodeThenDecodePacket(){}[0]
+    final fun setup() // com.monkopedia.ksrpc.bench/PacketCodecBenchmark.setup|setup(){}[0]
+}
+
+open class com.monkopedia.ksrpc.bench/SerializationBenchmark { // com.monkopedia.ksrpc.bench/SerializationBenchmark|null[0]
+    constructor <init>() // com.monkopedia.ksrpc.bench/SerializationBenchmark.<init>|<init>(){}[0]
+
+    final var payloadSize // com.monkopedia.ksrpc.bench/SerializationBenchmark.payloadSize|{}payloadSize[0]
+        final fun <get-payloadSize>(): kotlin/Int // com.monkopedia.ksrpc.bench/SerializationBenchmark.payloadSize.<get-payloadSize>|<get-payloadSize>(){}[0]
+        final fun <set-payloadSize>(kotlin/Int) // com.monkopedia.ksrpc.bench/SerializationBenchmark.payloadSize.<set-payloadSize>|<set-payloadSize>(kotlin.Int){}[0]
+
+    final fun createCallData(): kotlin/String // com.monkopedia.ksrpc.bench/SerializationBenchmark.createCallData|createCallData(){}[0]
+    final fun createThenDecodeCallData(): kotlin/String // com.monkopedia.ksrpc.bench/SerializationBenchmark.createThenDecodeCallData|createThenDecodeCallData(){}[0]
+    final fun decodeCallData(): kotlin/String // com.monkopedia.ksrpc.bench/SerializationBenchmark.decodeCallData|decodeCallData(){}[0]
+    final fun setup() // com.monkopedia.ksrpc.bench/SerializationBenchmark.setup|setup(){}[0]
+}

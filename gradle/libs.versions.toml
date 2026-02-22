@@ -21,6 +21,7 @@ ktlint-plugin = "14.0.1"
 buildconfig = "6.0.6"
 bcv = "0.18.1"
 vannik = "0.35.0"
+kotlinx-benchmark = "0.4.14"
 
 [libraries]
 dokka-base = { module = "org.jetbrains.dokka:dokka-base", version.ref = "dokka" }
@@ -54,6 +55,7 @@ ktor-websockets = { module = "io.ktor:ktor-websockets", version.ref = "ktor" }
 ktor-websockets-serialization = { module = "io.ktor:ktor-websocket-serialization", version.ref = "ktor" }
 clikt = { module = "com.github.ajalt.clikt:clikt", version.ref = "clikt"}
 vannik-publish = { module = "com.vanniktech.maven.publish:com.vanniktech.maven.publish.gradle.plugin", version.ref = "vannik" }
+kotlinx-benchmark-runtime = { module = "org.jetbrains.kotlinx:kotlinx-benchmark-runtime", version.ref = "kotlinx-benchmark" }
 
 [bundles]
 dokka = ["dokka-base", "dokka-gradle"]
@@ -74,3 +76,4 @@ gmazzo-buildconfig = { id = "com.github.gmazzo.buildconfig", version.ref = "buil
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp"}
 gradle-publish = { id = "com.gradle.plugin-publish", version.ref = "gradleplugin" }
 vannik-publish = { id = "com.vanniktech.maven.publish", version.ref = "vannik" }
+kotlinx-benchmark = { id = "org.jetbrains.kotlinx.benchmark", version.ref = "kotlinx-benchmark" }

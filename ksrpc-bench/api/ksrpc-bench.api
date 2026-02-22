@@ -1,0 +1,110 @@
+public class com/monkopedia/ksrpc/bench/HttpTransportBenchmark {
+	public fun <init> ()V
+	public final fun getPayloadSize ()I
+	public final fun httpRoundTrip ()Ljava/lang/String;
+	public final fun setPayloadSize (I)V
+	public final fun setup ()V
+	public final fun tearDown ()V
+}
+
+public class com/monkopedia/ksrpc/bench/JniCommunicationBenchmark {
+	public fun <init> ()V
+	public final fun getPayloadSize ()I
+	public final fun jniRpcRoundTrip ()Ljava/lang/String;
+	public final fun setPayloadSize (I)V
+	public final fun setup ()V
+	public final fun tearDown ()V
+}
+
+public class com/monkopedia/ksrpc/bench/JniSerializationBenchmark {
+	public fun <init> ()V
+	public final fun decode ()Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniPayload;
+	public final fun encode ()Lcom/monkopedia/ksrpc/jni/JniSerialized;
+	public final fun encodeThenDecode ()Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniPayload;
+	public final fun getPayloadSize ()I
+	public final fun setPayloadSize (I)V
+	public final fun setup ()V
+}
+
+public final class com/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniNestedPayload {
+	public fun <init> (ZD)V
+	public final fun component1 ()Z
+	public final fun component2 ()D
+	public final fun copy (ZD)Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniNestedPayload;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniNestedPayload;ZDILjava/lang/Object;)Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniNestedPayload;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEnabled ()Z
+	public final fun getRatio ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniPayload {
+	public fun <init> (Ljava/lang/String;Ljava/util/List;Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniNestedPayload;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniNestedPayload;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniNestedPayload;)Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniPayload;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniPayload;Ljava/lang/String;Ljava/util/List;Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniNestedPayload;ILjava/lang/Object;)Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniPayload;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getNested ()Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniNestedPayload;
+	public final fun getNumbers ()Ljava/util/List;
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public class com/monkopedia/ksrpc/bench/JsonRpcWriterBenchmark {
+	public fun <init> ()V
+	public final fun executeLoopbackRoundTrip ()Ljava/lang/String;
+	public final fun getPayloadSize ()I
+	public final fun setPayloadSize (I)V
+	public final fun setup ()V
+	public final fun tearDown ()V
+}
+
+public class com/monkopedia/ksrpc/bench/MultiChannelBenchmark {
+	public fun <init> ()V
+	public final fun allocateSendReceive ()I
+	public final fun setup ()V
+	public final fun tearDown ()V
+}
+
+public class com/monkopedia/ksrpc/bench/PacketCodecBenchmark {
+	public fun <init> ()V
+	public final fun decodePacket ()Lcom/monkopedia/ksrpc/packets/internal/Packet;
+	public final fun encodePacket ()Ljava/lang/String;
+	public final fun encodeThenDecodePacket ()Lcom/monkopedia/ksrpc/packets/internal/Packet;
+	public final fun getPayloadSize ()I
+	public final fun setPayloadSize (I)V
+	public final fun setup ()V
+}
+
+public class com/monkopedia/ksrpc/bench/SerializationBenchmark {
+	public fun <init> ()V
+	public final fun createCallData ()Ljava/lang/String;
+	public final fun createThenDecodeCallData ()Ljava/lang/String;
+	public final fun decodeCallData ()Ljava/lang/String;
+	public final fun getPayloadSize ()I
+	public final fun setPayloadSize (I)V
+	public final fun setup ()V
+}
+
+public class com/monkopedia/ksrpc/bench/SocketTransportBenchmark {
+	public fun <init> ()V
+	public final fun getPayloadSize ()I
+	public final fun setPayloadSize (I)V
+	public final fun setup ()V
+	public final fun socketRoundTrip ()Ljava/lang/String;
+	public final fun tearDown ()V
+}
+
+public class com/monkopedia/ksrpc/bench/WebsocketTransportBenchmark {
+	public fun <init> ()V
+	public final fun getPayloadSize ()I
+	public final fun setPayloadSize (I)V
+	public final fun setup ()V
+	public final fun tearDown ()V
+	public final fun websocketRoundTrip ()Ljava/lang/String;
+}
+

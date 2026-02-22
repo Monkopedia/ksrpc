@@ -34,6 +34,7 @@ include(":ksrpc-service-worker")
 include(":ksrpc-service-worker-test")
 include(":ksrpc-jni")
 include(":ksrpc-test")
+include(":ksrpc-bench")
 
 include(":ksrpc-ktor-client")
 project(":ksrpc-ktor-client").projectDir = file("ksrpc-ktor/client")
