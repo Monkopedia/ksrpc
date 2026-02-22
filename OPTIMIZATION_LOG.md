@@ -73,34 +73,25 @@ Status values:
     - `/tmp/socket-after-inline.json`
 - Decision: reverted.
 
+### Socket packet parsing: direct content-length scan instead of header map parse
+- Area: `ksrpc-sockets` packet read path in `PacketUtils`/`ReadWritePacketChannel`.
+- Status: `Not useful`
+- Change attempt:
+  - Added a direct `readContentLength()` scan and switched `readPacket()` to skip `readFields()` map creation.
+  - Goal was lower per-packet allocation in socket framing read path.
+- Benchmark evidence (JMH, `SocketTransportBenchmark.socket(RoundTrip|BinaryRoundTrip)`, `payloadSize=256`, `-wi 3 -i 8 -w 1s -r 2s -f 1`):
+  - `socketRoundTrip`: `32,646.470 -> 24,179.461` ops/s (`-25.94%`)
+  - `socketBinaryRoundTrip`: `15,845.345 -> 9,207.484` ops/s (`-41.89%`)
+  - Results saved:
+    - `/tmp/socket-before.json`
+    - `/tmp/socket-after-headerparse-v2.json`
+- Decision: reverted.
+
 ## 2026-02-22 (Backlog)
 
 ### Prioritized optimization candidates (not tested)
 
 #### P1
-
-### Packet receive path: reduce coroutine-per-packet launch overhead
-- Status: `Not tested`
-- Area:
-  - `ksrpc-packets/src/commonMain/kotlin/PacketChannelBase.kt`
-- Why:
-  - `executeReceive()` launches a new coroutine for each received packet.
-  - Can add scheduling overhead and allocation under high packet rates.
-- Try:
-  - Handle common fast paths inline (response routing / binary continuation) and only launch for expensive endpoint execution.
-  - Consider bounded worker model rather than unbounded packet launch.
-
-### Socket header parsing: avoid per-packet map/string churn
-- Status: `Not tested`
-- Area:
-  - `ksrpc-sockets/src/commonMain/kotlin/PacketUtils.kt`
-  - `ksrpc-sockets/src/commonMain/kotlin/ReadWritePacketChannel.kt`
-- Why:
-  - `readFields()` allocates `Map`, substrings, and trims for every packet.
-  - `readContent()` allocates a new `ByteArray` every packet.
-- Try:
-  - Add a content-length fast path parser with minimal allocations.
-  - Reuse buffers where safe; parse only required headers.
 
 ### JVM stream bridge: remove per-chunk context switching and aggressive flush
 - Status: `Not tested`
