@@ -339,23 +339,27 @@ abstract class PacketChannelBase<T>(
             get() = hasClosedChannel && hasGottenChannel
 
         suspend fun handlePacket(packet: Packet<T>): Boolean {
-            if (packet.messageId.toInt() == currentPacket) {
+            val packetId = packet.messageId.toInt()
+            if (packetId != currentPacket) {
+                pending[packetId] = packet
+                return false
+            }
+
+            var nextPacket: Packet<T>? = packet
+            while (nextPacket != null) {
                 currentPacket++
                 val data = env.serialization.decodeCallData(
                     ByteArraySerializer(),
-                    CallData.create(packet.data)
+                    CallData.create(nextPacket.data)
                 )
                 if (data.isEmpty()) {
                     channel.flush()
                     channel.close()
                     hasClosedChannel = true
                     return true
-                } else {
-                    channel.writeFully(data, 0, data.size)
-                    pending[currentPacket]?.let { handlePacket(it) }
                 }
-            } else {
-                pending[packet.messageId.toInt()] = packet
+                channel.writeFully(data, 0, data.size)
+                nextPacket = if (pending.isEmpty()) null else pending.remove(currentPacket)
             }
             return false
         }

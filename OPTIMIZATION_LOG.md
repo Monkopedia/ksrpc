@@ -125,6 +125,60 @@ Status values:
 - Decision:
   - Reverted benchmark scaffolding; defer this optimization until scope/lifecycle semantics are addressed.
 
+### JNI connection bridge: cache packet serializer and int converter in `JniConnection`
+- Area: `ksrpc-jni` JVM bridge hot path (`JniConnection.kt`).
+- Status: `Not useful`
+- Change attempt:
+  - Cached `Packet.serializer(JniSerialized)` and `newTypeConverter<Any?>().int` as instance properties.
+  - Replaced per-call lookup sites in `sendLocked`, `sendFromNative`, `close`, and `closeFromNative`.
+- Benchmark evidence (`JniCommunicationBenchmark.jniRpcRoundTrip`, `payloadSize=32,256,2048`, `-wi 3 -i 8 -w 1s -r 2s -f 1`):
+  - `payloadSize=32`: `93.406 -> 91.721` ops/s (`-1.80%`)
+  - `payloadSize=256`: `93.471 -> 93.353` ops/s (`-0.13%`)
+  - `payloadSize=2048`: `92.500 -> 92.081` ops/s (`-0.45%`)
+  - Results saved:
+    - `/tmp/jni-comm-before-cache.json`
+    - `/tmp/jni-comm-after-cache.json`
+- Decision: reverted.
+
+### String serializer `isError`: single read of serialized payload
+- Area: `ksrpc-core` common `StringSerializer.isError`.
+- Status: `Inconclusive`
+- Change attempt:
+  - Read `CallData.readSerialized()` once in `isError` and reuse for both prefix checks.
+- Benchmark evidence (`SocketTransportBenchmark.socketRoundTrip`, `payloadSize=32,256,2048`, `-wi 3 -i 8 -w 1s -r 2s -f 1`):
+  - `payloadSize=32`: `35,444.405 -> 35,090.899` ops/s (`-1.00%`)
+  - `payloadSize=256`: `32,582.050 -> 33,103.774` ops/s (`+1.60%`)
+  - `payloadSize=2048`: highly unstable in both runs (large variance), no reliable conclusion.
+  - Results saved:
+    - `/tmp/socket-iserror-double-read.json` (baseline)
+    - `/tmp/socket-iserror-single-read.json` (attempt)
+- Observation:
+  - Transport-level benchmark noise at larger payload dominated any micro-change from this branch.
+- Decision:
+  - Reverted code change; keep as a possible micro-optimization if a tighter benchmark harness is added.
+
+### BinaryChannel pending handling: iterative drain + parse-once out-of-order fast path
+- Area: `ksrpc-packets` binary packet reassembly in `PacketChannelBase.BinaryChannel`.
+- Status: `Useful`
+- Change:
+  - Parse `messageId` once per packet (`packetId`) and use a fast out-of-order path:
+    - if not current packet, enqueue in `pending` and return.
+  - Replaced recursive replay with iterative drain loop over `currentPacket`.
+  - Added small map fast-path (`if (pending.isEmpty()) null else pending.remove(currentPacket)`).
+  - Added regression coverage:
+    - `ksrpc-test/src/commonTest/kotlin/PacketChannelBinaryOrderingTest.kt`
+    - Verifies out-of-order binary chunks (`1`, `0`, terminator `2`) reassemble correctly.
+- Benchmark evidence (`SocketTransportBenchmark.socketBinaryRoundTrip`, `payloadSize=32,256,2048`, `-wi 3 -i 8 -w 1s -r 2s -f 1`):
+  - `payloadSize=32`: `21,466.487 -> 22,784.627` ops/s (`+6.14%`)
+  - `payloadSize=256`: `11,012.866 -> 16,759.629` ops/s (`+52.18%`)
+  - `payloadSize=2048`: `5,809.171 -> 5,831.617` ops/s (`+0.39%`)
+  - Results saved:
+    - `/tmp/socket-binary-before-pending-iter.json`
+    - `/tmp/socket-binary-after-pending-iter.json`
+- Validation:
+  - `./gradlew allTests` passed (`BUILD SUCCESSFUL`).
+- Decision: keep.
+
 ## 2026-02-22 (Backlog)
 
 ### Prioritized optimization candidates (not tested)
@@ -176,16 +230,6 @@ Status values:
   - Frequent `Int -> String` and `String -> Int` conversions (`toString()`, `toInt()`).
 - Try:
   - Introduce numeric message ID representation internally and convert only at boundaries.
-
-### BinaryChannel pending handling: reduce map churn and recursive drain
-- Status: `Not tested`
-- Area:
-  - `ksrpc-packets/src/commonMain/kotlin/PacketChannelBase.kt` (`BinaryChannel`)
-- Why:
-  - Pending out-of-order packets stored in `MutableMap<Int, Packet<T>>`; recursive replay.
-  - Can accumulate allocations and recursion overhead for out-of-order streams.
-- Try:
-  - Iterative drain loop with queue-like structure; avoid recursive `handlePacket` calls.
 
 ### JsonRpc header transformer: avoid extra string/byte conversions
 - Status: `Not tested`
