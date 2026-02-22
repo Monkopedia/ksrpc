@@ -388,6 +388,34 @@ Status values:
   - No consistent transport-level uplift; movements were small/mixed and often within noisy ranges.
 - Decision: reverted.
 
+### Packet binary path serializer fast-paths: `createSerialized` / `decodeSerialized`
+- Area: `ksrpc-core` serializer API + `ksrpc-packets` binary packet hot path.
+- Status: `Not useful`
+- Change attempt:
+  - Added default serializer fast-path helpers on `CallDataSerializer<T>`:
+    - `createSerialized(serializer, input): T`
+    - `decodeSerialized(serializer, data: T): I`
+  - Overrode fast-path methods in:
+    - `ksrpc-core` string serializer
+    - `ksrpc-jni` serializer
+  - Updated binary packet path in `PacketChannelBase` to use fast-path APIs and skip
+    `CallData.create(...).readSerialized()` / `decodeCallData(..., CallData.create(...))` wrappers.
+  - Added serializer parity tests in `CallDataSerializerErrorHandlingTest`.
+- Benchmark evidence:
+  - Full run (`SocketTransportBenchmark.socket(RoundTrip|BinaryRoundTrip)`,
+    `payloadSize=32,256,2048`, `-wi 3 -i 8 -w 1s -r 2s -f 1`):
+    - Baseline: `/tmp/socket-before-serializer-fastpath.json`
+    - Attempt: `/tmp/socket-after-serializer-fastpath.json`
+    - Observed mixed/noisy movement (including regressions on larger payload cases).
+  - Focused confirmation (`payloadSize=256`, same settings):
+    - Attempt rerun: `/tmp/socket-after-serializer-fastpath-256-r2.json`
+    - Baseline control rerun: `/tmp/socket-before-serializer-fastpath-256-r2.json`
+    - Binary and non-binary results remained highly variable across reruns, with no stable,
+      repeatable gain attributable to the change.
+- Observation:
+  - Effect size was not robust under reruns; transport noise dominated the measured deltas.
+- Decision: reverted.
+
 ## 2026-02-22 (Backlog)
 
 ### Prioritized optimization candidates (not tested)
@@ -406,13 +434,15 @@ Status values:
   - Write directly from buffer/pointer without array copies.
 
 ### Binary transport path: reduce encode/decode hops for chunked binary
-- Status: `Not tested`
+- Status: `Inconclusive`
 - Area:
   - `ksrpc-packets/src/commonMain/kotlin/PacketChannelBase.kt`
 - Why:
   - Binary chunks are wrapped in packet serialization, often via string serialization.
   - Multiple conversions per chunk can dominate throughput.
 - Try:
+  - Prior attempt (`createSerialized`/`decodeSerialized` fast-path wrappers) did not show a stable
+    transport-level gain; see entry above.
   - Transport-specific direct binary frame path (sockets/websocket/jni) where possible.
   - Keep packet metadata separate from binary payload bytes.
 
