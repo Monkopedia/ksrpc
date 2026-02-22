@@ -50,9 +50,15 @@ abstract class RpcFunctionalityTest(
         if (TestType.SERIALIZE !in supportedTypes) return@runBlockingUnit
         val serializedChannel = serializedChannel()
         val channel = HostSerializedChannelImpl(createEnv())
-        channel.registerDefault(serializedChannel)
-
-        verifyOnChannel(channel.asClient.defaultChannel())
+        try {
+            channel.registerDefault(serializedChannel)
+            verifyOnChannel(channel.asClient.defaultChannel())
+        } finally {
+            try {
+                channel.close()
+            } catch (t: Throwable) {
+            }
+        }
     }
 
     @Test
@@ -60,16 +66,31 @@ abstract class RpcFunctionalityTest(
         if (TestType.PIPE !in supportedTypes) return@runBlockingUnit
         val (output, input) = createPipe()
         val (so, si) = createPipe()
-        launch(Dispatchers.Default) {
+        val serverConnection = (si to output).asConnection(createEnv())
+        val clientConnection = (input to so).asConnection(createEnv())
+        val serverJob = launch(Dispatchers.Default) {
             val serializedChannel = serializedChannel()
-            val connection = (si to output).asConnection(
-                createEnv()
-            )
-            connection.registerDefault(serializedChannel)
+            serverConnection.registerDefault(serializedChannel)
         }
         try {
-            verifyOnChannel((input to so).asConnection(createEnv()).defaultChannel())
+            verifyOnChannel(clientConnection.defaultChannel())
         } finally {
+            try {
+                clientConnection.close()
+            } catch (t: Throwable) {
+            }
+            try {
+                serverConnection.close()
+            } catch (t: Throwable) {
+            }
+            try {
+                serverJob.cancel()
+            } catch (t: Throwable) {
+            }
+            try {
+                serverJob.join()
+            } catch (t: Throwable) {
+            }
             try {
                 input.cancel(null)
             } catch (t: Throwable) {
@@ -98,10 +119,14 @@ abstract class RpcFunctionalityTest(
             },
             test = {
                 val client = HttpClient()
-                client.asConnection("http://localhost:$it$path", createEnv())
-                    .use { channel ->
-                        verifyOnChannel(channel.defaultChannel())
-                    }
+                try {
+                    client.asConnection("http://localhost:$it$path", createEnv())
+                        .use { channel ->
+                            verifyOnChannel(channel.defaultChannel())
+                        }
+                } finally {
+                    client.close()
+                }
             },
             isWebsocket = false
         )
@@ -124,10 +149,14 @@ abstract class RpcFunctionalityTest(
                 val client = HttpClient {
                     install(WebSockets)
                 }
-                client.asWebsocketConnection("http://localhost:$it$path", createEnv())
-                    .use { channel ->
-                        verifyOnChannel(channel.defaultChannel())
-                    }
+                try {
+                    client.asWebsocketConnection("http://localhost:$it$path", createEnv())
+                        .use { channel ->
+                            verifyOnChannel(channel.defaultChannel())
+                        }
+                } finally {
+                    client.close()
+                }
             },
             isWebsocket = true
         )

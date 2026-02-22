@@ -48,6 +48,8 @@ import platform.posix.pthread_self
 
 @PublishedApi
 internal val nextPort = atomic(9181)
+@PublishedApi
+internal const val MAX_BIND_ATTEMPTS = 32
 val serverDispatcher = newFixedThreadPoolContext(8, "server-threads")
 
 internal actual fun platformSupportedTestTypes(): Set<RpcFunctionalityTest.TestType> = setOf(
@@ -62,29 +64,41 @@ actual suspend inline fun httpTest(
     isWebsocket: Boolean
 ) {
     if (isWebsocket) return
-    val port = nextPort.getAndIncrement()
-    val serverCompletion = CompletableDeferred<EmbeddedServer<*, *>>()
-    GlobalScope.launch(serverDispatcher) {
-        try {
-            serverCompletion.complete(
-                embeddedServer(CIO, port) {
-                    routing {
-                        runBlocking {
-                            serve()
+    repeat(MAX_BIND_ATTEMPTS) {
+        val port = nextPort.getAndIncrement()
+        val serverCompletion = CompletableDeferred<EmbeddedServer<*, *>>()
+        GlobalScope.launch(serverDispatcher) {
+            try {
+                serverCompletion.complete(
+                    embeddedServer(CIO, port) {
+                        routing {
+                            runBlocking {
+                                serve()
+                            }
                         }
-                    }
-                }.start()
-            )
-        } catch (t: Throwable) {
-            serverCompletion.completeExceptionally(t)
+                    }.start()
+                )
+            } catch (t: Throwable) {
+                serverCompletion.completeExceptionally(t)
+            }
         }
+        val serverResult = runCatching { serverCompletion.await() }
+        if (serverResult.isFailure) {
+            val failure = serverResult.exceptionOrNull()
+            if (failure != null && failure.isAddressInUse()) {
+                return@repeat
+            }
+            throw serverResult.exceptionOrNull()!!
+        }
+        val server = serverResult.getOrThrow()
+        try {
+            test(port)
+        } finally {
+            server.stop(1_000, 3_000)
+        }
+        return
     }
-    val server = serverCompletion.await()
-    try {
-        test(port)
-    } finally {
-        server.stop(1_000, 3_000)
-    }
+    error("Unable to bind test server after $MAX_BIND_ATTEMPTS attempts")
 }
 
 actual suspend fun Routing.testServe(
@@ -142,4 +156,11 @@ class NativeTestTest {
         }
         println("Thread: $x")
     }
+}
+
+@PublishedApi
+internal fun Throwable.isAddressInUse(): Boolean = generateSequence(this) { it.cause }.any {
+    val message = it.message ?: return@any false
+    message.contains("Address already in use", ignoreCase = true) ||
+        message.contains("EADDRINUSE", ignoreCase = true)
 }

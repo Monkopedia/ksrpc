@@ -42,6 +42,8 @@ import kotlinx.serialization.json.Json
 
 @PublishedApi
 internal val nextPort = atomic(8081)
+@PublishedApi
+internal const val MAX_BIND_ATTEMPTS = 32
 
 actual typealias Routing = io.ktor.server.routing.Routing
 
@@ -53,32 +55,44 @@ actual suspend inline fun httpTest(
     test: suspend (Int) -> Unit,
     isWebsocket: Boolean
 ) {
-    val port = nextPort.getAndIncrement()
-    val serverCompletion = CompletableDeferred<EmbeddedServer<*, *>>()
-    GlobalScope.launch(Dispatchers.IO) {
-        try {
-            serverCompletion.complete(
-                embeddedServer(Netty, port) {
-                    install(WebSockets) {
-                        contentConverter = KotlinxWebsocketSerializationConverter(Json)
-                    }
-                    routing {
-                        runBlocking {
-                            serve()
+    repeat(MAX_BIND_ATTEMPTS) {
+        val port = nextPort.getAndIncrement()
+        val serverCompletion = CompletableDeferred<EmbeddedServer<*, *>>()
+        GlobalScope.launch(Dispatchers.IO) {
+            try {
+                serverCompletion.complete(
+                    embeddedServer(Netty, port) {
+                        install(WebSockets) {
+                            contentConverter = KotlinxWebsocketSerializationConverter(Json)
                         }
-                    }
-                }.start()
-            )
-        } catch (t: Throwable) {
-            serverCompletion.completeExceptionally(t)
+                        routing {
+                            runBlocking {
+                                serve()
+                            }
+                        }
+                    }.start()
+                )
+            } catch (t: Throwable) {
+                serverCompletion.completeExceptionally(t)
+            }
         }
+        val serverResult = runCatching { serverCompletion.await() }
+        if (serverResult.isFailure) {
+            val failure = serverResult.exceptionOrNull()
+            if (failure != null && failure.isAddressInUse()) {
+                return@repeat
+            }
+            throw serverResult.exceptionOrNull()!!
+        }
+        val server = serverResult.getOrThrow()
+        try {
+            test(port)
+        } finally {
+            server.stop(1_000, 3_000)
+        }
+        return
     }
-    val server = serverCompletion.await()
-    try {
-        test(port)
-    } finally {
-        server.stop(1_000, 3_000)
-    }
+    error("Unable to bind test server after $MAX_BIND_ATTEMPTS attempts")
 }
 
 actual suspend fun Routing.testServe(
@@ -116,4 +130,11 @@ internal actual fun runBlockingUnit(function: suspend CoroutineScope.() -> Unit)
     }
     block.await()
     exc?.let { throw it }
+}
+
+@PublishedApi
+internal fun Throwable.isAddressInUse(): Boolean = generateSequence(this) { it.cause }.any {
+    val message = it.message ?: return@any false
+    message.contains("Address already in use", ignoreCase = true) ||
+        message.contains("EADDRINUSE", ignoreCase = true)
 }

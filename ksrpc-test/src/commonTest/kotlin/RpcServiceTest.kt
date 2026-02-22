@@ -27,6 +27,7 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.PairSerializer
 import kotlinx.serialization.builtins.serializer
@@ -315,15 +316,12 @@ class RpcServiceCancelTest :
         verifyOnChannel = { serializedChannel ->
             val stub = serializedChannel.toStub<TestInterface, String>()
             val rpcJob = launch {
-                try {
-                    stub.rpc("Hello" to "world")
-                    cancelSignal!!.completeExceptionally(RuntimeException("Test failure"))
-                } finally {
-                }
+                stub.rpc("Hello" to "world")
             }
             val continueSignal = cancelSignal!!.await()
             rpcJob.cancel()
             continueSignal.complete(Unit)
+            rpcJob.cancelAndJoin()
 
             cancelSignal = CompletableDeferred<CompletableDeferred<Unit>>().also {
                 launch {
