@@ -29,19 +29,19 @@ data class JniEncoder<T> internal constructor(
 ) : AbstractEncoder() {
 
     private var outputList = newList<T?>()
-    private val lastStructurePoints = mutableListOf<Int>()
+    private val lastStructurePoints = IntStack()
 
     val serialized: JniSerialized
         get() = outputList.asSerialized
 
     override fun beginStructure(descriptor: SerialDescriptor): CompositeEncoder {
-        lastStructurePoints.add(outputList.size)
+        lastStructurePoints.push(outputList.size)
         outputList.add(typeConverter.int.convertFrom(0))
         return super.beginStructure(descriptor)
     }
 
     override fun endStructure(descriptor: SerialDescriptor) {
-        val position = lastStructurePoints.removeLast()
+        val position = lastStructurePoints.pop()
         outputList[position] = typeConverter.int.convertFrom(outputList.size)
         super.endStructure(descriptor)
     }

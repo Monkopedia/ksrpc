@@ -30,7 +30,7 @@ data class JniDecoder<T> internal constructor(
     private val typeConverter: JniTypeConverter<T>,
     private val inputList: BasicList<T>
 ) : AbstractDecoder() {
-    private val structEnds = mutableListOf<Int>()
+    private val structEnds = IntStack()
     private var index = 0
 
     private fun next() = inputList[index++]
@@ -41,16 +41,16 @@ data class JniDecoder<T> internal constructor(
     }
 
     override fun beginStructure(descriptor: SerialDescriptor): CompositeDecoder {
-        structEnds.add(typeConverter.int.convertTo(next()))
+        structEnds.push(typeConverter.int.convertTo(next()))
         return super.beginStructure(descriptor)
     }
 
     override fun endStructure(descriptor: SerialDescriptor) {
-        structEnds.removeLast()
+        structEnds.pop()
     }
 
     override fun decodeElementIndex(descriptor: SerialDescriptor): Int =
-        if (index < structEnds.last()) {
+        if (index < structEnds.peek()) {
             typeConverter.int.convertTo(next())
         } else {
             CompositeDecoder.DECODE_DONE
