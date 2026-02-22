@@ -364,6 +364,30 @@ Status values:
   - Mixed full-run results and near-flat focused confirmation; no consistent measurable gain.
 - Decision: reverted.
 
+### Logger lazy-message API in packet hot path
+- Area: `ksrpc-core` `Logger` API and `ksrpc-packets` `PacketChannelBase` hot-path logging call sites.
+- Status: `Not useful`
+- Change attempt:
+  - Added `Logger` helpers with `isEnabled(level, tag)` and lazy message overloads (`message: () -> String`)
+    for `debug/info/warn/error`.
+  - Converted interpolated logging calls in `PacketChannelBase` to lazy form.
+- Benchmark evidence:
+  - Full run (`SocketTransportBenchmark.socket(RoundTrip|BinaryRoundTrip)`,
+    `payloadSize=32,256,2048`, `-wi 3 -i 8 -w 1s -r 2s -f 1`):
+    - `socketBinaryRoundTrip`: `+0.48%` (32), `-0.63%` (256), `-1.09%` (2048)
+    - `socketRoundTrip`: noisy `-12.98%` (32, outlier-affected), `+2.74%` (256), `+1.21%` (2048)
+    - Results:
+      - `/tmp/socket-lazylog-before.json`
+      - `/tmp/socket-lazylog-after.json`
+  - Focused confirmation (`payloadSize=32`, same settings):
+    - `socketBinaryRoundTrip`: `25384.207 -> 25243.072` ops/s (`-0.56%`)
+    - `socketRoundTrip`: `37926.736 -> 36970.970` ops/s (`-2.52%`, high variance)
+    - Result:
+      - `/tmp/socket-lazylog-after-32-r2.json`
+- Observation:
+  - No consistent transport-level uplift; movements were small/mixed and often within noisy ranges.
+- Decision: reverted.
+
 ## 2026-02-22 (Backlog)
 
 ### Prioritized optimization candidates (not tested)
