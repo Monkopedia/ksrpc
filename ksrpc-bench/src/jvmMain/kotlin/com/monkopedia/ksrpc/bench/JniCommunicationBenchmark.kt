@@ -17,6 +17,7 @@ package com.monkopedia.ksrpc.bench
 
 import com.monkopedia.ksrpc.channels.ChannelClient
 import com.monkopedia.ksrpc.channels.ChannelId
+import com.monkopedia.ksrpc.NativeHost
 import com.monkopedia.ksrpc.jni.JniConnection
 import com.monkopedia.ksrpc.jni.JniSerialization
 import com.monkopedia.ksrpc.jni.JniSerialized

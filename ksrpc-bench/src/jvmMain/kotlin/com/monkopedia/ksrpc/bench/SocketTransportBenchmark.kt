@@ -27,7 +27,12 @@ import kotlinx.benchmark.Scope
 import kotlinx.benchmark.Setup
 import kotlinx.benchmark.State
 import kotlinx.benchmark.TearDown
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 
 @State(Scope.Benchmark)
 open class SocketTransportBenchmark {
@@ -39,29 +44,42 @@ open class SocketTransportBenchmark {
     private lateinit var payload: String
     private lateinit var clientConnection: Connection<String>
     private lateinit var serverConnection: Connection<String>
-    private lateinit var clientChannel: SerializedService<String>
+    private lateinit var timedRunner: TimedRunner
+    private lateinit var scope: CoroutineScope
+    private lateinit var serverJob: Job
 
     @Setup
-    fun setup() = runBlocking {
+    fun setup() {
         payload = "x".repeat(payloadSize)
-        val clientToServer = ByteChannel(autoFlush = true)
-        val serverToClient = ByteChannel(autoFlush = true)
-        clientConnection = (serverToClient to clientToServer).asConnection(env)
-        serverConnection = (clientToServer to serverToClient).asConnection(env)
-        serverConnection.registerDefault(EchoSerializedService(env))
-        clientChannel = clientConnection.defaultChannel()
+        timedRunner = TimedRunner("SocketTransportBenchmark")
+        scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        timedRunner.run(timeoutMillis = 10_000) {
+            val clientToServer = ByteChannel(autoFlush = true)
+            val serverToClient = ByteChannel(autoFlush = true)
+            clientConnection = (serverToClient to clientToServer).asConnection(scope, env)
+            serverConnection = (clientToServer to serverToClient).asConnection(scope, env)
+            serverJob = scope.launch { serverConnection.registerDefault(EchoSerializedService(env)) }
+        }
     }
 
     @Benchmark
-    fun socketRoundTrip(): String = runBlocking {
+    fun socketRoundTrip(): String = timedRunner.run(timeoutMillis = 5_000) {
+        val clientChannel: SerializedService<String> = clientConnection.defaultChannel()
         callEcho(clientChannel, env, payload)
     }
 
     @TearDown
     fun tearDown() {
-        runBlocking {
-            runCatching { clientConnection.close() }
-            runCatching { serverConnection.close() }
+        if (::timedRunner.isInitialized) {
+            runCatching {
+                timedRunner.run(timeoutMillis = 5_000) {
+                    runCatching { clientConnection.close() }
+                    runCatching { serverConnection.close() }
+                    runCatching { serverJob.cancel() }
+                    runCatching { scope.cancel() }
+                }
+            }
+            runCatching { timedRunner.close() }
         }
     }
 }

@@ -22,6 +22,7 @@ import com.monkopedia.ksrpc.ktor.asConnection
 import com.monkopedia.ksrpc.ktor.serve
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.server.engine.EmbeddedServer
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
@@ -32,7 +33,6 @@ import kotlinx.benchmark.Scope
 import kotlinx.benchmark.Setup
 import kotlinx.benchmark.State
 import kotlinx.benchmark.TearDown
-import kotlinx.coroutines.runBlocking
 
 @State(Scope.Benchmark)
 open class HttpTransportBenchmark {
@@ -46,32 +46,48 @@ open class HttpTransportBenchmark {
     private lateinit var client: HttpClient
     private lateinit var connection: ChannelClient<String>
     private lateinit var clientChannel: SerializedService<String>
+    private lateinit var timedRunner: TimedRunner
 
     @Setup
-    fun setup() = runBlocking {
+    fun setup() {
         payload = "x".repeat(payloadSize)
-        val port = reserveFreePort()
-        server = embeddedServer(Netty, port) {
-            routing {
-                serve("/rpc", EchoSerializedService(env), env)
+        timedRunner = TimedRunner("HttpTransportBenchmark")
+        timedRunner.run(timeoutMillis = 15_000) {
+            server = embeddedServer(Netty, 0) {
+                routing {
+                    serve("/rpc", EchoSerializedService(env), env)
+                }
+            }.start(wait = false)
+            val port = server.engine.resolvedConnectors().first().port
+            waitForPortOpen("127.0.0.1", port)
+            client = HttpClient(OkHttp) {
+                install(HttpTimeout) {
+                    requestTimeoutMillis = 5_000
+                    connectTimeoutMillis = 2_000
+                    socketTimeoutMillis = 5_000
+                }
             }
-        }.start(wait = false)
-        client = HttpClient(OkHttp)
-        connection = client.asConnection("http://127.0.0.1:$port/rpc", env)
-        clientChannel = connection.defaultChannel()
+            connection = client.asConnection("http://127.0.0.1:$port/rpc", env)
+            clientChannel = connection.defaultChannel()
+        }
     }
 
     @Benchmark
-    fun httpRoundTrip(): String = runBlocking {
+    fun httpRoundTrip(): String = timedRunner.run(timeoutMillis = 5_000) {
         callEcho(clientChannel, env, payload)
     }
 
     @TearDown
     fun tearDown() {
-        runBlocking {
-            runCatching { connection.close() }
-            runCatching { client.close() }
-            runCatching { server.stop(1_000, 3_000) }
+        if (::timedRunner.isInitialized) {
+            runCatching {
+                timedRunner.run(timeoutMillis = 10_000) {
+                    runCatching { connection.close() }
+                    runCatching { client.close() }
+                    runCatching { server.stop(1_000, 3_000) }
+                }
+            }
+            runCatching { timedRunner.close() }
         }
     }
 }

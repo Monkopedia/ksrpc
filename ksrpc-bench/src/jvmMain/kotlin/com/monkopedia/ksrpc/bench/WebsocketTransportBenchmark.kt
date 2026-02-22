@@ -22,6 +22,7 @@ import com.monkopedia.ksrpc.ktor.websocket.asWebsocketConnection
 import com.monkopedia.ksrpc.ktor.websocket.serveWebsocket
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.websocket.WebSockets as ClientWebSockets
 import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
 import io.ktor.server.application.install
@@ -36,7 +37,11 @@ import kotlinx.benchmark.Scope
 import kotlinx.benchmark.Setup
 import kotlinx.benchmark.State
 import kotlinx.benchmark.TearDown
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 
 @State(Scope.Benchmark)
@@ -51,37 +56,61 @@ open class WebsocketTransportBenchmark {
     private lateinit var client: HttpClient
     private lateinit var connection: Connection<String>
     private lateinit var clientChannel: SerializedService<String>
+    private lateinit var timedRunner: TimedRunner
+    private lateinit var scope: CoroutineScope
 
     @Setup
-    fun setup() = runBlocking {
+    fun setup() {
         payload = "x".repeat(payloadSize)
-        val port = reserveFreePort()
-        server = embeddedServer(Netty, port) {
-            install(ServerWebSockets) {
-                contentConverter = KotlinxWebsocketSerializationConverter(Json)
+        timedRunner = TimedRunner("WebsocketTransportBenchmark")
+        scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        timedRunner.run(timeoutMillis = 15_000) {
+            server = embeddedServer(Netty, 0) {
+                install(ServerWebSockets) {
+                    contentConverter = KotlinxWebsocketSerializationConverter(Json)
+                }
+                routing {
+                    serveWebsocket("/rpc", EchoSerializedService(env), env)
+                }
+            }.start(wait = false)
+            val port = server.engine.resolvedConnectors().first().port
+            waitForPortOpen("127.0.0.1", port)
+            client = HttpClient(OkHttp) {
+                install(HttpTimeout) {
+                    requestTimeoutMillis = 5_000
+                    connectTimeoutMillis = 2_000
+                    socketTimeoutMillis = 5_000
+                }
+                install(ClientWebSockets)
             }
-            routing {
-                serveWebsocket("/rpc", EchoSerializedService(env), env)
+            withContext(scope.coroutineContext) {
+                connection = client.asWebsocketConnection("http://127.0.0.1:$port/rpc", env)
+                clientChannel = connection.defaultChannel()
             }
-        }.start(wait = false)
-        client = HttpClient(OkHttp) {
-            install(ClientWebSockets)
         }
-        connection = client.asWebsocketConnection("http://127.0.0.1:$port/rpc", env)
-        clientChannel = connection.defaultChannel()
     }
 
     @Benchmark
-    fun websocketRoundTrip(): String = runBlocking {
-        callEcho(clientChannel, env, payload)
+    fun websocketRoundTrip(): String = timedRunner.run(timeoutMillis = 5_000) {
+        withContext(scope.coroutineContext) {
+            callEcho(clientChannel, env, payload)
+        }
     }
 
     @TearDown
     fun tearDown() {
-        runBlocking {
-            runCatching { connection.close() }
-            runCatching { client.close() }
-            runCatching { server.stop(1_000, 3_000) }
+        if (::timedRunner.isInitialized) {
+            runCatching {
+                timedRunner.run(timeoutMillis = 10_000) {
+                    withContext(scope.coroutineContext) {
+                        runCatching { connection.close() }
+                        runCatching { client.close() }
+                        runCatching { server.stop(1_000, 3_000) }
+                        runCatching { scope.cancel() }
+                    }
+                }
+            }
+            runCatching { timedRunner.close() }
         }
     }
 }

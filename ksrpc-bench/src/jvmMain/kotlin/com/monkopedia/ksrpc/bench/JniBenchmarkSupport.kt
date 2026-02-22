@@ -15,32 +15,7 @@
  */
 package com.monkopedia.ksrpc.bench
 
-import com.monkopedia.ksrpc.jni.JavaJniContinuation
-import com.monkopedia.ksrpc.jni.JniConnection
-import com.monkopedia.ksrpc.jni.JniSerialized
-import com.monkopedia.ksrpc.jni.NativeJniContinuation
 import com.monkopedia.ksrpc.jni.NativeUtils
-
-internal class NativeHost {
-    external fun serializeDeserialize(serialized: JniSerialized): JniSerialized
-
-    external fun createContinuations(
-        receiver: Receiver,
-        list: MutableList<NativeJniContinuation<Int>>
-    )
-
-    external fun createContinuationRelay(
-        output: JavaJniContinuation<Int>
-    ): NativeJniContinuation<Int>
-
-    external fun createEnv(): Long
-
-    external fun registerService(connection: JniConnection, output: JavaJniContinuation<Int>)
-}
-
-internal interface Receiver {
-    fun message(str: String)
-}
 
 internal object JniLibraryLoader {
     @Volatile

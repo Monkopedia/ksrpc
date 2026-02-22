@@ -18,7 +18,14 @@ package com.monkopedia.ksrpc.bench
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.SerializedService
-import java.net.ServerSocket
+import java.net.InetSocketAddress
+import java.net.Socket
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.serializer
 
 internal class EchoSerializedService(override val env: KsrpcEnvironment<String>) :
@@ -46,7 +53,56 @@ internal suspend fun callEcho(
     return env.serialization.decodeCallData(String.serializer(), output)
 }
 
-internal fun reserveFreePort(): Int = ServerSocket(0).use { socket ->
-    socket.reuseAddress = true
-    socket.localPort
+internal fun waitForPortOpen(
+    host: String,
+    port: Int,
+    totalTimeoutMillis: Long = 5_000,
+    connectTimeoutMillis: Int = 200,
+    retryDelayMillis: Long = 25
+) {
+    val deadline = System.nanoTime() + (totalTimeoutMillis * 1_000_000L)
+    var lastError: Throwable? = null
+    while (System.nanoTime() < deadline) {
+        try {
+            Socket().use { socket ->
+                socket.connect(InetSocketAddress(host, port), connectTimeoutMillis)
+            }
+            return
+        } catch (t: Throwable) {
+            lastError = t
+            Thread.sleep(retryDelayMillis)
+        }
+    }
+    throw IllegalStateException(
+        "Port $host:$port did not become reachable within ${totalTimeoutMillis}ms",
+        lastError
+    )
+}
+
+internal class TimedRunner(name: String) : AutoCloseable {
+    private val runnerName = name
+    private val executor = Executors.newSingleThreadExecutor { runnable ->
+        Thread(runnable, "$runnerName-runner").apply { isDaemon = true }
+    }
+
+    fun <T> run(timeoutMillis: Long = 5_000, block: suspend () -> T): T {
+        val task = executor.submit<T> { runBlocking(Dispatchers.Default) { block() } }
+        return try {
+            task.get(timeoutMillis, TimeUnit.MILLISECONDS)
+        } catch (e: TimeoutException) {
+            task.cancel(true)
+            throw IllegalStateException("$runnerName timed out after ${timeoutMillis}ms", e)
+        } catch (e: ExecutionException) {
+            val cause = e.cause ?: e
+            when (cause) {
+                is RuntimeException -> throw cause
+                is Error -> throw cause
+                else -> throw IllegalStateException("$runnerName failed", cause)
+            }
+        }
+    }
+
+    override fun close() {
+        executor.shutdownNow()
+    }
 }
