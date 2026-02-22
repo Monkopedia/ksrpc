@@ -41,12 +41,19 @@ class MultiChannel<T> {
             if (isClosed) {
                 return@withLock
             }
-            val hasPending = pending.consume(matcher = { it.first == id }) { (_, pendingItem) ->
-                pendingItem.complete(response)
+            var pendingItem: CompletableDeferred<T>? = null
+            for (index in pending.indices) {
+                val item = pending[index]
+                if (item.first == id) {
+                    pendingItem = item.second
+                    pending.removeAt(index)
+                    break
+                }
             }
-            if (!hasPending) {
+            if (pendingItem == null) {
                 error("No pending receiver for $id and $response")
             }
+            pendingItem.complete(response)
         }
     }
 
@@ -72,17 +79,5 @@ class MultiChannel<T> {
             }
             pending.clear()
         }
-    }
-}
-
-internal inline fun <T> MutableList<T>.consume(
-    crossinline matcher: (T) -> Boolean,
-    crossinline consumer: (T) -> Unit
-): Boolean = removeAll {
-    if (matcher(it)) {
-        consumer(it)
-        true
-    } else {
-        false
     }
 }
