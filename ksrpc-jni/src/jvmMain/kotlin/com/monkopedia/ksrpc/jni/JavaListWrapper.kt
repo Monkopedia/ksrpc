@@ -45,4 +45,20 @@ actual fun <T> newList(): MutableBasicList<T> = JavaMutableListWrapper(mutableLi
 
 fun toSerialized(list: List<Any?>): JniSerialized = JniSerialized(JavaListWrapper(list))
 
-fun toList(serialized: JniSerialized): List<Any?> = (serialized.list as JavaListWrapper<*>).list
+fun toList(serialized: JniSerialized): List<Any?> {
+    val list = serialized.list
+    return when (list) {
+        is JavaListWrapper<*> -> list.list
+
+        is SlicedBasicList<*> -> {
+            val source = list.source
+            if (source is JavaListWrapper<*>) {
+                source.list.subList(list.offset, list.offset + list.size)
+            } else {
+                List(list.size) { index -> list[index] }
+            }
+        }
+
+        else -> List(list.size) { index -> list[index] }
+    }
+}

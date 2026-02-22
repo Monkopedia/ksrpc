@@ -66,6 +66,34 @@ fun JniSerialized.Companion.fromJvm(
 
 fun JniSerialized.toJvm(jniEnv: CPointer<JNIEnvVar>): jobject {
     JNI.init(jniEnv)
-    val list = (list as NativeListWrapper).list
-    return JNI.JavaListWrapperKt.toSerialized(list)!!
+    val currentList = list
+    val jvmList =
+        when (currentList) {
+            is NativeListWrapper -> currentList.list
+
+            is SlicedBasicList<*> -> {
+                val source = currentList.source
+                if (source is NativeListWrapper) {
+                    JNI.List.subList(
+                        source.list,
+                        currentList.offset,
+                        currentList.offset + currentList.size
+                    ) ?: copyToNativeList(currentList)
+                } else {
+                    copyToNativeList(currentList)
+                }
+            }
+
+            else -> copyToNativeList(currentList)
+        }
+    return JNI.JavaListWrapperKt.toSerialized(jvmList)!!
 }
+
+private fun copyToNativeList(list: BasicList<*>): jobject =
+    NativeMutableListWrapper().also { wrapper ->
+        @Suppress("UNCHECKED_CAST")
+        val typedList = list as BasicList<jobject?>
+        for (i in 0 until typedList.size) {
+            wrapper.add(typedList[i])
+        }
+    }.list

@@ -316,6 +316,7 @@ internal object JNI {
     data object List : JvmClass("java/util/List") {
         val get = Method1("get", "(I)Ljava/lang/Object;", intArg, objMethod)
         val size = Method0("size", "()I", intMethod)
+        val subList = Method2("subList", "(II)Ljava/util/List;", intArg, intArg, objMethod)
     }
 
     data object JavaJniContinuation : JvmClass("com/monkopedia/ksrpc/jni/JavaJniContinuation") {

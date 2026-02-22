@@ -84,10 +84,19 @@ data class JniDecoder<T> internal constructor(
         typeConverter.int.convertTo(next())
 
     fun decodeSerialized(): JniSerialized {
-        val list = newList<T>()
-        for (i in 0 until decodeInt()) {
-            list.add(next())
+        val size = decodeInt()
+        if (size < 0) {
+            error("Cannot decode serialized payload of negative size: $size")
         }
-        return JniSerialized(list)
+        val start = index
+        val endExclusive = start + size
+        if (endExclusive < start || endExclusive > inputList.size) {
+            error(
+                "Cannot decode serialized payload of size $size at index $start " +
+                    "from list of size ${inputList.size}"
+            )
+        }
+        index = endExclusive
+        return JniSerialized(SlicedBasicList(inputList, start, size))
     }
 }
