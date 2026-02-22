@@ -35,6 +35,16 @@ class MultiChannelCoreTest {
     }
 
     @Test
+    fun testSendCompletesMatchingPendingReceiveFromStringIdAllocation() = runBlockingUnit {
+        val channel = MultiChannel<String>()
+        val (id, pending) = channel.allocateReceiveString()
+
+        channel.send(id, "value")
+
+        assertEquals("value", pending.await())
+    }
+
+    @Test
     fun testCloseCancelsPendingReceive() = runBlockingUnit {
         val channel = MultiChannel<String>()
         val (_, pending) = channel.allocateReceive()
@@ -67,6 +77,18 @@ class MultiChannelCoreTest {
         val thrown =
             assertFailsWith<IllegalStateException> {
                 channel.allocateReceive()
+            }
+        assertTrue(thrown.message?.contains("closed") == true)
+    }
+
+    @Test
+    fun testAllocateReceiveStringAfterCloseThrows() = runBlockingUnit {
+        val channel = MultiChannel<String>()
+        channel.close()
+
+        val thrown =
+            assertFailsWith<IllegalStateException> {
+                channel.allocateReceiveString()
             }
         assertTrue(thrown.message?.contains("closed") == true)
     }

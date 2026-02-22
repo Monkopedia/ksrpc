@@ -87,6 +87,44 @@ Status values:
     - `/tmp/socket-after-headerparse-v2.json`
 - Decision: reverted.
 
+### Packet call path message IDs: allocate string IDs directly for packet callers
+- Area: `ksrpc-core`/`ksrpc-packets` call-response message ID handling.
+- Status: `Useful`
+- Change:
+  - Added `allocateReceiveString()` to `MultiChannel` to avoid duplicate `Int -> String` conversion for string-keyed callers.
+  - Updated packet call path to use string-id allocation directly:
+    - `ksrpc-packets/src/commonMain/kotlin/PacketChannelBase.kt`
+  - Added coverage for new API:
+    - `ksrpc-test/src/commonTest/kotlin/MultiChannelCoreTest.kt`
+  - Added side-by-side benchmark method:
+    - `ksrpc-bench/src/jvmMain/kotlin/com/monkopedia/ksrpc/bench/MultiChannelBenchmark.kt`
+- Benchmark evidence:
+  - `MultiChannelBenchmark` (same run, same settings) shows direct gain for string-id path:
+    - `allocateSendReceive`: `5,422,733.712` ops/s
+    - `allocateSendReceiveStringId`: `6,324,901.663` ops/s
+    - Delta: `+16.63%` for string-id allocation path
+  - End-to-end socket transport (same environment window) also moved up, though noisier:
+    - `socketRoundTrip`: `22,706.670 -> 29,312.324` ops/s (`+29.09%`)
+    - `socketBinaryRoundTrip`: `10,361.954 -> 13,538.003` ops/s (`+30.65%`)
+  - Results saved:
+    - `/tmp/multichannel-msgid-compare-v2.json`
+    - `/tmp/socket-before-msgidstr.json`
+    - `/tmp/socket-after-msgidstr.json`
+- Validation:
+  - `./gradlew allTests` passed (`BUILD SUCCESSFUL`).
+- Decision: keep.
+
+### JVM stream bridge benchmark attempt (`InputStream`/`OutputStream`)
+- Area: `ksrpc-sockets` JVM stream bridge candidate (`InputOutputStreams.kt`).
+- Status: `Inconclusive`
+- Attempt:
+  - Tried to add a dedicated benchmark for `Pair<InputStream, OutputStream>.asConnection`.
+  - Benchmark setup consistently timed out (`InputOutputStreamTransportBenchmark timed out after 10000ms`).
+- Observation:
+  - Current stream bridge ties a long-lived writer coroutine to caller context, which prevents benchmark setup completion in this harness.
+- Decision:
+  - Reverted benchmark scaffolding; defer this optimization until scope/lifecycle semantics are addressed.
+
 ## 2026-02-22 (Backlog)
 
 ### Prioritized optimization candidates (not tested)

@@ -53,8 +53,19 @@ class MultiChannel<T> {
         lock.withLock {
             checkClosed()
             val id = this.id.getAndIncrement()
+            val idString = id.toString()
             val completable = CompletableDeferred<T>()
-            pending[id.toString()] = completable
+            pending[idString] = completable
+            return id to completable
+        }
+    }
+
+    suspend fun allocateReceiveString(): Pair<String, Deferred<T>> {
+        lock.withLock {
+            checkClosed()
+            val id = this.id.getAndIncrement().toString()
+            val completable = CompletableDeferred<T>()
+            pending[id] = completable
             return id to completable
         }
     }

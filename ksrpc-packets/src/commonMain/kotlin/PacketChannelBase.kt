@@ -280,12 +280,12 @@ abstract class PacketChannelBase<T>(
         endpoint: String,
         data: CallData<T>
     ): CallData<T> {
-        val (messageId, response) = multiChannel.allocateReceive()
+        val (messageId, response) = multiChannel.allocateReceiveString()
         env.logger.debug(
             "SerializedChannel",
             "Sending call ${channelId.id}/$endpoint -  $messageId"
         )
-        scope.sendPacket(true, channelId.id, messageId.toString(), endpoint, data)
+        scope.sendPacket(true, channelId.id, messageId, endpoint, data)
         return getCallData(response.await())
     }
 

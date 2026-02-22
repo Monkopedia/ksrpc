@@ -26,22 +26,32 @@ import kotlinx.coroutines.runBlocking
 @State(Scope.Benchmark)
 open class MultiChannelBenchmark {
 
-    private lateinit var multiChannel: MultiChannel<Int>
+    private lateinit var intChannel: MultiChannel<Int>
+    private lateinit var stringChannel: MultiChannel<String>
 
     @Setup
     fun setup() {
-        multiChannel = MultiChannel()
+        intChannel = MultiChannel()
+        stringChannel = MultiChannel()
     }
 
     @Benchmark
     fun allocateSendReceive(): Int = runBlocking {
-        val (id, pending) = multiChannel.allocateReceive()
-        multiChannel.send(id.toString(), id)
+        val (id, pending) = intChannel.allocateReceive()
+        intChannel.send(id.toString(), id)
+        pending.await()
+    }
+
+    @Benchmark
+    fun allocateSendReceiveStringId(): String = runBlocking {
+        val (id, pending) = stringChannel.allocateReceiveString()
+        stringChannel.send(id, id)
         pending.await()
     }
 
     @TearDown
     fun tearDown() = runBlocking {
-        multiChannel.close()
+        intChannel.close()
+        stringChannel.close()
     }
 }
