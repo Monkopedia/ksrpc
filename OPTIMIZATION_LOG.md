@@ -317,6 +317,29 @@ Status values:
   - Binary path improved, but non-binary round-trip regressed in confirmation runs.
 - Decision: reverted.
 
+### PacketChannel binary serializer caching: `ByteArraySerializer` only
+- Area: `ksrpc-packets` binary packet encode/decode path in `PacketChannelBase`.
+- Status: `Not useful`
+- Change attempt:
+  - Added a cached `ByteArraySerializer()` value and used it only for:
+    - binary chunk send serialization
+    - binary terminator packet serialization
+    - binary chunk decode in `BinaryChannel.handlePacket`
+  - Left `String` and `Unit` serializer call sites unchanged.
+- Benchmark evidence:
+  - Full run (`SocketTransportBenchmark.socket(RoundTrip|BinaryRoundTrip)`, `payloadSize=32,256,2048`,
+    `-wi 3 -i 8 -w 1s -r 2s -f 1`) was noisy and mixed:
+    - `/tmp/socket-binary-before-bytearray-only-cache.json`
+    - `/tmp/socket-binary-after-bytearray-only-cache.json`
+  - Focused A/B confirmation (`payloadSize=256`, same settings) showed negligible movement:
+    - `socketBinaryRoundTrip`: `19191.863 -> 19244.719` ops/s (`+0.28%`)
+    - `socketRoundTrip`: `36115.811 -> 36182.668` ops/s (`+0.19%`)
+    - `/tmp/socket-before-bytearray-only-cache-256-r3.json`
+    - `/tmp/socket-after-bytearray-only-cache-256-r3.json`
+- Observation:
+  - Effect size is within noise; no meaningful transport-level gain.
+- Decision: reverted.
+
 ## 2026-02-22 (Backlog)
 
 ### Prioritized optimization candidates (not tested)
