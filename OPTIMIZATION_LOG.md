@@ -416,6 +416,33 @@ Status values:
   - Effect size was not robust under reruns; transport noise dominated the measured deltas.
 - Decision: reverted.
 
+### JNI call-data envelope: flatten wrapper to fixed header + payload slice
+- Area: `ksrpc-jni` call-data envelope in `JniSerialization`.
+- Status: `Useful`
+- Change:
+  - Replaced nested wrapper serialization (`Wrapper(isError, content: JniSerialized, ...)`) with a flat
+    envelope layout:
+    - `[isError, isEndpointMissing, payloadSize, payload...]`
+  - Encode path now serializes payload once, then prepends a fixed header.
+  - Decode path reads header directly and slices payload without wrapper deserialization.
+  - Added compatibility fallback on decode for legacy wrapper-encoded payloads.
+  - Files changed:
+    - `ksrpc-jni/src/commonMain/kotlin/com/monkopedia/ksrpc/jni/JniSerialization.kt`
+- Benchmark evidence:
+  - `JniCommunicationBenchmark.jniRpcRoundTrip` (`payloadSize=32,256,2048`,
+    `-wi 3 -i 8 -w 1s -r 2s -f 1`):
+    - Before: `/tmp/jni-comm-before-envelope-flatten.json`
+    - After: `/tmp/jni-comm-after-envelope-flatten.json`
+    - `payloadSize=32`: `89.270 -> 90.552` ops/s (`+1.44%`)
+    - `payloadSize=256`: `88.912 -> 90.214` ops/s (`+1.46%`)
+    - `payloadSize=2048`: `88.379 -> 91.981` ops/s (`+4.08%`, noisier)
+  - Focused confirmation (`payloadSize=256`, same settings):
+    - `/tmp/jni-comm-after-envelope-flatten-256-r2.json`
+    - `91.470` ops/s (still above baseline `88.912`).
+- Validation:
+  - `./gradlew allTests` passed (`BUILD SUCCESSFUL`).
+- Decision: keep.
+
 ## 2026-02-22 (Backlog)
 
 ### Prioritized optimization candidates (not tested)
@@ -487,7 +514,7 @@ Status values:
   - Cache packet serializer and int converter on instance initialization.
 
 ### JNI call-data envelope: remove nested wrapper serialization when possible
-- Status: `Not tested`
+- Status: `Useful`
 - Area:
   - `ksrpc-jni/src/commonMain/kotlin/com/monkopedia/ksrpc/jni/JniSerialization.kt`
 - Why:

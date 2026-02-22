@@ -26,11 +26,16 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 
 class JniSerialization(private val jniSer: JniSer = JniSer) : CallDataSerializer<JniSerialized> {
+    private val typeConverter = newTypeConverter<Any?>()
+    private val booleanConverter = typeConverter.boolean
+    private val intConverter = typeConverter.int
+
     override fun <I> createCallData(serializer: KSerializer<I>, input: I): CallData<JniSerialized> =
         CallData.create(
-            jniSer.encodeToJni(
-                Wrapper.serializer(),
-                Wrapper(false, jniSer.encodeToJni(serializer, input))
+            encodeEnvelope(
+                isError = false,
+                isEndpointMissing = false,
+                content = jniSer.encodeToJni(serializer, input)
             )
         )
 
@@ -38,9 +43,10 @@ class JniSerialization(private val jniSer: JniSer = JniSer) : CallDataSerializer
         serializer: KSerializer<I>,
         input: I
     ): CallData<JniSerialized> = CallData.create(
-        jniSer.encodeToJni(
-            Wrapper.serializer(),
-            Wrapper(true, jniSer.encodeToJni(serializer, input))
+        encodeEnvelope(
+            isError = true,
+            isEndpointMissing = false,
+            content = jniSer.encodeToJni(serializer, input)
         )
     )
 
@@ -48,30 +54,83 @@ class JniSerialization(private val jniSer: JniSer = JniSer) : CallDataSerializer
         serializer: KSerializer<I>,
         input: I
     ): CallData<JniSerialized> = CallData.create(
-        jniSer.encodeToJni(
-            Wrapper.serializer(),
-            Wrapper(true, jniSer.encodeToJni(serializer, input), isEndpointMissing = true)
+        encodeEnvelope(
+            isError = true,
+            isEndpointMissing = true,
+            content = jniSer.encodeToJni(serializer, input)
         )
     )
 
-    override fun isError(data: CallData<JniSerialized>): Boolean {
-        val wrapper = jniSer.decodeFromJni(Wrapper.serializer(), data.readSerialized())
-        return wrapper.isError
-    }
+    override fun isError(data: CallData<JniSerialized>): Boolean =
+        decodeEnvelope(data.readSerialized()).isError
 
     override fun decodeErrorCallData(callData: CallData<JniSerialized>): Throwable {
-        val wrapper = jniSer.decodeFromJni(Wrapper.serializer(), callData.readSerialized())
-        return if (wrapper.isEndpointMissing) {
-            val failure = jniSer.decodeFromJni(RpcFailure.serializer(), wrapper.content)
+        val envelope = decodeEnvelope(callData.readSerialized())
+        return if (envelope.isEndpointMissing) {
+            val failure = jniSer.decodeFromJni(RpcFailure.serializer(), envelope.content)
             RpcEndpointException(failure.stack)
         } else {
-            jniSer.decodeFromJni(RpcFailure.serializer(), wrapper.content).toException()
+            jniSer.decodeFromJni(RpcFailure.serializer(), envelope.content).toException()
         }
     }
 
     override fun <I> decodeCallData(serializer: KSerializer<I>, data: CallData<JniSerialized>): I {
-        val wrapper = jniSer.decodeFromJni(Wrapper.serializer(), data.readSerialized())
-        return jniSer.decodeFromJni(serializer, wrapper.content)
+        val envelope = decodeEnvelope(data.readSerialized())
+        return jniSer.decodeFromJni(serializer, envelope.content)
+    }
+
+    private fun encodeEnvelope(
+        isError: Boolean,
+        isEndpointMissing: Boolean,
+        content: JniSerialized
+    ): JniSerialized {
+        val out = newList<Any?>()
+        out.add(booleanConverter.convertFrom(isError))
+        out.add(booleanConverter.convertFrom(isEndpointMissing))
+        out.add(intConverter.convertFrom(content.list.size))
+        for (index in 0 until content.list.size) {
+            out.add(content.list[index])
+        }
+        return out.asSerialized
+    }
+
+    private fun decodeEnvelope(serialized: JniSerialized): Envelope = runCatching {
+        decodeFlatEnvelope(serialized)
+    }.getOrElse {
+        val wrapper = jniSer.decodeFromJni(Wrapper.serializer(), serialized)
+        Envelope(
+            isError = wrapper.isError,
+            isEndpointMissing = wrapper.isEndpointMissing,
+            content = wrapper.content
+        )
+    }
+
+    private fun decodeFlatEnvelope(serialized: JniSerialized): Envelope {
+        @Suppress("UNCHECKED_CAST")
+        val list = serialized.list as BasicList<Any?>
+        if (list.size < ENVELOPE_HEADER_SIZE) {
+            error("Invalid Jni envelope size: ${list.size}")
+        }
+
+        val isError = booleanConverter.convertTo(list[0])
+        val isEndpointMissing = booleanConverter.convertTo(list[1])
+        val payloadSize = intConverter.convertTo(list[2])
+        if (payloadSize < 0) {
+            error("Invalid Jni envelope payload size: $payloadSize")
+        }
+        val payloadOffset = ENVELOPE_HEADER_SIZE
+        val payloadEndExclusive = payloadOffset + payloadSize
+        if (payloadEndExclusive < payloadOffset || payloadEndExclusive > list.size) {
+            error(
+                "Invalid Jni envelope payload bounds: " +
+                    "offset=$payloadOffset size=$payloadSize listSize=${list.size}"
+            )
+        }
+        return Envelope(
+            isError = isError,
+            isEndpointMissing = isEndpointMissing,
+            content = JniSerialized(SlicedBasicList(list, payloadOffset, payloadSize))
+        )
     }
 
     @Serializable
@@ -80,4 +139,14 @@ class JniSerialization(private val jniSer: JniSer = JniSer) : CallDataSerializer
         val content: JniSerialized,
         val isEndpointMissing: Boolean = false
     )
+
+    private data class Envelope(
+        val isError: Boolean,
+        val isEndpointMissing: Boolean,
+        val content: JniSerialized
+    )
+
+    private companion object {
+        const val ENVELOPE_HEADER_SIZE = 3
+    }
 }
