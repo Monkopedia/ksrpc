@@ -475,6 +475,68 @@ Status values:
     passed (`BUILD SUCCESSFUL`).
 - Decision: keep.
 
+### JsonRpc header receive path: reusable buffer for payload decode
+- Area: `ksrpc-jsonrpc` `JsonRpcHeader.receive()`.
+- Status: `Not useful`
+- Change attempt:
+  - Reused a mutable `ByteArray` receive buffer and decoded from a `[0, length)` slice to avoid
+    per-message byte array allocation.
+- Benchmark evidence (`JsonRpcHeaderBenchmark.sendThenReceive`,
+  `payloadSize=32,256,2048`, `-wi 3 -i 8 -w 1s -r 2s -f 1`):
+  - Baseline (post-`Content-Length` scan version):
+    - `/tmp/jsonrpc-header-after-contentlength-scan.json`
+    - `32`: `986,110.337` ops/s
+    - `256`: `843,864.255` ops/s
+    - `2048`: `416,752.777` ops/s
+  - Attempt:
+    - `/tmp/jsonrpc-header-after-buffer-reuse.json`
+    - `32`: `971,523.163` ops/s (`-1.48%`)
+    - `256`: `796,424.122` ops/s (`-5.62%`)
+    - `2048`: `460,151.443` ops/s (mixed gain)
+  - Focused confirmation (`payloadSize=256`, same settings):
+    - `/tmp/jsonrpc-header-after-buffer-reuse-256-r2.json`
+    - `810,162.780` ops/s (still below baseline `843,864.255`).
+- Decision: reverted.
+
+### JsonRpc dispatch parse: manual `JsonObject` extraction for request/response
+- Area: `ksrpc-jsonrpc` receive loop dispatch in `JsonRpcWriterBase`.
+- Status: `Inconclusive`
+- Change:
+  - Replaced `json.decodeFromJsonElement<JsonRpcRequest/JsonRpcResponse>(...)` in the hot receive
+    loop with strict/manual `JsonObject` field extraction:
+    - request detection/parsing via `parseRequestOrNull(...)`
+    - response parsing via `parseResponse(...)`
+    - error parsing via `parseError(...)`
+  - This avoids serializer-driven object decode in the dispatch branch while preserving error
+    signaling for malformed request/response payloads.
+  - File changed:
+    - `ksrpc-jsonrpc/src/commonMain/kotlin/JsonRpcWriterBase.kt`
+- Benchmark evidence (`JsonRpcWriterBenchmark.executeLoopbackRoundTrip`,
+  `payloadSize=32,256,2048`, `-wi 3 -i 8 -w 1s -r 2s -f 1`):
+  - Baseline:
+    - `/tmp/jsonrpc-writer-before-manual-parse.json`
+    - `32`: `106,551.765` ops/s
+    - `256`: `92,432.734` ops/s (noisy run)
+    - `2048`: `102,948.715` ops/s
+  - Attempt:
+    - `/tmp/jsonrpc-writer-after-manual-parse.json`
+    - `32`: `105,648.605` ops/s (`-0.85%`)
+    - `256`: `107,675.075` ops/s (`+16.49%` vs baseline run)
+    - `2048`: `103,028.389` ops/s (`+0.08%`)
+  - Controlled focused confirmation (`payloadSize=256`, same settings):
+    - Baseline control: `/tmp/jsonrpc-writer-before-manual-parse-256-r2.json`
+      - `101,089.146` ops/s
+    - Attempt: `/tmp/jsonrpc-writer-after-manual-parse-256-r2.json`
+      - `107,379.714` ops/s
+    - Delta: `+6.22%`
+  - Additional attempt reruns (`payloadSize=256`, same settings) were unstable:
+    - `/tmp/jsonrpc-writer-after-manual-parse-256-r3.json`: `100,995.357` ops/s (near baseline)
+    - `/tmp/jsonrpc-writer-after-manual-parse-256-r4.json`: `87,368.339` ops/s (regressed)
+- Observation:
+  - Measured throughput moved significantly across reruns, including clear regressions, so the
+    change does not provide a reliable gain in this environment.
+- Decision: reverted.
+
 ## 2026-02-22 (Backlog)
 
 ### Prioritized optimization candidates (not tested)
@@ -528,13 +590,14 @@ Status values:
   - Explore direct byte-oriented JSON encode/decode path or pooling for reusable byte buffers.
 
 ### JsonRpc request/response dispatch parse path: reduce intermediate JSON allocations
-- Status: `Not tested`
+- Status: `Inconclusive`
 - Area:
   - `ksrpc-jsonrpc/src/commonMain/kotlin/JsonRpcWriterBase.kt`
 - Why:
   - Decode to `JsonObject`/`JsonElement` first, then decode again to typed request/response.
 - Try:
-  - Single-pass typed decode path based on a lighter discriminator extraction.
+  - Manual extraction attempt was benchmarked but remained unstable across reruns;
+    see `2026-02-23` entry above.
 
 ### JNI connection bridge: cache serializers/converters used per call
 - Status: `Not tested`
