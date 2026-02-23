@@ -537,6 +537,32 @@ Status values:
     change does not provide a reliable gain in this environment.
 - Decision: reverted.
 
+### BinaryChannel in-order fast path: compare `messageId` string before `toInt()`
+- Area: `ksrpc-packets` binary reassembly hot path in `PacketChannelBase.BinaryChannel`.
+- Status: `Not useful`
+- Change attempt:
+  - Added `currentPacketString` and compared incoming `packet.messageId` string directly for the
+    common in-order path.
+  - Deferred `messageId.toInt()` parsing to out-of-order packets only.
+- Benchmark evidence (`SocketTransportBenchmark.socketBinaryRoundTrip` and `socketRoundTrip`,
+  `payloadSize=32,256,2048`, `-wi 3 -i 8 -w 1s -r 2s -f 1`):
+  - Baseline:
+    - `/tmp/socket-binary-inorder-before.json`
+    - Binary: `32` `23,326.958`, `256` `17,723.187`, `2048` `5,709.927` ops/s
+    - Non-binary: `32` `26,458.449`, `256` `31,844.971`, `2048` `21,405.412` ops/s
+  - Attempt:
+    - `/tmp/socket-binary-inorder-after.json`
+    - Binary: `32` `22,223.609` (`-4.73%`), `256` `14,446.282` (`-18.49%`, noisy),
+      `2048` `5,949.821` (`+4.20%`)
+    - Non-binary: `32` `34,079.817`, `256` `31,248.620` (`-1.87%`), `2048` `21,931.777`
+  - Focused confirmation (`payloadSize=256`, same settings):
+    - `/tmp/socket-binary-inorder-after-256-r2.json`
+    - Binary: `16,802.441` ops/s (still below baseline `17,723.187`, about `-5.20%`)
+    - Non-binary: `33,293.506` ops/s (mixed/noisy)
+- Observation:
+  - Targeted binary path did not improve reliably and regressed in focused confirmation.
+- Decision: reverted.
+
 ## 2026-02-22 (Backlog)
 
 ### Prioritized optimization candidates (not tested)
