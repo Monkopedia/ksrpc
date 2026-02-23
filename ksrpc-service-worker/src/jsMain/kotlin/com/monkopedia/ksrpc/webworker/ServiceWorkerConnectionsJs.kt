@@ -128,7 +128,7 @@ private fun encodePacket(
     packet: Packet<String>,
     serialization: CallDataSerializer<String>
 ): String = serialization
-    .createCallData(Packet.serializer(String.serializer()), packet)
+    .createCallData(SERVICE_WORKER_PACKET_SERIALIZER, packet)
     .readSerialized()
 
 private fun decodePacket(
@@ -136,8 +136,10 @@ private fun decodePacket(
     serialization: CallDataSerializer<String>
 ): Packet<String> {
     val callData = CallData.create(payload)
-    return serialization.decodeCallData(Packet.serializer(String.serializer()), callData)
+    return serialization.decodeCallData(SERVICE_WORKER_PACKET_SERIALIZER, callData)
 }
+
+private val SERVICE_WORKER_PACKET_SERIALIZER = Packet.serializer(String.serializer())
 
 private suspend fun resolveServiceWorker(registration: dynamic): dynamic {
     val active = registration.active ?: registration.waiting ?: registration.installing
