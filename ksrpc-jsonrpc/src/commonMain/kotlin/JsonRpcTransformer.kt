@@ -19,7 +19,6 @@ import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.packets.internal.CONTENT_LENGTH
 import com.monkopedia.ksrpc.packets.internal.CONTENT_TYPE
 import com.monkopedia.ksrpc.sockets.internal.appendLine
-import com.monkopedia.ksrpc.sockets.internal.readFields
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.close
@@ -72,11 +71,27 @@ internal class JsonRpcHeader(
 
     override suspend fun receive(): JsonElement? {
         receiveLock.withLock {
-            val params = input.readFields()
-            val length = params[CONTENT_LENGTH]?.toIntOrNull() ?: return null
+            val length = readContentLength() ?: return null
             var byteArray = ByteArray(length)
             input.readFully(byteArray)
             return json.decodeFromString(serializer, byteArray.decodeToString())
+        }
+    }
+
+    private suspend fun readContentLength(): Int? {
+        var contentLength: Int? = null
+        while (true) {
+            val line = input.readUTF8Line() ?: return null
+            if (line.isEmpty()) {
+                return contentLength
+            }
+            val separator = line.indexOf(':')
+            if (separator <= 0) continue
+            val headerName = line.substring(0, separator).trim()
+            if (headerName.equals(CONTENT_LENGTH, ignoreCase = true)) {
+                val headerValue = line.substring(separator + 1).trim()
+                contentLength = headerValue.toIntOrNull()
+            }
         }
     }
 

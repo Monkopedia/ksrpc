@@ -443,6 +443,38 @@ Status values:
   - `./gradlew allTests` passed (`BUILD SUCCESSFUL`).
 - Decision: keep.
 
+## 2026-02-23
+
+### JsonRpc header receive path: direct `Content-Length` scan
+- Area: `ksrpc-jsonrpc` header parse path in `JsonRpcTransformer`.
+- Status: `Useful`
+- Change:
+  - Replaced `readFields()` map parsing in `JsonRpcHeader.receive()` with direct line-by-line
+    `Content-Length` extraction (`readContentLength()`).
+  - This removes header map allocation and extra key lookups in the receive hot path.
+  - Added benchmark coverage:
+    - `ksrpc-bench/src/jvmMain/kotlin/com/monkopedia/ksrpc/bench/JsonRpcHeaderBenchmark.kt`
+- Benchmark evidence (`JsonRpcHeaderBenchmark.sendThenReceive`,
+  `payloadSize=32,256,2048`, `-wi 3 -i 8 -w 1s -r 2s -f 1`):
+  - Baseline:
+    - `/tmp/jsonrpc-header-before-jvmcodec.json`
+    - `32`: `886,304.905` ops/s
+    - `256`: `747,225.631` ops/s (noisy run)
+    - `2048`: `447,541.790` ops/s
+  - Attempt:
+    - `/tmp/jsonrpc-header-after-contentlength-scan.json`
+    - `32`: `986,110.337` ops/s (`+11.26%`)
+    - `256`: `843,864.255` ops/s (`+12.94%` vs baseline run)
+    - `2048`: `416,752.777` ops/s (full-run regression/noise)
+  - Focused confirmation (`payloadSize=2048`, same settings):
+    - `/tmp/jsonrpc-header-after-contentlength-scan-2048-r2.json`
+    - `448,264.202` ops/s (effectively flat/slightly above baseline `447,541.790`)
+- Validation:
+  - `./gradlew allTests` passed (`BUILD SUCCESSFUL`).
+  - `./gradlew :ksrpc-jsonrpc:ktlintCommonMainSourceSetCheck :ksrpc-bench:ktlintJvmMainSourceSetCheck`
+    passed (`BUILD SUCCESSFUL`).
+- Decision: keep.
+
 ## 2026-02-22 (Backlog)
 
 ### Prioritized optimization candidates (not tested)
