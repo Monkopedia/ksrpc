@@ -114,9 +114,11 @@ private class StringSerializer(val stringFormat: StringFormat = Json) : CallData
         }
     }
 
-    override fun isError(data: CallData<String>): Boolean =
-        data.readSerialized().startsWith(ERROR_PREFIX) ||
-            data.readSerialized().startsWith(ENDPOINT_NOT_FOUND_PREFIX)
+    override fun isError(data: CallData<String>): Boolean {
+        val serialized = data.readSerialized()
+        return serialized.startsWith(ERROR_PREFIX) ||
+            serialized.startsWith(ENDPOINT_NOT_FOUND_PREFIX)
+    }
 }
 
 data class KsrpcEnvironmentBuilder<T> internal constructor(

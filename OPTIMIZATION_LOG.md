@@ -184,7 +184,8 @@ Status values:
 - Observation:
   - Transport-level benchmark noise at larger payload dominated any micro-change from this branch.
 - Decision:
-  - Reverted code change; keep as a possible micro-optimization if a tighter benchmark harness is added.
+  - Reverted in this transport-level attempt; later reintroduced and kept after a dedicated benchmark
+    showed consistent gains (see `2026-02-23` entry below).
 
 ### BinaryChannel pending handling: iterative drain + parse-once out-of-order fast path
 - Area: `ksrpc-packets` binary packet reassembly in `PacketChannelBase.BinaryChannel`.
@@ -652,6 +653,29 @@ Status values:
   - `./gradlew :ksrpc-sockets:ktlintNativeMainSourceSetCheck` passed (`BUILD SUCCESSFUL`).
 - Decision: keep.
 
+### String serializer `isError`: single read of serialized payload (dedicated benchmark)
+- Area: `ksrpc-core` common `StringSerializer.isError`.
+- Status: `Useful`
+- Change:
+  - Read `CallData.readSerialized()` once in `isError` and reuse it for both error-prefix checks.
+  - Added dedicated benchmark coverage:
+    - `ksrpc-bench/src/commonMain/kotlin/com/monkopedia/ksrpc/bench/StringSerializerErrorBenchmark.kt`
+- Benchmark evidence (`StringSerializerErrorBenchmark.(isErrorNormal|isErrorError|isErrorEndpointMissing)`,
+  `payloadSize=32,256,2048`, `-wi 3 -i 8 -w 1s -r 2s -f 1`):
+  - Baseline:
+    - `/tmp/string-iserror-before-single-read.json`
+  - Attempt:
+    - `/tmp/string-iserror-after-single-read.json`
+  - Deltas:
+    - `isErrorEndpointMissing`: `+6.16%` (32), `+4.40%` (256), `+14.20%` (2048)
+    - `isErrorError`: `+3.44%` (32), `+7.45%` (256), `+3.25%` (2048)
+    - `isErrorNormal`: `+9.41%` (32), `+2.24%` (256), `+3.17%` (2048)
+- Validation:
+  - `./gradlew :ksrpc-core:ktlintCommonMainSourceSetCheck :ksrpc-bench:ktlintCommonMainSourceSetCheck`
+    passed (`BUILD SUCCESSFUL`).
+  - `./gradlew allTests` passed (`BUILD SUCCESSFUL`).
+- Decision: keep.
+
 ## 2026-02-22 (Backlog)
 
 ### Prioritized optimization candidates (not tested)
@@ -684,7 +708,7 @@ Status values:
 #### P2
 
 ### Packet message ID type: use numeric IDs in hot path
-- Status: `Not tested`
+- Status: `Not useful`
 - Area:
   - `ksrpc-packets/src/commonMain/kotlin/Packet.kt`
   - `ksrpc-packets/src/commonMain/kotlin/PacketChannelBase.kt`
@@ -693,15 +717,19 @@ Status values:
   - Frequent `Int -> String` and `String -> Int` conversions (`toString()`, `toInt()`).
 - Try:
   - Introduce numeric message ID representation internally and convert only at boundaries.
+  - Partial attempt via int-key pending map/fast-path (`2026-02-22` entry) regressed core benchmark
+    path and was reverted.
 
 ### JsonRpc header transformer: avoid extra string/byte conversions
-- Status: `Not tested`
+- Status: `Not useful`
 - Area:
   - `ksrpc-jsonrpc/src/commonMain/kotlin/JsonRpcTransformer.kt`
 - Why:
   - `encodeToString` -> `encodeToByteArray`, then `ByteArray` -> `decodeToString` -> `decodeFromString`.
 - Try:
   - Explore direct byte-oriented JSON encode/decode path or pooling for reusable byte buffers.
+  - Prior send-path conversion attempt (`utf8Length` + direct `writeStringUtf8`) regressed and was
+    reverted (`2026-02-23` entry).
 
 ### JsonRpc request/response dispatch parse path: reduce intermediate JSON allocations
 - Status: `Inconclusive`
@@ -714,13 +742,14 @@ Status values:
     see `2026-02-23` entry above.
 
 ### JNI connection bridge: cache serializers/converters used per call
-- Status: `Not tested`
+- Status: `Not useful`
 - Area:
   - `ksrpc-jni/src/jvmMain/kotlin/com/monkopedia/ksrpc/jni/JniConnection.kt`
 - Why:
   - Repeated `Packet.serializer(JniSerialized)` and converter construction in hot methods.
 - Try:
   - Cache packet serializer and int converter on instance initialization.
+  - Attempted and regressed (`2026-02-22` entry); reverted.
 
 ### JNI call-data envelope: remove nested wrapper serialization when possible
 - Status: `Useful`
@@ -734,7 +763,7 @@ Status values:
 #### P3
 
 ### Logging overhead in hot paths: add lazy message formatting
-- Status: `Not tested`
+- Status: `Not useful`
 - Area:
   - Frequent call sites in packet/channel code
   - `ksrpc-core/src/commonMain/kotlin/Logger.kt`
@@ -742,15 +771,17 @@ Status values:
   - String interpolation occurs even when default no-op logger drops logs.
 - Try:
   - Add lambda-based logging API or explicit level checks before building expensive messages.
+  - Attempted and benchmarked (`2026-02-22` entry) with no reliable gain; reverted.
 
 ### String serializer error checks: reduce repeated serialized reads
-- Status: `Not tested`
+- Status: `Useful`
 - Area:
   - `ksrpc-core/src/commonMain/kotlin/KsrpcEnvironment.kt` (`StringSerializer.isError`)
 - Why:
   - `readSerialized()` called multiple times on same `CallData`.
 - Try:
   - Read once and reuse local value in predicates.
+  - Implemented and retained (`2026-02-23` dedicated benchmark entry above).
 
 ### Service worker packet channels (JS/Wasm): reduce queue and serialization overhead
 - Status: `Not tested`
@@ -764,10 +795,11 @@ Status values:
   - Backpressure-aware channel sizing and structured-clone-friendly payload formats.
 
 ### Ktor websocket packet conversion path: evaluate lower-overhead codec
-- Status: `Not tested`
+- Status: `Not useful`
 - Area:
   - `ksrpc-ktor/websocket/shared/src/commonMain/kotlin/WebsocketPacketChannel.kt`
 - Why:
   - Generic converter path may add overhead per frame.
 - Try:
   - Compare against direct serializer-based frame read/write with reusable buffers.
+  - Attempted direct frame codec and reverted due mixed/flat results (`2026-02-22` entry).
