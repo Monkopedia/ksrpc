@@ -24,6 +24,13 @@ kotlin {
     js(IR) {
         nodejs()
     }
+    linuxX64 {
+        binaries {
+            executable("posixBench") {
+                entryPoint = "com.monkopedia.ksrpc.bench.posixBenchMain"
+            }
+        }
+    }
 
     sourceSets["commonMain"].dependencies {
         implementation(project(":ksrpc-core"))
@@ -47,6 +54,10 @@ kotlin {
         implementation(libs.ktor.server.netty)
         implementation(libs.ktor.server.websockets)
         implementation(libs.ktor.kotlinx.serialization)
+    }
+
+    sourceSets["linuxX64Main"].dependencies {
+        implementation(project(":ksrpc-sockets"))
     }
 }
 

@@ -576,9 +576,21 @@ Status values:
 - Why this is kept:
   - Correctness: previous code could drop bytes on partial `write(...)` results.
   - Performance: removed expensive durability/sync calls and copy allocations from hot path.
-- Benchmark note:
-  - Native benchmark measurement is currently blocked because `ksrpc-bench` does not have a native
-    benchmark target enabled in this repo configuration.
+- Native benchmark support:
+  - Added `linuxX64` native benchmark executable target in:
+    - `ksrpc-bench/build.gradle.kts`
+  - Added native POSIX pipe microbenchmark harness in:
+    - `ksrpc-bench/src/linuxX64Main/kotlin/com/monkopedia/ksrpc/bench/PosixFileChannelMicrobench.kt`
+- Benchmark evidence (native executable, `--warmup=500 --iterations=4000 --payloads=256,4096,16384`,
+  3 baseline runs from `35c1bea^` vs 3 optimized runs from `35c1bea`):
+  - Median throughput deltas:
+    - `256`: `60,931.364 -> 66,670.841` ops/s (`+9.42%`)
+    - `4096`: `37,474.390 -> 62,329.155` ops/s (`+66.32%`)
+    - `16384`: `20,426.728 -> 49,228.390` ops/s (`+141.00%`)
+  - Median latency deltas:
+    - `256`: `16,411.909 -> 14,999.061` ns/op (`-8.61%`)
+    - `4096`: `26,684.891 -> 16,043.856` ns/op (`-39.88%`)
+    - `16384`: `48,955.466 -> 20,313.482` ns/op (`-58.51%`)
 - Validation:
   - `./gradlew allTests` passed (`BUILD SUCCESSFUL`).
   - `./gradlew :ksrpc-sockets:ktlintNativeMainSourceSetCheck` passed (`BUILD SUCCESSFUL`).
