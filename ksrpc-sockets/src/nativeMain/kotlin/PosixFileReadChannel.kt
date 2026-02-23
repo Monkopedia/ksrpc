@@ -30,18 +30,19 @@ import io.ktor.utils.io.writeFully
 import io.ktor.utils.io.writer
 import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.allocArray
 import kotlinx.cinterop.memScoped
-import kotlinx.cinterop.toCValues
+import kotlinx.cinterop.usePinned
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.newSingleThreadContext
+import platform.posix.EINTR
 import platform.posix.STDIN_FILENO
 import platform.posix.STDOUT_FILENO
 import platform.posix.close
-import platform.posix.fflush
-import platform.posix.fsync
+import platform.posix.errno
 import platform.posix.read
 import platform.posix.write
 
@@ -106,24 +107,38 @@ fun posixFileReadChannel(fd: Int): ByteReadChannel {
 fun posixFileWriteChannel(fd: Int): ByteWriteChannel {
     val thread = newSingleThreadContext("write-channel-$fd")
     return GlobalScope.reader(thread, autoFlush = true) {
-        memScoped {
-            try {
-                while (!channel.isClosedForRead) {
-                    channel.read { source, start, end ->
-                        val size = end - start
-                        write(fd, source.sliceArray(start until end).toCValues(), size.toULong())
-                        fsync(fd)
-                        fflush(null)
-                        size.toInt()
+        try {
+            while (!channel.isClosedForRead) {
+                channel.read { source, start, end ->
+                    var writeOffset = start
+                    while (writeOffset < end) {
+                        val written = source.usePinned { pinned ->
+                            write(
+                                fd,
+                                pinned.addressOf(writeOffset),
+                                (end - writeOffset).toULong()
+                            )
+                        }
+                        if (written < 0) {
+                            if (errno == EINTR) {
+                                continue
+                            }
+                            error("posix write failed for fd=$fd")
+                        }
+                        if (written == 0L) {
+                            error("posix write made no progress for fd=$fd")
+                        }
+                        writeOffset += written.toInt()
                     }
+                    end - start
                 }
-            } catch (cause: Throwable) {
-                cause.printStackTrace()
-                channel.cancel(cause)
-            } finally {
-                close(fd)
-                thread.close()
             }
+        } catch (cause: Throwable) {
+            cause.printStackTrace()
+            channel.cancel(cause)
+        } finally {
+            close(fd)
+            thread.close()
         }
     }.channel
 }

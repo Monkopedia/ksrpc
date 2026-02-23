@@ -563,6 +563,27 @@ Status values:
   - Targeted binary path did not improve reliably and regressed in focused confirmation.
 - Decision: reverted.
 
+### Native POSIX write path: remove per-chunk sync/copy and handle partial writes
+- Area: `ksrpc-sockets` native write bridge in `PosixFileReadChannel.kt`.
+- Status: `Useful`
+- Change:
+  - Removed per-chunk `fsync(fd)` and `fflush(null)` calls from the stream write loop.
+  - Removed per-chunk `sliceArray(...).toCValues()` allocation.
+  - Switched to pinned buffer pointer writes and added proper partial-write handling:
+    - loop until full chunk is written
+    - retry on `EINTR`
+    - fail fast on no-progress writes
+- Why this is kept:
+  - Correctness: previous code could drop bytes on partial `write(...)` results.
+  - Performance: removed expensive durability/sync calls and copy allocations from hot path.
+- Benchmark note:
+  - Native benchmark measurement is currently blocked because `ksrpc-bench` does not have a native
+    benchmark target enabled in this repo configuration.
+- Validation:
+  - `./gradlew allTests` passed (`BUILD SUCCESSFUL`).
+  - `./gradlew :ksrpc-sockets:ktlintNativeMainSourceSetCheck` passed (`BUILD SUCCESSFUL`).
+- Decision: keep.
+
 ## 2026-02-22 (Backlog)
 
 ### Prioritized optimization candidates (not tested)
@@ -570,15 +591,14 @@ Status values:
 #### P1
 
 ### Native POSIX write path: avoid fsync/fflush and sliceArray per chunk
-- Status: `Not tested`
+- Status: `Useful`
 - Area:
   - `ksrpc-sockets/src/nativeMain/kotlin/PosixFileReadChannel.kt`
 - Why:
   - `fsync(fd)` and `fflush(null)` on every chunk are very expensive.
   - `sliceArray(...).toCValues()` allocates on every write.
 - Try:
-  - Remove per-chunk durability calls for stream transport.
-  - Write directly from buffer/pointer without array copies.
+  - Implemented in `2026-02-23` entry above, including partial-write handling.
 
 ### Binary transport path: reduce encode/decode hops for chunked binary
 - Status: `Inconclusive`
