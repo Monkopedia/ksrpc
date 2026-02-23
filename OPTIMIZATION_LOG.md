@@ -261,13 +261,26 @@ Status values:
 
 ### Binary sender chunk extraction: swap `readBytes()` to `readByteArray()`
 - Area: `ksrpc-packets` binary send loop in `PacketChannelBase.sendPacket`.
-- Status: `Inconclusive`
+- Status: `Not useful`
 - Change attempt:
   - Replaced `readRemaining(maxSize).readBytes()` with `readByteArray()`.
-- Outcome:
-  - Compilation failed: `Unresolved reference 'readByteArray'` for current source-set API.
+  - Added `kotlinx.io.readByteArray` import (the API is available in current source set).
+- Benchmark evidence (`SocketTransportBenchmark`, `payloadSize=256`, `-wi 3 -i 8 -w 1s -r 2s -f 1`):
+  - Baseline:
+    - `/tmp/socket-before-readbytearray-r2.json`
+    - `socketBinaryRoundTrip`: `13,112.349` ops/s
+    - `socketRoundTrip`: `30,896.422` ops/s
+  - Attempt:
+    - `/tmp/socket-after-readbytearray-r2.json`
+    - `socketBinaryRoundTrip`: `13,969.085` ops/s (`+6.53%`)
+    - `socketRoundTrip`: `26,856.813` ops/s (`-13.07%`)
+  - Focused binary-only rerun (same settings):
+    - Baseline: `/tmp/socket-before-readbytearray-binary-r3.json` -> `14,584.757` ops/s
+    - Attempt: `/tmp/socket-after-readbytearray-binary-r3.json` -> `13,872.844` ops/s (`-4.88%`)
+- Observation:
+  - Results were noisy and directionally inconsistent; focused binary rerun regressed.
 - Decision:
-  - Reverted immediately; no benchmark run performed.
+  - Reverted.
 
 ### MultiChannel locking: replace `Mutex` with atomicfu `SynchronizedObject`
 - Area: `ksrpc-core` pending-response synchronization in `MultiChannel`.
@@ -561,6 +574,49 @@ Status values:
     - Non-binary: `33,293.506` ops/s (mixed/noisy)
 - Observation:
   - Targeted binary path did not improve reliably and regressed in focused confirmation.
+- Decision: reverted.
+
+### MultiChannel lock scope: complete deferreds outside mutex
+- Area: `ksrpc-core` pending-response synchronization in `MultiChannel`.
+- Status: `Not useful`
+- Change attempt:
+  - Reduced mutex scope in `send` and `close` by removing deferreds under lock and calling
+    `complete(...)` / `completeExceptionally(...)` after releasing the mutex.
+- Benchmark evidence (`MultiChannelBenchmark`, `-wi 3 -i 8 -w 1s -r 2s -f 1`):
+  - Baseline:
+    - `/tmp/multichannel-before-complete-outside-lock.json`
+    - `allocateSendReceive`: `7,661,388.592` ops/s
+    - `allocateSendReceiveStringId`: `8,786,507.419` ops/s
+  - Attempt:
+    - `/tmp/multichannel-after-complete-outside-lock.json`
+    - `allocateSendReceive`: `7,533,060.101` ops/s (`-1.68%`)
+    - `allocateSendReceiveStringId`: `8,609,638.628` ops/s (`-2.01%`)
+- Observation:
+  - Both benchmark variants regressed in the same run configuration.
+- Decision: reverted.
+
+### JsonRpc header send path: write UTF-8 string directly + computed UTF-8 length
+- Area: `ksrpc-jsonrpc` `JsonRpcHeader.send()`.
+- Status: `Not useful`
+- Change attempt:
+  - Replaced `encodeToString(...).encodeToByteArray()` + `writeFully(byte[])` with:
+    - direct `writeStringUtf8(content)`
+    - computed UTF-8 byte length via a `utf8Length()` helper for `Content-Length`.
+  - Goal: avoid payload `ByteArray` allocation and reduce conversion overhead in the send path.
+- Benchmark evidence (`JsonRpcHeaderBenchmark.sendThenReceive`,
+  `payloadSize=32,256,2048`, `-wi 3 -i 8 -w 1s -r 2s -f 1`):
+  - Baseline:
+    - `/tmp/jsonrpc-header-before-bytecodec.json`
+    - `32`: `870,590.721` ops/s
+    - `256`: `739,881.528` ops/s
+    - `2048`: `341,366.715` ops/s
+  - Attempt:
+    - `/tmp/jsonrpc-header-after-utf8len-writeString.json`
+    - `32`: `680,143.293` ops/s (`-21.88%`, noisy but materially lower)
+    - `256`: `733,327.921` ops/s (`-0.89%`)
+    - `2048`: `324,615.384` ops/s (`-4.91%`)
+- Observation:
+  - Regressed or flat across all payload sizes in this run.
 - Decision: reverted.
 
 ### Native POSIX write path: remove per-chunk sync/copy and handle partial writes
