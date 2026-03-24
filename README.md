@@ -5,10 +5,36 @@
 [![Maven Central](https://img.shields.io/maven-central/v/com.monkopedia.ksrpc/ksrpc-core/0.11.0)](https://search.maven.org/artifact/com.monkopedia.ksrpc/ksrpc-core/0.11.0/pom)
 [![KDoc link](https://img.shields.io/badge/API_reference-KDoc-blue)](https://monkopedia.github.io/ksrpc/)
 
-This is a simple library that allows for json-like RPCs with a simple service declaration in kotlin
-common.
+Define a service interface once in Kotlin common, then call it over HTTP, sockets, stdin/out,
+websockets, or in-process, without changing your service code. Built for Kotlin Multiplatform,
+curl-testable by default, and LSP-protocol-compatible out of the box.
 
-## Why not protobuf or one of the 1000 other RPC projects?
+```kotlin
+@KsService
+interface MyService : RpcService {
+    @KsMethod("/greet")
+    suspend fun greet(name: String): String
+}
+
+// Implement once, host anywhere
+val connection = stdInConnection(env)
+connection.registerDefault(MyServiceImpl())
+
+// Or call over HTTP
+val service = HttpClient { }.asConnection("http://localhost:8080/my_service", env)
+    .defaultChannel().toStub<MyService>()
+```
+
+## Supported transports
+
+ - HTTP (JVM, Native, JS/WASM client)
+ - WebSockets (JVM, Native, JS/WASM client)
+ - Sockets (JVM, Native)
+ - Stdin/out (JVM, Native) — compatible with LSP and similar protocols
+ - jsonrpc 2.0 (JVM, Native)
+ - Service workers (JS, experimental)
+
+## Why not gRPC or protobuf?
 
 Because those didn't quite exactly meet my needs. Here are a few of the things I considered when
 deciding to write this.
@@ -22,16 +48,6 @@ deciding to write this.
 The result after a little work was ksrpc. Its not perfect, but it fits my situation well. It
 has a relatively simple way to declare services and supports a number of connection mechanisms
 depending on the platform being targeted.
-
- - HTTP (JVM, Native, JS/WASM (Client only))
- - Socket (JVM, Native)
- - Stdin/out (JVM, Native)
- - Local class instantiation (JVM)
- - Web sockets (JVM, Native, JS/WASM (Client only))
- - jsonrpc 2.0 (JVM, Native)
- - Service workers (JS host/client, WASM client, experimental)
-
- \* Not implemented but expected soon
 
 # Build setup
 
