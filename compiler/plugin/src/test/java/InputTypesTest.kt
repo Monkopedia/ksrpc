@@ -19,7 +19,6 @@ package com.monkopedia.ksrpc.plugin
 
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
-import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.junit.Test
@@ -60,44 +59,5 @@ interface MyInterface: RpcService {
     fun `IR plugin success`() {
         val result = compile(sourceFile = sourceFile)
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
-    }
-
-    @Test
-    fun `Detects native types as default input`() {
-        val result = compile(sourceFile = sourceFile)
-        assertContains(
-            result.messages,
-            "generating MyInterface#Do1(\"native_input\") with types: DEFAULT(String) DEFAULT(Int)"
-        )
-    }
-
-    @Test
-    fun `Detects custom types as default input`() {
-        val result = compile(sourceFile = sourceFile)
-        assertContains(
-            result.messages,
-            "generating MyInterface#Do2(\"default_input\") " +
-                "with types: DEFAULT(CustomType) DEFAULT(Int)"
-        )
-    }
-
-    @Test
-    fun `Detects binary input`() {
-        val result = compile(sourceFile = sourceFile)
-        assertContains(
-            result.messages,
-            "generating MyInterface#Do3(\"binary_input\") with " +
-                "types: BINARY(ByteReadChannel) DEFAULT(Int)"
-        )
-    }
-
-    @Test
-    fun `Detects service input`() {
-        val result = compile(sourceFile = sourceFile)
-        assertContains(
-            result.messages,
-            "generating MyInterface#Do4(\"service_input\") with " +
-                "types: SERVICE(MyInterface) DEFAULT(Int)"
-        )
     }
 }

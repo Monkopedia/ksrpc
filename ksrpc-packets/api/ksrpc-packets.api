@@ -59,6 +59,7 @@ public abstract class com/monkopedia/ksrpc/packets/internal/PacketChannelBase : 
 	public fun registerDefault (Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun registerHost (Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun send (Lcom/monkopedia/ksrpc/packets/internal/Packet;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	protected final fun startReceiveLoop ()V
 	public fun wrapChannel (Lcom/monkopedia/ksrpc/channels/ChannelId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 

@@ -37,6 +37,7 @@ class KsrpcGradlePlugin : KotlinCompilerPluginSupportPlugin {
         version = BuildConfig.KOTLIN_PLUGIN_VERSION
     )
 
+    @Deprecated("Deprecated in KotlinCompilerPluginSupportPlugin")
     override fun getPluginArtifactForNative(): SubpluginArtifact = SubpluginArtifact(
         groupId = BuildConfig.KOTLIN_PLUGIN_GROUP,
         artifactId = BuildConfig.KOTLIN_PLUGIN_NAME + "-native",

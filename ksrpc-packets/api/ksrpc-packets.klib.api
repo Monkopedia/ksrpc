@@ -18,6 +18,7 @@ abstract class <#A: kotlin/Any?> com.monkopedia.ksrpc.packets.internal/PacketCha
     open val maxSize // com.monkopedia.ksrpc.packets.internal/PacketChannelBase.maxSize|{}maxSize[0]
         open fun <get-maxSize>(): kotlin/Long // com.monkopedia.ksrpc.packets.internal/PacketChannelBase.maxSize.<get-maxSize>|<get-maxSize>(){}[0]
 
+    final fun startReceiveLoop() // com.monkopedia.ksrpc.packets.internal/PacketChannelBase.startReceiveLoop|startReceiveLoop(){}[0]
     final suspend fun receive(): com.monkopedia.ksrpc.packets.internal/Packet<#A> // com.monkopedia.ksrpc.packets.internal/PacketChannelBase.receive|receive(){}[0]
     final suspend fun send(com.monkopedia.ksrpc.packets.internal/Packet<#A>) // com.monkopedia.ksrpc.packets.internal/PacketChannelBase.send|send(com.monkopedia.ksrpc.packets.internal.Packet<1:0>){}[0]
     open suspend fun call(com.monkopedia.ksrpc.channels/ChannelId, kotlin/String, com.monkopedia.ksrpc.channels/CallData<#A>): com.monkopedia.ksrpc.channels/CallData<#A> // com.monkopedia.ksrpc.packets.internal/PacketChannelBase.call|call(com.monkopedia.ksrpc.channels.ChannelId;kotlin.String;com.monkopedia.ksrpc.channels.CallData<1:0>){}[0]

@@ -7,6 +7,7 @@
 // - Show declarations: true
 
 // Library unique name: <com.monkopedia.ksrpc:ksrpc-sockets>
+final fun (kotlin/Pair<io.ktor.utils.io/ByteReadChannel, io.ktor.utils.io/ByteWriteChannel>).com.monkopedia.ksrpc.sockets/asConnection(kotlinx.coroutines/CoroutineScope, com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String>): com.monkopedia.ksrpc.channels/Connection<kotlin/String> // com.monkopedia.ksrpc.sockets/asConnection|asConnection@kotlin.Pair<io.ktor.utils.io.ByteReadChannel,io.ktor.utils.io.ByteWriteChannel>(kotlinx.coroutines.CoroutineScope;com.monkopedia.ksrpc.KsrpcEnvironment<kotlin.String>){}[0]
 final inline fun com.monkopedia.ksrpc.sockets.internal/swallow(kotlin/Function0<kotlin/Unit>) // com.monkopedia.ksrpc.sockets.internal/swallow|swallow(kotlin.Function0<kotlin.Unit>){}[0]
 final suspend fun (io.ktor.utils.io/ByteReadChannel).com.monkopedia.ksrpc.sockets.internal/readFields(): kotlin.collections/Map<kotlin/String, kotlin/String> // com.monkopedia.ksrpc.sockets.internal/readFields|readFields@io.ktor.utils.io.ByteReadChannel(){}[0]
 final suspend fun (io.ktor.utils.io/ByteWriteChannel).com.monkopedia.ksrpc.sockets.internal/appendLine(kotlin/String = ...) // com.monkopedia.ksrpc.sockets.internal/appendLine|appendLine@io.ktor.utils.io.ByteWriteChannel(kotlin.String){}[0]

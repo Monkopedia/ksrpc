@@ -9,6 +9,7 @@ public final class com/monkopedia/ksrpc/sockets/ProcessStreamKt {
 
 public final class com/monkopedia/ksrpc/sockets/ReadWriteChannelsKt {
 	public static final fun asConnection (Lkotlin/Pair;Lcom/monkopedia/ksrpc/KsrpcEnvironment;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun asConnection (Lkotlin/Pair;Lkotlinx/coroutines/CoroutineScope;Lcom/monkopedia/ksrpc/KsrpcEnvironment;)Lcom/monkopedia/ksrpc/channels/Connection;
 }
 
 public final class com/monkopedia/ksrpc/sockets/internal/PacketUtilsKt {

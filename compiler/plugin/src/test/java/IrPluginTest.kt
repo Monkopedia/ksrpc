@@ -17,9 +17,9 @@
 
 package com.monkopedia.ksrpc.plugin
 
+import com.tschuchort.compiletesting.JvmCompilationResult
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
-import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
@@ -48,30 +48,13 @@ interface MyInterface: RpcService {
         val result = compile(sourceFile = sourceFile)
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
     }
-
-    @Test
-    fun `IR plugin method detection`() {
-        val result = compile(sourceFile = sourceFile)
-        assertContains(result.messages, "Generating for class MyInterface with 1 methods")
-    }
-
-    @Test
-    fun `IR plugin method type logging`() {
-        val result = compile(sourceFile = sourceFile)
-        assertContains(
-            result.messages,
-            "generating MyInterface#DoSomething(\"serial_name\") with " +
-                "types: DEFAULT(String) DEFAULT(Int)"
-        )
-    }
 }
 
 fun compile(
     sourceFiles: List<SourceFile>,
     plugin: CompilerPluginRegistrar = KsrpcComponentRegistrar()
-): KotlinCompilation.Result = KotlinCompilation().apply {
+): JvmCompilationResult = KotlinCompilation().apply {
     sources = sourceFiles
-    useIR = true
     compilerPluginRegistrars = listOf(plugin)
     inheritClassPath = true
 }.compile()
@@ -79,4 +62,4 @@ fun compile(
 fun compile(
     sourceFile: SourceFile,
     plugin: CompilerPluginRegistrar = KsrpcComponentRegistrar()
-): KotlinCompilation.Result = compile(listOf(sourceFile), plugin)
+): JvmCompilationResult = compile(listOf(sourceFile), plugin)

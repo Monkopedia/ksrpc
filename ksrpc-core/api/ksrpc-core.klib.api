@@ -189,6 +189,7 @@ final class <#A: kotlin/Any?> com.monkopedia.ksrpc.internal/MultiChannel { // co
     constructor <init>() // com.monkopedia.ksrpc.internal/MultiChannel.<init>|<init>(){}[0]
 
     final suspend fun allocateReceive(): kotlin/Pair<kotlin/Int, kotlinx.coroutines/Deferred<#A>> // com.monkopedia.ksrpc.internal/MultiChannel.allocateReceive|allocateReceive(){}[0]
+    final suspend fun allocateReceiveString(): kotlin/Pair<kotlin/String, kotlinx.coroutines/Deferred<#A>> // com.monkopedia.ksrpc.internal/MultiChannel.allocateReceiveString|allocateReceiveString(){}[0]
     final suspend fun close(kotlin.coroutines.cancellation/CancellationException? = ...) // com.monkopedia.ksrpc.internal/MultiChannel.close|close(kotlin.coroutines.cancellation.CancellationException?){}[0]
     final suspend fun send(kotlin/String, #A) // com.monkopedia.ksrpc.internal/MultiChannel.send|send(kotlin.String;1:0){}[0]
 }

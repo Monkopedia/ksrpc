@@ -22,6 +22,17 @@ public class com/monkopedia/ksrpc/bench/HttpTransportBenchmark {
 	public final fun tearDown ()V
 }
 
+public class com/monkopedia/ksrpc/bench/InputOutputStreamTransportBenchmark {
+	public fun <init> ()V
+	public final fun getPayloadSize ()I
+	public final fun inputOutputBinaryRoundTrip ()I
+	public final fun inputOutputComplexRoundTrip ()I
+	public final fun inputOutputRoundTrip ()Ljava/lang/String;
+	public final fun setPayloadSize (I)V
+	public final fun setup ()V
+	public final fun tearDown ()V
+}
+
 public class com/monkopedia/ksrpc/bench/JniCommunicationBenchmark {
 	public fun <init> ()V
 	public final fun getPayloadSize ()I
@@ -34,11 +45,192 @@ public class com/monkopedia/ksrpc/bench/JniCommunicationBenchmark {
 public class com/monkopedia/ksrpc/bench/JniSerializationBenchmark {
 	public fun <init> ()V
 	public final fun decode ()Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniPayload;
+	public final fun decodeBinary ()Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniBinaryPayload;
+	public final fun decodeComplex ()Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexPayload;
+	public final fun decodeNestedSerialized ()Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniNestedSerializedPayload;
+	public final fun decodeNestedSerializedContent ()Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexPayload;
+	public final fun decodeNestedSerializedToJvmListSize ()I
 	public final fun encode ()Lcom/monkopedia/ksrpc/jni/JniSerialized;
+	public final fun encodeBinary ()Lcom/monkopedia/ksrpc/jni/JniSerialized;
+	public final fun encodeComplex ()Lcom/monkopedia/ksrpc/jni/JniSerialized;
+	public final fun encodeNestedSerialized ()Lcom/monkopedia/ksrpc/jni/JniSerialized;
 	public final fun encodeThenDecode ()Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniPayload;
+	public final fun encodeThenDecodeBinary ()Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniBinaryPayload;
+	public final fun encodeThenDecodeComplex ()Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexPayload;
 	public final fun getPayloadSize ()I
 	public final fun setPayloadSize (I)V
 	public final fun setup ()V
+}
+
+public final class com/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniBinaryPayload {
+	public static final field Companion Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniBinaryPayload$Companion;
+	public fun <init> ([BLjava/util/List;I)V
+	public final fun component1 ()[B
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()I
+	public final fun copy ([BLjava/util/List;I)Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniBinaryPayload;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniBinaryPayload;[BLjava/util/List;IILjava/lang/Object;)Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniBinaryPayload;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getChunks ()Ljava/util/List;
+	public final fun getFooter ()I
+	public final fun getRaw ()[B
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class com/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniBinaryPayload$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniBinaryPayload$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniBinaryPayload;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniBinaryPayload;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniBinaryPayload$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexNode {
+	public static final field Companion Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexNode$Companion;
+	public fun <init> (Ljava/lang/String;ILjava/util/List;Ljava/util/Map;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()I
+	public final fun component3 ()Ljava/util/List;
+	public final fun component4 ()Ljava/util/Map;
+	public final fun copy (Ljava/lang/String;ILjava/util/List;Ljava/util/Map;)Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexNode;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexNode;Ljava/lang/String;ILjava/util/List;Ljava/util/Map;ILjava/lang/Object;)Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexNode;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCount ()I
+	public final fun getKey ()Ljava/lang/String;
+	public final fun getMetadata ()Ljava/util/Map;
+	public final fun getValues ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class com/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexNode$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexNode$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexNode;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexNode;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexNode$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexPayload {
+	public static final field Companion Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexPayload$Companion;
+	public fun <init> (JLjava/lang/String;Ljava/util/List;Ljava/util/Set;Ljava/util/Map;Ljava/util/List;Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexVariant;Ljava/lang/String;)V
+	public final fun component1 ()J
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/util/List;
+	public final fun component4 ()Ljava/util/Set;
+	public final fun component5 ()Ljava/util/Map;
+	public final fun component6 ()Ljava/util/List;
+	public final fun component7 ()Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexVariant;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun copy (JLjava/lang/String;Ljava/util/List;Ljava/util/Set;Ljava/util/Map;Ljava/util/List;Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexVariant;Ljava/lang/String;)Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexPayload;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexPayload;JLjava/lang/String;Ljava/util/List;Ljava/util/Set;Ljava/util/Map;Ljava/util/List;Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexVariant;Ljava/lang/String;ILjava/lang/Object;)Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexPayload;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFlags ()Ljava/util/List;
+	public final fun getId ()J
+	public final fun getMetrics ()Ljava/util/Map;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getNodes ()Ljava/util/List;
+	public final fun getOptional ()Ljava/lang/String;
+	public final fun getTags ()Ljava/util/Set;
+	public final fun getVariant ()Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexVariant;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class com/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexPayload$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexPayload$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexPayload;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexPayload;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexPayload$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public abstract interface class com/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexVariant {
+	public static final field Companion Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexVariant$Companion;
+}
+
+public final class com/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexVariant$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexVariant$Error : com/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexVariant {
+	public static final field Companion Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexVariant$Error$Companion;
+	public fun <init> (ILjava/lang/String;)V
+	public final fun component1 ()I
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (ILjava/lang/String;)Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexVariant$Error;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexVariant$Error;ILjava/lang/String;ILjava/lang/Object;)Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexVariant$Error;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCode ()I
+	public final fun getReason ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class com/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexVariant$Error$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexVariant$Error$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexVariant$Error;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexVariant$Error;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexVariant$Error$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexVariant$Message : com/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexVariant {
+	public static final field Companion Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexVariant$Message$Companion;
+	public fun <init> (Ljava/lang/String;I)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()I
+	public final fun copy (Ljava/lang/String;I)Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexVariant$Message;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexVariant$Message;Ljava/lang/String;IILjava/lang/Object;)Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexVariant$Message;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLevel ()I
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class com/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexVariant$Message$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexVariant$Message$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexVariant$Message;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexVariant$Message;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniComplexVariant$Message$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniNestedPayload {
@@ -67,6 +259,37 @@ public final synthetic class com/monkopedia/ksrpc/bench/JniSerializationBenchmar
 }
 
 public final class com/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniNestedPayload$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniNestedSerializedPayload {
+	public static final field Companion Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniNestedSerializedPayload$Companion;
+	public fun <init> (Ljava/lang/String;Lcom/monkopedia/ksrpc/jni/JniSerialized;J)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lcom/monkopedia/ksrpc/jni/JniSerialized;
+	public final fun component3 ()J
+	public final fun copy (Ljava/lang/String;Lcom/monkopedia/ksrpc/jni/JniSerialized;J)Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniNestedSerializedPayload;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniNestedSerializedPayload;Ljava/lang/String;Lcom/monkopedia/ksrpc/jni/JniSerialized;JILjava/lang/Object;)Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniNestedSerializedPayload;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getContent ()Lcom/monkopedia/ksrpc/jni/JniSerialized;
+	public final fun getHeader ()Ljava/lang/String;
+	public final fun getTrailer ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class com/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniNestedSerializedPayload$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniNestedSerializedPayload$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniNestedSerializedPayload;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniNestedSerializedPayload;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniNestedSerializedPayload$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
@@ -101,6 +324,15 @@ public final class com/monkopedia/ksrpc/bench/JniSerializationBenchmark$JniPaylo
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
+public class com/monkopedia/ksrpc/bench/JsonRpcHeaderBenchmark {
+	public fun <init> ()V
+	public final fun getPayloadSize ()I
+	public final fun sendThenReceive ()Ljava/lang/String;
+	public final fun setPayloadSize (I)V
+	public final fun setup ()V
+	public final fun tearDown ()V
+}
+
 public class com/monkopedia/ksrpc/bench/JsonRpcWriterBenchmark {
 	public fun <init> ()V
 	public final fun executeLoopbackRoundTrip ()Ljava/lang/String;
@@ -113,6 +345,7 @@ public class com/monkopedia/ksrpc/bench/JsonRpcWriterBenchmark {
 public class com/monkopedia/ksrpc/bench/MultiChannelBenchmark {
 	public fun <init> ()V
 	public final fun allocateSendReceive ()I
+	public final fun allocateSendReceiveStringId ()Ljava/lang/String;
 	public final fun setup ()V
 	public final fun tearDown ()V
 }
@@ -146,6 +379,16 @@ public class com/monkopedia/ksrpc/bench/SocketTransportBenchmark {
 	public final fun socketComplexRoundTrip ()I
 	public final fun socketRoundTrip ()Ljava/lang/String;
 	public final fun tearDown ()V
+}
+
+public class com/monkopedia/ksrpc/bench/StringSerializerErrorBenchmark {
+	public fun <init> ()V
+	public final fun getPayloadSize ()I
+	public final fun isErrorEndpointMissing ()Z
+	public final fun isErrorError ()Z
+	public final fun isErrorNormal ()Z
+	public final fun setPayloadSize (I)V
+	public final fun setup ()V
 }
 
 public class com/monkopedia/ksrpc/bench/WebsocketTransportBenchmark {

@@ -207,6 +207,7 @@ public final class com/monkopedia/ksrpc/jni/JniSer$Companion : com/monkopedia/ks
 }
 
 public final class com/monkopedia/ksrpc/jni/JniSerialization : com/monkopedia/ksrpc/CallDataSerializer {
+	public static final field ENVELOPE_HEADER_SIZE I
 	public fun <init> ()V
 	public fun <init> (Lcom/monkopedia/ksrpc/jni/JniSer;)V
 	public synthetic fun <init> (Lcom/monkopedia/ksrpc/jni/JniSer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V

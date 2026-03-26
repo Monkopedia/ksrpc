@@ -352,6 +352,7 @@ public final class com/monkopedia/ksrpc/internal/HostSerializedServiceImplKt {
 public final class com/monkopedia/ksrpc/internal/MultiChannel {
 	public fun <init> ()V
 	public final fun allocateReceive (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun allocateReceiveString (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun close (Ljava/util/concurrent/CancellationException;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun close$default (Lcom/monkopedia/ksrpc/internal/MultiChannel;Ljava/util/concurrent/CancellationException;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun send (Ljava/lang/String;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;

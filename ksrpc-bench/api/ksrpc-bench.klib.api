@@ -1,5 +1,5 @@
 // Klib ABI Dump
-// Targets: [js]
+// Targets: [js, linuxX64]
 // Rendering settings:
 // - Signature version: 2
 // - Show manifest properties: true
@@ -31,3 +31,19 @@ open class com.monkopedia.ksrpc.bench/SerializationBenchmark { // com.monkopedia
     final fun decodeCallData(): kotlin/String // com.monkopedia.ksrpc.bench/SerializationBenchmark.decodeCallData|decodeCallData(){}[0]
     final fun setup() // com.monkopedia.ksrpc.bench/SerializationBenchmark.setup|setup(){}[0]
 }
+
+open class com.monkopedia.ksrpc.bench/StringSerializerErrorBenchmark { // com.monkopedia.ksrpc.bench/StringSerializerErrorBenchmark|null[0]
+    constructor <init>() // com.monkopedia.ksrpc.bench/StringSerializerErrorBenchmark.<init>|<init>(){}[0]
+
+    final var payloadSize // com.monkopedia.ksrpc.bench/StringSerializerErrorBenchmark.payloadSize|{}payloadSize[0]
+        final fun <get-payloadSize>(): kotlin/Int // com.monkopedia.ksrpc.bench/StringSerializerErrorBenchmark.payloadSize.<get-payloadSize>|<get-payloadSize>(){}[0]
+        final fun <set-payloadSize>(kotlin/Int) // com.monkopedia.ksrpc.bench/StringSerializerErrorBenchmark.payloadSize.<set-payloadSize>|<set-payloadSize>(kotlin.Int){}[0]
+
+    final fun isErrorEndpointMissing(): kotlin/Boolean // com.monkopedia.ksrpc.bench/StringSerializerErrorBenchmark.isErrorEndpointMissing|isErrorEndpointMissing(){}[0]
+    final fun isErrorError(): kotlin/Boolean // com.monkopedia.ksrpc.bench/StringSerializerErrorBenchmark.isErrorError|isErrorError(){}[0]
+    final fun isErrorNormal(): kotlin/Boolean // com.monkopedia.ksrpc.bench/StringSerializerErrorBenchmark.isErrorNormal|isErrorNormal(){}[0]
+    final fun setup() // com.monkopedia.ksrpc.bench/StringSerializerErrorBenchmark.setup|setup(){}[0]
+}
+
+// Targets: [linuxX64]
+final fun com.monkopedia.ksrpc.bench/posixBenchMain(kotlin/Array<kotlin/String>) // com.monkopedia.ksrpc.bench/posixBenchMain|posixBenchMain(kotlin.Array<kotlin.String>){}[0]
