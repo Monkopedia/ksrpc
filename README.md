@@ -552,12 +552,3 @@ sub-service.
 # API Docs
 
 For further information, see the API docs, which are hosted on [monkopedia.github.io](https://monkopedia.github.io/ksrpc/).
-
-# TODO List
-
-Unranked list of things I know I want to implement:
-
-- Additional annotations and parsing in compiler plugin to have support for things like notifications not just requests
-- Finish testing [TrackingService](ksrpc/src/commonMain/kotlin/TrackingService.kt) and publish it as API
-- Add tests to ensure no leaks around sub-service usage and cleanup
-- Support building windows binaries in github release workflow
