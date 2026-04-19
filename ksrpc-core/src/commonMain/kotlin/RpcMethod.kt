@@ -27,8 +27,26 @@ import com.monkopedia.ksrpc.internal.host
 import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.serializer
+
+private const val KS_TIMEOUT_FQ = "com.monkopedia.ksrpc.annotation.KsTimeout"
+
+/**
+ * Returns the timeout in milliseconds configured via `@KsTimeout` on the
+ * source method, or `null` if no timeout annotation was present.
+ *
+ * The total is computed as `millis + seconds * 1000 + minutes * 60_000`.
+ */
+val RpcMethod<*, *, *>.timeoutMillis: Long?
+    get() {
+        val meta = metadata(KS_TIMEOUT_FQ) ?: return null
+        val millis = (meta.argument("millis") as? MetadataValue.LongValue)?.value ?: 0L
+        val seconds = (meta.argument("seconds") as? MetadataValue.LongValue)?.value ?: 0L
+        val minutes = (meta.argument("minutes") as? MetadataValue.LongValue)?.value ?: 0L
+        return millis + seconds * 1000 + minutes * 60_000
+    }
 
 sealed interface Transformer<T> {
     val hasContent: Boolean
@@ -155,29 +173,39 @@ class RpcMethod<T : RpcService, I, O>(
     }
 
     @Suppress("UNCHECKED_CAST")
-    suspend fun <S> callChannel(channel: SerializedService<S>, input: Any?): Any? =
+    suspend fun <S> callChannel(channel: SerializedService<S>, input: Any?): Any? {
+        val timeout = timeoutMillis
         // Drop the Job element from the channel's context so the caller's Job remains the
         // parent for cancellation propagation — otherwise cancelling the caller wouldn't
         // surface inside the remote call (it would only cancel this [withContext] body's
         // own child scope, which is unreachable from the caller's cancel signal).
-        withContext(channel.context.minusKey(Job)) {
-            val input = inputTransform.transform(input as I, channel)
-            val id = randomUuid()
-            channel.env.logger.info(
-                "Transformer",
-                "($id) Calling remote endpoint $endpoint"
-            )
-            // Client-side stubs do not forward a callId — they generate their own wire-level
-            // id at the transport if needed, and any server-side handler reached via the
-            // remote transport will have its own CurrentRpcCallElement installed by that
-            // transport's RpcMethod.call invocation.
-            val transformedOutput = channel.call(this@RpcMethod, input, callId = null)
-            channel.env.logger.debug(
-                "Transformer",
-                "($id) Completed remote endpoint $endpoint"
-            )
-            outputTransform.untransform(transformedOutput, channel)
+        return withContext(channel.context.minusKey(Job)) {
+            val body: suspend () -> Any? = {
+                val input = inputTransform.transform(input as I, channel)
+                val id = randomUuid()
+                channel.env.logger.info(
+                    "Transformer",
+                    "($id) Calling remote endpoint $endpoint"
+                )
+                // Client-side stubs do not forward a callId — they generate their own
+                // wire-level id at the transport if needed, and any server-side handler
+                // reached via the remote transport will have its own
+                // CurrentRpcCallElement installed by that transport's RpcMethod.call
+                // invocation.
+                val transformedOutput = channel.call(this@RpcMethod, input, callId = null)
+                channel.env.logger.debug(
+                    "Transformer",
+                    "($id) Completed remote endpoint $endpoint"
+                )
+                outputTransform.untransform(transformedOutput, channel)
+            }
+            if (timeout != null && timeout > 0) {
+                withTimeout(timeout) { body() }
+            } else {
+                body()
+            }
         }
+    }
 
     fun findSubserviceTransformers(): List<SubserviceTransformer<out RpcService>> = listOfNotNull(
         inputTransform as? SubserviceTransformer<*>,
