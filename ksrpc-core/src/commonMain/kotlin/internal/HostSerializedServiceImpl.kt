@@ -157,8 +157,7 @@ internal class HostSerializedServiceImpl<T : RpcService, S>(
         } catch (t: RpcEndpointException) {
             // Opt-in fallback: if the service implements UnhandledMethodHandler, route
             // unknown endpoints to it instead of propagating the endpoint-not-found error.
-            @Suppress("UNCHECKED_CAST")
-            val handler = service as? UnhandledMethodHandler<S>
+            val handler = service as? UnhandledMethodHandler
             if (handler != null) {
                 return handler.onUnhandled(endpoint, input)
             }

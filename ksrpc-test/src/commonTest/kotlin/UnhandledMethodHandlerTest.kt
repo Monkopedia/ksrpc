@@ -64,21 +64,24 @@ class RpcUnhandledMethodHandlerImplementedTest :
             val env = ksrpcEnvironment { }
             val impl = object :
                 UnhandledHandlerService,
-                UnhandledMethodHandler<String> {
+                UnhandledMethodHandler {
                 override suspend fun known(input: String): String = "known:$input"
 
-                override suspend fun onUnhandled(
+                override suspend fun <T> onUnhandled(
                     method: String,
-                    input: CallData<String>
-                ): CallData<String> {
+                    input: CallData<T>
+                ): CallData<T> {
+                    @Suppress("UNCHECKED_CAST")
+                    val stringInput = input as CallData<String>
                     val payload = env.serialization.decodeCallData(
                         String.serializer(),
-                        input
+                        stringInput
                     )
+                    @Suppress("UNCHECKED_CAST")
                     return env.serialization.createCallData(
                         String.serializer(),
                         "handled:$method:$payload"
-                    )
+                    ) as CallData<T>
                 }
             }
             impl.serialized(env)
@@ -129,13 +132,13 @@ class RpcUnhandledMethodHandlerThrowsTest :
         serializedChannel = {
             val impl = object :
                 UnhandledHandlerService,
-                UnhandledMethodHandler<String> {
+                UnhandledMethodHandler {
                 override suspend fun known(input: String): String = "known:$input"
 
-                override suspend fun onUnhandled(
+                override suspend fun <T> onUnhandled(
                     method: String,
-                    input: CallData<String>
-                ): CallData<String> {
+                    input: CallData<T>
+                ): CallData<T> {
                     throw IllegalStateException("boom:$method")
                 }
             }

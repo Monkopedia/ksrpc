@@ -40,7 +40,7 @@ import com.monkopedia.ksrpc.channels.CallData
  * Services that do not implement this interface preserve the existing
  * unknown-endpoint error behavior.
  */
-interface UnhandledMethodHandler<T> {
+interface UnhandledMethodHandler {
     /**
      * Invoked when an incoming call targets an endpoint that is not registered on
      * this service.
@@ -50,5 +50,5 @@ interface UnhandledMethodHandler<T> {
      * @param input The serialized call payload as it arrived on the wire.
      * @return The serialized payload to return to the caller.
      */
-    suspend fun onUnhandled(method: String, input: CallData<T>): CallData<T>
+    suspend fun <T> onUnhandled(method: String, input: CallData<T>): CallData<T>
 }
