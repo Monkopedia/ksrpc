@@ -48,6 +48,31 @@ annotation class KsTestMarker(
 annotation class KsTestFlag(val enabled: Boolean)
 
 /**
+ * Demo enum used as a metadata argument to verify that enum values flow
+ * through the compiler plugin as real enum references rather than as string
+ * names.
+ */
+enum class KsTestColor { RED, GREEN, BLUE }
+
+/**
+ * Demo class used as a metadata argument to verify that `KClass` literals
+ * flow through the compiler plugin as real `KClass` references.
+ */
+class KsTestPayload
+
+/**
+ * Third demo sibling annotation — captures a `KClass` literal and an enum
+ * constant so the test can assert on real references.
+ */
+@KsMethodMetadata
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.BINARY)
+annotation class KsTestRef(
+    val payload: kotlin.reflect.KClass<*>,
+    val color: KsTestColor
+)
+
+/**
  * A plain, non-metadata sibling annotation. The compiler plugin should ignore
  * it and NOT attach anything for it to the RpcMethod descriptor.
  */
@@ -76,6 +101,10 @@ interface AnnotationPropagationTestService : RpcService {
     @KsMethod("/non_metadata_sibling")
     @NotMetadata("ignored")
     suspend fun withNonMetadataSibling(input: String): String
+
+    @KsMethod("/refs")
+    @KsTestRef(payload = KsTestPayload::class, color = KsTestColor.GREEN)
+    suspend fun withRefs(input: String): String
 }
 
 class MethodMetadataPropagationTest {
@@ -148,6 +177,21 @@ class MethodMetadataPropagationTest {
     fun metadataCarriesAnnotationFqName() {
         val meta = method("with_marker").metadata.single()
         assertEquals("com.monkopedia.ksrpc.KsTestMarker", meta.annotationFqName)
+    }
+
+    @Test
+    fun kClassAndEnumArgsAreCapturedAsRealReferences() {
+        // KClassValue and EnumValue carry real references emitted by the
+        // compiler plugin from the original IR, not stringified FQ names.
+        val meta = method("refs").metadata("com.monkopedia.ksrpc.KsTestRef")
+        assertNotNull(meta)
+        val payload = meta.argument("payload") as? MetadataValue.KClassValue
+        assertNotNull(payload)
+        assertEquals(KsTestPayload::class, payload.kClass)
+
+        val color = meta.argument("color") as? MetadataValue.EnumValue
+        assertNotNull(color)
+        assertEquals(KsTestColor.GREEN, color.value)
     }
 
     @Test

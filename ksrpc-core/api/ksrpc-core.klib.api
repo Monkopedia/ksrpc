@@ -357,12 +357,10 @@ sealed class com.monkopedia.ksrpc/MetadataValue { // com.monkopedia.ksrpc/Metada
     }
 
     final class EnumValue : com.monkopedia.ksrpc/MetadataValue { // com.monkopedia.ksrpc/MetadataValue.EnumValue|null[0]
-        constructor <init>(kotlin/String, kotlin/String) // com.monkopedia.ksrpc/MetadataValue.EnumValue.<init>|<init>(kotlin.String;kotlin.String){}[0]
+        constructor <init>(kotlin/Enum<*>) // com.monkopedia.ksrpc/MetadataValue.EnumValue.<init>|<init>(kotlin.Enum<*>){}[0]
 
-        final val entryName // com.monkopedia.ksrpc/MetadataValue.EnumValue.entryName|{}entryName[0]
-            final fun <get-entryName>(): kotlin/String // com.monkopedia.ksrpc/MetadataValue.EnumValue.entryName.<get-entryName>|<get-entryName>(){}[0]
-        final val enumFqName // com.monkopedia.ksrpc/MetadataValue.EnumValue.enumFqName|{}enumFqName[0]
-            final fun <get-enumFqName>(): kotlin/String // com.monkopedia.ksrpc/MetadataValue.EnumValue.enumFqName.<get-enumFqName>|<get-enumFqName>(){}[0]
+        final val value // com.monkopedia.ksrpc/MetadataValue.EnumValue.value|{}value[0]
+            final fun <get-value>(): kotlin/Enum<*> // com.monkopedia.ksrpc/MetadataValue.EnumValue.value.<get-value>|<get-value>(){}[0]
 
         final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc/MetadataValue.EnumValue.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc/MetadataValue.EnumValue.hashCode|hashCode(){}[0]
@@ -392,10 +390,10 @@ sealed class com.monkopedia.ksrpc/MetadataValue { // com.monkopedia.ksrpc/Metada
     }
 
     final class KClassValue : com.monkopedia.ksrpc/MetadataValue { // com.monkopedia.ksrpc/MetadataValue.KClassValue|null[0]
-        constructor <init>(kotlin/String) // com.monkopedia.ksrpc/MetadataValue.KClassValue.<init>|<init>(kotlin.String){}[0]
+        constructor <init>(kotlin.reflect/KClass<*>) // com.monkopedia.ksrpc/MetadataValue.KClassValue.<init>|<init>(kotlin.reflect.KClass<*>){}[0]
 
-        final val classFqName // com.monkopedia.ksrpc/MetadataValue.KClassValue.classFqName|{}classFqName[0]
-            final fun <get-classFqName>(): kotlin/String // com.monkopedia.ksrpc/MetadataValue.KClassValue.classFqName.<get-classFqName>|<get-classFqName>(){}[0]
+        final val kClass // com.monkopedia.ksrpc/MetadataValue.KClassValue.kClass|{}kClass[0]
+            final fun <get-kClass>(): kotlin.reflect/KClass<*> // com.monkopedia.ksrpc/MetadataValue.KClassValue.kClass.<get-kClass>|<get-kClass>(){}[0]
 
         final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc/MetadataValue.KClassValue.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc/MetadataValue.KClassValue.hashCode|hashCode(){}[0]

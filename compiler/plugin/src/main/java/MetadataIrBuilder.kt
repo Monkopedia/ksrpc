@@ -40,7 +40,6 @@ import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.starProjectedType
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
-import org.jetbrains.kotlin.ir.util.classId
 import org.jetbrains.kotlin.ir.util.constructors
 import org.jetbrains.kotlin.ir.util.parentClassOrNull
 
@@ -72,11 +71,10 @@ class MetadataIrBuilder(
     private val metadataValueType = metadataValue.starProjectedType
     private val pairType = pair.typeWith(stringType, metadataValueType)
 
-    fun buildMetadataList(metadataAnnotations: List<IrConstructorCall>): IrExpression =
-        buildListOf(
-            methodMetadata.starProjectedType,
-            metadataAnnotations.map { buildMetadata(it) }
-        )
+    fun buildMetadataList(metadataAnnotations: List<IrConstructorCall>): IrExpression = buildListOf(
+        methodMetadata.starProjectedType,
+        metadataAnnotations.map { buildMetadata(it) }
+    )
 
     private fun buildMetadata(annotation: IrConstructorCall): IrExpression {
         val annotationFqName = annotation.type.classFqName?.asString()
@@ -129,9 +127,13 @@ class MetadataIrBuilder(
     private fun buildMetadataValue(expr: IrExpression): IrExpression? = when (expr) {
         is IrConst -> when (val v = expr.value) {
             is String -> ctor(env.metadataValueString!!, builder.irString(v))
+
             is Int -> ctor(env.metadataValueInt!!, builder.irInt(v))
+
             is Long -> ctor(env.metadataValueLong!!, builder.irLong(v))
+
             is Boolean -> ctor(env.metadataValueBoolean!!, builder.irBoolean(v))
+
             is Double -> ctor(
                 env.metadataValueDouble!!,
                 IrConstImpl.double(
@@ -141,6 +143,7 @@ class MetadataIrBuilder(
                     v
                 )
             )
+
             is Float -> ctor(
                 env.metadataValueFloat!!,
                 IrConstImpl.float(
@@ -150,23 +153,14 @@ class MetadataIrBuilder(
                     v
                 )
             )
+
             else -> null
         }
-        is IrClassReference -> {
-            val fq = expr.classType.classFqName?.asString() ?: return null
-            ctor(env.metadataValueKClass!!, builder.irString(fq))
-        }
-        is IrGetEnumValue -> {
-            val sym = expr.symbol
-            val enumClass = sym.owner.parentClassOrNull ?: return null
-            val enumFq = enumClass.classId?.asSingleFqName()?.asString() ?: return null
-            val entryName = sym.owner.name.asString()
-            ctor(
-                env.metadataValueEnum!!,
-                builder.irString(enumFq),
-                builder.irString(entryName)
-            )
-        }
+
+        is IrClassReference -> ctor(env.metadataValueKClass!!, expr)
+
+        is IrGetEnumValue -> ctor(env.metadataValueEnum!!, expr)
+
         is IrVararg -> {
             val items = expr.elements.mapNotNull { element ->
                 val itemExpr = element as? IrExpression ?: return@mapNotNull null
@@ -174,6 +168,7 @@ class MetadataIrBuilder(
             }
             ctor(env.metadataValueList!!, buildListOf(metadataValueType, items))
         }
+
         else -> null
     }
 

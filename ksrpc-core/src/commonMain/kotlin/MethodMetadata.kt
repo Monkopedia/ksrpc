@@ -15,6 +15,8 @@
  */
 package com.monkopedia.ksrpc
 
+import kotlin.reflect.KClass
+
 /**
  * A captured sibling annotation on a `@KsMethod` function.
  *
@@ -113,30 +115,32 @@ sealed class MetadataValue {
     }
 
     /**
-     * A `KClass<*>` literal captured by FQ name. The class itself is not
-     * dereferenced at descriptor-build time — the FQ name is the only field.
-     * Consumers that need to resolve it to a live class do so via their own
-     * reflection facilities on platforms that support it.
+     * A `KClass<*>` literal captured directly as a real reference. The
+     * compiler plugin emits the same `IrClassReference` already present on
+     * the source-level annotation argument, so consumers receive the actual
+     * `KClass` and can call reflection facilities directly when supported.
      */
-    class KClassValue(val classFqName: String) : MetadataValue() {
+    class KClassValue(val kClass: KClass<*>) : MetadataValue() {
         override fun equals(other: Any?): Boolean =
-            this === other || (other is KClassValue && classFqName == other.classFqName)
-        override fun hashCode(): Int = classFqName.hashCode()
-        override fun toString(): String = "$classFqName::class"
+            this === other || (other is KClassValue && kClass == other.kClass)
+        override fun hashCode(): Int = kClass.hashCode()
+        override fun toString(): String = "${kClass.simpleName ?: "<anonymous>"}::class"
     }
 
     /**
-     * An enum constant captured as the FQ name of the enum class plus the
-     * constant's name.
+     * An enum constant captured as a real reference to the enum entry. The
+     * compiler plugin emits the same `IrGetEnumValue` already present on the
+     * source-level annotation argument, so consumers receive the actual
+     * enum constant.
      */
-    class EnumValue(val enumFqName: String, val entryName: String) : MetadataValue() {
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (other !is EnumValue) return false
-            return enumFqName == other.enumFqName && entryName == other.entryName
+    class EnumValue(val value: Enum<*>) : MetadataValue() {
+        override fun equals(other: Any?): Boolean =
+            this === other || (other is EnumValue && value == other.value)
+        override fun hashCode(): Int = value.hashCode()
+        override fun toString(): String {
+            val cls = value::class.simpleName ?: "<anonymous>"
+            return "$cls.${value.name}"
         }
-        override fun hashCode(): Int = 31 * enumFqName.hashCode() + entryName.hashCode()
-        override fun toString(): String = "$enumFqName.$entryName"
     }
 
     /**
