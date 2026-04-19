@@ -15,8 +15,6 @@
  */
 package com.monkopedia.ksrpc
 
-import kotlin.reflect.KClass
-
 /**
  * A captured sibling annotation on a `@KsMethod` function.
  *
@@ -116,12 +114,11 @@ sealed class MetadataValue {
 
     /**
      * A `KClass<*>` literal captured by FQ name. The class itself is not
-     * dereferenced at descriptor-build time — consumers that need the live
-     * class look it up via [kClass] (which uses [classFqName]).
+     * dereferenced at descriptor-build time — the FQ name is the only field.
+     * Consumers that need to resolve it to a live class do so via their own
+     * reflection facilities on platforms that support it.
      */
     class KClassValue(val classFqName: String) : MetadataValue() {
-        val kClass: KClass<*>?
-            get() = lookupKClass(classFqName)
         override fun equals(other: Any?): Boolean =
             this === other || (other is KClassValue && classFqName == other.classFqName)
         override fun hashCode(): Int = classFqName.hashCode()
@@ -153,5 +150,3 @@ sealed class MetadataValue {
         override fun toString(): String = items.joinToString(prefix = "[", postfix = "]")
     }
 }
-
-internal expect fun lookupKClass(fqName: String): KClass<*>?
