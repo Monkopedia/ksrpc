@@ -141,8 +141,6 @@ final class <#A: com.monkopedia.ksrpc/RpcService, #B: kotlin/Any?, #C: kotlin/An
         final fun <get-hasReturnType>(): kotlin/Boolean // com.monkopedia.ksrpc/RpcMethod.hasReturnType.<get-hasReturnType>|<get-hasReturnType>(){}[0]
     final val inputTransform // com.monkopedia.ksrpc/RpcMethod.inputTransform|{}inputTransform[0]
         final fun <get-inputTransform>(): com.monkopedia.ksrpc/Transformer<#B> // com.monkopedia.ksrpc/RpcMethod.inputTransform.<get-inputTransform>|<get-inputTransform>(){}[0]
-    final val isNotification // com.monkopedia.ksrpc/RpcMethod.isNotification|{}isNotification[0]
-        final fun <get-isNotification>(): kotlin/Boolean // com.monkopedia.ksrpc/RpcMethod.isNotification.<get-isNotification>|<get-isNotification>(){}[0]
     final val metadata // com.monkopedia.ksrpc/RpcMethod.metadata|{}metadata[0]
         final fun <get-metadata>(): kotlin.collections/List<com.monkopedia.ksrpc/MethodMetadata> // com.monkopedia.ksrpc/RpcMethod.metadata.<get-metadata>|<get-metadata>(){}[0]
     final val outputTransform // com.monkopedia.ksrpc/RpcMethod.outputTransform|{}outputTransform[0]

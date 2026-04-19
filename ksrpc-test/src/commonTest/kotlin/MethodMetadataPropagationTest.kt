@@ -213,18 +213,27 @@ class MethodMetadataPropagationTest {
     }
 
     @Test
-    fun ksNotificationMethodIsNotificationReturnsTrue() {
-        assertTrue(method("notification").isNotification)
+    fun ksNotificationMethodHasNotificationMetadata() {
+        assertNotNull(
+            method("notification")
+                .metadata("com.monkopedia.ksrpc.annotation.KsNotification")
+        )
     }
 
     @Test
-    fun unitMethodWithoutKsNotificationIsNotificationReturnsFalse() {
-        assertFalse(method("unit_no_notification").isNotification)
+    fun unitMethodWithoutKsNotificationHasNoNotificationMetadata() {
+        assertNull(
+            method("unit_no_notification")
+                .metadata("com.monkopedia.ksrpc.annotation.KsNotification")
+        )
     }
 
     @Test
-    fun plainMethodIsNotificationReturnsFalse() {
-        assertFalse(method("plain").isNotification)
+    fun plainMethodHasNoNotificationMetadata() {
+        assertNull(
+            method("plain")
+                .metadata("com.monkopedia.ksrpc.annotation.KsNotification")
+        )
     }
 
     @Test
