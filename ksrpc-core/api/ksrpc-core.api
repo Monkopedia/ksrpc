@@ -218,6 +218,7 @@ public final class com/monkopedia/ksrpc/RpcMethod {
 	public final fun getInputTransform ()Lcom/monkopedia/ksrpc/Transformer;
 	public final fun getMetadata ()Ljava/util/List;
 	public final fun getOutputTransform ()Lcom/monkopedia/ksrpc/Transformer;
+	public final fun isNotification ()Z
 	public final fun metadata (Ljava/lang/String;)Lcom/monkopedia/ksrpc/MethodMetadata;
 }
 

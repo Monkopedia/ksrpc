@@ -38,7 +38,7 @@ class JsonRpcSerializedChannel(
         endpoint: RpcMethod<*, *, *>,
         input: CallData<String>,
         callId: RpcCallId?
-    ): CallData<String> = call(endpoint.endpoint, input, !endpoint.hasReturnType)
+    ): CallData<String> = call(endpoint.endpoint, input, endpoint.isNotification)
 
     override suspend fun call(
         endpoint: String,

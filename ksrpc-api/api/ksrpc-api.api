@@ -50,6 +50,9 @@ public abstract interface annotation class com/monkopedia/ksrpc/annotation/KsMet
 public abstract interface annotation class com/monkopedia/ksrpc/annotation/KsMethodMetadata : java/lang/annotation/Annotation {
 }
 
+public abstract interface annotation class com/monkopedia/ksrpc/annotation/KsNotification : java/lang/annotation/Annotation {
+}
+
 public abstract interface annotation class com/monkopedia/ksrpc/annotation/KsService : java/lang/annotation/Annotation {
 }
 

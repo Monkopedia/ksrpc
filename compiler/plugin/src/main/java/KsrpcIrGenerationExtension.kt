@@ -59,6 +59,9 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
                 serviceMethod.function,
                 serviceMethod.ksMethodAnnotation,
                 names
+            ) && validateNotification(
+                cls.irClass,
+                serviceMethod
             ) && current
         }
     }
@@ -119,6 +122,27 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
             isValid = false
         }
         return isValid
+    }
+
+    private fun validateNotification(
+        irClass: IrClass,
+        serviceMethod: ServiceMethod
+    ): Boolean {
+        val hasNotification = serviceMethod.metadataAnnotations.any {
+            it.type.classFqName == FqConstants.KS_NOTIFICATION
+        }
+        if (!hasNotification) return true
+        val returnType = serviceMethod.function.returnType.classFqName
+        if (returnType?.asString() != "kotlin.Unit") {
+            val fqName = irClass.kotlinFqName.asString()
+            val methodName = serviceMethod.function.name.asString()
+            report.error(
+                "$fqName.$methodName: @KsNotification methods must return Unit, " +
+                    "but returns $returnType"
+            )
+            return false
+        }
+        return true
     }
 }
 

@@ -179,6 +179,16 @@ class RpcMethod<T : RpcService, I, O>(
             outputTransform.untransform(transformedOutput, channel)
         }
 
+    /**
+     * Whether this method is annotated with `@KsNotification`, indicating it
+     * should be treated as a JSON-RPC notification (fire-and-forget, no
+     * response). Transports that support notification semantics use this to
+     * decide whether to send the call without an `id` and skip awaiting a
+     * response.
+     */
+    val isNotification: Boolean
+        get() = metadata("com.monkopedia.ksrpc.annotation.KsNotification") != null
+
     fun findSubserviceTransformers(): List<SubserviceTransformer<out RpcService>> = listOfNotNull(
         inputTransform as? SubserviceTransformer<*>,
         outputTransform as? SubserviceTransformer<*>
