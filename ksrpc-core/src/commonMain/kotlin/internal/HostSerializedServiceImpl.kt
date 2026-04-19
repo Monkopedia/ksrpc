@@ -22,6 +22,7 @@ import com.monkopedia.ksrpc.RpcObject
 import com.monkopedia.ksrpc.RpcService
 import com.monkopedia.ksrpc.SuspendCloseable
 import com.monkopedia.ksrpc.TrackingService
+import com.monkopedia.ksrpc.UnhandledMethodHandler
 import com.monkopedia.ksrpc.asString
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.ChannelClient
@@ -151,7 +152,18 @@ internal class HostSerializedServiceImpl<T : RpcService, S>(
     private val onCloseCallbacks = mutableSetOf<suspend () -> Unit>()
 
     override suspend fun call(endpoint: String, input: CallData<S>): CallData<S> {
-        val rpcEndpoint = rpcObject.findEndpoint(endpoint)
+        val rpcEndpoint = try {
+            rpcObject.findEndpoint(endpoint)
+        } catch (t: RpcEndpointException) {
+            // Opt-in fallback: if the service implements UnhandledMethodHandler, route
+            // unknown endpoints to it instead of propagating the endpoint-not-found error.
+            @Suppress("UNCHECKED_CAST")
+            val handler = service as? UnhandledMethodHandler<S>
+            if (handler != null) {
+                return handler.onUnhandled(endpoint, input)
+            }
+            throw t
+        }
         return rpcEndpoint.call(this, service, input)
     }
 
