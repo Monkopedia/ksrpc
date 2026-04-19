@@ -17,6 +17,7 @@ package com.monkopedia.ksrpc.bench
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.channels.CallData
+import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.toByteArray
@@ -35,7 +36,11 @@ internal class EchoSerializedService(override val env: KsrpcEnvironment<String>)
     SerializedService<String> {
     private val onCloseHandlers = mutableSetOf<suspend () -> Unit>()
 
-    override suspend fun call(endpoint: String, input: CallData<String>): CallData<String> = input
+    override suspend fun call(
+        endpoint: String,
+        input: CallData<String>,
+        callId: RpcCallId?
+    ): CallData<String> = input
 
     override suspend fun close() {
         onCloseHandlers.forEach { it.invoke() }
@@ -52,7 +57,7 @@ internal suspend fun callEcho(
     payload: String
 ): String {
     val input = env.serialization.createCallData(String.serializer(), payload)
-    val output = service.call("echo", input)
+    val output = service.call("echo", input, callId = null)
     return env.serialization.decodeCallData(String.serializer(), output)
 }
 
@@ -62,7 +67,7 @@ internal suspend fun callComplexEcho(
     payload: ComplexEchoPayload
 ): ComplexEchoPayload {
     val input = env.serialization.createCallData(ComplexEchoPayload.serializer(), payload)
-    val output = service.call("complexEcho", input)
+    val output = service.call("complexEcho", input, callId = null)
     return env.serialization.decodeCallData(ComplexEchoPayload.serializer(), output)
 }
 
@@ -71,7 +76,7 @@ internal suspend fun callBinaryEcho(
     payload: ByteArray
 ): ByteArray {
     val input = CallData.createBinary<String>(ByteReadChannel(payload))
-    val output = service.call("binaryEcho", input)
+    val output = service.call("binaryEcho", input, callId = null)
     return output.readBinary().toByteArray()
 }
 

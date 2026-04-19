@@ -52,7 +52,7 @@ class JsonRpcSerializedChannelNotifyTest {
             )
         val input = CallData.create(Json.encodeToString(String.serializer(), "payload"))
 
-        val output = serializedChannel.call(method, input)
+        val output = serializedChannel.call(method, input, callId = null)
 
         assertEquals("notify-endpoint", jsonChannel.method)
         assertEquals(JsonPrimitive("payload"), jsonChannel.message)
@@ -84,7 +84,7 @@ class JsonRpcSerializedChannelNotifyTest {
             )
         val input = CallData.create(Json.encodeToString(String.serializer(), "payload"))
 
-        val output = serializedChannel.call(method, input)
+        val output = serializedChannel.call(method, input, callId = null)
 
         assertEquals("request-endpoint", jsonChannel.method)
         assertEquals(JsonPrimitive("payload"), jsonChannel.message)
@@ -144,7 +144,7 @@ class JsonRpcSerializedChannelNotifyTest {
             )
         val input = CallData.create(Json.encodeToString(String.serializer(), "ping"))
 
-        val output = serializedChannel.call("echo", input)
+        val output = serializedChannel.call("echo", input, callId = null)
 
         assertEquals("echo", jsonChannel.method)
         assertEquals(JsonPrimitive("ping"), jsonChannel.message)
@@ -164,7 +164,7 @@ class JsonRpcSerializedChannelNotifyTest {
             )
         val input = CallData.create(Json.encodeToString(String.serializer(), "ping"))
 
-        val output = serializedChannel.call("nullable", input)
+        val output = serializedChannel.call("nullable", input, callId = null)
 
         assertEquals("nullable", jsonChannel.method)
         assertEquals(JsonPrimitive("ping"), jsonChannel.message)
@@ -184,7 +184,7 @@ class JsonRpcSerializedChannelNotifyTest {
             )
 
         assertFailsWith<Throwable> {
-            serializedChannel.call("bad-json", CallData.create("{"))
+            serializedChannel.call("bad-json", CallData.create("{"), callId = null)
         }
         assertEquals(null, jsonChannel.method)
     }
@@ -212,7 +212,7 @@ class JsonRpcSerializedChannelNotifyTest {
             )
 
         assertFailsWith<Throwable> {
-            serializedChannel.call(method, CallData.create("{"))
+            serializedChannel.call(method, CallData.create("{"), callId = null)
         }
         assertEquals(null, jsonChannel.method)
     }
@@ -227,7 +227,8 @@ class JsonRpcSerializedChannelNotifyTest {
         override suspend fun execute(
             method: String,
             message: JsonElement?,
-            isNotify: Boolean
+            isNotify: Boolean,
+            id: JsonPrimitive?
         ): JsonElement? {
             this.method = method
             this.message = message

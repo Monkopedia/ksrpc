@@ -18,10 +18,12 @@ package com.monkopedia.ksrpc.jsonrpc.internal
 import com.monkopedia.ksrpc.KsrpcEnvironment.Element
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.SerializedService
+import com.monkopedia.ksrpc.jsonrpc.JsonRpcCallId
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonPrimitive
 
 class JsonRpcServiceWrapper(private val channel: SerializedService<String>) :
     JsonRpcChannel,
@@ -30,9 +32,18 @@ class JsonRpcServiceWrapper(private val channel: SerializedService<String>) :
     override suspend fun execute(
         method: String,
         message: JsonElement?,
-        isNotify: Boolean
+        isNotify: Boolean,
+        id: JsonPrimitive?
     ): JsonElement? {
-        val response = channel.call(method, CallData.create(json.encodeToString(message)))
+        // Forward the request id (if any) to the SerializedService call as a JsonRpcCallId.
+        // RpcMethod.call then installs CurrentRpcCallElement for the handler — this is the
+        // single central install site.
+        val callId = id?.let { JsonRpcCallId(it) }
+        val response = channel.call(
+            method,
+            CallData.create(json.encodeToString(message)),
+            callId
+        )
         require(!response.isBinary) {
             "JsonRpc does not support binary data"
         }

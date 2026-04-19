@@ -142,7 +142,7 @@ class ServiceWorkerTest {
         if (!hasWindow()) return@runBlockingUnit
         createServiceWorkerWithConnection(wasmWorkerUrl(), ksrpcEnvironment { }).use { connection ->
             val channel = connection.defaultChannel()
-            val response = channel.call("ping", CallData.create("123"))
+            val response = channel.call("ping", CallData.create("123"), callId = null)
             assertTrue(connection.env.serialization.isError(response))
 
             val error = connection.env.serialization.decodeErrorCallData(response)

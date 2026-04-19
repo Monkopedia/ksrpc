@@ -161,7 +161,12 @@ interface SerializedChannel<T> :
     SuspendCloseableObservable,
     ContextContainer,
     KsrpcEnvironment.Element<T> {
-    suspend fun call(channelId: ChannelId, endpoint: String, data: CallData<T>): CallData<T>
+    suspend fun call(
+        channelId: ChannelId,
+        endpoint: String,
+        data: CallData<T>,
+        callId: RpcCallId?
+    ): CallData<T>
     suspend fun close(id: ChannelId)
 }
 
@@ -173,9 +178,12 @@ interface SerializedService<T> :
     SuspendCloseableObservable,
     ContextContainer,
     KsrpcEnvironment.Element<T> {
-    suspend fun call(endpoint: String, input: CallData<T>): CallData<T>
-    suspend fun call(endpoint: RpcMethod<*, *, *>, input: CallData<T>): CallData<T> =
-        call(endpoint.endpoint, input)
+    suspend fun call(endpoint: String, input: CallData<T>, callId: RpcCallId?): CallData<T>
+    suspend fun call(
+        endpoint: RpcMethod<*, *, *>,
+        input: CallData<T>,
+        callId: RpcCallId?
+    ): CallData<T> = call(endpoint.endpoint, input, callId)
 }
 
 expect fun randomUuid(): String

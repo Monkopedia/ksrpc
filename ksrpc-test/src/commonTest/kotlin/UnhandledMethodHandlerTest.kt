@@ -42,7 +42,7 @@ class RpcUnhandledMethodHandlerNotImplementedTest :
             impl.serialized(ksrpcEnvironment { })
         },
         verifyOnChannel = { channel ->
-            val response = channel.call("missing", CallData.create("ignored"))
+            val response = channel.call("missing", CallData.create("ignored"), callId = null)
             assertTrue(channel.env.serialization.isError(response))
             val exception = channel.env.serialization.decodeErrorCallData(response)
             val message = exception.message ?: ""
@@ -93,7 +93,8 @@ class RpcUnhandledMethodHandlerImplementedTest :
                 channel.env.serialization.createCallData(
                     String.serializer(),
                     "hi"
-                )
+                ),
+                callId = null
             )
             assertFalse(channel.env.serialization.isError(knownResponse))
             assertEquals(
@@ -110,7 +111,8 @@ class RpcUnhandledMethodHandlerImplementedTest :
                 channel.env.serialization.createCallData(
                     String.serializer(),
                     "payload"
-                )
+                ),
+                callId = null
             )
             assertFalse(channel.env.serialization.isError(unknownResponse))
             assertEquals(
@@ -150,7 +152,8 @@ class RpcUnhandledMethodHandlerThrowsTest :
                 channel.env.serialization.createCallData(
                     String.serializer(),
                     "payload"
-                )
+                ),
+                callId = null
             )
             assertTrue(channel.env.serialization.isError(response))
             val exception = channel.env.serialization.decodeErrorCallData(response)

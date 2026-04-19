@@ -60,7 +60,7 @@ public final class com/monkopedia/ksrpc/packets/internal/PacketCallId : com/monk
 
 public abstract class com/monkopedia/ksrpc/packets/internal/PacketChannelBase : com/monkopedia/ksrpc/channels/CancellationSupport, com/monkopedia/ksrpc/channels/ChannelHost, com/monkopedia/ksrpc/channels/Connection, com/monkopedia/ksrpc/packets/internal/PacketChannel {
 	public fun <init> (Lkotlinx/coroutines/CoroutineScope;Lcom/monkopedia/ksrpc/KsrpcEnvironment;)V
-	public fun call (Lcom/monkopedia/ksrpc/channels/ChannelId;Ljava/lang/String;Lcom/monkopedia/ksrpc/channels/CallData;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun call (Lcom/monkopedia/ksrpc/channels/ChannelId;Ljava/lang/String;Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/RpcCallId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun cancelHandler (Lcom/monkopedia/ksrpc/channels/RpcCallId;Ljava/util/concurrent/CancellationException;)V
 	public fun close (Lcom/monkopedia/ksrpc/channels/ChannelId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun close (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;

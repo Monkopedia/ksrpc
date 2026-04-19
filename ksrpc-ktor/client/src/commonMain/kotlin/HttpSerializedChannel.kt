@@ -23,6 +23,7 @@ import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.ChannelClient
 import com.monkopedia.ksrpc.channels.ChannelId
+import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedChannel
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.internal.ClientChannelContext
@@ -57,7 +58,8 @@ internal class HttpSerializedChannel(
     override suspend fun call(
         channelId: ChannelId,
         endpoint: String,
-        data: CallData<String>
+        data: CallData<String>,
+        callId: RpcCallId?
     ): CallData<String> {
         val response = httpClient.post(
             "$baseStripped/call/${endpoint.encodeURLPath()}"
@@ -75,7 +77,7 @@ internal class HttpSerializedChannel(
     }
 
     override suspend fun close(id: ChannelId) {
-        call(id, "", CallData.create("{}"))
+        call(id, "", CallData.create("{}"), callId = null)
     }
 
     override suspend fun wrapChannel(channelId: ChannelId): SerializedService<String> {

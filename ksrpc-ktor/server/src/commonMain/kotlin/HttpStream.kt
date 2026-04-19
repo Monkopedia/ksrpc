@@ -94,7 +94,11 @@ private suspend fun RoutingContext.execCall(channel: SerializedChannel<String>, 
     }
     val channelId = call.request.headers[KSRPC_CHANNEL] ?: ChannelClient.DEFAULT
     channel.env.logger.debug("HttpChannel", "Executing call $channelId/$method")
-    val response = channel.call(ChannelId(channelId), method, content)
+    // HTTP has no wire-level request correlation id the handler would need to see; each
+    // request is a synchronous round trip. Pass null as the callId — the server-side
+    // RpcMethod.call will still install CurrentRpcCallElement so handlers can introspect
+    // the method, with id == null indicating "no transport-level call id".
+    val response = channel.call(ChannelId(channelId), method, content, callId = null)
     if (response.isBinary) {
         channel.env.logger.debug(
             "HttpChannel",

@@ -16,6 +16,7 @@
 package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.channels.CallData
+import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.CoroutineContext
@@ -35,8 +36,11 @@ private class FakeSerializedService : SerializedService<String> {
     override val env: KsrpcEnvironment<String>
         get() = error("not needed for TrackingService tests")
 
-    override suspend fun call(endpoint: String, input: CallData<String>): CallData<String> =
-        error("not needed for TrackingService tests")
+    override suspend fun call(
+        endpoint: String,
+        input: CallData<String>,
+        callId: RpcCallId?
+    ): CallData<String> = error("not needed for TrackingService tests")
 
     override suspend fun close() = Unit
 

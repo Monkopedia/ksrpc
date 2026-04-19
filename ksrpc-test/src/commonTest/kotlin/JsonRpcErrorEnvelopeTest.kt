@@ -16,6 +16,7 @@
 package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.channels.CallData
+import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcError
 import com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcRequest
@@ -71,7 +72,8 @@ class JsonRpcErrorEnvelopeTest {
 
                 override suspend fun call(
                     endpoint: String,
-                    input: CallData<String>
+                    input: CallData<String>,
+                    callId: RpcCallId?
                 ): CallData<String> = throw IllegalStateException("boom")
 
                 override suspend fun close() {}
@@ -118,7 +120,8 @@ class JsonRpcErrorEnvelopeTest {
 
                 override suspend fun call(
                     endpoint: String,
-                    input: CallData<String>
+                    input: CallData<String>,
+                    callId: RpcCallId?
                 ): CallData<String> = input
 
                 override suspend fun close() {}
@@ -166,7 +169,8 @@ class JsonRpcErrorEnvelopeTest {
 
                 override suspend fun call(
                     endpoint: String,
-                    input: CallData<String>
+                    input: CallData<String>,
+                    callId: RpcCallId?
                 ): CallData<String> = input
 
                 override suspend fun close() {}
@@ -208,7 +212,8 @@ class JsonRpcErrorEnvelopeTest {
 
                 override suspend fun call(
                     endpoint: String,
-                    input: CallData<String>
+                    input: CallData<String>,
+                    callId: RpcCallId?
                 ): CallData<String> = CallData.create("first")
 
                 override suspend fun close() {}
@@ -222,7 +227,8 @@ class JsonRpcErrorEnvelopeTest {
 
                 override suspend fun call(
                     endpoint: String,
-                    input: CallData<String>
+                    input: CallData<String>,
+                    callId: RpcCallId?
                 ): CallData<String> = CallData.create("second")
 
                 override suspend fun close() {}
@@ -254,7 +260,7 @@ class JsonRpcErrorEnvelopeTest {
 
         val thrown =
             assertFailsWith<IllegalStateException> {
-                writer.execute("explode", JsonPrimitive("input"), isNotify = false)
+                writer.execute("explode", JsonPrimitive("input"), isNotify = false, id = null)
             }
 
         assertTrue(thrown.message?.contains("JsonRpcError(-32603): server exploded") == true)
@@ -281,7 +287,7 @@ class JsonRpcErrorEnvelopeTest {
 
         val thrown =
             assertFailsWith<RpcException> {
-                writer.execute("explode", JsonPrimitive("input"), isNotify = false)
+                writer.execute("explode", JsonPrimitive("input"), isNotify = false, id = null)
             }
 
         assertTrue(thrown.message.contains("remote stack"))
@@ -305,7 +311,7 @@ class JsonRpcErrorEnvelopeTest {
 
         val thrown =
             assertFailsWith<IllegalStateException> {
-                writer.execute("explode", JsonPrimitive("input"), isNotify = false)
+                writer.execute("explode", JsonPrimitive("input"), isNotify = false, id = null)
             }
 
         assertTrue(thrown.message?.contains("JsonRpcError(-32603): server exploded") == true)
@@ -323,7 +329,7 @@ class JsonRpcErrorEnvelopeTest {
                 comm = transformer
             )
 
-        val response = writer.execute("ping", JsonPrimitive("input"), isNotify = false)
+        val response = writer.execute("ping", JsonPrimitive("input"), isNotify = false, id = null)
         assertEquals(JsonPrimitive("ok"), response)
 
         val request = withTimeout(2_000) { transformer.sentRequest() }
@@ -344,7 +350,7 @@ class JsonRpcErrorEnvelopeTest {
                 comm = transformer
             )
 
-        val response = writer.execute("ping", JsonPrimitive("input"), isNotify = false)
+        val response = writer.execute("ping", JsonPrimitive("input"), isNotify = false, id = null)
         assertNull(response)
         writer.close()
     }
@@ -362,7 +368,7 @@ class JsonRpcErrorEnvelopeTest {
 
         val thrown =
             assertFailsWith<IllegalStateException> {
-                writer.execute("ping", JsonPrimitive("input"), isNotify = false)
+                writer.execute("ping", JsonPrimitive("input"), isNotify = false, id = null)
             }
 
         assertTrue(thrown.message?.contains("JsonRpcError(-32603): mixed response") == true)
@@ -380,7 +386,7 @@ class JsonRpcErrorEnvelopeTest {
                 comm = transformer
             )
 
-        val response = writer.execute("ping", null, isNotify = false)
+        val response = writer.execute("ping", null, isNotify = false, id = null)
         assertEquals(JsonPrimitive("ok"), response)
 
         val request = withTimeout(2_000) { transformer.sentRequest() }
@@ -401,7 +407,7 @@ class JsonRpcErrorEnvelopeTest {
                 comm = transformer
             )
 
-        val response = writer.execute("notify", JsonPrimitive("input"), isNotify = true)
+        val response = writer.execute("notify", JsonPrimitive("input"), isNotify = true, id = null)
         assertEquals(null, response)
         assertFalse(transformer.receiveCalled)
         val request = assertNotNull(transformer.sentRequest)
@@ -439,7 +445,8 @@ class JsonRpcErrorEnvelopeTest {
 
                 override suspend fun call(
                     endpoint: String,
-                    input: CallData<String>
+                    input: CallData<String>,
+                    callId: RpcCallId?
                 ): CallData<String> {
                     callSeen.complete(Unit)
                     throw IllegalStateException("boom notify")
@@ -484,7 +491,8 @@ class JsonRpcErrorEnvelopeTest {
 
                 override suspend fun call(
                     endpoint: String,
-                    input: CallData<String>
+                    input: CallData<String>,
+                    callId: RpcCallId?
                 ): CallData<String> {
                     callSeen.complete(Unit)
                     return input
@@ -558,7 +566,9 @@ class JsonRpcErrorEnvelopeTest {
                 comm = transformer
             )
 
-        val pending = async { writer.execute("pending", JsonPrimitive("input"), isNotify = false) }
+        val pending = async {
+            writer.execute("pending", JsonPrimitive("input"), isNotify = false, id = null)
+        }
         withTimeout(2_000) { transformer.sentRequest.await() }
 
         writer.close()
@@ -599,7 +609,12 @@ class JsonRpcErrorEnvelopeTest {
                 comm = transformer
             )
 
-        val response = writer.execute("dup-id", JsonPrimitive("input"), isNotify = false)
+        val response = writer.execute(
+            "dup-id",
+            JsonPrimitive("input"),
+            isNotify = false,
+            id = null
+        )
         assertEquals(JsonPrimitive("ok"), response)
 
         val error = withTimeout(2_000) { observedError.await() }
@@ -628,7 +643,12 @@ class JsonRpcErrorEnvelopeTest {
                 comm = transformer
             )
 
-        val response = writer.execute("null-id", JsonPrimitive("input"), isNotify = false)
+        val response = writer.execute(
+            "null-id",
+            JsonPrimitive("input"),
+            isNotify = false,
+            id = null
+        )
         assertEquals(JsonPrimitive("ok"), response)
 
         val error = withTimeout(2_000) { observedError.await() }

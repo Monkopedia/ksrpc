@@ -47,7 +47,7 @@ public final class com/monkopedia/ksrpc/jsonrpc/JsonRpcChannelsKt {
 }
 
 public abstract interface class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcChannel : com/monkopedia/ksrpc/KsrpcEnvironment$Element, com/monkopedia/ksrpc/SuspendCloseable {
-	public abstract fun execute (Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun execute (Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;ZLkotlinx/serialization/json/JsonPrimitive;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcError {
@@ -160,8 +160,8 @@ public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcResponse$Compani
 
 public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcSerializedChannel : com/monkopedia/ksrpc/channels/SerializedService {
 	public fun <init> (Lkotlin/coroutines/CoroutineContext;Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcChannel;Lcom/monkopedia/ksrpc/KsrpcEnvironment;)V
-	public fun call (Lcom/monkopedia/ksrpc/RpcMethod;Lcom/monkopedia/ksrpc/channels/CallData;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun call (Ljava/lang/String;Lcom/monkopedia/ksrpc/channels/CallData;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun call (Lcom/monkopedia/ksrpc/RpcMethod;Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/RpcCallId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun call (Ljava/lang/String;Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/RpcCallId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun close (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun getContext ()Lkotlin/coroutines/CoroutineContext;
 	public fun getEnv ()Lcom/monkopedia/ksrpc/KsrpcEnvironment;
@@ -171,7 +171,7 @@ public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcSerializedChanne
 public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcServiceWrapper : com/monkopedia/ksrpc/KsrpcEnvironment$Element, com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcChannel {
 	public fun <init> (Lcom/monkopedia/ksrpc/channels/SerializedService;)V
 	public fun close (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun execute (Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun execute (Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;ZLkotlinx/serialization/json/JsonPrimitive;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun getEnv ()Lcom/monkopedia/ksrpc/KsrpcEnvironment;
 }
 
@@ -195,7 +195,7 @@ public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcWriterBase : com
 	public fun cancelHandler (Lcom/monkopedia/ksrpc/channels/RpcCallId;Ljava/util/concurrent/CancellationException;)V
 	public fun close (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun defaultChannel (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun execute (Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun execute (Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;ZLkotlinx/serialization/json/JsonPrimitive;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun getEnv ()Lcom/monkopedia/ksrpc/KsrpcEnvironment;
 	public fun registerDefault (Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun registerHandler (Lcom/monkopedia/ksrpc/channels/RpcCallId;Lkotlinx/coroutines/Job;)V

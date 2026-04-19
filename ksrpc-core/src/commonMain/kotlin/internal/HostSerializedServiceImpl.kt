@@ -28,6 +28,7 @@ import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.ChannelClient
 import com.monkopedia.ksrpc.channels.ChannelId
 import com.monkopedia.ksrpc.channels.Connection
+import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedChannel
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.channels.randomUuid
@@ -54,7 +55,8 @@ class HostSerializedChannelImpl<T>(
     override suspend fun call(
         channelId: ChannelId,
         endpoint: String,
-        data: CallData<T>
+        data: CallData<T>,
+        callId: RpcCallId?
     ): CallData<T> = try {
         val channel = if (channelId.id.isEmpty()) {
             baseChannel.await()
@@ -69,7 +71,7 @@ class HostSerializedChannelImpl<T>(
                 close(channelId)
                 env.serialization.createCallData(Unit.serializer(), Unit)
             } else {
-                channel.call(endpoint, data)
+                channel.call(endpoint, data, callId)
             }
         }
     } catch (t: Throwable) {
@@ -151,7 +153,11 @@ internal class HostSerializedServiceImpl<T : RpcService, S>(
 ) : SerializedService<S> {
     private val onCloseCallbacks = mutableSetOf<suspend () -> Unit>()
 
-    override suspend fun call(endpoint: String, input: CallData<S>): CallData<S> {
+    override suspend fun call(
+        endpoint: String,
+        input: CallData<S>,
+        callId: RpcCallId?
+    ): CallData<S> {
         val rpcEndpoint = try {
             rpcObject.findEndpoint(endpoint)
         } catch (t: RpcEndpointException) {
@@ -163,7 +169,7 @@ internal class HostSerializedServiceImpl<T : RpcService, S>(
             }
             throw t
         }
-        return rpcEndpoint.call(this, service, input)
+        return rpcEndpoint.call(this, service, input, callId)
     }
 
     override suspend fun onClose(onClose: suspend () -> Unit) {

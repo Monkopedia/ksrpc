@@ -42,7 +42,12 @@ class JsonRpcNotifyRequestShapeTest {
                 comm = transformer
             )
 
-        val response = writer.execute("notify-endpoint", JsonPrimitive("payload"), isNotify = true)
+        val response = writer.execute(
+            "notify-endpoint",
+            JsonPrimitive("payload"),
+            isNotify = true,
+            id = null
+        )
         assertEquals(null, response)
 
         val request = withTimeout(2_000) { transformer.sentRequest.await() }
@@ -64,7 +69,7 @@ class JsonRpcNotifyRequestShapeTest {
                 comm = transformer
             )
 
-        val response = writer.execute("notify-null", null, isNotify = true)
+        val response = writer.execute("notify-null", null, isNotify = true, id = null)
         assertEquals(null, response)
 
         val request = withTimeout(2_000) { transformer.sentRequest.await() }

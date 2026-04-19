@@ -146,11 +146,14 @@ abstract class PacketChannelBase<T>(
                             // Strip the channel's Job so the handler coroutine's Job stays
                             // the parent — an incoming cancel frame cancels the handler and
                             // the cancellation must flow through into serviceChannel.call.
+                            // The CurrentRpcCallElement is installed centrally in
+                            // RpcMethod.call via the callId we pass through here.
                             val response = withContext(context.minusKey(Job)) {
                                 serviceChannel.call(
                                     ChannelId(p.id),
                                     p.endpoint,
-                                    callData
+                                    callData,
+                                    callId
                                 )
                             }
 
@@ -312,17 +315,18 @@ abstract class PacketChannelBase<T>(
     override suspend fun call(
         channelId: ChannelId,
         endpoint: String,
-        data: CallData<T>
+        data: CallData<T>,
+        callId: RpcCallId?
     ): CallData<T> {
         val (messageId, response) = multiChannel.allocateReceiveString()
-        val callId = PacketCallId(channelId.id, messageId)
+        val wireCallId = PacketCallId(channelId.id, messageId)
         env.logger.debug(
             "SerializedChannel",
             "Sending call ${channelId.id}/$endpoint -  $messageId"
         )
         scope.sendPacket(true, channelId.id, messageId, endpoint, data)
         val packet = try {
-            awaitRequestCancellable(callId, response)
+            awaitRequestCancellable(wireCallId, response)
         } catch (t: CancellationException) {
             // Cleanup the pending entry while the parent is being cancelled — must use
             // NonCancellable so Mutex.withLock doesn't immediately rethrow.
@@ -338,7 +342,7 @@ abstract class PacketChannelBase<T>(
         val serviceChannel = serviceChannel
         serviceChannel.close(id)
         env.logger.info("SerializedChannel", "Closing channel ${id.id}")
-        call(id, "", env.serialization.createCallData(Unit.serializer(), Unit))
+        call(id, "", env.serialization.createCallData(Unit.serializer(), Unit), callId = null)
     }
 
     override suspend fun registerDefault(service: SerializedService<T>) {

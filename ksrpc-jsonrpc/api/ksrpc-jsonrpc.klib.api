@@ -7,7 +7,7 @@
 
 // Library unique name: <com.monkopedia.ksrpc:ksrpc-jsonrpc>
 abstract interface com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcChannel : com.monkopedia.ksrpc/KsrpcEnvironment.Element<kotlin/String>, com.monkopedia.ksrpc/SuspendCloseable { // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcChannel|null[0]
-    abstract suspend fun execute(kotlin/String, kotlinx.serialization.json/JsonElement?, kotlin/Boolean): kotlinx.serialization.json/JsonElement? // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcChannel.execute|execute(kotlin.String;kotlinx.serialization.json.JsonElement?;kotlin.Boolean){}[0]
+    abstract suspend fun execute(kotlin/String, kotlinx.serialization.json/JsonElement?, kotlin/Boolean, kotlinx.serialization.json/JsonPrimitive?): kotlinx.serialization.json/JsonElement? // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcChannel.execute|execute(kotlin.String;kotlinx.serialization.json.JsonElement?;kotlin.Boolean;kotlinx.serialization.json.JsonPrimitive?){}[0]
 }
 
 sealed interface com.monkopedia.ksrpc.jsonrpc/JsonRpcCancellationConvention { // com.monkopedia.ksrpc.jsonrpc/JsonRpcCancellationConvention|null[0]
@@ -172,8 +172,8 @@ final class com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcSerializedChannel : com
     final val env // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcSerializedChannel.env|{}env[0]
         final fun <get-env>(): com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String> // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcSerializedChannel.env.<get-env>|<get-env>(){}[0]
 
-    final suspend fun call(com.monkopedia.ksrpc/RpcMethod<*, *, *>, com.monkopedia.ksrpc.channels/CallData<kotlin/String>): com.monkopedia.ksrpc.channels/CallData<kotlin/String> // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcSerializedChannel.call|call(com.monkopedia.ksrpc.RpcMethod<*,*,*>;com.monkopedia.ksrpc.channels.CallData<kotlin.String>){}[0]
-    final suspend fun call(kotlin/String, com.monkopedia.ksrpc.channels/CallData<kotlin/String>): com.monkopedia.ksrpc.channels/CallData<kotlin/String> // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcSerializedChannel.call|call(kotlin.String;com.monkopedia.ksrpc.channels.CallData<kotlin.String>){}[0]
+    final suspend fun call(com.monkopedia.ksrpc/RpcMethod<*, *, *>, com.monkopedia.ksrpc.channels/CallData<kotlin/String>, com.monkopedia.ksrpc.channels/RpcCallId?): com.monkopedia.ksrpc.channels/CallData<kotlin/String> // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcSerializedChannel.call|call(com.monkopedia.ksrpc.RpcMethod<*,*,*>;com.monkopedia.ksrpc.channels.CallData<kotlin.String>;com.monkopedia.ksrpc.channels.RpcCallId?){}[0]
+    final suspend fun call(kotlin/String, com.monkopedia.ksrpc.channels/CallData<kotlin/String>, com.monkopedia.ksrpc.channels/RpcCallId?): com.monkopedia.ksrpc.channels/CallData<kotlin/String> // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcSerializedChannel.call|call(kotlin.String;com.monkopedia.ksrpc.channels.CallData<kotlin.String>;com.monkopedia.ksrpc.channels.RpcCallId?){}[0]
     final suspend fun close() // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcSerializedChannel.close|close(){}[0]
     final suspend fun onClose(kotlin.coroutines/SuspendFunction0<kotlin/Unit>) // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcSerializedChannel.onClose|onClose(kotlin.coroutines.SuspendFunction0<kotlin.Unit>){}[0]
 }
@@ -185,7 +185,7 @@ final class com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcServiceWrapper : com.mo
         final fun <get-env>(): com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String> // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcServiceWrapper.env.<get-env>|<get-env>(){}[0]
 
     final suspend fun close() // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcServiceWrapper.close|close(){}[0]
-    final suspend fun execute(kotlin/String, kotlinx.serialization.json/JsonElement?, kotlin/Boolean): kotlinx.serialization.json/JsonElement? // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcServiceWrapper.execute|execute(kotlin.String;kotlinx.serialization.json.JsonElement?;kotlin.Boolean){}[0]
+    final suspend fun execute(kotlin/String, kotlinx.serialization.json/JsonElement?, kotlin/Boolean, kotlinx.serialization.json/JsonPrimitive?): kotlinx.serialization.json/JsonElement? // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcServiceWrapper.execute|execute(kotlin.String;kotlinx.serialization.json.JsonElement?;kotlin.Boolean;kotlinx.serialization.json.JsonPrimitive?){}[0]
 }
 
 final class com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase : com.monkopedia.ksrpc.channels/CancellationSupport, com.monkopedia.ksrpc.channels/SingleChannelConnection<kotlin/String>, com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcChannel { // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase|null[0]
@@ -199,7 +199,7 @@ final class com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase : com.monkop
     final fun unregisterHandler(com.monkopedia.ksrpc.channels/RpcCallId) // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase.unregisterHandler|unregisterHandler(com.monkopedia.ksrpc.channels.RpcCallId){}[0]
     final suspend fun close() // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase.close|close(){}[0]
     final suspend fun defaultChannel(): com.monkopedia.ksrpc.channels/SerializedService<kotlin/String> // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase.defaultChannel|defaultChannel(){}[0]
-    final suspend fun execute(kotlin/String, kotlinx.serialization.json/JsonElement?, kotlin/Boolean): kotlinx.serialization.json/JsonElement? // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase.execute|execute(kotlin.String;kotlinx.serialization.json.JsonElement?;kotlin.Boolean){}[0]
+    final suspend fun execute(kotlin/String, kotlinx.serialization.json/JsonElement?, kotlin/Boolean, kotlinx.serialization.json/JsonPrimitive?): kotlinx.serialization.json/JsonElement? // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase.execute|execute(kotlin.String;kotlinx.serialization.json.JsonElement?;kotlin.Boolean;kotlinx.serialization.json.JsonPrimitive?){}[0]
     final suspend fun registerDefault(com.monkopedia.ksrpc.channels/SerializedService<kotlin/String>) // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase.registerDefault|registerDefault(com.monkopedia.ksrpc.channels.SerializedService<kotlin.String>){}[0]
     final suspend fun sendCancel(com.monkopedia.ksrpc.channels/RpcCallId) // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase.sendCancel|sendCancel(com.monkopedia.ksrpc.channels.RpcCallId){}[0]
 }

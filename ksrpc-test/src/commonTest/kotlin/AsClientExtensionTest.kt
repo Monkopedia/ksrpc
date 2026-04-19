@@ -17,6 +17,7 @@ package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.ChannelId
+import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedChannel
 import com.monkopedia.ksrpc.internal.asClient
 import kotlin.test.Test
@@ -31,7 +32,8 @@ private class CapturingSerializedChannel(override val env: KsrpcEnvironment<Stri
     override suspend fun call(
         channelId: ChannelId,
         endpoint: String,
-        data: CallData<String>
+        data: CallData<String>,
+        callId: RpcCallId?
     ): CallData<String> {
         lastCallChannelId = channelId
         lastEndpoint = endpoint
@@ -56,7 +58,7 @@ class AsClientExtensionTest {
         val client = base.asClient
         val wrapped = client.wrapChannel(serviceId)
 
-        val output = wrapped.call("echo", CallData.create("payload"))
+        val output = wrapped.call("echo", CallData.create("payload"), callId = null)
         wrapped.close()
 
         assertEquals("service-123", base.lastCallChannelId?.id)

@@ -18,6 +18,7 @@ package com.monkopedia.ksrpc
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.ChannelClient
 import com.monkopedia.ksrpc.channels.ChannelId
+import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -25,7 +26,11 @@ import kotlin.test.assertSame
 
 private class ClientDefaultChannelService(override val env: KsrpcEnvironment<String>) :
     SerializedService<String> {
-    override suspend fun call(endpoint: String, input: CallData<String>): CallData<String> = input
+    override suspend fun call(
+        endpoint: String,
+        input: CallData<String>,
+        callId: RpcCallId?
+    ): CallData<String> = input
 
     override suspend fun close() = Unit
 
@@ -46,7 +51,8 @@ private class CapturingDefaultChannelClient(
     override suspend fun call(
         channelId: ChannelId,
         endpoint: String,
-        data: CallData<String>
+        data: CallData<String>,
+        callId: RpcCallId?
     ): CallData<String> = error("unused")
 
     override suspend fun close(id: ChannelId) = Unit

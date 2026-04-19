@@ -64,7 +64,7 @@ open class JsonRpcWriterBenchmark {
 
     @Benchmark
     fun executeLoopbackRoundTrip(): String = runBlocking {
-        val response = writer.execute("echo", payload, isNotify = false)
+        val response = writer.execute("echo", payload, isNotify = false, id = null)
         (response as? JsonPrimitive)?.content ?: ""
     }
 

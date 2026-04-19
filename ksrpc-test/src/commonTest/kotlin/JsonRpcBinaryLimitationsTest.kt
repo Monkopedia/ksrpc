@@ -16,6 +16,7 @@
 package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.channels.CallData
+import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcChannel
 import com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcSerializedChannel
@@ -43,7 +44,8 @@ class JsonRpcBinaryLimitationsTest {
                 override suspend fun execute(
                     method: String,
                     message: JsonElement?,
-                    isNotify: Boolean
+                    isNotify: Boolean,
+                    id: JsonPrimitive?
                 ): JsonElement? {
                     executed = true
                     return JsonPrimitive("unused")
@@ -63,7 +65,8 @@ class JsonRpcBinaryLimitationsTest {
             assertFailsWith<IllegalArgumentException> {
                 serializedChannel.call(
                     endpoint = "binaryEndpoint",
-                    input = CallData.createBinary(ByteReadChannel(byteArrayOf(1, 2, 3)))
+                    input = CallData.createBinary(ByteReadChannel(byteArrayOf(1, 2, 3))),
+                    callId = null
                 )
             }
 
@@ -80,7 +83,8 @@ class JsonRpcBinaryLimitationsTest {
 
                 override suspend fun call(
                     endpoint: String,
-                    input: CallData<String>
+                    input: CallData<String>,
+                    callId: RpcCallId?
                 ): CallData<String> = CallData.createBinary(ByteReadChannel(byteArrayOf(9, 9, 9)))
 
                 override suspend fun close() {}
@@ -95,7 +99,8 @@ class JsonRpcBinaryLimitationsTest {
                 wrapper.execute(
                     method = "binaryEndpoint",
                     message = JsonPrimitive("message"),
-                    isNotify = false
+                    isNotify = false,
+                    id = null
                 )
             }
 
@@ -111,7 +116,8 @@ class JsonRpcBinaryLimitationsTest {
 
                 override suspend fun call(
                     endpoint: String,
-                    input: CallData<String>
+                    input: CallData<String>,
+                    callId: RpcCallId?
                 ): CallData<String> = CallData.createBinary(ByteReadChannel(byteArrayOf(7, 7, 7)))
 
                 override suspend fun close() {}
@@ -126,7 +132,8 @@ class JsonRpcBinaryLimitationsTest {
                 wrapper.execute(
                     method = "binaryEndpoint",
                     message = JsonPrimitive("message"),
-                    isNotify = true
+                    isNotify = true,
+                    id = null
                 )
             }
 
@@ -144,7 +151,8 @@ class JsonRpcBinaryLimitationsTest {
 
                 override suspend fun call(
                     endpoint: String,
-                    input: CallData<String>
+                    input: CallData<String>,
+                    callId: RpcCallId?
                 ): CallData<String> {
                     calledEndpoint = endpoint
                     calledPayload = input.readSerialized()
@@ -157,7 +165,12 @@ class JsonRpcBinaryLimitationsTest {
             }
 
         val wrapper = JsonRpcServiceWrapper(service)
-        val response = wrapper.execute(method = "ping", message = null, isNotify = true)
+        val response = wrapper.execute(
+            method = "ping",
+            message = null,
+            isNotify = true,
+            id = null
+        )
 
         assertEquals("ping", calledEndpoint)
         assertEquals("null", calledPayload)
@@ -175,7 +188,8 @@ class JsonRpcBinaryLimitationsTest {
 
                 override suspend fun call(
                     endpoint: String,
-                    input: CallData<String>
+                    input: CallData<String>,
+                    callId: RpcCallId?
                 ): CallData<String> {
                     calledEndpoint = endpoint
                     calledPayload = input.readSerialized()
@@ -191,7 +205,8 @@ class JsonRpcBinaryLimitationsTest {
         val response = wrapper.execute(
             method = "ping",
             message = JsonPrimitive("hello"),
-            isNotify = false
+            isNotify = false,
+            id = null
         )
 
         assertEquals("ping", calledEndpoint)
@@ -210,7 +225,8 @@ class JsonRpcBinaryLimitationsTest {
 
                 override suspend fun call(
                     endpoint: String,
-                    input: CallData<String>
+                    input: CallData<String>,
+                    callId: RpcCallId?
                 ): CallData<String> {
                     calledEndpoint = endpoint
                     calledPayload = input.readSerialized()
@@ -226,7 +242,8 @@ class JsonRpcBinaryLimitationsTest {
         val response = wrapper.execute(
             method = "notifyPing",
             message = JsonPrimitive("hello"),
-            isNotify = true
+            isNotify = true,
+            id = null
         )
 
         assertEquals("notifyPing", calledEndpoint)
@@ -244,7 +261,8 @@ class JsonRpcBinaryLimitationsTest {
 
                 override suspend fun call(
                     endpoint: String,
-                    input: CallData<String>
+                    input: CallData<String>,
+                    callId: RpcCallId?
                 ): CallData<String> = error("unused")
 
                 override suspend fun close() {
@@ -269,7 +287,8 @@ class JsonRpcBinaryLimitationsTest {
 
                 override suspend fun call(
                     endpoint: String,
-                    input: CallData<String>
+                    input: CallData<String>,
+                    callId: RpcCallId?
                 ): CallData<String> = CallData.create("{")
 
                 override suspend fun close() {}
@@ -280,7 +299,12 @@ class JsonRpcBinaryLimitationsTest {
         val wrapper = JsonRpcServiceWrapper(service)
 
         assertFailsWith<Throwable> {
-            wrapper.execute(method = "ping", message = JsonPrimitive("input"), isNotify = false)
+            wrapper.execute(
+                method = "ping",
+                message = JsonPrimitive("input"),
+                isNotify = false,
+                id = null
+            )
         }
     }
 }

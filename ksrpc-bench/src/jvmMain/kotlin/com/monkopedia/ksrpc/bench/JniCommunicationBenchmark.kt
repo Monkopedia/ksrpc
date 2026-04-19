@@ -70,7 +70,7 @@ open class JniCommunicationBenchmark {
     @Benchmark
     fun jniRpcRoundTrip(): String = runBlocking {
         val input = env.serialization.createCallData(pairSerializer, payload)
-        val output = connection.call(ChannelId(ChannelClient.DEFAULT), "rpc", input)
+        val output = connection.call(ChannelId(ChannelClient.DEFAULT), "rpc", input, callId = null)
         env.serialization.decodeCallData(String.serializer(), output)
     }
 

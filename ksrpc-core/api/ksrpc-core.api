@@ -210,7 +210,7 @@ public class com/monkopedia/ksrpc/RpcEndpointException : java/lang/IllegalArgume
 
 public final class com/monkopedia/ksrpc/RpcMethod {
 	public fun <init> (Ljava/lang/String;Lcom/monkopedia/ksrpc/Transformer;Lcom/monkopedia/ksrpc/Transformer;Lcom/monkopedia/ksrpc/ServiceExecutor;Ljava/util/List;)V
-	public final fun call (Lcom/monkopedia/ksrpc/channels/SerializedService;Lcom/monkopedia/ksrpc/RpcService;Lcom/monkopedia/ksrpc/channels/CallData;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun call (Lcom/monkopedia/ksrpc/channels/SerializedService;Lcom/monkopedia/ksrpc/RpcService;Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/RpcCallId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun callChannel (Lcom/monkopedia/ksrpc/channels/SerializedService;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun findSubserviceTransformers ()Ljava/util/List;
 	public final fun getEndpoint ()Ljava/lang/String;
@@ -402,11 +402,26 @@ public final class com/monkopedia/ksrpc/channels/ContextContainer$DefaultImpls {
 	public static fun getContext (Lcom/monkopedia/ksrpc/channels/ContextContainer;)Lkotlin/coroutines/CoroutineContext;
 }
 
+public final class com/monkopedia/ksrpc/channels/CurrentRpcCallElement : kotlin/coroutines/AbstractCoroutineContextElement {
+	public static final field CurrentRpcCall Lcom/monkopedia/ksrpc/channels/CurrentRpcCallElement$CurrentRpcCall;
+	public fun <init> (Lcom/monkopedia/ksrpc/RpcMethod;Lcom/monkopedia/ksrpc/channels/RpcCallId;)V
+	public final fun getId ()Lcom/monkopedia/ksrpc/channels/RpcCallId;
+	public final fun getMethod ()Lcom/monkopedia/ksrpc/RpcMethod;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/monkopedia/ksrpc/channels/CurrentRpcCallElement$CurrentRpcCall : kotlin/coroutines/CoroutineContext$Key {
+}
+
+public final class com/monkopedia/ksrpc/channels/CurrentRpcCallElementKt {
+	public static final fun currentRpcCall (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
 public abstract interface class com/monkopedia/ksrpc/channels/RpcCallId {
 }
 
 public abstract interface class com/monkopedia/ksrpc/channels/SerializedChannel : com/monkopedia/ksrpc/KsrpcEnvironment$Element, com/monkopedia/ksrpc/SuspendCloseableObservable, com/monkopedia/ksrpc/channels/ContextContainer {
-	public abstract fun call (Lcom/monkopedia/ksrpc/channels/ChannelId;Ljava/lang/String;Lcom/monkopedia/ksrpc/channels/CallData;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun call (Lcom/monkopedia/ksrpc/channels/ChannelId;Ljava/lang/String;Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/RpcCallId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun close (Lcom/monkopedia/ksrpc/channels/ChannelId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
@@ -420,12 +435,12 @@ public final class com/monkopedia/ksrpc/channels/SerializedChannelKt {
 }
 
 public abstract interface class com/monkopedia/ksrpc/channels/SerializedService : com/monkopedia/ksrpc/KsrpcEnvironment$Element, com/monkopedia/ksrpc/SuspendCloseableObservable, com/monkopedia/ksrpc/channels/ContextContainer {
-	public fun call (Lcom/monkopedia/ksrpc/RpcMethod;Lcom/monkopedia/ksrpc/channels/CallData;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun call (Ljava/lang/String;Lcom/monkopedia/ksrpc/channels/CallData;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun call (Lcom/monkopedia/ksrpc/RpcMethod;Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/RpcCallId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun call (Ljava/lang/String;Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/RpcCallId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class com/monkopedia/ksrpc/channels/SerializedService$DefaultImpls {
-	public static fun call (Lcom/monkopedia/ksrpc/channels/SerializedService;Lcom/monkopedia/ksrpc/RpcMethod;Lcom/monkopedia/ksrpc/channels/CallData;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun call (Lcom/monkopedia/ksrpc/channels/SerializedService;Lcom/monkopedia/ksrpc/RpcMethod;Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/RpcCallId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static fun getContext (Lcom/monkopedia/ksrpc/channels/SerializedService;)Lkotlin/coroutines/CoroutineContext;
 }
 
@@ -475,7 +490,7 @@ public final class com/monkopedia/ksrpc/internal/HostChannelContext$Key : kotlin
 public final class com/monkopedia/ksrpc/internal/HostSerializedChannelImpl : com/monkopedia/ksrpc/channels/Connection {
 	public fun <init> (Lcom/monkopedia/ksrpc/KsrpcEnvironment;Lkotlin/coroutines/CoroutineContext;)V
 	public synthetic fun <init> (Lcom/monkopedia/ksrpc/KsrpcEnvironment;Lkotlin/coroutines/CoroutineContext;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun call (Lcom/monkopedia/ksrpc/channels/ChannelId;Ljava/lang/String;Lcom/monkopedia/ksrpc/channels/CallData;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun call (Lcom/monkopedia/ksrpc/channels/ChannelId;Ljava/lang/String;Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/RpcCallId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun close (Lcom/monkopedia/ksrpc/channels/ChannelId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun close (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun defaultChannel (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -504,8 +519,8 @@ public final class com/monkopedia/ksrpc/internal/MultiChannel {
 
 public final class com/monkopedia/ksrpc/internal/SubserviceChannel : com/monkopedia/ksrpc/channels/SerializedService {
 	public fun <init> (Lcom/monkopedia/ksrpc/channels/ChannelClient;Lcom/monkopedia/ksrpc/channels/ChannelId;)V
-	public fun call (Lcom/monkopedia/ksrpc/RpcMethod;Lcom/monkopedia/ksrpc/channels/CallData;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun call (Ljava/lang/String;Lcom/monkopedia/ksrpc/channels/CallData;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun call (Lcom/monkopedia/ksrpc/RpcMethod;Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/RpcCallId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun call (Ljava/lang/String;Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/RpcCallId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun close (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun getContext ()Lkotlin/coroutines/CoroutineContext;
 	public fun getEnv ()Lcom/monkopedia/ksrpc/KsrpcEnvironment;
