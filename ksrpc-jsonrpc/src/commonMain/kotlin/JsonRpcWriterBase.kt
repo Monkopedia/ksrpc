@@ -108,8 +108,11 @@ class JsonRpcWriterBase(
                     ?: error("Handler launched without a Job in its context")
             }
             try {
+                // Pass the request id through so the downstream SerializedService call can
+                // hand it to RpcMethod.call, which installs the CurrentRpcCallElement at the
+                // one central chokepoint.
                 val response =
-                    channel.execute(message.method, message.params, id == null)
+                    channel.execute(message.method, message.params, id == null, id)
                 if (id == null) return@launch
                 comm.send(
                     json.encodeToJsonElement(
@@ -151,17 +154,21 @@ class JsonRpcWriterBase(
     override suspend fun execute(
         method: String,
         message: JsonElement?,
-        isNotify: Boolean
+        isNotify: Boolean,
+        id: JsonPrimitive?
     ): JsonElement? {
-        val (id, pending) = if (isNotify) null to null else multiChannel.allocateReceive()
+        // The `id` parameter is only meaningful on the server side (forwarded from an inbound
+        // request) — on the client/wire side we allocate our own wire id below. Accepting it
+        // here keeps the interface symmetric; outbound calls pass null.
+        val (wireId, pending) = if (isNotify) null to null else multiChannel.allocateReceive()
         val request = JsonRpcRequest(
             method = method,
             params = message,
-            id = JsonPrimitive(id)
+            id = JsonPrimitive(wireId)
         )
         comm.send(json.encodeToJsonElement(request))
-        if (pending == null || id == null) return null
-        val callId = JsonRpcCallId(JsonPrimitive(id))
+        if (pending == null || wireId == null) return null
+        val callId = JsonRpcCallId(JsonPrimitive(wireId))
         val response = try {
             awaitRequestCancellable(callId, pending)
         } catch (t: CancellationException) {
@@ -170,7 +177,7 @@ class JsonRpcWriterBase(
             // cancel path and Mutex.withLock would otherwise rethrow the CancellationException
             // immediately without dropping the entry.
             withContext(NonCancellable) {
-                multiChannel.cancelPending(id.toString(), t)
+                multiChannel.cancelPending(wireId.toString(), t)
             }
             throw t
         }

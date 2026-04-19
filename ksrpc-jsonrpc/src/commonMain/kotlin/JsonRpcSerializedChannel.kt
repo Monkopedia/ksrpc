@@ -18,6 +18,7 @@ package com.monkopedia.ksrpc.jsonrpc.internal
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.RpcMethod
 import com.monkopedia.ksrpc.channels.CallData
+import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
 import kotlin.coroutines.CoroutineContext
 import kotlinx.serialization.decodeFromString
@@ -35,11 +36,15 @@ class JsonRpcSerializedChannel(
 
     override suspend fun call(
         endpoint: RpcMethod<*, *, *>,
-        input: CallData<String>
+        input: CallData<String>,
+        callId: RpcCallId?
     ): CallData<String> = call(endpoint.endpoint, input, !endpoint.hasReturnType)
 
-    override suspend fun call(endpoint: String, input: CallData<String>): CallData<String> =
-        call(endpoint, input, false)
+    override suspend fun call(
+        endpoint: String,
+        input: CallData<String>,
+        callId: RpcCallId?
+    ): CallData<String> = call(endpoint, input, false)
 
     private suspend fun call(
         endpoint: String,
@@ -50,7 +55,9 @@ class JsonRpcSerializedChannel(
             "JsonRpc does not support binary data"
         }
         val message = json.decodeFromString<JsonElement?>(input.readSerialized())
-        val response = channel.execute(endpoint, message, isNotify)
+        // Outbound stub path: no server-side id to forward. The wire id (if any) is allocated
+        // by the underlying JsonRpcChannel.
+        val response = channel.execute(endpoint, message, isNotify, id = null)
 
         return CallData.create(
             if (isNotify) {

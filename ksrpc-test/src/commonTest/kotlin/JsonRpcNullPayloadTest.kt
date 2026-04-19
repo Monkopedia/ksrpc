@@ -42,7 +42,7 @@ class JsonRpcNullPayloadTest {
                 comm = transformer
             )
 
-        val response = writer.execute("null-io", message = null, isNotify = false)
+        val response = writer.execute("null-io", message = null, isNotify = false, id = null)
         assertEquals(null, response)
 
         val request = withTimeout(2_000) { transformer.sentRequest.await() }

@@ -19,6 +19,7 @@ import com.monkopedia.ksrpc.annotation.KsIntrospectable
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
 import com.monkopedia.ksrpc.channels.CallData
+import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -89,7 +90,11 @@ class RpcServiceTest :
             override val env: KsrpcEnvironment<String>
                 get() = ksrpcEnvironment { }
 
-            override suspend fun call(endpoint: String, input: CallData<String>): CallData<String> {
+            override suspend fun call(
+                endpoint: String,
+                input: CallData<String>,
+                callId: RpcCallId?
+            ): CallData<String> {
                 error("Not implemented")
             }
 
@@ -111,7 +116,11 @@ class RpcServiceTest :
             override val env: KsrpcEnvironment<String>
                 get() = ksrpcEnvironment { }
 
-            override suspend fun call(endpoint: String, input: CallData<String>): CallData<String> {
+            override suspend fun call(
+                endpoint: String,
+                input: CallData<String>,
+                callId: RpcCallId?
+            ): CallData<String> {
                 val input = Json.decodeFromString(
                     PairSerializer(String.serializer(), String.serializer()),
                     input.readSerialized()
@@ -148,7 +157,8 @@ class RpcServiceTest :
                             PairSerializer(String.serializer(), String.serializer()),
                             "Hello" to "world"
                         )
-                    )
+                    ),
+                    callId = null
                 ).readSerialized()
             )
         )
@@ -250,8 +260,11 @@ class RpcServiceTest :
                 hasCalledClose = true
             }
 
-            override suspend fun call(endpoint: String, input: CallData<String>): CallData<String> =
-                error("Not implemented")
+            override suspend fun call(
+                endpoint: String,
+                input: CallData<String>,
+                callId: RpcCallId?
+            ): CallData<String> = error("Not implemented")
 
             override suspend fun onClose(onClose: suspend () -> Unit) {
                 error("Not implemented")

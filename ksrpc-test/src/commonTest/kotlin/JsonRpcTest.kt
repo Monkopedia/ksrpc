@@ -275,7 +275,8 @@ class JsonRpcTest {
                 jsonChannel.execute(
                     "subtract",
                     Json.decodeFromString(params),
-                    false
+                    false,
+                    id = null
                 )
             )
         )

@@ -20,6 +20,7 @@ import com.monkopedia.ksrpc.annotation.KsService
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.ChannelHost
 import com.monkopedia.ksrpc.channels.ChannelId
+import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.channels.registerDefault
 import com.monkopedia.ksrpc.channels.registerHost
@@ -50,7 +51,8 @@ private class CapturingHost(override val env: KsrpcEnvironment<String>) : Channe
     override suspend fun call(
         channelId: ChannelId,
         endpoint: String,
-        data: CallData<String>
+        data: CallData<String>,
+        callId: RpcCallId?
     ): CallData<String> = error("unused")
 
     override suspend fun close(id: ChannelId) = Unit
@@ -73,7 +75,7 @@ class SerializedChannelHostExtensionsTest {
         val channelId = host.registerHost(service)
         val serialized = assertNotNull(host.hostedService)
         val input = env.serialization.createCallData(String.serializer(), "ping")
-        val output = serialized.call("echo", input)
+        val output = serialized.call("echo", input, callId = null)
         val decoded = env.serialization.decodeCallData(String.serializer(), output)
 
         assertEquals("captured-host-id", channelId.id)
@@ -91,7 +93,7 @@ class SerializedChannelHostExtensionsTest {
         host.registerDefault(service)
         val serialized = assertNotNull(host.defaultService)
         val input = env.serialization.createCallData(String.serializer(), "pong")
-        val output = serialized.call("echo", input)
+        val output = serialized.call("echo", input, callId = null)
         val decoded = env.serialization.decodeCallData(String.serializer(), output)
 
         assertEquals("pong?", decoded)
@@ -108,7 +110,7 @@ class SerializedChannelHostExtensionsTest {
         val channelId = host.registerHost(service, rpcObject())
         val serialized = assertNotNull(host.hostedService)
         val input = env.serialization.createCallData(String.serializer(), "zip")
-        val output = serialized.call("echo", input)
+        val output = serialized.call("echo", input, callId = null)
         val decoded = env.serialization.decodeCallData(String.serializer(), output)
 
         assertEquals("captured-host-id", channelId.id)
@@ -126,7 +128,7 @@ class SerializedChannelHostExtensionsTest {
         host.registerDefault(service, rpcObject())
         val serialized = assertNotNull(host.defaultService)
         val input = env.serialization.createCallData(String.serializer(), "zap")
-        val output = serialized.call("echo", input)
+        val output = serialized.call("echo", input, callId = null)
         val decoded = env.serialization.decodeCallData(String.serializer(), output)
 
         assertEquals("zap*", decoded)

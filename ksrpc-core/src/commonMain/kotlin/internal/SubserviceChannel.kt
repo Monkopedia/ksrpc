@@ -19,6 +19,7 @@ import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.ChannelClient
 import com.monkopedia.ksrpc.channels.ChannelId
+import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
 import kotlin.coroutines.CoroutineContext
 
@@ -33,9 +34,13 @@ class SubserviceChannel<T>(
     override val context: CoroutineContext
         get() = baseChannel.context
 
-    override suspend fun call(endpoint: String, input: CallData<T>): CallData<T> {
+    override suspend fun call(
+        endpoint: String,
+        input: CallData<T>,
+        callId: RpcCallId?
+    ): CallData<T> {
         env.logger.debug("SerializeService", "Calling from subservice ${serviceId.id}")
-        return baseChannel.call(serviceId, endpoint, input)
+        return baseChannel.call(serviceId, endpoint, input, callId)
     }
 
     override suspend fun onClose(onClose: suspend () -> Unit) {

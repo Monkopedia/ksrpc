@@ -17,6 +17,8 @@ package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.ChannelId
+import com.monkopedia.ksrpc.channels.CurrentRpcCallElement
+import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.channels.randomUuid
 import com.monkopedia.ksrpc.channels.registerHost
@@ -133,28 +135,47 @@ class RpcMethod<T : RpcService, I, O>(
     suspend fun <S> call(
         channel: SerializedService<S>,
         service: RpcService,
-        input: CallData<S>
-    ): CallData<S> = withContext(channel.context.minusKey(Job)) {
-        val transformedInput = inputTransform.untransform(input, channel)
-        val id = randomUuid()
-        channel.env.logger.info("Transformer", "($id) Calling endpoint $endpoint")
-        val output = method.invoke(service as T, transformedInput)
-        channel.env.logger.debug("Transformer", "($id) Completed endpoint $endpoint")
-        outputTransform.transform(output as O, channel)
+        input: CallData<S>,
+        callId: RpcCallId?
+    ): CallData<S> {
+        // Install CurrentRpcCallElement at the one place handlers are actually invoked. This
+        // is the central chokepoint — transports do not install the element themselves, they
+        // just pass the id through. Nested outbound calls that re-enter RpcMethod.call on the
+        // far side naturally get a fresh element installed, so no caller-side stripping is
+        // needed.
+        val currentCall = CurrentRpcCallElement(method = this, id = callId)
+        return withContext(channel.context.minusKey(Job) + currentCall) {
+            val transformedInput = inputTransform.untransform(input, channel)
+            val logId = randomUuid()
+            channel.env.logger.info("Transformer", "($logId) Calling endpoint $endpoint")
+            val output = method.invoke(service as T, transformedInput)
+            channel.env.logger.debug("Transformer", "($logId) Completed endpoint $endpoint")
+            outputTransform.transform(output as O, channel)
+        }
     }
 
     @Suppress("UNCHECKED_CAST")
     suspend fun <S> callChannel(channel: SerializedService<S>, input: Any?): Any? =
         // Drop the Job element from the channel's context so the caller's Job remains the
         // parent for cancellation propagation — otherwise cancelling the caller wouldn't
-        // surface inside the remote call (it would only cancel this [withContext] body's own
-        // child scope, which is unreachable from the caller's cancel signal).
+        // surface inside the remote call (it would only cancel this [withContext] body's
+        // own child scope, which is unreachable from the caller's cancel signal).
         withContext(channel.context.minusKey(Job)) {
             val input = inputTransform.transform(input as I, channel)
             val id = randomUuid()
-            channel.env.logger.info("Transformer", "($id) Calling remote endpoint $endpoint")
-            val transformedOutput = channel.call(this@RpcMethod, input)
-            channel.env.logger.debug("Transformer", "($id) Completed remote endpoint $endpoint")
+            channel.env.logger.info(
+                "Transformer",
+                "($id) Calling remote endpoint $endpoint"
+            )
+            // Client-side stubs do not forward a callId — they generate their own wire-level
+            // id at the transport if needed, and any server-side handler reached via the
+            // remote transport will have its own CurrentRpcCallElement installed by that
+            // transport's RpcMethod.call invocation.
+            val transformedOutput = channel.call(this@RpcMethod, input, callId = null)
+            channel.env.logger.debug(
+                "Transformer",
+                "($id) Completed remote endpoint $endpoint"
+            )
             outputTransform.untransform(transformedOutput, channel)
         }
 

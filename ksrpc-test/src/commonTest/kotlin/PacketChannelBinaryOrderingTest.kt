@@ -54,7 +54,8 @@ class PacketChannelBinaryOrderingTest {
                     channel.call(
                         ChannelId("svc"),
                         "echo",
-                        env.serialization.createCallData(String.serializer(), "request")
+                        env.serialization.createCallData(String.serializer(), "request"),
+                        callId = null
                     )
                 }
             val request = channel.sentPackets.receive()

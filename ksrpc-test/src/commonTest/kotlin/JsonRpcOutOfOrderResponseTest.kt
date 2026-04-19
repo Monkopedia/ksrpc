@@ -44,8 +44,12 @@ class JsonRpcOutOfOrderResponseTest {
                 comm = transformer
             )
 
-        val first = async { writer.execute("first", JsonPrimitive("a"), isNotify = false) }
-        val second = async { writer.execute("second", JsonPrimitive("b"), isNotify = false) }
+        val first = async {
+            writer.execute("first", JsonPrimitive("a"), isNotify = false, id = null)
+        }
+        val second = async {
+            writer.execute("second", JsonPrimitive("b"), isNotify = false, id = null)
+        }
 
         assertEquals(JsonPrimitive("first-result"), first.await())
         assertEquals(JsonPrimitive("second-result"), second.await())
@@ -63,10 +67,16 @@ class JsonRpcOutOfOrderResponseTest {
                 comm = transformer
             )
 
-        val first =
-            async { runCatching { writer.execute("first", JsonPrimitive("a"), isNotify = false) } }
-        val second =
-            async { runCatching { writer.execute("second", JsonPrimitive("b"), isNotify = false) } }
+        val first = async {
+            runCatching {
+                writer.execute("first", JsonPrimitive("a"), isNotify = false, id = null)
+            }
+        }
+        val second = async {
+            runCatching {
+                writer.execute("second", JsonPrimitive("b"), isNotify = false, id = null)
+            }
+        }
 
         val firstResult = first.await()
         val secondResult = second.await()

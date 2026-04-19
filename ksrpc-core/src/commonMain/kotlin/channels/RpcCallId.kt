@@ -20,9 +20,15 @@ package com.monkopedia.ksrpc.channels
  *
  * Each transport that supports cancellation (or other features keyed by an original request)
  * provides its own subtype to carry the identifier in whatever native form the wire protocol
- * requires (integer message id for packet transports, `JsonPrimitive` for json-rpc, etc.).
+ * requires (`PacketCallId(channelId, messageId)` for packet transports,
+ * `JsonRpcCallId(JsonPrimitive)` for json-rpc, etc.).
+ *
+ * Not declared `sealed` because the known subtypes live in sibling transport modules
+ * (ksrpc-packets, ksrpc-jsonrpc), which Kotlin does not permit for sealed hierarchies — a
+ * sealed hierarchy would have to collapse them into a single module. Consumers that need to
+ * inspect a transport-specific shape should `is` / cast to the subtype they expect.
  *
  * Subtypes MUST be data classes / objects with stable `equals` and `hashCode` implementations
- * so they can be used as keys in cancellation-tracking maps.
+ * so they can be used as keys in cancellation-tracking maps and compared in tests.
  */
 interface RpcCallId

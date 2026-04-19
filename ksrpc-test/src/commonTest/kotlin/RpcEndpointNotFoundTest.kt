@@ -37,7 +37,7 @@ class RpcEndpointNotFoundTransportTest :
             channel.serialized(ksrpcEnvironment { })
         },
         verifyOnChannel = { channel ->
-            val response = channel.call("missing", CallData.create("ignored"))
+            val response = channel.call("missing", CallData.create("ignored"), callId = null)
             assertTrue(channel.env.serialization.isError(response))
             val exception = channel.env.serialization.decodeErrorCallData(response)
             val message = exception.message ?: ""

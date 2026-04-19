@@ -25,7 +25,12 @@ import kotlinx.serialization.json.JsonPrimitive
 interface JsonRpcChannel :
     SuspendCloseable,
     Element<String> {
-    suspend fun execute(method: String, message: JsonElement?, isNotify: Boolean): JsonElement?
+    suspend fun execute(
+        method: String,
+        message: JsonElement?,
+        isNotify: Boolean,
+        id: JsonPrimitive?
+    ): JsonElement?
 }
 
 @Serializable
