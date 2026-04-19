@@ -103,13 +103,12 @@ class StubGeneration(
             add(generateChannelField(service))
             val companion = generateCompanion(service)
             add(companion)
-            service.methods.map { (method, annotation) ->
-                val metadata = service.methodMetadata[method].orEmpty()
+            service.methods.map { serviceMethod ->
                 add(
                     declaration.generateMethodField(
-                        method,
-                        annotation,
-                        metadata,
+                        serviceMethod.function,
+                        serviceMethod.ksMethodAnnotation,
+                        serviceMethod.metadataAnnotations,
                         companion,
                         service
                     )

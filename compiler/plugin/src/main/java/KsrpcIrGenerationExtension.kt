@@ -53,8 +53,13 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
 
     private fun validate(cls: ServiceClass): Boolean {
         val names = mutableSetOf<String>()
-        return cls.methods.fold(validateClass(cls.irClass)) { current, (method, annotation) ->
-            validateMethod(cls.irClass, method, annotation, names) && current
+        return cls.methods.fold(validateClass(cls.irClass)) { current, serviceMethod ->
+            validateMethod(
+                cls.irClass,
+                serviceMethod.function,
+                serviceMethod.ksMethodAnnotation,
+                names
+            ) && current
         }
     }
 

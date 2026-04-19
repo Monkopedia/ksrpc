@@ -75,10 +75,13 @@ private class Visitor(private val messageCollector: MessageCollector) : IrElemen
                             it.type.classFqName == metadataMarker
                         } == true
                 }
-                current.methods.add(declaration to annotation)
-                if (metadataAnnotations.isNotEmpty()) {
-                    current.methodMetadata[declaration] = metadataAnnotations
-                }
+                current.methods.add(
+                    ServiceMethod(
+                        function = declaration,
+                        ksMethodAnnotation = annotation,
+                        metadataAnnotations = metadataAnnotations
+                    )
+                )
             } else if (!declaration.isFakeOverride) {
                 if (declaration.dispatchReceiverParameter?.type?.classFqName !=
                     FqConstants.FQ_INTROSPECTABLE_RPC_SERVICE
@@ -124,11 +127,16 @@ private class SubclassVisitor(
     }
 }
 
+data class ServiceMethod(
+    val function: IrSimpleFunction,
+    val ksMethodAnnotation: IrConstructorCall,
+    val metadataAnnotations: List<IrConstructorCall> = emptyList()
+)
+
 data class ServiceClass(
     val irClass: IrClass,
     val irClassAndImpls: MutableList<IrClass> = mutableListOf(irClass),
-    val methods: MutableList<Pair<IrSimpleFunction, IrConstructorCall>> = mutableListOf(),
-    val methodMetadata: MutableMap<IrSimpleFunction, List<IrConstructorCall>> = mutableMapOf()
+    val methods: MutableList<ServiceMethod> = mutableListOf()
 ) {
     val endpoints = mutableMapOf<String, IrFunction>()
     lateinit var channel: IrField
