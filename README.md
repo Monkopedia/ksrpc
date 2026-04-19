@@ -27,11 +27,11 @@ val service = HttpClient { }.asConnection("http://localhost:8080/my_service", en
 
 ## Supported transports
 
- - HTTP (JVM, Native, JS/WASM client)
- - WebSockets (JVM, Native, JS/WASM client)
- - Sockets (JVM, Native)
- - Stdin/out (JVM, Native) — compatible with LSP and similar protocols
- - jsonrpc 2.0 (JVM, Native)
+ - HTTP (JVM, Native including mingwX64, JS/WASM client)
+ - WebSockets (JVM, Native including mingwX64, JS/WASM client)
+ - Sockets (JVM, POSIX Native) — Windows not supported (termios-based)
+ - Stdin/out (JVM, POSIX Native) — compatible with LSP and similar protocols; Windows not supported
+ - jsonrpc 2.0 (JVM, POSIX Native) — Windows not supported
  - Service workers (JS, experimental)
 
 ## Why not gRPC or protobuf?
