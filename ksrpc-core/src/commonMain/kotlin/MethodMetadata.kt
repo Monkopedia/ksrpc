@@ -39,7 +39,7 @@ import kotlin.reflect.KClass
  *   each as a name → [MetadataValue] pair. Default-valued arguments that the
  *   call site does not specify are not represented.
  */
-class MethodMetadata(
+data class MethodMetadata(
     val annotationFqName: String,
     val arguments: List<Pair<String, MetadataValue>>
 ) {
@@ -48,14 +48,6 @@ class MethodMetadata(
      * argument was captured.
      */
     fun argument(name: String): MetadataValue? = arguments.firstOrNull { it.first == name }?.second
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is MethodMetadata) return false
-        return annotationFqName == other.annotationFqName && arguments == other.arguments
-    }
-
-    override fun hashCode(): Int = 31 * annotationFqName.hashCode() + arguments.hashCode()
 
     override fun toString(): String {
         val args = arguments.joinToString { "${it.first}=${it.second}" }
@@ -72,47 +64,17 @@ class MethodMetadata(
  * value has a concrete static type.
  */
 sealed class MetadataValue {
-    class StringValue(val value: String) : MetadataValue() {
-        override fun equals(other: Any?): Boolean =
-            this === other || (other is StringValue && value == other.value)
-        override fun hashCode(): Int = value.hashCode()
-        override fun toString(): String = "\"$value\""
-    }
+    data class StringValue(val value: String) : MetadataValue()
 
-    class IntValue(val value: Int) : MetadataValue() {
-        override fun equals(other: Any?): Boolean =
-            this === other || (other is IntValue && value == other.value)
-        override fun hashCode(): Int = value.hashCode()
-        override fun toString(): String = value.toString()
-    }
+    data class IntValue(val value: Int) : MetadataValue()
 
-    class LongValue(val value: Long) : MetadataValue() {
-        override fun equals(other: Any?): Boolean =
-            this === other || (other is LongValue && value == other.value)
-        override fun hashCode(): Int = value.hashCode()
-        override fun toString(): String = "${value}L"
-    }
+    data class LongValue(val value: Long) : MetadataValue()
 
-    class BooleanValue(val value: Boolean) : MetadataValue() {
-        override fun equals(other: Any?): Boolean =
-            this === other || (other is BooleanValue && value == other.value)
-        override fun hashCode(): Int = value.hashCode()
-        override fun toString(): String = value.toString()
-    }
+    data class BooleanValue(val value: Boolean) : MetadataValue()
 
-    class DoubleValue(val value: Double) : MetadataValue() {
-        override fun equals(other: Any?): Boolean =
-            this === other || (other is DoubleValue && value == other.value)
-        override fun hashCode(): Int = value.hashCode()
-        override fun toString(): String = value.toString()
-    }
+    data class DoubleValue(val value: Double) : MetadataValue()
 
-    class FloatValue(val value: Float) : MetadataValue() {
-        override fun equals(other: Any?): Boolean =
-            this === other || (other is FloatValue && value == other.value)
-        override fun hashCode(): Int = value.hashCode()
-        override fun toString(): String = "${value}f"
-    }
+    data class FloatValue(val value: Float) : MetadataValue()
 
     /**
      * A `KClass<*>` literal captured directly as a real reference. The
@@ -120,10 +82,7 @@ sealed class MetadataValue {
      * the source-level annotation argument, so consumers receive the actual
      * `KClass` and can call reflection facilities directly when supported.
      */
-    class KClassValue(val kClass: KClass<*>) : MetadataValue() {
-        override fun equals(other: Any?): Boolean =
-            this === other || (other is KClassValue && kClass == other.kClass)
-        override fun hashCode(): Int = kClass.hashCode()
+    data class KClassValue(val kClass: KClass<*>) : MetadataValue() {
         override fun toString(): String = "${kClass.simpleName ?: "<anonymous>"}::class"
     }
 
@@ -133,10 +92,7 @@ sealed class MetadataValue {
      * source-level annotation argument, so consumers receive the actual
      * enum constant.
      */
-    class EnumValue(val value: Enum<*>) : MetadataValue() {
-        override fun equals(other: Any?): Boolean =
-            this === other || (other is EnumValue && value == other.value)
-        override fun hashCode(): Int = value.hashCode()
+    data class EnumValue(val value: Enum<*>) : MetadataValue() {
         override fun toString(): String {
             val cls = value::class.simpleName ?: "<anonymous>"
             return "$cls.${value.name}"
@@ -147,10 +103,7 @@ sealed class MetadataValue {
      * A list/array argument. Annotation `vararg` and `Array<X>` arguments are
      * captured here.
      */
-    class ListValue(val items: List<MetadataValue>) : MetadataValue() {
-        override fun equals(other: Any?): Boolean =
-            this === other || (other is ListValue && items == other.items)
-        override fun hashCode(): Int = items.hashCode()
+    data class ListValue(val items: List<MetadataValue>) : MetadataValue() {
         override fun toString(): String = items.joinToString(prefix = "[", postfix = "]")
     }
 }

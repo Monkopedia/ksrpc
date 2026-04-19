@@ -88,6 +88,9 @@ public abstract class com/monkopedia/ksrpc/MetadataValue {
 
 public final class com/monkopedia/ksrpc/MetadataValue$BooleanValue : com/monkopedia/ksrpc/MetadataValue {
 	public fun <init> (Z)V
+	public final fun component1 ()Z
+	public final fun copy (Z)Lcom/monkopedia/ksrpc/MetadataValue$BooleanValue;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/MetadataValue$BooleanValue;ZILjava/lang/Object;)Lcom/monkopedia/ksrpc/MetadataValue$BooleanValue;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getValue ()Z
 	public fun hashCode ()I
@@ -96,6 +99,9 @@ public final class com/monkopedia/ksrpc/MetadataValue$BooleanValue : com/monkope
 
 public final class com/monkopedia/ksrpc/MetadataValue$DoubleValue : com/monkopedia/ksrpc/MetadataValue {
 	public fun <init> (D)V
+	public final fun component1 ()D
+	public final fun copy (D)Lcom/monkopedia/ksrpc/MetadataValue$DoubleValue;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/MetadataValue$DoubleValue;DILjava/lang/Object;)Lcom/monkopedia/ksrpc/MetadataValue$DoubleValue;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getValue ()D
 	public fun hashCode ()I
@@ -104,6 +110,9 @@ public final class com/monkopedia/ksrpc/MetadataValue$DoubleValue : com/monkoped
 
 public final class com/monkopedia/ksrpc/MetadataValue$EnumValue : com/monkopedia/ksrpc/MetadataValue {
 	public fun <init> (Ljava/lang/Enum;)V
+	public final fun component1 ()Ljava/lang/Enum;
+	public final fun copy (Ljava/lang/Enum;)Lcom/monkopedia/ksrpc/MetadataValue$EnumValue;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/MetadataValue$EnumValue;Ljava/lang/Enum;ILjava/lang/Object;)Lcom/monkopedia/ksrpc/MetadataValue$EnumValue;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getValue ()Ljava/lang/Enum;
 	public fun hashCode ()I
@@ -112,6 +121,9 @@ public final class com/monkopedia/ksrpc/MetadataValue$EnumValue : com/monkopedia
 
 public final class com/monkopedia/ksrpc/MetadataValue$FloatValue : com/monkopedia/ksrpc/MetadataValue {
 	public fun <init> (F)V
+	public final fun component1 ()F
+	public final fun copy (F)Lcom/monkopedia/ksrpc/MetadataValue$FloatValue;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/MetadataValue$FloatValue;FILjava/lang/Object;)Lcom/monkopedia/ksrpc/MetadataValue$FloatValue;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getValue ()F
 	public fun hashCode ()I
@@ -120,6 +132,9 @@ public final class com/monkopedia/ksrpc/MetadataValue$FloatValue : com/monkopedi
 
 public final class com/monkopedia/ksrpc/MetadataValue$IntValue : com/monkopedia/ksrpc/MetadataValue {
 	public fun <init> (I)V
+	public final fun component1 ()I
+	public final fun copy (I)Lcom/monkopedia/ksrpc/MetadataValue$IntValue;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/MetadataValue$IntValue;IILjava/lang/Object;)Lcom/monkopedia/ksrpc/MetadataValue$IntValue;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getValue ()I
 	public fun hashCode ()I
@@ -128,6 +143,9 @@ public final class com/monkopedia/ksrpc/MetadataValue$IntValue : com/monkopedia/
 
 public final class com/monkopedia/ksrpc/MetadataValue$KClassValue : com/monkopedia/ksrpc/MetadataValue {
 	public fun <init> (Lkotlin/reflect/KClass;)V
+	public final fun component1 ()Lkotlin/reflect/KClass;
+	public final fun copy (Lkotlin/reflect/KClass;)Lcom/monkopedia/ksrpc/MetadataValue$KClassValue;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/MetadataValue$KClassValue;Lkotlin/reflect/KClass;ILjava/lang/Object;)Lcom/monkopedia/ksrpc/MetadataValue$KClassValue;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getKClass ()Lkotlin/reflect/KClass;
 	public fun hashCode ()I
@@ -136,6 +154,9 @@ public final class com/monkopedia/ksrpc/MetadataValue$KClassValue : com/monkoped
 
 public final class com/monkopedia/ksrpc/MetadataValue$ListValue : com/monkopedia/ksrpc/MetadataValue {
 	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lcom/monkopedia/ksrpc/MetadataValue$ListValue;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/MetadataValue$ListValue;Ljava/util/List;ILjava/lang/Object;)Lcom/monkopedia/ksrpc/MetadataValue$ListValue;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getItems ()Ljava/util/List;
 	public fun hashCode ()I
@@ -144,6 +165,9 @@ public final class com/monkopedia/ksrpc/MetadataValue$ListValue : com/monkopedia
 
 public final class com/monkopedia/ksrpc/MetadataValue$LongValue : com/monkopedia/ksrpc/MetadataValue {
 	public fun <init> (J)V
+	public final fun component1 ()J
+	public final fun copy (J)Lcom/monkopedia/ksrpc/MetadataValue$LongValue;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/MetadataValue$LongValue;JILjava/lang/Object;)Lcom/monkopedia/ksrpc/MetadataValue$LongValue;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getValue ()J
 	public fun hashCode ()I
@@ -152,6 +176,9 @@ public final class com/monkopedia/ksrpc/MetadataValue$LongValue : com/monkopedia
 
 public final class com/monkopedia/ksrpc/MetadataValue$StringValue : com/monkopedia/ksrpc/MetadataValue {
 	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/monkopedia/ksrpc/MetadataValue$StringValue;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/MetadataValue$StringValue;Ljava/lang/String;ILjava/lang/Object;)Lcom/monkopedia/ksrpc/MetadataValue$StringValue;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getValue ()Ljava/lang/String;
 	public fun hashCode ()I
@@ -161,6 +188,10 @@ public final class com/monkopedia/ksrpc/MetadataValue$StringValue : com/monkoped
 public final class com/monkopedia/ksrpc/MethodMetadata {
 	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
 	public final fun argument (Ljava/lang/String;)Lcom/monkopedia/ksrpc/MetadataValue;
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;)Lcom/monkopedia/ksrpc/MethodMetadata;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/MethodMetadata;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lcom/monkopedia/ksrpc/MethodMetadata;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAnnotationFqName ()Ljava/lang/String;
 	public final fun getArguments ()Ljava/util/List;

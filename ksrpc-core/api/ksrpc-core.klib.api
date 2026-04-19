@@ -281,6 +281,9 @@ final class com.monkopedia.ksrpc/MethodMetadata { // com.monkopedia.ksrpc/Method
         final fun <get-arguments>(): kotlin.collections/List<kotlin/Pair<kotlin/String, com.monkopedia.ksrpc/MetadataValue>> // com.monkopedia.ksrpc/MethodMetadata.arguments.<get-arguments>|<get-arguments>(){}[0]
 
     final fun argument(kotlin/String): com.monkopedia.ksrpc/MetadataValue? // com.monkopedia.ksrpc/MethodMetadata.argument|argument(kotlin.String){}[0]
+    final fun component1(): kotlin/String // com.monkopedia.ksrpc/MethodMetadata.component1|component1(){}[0]
+    final fun component2(): kotlin.collections/List<kotlin/Pair<kotlin/String, com.monkopedia.ksrpc/MetadataValue>> // com.monkopedia.ksrpc/MethodMetadata.component2|component2(){}[0]
+    final fun copy(kotlin/String = ..., kotlin.collections/List<kotlin/Pair<kotlin/String, com.monkopedia.ksrpc/MetadataValue>> = ...): com.monkopedia.ksrpc/MethodMetadata // com.monkopedia.ksrpc/MethodMetadata.copy|copy(kotlin.String;kotlin.collections.List<kotlin.Pair<kotlin.String,com.monkopedia.ksrpc.MetadataValue>>){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc/MethodMetadata.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc/MethodMetadata.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // com.monkopedia.ksrpc/MethodMetadata.toString|toString(){}[0]
@@ -340,6 +343,8 @@ sealed class com.monkopedia.ksrpc/MetadataValue { // com.monkopedia.ksrpc/Metada
         final val value // com.monkopedia.ksrpc/MetadataValue.BooleanValue.value|{}value[0]
             final fun <get-value>(): kotlin/Boolean // com.monkopedia.ksrpc/MetadataValue.BooleanValue.value.<get-value>|<get-value>(){}[0]
 
+        final fun component1(): kotlin/Boolean // com.monkopedia.ksrpc/MetadataValue.BooleanValue.component1|component1(){}[0]
+        final fun copy(kotlin/Boolean = ...): com.monkopedia.ksrpc/MetadataValue.BooleanValue // com.monkopedia.ksrpc/MetadataValue.BooleanValue.copy|copy(kotlin.Boolean){}[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc/MetadataValue.BooleanValue.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc/MetadataValue.BooleanValue.hashCode|hashCode(){}[0]
         final fun toString(): kotlin/String // com.monkopedia.ksrpc/MetadataValue.BooleanValue.toString|toString(){}[0]
@@ -351,6 +356,8 @@ sealed class com.monkopedia.ksrpc/MetadataValue { // com.monkopedia.ksrpc/Metada
         final val value // com.monkopedia.ksrpc/MetadataValue.DoubleValue.value|{}value[0]
             final fun <get-value>(): kotlin/Double // com.monkopedia.ksrpc/MetadataValue.DoubleValue.value.<get-value>|<get-value>(){}[0]
 
+        final fun component1(): kotlin/Double // com.monkopedia.ksrpc/MetadataValue.DoubleValue.component1|component1(){}[0]
+        final fun copy(kotlin/Double = ...): com.monkopedia.ksrpc/MetadataValue.DoubleValue // com.monkopedia.ksrpc/MetadataValue.DoubleValue.copy|copy(kotlin.Double){}[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc/MetadataValue.DoubleValue.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc/MetadataValue.DoubleValue.hashCode|hashCode(){}[0]
         final fun toString(): kotlin/String // com.monkopedia.ksrpc/MetadataValue.DoubleValue.toString|toString(){}[0]
@@ -362,6 +369,8 @@ sealed class com.monkopedia.ksrpc/MetadataValue { // com.monkopedia.ksrpc/Metada
         final val value // com.monkopedia.ksrpc/MetadataValue.EnumValue.value|{}value[0]
             final fun <get-value>(): kotlin/Enum<*> // com.monkopedia.ksrpc/MetadataValue.EnumValue.value.<get-value>|<get-value>(){}[0]
 
+        final fun component1(): kotlin/Enum<*> // com.monkopedia.ksrpc/MetadataValue.EnumValue.component1|component1(){}[0]
+        final fun copy(kotlin/Enum<*> = ...): com.monkopedia.ksrpc/MetadataValue.EnumValue // com.monkopedia.ksrpc/MetadataValue.EnumValue.copy|copy(kotlin.Enum<*>){}[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc/MetadataValue.EnumValue.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc/MetadataValue.EnumValue.hashCode|hashCode(){}[0]
         final fun toString(): kotlin/String // com.monkopedia.ksrpc/MetadataValue.EnumValue.toString|toString(){}[0]
@@ -373,6 +382,8 @@ sealed class com.monkopedia.ksrpc/MetadataValue { // com.monkopedia.ksrpc/Metada
         final val value // com.monkopedia.ksrpc/MetadataValue.FloatValue.value|{}value[0]
             final fun <get-value>(): kotlin/Float // com.monkopedia.ksrpc/MetadataValue.FloatValue.value.<get-value>|<get-value>(){}[0]
 
+        final fun component1(): kotlin/Float // com.monkopedia.ksrpc/MetadataValue.FloatValue.component1|component1(){}[0]
+        final fun copy(kotlin/Float = ...): com.monkopedia.ksrpc/MetadataValue.FloatValue // com.monkopedia.ksrpc/MetadataValue.FloatValue.copy|copy(kotlin.Float){}[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc/MetadataValue.FloatValue.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc/MetadataValue.FloatValue.hashCode|hashCode(){}[0]
         final fun toString(): kotlin/String // com.monkopedia.ksrpc/MetadataValue.FloatValue.toString|toString(){}[0]
@@ -384,6 +395,8 @@ sealed class com.monkopedia.ksrpc/MetadataValue { // com.monkopedia.ksrpc/Metada
         final val value // com.monkopedia.ksrpc/MetadataValue.IntValue.value|{}value[0]
             final fun <get-value>(): kotlin/Int // com.monkopedia.ksrpc/MetadataValue.IntValue.value.<get-value>|<get-value>(){}[0]
 
+        final fun component1(): kotlin/Int // com.monkopedia.ksrpc/MetadataValue.IntValue.component1|component1(){}[0]
+        final fun copy(kotlin/Int = ...): com.monkopedia.ksrpc/MetadataValue.IntValue // com.monkopedia.ksrpc/MetadataValue.IntValue.copy|copy(kotlin.Int){}[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc/MetadataValue.IntValue.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc/MetadataValue.IntValue.hashCode|hashCode(){}[0]
         final fun toString(): kotlin/String // com.monkopedia.ksrpc/MetadataValue.IntValue.toString|toString(){}[0]
@@ -395,6 +408,8 @@ sealed class com.monkopedia.ksrpc/MetadataValue { // com.monkopedia.ksrpc/Metada
         final val kClass // com.monkopedia.ksrpc/MetadataValue.KClassValue.kClass|{}kClass[0]
             final fun <get-kClass>(): kotlin.reflect/KClass<*> // com.monkopedia.ksrpc/MetadataValue.KClassValue.kClass.<get-kClass>|<get-kClass>(){}[0]
 
+        final fun component1(): kotlin.reflect/KClass<*> // com.monkopedia.ksrpc/MetadataValue.KClassValue.component1|component1(){}[0]
+        final fun copy(kotlin.reflect/KClass<*> = ...): com.monkopedia.ksrpc/MetadataValue.KClassValue // com.monkopedia.ksrpc/MetadataValue.KClassValue.copy|copy(kotlin.reflect.KClass<*>){}[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc/MetadataValue.KClassValue.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc/MetadataValue.KClassValue.hashCode|hashCode(){}[0]
         final fun toString(): kotlin/String // com.monkopedia.ksrpc/MetadataValue.KClassValue.toString|toString(){}[0]
@@ -406,6 +421,8 @@ sealed class com.monkopedia.ksrpc/MetadataValue { // com.monkopedia.ksrpc/Metada
         final val items // com.monkopedia.ksrpc/MetadataValue.ListValue.items|{}items[0]
             final fun <get-items>(): kotlin.collections/List<com.monkopedia.ksrpc/MetadataValue> // com.monkopedia.ksrpc/MetadataValue.ListValue.items.<get-items>|<get-items>(){}[0]
 
+        final fun component1(): kotlin.collections/List<com.monkopedia.ksrpc/MetadataValue> // com.monkopedia.ksrpc/MetadataValue.ListValue.component1|component1(){}[0]
+        final fun copy(kotlin.collections/List<com.monkopedia.ksrpc/MetadataValue> = ...): com.monkopedia.ksrpc/MetadataValue.ListValue // com.monkopedia.ksrpc/MetadataValue.ListValue.copy|copy(kotlin.collections.List<com.monkopedia.ksrpc.MetadataValue>){}[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc/MetadataValue.ListValue.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc/MetadataValue.ListValue.hashCode|hashCode(){}[0]
         final fun toString(): kotlin/String // com.monkopedia.ksrpc/MetadataValue.ListValue.toString|toString(){}[0]
@@ -417,6 +434,8 @@ sealed class com.monkopedia.ksrpc/MetadataValue { // com.monkopedia.ksrpc/Metada
         final val value // com.monkopedia.ksrpc/MetadataValue.LongValue.value|{}value[0]
             final fun <get-value>(): kotlin/Long // com.monkopedia.ksrpc/MetadataValue.LongValue.value.<get-value>|<get-value>(){}[0]
 
+        final fun component1(): kotlin/Long // com.monkopedia.ksrpc/MetadataValue.LongValue.component1|component1(){}[0]
+        final fun copy(kotlin/Long = ...): com.monkopedia.ksrpc/MetadataValue.LongValue // com.monkopedia.ksrpc/MetadataValue.LongValue.copy|copy(kotlin.Long){}[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc/MetadataValue.LongValue.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc/MetadataValue.LongValue.hashCode|hashCode(){}[0]
         final fun toString(): kotlin/String // com.monkopedia.ksrpc/MetadataValue.LongValue.toString|toString(){}[0]
@@ -428,6 +447,8 @@ sealed class com.monkopedia.ksrpc/MetadataValue { // com.monkopedia.ksrpc/Metada
         final val value // com.monkopedia.ksrpc/MetadataValue.StringValue.value|{}value[0]
             final fun <get-value>(): kotlin/String // com.monkopedia.ksrpc/MetadataValue.StringValue.value.<get-value>|<get-value>(){}[0]
 
+        final fun component1(): kotlin/String // com.monkopedia.ksrpc/MetadataValue.StringValue.component1|component1(){}[0]
+        final fun copy(kotlin/String = ...): com.monkopedia.ksrpc/MetadataValue.StringValue // com.monkopedia.ksrpc/MetadataValue.StringValue.copy|copy(kotlin.String){}[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc/MetadataValue.StringValue.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc/MetadataValue.StringValue.hashCode|hashCode(){}[0]
         final fun toString(): kotlin/String // com.monkopedia.ksrpc/MetadataValue.StringValue.toString|toString(){}[0]
