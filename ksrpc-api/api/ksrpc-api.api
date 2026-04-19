@@ -47,6 +47,9 @@ public abstract interface annotation class com/monkopedia/ksrpc/annotation/KsMet
 	public abstract fun name ()Ljava/lang/String;
 }
 
+public abstract interface annotation class com/monkopedia/ksrpc/annotation/KsMethodMetadata : java/lang/annotation/Annotation {
+}
+
 public abstract interface annotation class com/monkopedia/ksrpc/annotation/KsService : java/lang/annotation/Annotation {
 }
 

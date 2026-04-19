@@ -31,7 +31,7 @@ import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
 class KsrpcGenerationEnvironment(
-    private val context: IrPluginContext,
+    val context: IrPluginContext,
     private val messageCollector: MessageCollector
 ) {
     private val endpointException =
@@ -73,6 +73,46 @@ class KsrpcGenerationEnvironment(
                 messageCollector.report(ERROR, "Can't find kotlin.collections.listOf")
                 error("Can't find kotlin.collections.listOf")
             }
+
+    // Metadata propagation support is optional so the compiler plugin continues
+    // to work against older ksrpc-core artifacts that predate #11.
+    val methodMetadata = maybeReferenceClass(FqConstants.METHOD_METADATA)
+    val metadataValue = maybeReferenceClass(FqConstants.METADATA_VALUE)
+    val metadataValueString = maybeReferenceClass(FqConstants.METADATA_VALUE_STRING)
+    val metadataValueInt = maybeReferenceClass(FqConstants.METADATA_VALUE_INT)
+    val metadataValueLong = maybeReferenceClass(FqConstants.METADATA_VALUE_LONG)
+    val metadataValueBoolean = maybeReferenceClass(FqConstants.METADATA_VALUE_BOOLEAN)
+    val metadataValueDouble = maybeReferenceClass(FqConstants.METADATA_VALUE_DOUBLE)
+    val metadataValueFloat = maybeReferenceClass(FqConstants.METADATA_VALUE_FLOAT)
+    val metadataValueKClass = maybeReferenceClass(FqConstants.METADATA_VALUE_KCLASS)
+    val metadataValueEnum = maybeReferenceClass(FqConstants.METADATA_VALUE_ENUM)
+    val metadataValueList = maybeReferenceClass(FqConstants.METADATA_VALUE_LIST)
+    val pair = maybeReferenceClass(FqConstants.PAIR)
+    val toFunction =
+        context.referenceFunctions(FqConstants.TO_FUNCTION).firstOrNull { fn ->
+            fn.owner.parameters.any { it.kind == IrParameterKind.ExtensionReceiver } &&
+                fn.owner.parameters.count { it.kind == IrParameterKind.Regular } == 1
+        }
+
+    /**
+     * True when every symbol needed to emit `MethodMetadata` entries was
+     * resolved. When false, the plugin passes `null` (falling back to the old
+     * four-arg constructor) and does not attempt metadata propagation.
+     */
+    val metadataSupported: Boolean =
+        methodMetadata != null &&
+            metadataValue != null &&
+            metadataValueString != null &&
+            metadataValueInt != null &&
+            metadataValueLong != null &&
+            metadataValueBoolean != null &&
+            metadataValueDouble != null &&
+            metadataValueFloat != null &&
+            metadataValueKClass != null &&
+            metadataValueEnum != null &&
+            metadataValueList != null &&
+            pair != null &&
+            toFunction != null
 
     private fun maybeReferenceClass(name: ClassId): IrClassSymbol? = context.referenceClass(name)
 

@@ -47,7 +47,8 @@ class JsonRpcSerializedChannelNotifyTest {
                 method =
                     object : ServiceExecutor {
                         override suspend fun invoke(service: RpcService, input: Any?): Any? = Unit
-                    }
+                    },
+                metadata = emptyList()
             )
         val input = CallData.create(Json.encodeToString(String.serializer(), "payload"))
 
@@ -78,7 +79,8 @@ class JsonRpcSerializedChannelNotifyTest {
                     object : ServiceExecutor {
                         override suspend fun invoke(service: RpcService, input: Any?): Any? =
                             "unused"
-                    }
+                    },
+                metadata = emptyList()
             )
         val input = CallData.create(Json.encodeToString(String.serializer(), "payload"))
 
@@ -205,7 +207,8 @@ class JsonRpcSerializedChannelNotifyTest {
                     object : ServiceExecutor {
                         override suspend fun invoke(service: RpcService, input: Any?): Any? =
                             "unused"
-                    }
+                    },
+                metadata = emptyList()
             )
 
         assertFailsWith<Throwable> {

@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(UnsafeDuringIrConstructionAPI::class)
+
 package com.monkopedia.ksrpc.plugin
 
-import org.jetbrains.kotlin.backend.konan.ir.superClasses
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.ir.IrStatement
@@ -26,7 +27,9 @@ import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
+import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.classFqName
+import org.jetbrains.kotlin.ir.types.classOrNull
 import org.jetbrains.kotlin.ir.util.fqNameForIrSerialization
 import org.jetbrains.kotlin.ir.util.getAllSuperclasses
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
@@ -37,6 +40,7 @@ private class Visitor(private val messageCollector: MessageCollector) : IrElemen
     private var currentService: ServiceClass? = null
     private val method = FqName("com.monkopedia.ksrpc.annotation.KsMethod")
     private val service = FqName("com.monkopedia.ksrpc.annotation.KsService")
+    private val metadataMarker = FqConstants.KS_METHOD_METADATA
 
     override fun visitClass(declaration: IrClass): IrStatement {
         val annotation = declaration.annotations.find { annotation ->
@@ -65,7 +69,19 @@ private class Visitor(private val messageCollector: MessageCollector) : IrElemen
         if (annotation != null) {
             val current = currentService
             if (current != null) {
-                current.methods.add(declaration to annotation)
+                val metadataAnnotations = declaration.annotations.filter { siblingAnnotation ->
+                    siblingAnnotation.type.classFqName != method &&
+                        siblingAnnotation.type.classOrNull?.owner?.annotations?.any {
+                            it.type.classFqName == metadataMarker
+                        } == true
+                }
+                current.methods.add(
+                    ServiceMethod(
+                        function = declaration,
+                        ksMethodAnnotation = annotation,
+                        metadataAnnotations = metadataAnnotations
+                    )
+                )
             } else if (!declaration.isFakeOverride) {
                 if (declaration.dispatchReceiverParameter?.type?.classFqName !=
                     FqConstants.FQ_INTROSPECTABLE_RPC_SERVICE
@@ -111,10 +127,16 @@ private class SubclassVisitor(
     }
 }
 
+data class ServiceMethod(
+    val function: IrSimpleFunction,
+    val ksMethodAnnotation: IrConstructorCall,
+    val metadataAnnotations: List<IrConstructorCall> = emptyList()
+)
+
 data class ServiceClass(
     val irClass: IrClass,
     val irClassAndImpls: MutableList<IrClass> = mutableListOf(irClass),
-    val methods: MutableList<Pair<IrSimpleFunction, IrConstructorCall>> = mutableListOf()
+    val methods: MutableList<ServiceMethod> = mutableListOf()
 ) {
     val endpoints = mutableMapOf<String, IrFunction>()
     lateinit var channel: IrField
