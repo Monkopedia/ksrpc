@@ -18,6 +18,7 @@ package com.monkopedia.ksrpc
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
 import com.monkopedia.ksrpc.annotation.KsTimeout
+import com.monkopedia.ksrpc.MetadataValue
 import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
 import com.monkopedia.ksrpc.internal.asClient
 import kotlin.test.Test
@@ -32,15 +33,23 @@ import kotlinx.coroutines.delay
 @KsService
 interface TimeoutTestService : RpcService {
     @KsMethod("/fast")
-    @KsTimeout(5000)
+    @KsTimeout(seconds = 5)
     suspend fun fast(input: String): String
 
     @KsMethod("/slow")
-    @KsTimeout(200)
+    @KsTimeout(millis = 200)
     suspend fun slow(input: String): String
 
     @KsMethod("/no_timeout")
     suspend fun noTimeout(input: String): String
+
+    @KsMethod("/combined")
+    @KsTimeout(seconds = 1, millis = 500)
+    suspend fun combined(input: String): String
+
+    @KsMethod("/minutes")
+    @KsTimeout(minutes = 2)
+    suspend fun withMinutes(input: String): String
 }
 
 class TimeoutTestServiceImpl : TimeoutTestService {
@@ -52,6 +61,10 @@ class TimeoutTestServiceImpl : TimeoutTestService {
     }
 
     override suspend fun noTimeout(input: String): String = "noTimeout:$input"
+
+    override suspend fun combined(input: String): String = "combined:$input"
+
+    override suspend fun withMinutes(input: String): String = "minutes:$input"
 }
 
 class KsTimeoutMetadataTest {
@@ -85,6 +98,37 @@ class KsTimeoutMetadataTest {
         val timeout = method.timeoutMillis
         assertNotNull(timeout)
         assertEquals(200L, timeout)
+    }
+
+    @Test
+    fun combinedSecondsAndMillisAreSummed() {
+        val method = rpcObject.findEndpoint("combined")
+        val timeout = method.timeoutMillis
+        assertNotNull(timeout)
+        assertEquals(1500L, timeout)
+    }
+
+    @Test
+    fun minutesTimeoutIsConvertedToMillis() {
+        val method = rpcObject.findEndpoint("minutes")
+        val timeout = method.timeoutMillis
+        assertNotNull(timeout)
+        assertEquals(120_000L, timeout)
+    }
+
+    @Test
+    fun combinedMetadataHasAllParams() {
+        val method = rpcObject.findEndpoint("combined")
+        val meta = method.metadata("com.monkopedia.ksrpc.annotation.KsTimeout")
+        assertNotNull(meta)
+        assertEquals(
+            500L,
+            (meta.argument("millis") as? MetadataValue.LongValue)?.value
+        )
+        assertEquals(
+            1L,
+            (meta.argument("seconds") as? MetadataValue.LongValue)?.value
+        )
     }
 }
 

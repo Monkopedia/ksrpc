@@ -36,11 +36,16 @@ private const val KS_TIMEOUT_FQ = "com.monkopedia.ksrpc.annotation.KsTimeout"
 /**
  * Returns the timeout in milliseconds configured via `@KsTimeout` on the
  * source method, or `null` if no timeout annotation was present.
+ *
+ * The total is computed as `millis + seconds * 1000 + minutes * 60_000`.
  */
 val RpcMethod<*, *, *>.timeoutMillis: Long?
     get() {
         val meta = metadata(KS_TIMEOUT_FQ) ?: return null
-        return (meta.argument("millis") as? MetadataValue.LongValue)?.value
+        val millis = (meta.argument("millis") as? MetadataValue.LongValue)?.value ?: 0L
+        val seconds = (meta.argument("seconds") as? MetadataValue.LongValue)?.value ?: 0L
+        val minutes = (meta.argument("minutes") as? MetadataValue.LongValue)?.value ?: 0L
+        return millis + seconds * 1000 + minutes * 60_000
     }
 
 sealed interface Transformer<T> {
