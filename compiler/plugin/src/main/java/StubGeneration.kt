@@ -104,7 +104,16 @@ class StubGeneration(
             val companion = generateCompanion(service)
             add(companion)
             service.methods.map { (method, annotation) ->
-                add(declaration.generateMethodField(method, annotation, companion, service))
+                val metadata = service.methodMetadata[method].orEmpty()
+                add(
+                    declaration.generateMethodField(
+                        method,
+                        annotation,
+                        metadata,
+                        companion,
+                        service
+                    )
+                )
             }
             add(declaration.generateCloseMethod(service))
         }
@@ -192,11 +201,13 @@ class StubGeneration(
     private fun IrClass.generateMethodField(
         method: IrSimpleFunction,
         annotation: IrConstructorCall,
+        metadataAnnotations: List<IrConstructorCall>,
         companion: IrClass,
         service: ServiceClass
     ): IrFunction {
         val endpoint = annotation.arguments[0].constString() ?: error("Lost endpoint")
-        val methodField = generateRpcMethod(env, endpoint, method, this, companion)
+        val methodField =
+            generateRpcMethod(env, endpoint, method, this, companion, metadataAnnotations)
 
         service.addEndpoint(endpoint, methodField)
         val callChannel = env.rpcMethod.findMethod(FqConstants.CALL_CHANNEL)
@@ -228,7 +239,8 @@ class StubGeneration(
         endpoint: String,
         method: IrSimpleFunction,
         serviceInterface: IrClass,
-        companion: IrClass
+        companion: IrClass,
+        metadataAnnotations: List<IrConstructorCall>
     ): IrFunction {
         val field = companion.addField {
             startOffset = SYNTHETIC_OFFSET
@@ -258,7 +270,12 @@ class StubGeneration(
                     irSetField(
                         irGet(dispatchReceiverParameter!!),
                         field,
-                        builder.irCreateRpcMethod(serviceInterface, endpoint, method)
+                        builder.irCreateRpcMethod(
+                            serviceInterface,
+                            endpoint,
+                            method,
+                            metadataAnnotations
+                        )
                     )
                 )
                 +irReturn(irGetField(irGet(dispatchReceiverParameter!!), field))
@@ -269,19 +286,22 @@ class StubGeneration(
     private fun DeclarationIrBuilder.irCreateRpcMethod(
         serviceInterface: IrClass,
         endpoint: String,
-        method: IrSimpleFunction
+        method: IrSimpleFunction,
+        metadataAnnotations: List<IrConstructorCall>
     ): IrConstructorCall {
         val inputType = method.parameters.first { !it.isDispatchReceiver }.type
         val outputType = method.returnType
         val inputRpcType = determineType(inputType)
         val outputRpcType = determineType(outputType)
 
+        val constructor = env.rpcMethod.constructors.first()
+        val supportsMetadata = env.metadataSupported && constructor.owner.parameters.size >= 5
         return irCallConstructor(
-            env.rpcMethod.constructors.first(),
+            constructor,
             listOf(serviceInterface.typeWith(), inputType, outputType)
         ).apply {
             this.type = env.rpcMethod.typeWith(serviceInterface.typeWith(), inputType, outputType)
-            putArgs(
+            val args = mutableListOf(
                 irString(endpoint.trimStart('/')),
                 createTypeConverter(inputRpcType, inputType, this@irCreateRpcMethod),
                 createTypeConverter(outputRpcType, outputType, this@irCreateRpcMethod),
@@ -295,6 +315,11 @@ class StubGeneration(
                     }
                 }
             )
+            if (supportsMetadata) {
+                args += MetadataIrBuilder(env, this@irCreateRpcMethod)
+                    .buildMetadataList(metadataAnnotations)
+            }
+            putArgs(*args.toTypedArray())
         }
     }
 

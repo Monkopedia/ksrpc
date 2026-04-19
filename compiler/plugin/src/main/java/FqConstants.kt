@@ -65,4 +65,27 @@ object FqConstants {
     val KS_METHOD = FqName("com.monkopedia.ksrpc.annotation.KsMethod")
     val KS_SERVICE = FqName("com.monkopedia.ksrpc.annotation.KsService")
     val KS_INTROSPECTABLE = FqName("com.monkopedia.ksrpc.annotation.KsIntrospectable")
+    val KS_METHOD_METADATA = FqName("com.monkopedia.ksrpc.annotation.KsMethodMetadata")
+
+    val METHOD_METADATA = ClassId(FQPKG, Name.identifier("MethodMetadata"))
+    val METADATA_VALUE = ClassId(FQPKG, Name.identifier("MetadataValue"))
+    val METADATA_VALUE_STRING =
+        METADATA_VALUE.createNestedClassId(Name.identifier("StringValue"))
+    val METADATA_VALUE_INT = METADATA_VALUE.createNestedClassId(Name.identifier("IntValue"))
+    val METADATA_VALUE_LONG = METADATA_VALUE.createNestedClassId(Name.identifier("LongValue"))
+    val METADATA_VALUE_BOOLEAN =
+        METADATA_VALUE.createNestedClassId(Name.identifier("BooleanValue"))
+    val METADATA_VALUE_DOUBLE =
+        METADATA_VALUE.createNestedClassId(Name.identifier("DoubleValue"))
+    val METADATA_VALUE_FLOAT =
+        METADATA_VALUE.createNestedClassId(Name.identifier("FloatValue"))
+    val METADATA_VALUE_KCLASS =
+        METADATA_VALUE.createNestedClassId(Name.identifier("KClassValue"))
+    val METADATA_VALUE_ENUM =
+        METADATA_VALUE.createNestedClassId(Name.identifier("EnumValue"))
+    val METADATA_VALUE_LIST =
+        METADATA_VALUE.createNestedClassId(Name.identifier("ListValue"))
+
+    val PAIR = ClassId(FqName("kotlin"), Name.identifier("Pair"))
+    val TO_FUNCTION = CallableId(FqName("kotlin"), Name.identifier("to"))
 }

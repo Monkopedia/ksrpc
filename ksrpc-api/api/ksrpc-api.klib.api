@@ -13,6 +13,10 @@ open annotation class com.monkopedia.ksrpc.annotation/KsMethod : kotlin/Annotati
         final fun <get-name>(): kotlin/String // com.monkopedia.ksrpc.annotation/KsMethod.name.<get-name>|<get-name>(){}[0]
 }
 
+open annotation class com.monkopedia.ksrpc.annotation/KsMethodMetadata : kotlin/Annotation { // com.monkopedia.ksrpc.annotation/KsMethodMetadata|null[0]
+    constructor <init>() // com.monkopedia.ksrpc.annotation/KsMethodMetadata.<init>|<init>(){}[0]
+}
+
 open annotation class com.monkopedia.ksrpc.annotation/KsService : kotlin/Annotation { // com.monkopedia.ksrpc.annotation/KsService|null[0]
     constructor <init>() // com.monkopedia.ksrpc.annotation/KsService.<init>|<init>(){}[0]
 }

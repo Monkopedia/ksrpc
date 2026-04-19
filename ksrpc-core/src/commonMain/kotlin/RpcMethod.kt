@@ -23,6 +23,7 @@ import com.monkopedia.ksrpc.channels.registerHost
 import com.monkopedia.ksrpc.internal.client
 import com.monkopedia.ksrpc.internal.host
 import io.ktor.utils.io.ByteReadChannel
+import kotlin.jvm.JvmOverloads
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.KSerializer
@@ -104,16 +105,30 @@ interface ServiceExecutor {
 
 /**
  * A wrapper around calling into or from stubs/serialization.
+ *
+ * The optional [metadata] list carries sibling-annotation metadata captured by
+ * the ksrpc compiler plugin from annotations on the source method that are
+ * themselves annotated `@KsMethodMetadata`. Transport layers can read it to
+ * customize how a call is serialized.
  */
-class RpcMethod<T : RpcService, I, O> constructor(
+class RpcMethod<T : RpcService, I, O> @JvmOverloads constructor(
     val endpoint: String,
     val inputTransform: Transformer<I>,
     val outputTransform: Transformer<O>,
-    private val method: ServiceExecutor
+    private val method: ServiceExecutor,
+    val metadata: List<MethodMetadata> = emptyList()
 ) {
 
     val hasReturnType: Boolean
         get() = outputTransform.hasContent
+
+    /**
+     * Look up the captured sibling-annotation metadata with the given fully
+     * qualified annotation name, or null if the method was not annotated with
+     * such a sibling annotation.
+     */
+    fun metadata(annotationFqName: String): MethodMetadata? =
+        metadata.firstOrNull { it.annotationFqName == annotationFqName }
 
     @Suppress("UNCHECKED_CAST")
     suspend fun <S> call(
