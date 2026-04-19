@@ -17,6 +17,11 @@ package com.monkopedia.ksrpc.ktor.websocket
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.channels.CallData
+import com.monkopedia.ksrpc.channels.ChannelClient
+import com.monkopedia.ksrpc.channels.ChannelId
+import com.monkopedia.ksrpc.channels.RpcCallId
+import com.monkopedia.ksrpc.channels.SerializedChannel
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.channels.connect
 import com.monkopedia.ksrpc.ktor.websocket.internal.WebsocketPacketChannel
@@ -44,5 +49,64 @@ fun Routing.serveWebsocket(
                 channel
             }
         }
+    }
+}
+
+/**
+ * Mirrors [Routing.serve]'s [SerializedChannel] overload for the websocket transport.
+ *
+ * The [SerializedService]-taking overload above is the convenience entry point that wraps a
+ * single root service; this overload accepts a pre-built [SerializedChannel] for callers
+ * that own the dispatch surface (e.g. a [com.monkopedia.ksrpc.internal.HostSerializedChannelImpl]
+ * with multiple registered services). Calls received over the socket are dispatched through
+ * the supplied [channel].
+ */
+fun Routing.serveWebsocket(
+    basePath: String,
+    channel: SerializedChannel<String>,
+    env: KsrpcEnvironment<String>
+) {
+    val baseStripped = basePath.trimEnd('/')
+    webSocket(baseStripped) {
+        coroutineScope {
+            val wb = WebsocketPacketChannel(this, this@webSocket, env)
+            wb.connect<String> {
+                ChannelBackedSerializedService(channel)
+            }
+        }
+    }
+}
+
+/**
+ * Adapter exposing a [SerializedChannel] as a [SerializedService] bound to the channel's
+ * default channel id. Used by the [SerializedChannel] overload of [serveWebsocket] to
+ * register the supplied channel through the websocket connection's [connect] entry point.
+ *
+ * If [channel] also implements [ChannelClient], its [ChannelClient.defaultChannel] is used
+ * directly so any extra wiring (close hooks, sub-service routing) is preserved. When the
+ * underlying type does not expose [ChannelClient], the adapter forwards calls to the channel
+ * using the [ChannelClient.DEFAULT] channel id.
+ */
+private class ChannelBackedSerializedService(private val channel: SerializedChannel<String>) :
+    SerializedService<String> {
+    override val env: KsrpcEnvironment<String>
+        get() = channel.env
+
+    override suspend fun call(
+        endpoint: String,
+        input: CallData<String>,
+        callId: RpcCallId?
+    ): CallData<String> = if (channel is ChannelClient<String>) {
+        channel.defaultChannel().call(endpoint, input, callId)
+    } else {
+        channel.call(ChannelId(ChannelClient.DEFAULT), endpoint, input, callId)
+    }
+
+    override suspend fun close() {
+        channel.close()
+    }
+
+    override suspend fun onClose(onClose: suspend () -> Unit) {
+        channel.onClose(onClose)
     }
 }

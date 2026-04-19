@@ -16,6 +16,7 @@
 package com.monkopedia.ksrpc.ktor.websocket
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
+import com.monkopedia.ksrpc.channels.SerializedChannel
 import com.monkopedia.ksrpc.channels.SerializedService
 import io.ktor.server.routing.Routing
 import kotlin.test.Test
@@ -32,6 +33,21 @@ class KtorWebsocketServerModuleTypeReferenceTest {
                 KsrpcEnvironment<String>
             ) -> Unit = { routing, basePath, service, env ->
                 routing.serveWebsocket(basePath, service, env)
+            }
+
+        assertNotNull(function)
+    }
+
+    @Test
+    fun websocketServerSerializedChannelOverloadIsReachableWithoutReflection() {
+        val function:
+            (
+                Routing,
+                String,
+                SerializedChannel<String>,
+                KsrpcEnvironment<String>
+            ) -> Unit = { routing, basePath, channel, env ->
+                routing.serveWebsocket(basePath, channel, env)
             }
 
         assertNotNull(function)

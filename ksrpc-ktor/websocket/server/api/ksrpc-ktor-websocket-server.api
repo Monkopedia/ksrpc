@@ -1,4 +1,5 @@
 public final class com/monkopedia/ksrpc/ktor/websocket/WebsocketServeKt {
+	public static final fun serveWebsocket (Lio/ktor/server/routing/Routing;Ljava/lang/String;Lcom/monkopedia/ksrpc/channels/SerializedChannel;Lcom/monkopedia/ksrpc/KsrpcEnvironment;)V
 	public static final fun serveWebsocket (Lio/ktor/server/routing/Routing;Ljava/lang/String;Lcom/monkopedia/ksrpc/channels/SerializedService;Lcom/monkopedia/ksrpc/KsrpcEnvironment;)V
 }
 
