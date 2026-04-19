@@ -43,6 +43,7 @@ class HostSerializedChannelImpl<T>(
     override val context: CoroutineContext = channelContext
         ?: (ClientChannelContext(this) + HostChannelContext(this) + env.coroutineExceptionHandler)
     private val onCloseObservers = mutableSetOf<suspend () -> Unit>()
+    private var isClosed: Boolean = false
 
     private val serviceMap by lazy {
         mutableMapOf<String, SerializedService<T>>()
@@ -86,13 +87,17 @@ class HostSerializedChannelImpl<T>(
     }
 
     override suspend fun close() {
+        if (isClosed) return
+        isClosed = true
         env.logger.debug("SerializedChannel", "Closing entire channel")
         serviceMap.values.forEach {
             it.trackingService?.onSerializationClosed(it)
             it.close()
         }
         serviceMap.clear()
-        onCloseObservers.forEach { it.invoke() }
+        val observers = onCloseObservers.toList()
+        onCloseObservers.clear()
+        observers.forEach { it.invoke() }
     }
 
     override suspend fun onClose(onClose: suspend () -> Unit) {
@@ -113,8 +118,12 @@ class HostSerializedChannelImpl<T>(
     }
 
     override suspend fun wrapChannel(channelId: ChannelId): SerializedService<T> {
-        env.logger.debug("SerializedChannel", "Wrapping (unmapping) local channel ${channelId.id}")
-        return serviceMap[channelId.id] ?: error("Unknown service ${channelId.id}")
+        // Route in-process sub-service access through a SubserviceChannel just like the
+        // asClient wrapper does. Returning the bare service from serviceMap here bypasses the
+        // close-remove path, which then leaves the entry in serviceMap until the parent
+        // channel closes — causing a double-close (explicit + cascade) on the sub-service.
+        env.logger.debug("SerializedChannel", "Wrapping local channel ${channelId.id}")
+        return SubserviceChannel(asClient, channelId)
     }
 
     private val SerializedService<T>.trackingService: TrackingService?
