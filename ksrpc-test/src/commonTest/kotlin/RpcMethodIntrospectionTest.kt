@@ -46,7 +46,8 @@ class RpcMethodIntrospectionTest {
                 outputTransform = SerializerTransformer(Unit.serializer()),
                 method = object : ServiceExecutor {
                     override suspend fun invoke(service: RpcService, input: Any?): Any? = Unit
-                }
+                },
+                metadata = emptyList()
             )
 
         assertFalse(method.hasReturnType)
@@ -61,7 +62,8 @@ class RpcMethodIntrospectionTest {
                 outputTransform = SerializerTransformer(String.serializer()),
                 method = object : ServiceExecutor {
                     override suspend fun invoke(service: RpcService, input: Any?): Any? = "ok"
-                }
+                },
+                metadata = emptyList()
             )
 
         assertTrue(method.hasReturnType)
@@ -78,7 +80,8 @@ class RpcMethodIntrospectionTest {
                 outputTransform = subserviceOut,
                 method = object : ServiceExecutor {
                     override suspend fun invoke(service: RpcService, input: Any?): Any? = input
-                }
+                },
+                metadata = emptyList()
             )
 
         val found = method.findSubserviceTransformers()

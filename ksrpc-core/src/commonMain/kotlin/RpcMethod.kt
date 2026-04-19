@@ -23,7 +23,6 @@ import com.monkopedia.ksrpc.channels.registerHost
 import com.monkopedia.ksrpc.internal.client
 import com.monkopedia.ksrpc.internal.host
 import io.ktor.utils.io.ByteReadChannel
-import kotlin.jvm.JvmOverloads
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.KSerializer
@@ -111,12 +110,12 @@ interface ServiceExecutor {
  * themselves annotated `@KsMethodMetadata`. Transport layers can read it to
  * customize how a call is serialized.
  */
-class RpcMethod<T : RpcService, I, O> @JvmOverloads constructor(
+class RpcMethod<T : RpcService, I, O>(
     val endpoint: String,
     val inputTransform: Transformer<I>,
     val outputTransform: Transformer<O>,
     private val method: ServiceExecutor,
-    val metadata: List<MethodMetadata> = emptyList()
+    val metadata: List<MethodMetadata>
 ) {
 
     val hasReturnType: Boolean

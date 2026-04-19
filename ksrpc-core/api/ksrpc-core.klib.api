@@ -129,7 +129,7 @@ sealed interface <#A: kotlin/Any?> com.monkopedia.ksrpc/Transformer { // com.mon
 }
 
 final class <#A: com.monkopedia.ksrpc/RpcService, #B: kotlin/Any?, #C: kotlin/Any?> com.monkopedia.ksrpc/RpcMethod { // com.monkopedia.ksrpc/RpcMethod|null[0]
-    constructor <init>(kotlin/String, com.monkopedia.ksrpc/Transformer<#B>, com.monkopedia.ksrpc/Transformer<#C>, com.monkopedia.ksrpc/ServiceExecutor, kotlin.collections/List<com.monkopedia.ksrpc/MethodMetadata> = ...) // com.monkopedia.ksrpc/RpcMethod.<init>|<init>(kotlin.String;com.monkopedia.ksrpc.Transformer<1:1>;com.monkopedia.ksrpc.Transformer<1:2>;com.monkopedia.ksrpc.ServiceExecutor;kotlin.collections.List<com.monkopedia.ksrpc.MethodMetadata>){}[0]
+    constructor <init>(kotlin/String, com.monkopedia.ksrpc/Transformer<#B>, com.monkopedia.ksrpc/Transformer<#C>, com.monkopedia.ksrpc/ServiceExecutor, kotlin.collections/List<com.monkopedia.ksrpc/MethodMetadata>) // com.monkopedia.ksrpc/RpcMethod.<init>|<init>(kotlin.String;com.monkopedia.ksrpc.Transformer<1:1>;com.monkopedia.ksrpc.Transformer<1:2>;com.monkopedia.ksrpc.ServiceExecutor;kotlin.collections.List<com.monkopedia.ksrpc.MethodMetadata>){}[0]
 
     final val endpoint // com.monkopedia.ksrpc/RpcMethod.endpoint|{}endpoint[0]
         final fun <get-endpoint>(): kotlin/String // com.monkopedia.ksrpc/RpcMethod.endpoint.<get-endpoint>|<get-endpoint>(){}[0]
@@ -396,8 +396,6 @@ sealed class com.monkopedia.ksrpc/MetadataValue { // com.monkopedia.ksrpc/Metada
 
         final val classFqName // com.monkopedia.ksrpc/MetadataValue.KClassValue.classFqName|{}classFqName[0]
             final fun <get-classFqName>(): kotlin/String // com.monkopedia.ksrpc/MetadataValue.KClassValue.classFqName.<get-classFqName>|<get-classFqName>(){}[0]
-        final val kClass // com.monkopedia.ksrpc/MetadataValue.KClassValue.kClass|{}kClass[0]
-            final fun <get-kClass>(): kotlin.reflect/KClass<*>? // com.monkopedia.ksrpc/MetadataValue.KClassValue.kClass.<get-kClass>|<get-kClass>(){}[0]
 
         final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc/MetadataValue.KClassValue.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc/MetadataValue.KClassValue.hashCode|hashCode(){}[0]

@@ -76,7 +76,8 @@ class SerializedChannelDefaultMethodTest {
                 outputTransform = SerializerTransformer(String.serializer()),
                 method = object : ServiceExecutor {
                     override suspend fun invoke(service: RpcService, input: Any?): Any? = "unused"
-                }
+                },
+                metadata = emptyList()
             )
 
         val output = service.call(method, CallData.create("input"))

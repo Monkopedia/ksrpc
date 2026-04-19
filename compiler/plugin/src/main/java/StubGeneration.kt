@@ -294,6 +294,10 @@ class StubGeneration(
         val outputRpcType = determineType(outputType)
 
         val constructor = env.rpcMethod.constructors.first()
+        // Back-compat: if the ksrpc-core on the compile classpath predates #11
+        // (four-arg RpcMethod), fall back to the old call shape. When
+        // MethodMetadata is available, always emit the five-arg shape and pass
+        // `emptyList()` when there is no metadata.
         val supportsMetadata = env.metadataSupported && constructor.owner.parameters.size >= 5
         return irCallConstructor(
             constructor,
