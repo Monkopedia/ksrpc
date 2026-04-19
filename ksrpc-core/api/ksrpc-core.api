@@ -208,6 +208,23 @@ public final class com/monkopedia/ksrpc/channels/CallData$Serialized : com/monko
 	public fun toString ()Ljava/lang/String;
 }
 
+public abstract interface class com/monkopedia/ksrpc/channels/CancellationSupport {
+	public abstract fun cancelHandler (Lcom/monkopedia/ksrpc/channels/RpcCallId;Ljava/util/concurrent/CancellationException;)V
+	public static synthetic fun cancelHandler$default (Lcom/monkopedia/ksrpc/channels/CancellationSupport;Lcom/monkopedia/ksrpc/channels/RpcCallId;Ljava/util/concurrent/CancellationException;ILjava/lang/Object;)V
+	public abstract fun registerHandler (Lcom/monkopedia/ksrpc/channels/RpcCallId;Lkotlinx/coroutines/Job;)V
+	public abstract fun sendCancel (Lcom/monkopedia/ksrpc/channels/RpcCallId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun unregisterHandler (Lcom/monkopedia/ksrpc/channels/RpcCallId;)V
+}
+
+public final class com/monkopedia/ksrpc/channels/CancellationSupport$DefaultImpls {
+	public static synthetic fun cancelHandler$default (Lcom/monkopedia/ksrpc/channels/CancellationSupport;Lcom/monkopedia/ksrpc/channels/RpcCallId;Ljava/util/concurrent/CancellationException;ILjava/lang/Object;)V
+}
+
+public final class com/monkopedia/ksrpc/channels/CancellationSupportKt {
+	public static final fun awaitRequestCancellable (Lcom/monkopedia/ksrpc/channels/CancellationSupport;Lcom/monkopedia/ksrpc/channels/RpcCallId;Lkotlinx/coroutines/Deferred;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun withHandlerRegistered (Lcom/monkopedia/ksrpc/channels/CancellationSupport;Lcom/monkopedia/ksrpc/channels/RpcCallId;Lkotlin/jvm/functions/Function0;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
 public abstract interface class com/monkopedia/ksrpc/channels/ChannelClient : com/monkopedia/ksrpc/KsrpcEnvironment$Element, com/monkopedia/ksrpc/channels/SerializedChannel, com/monkopedia/ksrpc/channels/SingleChannelClient {
 	public static final field Companion Lcom/monkopedia/ksrpc/channels/ChannelClient$Companion;
 	public static final field DEFAULT Ljava/lang/String;
@@ -261,6 +278,9 @@ public abstract interface class com/monkopedia/ksrpc/channels/ContextContainer {
 
 public final class com/monkopedia/ksrpc/channels/ContextContainer$DefaultImpls {
 	public static fun getContext (Lcom/monkopedia/ksrpc/channels/ContextContainer;)Lkotlin/coroutines/CoroutineContext;
+}
+
+public abstract interface class com/monkopedia/ksrpc/channels/RpcCallId {
 }
 
 public abstract interface class com/monkopedia/ksrpc/channels/SerializedChannel : com/monkopedia/ksrpc/KsrpcEnvironment$Element, com/monkopedia/ksrpc/SuspendCloseableObservable, com/monkopedia/ksrpc/channels/ContextContainer {
@@ -353,6 +373,8 @@ public final class com/monkopedia/ksrpc/internal/MultiChannel {
 	public fun <init> ()V
 	public final fun allocateReceive (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun allocateReceiveString (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun cancelPending (Ljava/lang/String;Ljava/util/concurrent/CancellationException;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun cancelPending$default (Lcom/monkopedia/ksrpc/internal/MultiChannel;Ljava/lang/String;Ljava/util/concurrent/CancellationException;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun close (Ljava/util/concurrent/CancellationException;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun close$default (Lcom/monkopedia/ksrpc/internal/MultiChannel;Ljava/util/concurrent/CancellationException;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun send (Ljava/lang/String;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;

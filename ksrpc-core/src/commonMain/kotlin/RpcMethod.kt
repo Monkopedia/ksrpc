@@ -23,6 +23,7 @@ import com.monkopedia.ksrpc.channels.registerHost
 import com.monkopedia.ksrpc.internal.client
 import com.monkopedia.ksrpc.internal.host
 import io.ktor.utils.io.ByteReadChannel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.serializer
@@ -119,7 +120,7 @@ class RpcMethod<T : RpcService, I, O> constructor(
         channel: SerializedService<S>,
         service: RpcService,
         input: CallData<S>
-    ): CallData<S> = withContext(channel.context) {
+    ): CallData<S> = withContext(channel.context.minusKey(Job)) {
         val transformedInput = inputTransform.untransform(input, channel)
         val id = randomUuid()
         channel.env.logger.info("Transformer", "($id) Calling endpoint $endpoint")
@@ -130,7 +131,11 @@ class RpcMethod<T : RpcService, I, O> constructor(
 
     @Suppress("UNCHECKED_CAST")
     suspend fun <S> callChannel(channel: SerializedService<S>, input: Any?): Any? =
-        withContext(channel.context) {
+        // Drop the Job element from the channel's context so the caller's Job remains the
+        // parent for cancellation propagation — otherwise cancelling the caller wouldn't
+        // surface inside the remote call (it would only cancel this [withContext] body's own
+        // child scope, which is unreachable from the caller's cancel signal).
+        withContext(channel.context.minusKey(Job)) {
             val input = inputTransform.transform(input as I, channel)
             val id = randomUuid()
             channel.env.logger.info("Transformer", "($id) Calling remote endpoint $endpoint")

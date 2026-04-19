@@ -27,10 +27,12 @@ import kotlinx.coroutines.CoroutineScope
 
 suspend fun Pair<ByteReadChannel, ByteWriteChannel>.asJsonRpcConnection(
     env: KsrpcEnvironment<String>,
-    includeContentHeaders: Boolean = true
+    includeContentHeaders: Boolean = true,
+    cancellationConvention: JsonRpcCancellationConvention = JsonRpcCancellationConvention.None
 ): SingleChannelConnection<String> = JsonRpcWriterBase(
     CoroutineScope(coroutineContext),
     coroutineContext,
     env,
-    if (includeContentHeaders) jsonHeader(env) else jsonLine(env)
+    if (includeContentHeaders) jsonHeader(env) else jsonLine(env),
+    cancellationConvention
 )

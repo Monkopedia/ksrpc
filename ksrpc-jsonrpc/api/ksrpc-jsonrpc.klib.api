@@ -10,6 +10,32 @@ abstract interface com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcChannel : com.mo
     abstract suspend fun execute(kotlin/String, kotlinx.serialization.json/JsonElement?, kotlin/Boolean): kotlinx.serialization.json/JsonElement? // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcChannel.execute|execute(kotlin.String;kotlinx.serialization.json.JsonElement?;kotlin.Boolean){}[0]
 }
 
+sealed interface com.monkopedia.ksrpc.jsonrpc/JsonRpcCancellationConvention { // com.monkopedia.ksrpc.jsonrpc/JsonRpcCancellationConvention|null[0]
+    final class Notification : com.monkopedia.ksrpc.jsonrpc/JsonRpcCancellationConvention { // com.monkopedia.ksrpc.jsonrpc/JsonRpcCancellationConvention.Notification|null[0]
+        constructor <init>(kotlin/String) // com.monkopedia.ksrpc.jsonrpc/JsonRpcCancellationConvention.Notification.<init>|<init>(kotlin.String){}[0]
+
+        final val method // com.monkopedia.ksrpc.jsonrpc/JsonRpcCancellationConvention.Notification.method|{}method[0]
+            final fun <get-method>(): kotlin/String // com.monkopedia.ksrpc.jsonrpc/JsonRpcCancellationConvention.Notification.method.<get-method>|<get-method>(){}[0]
+
+        final fun component1(): kotlin/String // com.monkopedia.ksrpc.jsonrpc/JsonRpcCancellationConvention.Notification.component1|component1(){}[0]
+        final fun copy(kotlin/String = ...): com.monkopedia.ksrpc.jsonrpc/JsonRpcCancellationConvention.Notification // com.monkopedia.ksrpc.jsonrpc/JsonRpcCancellationConvention.Notification.copy|copy(kotlin.String){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc.jsonrpc/JsonRpcCancellationConvention.Notification.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc.jsonrpc/JsonRpcCancellationConvention.Notification.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.monkopedia.ksrpc.jsonrpc/JsonRpcCancellationConvention.Notification.toString|toString(){}[0]
+    }
+
+    final object Companion { // com.monkopedia.ksrpc.jsonrpc/JsonRpcCancellationConvention.Companion|null[0]
+        final val Lsp // com.monkopedia.ksrpc.jsonrpc/JsonRpcCancellationConvention.Companion.Lsp|{}Lsp[0]
+            final fun <get-Lsp>(): com.monkopedia.ksrpc.jsonrpc/JsonRpcCancellationConvention // com.monkopedia.ksrpc.jsonrpc/JsonRpcCancellationConvention.Companion.Lsp.<get-Lsp>|<get-Lsp>(){}[0]
+    }
+
+    final object None : com.monkopedia.ksrpc.jsonrpc/JsonRpcCancellationConvention { // com.monkopedia.ksrpc.jsonrpc/JsonRpcCancellationConvention.None|null[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc.jsonrpc/JsonRpcCancellationConvention.None.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc.jsonrpc/JsonRpcCancellationConvention.None.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.monkopedia.ksrpc.jsonrpc/JsonRpcCancellationConvention.None.toString|toString(){}[0]
+    }
+}
+
 abstract class com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcTransformer { // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcTransformer|null[0]
     constructor <init>() // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcTransformer.<init>|<init>(){}[0]
 
@@ -162,16 +188,33 @@ final class com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcServiceWrapper : com.mo
     final suspend fun execute(kotlin/String, kotlinx.serialization.json/JsonElement?, kotlin/Boolean): kotlinx.serialization.json/JsonElement? // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcServiceWrapper.execute|execute(kotlin.String;kotlinx.serialization.json.JsonElement?;kotlin.Boolean){}[0]
 }
 
-final class com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase : com.monkopedia.ksrpc.channels/SingleChannelConnection<kotlin/String>, com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcChannel { // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase|null[0]
-    constructor <init>(kotlinx.coroutines/CoroutineScope, kotlin.coroutines/CoroutineContext, com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String>, com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcTransformer) // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase.<init>|<init>(kotlinx.coroutines.CoroutineScope;kotlin.coroutines.CoroutineContext;com.monkopedia.ksrpc.KsrpcEnvironment<kotlin.String>;com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcTransformer){}[0]
+final class com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase : com.monkopedia.ksrpc.channels/CancellationSupport, com.monkopedia.ksrpc.channels/SingleChannelConnection<kotlin/String>, com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcChannel { // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase|null[0]
+    constructor <init>(kotlinx.coroutines/CoroutineScope, kotlin.coroutines/CoroutineContext, com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String>, com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcTransformer, com.monkopedia.ksrpc.jsonrpc/JsonRpcCancellationConvention = ...) // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase.<init>|<init>(kotlinx.coroutines.CoroutineScope;kotlin.coroutines.CoroutineContext;com.monkopedia.ksrpc.KsrpcEnvironment<kotlin.String>;com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcTransformer;com.monkopedia.ksrpc.jsonrpc.JsonRpcCancellationConvention){}[0]
 
     final val env // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase.env|{}env[0]
         final fun <get-env>(): com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String> // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase.env.<get-env>|<get-env>(){}[0]
 
+    final fun cancelHandler(com.monkopedia.ksrpc.channels/RpcCallId, kotlin.coroutines.cancellation/CancellationException?) // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase.cancelHandler|cancelHandler(com.monkopedia.ksrpc.channels.RpcCallId;kotlin.coroutines.cancellation.CancellationException?){}[0]
+    final fun registerHandler(com.monkopedia.ksrpc.channels/RpcCallId, kotlinx.coroutines/Job) // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase.registerHandler|registerHandler(com.monkopedia.ksrpc.channels.RpcCallId;kotlinx.coroutines.Job){}[0]
+    final fun unregisterHandler(com.monkopedia.ksrpc.channels/RpcCallId) // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase.unregisterHandler|unregisterHandler(com.monkopedia.ksrpc.channels.RpcCallId){}[0]
     final suspend fun close() // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase.close|close(){}[0]
     final suspend fun defaultChannel(): com.monkopedia.ksrpc.channels/SerializedService<kotlin/String> // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase.defaultChannel|defaultChannel(){}[0]
     final suspend fun execute(kotlin/String, kotlinx.serialization.json/JsonElement?, kotlin/Boolean): kotlinx.serialization.json/JsonElement? // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase.execute|execute(kotlin.String;kotlinx.serialization.json.JsonElement?;kotlin.Boolean){}[0]
     final suspend fun registerDefault(com.monkopedia.ksrpc.channels/SerializedService<kotlin/String>) // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase.registerDefault|registerDefault(com.monkopedia.ksrpc.channels.SerializedService<kotlin.String>){}[0]
+    final suspend fun sendCancel(com.monkopedia.ksrpc.channels/RpcCallId) // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcWriterBase.sendCancel|sendCancel(com.monkopedia.ksrpc.channels.RpcCallId){}[0]
+}
+
+final class com.monkopedia.ksrpc.jsonrpc/JsonRpcCallId : com.monkopedia.ksrpc.channels/RpcCallId { // com.monkopedia.ksrpc.jsonrpc/JsonRpcCallId|null[0]
+    constructor <init>(kotlinx.serialization.json/JsonPrimitive) // com.monkopedia.ksrpc.jsonrpc/JsonRpcCallId.<init>|<init>(kotlinx.serialization.json.JsonPrimitive){}[0]
+
+    final val id // com.monkopedia.ksrpc.jsonrpc/JsonRpcCallId.id|{}id[0]
+        final fun <get-id>(): kotlinx.serialization.json/JsonPrimitive // com.monkopedia.ksrpc.jsonrpc/JsonRpcCallId.id.<get-id>|<get-id>(){}[0]
+
+    final fun component1(): kotlinx.serialization.json/JsonPrimitive // com.monkopedia.ksrpc.jsonrpc/JsonRpcCallId.component1|component1(){}[0]
+    final fun copy(kotlinx.serialization.json/JsonPrimitive = ...): com.monkopedia.ksrpc.jsonrpc/JsonRpcCallId // com.monkopedia.ksrpc.jsonrpc/JsonRpcCallId.copy|copy(kotlinx.serialization.json.JsonPrimitive){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc.jsonrpc/JsonRpcCallId.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc.jsonrpc/JsonRpcCallId.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // com.monkopedia.ksrpc.jsonrpc/JsonRpcCallId.toString|toString(){}[0]
 }
 
 final const val com.monkopedia.ksrpc.jsonrpc.internal/DEFAULT_CONTENT_TYPE // com.monkopedia.ksrpc.jsonrpc.internal/DEFAULT_CONTENT_TYPE|{}DEFAULT_CONTENT_TYPE[0]
@@ -179,4 +222,4 @@ final const val com.monkopedia.ksrpc.jsonrpc.internal/DEFAULT_CONTENT_TYPE // co
 
 final fun (kotlin/Pair<io.ktor.utils.io/ByteReadChannel, io.ktor.utils.io/ByteWriteChannel>).com.monkopedia.ksrpc.jsonrpc.internal/jsonHeader(com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String>): com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcTransformer // com.monkopedia.ksrpc.jsonrpc.internal/jsonHeader|jsonHeader@kotlin.Pair<io.ktor.utils.io.ByteReadChannel,io.ktor.utils.io.ByteWriteChannel>(com.monkopedia.ksrpc.KsrpcEnvironment<kotlin.String>){}[0]
 final fun (kotlin/Pair<io.ktor.utils.io/ByteReadChannel, io.ktor.utils.io/ByteWriteChannel>).com.monkopedia.ksrpc.jsonrpc.internal/jsonLine(com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String>): com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcTransformer // com.monkopedia.ksrpc.jsonrpc.internal/jsonLine|jsonLine@kotlin.Pair<io.ktor.utils.io.ByteReadChannel,io.ktor.utils.io.ByteWriteChannel>(com.monkopedia.ksrpc.KsrpcEnvironment<kotlin.String>){}[0]
-final suspend fun (kotlin/Pair<io.ktor.utils.io/ByteReadChannel, io.ktor.utils.io/ByteWriteChannel>).com.monkopedia.ksrpc.jsonrpc/asJsonRpcConnection(com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String>, kotlin/Boolean = ...): com.monkopedia.ksrpc.channels/SingleChannelConnection<kotlin/String> // com.monkopedia.ksrpc.jsonrpc/asJsonRpcConnection|asJsonRpcConnection@kotlin.Pair<io.ktor.utils.io.ByteReadChannel,io.ktor.utils.io.ByteWriteChannel>(com.monkopedia.ksrpc.KsrpcEnvironment<kotlin.String>;kotlin.Boolean){}[0]
+final suspend fun (kotlin/Pair<io.ktor.utils.io/ByteReadChannel, io.ktor.utils.io/ByteWriteChannel>).com.monkopedia.ksrpc.jsonrpc/asJsonRpcConnection(com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String>, kotlin/Boolean = ..., com.monkopedia.ksrpc.jsonrpc/JsonRpcCancellationConvention = ...): com.monkopedia.ksrpc.channels/SingleChannelConnection<kotlin/String> // com.monkopedia.ksrpc.jsonrpc/asJsonRpcConnection|asJsonRpcConnection@kotlin.Pair<io.ktor.utils.io.ByteReadChannel,io.ktor.utils.io.ByteWriteChannel>(com.monkopedia.ksrpc.KsrpcEnvironment<kotlin.String>;kotlin.Boolean;com.monkopedia.ksrpc.jsonrpc.JsonRpcCancellationConvention){}[0]

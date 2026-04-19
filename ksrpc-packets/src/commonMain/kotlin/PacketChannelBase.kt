@@ -17,10 +17,13 @@ package com.monkopedia.ksrpc.packets.internal
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.channels.CallData
+import com.monkopedia.ksrpc.channels.CancellationSupport
 import com.monkopedia.ksrpc.channels.ChannelHost
 import com.monkopedia.ksrpc.channels.ChannelId
 import com.monkopedia.ksrpc.channels.Connection
+import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
+import com.monkopedia.ksrpc.channels.awaitRequestCancellable
 import com.monkopedia.ksrpc.channels.randomUuid
 import com.monkopedia.ksrpc.internal.ClientChannelContext
 import com.monkopedia.ksrpc.internal.HostChannelContext
@@ -36,6 +39,8 @@ import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -52,7 +57,8 @@ abstract class PacketChannelBase<T>(
     final override val env: KsrpcEnvironment<T>
 ) : PacketChannel<T>,
     Connection<T>,
-    ChannelHost<T> {
+    ChannelHost<T>,
+    CancellationSupport {
     private val sendLock = Mutex()
     private val receiveLock = Mutex()
     private var isClosed = false
@@ -73,6 +79,16 @@ abstract class PacketChannelBase<T>(
 
     private val multiChannel = MultiChannel<Packet<T>>()
     private val receiveLoopStart = CompletableDeferred<Unit>()
+
+    // Incoming handler jobs, keyed by the remote-supplied (channelId, messageId). Populated
+    // when the server receives a call and launches the handler; removed on completion (via
+    // [unregisterHandler]) or on incoming cancel (via [cancelHandler]).
+    //
+    // Access is single-threaded in practice: the receive loop serialises all mutations from
+    // that side, and completion-side removes run in the handler's own coroutine which races
+    // only with the (equally rare) incoming cancel — both touch the same concurrent map and
+    // neither cares which one wins.
+    private val handlers = mutableMapOf<PacketCallId, Job>()
 
     init {
         scope.launch {
@@ -103,6 +119,13 @@ abstract class PacketChannelBase<T>(
         try {
             while (true) {
                 val p = receive()
+                if (p.cancel) {
+                    // Cancel frames carry no payload and resolve to the running handler job
+                    // registered under (id, messageId). Client side also receives cancel
+                    // frames in the future direction — currently unused but symmetric.
+                    cancelHandler(PacketCallId(p.id, p.messageId))
+                    continue
+                }
                 coroutineScope.launch {
                     if (p.binary) {
                         val channel = getBinaryChannel(p.id)
@@ -114,16 +137,27 @@ abstract class PacketChannelBase<T>(
                         }
                         removeBinaryChannelIfDone(channel)
                     } else if (p.input) {
-                        val callData = getCallData(p)
-                        val response = withContext(context) {
-                            serviceChannel.call(
-                                ChannelId(p.id),
-                                p.endpoint,
-                                callData
-                            )
-                        }
+                        val callId = PacketCallId(p.id, p.messageId)
+                        val handlerJob = this.coroutineContext[Job]
+                            ?: error("Handler launched without a Job in its context")
+                        registerHandler(callId, handlerJob)
+                        try {
+                            val callData = getCallData(p)
+                            // Strip the channel's Job so the handler coroutine's Job stays
+                            // the parent — an incoming cancel frame cancels the handler and
+                            // the cancellation must flow through into serviceChannel.call.
+                            val response = withContext(context.minusKey(Job)) {
+                                serviceChannel.call(
+                                    ChannelId(p.id),
+                                    p.endpoint,
+                                    callData
+                                )
+                            }
 
-                        sendPacket(false, p.id, p.messageId, p.endpoint, response)
+                            sendPacket(false, p.id, p.messageId, p.endpoint, response)
+                        } finally {
+                            unregisterHandler(callId)
+                        }
                     } else {
                         multiChannel.send(p.messageId, p)
                     }
@@ -281,12 +315,23 @@ abstract class PacketChannelBase<T>(
         data: CallData<T>
     ): CallData<T> {
         val (messageId, response) = multiChannel.allocateReceiveString()
+        val callId = PacketCallId(channelId.id, messageId)
         env.logger.debug(
             "SerializedChannel",
             "Sending call ${channelId.id}/$endpoint -  $messageId"
         )
         scope.sendPacket(true, channelId.id, messageId, endpoint, data)
-        return getCallData(response.await())
+        val packet = try {
+            awaitRequestCancellable(callId, response)
+        } catch (t: CancellationException) {
+            // Cleanup the pending entry while the parent is being cancelled — must use
+            // NonCancellable so Mutex.withLock doesn't immediately rethrow.
+            withContext(NonCancellable) {
+                multiChannel.cancelPending(messageId, t)
+            }
+            throw t
+        }
+        return getCallData(packet)
     }
 
     override suspend fun close(id: ChannelId) {
@@ -311,6 +356,10 @@ abstract class PacketChannelBase<T>(
         try {
             if (isClosed) return
             multiChannel.close()
+            handlers.values.forEach {
+                it.cancel(CancellationException("PacketChannel closed"))
+            }
+            handlers.clear()
             binaryChannels.values.forEach {
                 it.channel.close()
             }
@@ -325,6 +374,50 @@ abstract class PacketChannelBase<T>(
     override suspend fun onClose(onClose: suspend () -> Unit) {
         onCloseObservers.add(onClose)
     }
+
+    // region CancellationSupport
+
+    override suspend fun sendCancel(callId: RpcCallId) {
+        if (callId !is PacketCallId) return
+        if (isClosed) return
+        // Cancel frames carry no payload; we only encode a placeholder Unit because the wire
+        // schema requires a non-null `data` of type T. Receivers must not inspect the data
+        // field on cancel frames (handled by the early-return in the receive loop).
+        val emptyData = env.serialization.createCallData(Unit.serializer(), Unit).readSerialized()
+        try {
+            send(
+                Packet(
+                    input = true,
+                    cancel = true,
+                    id = callId.channelId,
+                    messageId = callId.messageId,
+                    endpoint = "",
+                    data = emptyData
+                )
+            )
+        } catch (t: Throwable) {
+            env.logger.debug("PacketChannel", "Ignoring failure sending cancel frame", t)
+        }
+    }
+
+    override fun registerHandler(callId: RpcCallId, job: Job) {
+        if (callId !is PacketCallId) return
+        // Lock-free insert is fine here — each messageId is unique per direction, and the
+        // receive loop is single-threaded.
+        handlers[callId] = job
+    }
+
+    override fun unregisterHandler(callId: RpcCallId) {
+        if (callId !is PacketCallId) return
+        handlers.remove(callId)
+    }
+
+    override fun cancelHandler(callId: RpcCallId, cause: CancellationException?) {
+        if (callId !is PacketCallId) return
+        handlers.remove(callId)?.cancel(cause ?: CancellationException("Remote cancellation"))
+    }
+
+    // endregion
 
     private class BinaryChannel<T>(
         val id: String,

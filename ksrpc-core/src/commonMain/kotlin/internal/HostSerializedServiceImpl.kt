@@ -32,6 +32,7 @@ import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.channels.randomUuid
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.serializer
 
@@ -59,7 +60,10 @@ class HostSerializedChannelImpl<T>(
         } else {
             serviceMap[channelId.id] ?: error("Cannot find service ${channelId.id}")
         }
-        withContext(context) {
+        // [context] is stored on this channel and typically carries the channel's Job — we
+        // strip it so cancellation from the caller (the handler coroutine on the server, or
+        // the stub invoker on the client) propagates into the endpoint call.
+        withContext(context.minusKey(Job)) {
             if (endpoint.isEmpty()) {
                 close(channelId)
                 env.serialization.createCallData(Unit.serializer(), Unit)

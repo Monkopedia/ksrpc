@@ -18,18 +18,27 @@ package com.monkopedia.ksrpc.jsonrpc.internal
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.asString
+import com.monkopedia.ksrpc.channels.CancellationSupport
+import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.channels.SingleChannelConnection
+import com.monkopedia.ksrpc.channels.awaitRequestCancellable
 import com.monkopedia.ksrpc.internal.MultiChannel
+import com.monkopedia.ksrpc.jsonrpc.JsonRpcCallId
+import com.monkopedia.ksrpc.jsonrpc.JsonRpcCancellationConvention
 import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 
@@ -37,13 +46,17 @@ class JsonRpcWriterBase(
     private val scope: CoroutineScope,
     private val context: CoroutineContext,
     override val env: KsrpcEnvironment<String>,
-    private val comm: JsonRpcTransformer
+    private val comm: JsonRpcTransformer,
+    private val cancellationConvention: JsonRpcCancellationConvention =
+        JsonRpcCancellationConvention.None
 ) : JsonRpcChannel,
-    SingleChannelConnection<String> {
+    SingleChannelConnection<String>,
+    CancellationSupport {
     private val json = (env.serialization as? Json) ?: Json
 
     private var baseChannel = CompletableDeferred<JsonRpcChannel>()
     private val multiChannel = MultiChannel<JsonRpcResponse>()
+    private val handlers = mutableMapOf<JsonRpcCallId, Job>()
 
     init {
         scope.launch {
@@ -53,7 +66,11 @@ class JsonRpcWriterBase(
                         val p = comm.receive() ?: continue
                         if ((p as? JsonObject)?.containsKey("method") == true) {
                             val request = json.decodeFromJsonElement<JsonRpcRequest>(p)
-                            launchRequestHandler(baseChannel.await(), request)
+                            if (isCancellationNotification(request)) {
+                                handleCancellationNotification(request)
+                            } else {
+                                launchRequestHandler(baseChannel.await(), request)
+                            }
                         } else {
                             val response = json.decodeFromJsonElement<JsonRpcResponse>(p)
                             multiChannel.send(response.id.toString(), response)
@@ -70,23 +87,46 @@ class JsonRpcWriterBase(
         }
     }
 
+    private fun isCancellationNotification(request: JsonRpcRequest): Boolean {
+        val convention = cancellationConvention as? JsonRpcCancellationConvention.Notification
+            ?: return false
+        return request.id == null && request.method == convention.method
+    }
+
+    private fun handleCancellationNotification(request: JsonRpcRequest) {
+        val params = request.params as? JsonObject ?: return
+        val id = params["id"] as? JsonPrimitive ?: return
+        cancelHandler(JsonRpcCallId(id))
+    }
+
     private fun launchRequestHandler(channel: JsonRpcChannel, message: JsonRpcRequest) {
         scope.launch(context) {
+            val id = message.id
+            val callId = id?.let { JsonRpcCallId(it) }
+            if (callId != null) {
+                handlers[callId] = coroutineContext[Job]
+                    ?: error("Handler launched without a Job in its context")
+            }
             try {
                 val response =
-                    channel.execute(message.method, message.params, message.id == null)
-                if (message.id == null) return@launch
+                    channel.execute(message.method, message.params, id == null)
+                if (id == null) return@launch
                 comm.send(
                     json.encodeToJsonElement(
                         JsonRpcResponse(
                             result = response,
-                            id = message.id
+                            id = id
                         )
                     )
                 )
+            } catch (t: CancellationException) {
+                // Handler was cancelled (usually from a remote cancel notification). No
+                // response is sent — jsonrpc cancellation conventions universally treat the
+                // cancelled request as abandoned rather than completed.
+                throw t
             } catch (t: Throwable) {
                 env.errorListener.onError(t)
-                if (message.id != null) {
+                if (id != null) {
                     comm.send(
                         json.encodeToJsonElement(
                             JsonRpcResponse(
@@ -95,10 +135,14 @@ class JsonRpcWriterBase(
                                     t.asString,
                                     json.encodeToJsonElement(RpcFailure(t.asString))
                                 ),
-                                id = message.id
+                                id = id
                             )
                         )
                     )
+                }
+            } finally {
+                if (callId != null) {
+                    handlers.remove(callId)
                 }
             }
         }
@@ -116,7 +160,20 @@ class JsonRpcWriterBase(
             id = JsonPrimitive(id)
         )
         comm.send(json.encodeToJsonElement(request))
-        val response = pending?.await() ?: return null
+        if (pending == null || id == null) return null
+        val callId = JsonRpcCallId(JsonPrimitive(id))
+        val response = try {
+            awaitRequestCancellable(callId, pending)
+        } catch (t: CancellationException) {
+            // Drop the pending entry so a late response can't trip the "No pending receiver"
+            // guard. The cleanup must run in NonCancellable scope because we're already on the
+            // cancel path and Mutex.withLock would otherwise rethrow the CancellationException
+            // immediately without dropping the entry.
+            withContext(NonCancellable) {
+                multiChannel.cancelPending(id.toString(), t)
+            }
+            throw t
+        }
         if (response.error != null) {
             val error = response.error.data?.let {
                 try {
@@ -143,6 +200,9 @@ class JsonRpcWriterBase(
         } catch (t: Throwable) {
             // Thats fine, just pending messages getting unhappy.
         }
+        val toCancel = handlers.values.toList()
+        handlers.clear()
+        toCancel.forEach { it.cancel(CancellationException("JsonRpcWriter closed")) }
     }
 
     override suspend fun registerDefault(service: SerializedService<String>) {
@@ -151,4 +211,42 @@ class JsonRpcWriterBase(
 
     override suspend fun defaultChannel(): SerializedService<String> =
         JsonRpcSerializedChannel(context, this, env)
+
+    // region CancellationSupport
+
+    override suspend fun sendCancel(callId: RpcCallId) {
+        if (callId !is JsonRpcCallId) return
+        val convention = cancellationConvention as? JsonRpcCancellationConvention.Notification
+            ?: return
+        try {
+            comm.send(
+                json.encodeToJsonElement(
+                    JsonRpcRequest(
+                        method = convention.method,
+                        params = buildJsonObject { put("id", callId.id) },
+                        id = null
+                    )
+                )
+            )
+        } catch (t: Throwable) {
+            env.logger.debug("JsonRpcWriter", "Ignoring failure sending cancel notification", t)
+        }
+    }
+
+    override fun registerHandler(callId: RpcCallId, job: Job) {
+        if (callId !is JsonRpcCallId) return
+        handlers[callId] = job
+    }
+
+    override fun unregisterHandler(callId: RpcCallId) {
+        if (callId !is JsonRpcCallId) return
+        handlers.remove(callId)
+    }
+
+    override fun cancelHandler(callId: RpcCallId, cause: CancellationException?) {
+        if (callId !is JsonRpcCallId) return
+        handlers.remove(callId)?.cancel(cause ?: CancellationException("Remote cancellation"))
+    }
+
+    // endregion
 }

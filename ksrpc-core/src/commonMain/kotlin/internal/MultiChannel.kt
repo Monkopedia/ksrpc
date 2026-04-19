@@ -28,6 +28,7 @@ class MultiChannel<T> {
     private var closeException: Throwable? = null
     private val lock = Mutex()
     private val pending = mutableMapOf<String, CompletableDeferred<T>>()
+    private val cancelled = mutableSetOf<String>()
     private val id = atomic(1)
 
     private fun checkClosed() {
@@ -41,11 +42,36 @@ class MultiChannel<T> {
             if (isClosed) {
                 return@withLock
             }
+            // Cancelled receivers leave a tombstone so a late response from the other side
+            // is silently dropped rather than raising the "no pending receiver" error: the
+            // caller has explicitly disowned this id via [cancelPending].
+            if (cancelled.remove(id)) {
+                return@withLock
+            }
             val pendingItem = pending.remove(id)
             if (pendingItem == null) {
                 error("No pending receiver for $id and $response")
             }
             pendingItem.complete(response)
+        }
+    }
+
+    /**
+     * Drop the pending receiver registered under [id] if still present, completing it with
+     * [cause] so any lingering awaiter wakes up. Future late `send()` calls for the same id
+     * will be silently ignored (treated as a cancelled response).
+     */
+    suspend fun cancelPending(
+        id: String,
+        cause: CancellationException = CancellationException("Pending call cancelled")
+    ) {
+        lock.withLock {
+            val removed = pending.remove(id)
+            removed?.completeExceptionally(cause)
+            // Mark as cancelled so a late-arriving response from the remote side is dropped
+            // instead of raising. We always set the tombstone, even if there was no pending
+            // entry — the caller may have cancelled before the receive was allocated.
+            cancelled.add(id)
         }
     }
 
@@ -81,6 +107,7 @@ class MultiChannel<T> {
                 it.completeExceptionally(t ?: CancellationException("Closing MultiChannel"))
             }
             pending.clear()
+            cancelled.clear()
         }
     }
 }

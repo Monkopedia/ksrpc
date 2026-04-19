@@ -36,10 +36,19 @@ data class Packet<T>(
     val binary: Boolean get() = (type and 2) != 0
     val startBinary: Boolean get() = (type and 4) != 0
 
+    /**
+     * Cancel frame flag (bit 3, value 8). When set, the packet carries no payload and instructs
+     * the receiver to cancel the handler previously associated with [messageId] on channel [id].
+     *
+     * Cancel frames are directional: client-to-server when a caller coroutine is cancelled.
+     */
+    val cancel: Boolean get() = (type and 8) != 0
+
     constructor(
         input: Boolean = false,
         binary: Boolean = false,
         startBinary: Boolean = false,
+        cancel: Boolean = false,
         id: String,
         messageId: String,
         endpoint: String,
@@ -47,7 +56,8 @@ data class Packet<T>(
     ) : this(
         (if (input) 1 else 0) or
             (if (binary) 2 else 0) or
-            (if (startBinary) 4 else 0),
+            (if (startBinary) 4 else 0) or
+            (if (cancel) 8 else 0),
         id,
         messageId,
         endpoint,

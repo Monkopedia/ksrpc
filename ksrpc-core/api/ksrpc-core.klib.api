@@ -90,10 +90,19 @@ abstract interface <#A: kotlin/Any?> com.monkopedia.ksrpc/KsrpcEnvironment { // 
     }
 }
 
+abstract interface com.monkopedia.ksrpc.channels/CancellationSupport { // com.monkopedia.ksrpc.channels/CancellationSupport|null[0]
+    abstract fun cancelHandler(com.monkopedia.ksrpc.channels/RpcCallId, kotlin.coroutines.cancellation/CancellationException? = ...) // com.monkopedia.ksrpc.channels/CancellationSupport.cancelHandler|cancelHandler(com.monkopedia.ksrpc.channels.RpcCallId;kotlin.coroutines.cancellation.CancellationException?){}[0]
+    abstract fun registerHandler(com.monkopedia.ksrpc.channels/RpcCallId, kotlinx.coroutines/Job) // com.monkopedia.ksrpc.channels/CancellationSupport.registerHandler|registerHandler(com.monkopedia.ksrpc.channels.RpcCallId;kotlinx.coroutines.Job){}[0]
+    abstract fun unregisterHandler(com.monkopedia.ksrpc.channels/RpcCallId) // com.monkopedia.ksrpc.channels/CancellationSupport.unregisterHandler|unregisterHandler(com.monkopedia.ksrpc.channels.RpcCallId){}[0]
+    abstract suspend fun sendCancel(com.monkopedia.ksrpc.channels/RpcCallId) // com.monkopedia.ksrpc.channels/CancellationSupport.sendCancel|sendCancel(com.monkopedia.ksrpc.channels.RpcCallId){}[0]
+}
+
 abstract interface com.monkopedia.ksrpc.channels/ContextContainer { // com.monkopedia.ksrpc.channels/ContextContainer|null[0]
     open val context // com.monkopedia.ksrpc.channels/ContextContainer.context|{}context[0]
         open fun <get-context>(): kotlin.coroutines/CoroutineContext // com.monkopedia.ksrpc.channels/ContextContainer.context.<get-context>|<get-context>(){}[0]
 }
+
+abstract interface com.monkopedia.ksrpc.channels/RpcCallId // com.monkopedia.ksrpc.channels/RpcCallId|null[0]
 
 abstract interface com.monkopedia.ksrpc/Logger { // com.monkopedia.ksrpc/Logger|null[0]
     open fun debug(kotlin/String, kotlin/String, kotlin/Throwable? = ...) // com.monkopedia.ksrpc/Logger.debug|debug(kotlin.String;kotlin.String;kotlin.Throwable?){}[0]
@@ -190,6 +199,7 @@ final class <#A: kotlin/Any?> com.monkopedia.ksrpc.internal/MultiChannel { // co
 
     final suspend fun allocateReceive(): kotlin/Pair<kotlin/Int, kotlinx.coroutines/Deferred<#A>> // com.monkopedia.ksrpc.internal/MultiChannel.allocateReceive|allocateReceive(){}[0]
     final suspend fun allocateReceiveString(): kotlin/Pair<kotlin/String, kotlinx.coroutines/Deferred<#A>> // com.monkopedia.ksrpc.internal/MultiChannel.allocateReceiveString|allocateReceiveString(){}[0]
+    final suspend fun cancelPending(kotlin/String, kotlin.coroutines.cancellation/CancellationException = ...) // com.monkopedia.ksrpc.internal/MultiChannel.cancelPending|cancelPending(kotlin.String;kotlin.coroutines.cancellation.CancellationException){}[0]
     final suspend fun close(kotlin.coroutines.cancellation/CancellationException? = ...) // com.monkopedia.ksrpc.internal/MultiChannel.close|close(kotlin.coroutines.cancellation.CancellationException?){}[0]
     final suspend fun send(kotlin/String, #A) // com.monkopedia.ksrpc.internal/MultiChannel.send|send(kotlin.String;1:0){}[0]
 }
@@ -334,8 +344,10 @@ final inline fun <#A: reified com.monkopedia.ksrpc/RpcService, #B: kotlin/Any?> 
 final inline fun <#A: reified com.monkopedia.ksrpc/RpcService> com.monkopedia.ksrpc/rpcObject(): com.monkopedia.ksrpc/RpcObject<#A> // com.monkopedia.ksrpc/rpcObject|rpcObject(){0§<com.monkopedia.ksrpc.RpcService>}[0]
 final suspend fun <#A: com.monkopedia.ksrpc/RpcService, #B: kotlin/Any?> (com.monkopedia.ksrpc.channels/ChannelHost<#B>).com.monkopedia.ksrpc.channels/registerHost(#A, com.monkopedia.ksrpc/RpcObject<#A>): com.monkopedia.ksrpc.channels/ChannelId // com.monkopedia.ksrpc.channels/registerHost|registerHost@com.monkopedia.ksrpc.channels.ChannelHost<0:1>(0:0;com.monkopedia.ksrpc.RpcObject<0:0>){0§<com.monkopedia.ksrpc.RpcService>;1§<kotlin.Any?>}[0]
 final suspend fun <#A: com.monkopedia.ksrpc/RpcService, #B: kotlin/Any?> (com.monkopedia.ksrpc.channels/SingleChannelHost<#B>).com.monkopedia.ksrpc.channels/registerDefault(#A, com.monkopedia.ksrpc/RpcObject<#A>) // com.monkopedia.ksrpc.channels/registerDefault|registerDefault@com.monkopedia.ksrpc.channels.SingleChannelHost<0:1>(0:0;com.monkopedia.ksrpc.RpcObject<0:0>){0§<com.monkopedia.ksrpc.RpcService>;1§<kotlin.Any?>}[0]
+final suspend fun <#A: kotlin/Any?> (com.monkopedia.ksrpc.channels/CancellationSupport).com.monkopedia.ksrpc.channels/awaitRequestCancellable(com.monkopedia.ksrpc.channels/RpcCallId, kotlinx.coroutines/Deferred<#A>): #A // com.monkopedia.ksrpc.channels/awaitRequestCancellable|awaitRequestCancellable@com.monkopedia.ksrpc.channels.CancellationSupport(com.monkopedia.ksrpc.channels.RpcCallId;kotlinx.coroutines.Deferred<0:0>){0§<kotlin.Any?>}[0]
 final suspend fun <#A: kotlin/Any?> (com.monkopedia.ksrpc.channels/SingleChannelConnection<#A>).com.monkopedia.ksrpc.channels/connect(kotlin.coroutines/SuspendFunction1<com.monkopedia.ksrpc.channels/SerializedService<#A>, com.monkopedia.ksrpc.channels/SerializedService<#A>>) // com.monkopedia.ksrpc.channels/connect|connect@com.monkopedia.ksrpc.channels.SingleChannelConnection<0:0>(kotlin.coroutines.SuspendFunction1<com.monkopedia.ksrpc.channels.SerializedService<0:0>,com.monkopedia.ksrpc.channels.SerializedService<0:0>>){0§<kotlin.Any?>}[0]
 final suspend inline fun <#A: com.monkopedia.ksrpc/SuspendCloseable, #B: kotlin/Any?> (#A).com.monkopedia.ksrpc/use(kotlin/Function1<#A, #B>): #B // com.monkopedia.ksrpc/use|use@0:0(kotlin.Function1<0:0,0:1>){0§<com.monkopedia.ksrpc.SuspendCloseable>;1§<kotlin.Any?>}[0]
+final suspend inline fun <#A: kotlin/Any?> (com.monkopedia.ksrpc.channels/CancellationSupport).com.monkopedia.ksrpc.channels/withHandlerRegistered(com.monkopedia.ksrpc.channels/RpcCallId, kotlin/Function0<#A>): #A // com.monkopedia.ksrpc.channels/withHandlerRegistered|withHandlerRegistered@com.monkopedia.ksrpc.channels.CancellationSupport(com.monkopedia.ksrpc.channels.RpcCallId;kotlin.Function0<0:0>){0§<kotlin.Any?>}[0]
 final suspend inline fun <#A: reified com.monkopedia.ksrpc/RpcService, #B: kotlin/Any?> (com.monkopedia.ksrpc.channels/ChannelHost<#B>).com.monkopedia.ksrpc.channels/registerHost(#A): com.monkopedia.ksrpc.channels/ChannelId // com.monkopedia.ksrpc.channels/registerHost|registerHost@com.monkopedia.ksrpc.channels.ChannelHost<0:1>(0:0){0§<com.monkopedia.ksrpc.RpcService>;1§<kotlin.Any?>}[0]
 final suspend inline fun <#A: reified com.monkopedia.ksrpc/RpcService, #B: kotlin/Any?> (com.monkopedia.ksrpc.channels/SingleChannelHost<#B>).com.monkopedia.ksrpc.channels/registerDefault(#A) // com.monkopedia.ksrpc.channels/registerDefault|registerDefault@com.monkopedia.ksrpc.channels.SingleChannelHost<0:1>(0:0){0§<com.monkopedia.ksrpc.RpcService>;1§<kotlin.Any?>}[0]
 final suspend inline fun <#A: reified com.monkopedia.ksrpc/RpcService, #B: reified com.monkopedia.ksrpc/RpcService, #C: kotlin/Any?> (com.monkopedia.ksrpc.channels/SingleChannelConnection<#C>).com.monkopedia.ksrpc.channels/connect(crossinline kotlin.coroutines/SuspendFunction1<#B, #A>) // com.monkopedia.ksrpc.channels/connect|connect@com.monkopedia.ksrpc.channels.SingleChannelConnection<0:2>(kotlin.coroutines.SuspendFunction1<0:1,0:0>){0§<com.monkopedia.ksrpc.RpcService>;1§<com.monkopedia.ksrpc.RpcService>;2§<kotlin.Any?>}[0]
