@@ -55,3 +55,19 @@ annotation class KsMethod(val name: String)
 @Target(AnnotationTarget.ANNOTATION_CLASS)
 @Retention(AnnotationRetention.BINARY)
 annotation class KsMethodMetadata
+
+/**
+ * Sibling annotation for [KsMethod] that specifies a timeout in milliseconds
+ * for the remote call. When present, the generated stub wraps the call in
+ * `withTimeout(millis)`. If the call does not complete within the specified
+ * duration, a [kotlinx.coroutines.TimeoutCancellationException] is thrown and
+ * (on transports with cancellation support) the cancellation propagates to the
+ * server.
+ *
+ * A value of `0` or negative means "no timeout" — the call proceeds without
+ * any timeout wrapper.
+ */
+@KsMethodMetadata
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.BINARY)
+annotation class KsTimeout(val millis: Long)

@@ -221,6 +221,10 @@ public final class com/monkopedia/ksrpc/RpcMethod {
 	public final fun metadata (Ljava/lang/String;)Lcom/monkopedia/ksrpc/MethodMetadata;
 }
 
+public final class com/monkopedia/ksrpc/RpcMethodKt {
+	public static final fun getTimeoutMillis (Lcom/monkopedia/ksrpc/RpcMethod;)Ljava/lang/Long;
+}
+
 public abstract interface class com/monkopedia/ksrpc/RpcObject {
 	public abstract fun createStub (Lcom/monkopedia/ksrpc/channels/SerializedService;)Lcom/monkopedia/ksrpc/RpcService;
 	public abstract fun findEndpoint (Ljava/lang/String;)Lcom/monkopedia/ksrpc/RpcMethod;
