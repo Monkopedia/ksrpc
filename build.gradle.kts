@@ -50,7 +50,7 @@ allprojects {
 
 // == BCV setup ==
 apiValidation {
-    ignoredProjects.addAll(listOf("ksrpc-test"))
+    ignoredProjects.addAll(listOf("ksrpc-test", "ksrpc-bench"))
     @OptIn(ExperimentalBCVApi::class)
     klib {
         enabled = true
