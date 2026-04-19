@@ -119,6 +119,10 @@ abstract interface com.monkopedia.ksrpc/SuspendCloseableObservable : com.monkope
     abstract suspend fun onClose(kotlin.coroutines/SuspendFunction0<kotlin/Unit>) // com.monkopedia.ksrpc/SuspendCloseableObservable.onClose|onClose(kotlin.coroutines.SuspendFunction0<kotlin.Unit>){}[0]
 }
 
+abstract interface com.monkopedia.ksrpc/UnhandledMethodHandler { // com.monkopedia.ksrpc/UnhandledMethodHandler|null[0]
+    abstract suspend fun <#A1: kotlin/Any?> onUnhandled(kotlin/String, com.monkopedia.ksrpc.channels/CallData<#A1>): com.monkopedia.ksrpc.channels/CallData<#A1> // com.monkopedia.ksrpc/UnhandledMethodHandler.onUnhandled|onUnhandled(kotlin.String;com.monkopedia.ksrpc.channels.CallData<0:0>){0§<kotlin.Any?>}[0]
+}
+
 sealed interface <#A: kotlin/Any?> com.monkopedia.ksrpc/Transformer { // com.monkopedia.ksrpc/Transformer|null[0]
     open val hasContent // com.monkopedia.ksrpc/Transformer.hasContent|{}hasContent[0]
         open fun <get-hasContent>(): kotlin/Boolean // com.monkopedia.ksrpc/Transformer.hasContent.<get-hasContent>|<get-hasContent>(){}[0]

@@ -288,6 +288,10 @@ public final class com/monkopedia/ksrpc/Transformer$DefaultImpls {
 	public static fun unpackError (Lcom/monkopedia/ksrpc/Transformer;Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/SerializedService;)V
 }
 
+public abstract interface class com/monkopedia/ksrpc/UnhandledMethodHandler {
+	public abstract fun onUnhandled (Ljava/lang/String;Lcom/monkopedia/ksrpc/channels/CallData;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
 public abstract class com/monkopedia/ksrpc/channels/CallData {
 	public static final field Companion Lcom/monkopedia/ksrpc/channels/CallData$Companion;
 	public abstract fun isBinary ()Z
