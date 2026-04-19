@@ -6,6 +6,10 @@
 // - Show declarations: true
 
 // Library unique name: <com.monkopedia.ksrpc:ksrpc-api>
+open annotation class com.monkopedia.ksrpc.annotation/ExperimentalKsrpc : kotlin/Annotation { // com.monkopedia.ksrpc.annotation/ExperimentalKsrpc|null[0]
+    constructor <init>() // com.monkopedia.ksrpc.annotation/ExperimentalKsrpc.<init>|<init>(){}[0]
+}
+
 open annotation class com.monkopedia.ksrpc.annotation/KsMethod : kotlin/Annotation { // com.monkopedia.ksrpc.annotation/KsMethod|null[0]
     constructor <init>(kotlin/String) // com.monkopedia.ksrpc.annotation/KsMethod.<init>|<init>(kotlin.String){}[0]
 
@@ -19,6 +23,10 @@ open annotation class com.monkopedia.ksrpc.annotation/KsMethodMetadata : kotlin/
 
 open annotation class com.monkopedia.ksrpc.annotation/KsService : kotlin/Annotation { // com.monkopedia.ksrpc.annotation/KsService|null[0]
     constructor <init>() // com.monkopedia.ksrpc.annotation/KsService.<init>|<init>(){}[0]
+}
+
+open annotation class com.monkopedia.ksrpc.annotation/KsrpcInternal : kotlin/Annotation { // com.monkopedia.ksrpc.annotation/KsrpcInternal|null[0]
+    constructor <init>() // com.monkopedia.ksrpc.annotation/KsrpcInternal.<init>|<init>(){}[0]
 }
 
 abstract interface com.monkopedia.ksrpc/RpcService : com.monkopedia.ksrpc/SuspendCloseable { // com.monkopedia.ksrpc/RpcService|null[0]
