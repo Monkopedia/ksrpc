@@ -259,16 +259,17 @@ class JsonRpcErrorEnvelopeTest {
             )
 
         val thrown =
-            assertFailsWith<IllegalStateException> {
+            assertFailsWith<KsrpcException> {
                 writer.execute("explode", JsonPrimitive("input"), isNotify = false, id = null)
             }
 
-        assertTrue(thrown.message?.contains("JsonRpcError(-32603): server exploded") == true)
+        assertEquals(JsonRpcError.INTERNAL_ERROR, thrown.code)
+        assertEquals("server exploded", thrown.message)
         writer.close()
     }
 
     @Test
-    fun testExecuteThrowsRpcExceptionFromErrorData() = runBlockingUnit {
+    fun testExecuteThrowsKsrpcExceptionFromErrorData() = runBlockingUnit {
         val transformer =
             RequestAwareErrorTransformer(
                 errorMessage = "server exploded",
@@ -286,16 +287,18 @@ class JsonRpcErrorEnvelopeTest {
             )
 
         val thrown =
-            assertFailsWith<RpcException> {
+            assertFailsWith<KsrpcException> {
                 writer.execute("explode", JsonPrimitive("input"), isNotify = false, id = null)
             }
 
-        assertTrue(thrown.message.contains("remote stack"))
+        assertEquals(JsonRpcError.INTERNAL_ERROR, thrown.code)
+        assertEquals("server exploded", thrown.message)
+        assertNotNull(thrown.data)
         writer.close()
     }
 
     @Test
-    fun testExecuteFallsBackToJsonRpcErrorWhenErrorDataIsMalformed() = runBlockingUnit {
+    fun testExecuteThrowsKsrpcExceptionWhenErrorDataIsMalformed() = runBlockingUnit {
         val transformer =
             RequestAwareErrorTransformer(
                 errorMessage = "server exploded",
@@ -310,11 +313,12 @@ class JsonRpcErrorEnvelopeTest {
             )
 
         val thrown =
-            assertFailsWith<IllegalStateException> {
+            assertFailsWith<KsrpcException> {
                 writer.execute("explode", JsonPrimitive("input"), isNotify = false, id = null)
             }
 
-        assertTrue(thrown.message?.contains("JsonRpcError(-32603): server exploded") == true)
+        assertEquals(JsonRpcError.INTERNAL_ERROR, thrown.code)
+        assertEquals("server exploded", thrown.message)
         writer.close()
     }
 
@@ -367,11 +371,12 @@ class JsonRpcErrorEnvelopeTest {
             )
 
         val thrown =
-            assertFailsWith<IllegalStateException> {
+            assertFailsWith<KsrpcException> {
                 writer.execute("ping", JsonPrimitive("input"), isNotify = false, id = null)
             }
 
-        assertTrue(thrown.message?.contains("JsonRpcError(-32603): mixed response") == true)
+        assertEquals(JsonRpcError.INTERNAL_ERROR, thrown.code)
+        assertEquals("mixed response", thrown.message)
         writer.close()
     }
 

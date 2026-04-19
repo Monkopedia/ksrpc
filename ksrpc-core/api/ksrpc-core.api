@@ -204,7 +204,7 @@ public final class com/monkopedia/ksrpc/RpcChannelKt {
 	public static final field ERROR_PREFIX Ljava/lang/String;
 }
 
-public class com/monkopedia/ksrpc/RpcEndpointException : java/lang/IllegalArgumentException {
+public class com/monkopedia/ksrpc/RpcEndpointException : com/monkopedia/ksrpc/KsrpcException {
 	public fun <init> (Ljava/lang/String;)V
 }
 
@@ -219,6 +219,10 @@ public final class com/monkopedia/ksrpc/RpcMethod {
 	public final fun getMetadata ()Ljava/util/List;
 	public final fun getOutputTransform ()Lcom/monkopedia/ksrpc/Transformer;
 	public final fun metadata (Ljava/lang/String;)Lcom/monkopedia/ksrpc/MethodMetadata;
+}
+
+public final class com/monkopedia/ksrpc/RpcMethodKt {
+	public static final fun getErrorDataType (Lcom/monkopedia/ksrpc/RpcMethod;)Lkotlin/reflect/KClass;
 }
 
 public abstract interface class com/monkopedia/ksrpc/RpcObject {

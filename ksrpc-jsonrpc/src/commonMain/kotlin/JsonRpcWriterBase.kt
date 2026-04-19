@@ -16,6 +16,7 @@
 package com.monkopedia.ksrpc.jsonrpc.internal
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
+import com.monkopedia.ksrpc.KsrpcException
 import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.asString
 import com.monkopedia.ksrpc.channels.CancellationSupport
@@ -182,16 +183,18 @@ class JsonRpcWriterBase(
             throw t
         }
         if (response.error != null) {
-            val error = response.error.data?.let {
+            val dataString = response.error.data?.let {
                 try {
-                    json.decodeFromJsonElement<RpcFailure>(it).toException()
+                    json.encodeToString(JsonElement.serializer(), it)
                 } catch (_: Throwable) {
                     null
                 }
-            } ?: IllegalStateException(
-                "JsonRpcError(${response.error.code}): ${response.error.message}"
+            }
+            throw KsrpcException(
+                code = response.error.code,
+                message = response.error.message,
+                data = dataString
             )
-            throw error
         }
         return response.result
     }

@@ -306,7 +306,7 @@ final class com.monkopedia.ksrpc/MethodMetadata { // com.monkopedia.ksrpc/Method
     final fun toString(): kotlin/String // com.monkopedia.ksrpc/MethodMetadata.toString|toString(){}[0]
 }
 
-open class com.monkopedia.ksrpc/RpcEndpointException : kotlin/IllegalArgumentException { // com.monkopedia.ksrpc/RpcEndpointException|null[0]
+open class com.monkopedia.ksrpc/RpcEndpointException : com.monkopedia.ksrpc/KsrpcException { // com.monkopedia.ksrpc/RpcEndpointException|null[0]
     constructor <init>(kotlin/String) // com.monkopedia.ksrpc/RpcEndpointException.<init>|<init>(kotlin.String){}[0]
 }
 
@@ -486,6 +486,8 @@ final val com.monkopedia.ksrpc.internal/asClient // com.monkopedia.ksrpc.interna
     final fun <#A1: kotlin/Any?> (com.monkopedia.ksrpc.channels/SerializedChannel<#A1>).<get-asClient>(): com.monkopedia.ksrpc.channels/ChannelClient<#A1> // com.monkopedia.ksrpc.internal/asClient.<get-asClient>|<get-asClient>@com.monkopedia.ksrpc.channels.SerializedChannel<0:0>(){0§<kotlin.Any?>}[0]
 final val com.monkopedia.ksrpc/asString // com.monkopedia.ksrpc/asString|@kotlin.Throwable{}asString[0]
     final fun (kotlin/Throwable).<get-asString>(): kotlin/String // com.monkopedia.ksrpc/asString.<get-asString>|<get-asString>@kotlin.Throwable(){}[0]
+final val com.monkopedia.ksrpc/errorDataType // com.monkopedia.ksrpc/errorDataType|@com.monkopedia.ksrpc.RpcMethod<*,*,*>{}errorDataType[0]
+    final fun (com.monkopedia.ksrpc/RpcMethod<*, *, *>).<get-errorDataType>(): kotlin.reflect/KClass<*>? // com.monkopedia.ksrpc/errorDataType.<get-errorDataType>|<get-errorDataType>@com.monkopedia.ksrpc.RpcMethod<*,*,*>(){}[0]
 
 final fun (com.monkopedia.ksrpc/RpcObject<*>).com.monkopedia.ksrpc/serviceInterfaceName(): kotlin/String // com.monkopedia.ksrpc/serviceInterfaceName|serviceInterfaceName@com.monkopedia.ksrpc.RpcObject<*>(){}[0]
 final fun <#A: com.monkopedia.ksrpc/RpcService, #B: kotlin/Any?> (#A).com.monkopedia.ksrpc/serialized(com.monkopedia.ksrpc/RpcObject<#A>, com.monkopedia.ksrpc/KsrpcEnvironment<#B>): com.monkopedia.ksrpc.channels/SerializedService<#B> // com.monkopedia.ksrpc/serialized|serialized@0:0(com.monkopedia.ksrpc.RpcObject<0:0>;com.monkopedia.ksrpc.KsrpcEnvironment<0:1>){0§<com.monkopedia.ksrpc.RpcService>;1§<kotlin.Any?>}[0]

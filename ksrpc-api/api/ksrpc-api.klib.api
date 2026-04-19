@@ -6,6 +6,13 @@
 // - Show declarations: true
 
 // Library unique name: <com.monkopedia.ksrpc:ksrpc-api>
+open annotation class com.monkopedia.ksrpc.annotation/KsErrorData : kotlin/Annotation { // com.monkopedia.ksrpc.annotation/KsErrorData|null[0]
+    constructor <init>(kotlin.reflect/KClass<*>) // com.monkopedia.ksrpc.annotation/KsErrorData.<init>|<init>(kotlin.reflect.KClass<*>){}[0]
+
+    final val errorType // com.monkopedia.ksrpc.annotation/KsErrorData.errorType|{}errorType[0]
+        final fun <get-errorType>(): kotlin.reflect/KClass<*> // com.monkopedia.ksrpc.annotation/KsErrorData.errorType.<get-errorType>|<get-errorType>(){}[0]
+}
+
 open annotation class com.monkopedia.ksrpc.annotation/KsMethod : kotlin/Annotation { // com.monkopedia.ksrpc.annotation/KsMethod|null[0]
     constructor <init>(kotlin/String) // com.monkopedia.ksrpc.annotation/KsMethod.<init>|<init>(kotlin.String){}[0]
 
@@ -29,7 +36,7 @@ abstract interface com.monkopedia.ksrpc/SuspendCloseable { // com.monkopedia.ksr
     abstract suspend fun close() // com.monkopedia.ksrpc/SuspendCloseable.close|close(){}[0]
 }
 
-final class com.monkopedia.ksrpc/RpcException : kotlin/RuntimeException { // com.monkopedia.ksrpc/RpcException|null[0]
+final class com.monkopedia.ksrpc/RpcException : com.monkopedia.ksrpc/KsrpcException { // com.monkopedia.ksrpc/RpcException|null[0]
     constructor <init>(kotlin/String) // com.monkopedia.ksrpc/RpcException.<init>|<init>(kotlin.String){}[0]
 
     final val message // com.monkopedia.ksrpc/RpcException.message|{}message[0]
@@ -46,7 +53,7 @@ final class com.monkopedia.ksrpc/RpcFailure { // com.monkopedia.ksrpc/RpcFailure
     final fun copy(kotlin/String = ...): com.monkopedia.ksrpc/RpcFailure // com.monkopedia.ksrpc/RpcFailure.copy|copy(kotlin.String){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc/RpcFailure.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc/RpcFailure.hashCode|hashCode(){}[0]
-    final fun toException(): kotlin/RuntimeException // com.monkopedia.ksrpc/RpcFailure.toException|toException(){}[0]
+    final fun toException(): com.monkopedia.ksrpc/RpcException // com.monkopedia.ksrpc/RpcFailure.toException|toException(){}[0]
     final fun toString(): kotlin/String // com.monkopedia.ksrpc/RpcFailure.toString|toString(){}[0]
 
     final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<com.monkopedia.ksrpc/RpcFailure> { // com.monkopedia.ksrpc/RpcFailure.$serializer|null[0]
@@ -61,4 +68,17 @@ final class com.monkopedia.ksrpc/RpcFailure { // com.monkopedia.ksrpc/RpcFailure
     final object Companion { // com.monkopedia.ksrpc/RpcFailure.Companion|null[0]
         final fun serializer(): kotlinx.serialization/KSerializer<com.monkopedia.ksrpc/RpcFailure> // com.monkopedia.ksrpc/RpcFailure.Companion.serializer|serializer(){}[0]
     }
+}
+
+open class com.monkopedia.ksrpc/KsrpcException : kotlin/RuntimeException { // com.monkopedia.ksrpc/KsrpcException|null[0]
+    constructor <init>(kotlin/Int, kotlin/String, kotlin/String? = ..., kotlin/Throwable? = ...) // com.monkopedia.ksrpc/KsrpcException.<init>|<init>(kotlin.Int;kotlin.String;kotlin.String?;kotlin.Throwable?){}[0]
+
+    final val code // com.monkopedia.ksrpc/KsrpcException.code|{}code[0]
+        final fun <get-code>(): kotlin/Int // com.monkopedia.ksrpc/KsrpcException.code.<get-code>|<get-code>(){}[0]
+    final val data // com.monkopedia.ksrpc/KsrpcException.data|{}data[0]
+        final fun <get-data>(): kotlin/String? // com.monkopedia.ksrpc/KsrpcException.data.<get-data>|<get-data>(){}[0]
+    open val message // com.monkopedia.ksrpc/KsrpcException.message|{}message[0]
+        open fun <get-message>(): kotlin/String // com.monkopedia.ksrpc/KsrpcException.message.<get-message>|<get-message>(){}[0]
+
+    open fun toString(): kotlin/String // com.monkopedia.ksrpc/KsrpcException.toString|toString(){}[0]
 }

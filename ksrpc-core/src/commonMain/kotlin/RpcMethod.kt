@@ -184,3 +184,22 @@ class RpcMethod<T : RpcService, I, O>(
         outputTransform as? SubserviceTransformer<*>
     )
 }
+
+/**
+ * The FQ name of the `@KsErrorData` annotation used to look up error-data
+ * metadata on an [RpcMethod].
+ */
+private const val KS_ERROR_DATA_FQ = "com.monkopedia.ksrpc.annotation.KsErrorData"
+
+/**
+ * The `KClass<*>` declared in `@KsErrorData(errorType = ...)` on the source
+ * method, or `null` if the method has no `@KsErrorData` annotation.
+ *
+ * Transport layers use this to deserialize a structured error payload into the
+ * declared type when a remote call fails.
+ */
+val RpcMethod<*, *, *>.errorDataType: kotlin.reflect.KClass<*>?
+    get() {
+        val meta = metadata(KS_ERROR_DATA_FQ) ?: return null
+        return (meta.argument("errorType") as? MetadataValue.KClassValue)?.kClass
+    }

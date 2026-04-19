@@ -81,7 +81,10 @@ class JsonRpcOutOfOrderResponseTest {
         val firstResult = first.await()
         val secondResult = second.await()
         assertTrue(firstResult.isFailure)
-        assertTrue(firstResult.exceptionOrNull()?.message?.contains("first failed") == true)
+        val error = firstResult.exceptionOrNull()
+        assertTrue(error is KsrpcException, "Expected KsrpcException, got ${error?.let { it::class }}")
+        assertEquals("first exploded", error.message)
+        assertEquals(JsonRpcError.INTERNAL_ERROR, error.code)
         assertEquals(JsonPrimitive("second-result"), secondResult.getOrThrow())
         writer.close()
     }

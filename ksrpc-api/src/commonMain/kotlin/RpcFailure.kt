@@ -22,10 +22,22 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class RpcFailure(val stack: String) {
-    fun toException(): RuntimeException = RpcException(stack)
+    /**
+     * Converts this failure to an [RpcException] (which extends
+     * [KsrpcException]). Transports that carry richer error codes (e.g.
+     * JSON-RPC) should construct [KsrpcException] directly with the wire code.
+     */
+    fun toException(): RpcException = RpcException(stack)
 }
 
 /**
  * Wrapper around exceptions thrown in remote calls.
+ *
+ * Retained for backward compatibility; new code should catch
+ * [KsrpcException] instead.
  */
-class RpcException(override val message: String) : RuntimeException(message)
+class RpcException(override val message: String) :
+    KsrpcException(
+        code = -1,
+        message = message
+    )

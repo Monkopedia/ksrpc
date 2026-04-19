@@ -535,13 +535,12 @@ class JsonRpcEndpointNotFoundTest :
             val message = exception.message ?: ""
             assertTrue(
                 exception is RpcEndpointException ||
-                    exception is IllegalStateException ||
-                    exception is RpcException,
+                    exception is KsrpcException ||
+                    exception is IllegalStateException,
                 "Unexpected exception type ${exception::class}: $message"
             )
             assertTrue(
                 message.contains("Unknown endpoint: extra") ||
-                    message.contains("JsonRpcError") ||
                     message.contains("RpcEndpointException"),
                 message
             )
@@ -585,7 +584,7 @@ class JsonRpcErrorPipeRpcExceptionTest {
             val error = assertFails {
                 stub.rpc("Hello" to "world")
             }
-            assertTrue(error is RpcException, "Expected RpcException, got ${error::class}")
+            assertTrue(error is KsrpcException, "Expected KsrpcException, got ${error::class}")
             assertTrue((error.message ?: "").contains("Failure"))
         } finally {
             try {

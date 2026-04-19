@@ -50,5 +50,12 @@ inline fun <reified T : RpcService, S> SerializedService<S>.toStub(): T =
 /**
  * Thrown when an endpoint cannot be found.
  * Could happen from version mismatch or other programmer errors.
+ *
+ * Uses error code `-32601` (Method not found) following the JSON-RPC
+ * convention, but the code is transport-agnostic.
  */
-open class RpcEndpointException(str: String) : IllegalArgumentException(str)
+open class RpcEndpointException(str: String) :
+    KsrpcException(
+        code = -32601,
+        message = str
+    )
