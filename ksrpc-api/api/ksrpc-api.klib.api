@@ -29,23 +29,19 @@ open annotation class com.monkopedia.ksrpc.annotation/KsService : kotlin/Annotat
     constructor <init>() // com.monkopedia.ksrpc.annotation/KsService.<init>|<init>(){}[0]
 }
 
-<<<<<<< HEAD
-open annotation class com.monkopedia.ksrpc.annotation/KsrpcInternal : kotlin/Annotation { // com.monkopedia.ksrpc.annotation/KsrpcInternal|null[0]
-    constructor <init>() // com.monkopedia.ksrpc.annotation/KsrpcInternal.<init>|<init>(){}[0]
-=======
 open annotation class com.monkopedia.ksrpc.annotation/KsTimeout : kotlin/Annotation { // com.monkopedia.ksrpc.annotation/KsTimeout|null[0]
     constructor <init>(kotlin/Long = ..., kotlin/Long = ..., kotlin/Long = ...) // com.monkopedia.ksrpc.annotation/KsTimeout.<init>|<init>(kotlin.Long;kotlin.Long;kotlin.Long){}[0]
 
     final val millis // com.monkopedia.ksrpc.annotation/KsTimeout.millis|{}millis[0]
         final fun <get-millis>(): kotlin/Long // com.monkopedia.ksrpc.annotation/KsTimeout.millis.<get-millis>|<get-millis>(){}[0]
-<<<<<<< HEAD
->>>>>>> 1248868 (Add @KsTimeout annotation for client-side call timeouts)
-=======
     final val minutes // com.monkopedia.ksrpc.annotation/KsTimeout.minutes|{}minutes[0]
         final fun <get-minutes>(): kotlin/Long // com.monkopedia.ksrpc.annotation/KsTimeout.minutes.<get-minutes>|<get-minutes>(){}[0]
     final val seconds // com.monkopedia.ksrpc.annotation/KsTimeout.seconds|{}seconds[0]
         final fun <get-seconds>(): kotlin/Long // com.monkopedia.ksrpc.annotation/KsTimeout.seconds.<get-seconds>|<get-seconds>(){}[0]
->>>>>>> f3199f6 (Support seconds/minutes params on @KsTimeout for natural duration expression)
+}
+
+open annotation class com.monkopedia.ksrpc.annotation/KsrpcInternal : kotlin/Annotation { // com.monkopedia.ksrpc.annotation/KsrpcInternal|null[0]
+    constructor <init>() // com.monkopedia.ksrpc.annotation/KsrpcInternal.<init>|<init>(){}[0]
 }
 
 abstract interface com.monkopedia.ksrpc/RpcService : com.monkopedia.ksrpc/SuspendCloseable { // com.monkopedia.ksrpc/RpcService|null[0]

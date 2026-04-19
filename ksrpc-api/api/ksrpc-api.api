@@ -59,16 +59,12 @@ public abstract interface annotation class com/monkopedia/ksrpc/annotation/KsNot
 public abstract interface annotation class com/monkopedia/ksrpc/annotation/KsService : java/lang/annotation/Annotation {
 }
 
-<<<<<<< HEAD
-public abstract interface annotation class com/monkopedia/ksrpc/annotation/KsrpcInternal : java/lang/annotation/Annotation {
-=======
 public abstract interface annotation class com/monkopedia/ksrpc/annotation/KsTimeout : java/lang/annotation/Annotation {
 	public abstract fun millis ()J
-<<<<<<< HEAD
->>>>>>> 1248868 (Add @KsTimeout annotation for client-side call timeouts)
-=======
 	public abstract fun minutes ()J
 	public abstract fun seconds ()J
->>>>>>> f3199f6 (Support seconds/minutes params on @KsTimeout for natural duration expression)
+}
+
+public abstract interface annotation class com/monkopedia/ksrpc/annotation/KsrpcInternal : java/lang/annotation/Annotation {
 }
 
