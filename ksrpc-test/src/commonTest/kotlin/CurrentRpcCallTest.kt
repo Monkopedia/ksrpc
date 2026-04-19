@@ -16,6 +16,7 @@
 package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsNotification
 import com.monkopedia.ksrpc.annotation.KsService
 import com.monkopedia.ksrpc.channels.currentRpcCall
 import com.monkopedia.ksrpc.jsonrpc.JsonRpcCallId
@@ -48,11 +49,12 @@ interface CallContextProbeService : RpcService {
     suspend fun nested(value: String): String
 
     /**
-     * Unit-return method. Over jsonrpc the call layer emits this as a notification (no `id`)
-     * because [RpcMethod.hasReturnType] is false for `Unit` results — see
-     * [JsonRpcSerializedChannel.call]. Used to exercise the "notification id is null" path.
+     * Notification method. Over jsonrpc the call layer emits this as a notification (no `id`)
+     * because the method is annotated with [KsNotification]. Used to exercise the
+     * "notification id is null" path.
      */
     @KsMethod("/notifyOnly")
+    @KsNotification
     suspend fun notifyOnly(value: String)
 }
 
@@ -170,8 +172,8 @@ class CurrentRpcCallTest {
     fun jsonRpcNotificationHandlerSeesNullId() = runBlockingUnit {
         // For jsonrpc notifications (no `id` on the wire), the handler's
         // `currentRpcCall().id` must be null. Method name must still be populated. The
-        // Unit-returning `notifyOnly` RPC flows through the notification path because
-        // `JsonRpcSerializedChannel.call` treats `!hasReturnType` as `isNotify = true`.
+        // `notifyOnly` RPC flows through the notification path because it is annotated
+        // with `@KsNotification`.
         val probe = CapturingProbe()
 
         val (output, input) = createPipe()

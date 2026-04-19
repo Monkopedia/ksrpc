@@ -18,6 +18,7 @@ package com.monkopedia.ksrpc
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcChannel
 import com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcSerializedChannel
+import com.monkopedia.ksrpc.MethodMetadata
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -31,7 +32,37 @@ import kotlinx.serialization.json.JsonPrimitive
 class JsonRpcSerializedChannelNotifyTest {
 
     @Test
-    fun testMethodWithoutReturnTypeUsesNotifyAndReturnsUnitPayload() = runBlockingUnit {
+    fun testUnitReturnWithoutKsNotificationUsesRequestPath() = runBlockingUnit {
+        val jsonChannel = CapturingJsonRpcChannel(response = JsonPrimitive("ignored"))
+        val serializedChannel =
+            JsonRpcSerializedChannel(
+                context = coroutineContext,
+                channel = jsonChannel,
+                env = ksrpcEnvironment { }
+            )
+        val method =
+            RpcMethod<RpcService, String, Unit>(
+                endpoint = "unit-endpoint",
+                inputTransform = SerializerTransformer(String.serializer()),
+                outputTransform = SerializerTransformer(Unit.serializer()),
+                method =
+                    object : ServiceExecutor {
+                        override suspend fun invoke(service: RpcService, input: Any?): Any? = Unit
+                    },
+                metadata = emptyList()
+            )
+        val input = CallData.create(Json.encodeToString(String.serializer(), "payload"))
+
+        val output = serializedChannel.call(method, input, callId = null)
+
+        assertEquals("unit-endpoint", jsonChannel.method)
+        assertEquals(JsonPrimitive("payload"), jsonChannel.message)
+        assertFalse(jsonChannel.isNotify)
+        assertFalse(output.isBinary)
+    }
+
+    @Test
+    fun testKsNotificationMethodUsesNotifyPath() = runBlockingUnit {
         val jsonChannel = CapturingJsonRpcChannel(response = JsonPrimitive("ignored"))
         val serializedChannel =
             JsonRpcSerializedChannel(
@@ -48,7 +79,13 @@ class JsonRpcSerializedChannelNotifyTest {
                     object : ServiceExecutor {
                         override suspend fun invoke(service: RpcService, input: Any?): Any? = Unit
                     },
-                metadata = emptyList()
+                metadata = listOf(
+                    MethodMetadata(
+                        annotationFqName =
+                            "com.monkopedia.ksrpc.annotation.KsNotification",
+                        arguments = emptyList()
+                    )
+                )
             )
         val input = CallData.create(Json.encodeToString(String.serializer(), "payload"))
 

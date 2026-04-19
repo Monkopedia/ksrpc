@@ -66,6 +66,7 @@ object FqConstants {
     val KS_SERVICE = FqName("com.monkopedia.ksrpc.annotation.KsService")
     val KS_INTROSPECTABLE = FqName("com.monkopedia.ksrpc.annotation.KsIntrospectable")
     val KS_METHOD_METADATA = FqName("com.monkopedia.ksrpc.annotation.KsMethodMetadata")
+    val KS_NOTIFICATION = FqName("com.monkopedia.ksrpc.annotation.KsNotification")
 
     val METHOD_METADATA = ClassId(FQPKG, Name.identifier("MethodMetadata"))
     val METADATA_VALUE = ClassId(FQPKG, Name.identifier("MetadataValue"))

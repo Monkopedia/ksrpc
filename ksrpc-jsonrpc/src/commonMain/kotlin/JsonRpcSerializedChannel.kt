@@ -26,6 +26,9 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 
+private val RpcMethod<*, *, *>.isNotification: Boolean
+    get() = metadata("com.monkopedia.ksrpc.annotation.KsNotification") != null
+
 class JsonRpcSerializedChannel(
     override val context: CoroutineContext,
     private val channel: JsonRpcChannel,
@@ -38,7 +41,7 @@ class JsonRpcSerializedChannel(
         endpoint: RpcMethod<*, *, *>,
         input: CallData<String>,
         callId: RpcCallId?
-    ): CallData<String> = call(endpoint.endpoint, input, !endpoint.hasReturnType)
+    ): CallData<String> = call(endpoint.endpoint, input, endpoint.isNotification)
 
     override suspend fun call(
         endpoint: String,

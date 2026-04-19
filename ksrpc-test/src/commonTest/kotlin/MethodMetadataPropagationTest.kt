@@ -17,9 +17,11 @@ package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsMethodMetadata
+import com.monkopedia.ksrpc.annotation.KsNotification
 import com.monkopedia.ksrpc.annotation.KsService
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -105,6 +107,13 @@ interface AnnotationPropagationTestService : RpcService {
     @KsMethod("/refs")
     @KsTestRef(payload = KsTestPayload::class, color = KsTestColor.GREEN)
     suspend fun withRefs(input: String): String
+
+    @KsMethod("/notification")
+    @KsNotification
+    suspend fun notificationMethod(input: String)
+
+    @KsMethod("/unit_no_notification")
+    suspend fun unitNoNotification(input: String)
 }
 
 class MethodMetadataPropagationTest {
@@ -192,6 +201,39 @@ class MethodMetadataPropagationTest {
         val color = meta.argument("color") as? MetadataValue.EnumValue
         assertNotNull(color)
         assertEquals(KsTestColor.GREEN, color.value)
+    }
+
+    @Test
+    fun ksNotificationMethodHasMetadataEntry() {
+        val meta = method("notification").metadata(
+            "com.monkopedia.ksrpc.annotation.KsNotification"
+        )
+        assertNotNull(meta)
+        assertEquals(emptyList(), meta.arguments)
+    }
+
+    @Test
+    fun ksNotificationMethodHasNotificationMetadata() {
+        assertNotNull(
+            method("notification")
+                .metadata("com.monkopedia.ksrpc.annotation.KsNotification")
+        )
+    }
+
+    @Test
+    fun unitMethodWithoutKsNotificationHasNoNotificationMetadata() {
+        assertNull(
+            method("unit_no_notification")
+                .metadata("com.monkopedia.ksrpc.annotation.KsNotification")
+        )
+    }
+
+    @Test
+    fun plainMethodHasNoNotificationMetadata() {
+        assertNull(
+            method("plain")
+                .metadata("com.monkopedia.ksrpc.annotation.KsNotification")
+        )
     }
 
     @Test
