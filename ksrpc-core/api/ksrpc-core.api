@@ -463,6 +463,68 @@ public final class com/monkopedia/ksrpc/channels/UtilsJvmKt {
 	public static final fun randomUuid ()Ljava/lang/String;
 }
 
+public final class com/monkopedia/ksrpc/flow/AsKsFlowKt {
+	public static final fun asKsFlow (Lkotlinx/coroutines/flow/Flow;)Lcom/monkopedia/ksrpc/flow/KsFlowService;
+}
+
+public final class com/monkopedia/ksrpc/flow/AutoClosingFlow : kotlinx/coroutines/flow/Flow {
+	public fun <init> (Lcom/monkopedia/ksrpc/flow/KsFlowService;)V
+	public fun collect (Lkotlinx/coroutines/flow/FlowCollector;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class com/monkopedia/ksrpc/flow/KsCollectionToken : com/monkopedia/ksrpc/RpcService {
+	public abstract fun cancelCollection (Lkotlin/Unit;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/monkopedia/ksrpc/flow/KsCollectionToken$DefaultImpls {
+	public static fun close (Lcom/monkopedia/ksrpc/flow/KsCollectionToken;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/monkopedia/ksrpc/flow/KsCollectionTokenObject : com/monkopedia/ksrpc/RpcObject {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/flow/KsCollectionTokenObject;
+	public synthetic fun createStub (Lcom/monkopedia/ksrpc/channels/SerializedService;)Lcom/monkopedia/ksrpc/RpcService;
+	public fun createStub (Lcom/monkopedia/ksrpc/channels/SerializedService;)Lcom/monkopedia/ksrpc/flow/KsCollectionToken;
+	public fun findEndpoint (Ljava/lang/String;)Lcom/monkopedia/ksrpc/RpcMethod;
+	public fun getEndpoints ()Ljava/util/List;
+	public fun getServiceName ()Ljava/lang/String;
+}
+
+public abstract interface class com/monkopedia/ksrpc/flow/KsFlowCollector : com/monkopedia/ksrpc/RpcService {
+	public abstract fun onComplete (Lkotlin/Unit;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun onError (Lcom/monkopedia/ksrpc/RpcFailure;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun onItem (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/monkopedia/ksrpc/flow/KsFlowCollector$DefaultImpls {
+	public static fun close (Lcom/monkopedia/ksrpc/flow/KsFlowCollector;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/monkopedia/ksrpc/flow/KsFlowCollectorObject : com/monkopedia/ksrpc/RpcObject {
+	public fun <init> (Lkotlinx/serialization/KSerializer;)V
+	public synthetic fun createStub (Lcom/monkopedia/ksrpc/channels/SerializedService;)Lcom/monkopedia/ksrpc/RpcService;
+	public fun createStub (Lcom/monkopedia/ksrpc/channels/SerializedService;)Lcom/monkopedia/ksrpc/flow/KsFlowCollector;
+	public fun findEndpoint (Ljava/lang/String;)Lcom/monkopedia/ksrpc/RpcMethod;
+	public fun getEndpoints ()Ljava/util/List;
+	public fun getServiceName ()Ljava/lang/String;
+}
+
+public abstract interface class com/monkopedia/ksrpc/flow/KsFlowService : com/monkopedia/ksrpc/RpcService, kotlinx/coroutines/flow/Flow {
+	public abstract fun startCollection (Lcom/monkopedia/ksrpc/flow/KsFlowCollector;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/monkopedia/ksrpc/flow/KsFlowService$DefaultImpls {
+	public static fun close (Lcom/monkopedia/ksrpc/flow/KsFlowService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/monkopedia/ksrpc/flow/KsFlowServiceObject : com/monkopedia/ksrpc/RpcObject {
+	public fun <init> (Lkotlinx/serialization/KSerializer;)V
+	public synthetic fun createStub (Lcom/monkopedia/ksrpc/channels/SerializedService;)Lcom/monkopedia/ksrpc/RpcService;
+	public fun createStub (Lcom/monkopedia/ksrpc/channels/SerializedService;)Lcom/monkopedia/ksrpc/flow/KsFlowService;
+	public fun findEndpoint (Ljava/lang/String;)Lcom/monkopedia/ksrpc/RpcMethod;
+	public fun getEndpoints ()Ljava/util/List;
+	public fun getServiceName ()Ljava/lang/String;
+}
+
 public final class com/monkopedia/ksrpc/internal/ClientChannelContext : kotlin/coroutines/CoroutineContext$Element {
 	public fun <init> (Lcom/monkopedia/ksrpc/channels/ChannelClient;)V
 	public fun fold (Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
