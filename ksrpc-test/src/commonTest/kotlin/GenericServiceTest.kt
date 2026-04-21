@@ -92,6 +92,22 @@ class GenericServiceRoundTripTest :
         assertEquals("maybe:hi", stub.maybe("hi"))
         assertNull(stub.maybe(null))
     }
+
+    /**
+     * Explicit end-to-end round trip via `rpcObject<GenericEcho<String>>()`. Complements
+     * [reifiedRpcObjectResolvesFactory] (which only inspects metadata) by actually sending
+     * and receiving calls over a serialized channel built from the resolved `RpcObject`.
+     */
+    @Test
+    fun reifiedRpcObjectRoundTrip() = runBlockingUnit {
+        val rpcObject = rpcObject<GenericEcho<String>>()
+        val impl: GenericEcho<String> = GenericEchoStringImpl()
+        val channel = impl.serialized(rpcObject, ksrpcEnvironment { })
+        val stub = rpcObject.createStub(channel)
+        assertEquals("echoed:hi", stub.echo("hi"))
+        assertEquals("maybe:hi", stub.maybe("hi"))
+        assertNull(stub.maybe(null))
+    }
 }
 
 /**
@@ -186,3 +202,4 @@ class GenericServiceFactoryTest {
         )
     }
 }
+

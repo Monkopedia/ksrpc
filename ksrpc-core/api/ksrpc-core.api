@@ -246,6 +246,7 @@ public abstract interface annotation class com/monkopedia/ksrpc/RpcObjectKey : j
 }
 
 public final class com/monkopedia/ksrpc/RpcObjectKt {
+	public static final fun allSupertypesPreservingArguments (Lkotlin/reflect/KType;)Ljava/util/List;
 	public static final fun getAsString (Ljava/lang/Throwable;)Ljava/lang/String;
 }
 
