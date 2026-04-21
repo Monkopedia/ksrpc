@@ -65,6 +65,7 @@ import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.classOrNull
+import org.jetbrains.kotlin.ir.types.defaultType
 import org.jetbrains.kotlin.ir.types.getClass
 import org.jetbrains.kotlin.ir.types.makeNullable
 import org.jetbrains.kotlin.ir.types.starProjectedType
@@ -99,22 +100,125 @@ class StubGeneration(
     ): Collection<IrDeclaration> {
         val target = (key as? FirKsrpcStubGenerator.Key)?.target
         val service = classes[target] ?: return emptyList()
+        // For generic services, also add per-instance serializer fields on the Stub so
+        // method bodies can reach the injected KSerializer<T>.
+        val stubSerializerFields = if (declaration.typeParameters.isNotEmpty()) {
+            declaration.typeParameters.map { tp ->
+                irFactory.buildField {
+                    startOffset = SYNTHETIC_OFFSET
+                    endOffset = SYNTHETIC_OFFSET
+                    name = Name.identifier(tp.name.asString() + "Serializer")
+                    origin = IrDeclarationOrigin.DELEGATE
+                    visibility = DescriptorVisibilities.PRIVATE
+                    type = env.kSerializer.typeWith(tp.defaultType)
+                    isFinal = true
+                    isStatic = false
+                }
+            }
+        } else {
+            emptyList()
+        }
+        service.setStubSerializerFields(stubSerializerFields)
+        // For generic services, pre-create per-endpoint ServiceExecutor classes parented
+        // to the Stub. They are shared with Obj (ObjGeneration looks them up via
+        // `service.genericExecutors`) so both the stub body and Obj.findEndpoint produce
+        // RpcMethod instances that reference the same executor class.
+        val genericBuilder = if (declaration.typeParameters.isNotEmpty()) {
+            GenericMethodIrBuilder(context, env, service).also { builder ->
+                for (serviceMethod in service.methods) {
+                    val endpoint = serviceMethod.ksMethodAnnotation.arguments[0].constString()
+                        ?: error("Lost endpoint")
+                    val executor = builder.buildExecutor(serviceMethod.function, declaration)
+                    service.genericExecutors[endpoint.trimStart('/')] = executor
+                }
+            }
+        } else {
+            null
+        }
         return buildList {
             add(generateChannelField(service))
+            addAll(stubSerializerFields)
             val companion = generateCompanion(service)
             add(companion)
             service.methods.map { serviceMethod ->
-                add(
-                    declaration.generateMethodField(
-                        serviceMethod.function,
-                        serviceMethod.ksMethodAnnotation,
-                        serviceMethod.metadataAnnotations,
-                        companion,
-                        service
+                if (genericBuilder != null) {
+                    val endpoint = serviceMethod.ksMethodAnnotation.arguments[0].constString()
+                        ?: error("Lost endpoint")
+                    add(
+                        declaration.generateGenericMethodBody(
+                            serviceMethod.function,
+                            endpoint,
+                            serviceMethod.metadataAnnotations,
+                            service,
+                            genericBuilder
+                        )
                     )
-                )
+                } else {
+                    add(
+                        declaration.generateMethodField(
+                            serviceMethod.function,
+                            serviceMethod.ksMethodAnnotation,
+                            serviceMethod.metadataAnnotations,
+                            companion,
+                            service
+                        )
+                    )
+                }
             }
             add(declaration.generateCloseMethod(service))
+        }
+    }
+
+    /**
+     * For generic services: emit a stub method body that creates a fresh `RpcMethod` inline
+     * using the stub instance's serializer fields, then calls `rpcMethod.callChannel(...)`.
+     * No caching — a fresh RpcMethod is materialized per call. This is a simpler contract
+     * than the non-generic path's lazy-cached Stub.Companion fields and avoids having to
+     * thread the per-instance serializer through a shared static cache.
+     *
+     * Parameter / return types use the STUB's type parameters (substituting for the service
+     * type parameters). Without substitution, Kotlin/Native reports the override as an
+     * abstract-function-not-implemented linkage error because the override's types reference
+     * the service interface's type parameter symbols rather than the stub's.
+     */
+    private fun IrClass.generateGenericMethodBody(
+        method: IrSimpleFunction,
+        endpoint: String,
+        metadataAnnotations: List<IrConstructorCall>,
+        service: ServiceClass,
+        builder: GenericMethodIrBuilder
+    ): IrFunction {
+        val callChannel = env.rpcMethod.findMethod(FqConstants.CALL_CHANNEL)
+        val substitutor = stubTypeSubstitutor(service, this)
+        val substitutedReturn = substitutor.substitute(method.returnType)
+        return context.overrideMethodWithSubstitution(
+            this,
+            method.symbol,
+            substitutor,
+            substitutedReturn
+        ) { override ->
+            val thisParam = override.parameters[0]
+            val inputParam = override.parameters[1]
+            val executor = service.genericExecutors[endpoint.trimStart('/')]
+                ?: error("Executor missing for endpoint $endpoint")
+            +irReturn(
+                irCall(callChannel).apply {
+                    type = substitutedReturn
+                    putArgs(
+                        builder.irCreateRpcMethod(
+                            this@overrideMethodWithSubstitution,
+                            thisParam,
+                            service.stubSerializerFields,
+                            endpoint,
+                            method,
+                            metadataAnnotations,
+                            executor = executor
+                        ),
+                        irGetField(irGet(thisParam), service.channel),
+                        irGet(inputParam)
+                    )
+                }
+            )
         }
     }
 
@@ -136,8 +240,16 @@ class StubGeneration(
             )
             val cls = constructor.constructedClass
             val channelField = service.channel
-            val parameter = constructor.parameters.first()
-            +irSetField(irGet(cls.thisReceiver!!), channelField, irGet(parameter))
+            val nonDispatch = constructor.parameters.filter { !it.isDispatchReceiver }
+            // Primary-constructor parameters are (channel, T1Serializer, T2Serializer, ...).
+            +irSetField(irGet(cls.thisReceiver!!), channelField, irGet(nonDispatch[0]))
+            for ((idx, field) in service.stubSerializerFields.withIndex()) {
+                +irSetField(
+                    irGet(cls.thisReceiver!!),
+                    field,
+                    irGet(nonDispatch[idx + 1])
+                )
+            }
         }
     }
 
@@ -438,6 +550,70 @@ fun KsrpcGenerationEnvironment.companionSymbol(outputType: IrType): IrClassSymbo
     val companionSymbol = clazz?.companionObject()?.symbol
         ?: error("Missing companion ${outputType.classFqName?.asString()}")
     return companionSymbol
+}
+
+/**
+ * Build an IrTypeSubstitutor that maps the service interface's class-level type parameters
+ * to the Stub's class-level type parameters (positionally). Used to substitute types when
+ * reconstructing stub overrides for generic services.
+ */
+fun stubTypeSubstitutor(
+    service: ServiceClass,
+    stub: IrClass
+): org.jetbrains.kotlin.ir.types.IrTypeSubstitutor {
+    val serviceTps = service.irClass.typeParameters.map { it.symbol }
+    val stubTps = stub.typeParameters.map {
+        it.defaultType as org.jetbrains.kotlin.ir.types.IrTypeArgument
+    }
+    return org.jetbrains.kotlin.ir.types.IrTypeSubstitutor(serviceTps, stubTps, false)
+}
+
+inline fun IrPluginContext.overrideMethodWithSubstitution(
+    irClass: IrClass,
+    method: IrSimpleFunctionSymbol,
+    substitutor: org.jetbrains.kotlin.ir.types.IrTypeSubstitutor,
+    returnType: IrType,
+    body: IrBlockBodyBuilder.(IrSimpleFunction) -> Unit
+) = irFactory.buildFun {
+    this.name = method.owner.name
+    this.returnType = returnType
+    this.modality = Modality.FINAL
+    this.visibility = method.owner.visibility
+    this.isSuspend = method.owner.isSuspend
+    this.isFakeOverride = false
+    this.isInline = false
+    this.origin = IrDeclarationOrigin.DELEGATE
+}.apply {
+    val thisReceiver = irClass.thisReceiver!!
+    parameters += buildReceiverParameter {
+        type = thisReceiver.type
+    }
+    val baseFqName = method.owner.parentAsClass.fqNameWhenAvailable!!
+    overriddenSymbols = (irClass.superTypes.mapNotNull { it.classOrNull?.owner } + irClass)
+        .filter { superType ->
+            superType.isSubclassOfFqName(baseFqName.asString())
+        }.flatMap { superClass ->
+            superClass.functions
+        }.filter { function ->
+            function.name.asString() == method.owner.name.asString() &&
+                function.overridesFunctionIn(baseFqName)
+        }.map { it.symbol }
+        .toList()
+    method.owner.parameters.filter { !it.isDispatchReceiver }.forEach {
+        addValueParameter {
+            startOffset = SYNTHETIC_OFFSET
+            endOffset = SYNTHETIC_OFFSET
+            name = it.name
+            type = substitutor.substitute(it.type)
+            isHidden = it.isHidden
+            isAssignable = it.isAssignable
+            isCrossInline = it.isCrossinline
+            varargElementType = it.varargElementType
+        }
+    }
+    this.body = irBuilder(symbol).irBlockBody {
+        body(this@apply)
+    }
 }
 
 inline fun IrPluginContext.overrideMethod(
