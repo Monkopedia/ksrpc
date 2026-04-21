@@ -81,10 +81,7 @@ class FirKsrpcStubGenerator(session: FirSession) : FirDeclarationGenerationExten
                 if (serviceTypeParams.isEmpty()) {
                     owner.defaultType()
                 } else {
-                    owner.classId.createConeType(
-                        session,
-                        refs.map { it.symbol.toConeType() }.toTypedArray()
-                    )
+                    owner.classId.createConeTypeForRefs(session, refs)
                 }
             }
             superType(RPC_SERVICE.createConeType(session))
@@ -108,17 +105,7 @@ class FirKsrpcStubGenerator(session: FirSession) : FirDeclarationGenerationExten
                 CHANNEL,
                 SERIALIZED_SERVICE.createConeType(session, arrayOf(ConeStarProjection))
             )
-            for ((idx, tp) in stubTypeParams.withIndex()) {
-                valueParameter(
-                    Name.identifier(tp.name.asString() + "Serializer"),
-                    typeProvider = { refs ->
-                        KSERIALIZER.createConeType(
-                            session,
-                            arrayOf(refs[idx].symbol.toConeType())
-                        )
-                    }
-                )
-            }
+            addSerializerValueParameters(session, stubTypeParams)
         }
         return listOf(constructor.symbol)
     }

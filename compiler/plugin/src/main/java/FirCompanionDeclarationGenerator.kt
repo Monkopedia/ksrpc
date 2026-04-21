@@ -213,10 +213,7 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
         val retTypeProvider: (List<org.jetbrains.kotlin.fir.declarations.FirTypeParameter>) ->
         ConeKotlinType = { tps ->
             // RpcObject<Service<T1, T2, ...>>
-            val serviceType = ownerKey.classId.createConeType(
-                session,
-                tps.map { it.symbol.toConeType() }.toTypedArray()
-            )
+            val serviceType = ownerKey.classId.createConeTypeForRefs(session, tps)
             RPC_OBJECT.createConeType(session, arrayOf(serviceType))
         }
         val function = createMemberFunction(
@@ -232,17 +229,7 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
             for (tp in serviceTypeParams) {
                 typeParameter(tp.name, Variance.INVARIANT, isReified = false)
             }
-            for ((idx, tp) in serviceTypeParams.withIndex()) {
-                valueParameter(
-                    Name.identifier(tp.name.asString() + "Serializer"),
-                    { types ->
-                        KSERIALIZER.createConeType(
-                            session,
-                            arrayOf(types[idx].symbol.toConeType())
-                        )
-                    }
-                )
-            }
+            addSerializerValueParameters(session, serviceTypeParams)
         }
         return listOf(function.symbol)
     }
@@ -265,12 +252,8 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
         ) { ConeStarProjection }
         val serviceStarType = serviceClassId.createConeType(session, starProjections)
         val retType = RPC_OBJECT.createConeType(session, arrayOf(serviceStarType))
-        val listClassId = ClassId(
-            org.jetbrains.kotlin.name.FqName("kotlin.collections"),
-            Name.identifier("List")
-        )
         val listOfKType =
-            listClassId.createConeType(session, arrayOf(KTYPE.createConeType(session)))
+            LIST_CLASS_ID.createConeType(session, arrayOf(KTYPE.createConeType(session)))
         val function = createMemberFunction(owner, ownerKey, callableId.callableName, retType) {
             modality = FINAL
             status {
@@ -338,10 +321,8 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
         owner: FirClassSymbol<*>,
         ownerKey: Key
     ): List<FirPropertySymbol> {
-        val listType = ClassId(
-            org.jetbrains.kotlin.name.FqName("kotlin.collections"),
-            Name.identifier("List")
-        ).createConeType(session, arrayOf(session.builtinTypes.stringType.coneType))
+        val listType = LIST_CLASS_ID
+            .createConeType(session, arrayOf(session.builtinTypes.stringType.coneType))
         val property = createMemberProperty(
             owner,
             ownerKey,

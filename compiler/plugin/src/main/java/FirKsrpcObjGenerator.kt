@@ -18,7 +18,6 @@ package com.monkopedia.ksrpc.plugin
 import com.monkopedia.ksrpc.plugin.FqConstants.CREATE_STUB
 import com.monkopedia.ksrpc.plugin.FqConstants.ENDPOINTS
 import com.monkopedia.ksrpc.plugin.FqConstants.FIND_ENDPOINT
-import com.monkopedia.ksrpc.plugin.FqConstants.KSERIALIZER
 import com.monkopedia.ksrpc.plugin.FqConstants.KS_METHOD
 import com.monkopedia.ksrpc.plugin.FqConstants.KS_SERVICE
 import com.monkopedia.ksrpc.plugin.FqConstants.OBJ
@@ -52,8 +51,6 @@ import org.jetbrains.kotlin.fir.symbols.impl.FirRegularClassSymbol
 import org.jetbrains.kotlin.fir.types.ConeKotlinType
 import org.jetbrains.kotlin.fir.types.ConeStarProjection
 import org.jetbrains.kotlin.name.CallableId
-import org.jetbrains.kotlin.name.ClassId
-import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.name.SpecialNames
 
@@ -96,10 +93,7 @@ class FirKsrpcObjGenerator(session: FirSession) : FirDeclarationGenerationExtens
                 typeParameter(tp.name)
             }
             superType { refs ->
-                val serviceType = owner.classId.createConeType(
-                    session,
-                    refs.map { it.symbol.toConeType() }.toTypedArray()
-                )
+                val serviceType = owner.classId.createConeTypeForRefs(session, refs)
                 RPC_OBJECT.createConeType(session, arrayOf(serviceType))
             }
         }.build().symbol
@@ -115,17 +109,7 @@ class FirKsrpcObjGenerator(session: FirSession) : FirDeclarationGenerationExtens
         val owner = context.owner as FirRegularClassSymbol
         val objTypeParams = owner.typeParameterSymbols
         val constructor = createConstructor(owner, ownerKey, isPrimary = true) {
-            for ((idx, tp) in objTypeParams.withIndex()) {
-                valueParameter(
-                    Name.identifier(tp.name.asString() + "Serializer"),
-                    typeProvider = { refs ->
-                        KSERIALIZER.createConeType(
-                            session,
-                            arrayOf(refs[idx].symbol.toConeType())
-                        )
-                    }
-                )
-            }
+            addSerializerValueParameters(session, objTypeParams)
         }
         return listOf(constructor.symbol)
     }
@@ -232,10 +216,8 @@ class FirKsrpcObjGenerator(session: FirSession) : FirDeclarationGenerationExtens
         owner: FirRegularClassSymbol,
         ownerKey: Key
     ): List<FirPropertySymbol> {
-        val listType = ClassId(
-            FqName("kotlin.collections"),
-            Name.identifier("List")
-        ).createConeType(session, arrayOf(session.builtinTypes.stringType.coneType))
+        val listType = LIST_CLASS_ID
+            .createConeType(session, arrayOf(session.builtinTypes.stringType.coneType))
         val property = createMemberProperty(
             owner,
             ownerKey,
