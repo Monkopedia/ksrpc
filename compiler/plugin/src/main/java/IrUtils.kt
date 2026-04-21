@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(UnsafeDuringIrConstructionAPI::class)
+
 package com.monkopedia.ksrpc.plugin
 
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
@@ -20,8 +22,12 @@ import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.ir.builders.IrBlockBodyBuilder
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.irBlockBody
+import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irConcat
+import org.jetbrains.kotlin.ir.builders.irString
+import org.jetbrains.kotlin.ir.builders.irVararg
 import org.jetbrains.kotlin.ir.declarations.IrClass
+import org.jetbrains.kotlin.ir.declarations.IrParameterKind
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.declarations.IrSymbolOwner
 import org.jetbrains.kotlin.ir.expressions.IrClassReference
@@ -101,4 +107,22 @@ fun IrMemberAccessExpression<*>.putArgs(vararg args: IrExpression) {
     args.forEachIndexed { index, irExpression ->
         arguments[index] = irExpression
     }
+}
+
+/**
+ * Emit a `listOf<String>(v0, v1, ...)` IR expression via the vararg overload of
+ * `kotlin.collections.listOf`. Shared between CompanionGeneration and ObjGeneration which
+ * both emit `endpoints` property bodies.
+ */
+internal fun IrBuilderWithScope.irListOfStrings(
+    env: KsrpcGenerationEnvironment,
+    values: List<String>
+): IrExpression = irCall(env.listOfFunction).apply {
+    typeArguments[0] = context.irBuiltIns.stringType
+    val varargParameter = env.listOfFunction.owner.parameters
+        .single { it.kind == IrParameterKind.Regular }
+    arguments[varargParameter] = irVararg(
+        context.irBuiltIns.stringType,
+        values.map { irString(it) }
+    )
 }

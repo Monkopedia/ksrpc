@@ -43,7 +43,6 @@ import org.jetbrains.kotlin.ir.builders.irImplicitCast
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irSetField
 import org.jetbrains.kotlin.ir.builders.irString
-import org.jetbrains.kotlin.ir.builders.irVararg
 import org.jetbrains.kotlin.ir.builders.irWhen
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrConstructor
@@ -441,16 +440,3 @@ internal class GenericMethodIrBuilder(
     }
 }
 
-// Extract the irListOfStrings helper so both CompanionGeneration and ObjGeneration can share it.
-internal fun IrBuilderWithScope.irListOfStrings(
-    env: KsrpcGenerationEnvironment,
-    values: List<String>
-): IrExpression = irCall(env.listOfFunction).apply {
-    typeArguments[0] = context.irBuiltIns.stringType
-    val varargParameter = env.listOfFunction.owner.parameters
-        .single { it.kind == org.jetbrains.kotlin.ir.declarations.IrParameterKind.Regular }
-    arguments[varargParameter] = irVararg(
-        context.irBuiltIns.stringType,
-        values.map { irString(it) }
-    )
-}
