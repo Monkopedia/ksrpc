@@ -50,10 +50,11 @@ actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> {
             return (companion as RpcObjectFactory<T>).create(typeArgs)
         }
     }
-    // Walk supertypes using KType so type arguments are preserved. For example, for
-    // `interface TypedGenericEcho : GenericEcho<String>`, `allSupertypes` yields a KType for
-    // `GenericEcho<String>` with `String` in `arguments`, which we feed to the factory.
-    for (supertype in kotlin.reflect.typeOf<T>().allSupertypesPreservingArguments()) {
+    // Walk supertypes via KClass.allSupertypes, which returns KTypes with type arguments
+    // already substituted. For `interface TypedGenericEcho : GenericEcho<String>` this yields
+    // a KType for `GenericEcho<String>` with `String` in `arguments` — exactly what the
+    // factory needs.
+    for (supertype in klass.allSupertypes) {
         val superKlass = supertype.classifier as? KClass<*> ?: continue
         when (val superCompanion = superKlass.companionObjectInstance) {
             is RpcObject<*> -> return superCompanion as RpcObject<T>
@@ -69,19 +70,6 @@ actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> {
         }
     }
     return error("Can't find rpc companion for $klass")
-}
-
-/**
- * Walk the supertypes of this [kotlin.reflect.KType], preserving the concrete type
- * arguments of each supertype. Uses [kotlin.reflect.KClass.allSupertypes] on the classifier
- * of this type — `allSupertypes` already returns the supertypes with their declared type
- * parameters substituted, so `GenericEcho<String>` shows up with `String` in its arguments
- * when queried from `TypedGenericEcho`.
- */
-@PublishedApi
-internal fun kotlin.reflect.KType.allSupertypesPreservingArguments(): List<kotlin.reflect.KType> {
-    val classifier = this.classifier as? KClass<*> ?: return emptyList()
-    return classifier.allSupertypes.toList()
 }
 
 actual val Throwable.asString: String
