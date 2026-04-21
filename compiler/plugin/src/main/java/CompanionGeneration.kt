@@ -75,14 +75,14 @@ class CompanionGeneration(
         val k = key as FirCompanionDeclarationGenerator.Key
         val cls = classes[k.type]
             ?: error("Invalid synthetic declaration for ${k.type} in ${classes.keys}")
-        // Skip RpcObjectKey annotation for generic services: the service type is never
-        // a concrete `RpcObject<T>` — users must go through Service(serializer).
-        if (!k.isGeneric) {
-            env.rpcObjectKey?.let {
-                val objectReference = createClassReference(context, declaration)
-                cls.irClassAndImpls.forEach { irClass ->
-                    irClass.annotations += createRpcObjectAnnotation(irClass, it, objectReference)
-                }
+        // Emit @RpcObjectKey pointing at the companion. For non-generic services the
+        // companion is the `RpcObject`; for generic services it's the `RpcObjectFactory`.
+        // `rpcObject<T>()` inspects the returned instance and, when it's a factory,
+        // resolves typeArgs from `typeOf<T>()` and calls `create(...)`.
+        env.rpcObjectKey?.let {
+            val objectReference = createClassReference(context, declaration)
+            cls.irClassAndImpls.forEach { irClass ->
+                irClass.annotations += createRpcObjectAnnotation(irClass, it, objectReference)
             }
         }
         declaration.declarations

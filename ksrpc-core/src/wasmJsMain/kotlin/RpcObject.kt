@@ -28,13 +28,26 @@ import kotlin.reflect.findAssociatedObject
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.BINARY)
 actual annotation class RpcObjectKey actual constructor(
-    actual val rpcObject: KClass<out RpcObject<*>>
+    actual val rpcObject: KClass<*>
 )
 
+@Suppress("UNCHECKED_CAST")
 @OptIn(ExperimentalAssociatedObjects::class)
 actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> {
     val obj = T::class.findAssociatedObject<RpcObjectKey>()
-    if (obj != null) return obj as RpcObject<T>
+    when (obj) {
+        is RpcObject<*> -> return obj as RpcObject<T>
+
+        is RpcObjectFactory<*> -> {
+            val type = kotlin.reflect.typeOf<T>()
+            val typeArgs = type.arguments.map {
+                it.type ?: error(
+                    "Star projection not supported in rpcObject<${T::class.simpleName}<...>>()"
+                )
+            }
+            return (obj as RpcObjectFactory<T>).create(typeArgs)
+        }
+    }
     return error("Can't find rpc companion for ${T::class}")
 }
 

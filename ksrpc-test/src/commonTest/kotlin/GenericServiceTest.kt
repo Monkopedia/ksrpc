@@ -45,17 +45,19 @@ private class GenericEchoStringImpl : GenericEcho<String> {
  * signatures. Exercises the companion's `invoke(serializer)` factory, the generated
  * `Obj<T>` RpcObject, and the Stub's ability to push method calls over a SerializedService
  * channel using the injected serializer.
+ *
+ * This variant uses the reified helpers (`rpcObject<T>()`, `serialized<T>()`, `toStub<T>()`)
+ * which for generic services go through the companion's `RpcObjectFactory` supertype and
+ * the `typeOf<T>()` type arguments to reach an `RpcObject`.
  */
 class GenericServiceRoundTripTest :
     RpcFunctionalityTest(
         serializedChannel = {
-            val rpcObject: RpcObject<GenericEcho<String>> = GenericEcho(String.serializer())
             val impl: GenericEcho<String> = GenericEchoStringImpl()
-            impl.serialized(rpcObject, ksrpcEnvironment { })
+            impl.serialized<GenericEcho<String>, String>(ksrpcEnvironment { })
         },
         verifyOnChannel = { serializedChannel ->
-            val rpcObject: RpcObject<GenericEcho<String>> = GenericEcho(String.serializer())
-            val stub: GenericEcho<String> = rpcObject.createStub(serializedChannel)
+            val stub = serializedChannel.toStub<GenericEcho<String>, String>()
             assertEquals("echoed:hi", stub.echo("hi"))
             assertEquals("maybe:hi", stub.maybe("hi"))
             assertNull(stub.maybe(null))
@@ -71,6 +73,24 @@ class GenericServiceRoundTripTest :
         val endpoints = rpcObject.endpoints
         assertEquals(true, "echo" in endpoints)
         assertEquals(true, "maybe" in endpoints)
+    }
+
+    @Test
+    fun reifiedRpcObjectResolvesFactory() = runBlockingUnit {
+        val rpcObject = rpcObject<GenericEcho<String>>()
+        assertEquals("com.monkopedia.ksrpc.GenericEcho", rpcObject.serviceName)
+        assertTrue("echo" in rpcObject.endpoints)
+        assertTrue("maybe" in rpcObject.endpoints)
+    }
+
+    @Test
+    fun reifiedSerializedAndToStubRoundTrip() = runBlockingUnit {
+        val impl: GenericEcho<String> = GenericEchoStringImpl()
+        val channel = impl.serialized<GenericEcho<String>, String>(ksrpcEnvironment { })
+        val stub = channel.toStub<GenericEcho<String>, String>()
+        assertEquals("echoed:hi", stub.echo("hi"))
+        assertEquals("maybe:hi", stub.maybe("hi"))
+        assertNull(stub.maybe(null))
     }
 }
 

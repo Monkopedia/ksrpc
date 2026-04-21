@@ -19,13 +19,22 @@ import java.io.PrintWriter
 import java.io.StringWriter
 import kotlin.reflect.full.allSuperclasses
 import kotlin.reflect.full.companionObjectInstance
-import kotlin.reflect.full.superclasses
 
 @Suppress("UNCHECKED_CAST")
 actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> {
     val klass = T::class
-    if (klass.companionObjectInstance is RpcObject<*>) {
-        return klass.companionObjectInstance as RpcObject<T>
+    when (val companion = klass.companionObjectInstance) {
+        is RpcObject<*> -> return companion as RpcObject<T>
+
+        is RpcObjectFactory<*> -> {
+            val type = kotlin.reflect.typeOf<T>()
+            val typeArgs = type.arguments.map {
+                it.type ?: error(
+                    "Star projection not supported in rpcObject<${klass.simpleName}<...>>()"
+                )
+            }
+            return (companion as RpcObjectFactory<T>).create(typeArgs)
+        }
     }
     klass.allSuperclasses.find {
         it.companionObjectInstance is RpcObject<*>

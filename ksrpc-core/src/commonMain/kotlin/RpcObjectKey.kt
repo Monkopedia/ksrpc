@@ -19,4 +19,4 @@ import kotlin.reflect.KClass
 
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.BINARY)
-expect annotation class RpcObjectKey(val rpcObject: KClass<out RpcObject<*>>)
+expect annotation class RpcObjectKey(val rpcObject: KClass<*>)
