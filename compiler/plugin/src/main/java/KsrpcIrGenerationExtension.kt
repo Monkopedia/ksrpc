@@ -44,6 +44,7 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
         val env = KsrpcGenerationEnvironment(pluginContext, report)
         val transformers = listOf(
             StubGeneration(pluginContext, report, classes, env),
+            ObjGeneration(pluginContext, classes, env),
             CompanionGeneration(pluginContext, classes, env),
             IntrospectionGeneration(pluginContext, classes, env)
         )

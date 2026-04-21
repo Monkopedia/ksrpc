@@ -19,28 +19,42 @@ package com.monkopedia.ksrpc.plugin
 
 import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
+import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.backend.common.lower.irThrow
+import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
+import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.backend.js.utils.isDispatchReceiver
 import org.jetbrains.kotlin.ir.builders.IrBlockBodyBuilder
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
+import org.jetbrains.kotlin.ir.builders.declarations.addConstructor
+import org.jetbrains.kotlin.ir.builders.declarations.addField
+import org.jetbrains.kotlin.ir.builders.declarations.addValueParameter
+import org.jetbrains.kotlin.ir.builders.declarations.buildClass
+import org.jetbrains.kotlin.ir.builders.declarations.buildReceiverParameter
+import org.jetbrains.kotlin.ir.builders.irBlock
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irBranch
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irCallConstructor
+import org.jetbrains.kotlin.ir.builders.irDelegatingConstructorCall
 import org.jetbrains.kotlin.ir.builders.irElseBranch
 import org.jetbrains.kotlin.ir.builders.irEquals
 import org.jetbrains.kotlin.ir.builders.irGet
+import org.jetbrains.kotlin.ir.builders.irGetField
 import org.jetbrains.kotlin.ir.builders.irGetObject
 import org.jetbrains.kotlin.ir.builders.irReturn
+import org.jetbrains.kotlin.ir.builders.irSetField
 import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.builders.irVararg
 import org.jetbrains.kotlin.ir.builders.irWhen
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrConstructor
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
+import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrParameterKind
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
+import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.expressions.IrBlockBody
 import org.jetbrains.kotlin.ir.expressions.IrBody
 import org.jetbrains.kotlin.ir.expressions.IrClassReference
@@ -48,9 +62,15 @@ import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
+import org.jetbrains.kotlin.ir.types.IrSimpleType
+import org.jetbrains.kotlin.ir.types.defaultType
+import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
 import org.jetbrains.kotlin.ir.util.constructors
+import org.jetbrains.kotlin.ir.util.createThisReceiverParameter
 import org.jetbrains.kotlin.ir.util.kotlinFqName
+import org.jetbrains.kotlin.name.Name
+import org.jetbrains.kotlin.util.capitalizeDecapitalize.capitalizeAsciiOnly
 
 class CompanionGeneration(
     context: IrPluginContext,
@@ -68,10 +88,14 @@ class CompanionGeneration(
         val k = key as FirCompanionDeclarationGenerator.Key
         val cls = classes[k.type]
             ?: error("Invalid synthetic declaration for ${k.type} in ${classes.keys}")
-        env.rpcObjectKey?.let {
-            val objectReference = createClassReference(context, declaration)
-            cls.irClassAndImpls.forEach { irClass ->
-                irClass.annotations += createRpcObjectAnnotation(irClass, it, objectReference)
+        // Skip RpcObjectKey annotation for generic services: the service type is never
+        // a concrete `RpcObject<T>` — users must go through Service(serializer).
+        if (!k.isGeneric) {
+            env.rpcObjectKey?.let {
+                val objectReference = createClassReference(context, declaration)
+                cls.irClassAndImpls.forEach { irClass ->
+                    irClass.annotations += createRpcObjectAnnotation(irClass, it, objectReference)
+                }
             }
         }
         declaration.declarations
@@ -143,6 +167,7 @@ class CompanionGeneration(
         return when (function.name) {
             FqConstants.CREATE_STUB -> buildCreateStubBody(function, cls)
             FqConstants.FIND_ENDPOINT -> buildFindEndpointBody(function, cls)
+            FqConstants.INVOKE -> buildInvokeFactoryBody(function, cls)
             else -> null
         }
     }
@@ -186,6 +211,33 @@ class CompanionGeneration(
                 }
             )
         }
+
+    /**
+     * Body for the generic companion's `operator fun <T> invoke(tSer, ...): RpcObject<Service<T>>`.
+     * Instantiates the generated `Obj<T>` nested class with the serializers and returns it.
+     */
+    private fun buildInvokeFactoryBody(function: IrSimpleFunction, cls: ServiceClass): IrBody {
+        val objClass = cls.irClass.declarations.filterIsInstance<IrClass>()
+            .firstOrNull { it.name == FqConstants.OBJ }
+            ?: error(
+                "Missing generated Obj class on ${cls.irClass.kotlinFqName.asString()}. " +
+                    "FirKsrpcObjGenerator did not run or generated under a different name."
+            )
+        val objConstructor = objClass.constructors.first { it.isPrimary }
+        val invokeTypeParams = function.typeParameters
+        val typeArgs = invokeTypeParams.map { it.defaultType }
+        return context.irBuilder(function).irSynthBody {
+            +irReturn(
+                irCallConstructor(objConstructor.symbol, typeArgs).apply {
+                    type = objClass.typeWith(typeArgs)
+                    val passthroughArgs = function.parameters
+                        .filter { !it.isDispatchReceiver }
+                        .map { irGet(it) }
+                    putArgs(*passthroughArgs.toTypedArray())
+                }
+            )
+        }
+    }
 
     private fun IrBuilderWithScope.irListOfStrings(values: List<String>) =
         irCall(env.listOfFunction)

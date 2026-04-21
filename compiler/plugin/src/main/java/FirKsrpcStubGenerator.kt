@@ -18,6 +18,7 @@ package com.monkopedia.ksrpc.plugin
 import com.monkopedia.ksrpc.plugin.FqConstants.KS_INTROSPECTABLE
 import com.monkopedia.ksrpc.plugin.FqConstants.KS_METHOD
 import com.monkopedia.ksrpc.plugin.FqConstants.KS_SERVICE
+import com.monkopedia.ksrpc.plugin.FqConstants.RPC_OBJECT
 import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.Modality

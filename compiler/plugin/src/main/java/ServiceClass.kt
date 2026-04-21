@@ -146,6 +146,27 @@ data class ServiceClass(
     lateinit var stubConstructor: IrConstructor
         private set
 
+    /** Per-instance serializer fields on the Stub (one per class-level type parameter). */
+    var stubSerializerFields: List<IrField> = emptyList()
+        private set
+
+    /** Generated nested `Obj<T, ...>` class for generic services, or null for non-generic. */
+    var objClass: IrClass? = null
+        private set
+
+    /** Per-instance serializer fields on the Obj (one per class-level type parameter). */
+    var objSerializerFields: List<IrField> = emptyList()
+        private set
+
+    /**
+     * Anonymous `ServiceExecutor` classes for generic services, keyed by method endpoint.
+     * Pre-created during [generateChildrenForClass] so that body-time IR (which runs during
+     * iteration over Obj's children) doesn't have to mutate the class.
+     */
+    val genericExecutors: MutableMap<String, IrClass> = mutableMapOf()
+
+    val isGeneric: Boolean get() = irClass.typeParameters.isNotEmpty()
+
     fun addEndpoint(endpoint: String, methodField: IrFunction) {
         endpoints[endpoint] = methodField
     }
@@ -160,6 +181,18 @@ data class ServiceClass(
 
     fun setStubConstructor(it: IrConstructor) {
         stubConstructor = it
+    }
+
+    fun setStubSerializerFields(fields: List<IrField>) {
+        stubSerializerFields = fields
+    }
+
+    fun setObjClass(it: IrClass) {
+        objClass = it
+    }
+
+    fun setObjSerializerFields(fields: List<IrField>) {
+        objSerializerFields = fields
     }
 
     companion object {

@@ -18,17 +18,17 @@ package com.monkopedia.ksrpc.plugin
 import com.monkopedia.ksrpc.plugin.FqConstants.CREATE_STUB
 import com.monkopedia.ksrpc.plugin.FqConstants.ENDPOINTS
 import com.monkopedia.ksrpc.plugin.FqConstants.FIND_ENDPOINT
-import com.monkopedia.ksrpc.plugin.FqConstants.INVOKE
 import com.monkopedia.ksrpc.plugin.FqConstants.KSERIALIZER
 import com.monkopedia.ksrpc.plugin.FqConstants.KS_METHOD
 import com.monkopedia.ksrpc.plugin.FqConstants.KS_SERVICE
+import com.monkopedia.ksrpc.plugin.FqConstants.OBJ
 import com.monkopedia.ksrpc.plugin.FqConstants.RPC_METHOD
 import com.monkopedia.ksrpc.plugin.FqConstants.RPC_OBJECT
 import com.monkopedia.ksrpc.plugin.FqConstants.SERIALIZED_SERVICE
 import com.monkopedia.ksrpc.plugin.FqConstants.SERVICE_NAME
 import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.descriptors.ClassKind
-import org.jetbrains.kotlin.descriptors.Modality.FINAL
+import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.declarations.FirDeclarationOrigin
 import org.jetbrains.kotlin.fir.extensions.FirDeclarationGenerationExtension
@@ -37,13 +37,11 @@ import org.jetbrains.kotlin.fir.extensions.MemberGenerationContext
 import org.jetbrains.kotlin.fir.extensions.NestedClassGenerationContext
 import org.jetbrains.kotlin.fir.extensions.predicate.LookupPredicate
 import org.jetbrains.kotlin.fir.extensions.predicateBasedProvider
-import org.jetbrains.kotlin.fir.plugin.createCompanionObject
+import org.jetbrains.kotlin.fir.plugin.ClassBuildingContext
 import org.jetbrains.kotlin.fir.plugin.createConeType
-import org.jetbrains.kotlin.fir.plugin.createDefaultPrivateConstructor
+import org.jetbrains.kotlin.fir.plugin.createConstructor
 import org.jetbrains.kotlin.fir.plugin.createMemberFunction
 import org.jetbrains.kotlin.fir.plugin.createMemberProperty
-import org.jetbrains.kotlin.fir.resolve.defaultType
-import org.jetbrains.kotlin.fir.resolve.providers.symbolProvider
 import org.jetbrains.kotlin.fir.scopes.impl.toConeType
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassLikeSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassSymbol
@@ -51,16 +49,23 @@ import org.jetbrains.kotlin.fir.symbols.impl.FirConstructorSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirNamedFunctionSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirPropertySymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirRegularClassSymbol
-import org.jetbrains.kotlin.fir.types.ConeClassLikeType
 import org.jetbrains.kotlin.fir.types.ConeStarProjection
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
+import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.name.SpecialNames
-import org.jetbrains.kotlin.types.Variance
 
-class FirCompanionDeclarationGenerator(session: FirSession) :
-    FirDeclarationGenerationExtension(session) {
+/**
+ * For generic `@KsService` interfaces, generates a nested `Obj<T, ...>` class that
+ * implements `RpcObject<Service<T, ...>>`. The companion-object `invoke<T, ...>(ser)`
+ * returns an instance of this class. Users reach the `RpcObject` via `Service(ser)`,
+ * not by naming `Obj` directly.
+ *
+ * For non-generic services there is no `Obj` — the companion-object itself directly
+ * implements `RpcObject<Service>` (handled by [FirCompanionDeclarationGenerator]).
+ */
+class FirKsrpcObjGenerator(session: FirSession) : FirDeclarationGenerationExtension(session) {
 
     private val predicates =
         listOf(KS_METHOD, KS_SERVICE).map { LookupPredicate.create { annotated(it) } }
@@ -74,20 +79,29 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
         name: Name,
         context: NestedClassGenerationContext
     ): FirClassLikeSymbol<*>? {
-        if (name != SpecialNames.DEFAULT_NAME_FOR_COMPANION_OBJECT) return null
-        // Always generate the companion. For non-generic services the companion directly
-        // implements RpcObject<Service>. For generic services the companion is a plain
-        // object exposing `operator fun <T, ...> invoke(serializers): RpcObject<Service<T, ...>>`,
-        // so users always reach an `RpcObject<Service<...>>` from the service symbol.
-        return if (owner.typeParameterSymbols.isEmpty()) {
-            createCompanionObject(owner, Key(owner.classId, isGeneric = false)) {
-                superType(RPC_OBJECT.createConeType(session, arrayOf(owner.defaultType())))
-            }.symbol
-        } else {
-            createCompanionObject(owner, Key(owner.classId, isGeneric = true)) {
-                // No RpcObject supertype; invoke is what materializes an RpcObject.
-            }.symbol
-        }
+        if (name != OBJ) return null
+        val serviceTypeParams = owner.typeParameterSymbols
+        if (serviceTypeParams.isEmpty()) return null
+        val classId = owner.classId.createNestedClassId(OBJ)
+        return ClassBuildingContext(
+            session,
+            Key(owner.classId.asFqNameString()),
+            owner,
+            classId,
+            ClassKind.CLASS
+        ).apply {
+            modality = Modality.FINAL
+            for (tp in serviceTypeParams) {
+                typeParameter(tp.name)
+            }
+            superType { refs ->
+                val serviceType = owner.classId.createConeType(
+                    session,
+                    refs.map { it.symbol.toConeType() }.toTypedArray()
+                )
+                RPC_OBJECT.createConeType(session, arrayOf(serviceType))
+            }
+        }.build().symbol
     }
 
     private fun checkOwnerKey(context: MemberGenerationContext): Key? =
@@ -97,7 +111,21 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
         context: MemberGenerationContext
     ): List<FirConstructorSymbol> {
         val ownerKey = checkOwnerKey(context) ?: return emptyList()
-        val constructor = createDefaultPrivateConstructor(context.owner, ownerKey)
+        val owner = context.owner as FirRegularClassSymbol
+        val objTypeParams = owner.typeParameterSymbols
+        val constructor = createConstructor(owner, ownerKey, isPrimary = true) {
+            for ((idx, tp) in objTypeParams.withIndex()) {
+                valueParameter(
+                    Name.identifier(tp.name.asString() + "Serializer"),
+                    typeProvider = { refs ->
+                        KSERIALIZER.createConeType(
+                            session,
+                            arrayOf(refs[idx].symbol.toConeType())
+                        )
+                    }
+                )
+            }
+        }
         return listOf(constructor.symbol)
     }
 
@@ -106,25 +134,10 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
         context: MemberGenerationContext?
     ): List<FirNamedFunctionSymbol> {
         val ownerKey = context?.let(::checkOwnerKey) ?: return emptyList()
+        val owner = context.owner as? FirRegularClassSymbol ?: return emptyList()
         return when (callableId.callableName) {
-            FIND_ENDPOINT -> if (ownerKey.isGeneric) {
-                emptyList()
-            } else {
-                createFindEndpoint(callableId, context.owner, ownerKey)
-            }
-
-            CREATE_STUB -> if (ownerKey.isGeneric) {
-                emptyList()
-            } else {
-                createCreateStub(callableId, context.owner, ownerKey)
-            }
-
-            INVOKE -> if (ownerKey.isGeneric) {
-                createInvokeFactory(callableId, context.owner, ownerKey)
-            } else {
-                emptyList()
-            }
-
+            CREATE_STUB -> createCreateStub(callableId, owner, ownerKey)
+            FIND_ENDPOINT -> createFindEndpoint(callableId, owner, ownerKey)
             else -> emptyList()
         }
     }
@@ -134,52 +147,28 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
         context: MemberGenerationContext?
     ): List<FirPropertySymbol> {
         val ownerKey = context?.let(::checkOwnerKey) ?: return emptyList()
-        if (ownerKey.isGeneric) return emptyList()
+        val owner = context.owner as? FirRegularClassSymbol ?: return emptyList()
         return when (callableId.callableName) {
-            SERVICE_NAME -> createServiceName(callableId, context.owner, ownerKey)
-            ENDPOINTS -> createEndpoints(callableId, context.owner, ownerKey)
+            SERVICE_NAME -> createServiceName(callableId, owner, ownerKey)
+            ENDPOINTS -> createEndpoints(callableId, owner, ownerKey)
             else -> emptyList()
         }
     }
 
     private fun createCreateStub(
         callableId: CallableId,
-        owner: FirClassSymbol<*>,
+        owner: FirRegularClassSymbol,
         ownerKey: Key
     ): List<FirNamedFunctionSymbol> {
-        val retType = ownerKey.classId.createConeType(session)
-        val function =
-            createMemberFunction(owner, ownerKey, callableId.callableName, retType) {
-                modality = FINAL
-                typeParameter(Name.identifier("S"))
-                valueParameter(Name.identifier("channel"), { types ->
-                    SERIALIZED_SERVICE.createConeType(session, arrayOf(types[0].toConeType()))
-                })
-            }
-        return listOf(function.symbol)
-    }
-
-    private fun createInvokeFactory(
-        callableId: CallableId,
-        owner: FirClassSymbol<*>,
-        ownerKey: Key
-    ): List<FirNamedFunctionSymbol> {
-        // Figure out how many type params the enclosing service carries.
-        val serviceClassId = ownerKey.classId
-        val serviceSymbol =
-            session.symbolProvider.getClassLikeSymbolByClassId(serviceClassId)
-                as? FirRegularClassSymbol
-                ?: return emptyList()
-        val serviceTypeParams = serviceSymbol.typeParameterSymbols
-        if (serviceTypeParams.isEmpty()) return emptyList()
+        // Obj<T>.createStub<S>(channel: SerializedService<S>): Service<T>
+        val serviceClassId = owner.classId.outerClassId!!
+        val objTypeParams = owner.typeParameterSymbols
         val retTypeProvider: (List<org.jetbrains.kotlin.fir.declarations.FirTypeParameter>) ->
-        org.jetbrains.kotlin.fir.types.ConeKotlinType = { tps ->
-            // RpcObject<Service<T1, T2, ...>>
-            val serviceType = ownerKey.classId.createConeType(
+        org.jetbrains.kotlin.fir.types.ConeKotlinType = { _ ->
+            serviceClassId.createConeType(
                 session,
-                tps.map { it.symbol.toConeType() }.toTypedArray()
+                objTypeParams.map { it.toConeType() }.toTypedArray()
             )
-            RPC_OBJECT.createConeType(session, arrayOf(serviceType))
         }
         val function = createMemberFunction(
             owner,
@@ -187,36 +176,30 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
             callableId.callableName,
             retTypeProvider
         ) {
-            modality = FINAL
+            modality = Modality.FINAL
             status {
-                isOperator = true
+                isOverride = true
             }
-            for (tp in serviceTypeParams) {
-                typeParameter(tp.name, Variance.INVARIANT, isReified = false)
-            }
-            for ((idx, tp) in serviceTypeParams.withIndex()) {
-                valueParameter(
-                    Name.identifier(tp.name.asString() + "Serializer"),
-                    { types ->
-                        KSERIALIZER.createConeType(
-                            session,
-                            arrayOf(types[idx].symbol.toConeType())
-                        )
-                    }
-                )
-            }
+            typeParameter(Name.identifier("S"))
+            valueParameter(Name.identifier("channel"), { types ->
+                SERIALIZED_SERVICE.createConeType(session, arrayOf(types[0].toConeType()))
+            })
         }
         return listOf(function.symbol)
     }
 
     private fun createFindEndpoint(
         callableId: CallableId,
-        owner: FirClassSymbol<*>,
+        owner: FirRegularClassSymbol,
         ownerKey: Key
     ): List<FirNamedFunctionSymbol> {
-        val retType = RPC_METHOD.createConeType(session, Array(3) { ConeStarProjection })
+        val retType =
+            RPC_METHOD.createConeType(session, Array(3) { ConeStarProjection })
         val function = createMemberFunction(owner, ownerKey, callableId.callableName, retType) {
-            modality = FINAL
+            modality = Modality.FINAL
+            status {
+                isOverride = true
+            }
             valueParameter(Name.identifier("endpoint"), session.builtinTypes.stringType.coneType)
         }
         return listOf(function.symbol)
@@ -224,7 +207,7 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
 
     private fun createServiceName(
         callableId: CallableId,
-        owner: FirClassSymbol<*>,
+        owner: FirRegularClassSymbol,
         ownerKey: Key
     ): List<FirPropertySymbol> {
         val property = createMemberProperty(
@@ -235,18 +218,21 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
             isVal = true,
             hasBackingField = false
         ) {
-            modality = FINAL
+            modality = Modality.FINAL
+            status {
+                isOverride = true
+            }
         }
         return listOf(property.symbol)
     }
 
     private fun createEndpoints(
         callableId: CallableId,
-        owner: FirClassSymbol<*>,
+        owner: FirRegularClassSymbol,
         ownerKey: Key
     ): List<FirPropertySymbol> {
         val listType = ClassId(
-            org.jetbrains.kotlin.name.FqName("kotlin.collections"),
+            FqName("kotlin.collections"),
             Name.identifier("List")
         ).createConeType(session, arrayOf(session.builtinTypes.stringType.coneType))
         val property = createMemberProperty(
@@ -257,7 +243,10 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
             isVal = true,
             hasBackingField = false
         ) {
-            modality = FINAL
+            modality = Modality.FINAL
+            status {
+                isOverride = true
+            }
         }
         return listOf(property.symbol)
     }
@@ -266,20 +255,20 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
         classSymbol: FirClassSymbol<*>,
         context: MemberGenerationContext
     ): Set<Name> {
-        if (classSymbol.classKind != ClassKind.OBJECT) {
-            return emptySet()
-        }
-        (classSymbol as? FirRegularClassSymbol)?.classId
-            ?.takeIf { it.isNestedClass }
-            ?.takeIf { it.shortClassName == SpecialNames.DEFAULT_NAME_FOR_COMPANION_OBJECT }
-            ?: return emptySet()
-
+        if (classSymbol.classKind != ClassKind.CLASS) return emptySet()
+        val classId = (classSymbol as? FirRegularClassSymbol)?.classId ?: return emptySet()
+        if (!classId.isNestedClass || classId.shortClassName != OBJ) return emptySet()
         val origin = classSymbol.origin as? FirDeclarationOrigin.Plugin
-        val key = origin?.key as? Key
-        return when {
-            key == null -> setOf(FIND_ENDPOINT, CREATE_STUB, SERVICE_NAME, ENDPOINTS)
-            key.isGeneric -> setOf(INVOKE, SpecialNames.INIT)
-            else -> setOf(FIND_ENDPOINT, CREATE_STUB, SERVICE_NAME, ENDPOINTS, SpecialNames.INIT)
+        return if (origin?.key is Key) {
+            setOf(
+                CREATE_STUB,
+                FIND_ENDPOINT,
+                SERVICE_NAME,
+                ENDPOINTS,
+                SpecialNames.INIT
+            )
+        } else {
+            emptySet()
         }
     }
 
@@ -288,18 +277,15 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
         context: NestedClassGenerationContext
     ): Set<Name> {
         if (!session.predicateBasedProvider.matches(predicates, classSymbol)) return emptySet()
-        // Always advertise the companion. For generic services the companion exposes
-        // `operator fun invoke(...)` to materialize an RpcObject. For non-generic services
-        // the companion directly extends RpcObject.
-        return setOf(SpecialNames.DEFAULT_NAME_FOR_COMPANION_OBJECT)
+        val typeParams = (classSymbol as? FirRegularClassSymbol)?.typeParameterSymbols
+        return if (typeParams.isNullOrEmpty()) {
+            emptySet()
+        } else {
+            setOf(OBJ)
+        }
     }
 
-    data class Key(
-        val classId: ClassId,
-        val isGeneric: Boolean = false,
-        val type: String = classId.asFqNameString()
-    ) : GeneratedDeclarationKey() {
-        override fun toString(): String =
-            if (isGeneric) "KsrpcServiceGeneric($type)" else "KsrpcService($type)"
+    data class Key(val target: String) : GeneratedDeclarationKey() {
+        override fun toString(): String = "KsrpcObj($target)"
     }
 }

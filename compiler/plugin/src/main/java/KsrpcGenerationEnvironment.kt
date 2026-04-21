@@ -61,6 +61,22 @@ class KsrpcGenerationEnvironment(
                 it.owner.parameters.isEmpty()
         }
 
+    // `val <T : Any> KSerializer<T>.nullable: KSerializer<T?>` — an extension property
+    // declared in `kotlinx.serialization.builtins.BuiltinSerializers`. We resolve the
+    // property symbol here and use its getter for IR-time composition of nullable
+    // serializers.
+    val getSerializerNullable =
+        context.referenceProperties(
+            CallableId(
+                FqName("kotlinx.serialization.builtins"),
+                Name.identifier("nullable")
+            )
+        ).firstOrNull { prop ->
+            prop.owner.getter?.parameters?.any {
+                it.kind == IrParameterKind.ExtensionReceiver
+            } == true
+        }?.owner?.getter?.symbol
+
     val threadLocal = referenceClass(FqConstants.THREAD_LOCAL)
     val listOfFunction =
         context.referenceFunctions(
