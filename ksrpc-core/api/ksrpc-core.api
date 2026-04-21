@@ -232,6 +232,15 @@ public abstract interface class com/monkopedia/ksrpc/RpcObject {
 	public abstract fun getServiceName ()Ljava/lang/String;
 }
 
+public abstract interface class com/monkopedia/ksrpc/RpcObjectFactory {
+	public abstract fun create (Ljava/util/List;)Lcom/monkopedia/ksrpc/RpcObject;
+	public abstract fun getArity ()I
+}
+
+public final class com/monkopedia/ksrpc/RpcObjectFactoryKt {
+	public static final fun resolveSerializerOrThrow (Lkotlin/reflect/KType;Ljava/lang/String;)Lkotlinx/serialization/KSerializer;
+}
+
 public abstract interface annotation class com/monkopedia/ksrpc/RpcObjectKey : java/lang/annotation/Annotation {
 	public abstract fun rpcObject ()Ljava/lang/Class;
 }

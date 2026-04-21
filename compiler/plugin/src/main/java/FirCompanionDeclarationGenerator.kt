@@ -15,6 +15,8 @@
  */
 package com.monkopedia.ksrpc.plugin
 
+import com.monkopedia.ksrpc.plugin.FqConstants.ARITY
+import com.monkopedia.ksrpc.plugin.FqConstants.CREATE
 import com.monkopedia.ksrpc.plugin.FqConstants.CREATE_STUB
 import com.monkopedia.ksrpc.plugin.FqConstants.ENDPOINTS
 import com.monkopedia.ksrpc.plugin.FqConstants.FIND_ENDPOINT
@@ -22,8 +24,10 @@ import com.monkopedia.ksrpc.plugin.FqConstants.INVOKE
 import com.monkopedia.ksrpc.plugin.FqConstants.KSERIALIZER
 import com.monkopedia.ksrpc.plugin.FqConstants.KS_METHOD
 import com.monkopedia.ksrpc.plugin.FqConstants.KS_SERVICE
+import com.monkopedia.ksrpc.plugin.FqConstants.KTYPE
 import com.monkopedia.ksrpc.plugin.FqConstants.RPC_METHOD
 import com.monkopedia.ksrpc.plugin.FqConstants.RPC_OBJECT
+import com.monkopedia.ksrpc.plugin.FqConstants.RPC_OBJECT_FACTORY
 import com.monkopedia.ksrpc.plugin.FqConstants.SERIALIZED_SERVICE
 import com.monkopedia.ksrpc.plugin.FqConstants.SERVICE_NAME
 import org.jetbrains.kotlin.GeneratedDeclarationKey
@@ -51,7 +55,6 @@ import org.jetbrains.kotlin.fir.symbols.impl.FirConstructorSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirNamedFunctionSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirPropertySymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirRegularClassSymbol
-import org.jetbrains.kotlin.fir.types.ConeClassLikeType
 import org.jetbrains.kotlin.fir.types.ConeStarProjection
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
@@ -64,6 +67,13 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
 
     private val predicates =
         listOf(KS_METHOD, KS_SERVICE).map { LookupPredicate.create { annotated(it) } }
+
+    // Older versions of ksrpc-core (pre-#41) don't ship RpcObjectFactory. When that class
+    // isn't on the classpath we skip the factory supertype and the arity/create callables so
+    // compilation against older cores still succeeds.
+    private val factorySupported: Boolean by lazy {
+        session.symbolProvider.getClassLikeSymbolByClassId(RPC_OBJECT_FACTORY) != null
+    }
 
     override fun FirDeclarationPredicateRegistrar.registerPredicates() {
         register(predicates)
@@ -84,8 +94,20 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
                 superType(RPC_OBJECT.createConeType(session, arrayOf(owner.defaultType())))
             }.symbol
         } else {
+            // Companion for a generic service implements
+            // RpcObjectFactory<Service<*, *, ...>>, so callers with only KTypes (e.g.
+            // sub-service transformers, introspection) can reach an RpcObject through the
+            // factory. The typed `operator fun invoke(ser, ...)` remains the preferred API.
+            val starProjections = Array<org.jetbrains.kotlin.fir.types.ConeTypeProjection>(
+                owner.typeParameterSymbols.size
+            ) { ConeStarProjection }
+            val serviceStarType = owner.classId.createConeType(session, starProjections)
             createCompanionObject(owner, Key(owner.classId, isGeneric = true)) {
-                // No RpcObject supertype; invoke is what materializes an RpcObject.
+                if (factorySupported) {
+                    superType(
+                        RPC_OBJECT_FACTORY.createConeType(session, arrayOf(serviceStarType))
+                    )
+                }
             }.symbol
         }
     }
@@ -125,6 +147,12 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
                 emptyList()
             }
 
+            CREATE -> if (ownerKey.isGeneric && factorySupported) {
+                createCreateFactory(callableId, context.owner, ownerKey)
+            } else {
+                emptyList()
+            }
+
             else -> emptyList()
         }
     }
@@ -134,7 +162,16 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
         context: MemberGenerationContext?
     ): List<FirPropertySymbol> {
         val ownerKey = context?.let(::checkOwnerKey) ?: return emptyList()
-        if (ownerKey.isGeneric) return emptyList()
+        if (ownerKey.isGeneric) {
+            return when (callableId.callableName) {
+                ARITY -> if (factorySupported) {
+                    createArity(callableId, context.owner, ownerKey)
+                } else {
+                    emptyList()
+                }
+                else -> emptyList()
+            }
+        }
         return when (callableId.callableName) {
             SERVICE_NAME -> createServiceName(callableId, context.owner, ownerKey)
             ENDPOINTS -> createEndpoints(callableId, context.owner, ownerKey)
@@ -209,6 +246,61 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
         return listOf(function.symbol)
     }
 
+    private fun createCreateFactory(
+        callableId: CallableId,
+        owner: FirClassSymbol<*>,
+        ownerKey: Key
+    ): List<FirNamedFunctionSymbol> {
+        // override fun create(typeArgs: List<KType>): RpcObject<Service<*, *, ...>>
+        val serviceClassId = ownerKey.classId
+        val serviceSymbol =
+            session.symbolProvider.getClassLikeSymbolByClassId(serviceClassId)
+                as? FirRegularClassSymbol
+                ?: return emptyList()
+        val serviceTypeParams = serviceSymbol.typeParameterSymbols
+        if (serviceTypeParams.isEmpty()) return emptyList()
+        val starProjections = Array<org.jetbrains.kotlin.fir.types.ConeTypeProjection>(
+            serviceTypeParams.size
+        ) { ConeStarProjection }
+        val serviceStarType = serviceClassId.createConeType(session, starProjections)
+        val retType = RPC_OBJECT.createConeType(session, arrayOf(serviceStarType))
+        val listClassId = ClassId(
+            org.jetbrains.kotlin.name.FqName("kotlin.collections"),
+            Name.identifier("List")
+        )
+        val listOfKType =
+            listClassId.createConeType(session, arrayOf(KTYPE.createConeType(session)))
+        val function = createMemberFunction(owner, ownerKey, callableId.callableName, retType) {
+            modality = FINAL
+            status {
+                isOverride = true
+            }
+            valueParameter(Name.identifier("typeArgs"), listOfKType)
+        }
+        return listOf(function.symbol)
+    }
+
+    private fun createArity(
+        callableId: CallableId,
+        owner: FirClassSymbol<*>,
+        ownerKey: Key
+    ): List<FirPropertySymbol> {
+        val property = createMemberProperty(
+            owner,
+            ownerKey,
+            callableId.callableName,
+            session.builtinTypes.intType.coneType,
+            isVal = true,
+            hasBackingField = false
+        ) {
+            modality = FINAL
+            status {
+                isOverride = true
+            }
+        }
+        return listOf(property.symbol)
+    }
+
     private fun createFindEndpoint(
         callableId: CallableId,
         owner: FirClassSymbol<*>,
@@ -278,7 +370,11 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
         val key = origin?.key as? Key
         return when {
             key == null -> setOf(FIND_ENDPOINT, CREATE_STUB, SERVICE_NAME, ENDPOINTS)
-            key.isGeneric -> setOf(INVOKE, SpecialNames.INIT)
+            key.isGeneric -> if (factorySupported) {
+                setOf(INVOKE, CREATE, ARITY, SpecialNames.INIT)
+            } else {
+                setOf(INVOKE, SpecialNames.INIT)
+            }
             else -> setOf(FIND_ENDPOINT, CREATE_STUB, SERVICE_NAME, ENDPOINTS, SpecialNames.INIT)
         }
     }

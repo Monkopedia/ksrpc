@@ -60,6 +60,8 @@ class KsrpcGenerationEnvironment(
                 it.owner.typeParameters.size == 1 &&
                 it.owner.parameters.isEmpty()
         }
+    val resolveSerializerOrThrow =
+        context.referenceFunctions(FqConstants.RESOLVE_SERIALIZER_OR_THROW).firstOrNull()
 
     // `val <T : Any> KSerializer<T>.nullable: KSerializer<T?>` — an extension property
     // declared in `kotlinx.serialization.builtins.BuiltinSerializers`. We resolve the

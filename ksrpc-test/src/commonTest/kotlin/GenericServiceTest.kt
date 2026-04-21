@@ -17,9 +17,12 @@ package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
+import kotlin.reflect.typeOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlinx.serialization.builtins.serializer
 
 @KsService
@@ -68,5 +71,98 @@ class GenericServiceRoundTripTest :
         val endpoints = rpcObject.endpoints
         assertEquals(true, "echo" in endpoints)
         assertEquals(true, "maybe" in endpoints)
+    }
+}
+
+/**
+ * Validates the KType-based factory API that the generated companion exposes via
+ * [RpcObjectFactory]. Callers without a static [kotlinx.serialization.KSerializer] — for
+ * example reflective or introspection code — should still be able to reach an
+ * [RpcObject] for a generic service by handing the companion `KType`s.
+ */
+private data class NotSerializable(val x: Int)
+
+class GenericServiceFactoryTest {
+
+    @Test
+    fun arityMatchesTypeParameterCount() {
+        val factory: RpcObjectFactory<*> = GenericEcho
+        assertEquals(1, factory.arity)
+    }
+
+    @Test
+    fun companionIsAccessibleViaFactoryInterface() {
+        // This is the "registry" use case: store the companion by its factory supertype
+        // and materialize an RpcObject for concrete type arguments later.
+        val factory: RpcObjectFactory<*> = GenericEcho
+        val rpcObject = factory.create(listOf(typeOf<String>()))
+        assertEquals("com.monkopedia.ksrpc.GenericEcho", rpcObject.serviceName)
+    }
+
+    @Test
+    fun createProducesWorkingRpcObject() = runBlockingUnit {
+        val rpcObject = GenericEcho.create(listOf(typeOf<String>()))
+        assertEquals("com.monkopedia.ksrpc.GenericEcho", rpcObject.serviceName)
+        val endpoints = rpcObject.endpoints
+        assertTrue("echo" in endpoints)
+        assertTrue("maybe" in endpoints)
+    }
+
+    @Test
+    fun createRoundTripsThroughPipe() = runBlockingUnit {
+        @Suppress("UNCHECKED_CAST")
+        val rpcObject =
+            GenericEcho.create(listOf(typeOf<String>())) as RpcObject<GenericEcho<String>>
+        val impl: GenericEcho<String> = object : GenericEcho<String> {
+            override suspend fun echo(item: String): String = "echoed:$item"
+            override suspend fun maybe(item: String?): String? =
+                if (item == null) null else "maybe:$item"
+            override suspend fun close() = Unit
+        }
+        val channel = impl.serialized(rpcObject, ksrpcEnvironment { })
+        val stub: GenericEcho<String> = rpcObject.createStub(channel)
+        assertEquals("echoed:hi", stub.echo("hi"))
+        assertEquals("maybe:hi", stub.maybe("hi"))
+        assertNull(stub.maybe(null))
+    }
+
+    @Test
+    fun createWithTooFewTypeArgsThrows() {
+        val ex = assertFailsWith<IllegalArgumentException> {
+            GenericEcho.create(emptyList())
+        }
+        val message = ex.message.orEmpty()
+        assertTrue(
+            "GenericEcho" in message,
+            "expected message to name the service; got: $message"
+        )
+    }
+
+    @Test
+    fun createWithTooManyTypeArgsThrows() {
+        val ex = assertFailsWith<IllegalArgumentException> {
+            GenericEcho.create(listOf(typeOf<String>(), typeOf<Int>()))
+        }
+        val message = ex.message.orEmpty()
+        assertTrue(
+            "GenericEcho" in message,
+            "expected message to name the service; got: $message"
+        )
+    }
+
+    @Test
+    fun createWithNonSerializableTypeThrows() {
+        val ex = assertFailsWith<IllegalArgumentException> {
+            GenericEcho.create(listOf(typeOf<NotSerializable>()))
+        }
+        val message = ex.message.orEmpty()
+        assertTrue(
+            "NotSerializable" in message,
+            "expected message to name the offending type; got: $message"
+        )
+        assertTrue(
+            "GenericEcho" in message,
+            "expected message to name the service; got: $message"
+        )
     }
 }

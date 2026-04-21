@@ -58,7 +58,13 @@ object FqConstants {
     val OBJ = Name.identifier("Obj")
 
     val RPC_OBJECT = ClassId(FQPKG, Name.identifier("RpcObject"))
+    val RPC_OBJECT_FACTORY = ClassId(FQPKG, Name.identifier("RpcObjectFactory"))
+    val RESOLVE_SERIALIZER_OR_THROW: CallableId =
+        CallableId(FQPKG, Name.identifier("resolveSerializerOrThrow"))
     val RPC_METHOD = ClassId(FQPKG, Name.identifier("RpcMethod"))
+    val ARITY = Name.identifier("arity")
+    val CREATE = Name.identifier("create")
+    val KTYPE = ClassId(FqName("kotlin.reflect"), Name.identifier("KType"))
 
     val SERIALIZED_SERVICE =
         ClassId(FqName("com.monkopedia.ksrpc.channels"), Name.identifier("SerializedService"))
