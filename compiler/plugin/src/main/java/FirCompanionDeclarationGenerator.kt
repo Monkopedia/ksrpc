@@ -55,6 +55,7 @@ import org.jetbrains.kotlin.fir.symbols.impl.FirConstructorSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirNamedFunctionSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirPropertySymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirRegularClassSymbol
+import org.jetbrains.kotlin.fir.types.ConeKotlinType
 import org.jetbrains.kotlin.fir.types.ConeStarProjection
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
@@ -210,7 +211,7 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
         val serviceTypeParams = serviceSymbol.typeParameterSymbols
         if (serviceTypeParams.isEmpty()) return emptyList()
         val retTypeProvider: (List<org.jetbrains.kotlin.fir.declarations.FirTypeParameter>) ->
-        org.jetbrains.kotlin.fir.types.ConeKotlinType = { tps ->
+        ConeKotlinType = { tps ->
             // RpcObject<Service<T1, T2, ...>>
             val serviceType = ownerKey.classId.createConeType(
                 session,

@@ -49,6 +49,7 @@ import org.jetbrains.kotlin.fir.symbols.impl.FirConstructorSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirNamedFunctionSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirPropertySymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirRegularClassSymbol
+import org.jetbrains.kotlin.fir.types.ConeKotlinType
 import org.jetbrains.kotlin.fir.types.ConeStarProjection
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
@@ -164,7 +165,7 @@ class FirKsrpcObjGenerator(session: FirSession) : FirDeclarationGenerationExtens
         val serviceClassId = owner.classId.outerClassId!!
         val objTypeParams = owner.typeParameterSymbols
         val retTypeProvider: (List<org.jetbrains.kotlin.fir.declarations.FirTypeParameter>) ->
-        org.jetbrains.kotlin.fir.types.ConeKotlinType = { _ ->
+        ConeKotlinType = { _ ->
             serviceClassId.createConeType(
                 session,
                 objTypeParams.map { it.toConeType() }.toTypedArray()
