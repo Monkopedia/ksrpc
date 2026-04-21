@@ -71,6 +71,11 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
         context: NestedClassGenerationContext
     ): FirClassLikeSymbol<*>? {
         if (name != SpecialNames.DEFAULT_NAME_FOR_COMPANION_OBJECT) return null
+        // Only generate the companion-object RpcObject for non-generic services.
+        // Generic services cannot have a companion RpcObject because Kotlin objects
+        // (including companions) cannot declare type parameters. Codegen for generic
+        // services is handled by a dedicated nested `Object` class, which is a follow-up.
+        if (owner.typeParameterSymbols.isNotEmpty()) return null
         return createCompanionObject(owner, Key(owner.classId)) {
             superType(RPC_OBJECT.createConeType(session, arrayOf(owner.defaultType())))
         }.symbol
@@ -204,10 +209,16 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
     override fun getNestedClassifiersNames(
         classSymbol: FirClassSymbol<*>,
         context: NestedClassGenerationContext
-    ): Set<Name> = if (session.predicateBasedProvider.matches(predicates, classSymbol)) {
-        setOf(SpecialNames.DEFAULT_NAME_FOR_COMPANION_OBJECT)
-    } else {
-        emptySet()
+    ): Set<Name> {
+        if (!session.predicateBasedProvider.matches(predicates, classSymbol)) return emptySet()
+        // Generic services don't get a companion (Kotlin objects can't have type
+        // parameters). Only advertise the companion name for non-generic services.
+        val typeParams = (classSymbol as? FirRegularClassSymbol)?.typeParameterSymbols
+        return if (typeParams.isNullOrEmpty()) {
+            setOf(SpecialNames.DEFAULT_NAME_FOR_COMPANION_OBJECT)
+        } else {
+            emptySet()
+        }
     }
 
     data class Key(val classId: ClassId, val type: String = classId.asFqNameString()) :

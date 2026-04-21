@@ -33,6 +33,7 @@ import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.util.kotlinFqName
 import org.jetbrains.kotlin.ir.visitors.acceptChildrenVoid
+import org.jetbrains.kotlin.types.Variance
 
 class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGenerationExtension {
 
@@ -77,6 +78,18 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
                 "${irClass.kotlinFqName.asString()} does not extend ${FQRPC_SERVICE.asString()}"
             )
             isValid = false
+        }
+        // Class-level type parameters on @KsService interfaces are supported, but must be
+        // invariant. `out T`/`in T` requires serializer-variance handling that is not yet
+        // implemented in codegen.
+        for (tp in irClass.typeParameters) {
+            if (tp.variance != Variance.INVARIANT) {
+                report.error(
+                    "${irClass.kotlinFqName.asString()}: type parameter ${tp.name.asString()} " +
+                        "must be invariant (got ${tp.variance.label})"
+                )
+                isValid = false
+            }
         }
         return isValid
     }
@@ -124,10 +137,7 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
         return isValid
     }
 
-    private fun validateNotification(
-        irClass: IrClass,
-        serviceMethod: ServiceMethod
-    ): Boolean {
+    private fun validateNotification(irClass: IrClass, serviceMethod: ServiceMethod): Boolean {
         val hasNotification = serviceMethod.metadataAnnotations.any {
             it.type.classFqName == FqConstants.KS_NOTIFICATION
         }

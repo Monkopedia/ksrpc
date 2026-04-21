@@ -34,6 +34,7 @@ import org.jetbrains.kotlin.fir.plugin.ClassBuildingContext
 import org.jetbrains.kotlin.fir.plugin.createConeType
 import org.jetbrains.kotlin.fir.plugin.createConstructor
 import org.jetbrains.kotlin.fir.resolve.defaultType
+import org.jetbrains.kotlin.fir.scopes.impl.toConeType
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassLikeSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirConstructorSymbol
@@ -58,8 +59,9 @@ class FirKsrpcStubGenerator(session: FirSession) : FirDeclarationGenerationExten
         name: Name,
         context: NestedClassGenerationContext
     ): FirClassLikeSymbol<*>? {
-        if (name == SpecialNames.DEFAULT_NAME_FOR_COMPANION_OBJECT) return null
+        if (name != STUB) return null
         val classId = owner.classId.createNestedClassId(STUB)
+        val serviceTypeParams = owner.typeParameterSymbols
         return ClassBuildingContext(
             session,
             Key(owner.classId.asFqNameString()),
@@ -71,7 +73,19 @@ class FirKsrpcStubGenerator(session: FirSession) : FirDeclarationGenerationExten
             status {
                 isExpect = owner.isExpect
             }
-            superType(owner.defaultType())
+            for (tp in serviceTypeParams) {
+                typeParameter(tp.name)
+            }
+            superType { refs ->
+                if (serviceTypeParams.isEmpty()) {
+                    owner.defaultType()
+                } else {
+                    owner.classId.createConeType(
+                        session,
+                        refs.map { it.symbol.toConeType() }.toTypedArray()
+                    )
+                }
+            }
             superType(RPC_SERVICE.createConeType(session))
         }.build().symbol
     }
@@ -83,11 +97,27 @@ class FirKsrpcStubGenerator(session: FirSession) : FirDeclarationGenerationExten
         context: MemberGenerationContext
     ): List<FirConstructorSymbol> {
         val ownerKey = checkOwnerKey(context) ?: return emptyList()
-        val constructor = createConstructor(context.owner, ownerKey, isPrimary = true) {
+        val owner = context.owner as FirRegularClassSymbol
+        // The service's type parameters show up on the Stub as its own type parameters, in
+        // the same order. If the owning service is generic, the primary constructor takes
+        // one KSerializer<T> per type parameter in addition to the channel.
+        val stubTypeParams = owner.typeParameterSymbols
+        val constructor = createConstructor(owner, ownerKey, isPrimary = true) {
             valueParameter(
                 CHANNEL,
                 SERIALIZED_SERVICE.createConeType(session, arrayOf(ConeStarProjection))
             )
+            for ((idx, tp) in stubTypeParams.withIndex()) {
+                valueParameter(
+                    Name.identifier(tp.name.asString() + "Serializer"),
+                    typeProvider = { refs ->
+                        KSERIALIZER.createConeType(
+                            session,
+                            arrayOf(refs[idx].symbol.toConeType())
+                        )
+                    }
+                )
+            }
         }
         return listOf(constructor.symbol)
     }
@@ -129,5 +159,7 @@ class FirKsrpcStubGenerator(session: FirSession) : FirDeclarationGenerationExten
         val RPC_SERVICE = ClassId(FqName("com.monkopedia.ksrpc"), Name.identifier("RpcService"))
         val SERIALIZED_SERVICE =
             ClassId(FqName("com.monkopedia.ksrpc.channels"), Name.identifier("SerializedService"))
+        val KSERIALIZER =
+            ClassId(FqName("kotlinx.serialization"), Name.identifier("KSerializer"))
     }
 }
