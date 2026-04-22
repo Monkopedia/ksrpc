@@ -7,6 +7,15 @@ public final class com/monkopedia/ksrpc/flow/AutoClosingFlow : kotlinx/coroutine
 	public fun collect (Lkotlinx/coroutines/flow/FlowCollector;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
+public final class com/monkopedia/ksrpc/flow/FlowTransformer : com/monkopedia/ksrpc/Transformer {
+	public fun <init> (Lcom/monkopedia/ksrpc/RpcObject;)V
+	public fun getHasContent ()Z
+	public synthetic fun transform (Ljava/lang/Object;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun transform (Lkotlinx/coroutines/flow/Flow;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun unpackError (Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/SerializedService;)V
+	public fun untransform (Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
 public abstract interface class com/monkopedia/ksrpc/flow/KsCollectionToken : com/monkopedia/ksrpc/RpcService {
 	public static final field Companion Lcom/monkopedia/ksrpc/flow/KsCollectionToken$Companion;
 	public abstract fun cancelCollection (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
