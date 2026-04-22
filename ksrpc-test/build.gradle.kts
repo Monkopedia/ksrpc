@@ -78,6 +78,7 @@ kotlin {
     }
     sourceSets["commonTest"].dependencies {
         implementation(project(":ksrpc-core"))
+        implementation(project(":ksrpc-flow"))
         implementation(project(":ksrpc-jsonrpc"))
         implementation(project(":ksrpc-ktor-client"))
         implementation(project(":ksrpc-ktor-websocket-client"))
