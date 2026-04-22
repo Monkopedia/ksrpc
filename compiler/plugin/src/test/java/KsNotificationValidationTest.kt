@@ -44,6 +44,11 @@ annotation class KsMethodMetadata
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.BINARY)
 annotation class KsNotification
+
+@KsMethodMetadata
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.BINARY)
+annotation class KsTimeout(val value: Long)
 """
     )
 
@@ -67,6 +72,39 @@ interface TestService : RpcService {
         )
         val result = compile(listOf(annotations, source))
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+    }
+
+    @Test
+    fun `multiple KsMethodMetadata-marked annotations on a single method compile`() {
+        // The metadata IR builder walks every `@KsMethodMetadata`-marked sibling annotation
+        // on the method and emits one MethodMetadata entry per annotation. Regressions where
+        // the plugin only honors the first metadata annotation, or rejects combinations,
+        // would break composite cases like `@KsNotification @KsTimeout` on the same method.
+        val source = SourceFile.kotlin(
+            "main.kt",
+            """
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsNotification
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.annotation.KsTimeout
+import com.monkopedia.ksrpc.RpcService
+
+@KsService
+interface MultiMetadataService : RpcService {
+    @KsMethod("/ping")
+    @KsNotification
+    @KsTimeout(500L)
+    suspend fun ping(input: String)
+}
+"""
+        )
+        val result = compile(listOf(annotations, source))
+        assertEquals(
+            KotlinCompilation.ExitCode.OK,
+            result.exitCode,
+            "Expected compilation to succeed with multiple metadata annotations; " +
+                "messages: ${result.messages}"
+        )
     }
 
     @Test
