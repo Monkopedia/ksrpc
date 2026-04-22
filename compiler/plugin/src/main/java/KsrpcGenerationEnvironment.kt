@@ -43,6 +43,7 @@ class KsrpcGenerationEnvironment(
     val rpcMethod = referenceClass(FqConstants.RPC_METHOD)
     val serviceExecutor = referenceClass(FqConstants.SERVICE_EXECUTOR)
     val serializerTransformer = referenceClass(FqConstants.SERIALIZER_TRANSFORMER)
+
     // The `ByteReadChannel` adapter lives in `ksrpc-binary-ktor`. Resolved
     // optionally so modules that never declare a `ByteReadChannel` service
     // signature — including `ksrpc-core` itself, which applies this plugin —
@@ -51,6 +52,14 @@ class KsrpcGenerationEnvironment(
     // misses.
     val binaryTransformer: IrClassSymbol? =
         maybeReferenceClass(FqConstants.BYTE_READ_CHANNEL_TRANSFORMER)
+
+    // The `kotlinx.io.Source` adapter lives in `ksrpc-binary-kotlinx-io`.
+    // Same optional-resolution pattern as [binaryTransformer]: consumers
+    // that never declare a `Source` service signature don't need the
+    // adapter on their classpath; callers emit a user-error diagnostic
+    // when the lookup misses.
+    val sourceTransformer: IrClassSymbol? =
+        maybeReferenceClass(FqConstants.SOURCE_TRANSFORMER)
     val introspectionImpl: IrClassSymbol by lazy {
         referenceClass(FqConstants.INTROSPECTION_SERVICE_IMPL)
     }

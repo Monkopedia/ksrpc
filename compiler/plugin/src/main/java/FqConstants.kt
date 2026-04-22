@@ -57,6 +57,18 @@ object FqConstants {
         FqName("com.monkopedia.ksrpc.binary.ktor"),
         Name.identifier("ByteReadChannelTransformer")
     )
+
+    /**
+     * Transformer emitted for methods with `kotlinx.io.Source` inputs or
+     * outputs. Lives in `ksrpc-binary-kotlinx-io`, the dedicated kotlinx.io
+     * adapter module. Resolved optionally: consumers who never use `Source`
+     * in a service signature do not need `ksrpc-binary-kotlinx-io` on their
+     * classpath.
+     */
+    val SOURCE_TRANSFORMER = ClassId(
+        FqName("com.monkopedia.ksrpc.binary.kxio"),
+        Name.identifier("SourceTransformer")
+    )
     val SUBSERVICE_TRANSFORMER = ClassId(FQPKG, Name.identifier("SubserviceTransformer"))
     val SUSPEND_CLOSEABLE = ClassId(FQPKG, Name.identifier("SuspendCloseable"))
 
@@ -70,6 +82,7 @@ object FqConstants {
     val THREAD_LOCAL = ClassId(FqName("kotlin.native.concurrent"), Name.identifier("ThreadLocal"))
 
     val BYTE_READ_CHANNEL = FqName("io.ktor.utils.io.ByteReadChannel")
+    val KOTLINX_IO_SOURCE = FqName("kotlinx.io.Source")
 
     val CREATE_STUB = Name.identifier("createStub")
     val FIND_ENDPOINT = Name.identifier("findEndpoint")

@@ -261,11 +261,13 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
         // user-declared input to check against ByteReadChannel.
         val inputType = valueParams.firstOrNull()?.type?.classFqName
         val outputType = method.returnType.classFqName
-        if (inputType == BYTE_READ_CHANNEL && outputType == BYTE_READ_CHANNEL) {
+        val binaryFqNames = setOf(BYTE_READ_CHANNEL, FqConstants.KOTLINX_IO_SOURCE)
+        if (inputType in binaryFqNames && outputType in binaryFqNames) {
             val fqName = irClass.kotlinFqName.asString()
             val methodName = method.name.asString()
             report.reportUserError(
-                "$fqName.$methodName: ByteReadChannel not yet supported for both input and output",
+                "$fqName.$methodName: binary streams not yet supported for both input and " +
+                    "output",
                 element = method
             )
             isValid = false
