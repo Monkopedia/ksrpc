@@ -69,6 +69,18 @@ object FqConstants {
         FqName("com.monkopedia.ksrpc.binary.kxio"),
         Name.identifier("SourceTransformer")
     )
+
+    /**
+     * Transformer emitted for methods with `okio.BufferedSource` inputs or
+     * outputs. Lives in `ksrpc-binary-okio`, the dedicated okio adapter
+     * module. Resolved optionally: consumers who never use `BufferedSource`
+     * in a service signature do not need `ksrpc-binary-okio` on their
+     * classpath.
+     */
+    val BUFFERED_SOURCE_TRANSFORMER = ClassId(
+        FqName("com.monkopedia.ksrpc.binary.okio"),
+        Name.identifier("BufferedSourceTransformer")
+    )
     val SUBSERVICE_TRANSFORMER = ClassId(FQPKG, Name.identifier("SubserviceTransformer"))
     val SUSPEND_CLOSEABLE = ClassId(FQPKG, Name.identifier("SuspendCloseable"))
 
@@ -83,6 +95,7 @@ object FqConstants {
 
     val BYTE_READ_CHANNEL = FqName("io.ktor.utils.io.ByteReadChannel")
     val KOTLINX_IO_SOURCE = FqName("kotlinx.io.Source")
+    val OKIO_BUFFERED_SOURCE = FqName("okio.BufferedSource")
 
     val CREATE_STUB = Name.identifier("createStub")
     val FIND_ENDPOINT = Name.identifier("findEndpoint")

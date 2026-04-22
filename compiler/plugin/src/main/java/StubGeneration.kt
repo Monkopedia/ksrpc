@@ -491,6 +491,13 @@ class StubGeneration(
                                 "on the compile classpath"
                         )
 
+                FqConstants.OKIO_BUFFERED_SOURCE ->
+                    env.bufferedSourceTransformer
+                        ?: reportInternal(
+                            "okio.BufferedSource adapter (ksrpc-binary-okio) missing " +
+                                "on the compile classpath"
+                        )
+
                 else ->
                     env.binaryTransformer
                         ?: reportInternal(
@@ -643,6 +650,7 @@ class StubGeneration(
         type.extends(env.rpcService) -> RpcType.SERVICE
         type.classFqName == BYTE_READ_CHANNEL -> RpcType.BINARY
         type.classFqName == FqConstants.KOTLINX_IO_SOURCE -> RpcType.BINARY
+        type.classFqName == FqConstants.OKIO_BUFFERED_SOURCE -> RpcType.BINARY
         else -> RpcType.DEFAULT
     }
 

@@ -1,0 +1,23 @@
+public final class com/monkopedia/ksrpc/binary/okio/BufferedSourceBinaryData : com/monkopedia/ksrpc/channels/RpcBinaryData {
+	public fun <init> (Lokio/BufferedSource;Ljava/lang/Long;)V
+	public synthetic fun <init> (Lokio/BufferedSource;Ljava/lang/Long;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun close (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getSize ()Ljava/lang/Long;
+	public fun transferTo (Lkotlin/jvm/functions/Function4;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/monkopedia/ksrpc/binary/okio/BufferedSourceBinaryDataKt {
+	public static final fun asBufferedSource (Lcom/monkopedia/ksrpc/channels/RpcBinaryData;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun asRpcBinaryData (Lokio/BufferedSource;Ljava/lang/Long;)Lcom/monkopedia/ksrpc/channels/RpcBinaryData;
+	public static synthetic fun asRpcBinaryData$default (Lokio/BufferedSource;Ljava/lang/Long;ILjava/lang/Object;)Lcom/monkopedia/ksrpc/channels/RpcBinaryData;
+}
+
+public final class com/monkopedia/ksrpc/binary/okio/BufferedSourceTransformer : com/monkopedia/ksrpc/BinaryDataTransformer, com/monkopedia/ksrpc/Transformer {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/binary/okio/BufferedSourceTransformer;
+	public fun getHasContent ()Z
+	public synthetic fun transform (Ljava/lang/Object;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun transform (Lokio/BufferedSource;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun unpackError (Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/SerializedService;)V
+	public fun untransform (Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+

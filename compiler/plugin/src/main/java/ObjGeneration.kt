@@ -368,6 +368,27 @@ internal class GenericMethodIrBuilder(
             }
             return builder.irGetObject(sourceTransformer)
         }
+        // BINARY (okio.BufferedSource) transformer. Emits the
+        // `BufferedSourceTransformer` from `ksrpc-binary-okio` — same
+        // optional-resolution pattern as [BYTE_READ_CHANNEL] and
+        // [KOTLINX_IO_SOURCE] above.
+        if (type.classFqName == FqConstants.OKIO_BUFFERED_SOURCE) {
+            val bufferedSourceTransformer = env.bufferedSourceTransformer ?: run {
+                report.reportUserError(
+                    "okio.BufferedSource in @KsMethod requires `ksrpc-binary-okio` " +
+                        "on the compile classpath for " +
+                        "${cls.irClass.kotlinFqName.asString()}.${method.name.asString()}",
+                    element = method
+                )
+                return builder.irCallConstructor(
+                    env.serializerTransformer.constructors.first(),
+                    listOf(context.irBuiltIns.unitType)
+                ).apply {
+                    this.type = env.serializerTransformer.typeWith(context.irBuiltIns.unitType)
+                }
+            }
+            return builder.irGetObject(bufferedSourceTransformer)
+        }
         // Flow<T> is bridged to the KsFlowService sub-service protocol. Only reachable when
         // ksrpc-flow is on the compile classpath — otherwise we fall through to the generic
         // serializer path, which will produce a clearer "no serializer" diagnostic.

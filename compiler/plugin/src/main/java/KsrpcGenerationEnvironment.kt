@@ -60,6 +60,14 @@ class KsrpcGenerationEnvironment(
     // when the lookup misses.
     val sourceTransformer: IrClassSymbol? =
         maybeReferenceClass(FqConstants.SOURCE_TRANSFORMER)
+
+    // The `okio.BufferedSource` adapter lives in `ksrpc-binary-okio`.
+    // Same optional-resolution pattern as [binaryTransformer]: consumers
+    // that never declare a `BufferedSource` service signature don't need
+    // the adapter on their classpath; callers emit a user-error diagnostic
+    // when the lookup misses.
+    val bufferedSourceTransformer: IrClassSymbol? =
+        maybeReferenceClass(FqConstants.BUFFERED_SOURCE_TRANSFORMER)
     val introspectionImpl: IrClassSymbol by lazy {
         referenceClass(FqConstants.INTROSPECTION_SERVICE_IMPL)
     }
