@@ -80,6 +80,8 @@ kotlin {
         // the extension helpers tests exercise.
         implementation(project(":ksrpc-packets"))
         implementation(project(":ksrpc-binary-ktor"))
+        // Exercises the kotlinx.io `Source` adapter alongside the ktor one.
+        implementation(project(":ksrpc-binary-kotlinx-io"))
     }
     sourceSets["commonTest"].dependencies {
         implementation(project(":ksrpc-core"))
