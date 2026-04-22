@@ -80,6 +80,44 @@ class KsrpcGenerationEnvironment(
             } == true
         }?.owner?.getter?.symbol
 
+    // Top-level builder functions in `kotlinx.serialization.builtins` that compose
+    // element serializers into `KSerializer<List<T>>` / `KSerializer<Set<T>>` /
+    // `KSerializer<Map<K, V>>`. Used by the generic @KsService codegen to build
+    // composed serializer expressions for wrapper types that reference a class-level
+    // type parameter. Resolved optimistically — callers fall back to reportUserError
+    // when the lookup misses (should only happen on a broken kotlinx-serialization
+    // classpath).
+    val listSerializerBuilder =
+        context.referenceFunctions(
+            CallableId(
+                FqName("kotlinx.serialization.builtins"),
+                Name.identifier("ListSerializer")
+            )
+        ).firstOrNull { fn ->
+            fn.owner.parameters.count { it.kind == IrParameterKind.Regular } == 1 &&
+                fn.owner.typeParameters.size == 1
+        }
+    val setSerializerBuilder =
+        context.referenceFunctions(
+            CallableId(
+                FqName("kotlinx.serialization.builtins"),
+                Name.identifier("SetSerializer")
+            )
+        ).firstOrNull { fn ->
+            fn.owner.parameters.count { it.kind == IrParameterKind.Regular } == 1 &&
+                fn.owner.typeParameters.size == 1
+        }
+    val mapSerializerBuilder =
+        context.referenceFunctions(
+            CallableId(
+                FqName("kotlinx.serialization.builtins"),
+                Name.identifier("MapSerializer")
+            )
+        ).firstOrNull { fn ->
+            fn.owner.parameters.count { it.kind == IrParameterKind.Regular } == 2 &&
+                fn.owner.typeParameters.size == 2
+        }
+
     val threadLocal = referenceClass(FqConstants.THREAD_LOCAL)
     val listOfFunction =
         context.referenceFunctions(

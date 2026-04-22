@@ -161,6 +161,135 @@ interface KsBatcher<T>: RpcService {
     }
 
     @Test
+    fun `generic ksservice with List-of-T input and output compiles`() {
+        val source = SourceFile.kotlin(
+            "main.kt",
+            """
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.RpcService
+
+@KsService
+interface KsListEcho<T>: RpcService {
+    @KsMethod("/echo")
+    suspend fun echo(items: List<T>): List<T>
+}
+"""
+        )
+        val result = compile(sourceFile = source)
+        assertEquals(
+            KotlinCompilation.ExitCode.OK,
+            result.exitCode,
+            "messages: ${result.messages}"
+        )
+    }
+
+    @Test
+    fun `generic ksservice with Set of T compiles`() {
+        val source = SourceFile.kotlin(
+            "main.kt",
+            """
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.RpcService
+
+@KsService
+interface KsSetEcho<T>: RpcService {
+    @KsMethod("/echo")
+    suspend fun echo(items: Set<T>): Set<T>
+}
+"""
+        )
+        val result = compile(sourceFile = source)
+        assertEquals(
+            KotlinCompilation.ExitCode.OK,
+            result.exitCode,
+            "messages: ${result.messages}"
+        )
+    }
+
+    @Test
+    fun `generic ksservice with Map of String to T compiles`() {
+        val source = SourceFile.kotlin(
+            "main.kt",
+            """
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.RpcService
+
+@KsService
+interface KsMapEcho<T>: RpcService {
+    @KsMethod("/echo")
+    suspend fun echo(entries: Map<String, T>): Map<String, T>
+}
+"""
+        )
+        val result = compile(sourceFile = source)
+        assertEquals(
+            KotlinCompilation.ExitCode.OK,
+            result.exitCode,
+            "messages: ${result.messages}"
+        )
+    }
+
+    @Test
+    fun `generic ksservice with nullable wrappers compiles`() {
+        val source = SourceFile.kotlin(
+            "main.kt",
+            """
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.RpcService
+
+@KsService
+interface KsNullableWrappers<T>: RpcService {
+    @KsMethod("/a")
+    suspend fun a(items: List<T>?): List<T>?
+
+    @KsMethod("/b")
+    suspend fun b(items: List<T?>): List<T?>
+
+    @KsMethod("/c")
+    suspend fun c(entries: Map<String, T?>?): Map<String, T?>?
+}
+"""
+        )
+        val result = compile(sourceFile = source)
+        assertEquals(
+            KotlinCompilation.ExitCode.OK,
+            result.exitCode,
+            "messages: ${result.messages}"
+        )
+    }
+
+    @Test
+    fun `generic ksservice with nested wrappers compiles`() {
+        val source = SourceFile.kotlin(
+            "main.kt",
+            """
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.RpcService
+
+@KsService
+interface KsNested<T>: RpcService {
+    @KsMethod("/a")
+    suspend fun a(items: List<List<T>>): List<List<T>>
+
+    @KsMethod("/b")
+    suspend fun b(entries: Map<String, List<T>>): Map<String, List<T>>
+}
+"""
+        )
+        val result = compile(sourceFile = source)
+        assertEquals(
+            KotlinCompilation.ExitCode.OK,
+            result.exitCode,
+            "messages: ${result.messages}"
+        )
+    }
+
+    @Test
     fun `method-level type parameters are still rejected`() {
         val source = SourceFile.kotlin(
             "main.kt",
