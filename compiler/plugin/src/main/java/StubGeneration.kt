@@ -17,8 +17,6 @@
 
 package com.monkopedia.ksrpc.plugin
 
-import com.monkopedia.ksrpc.plugin.FqConstants.BYTE_READ_CHANNEL
-import com.monkopedia.ksrpc.plugin.FqConstants.INVOKE
 import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
@@ -480,32 +478,23 @@ class StubGeneration(
     ) = when (outputRpcType) {
         // The paired `ObjGeneration.createTypeConverter` already emits a user
         // diagnostic when the underlying adapter is missing; by the time we
-        // reach stub generation the classpath must satisfy it. Dispatch on
-        // the user-facing type FQN to pick the correct transformer object.
-        RpcType.BINARY -> declarationIrBuilder.irGetObject(
-            when (outputType.classFqName) {
-                FqConstants.KOTLINX_IO_SOURCE ->
-                    env.sourceTransformer
-                        ?: reportInternal(
-                            "kotlinx.io.Source adapter (ksrpc-binary-kotlinx-io) missing " +
-                                "on the compile classpath"
-                        )
-
-                FqConstants.OKIO_BUFFERED_SOURCE ->
-                    env.bufferedSourceTransformer
-                        ?: reportInternal(
-                            "okio.BufferedSource adapter (ksrpc-binary-okio) missing " +
-                                "on the compile classpath"
-                        )
-
-                else ->
-                    env.binaryTransformer
-                        ?: reportInternal(
-                            "ByteReadChannel adapter (ksrpc-binary-ktor) missing " +
-                                "on the compile classpath"
-                        )
-            }
-        )
+        // reach stub generation the classpath must satisfy it. Dispatch via
+        // the binary-adapter registry to pick the correct transformer object.
+        RpcType.BINARY -> {
+            val adapter = env.findAdapterByFqName(outputType.classFqName)
+                ?: reportInternal(
+                    "RpcType.BINARY fired for unknown user type " +
+                        "${outputType.classFqName?.asString()} — registry and " +
+                        "determineType must agree"
+                )
+            val transformer = adapter.transformerClass
+                ?: reportInternal(
+                    "${adapter.userFqName.asString()} adapter (${adapter.moduleHint}) " +
+                        "missing on the compile classpath — ObjGeneration should have " +
+                        "reported the user-facing diagnostic before reaching stub codegen"
+                )
+            declarationIrBuilder.irGetObject(transformer)
+        }
 
         RpcType.FLOW -> buildFlowTransformer(outputType, declarationIrBuilder)
 
@@ -648,9 +637,7 @@ class StubGeneration(
     private fun determineType(type: IrType): RpcType = when {
         env.flowSupported && type.classFqName == FqConstants.FLOW -> RpcType.FLOW
         type.extends(env.rpcService) -> RpcType.SERVICE
-        type.classFqName == BYTE_READ_CHANNEL -> RpcType.BINARY
-        type.classFqName == FqConstants.KOTLINX_IO_SOURCE -> RpcType.BINARY
-        type.classFqName == FqConstants.OKIO_BUFFERED_SOURCE -> RpcType.BINARY
+        env.findAdapterByFqName(type.classFqName) != null -> RpcType.BINARY
         else -> RpcType.DEFAULT
     }
 
