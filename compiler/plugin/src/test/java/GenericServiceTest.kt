@@ -397,6 +397,76 @@ fun <S> useStub(
     }
 
     @Test
+    fun `generic ksservice with generic subservice parameter compiles`() {
+        // Exercises the ObjGeneration fix that lets a generic `@KsService` accept a
+        // generic sub-service in its method signature. Before the fix, the compiler
+        // plugin rejected `foo(sub: Sub<T>)` with "Cannot compose a KSerializer for
+        // Sub<T>" because the generic-path createTypeConverter always fell through to
+        // the KSerializer composer instead of recognizing the RpcService supertype.
+        val source = SourceFile.kotlin(
+            "main.kt",
+            """
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.RpcService
+
+@KsService
+interface Sub<T> : RpcService {
+    @KsMethod("/x")
+    suspend fun x(t: T)
+}
+
+@KsService
+interface Outer<T> : RpcService {
+    @KsMethod("/take")
+    suspend fun take(sub: Sub<T>)
+
+    @KsMethod("/give")
+    suspend fun give(u: Unit): Sub<T>
+}
+"""
+        )
+        val result = compile(sourceFile = source)
+        assertEquals(
+            KotlinCompilation.ExitCode.OK,
+            result.exitCode,
+            "messages: ${result.messages}"
+        )
+    }
+
+    @Test
+    fun `generic ksservice with non-generic subservice parameter compiles`() {
+        // The generic-service createTypeConverter must also route non-generic sub-services
+        // through SubserviceTransformer rather than the KSerializer composer.
+        val source = SourceFile.kotlin(
+            "main.kt",
+            """
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.RpcService
+
+@KsService
+interface Token : RpcService {
+    @KsMethod("/hit")
+    suspend fun hit(u: Unit)
+}
+
+@KsService
+interface GenericHolder<T> : RpcService {
+    @KsMethod("/token")
+    suspend fun token(u: Unit): Token
+}
+"""
+        )
+        val result = compile(sourceFile = source)
+        assertEquals(
+            KotlinCompilation.ExitCode.OK,
+            result.exitCode,
+            "messages: ${result.messages}"
+        )
+    }
+
+    @Test
     fun `out-variance on class type params is rejected`() {
         val source = SourceFile.kotlin(
             "main.kt",

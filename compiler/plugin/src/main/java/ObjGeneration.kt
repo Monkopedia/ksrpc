@@ -69,6 +69,7 @@ import org.jetbrains.kotlin.ir.types.typeOrNull
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
 import org.jetbrains.kotlin.ir.util.addChild
+import org.jetbrains.kotlin.ir.util.companionObject
 import org.jetbrains.kotlin.ir.util.constructors
 import org.jetbrains.kotlin.ir.util.createThisReceiverParameter
 import org.jetbrains.kotlin.ir.util.kotlinFqName
@@ -329,16 +330,97 @@ internal class GenericMethodIrBuilder(
         if (type.classFqName == FqConstants.BYTE_READ_CHANNEL) {
             return builder.irGetObject(env.binaryTransformer)
         }
-        // Subservice transforms are not supported for type-parameter-bearing output types,
-        // because we'd need an RpcObject<Service<T>> which requires composing a companion
-        // invoke. That's out of scope for the initial generic support. Fall through to the
-        // serializer transformer and let the runtime fail loudly if this actually happens.
+        // Sub-service transformer when `type` is itself an @KsService. Both non-generic
+        // sub-services (companion is the `RpcObject`) and generic sub-services (companion
+        // is an `RpcObjectFactory`, and we materialize a concrete `Obj<T, ...>` via the
+        // nested Obj constructor threading the outer service's serializer fields) are
+        // supported.
+        if (type.extendsRpcService()) {
+            val rpcObjectExpr = buildSubserviceRpcObject(
+                builder,
+                type,
+                serializerReceiver,
+                serializerFields,
+                method
+            )
+            return builder.irCallConstructor(
+                env.subserviceTransformer.constructors.first(),
+                listOf(type)
+            ).apply {
+                this.type = env.subserviceTransformer.typeWith(type)
+                putArgs(rpcObjectExpr)
+            }
+        }
         return builder.irCallConstructor(
             env.serializerTransformer.constructors.first(),
             listOf(type)
         ).apply {
             this.type = env.serializerTransformer.typeWith(type)
             putArgs(buildSerializer(builder, type, serializerReceiver, serializerFields, method))
+        }
+    }
+
+    /** True iff [this] has `com.monkopedia.ksrpc.RpcService` anywhere in its supertype chain. */
+    private fun IrType.extendsRpcService(): Boolean {
+        if (classFqName == FqConstants.FQRPC_SERVICE) return true
+        val cls = (this as? IrSimpleType)?.classifier as?
+            org.jetbrains.kotlin.ir.symbols.IrClassSymbol
+        return cls?.owner?.superTypes?.any { it.extendsRpcService() } == true
+    }
+
+    /**
+     * Build an IR expression that evaluates to an `RpcObject<ServiceType>` for a sub-service
+     * parameter/return type. When the sub-service type has no type arguments that reference
+     * our outer service's type parameters, we emit `irGetObject(subservice.Companion)`
+     * (companion is already an `RpcObject<Sub>` for non-generic services, or assignable to
+     * one when the sub-service itself is non-generic). Otherwise we construct the nested
+     * `Sub.Obj<A, B, ...>(serA, serB, ...)` directly, composing each type-argument
+     * serializer via [buildSerializer].
+     */
+    private fun buildSubserviceRpcObject(
+        builder: IrBuilderWithScope,
+        type: IrType,
+        serializerReceiver: IrValueParameter,
+        serializerFields: List<IrField>,
+        method: IrSimpleFunction
+    ): IrExpression {
+        val simple = type as? IrSimpleType
+            ?: reportInternal(
+                "sub-service type ${type.render()} is not IrSimpleType — cannot build " +
+                    "RpcObject for generic service codegen"
+            )
+        val subClassSymbol = simple.classifier as?
+            org.jetbrains.kotlin.ir.symbols.IrClassSymbol
+        val subClass = subClassSymbol?.owner ?: reportInternal(
+            "sub-service type ${type.render()} has no class classifier — cannot " +
+                "build RpcObject"
+        )
+        val companion = subClass.companionObject()
+            ?: reportInternal(
+                "sub-service ${subClass.kotlinFqName.asString()} has no companion — " +
+                    "must be an @KsService interface"
+            )
+        // No class-level type parameters: companion IS an RpcObject<Sub>.
+        if (subClass.typeParameters.isEmpty()) {
+            return builder.irGetObject(companion.symbol)
+        }
+        // Generic sub-service — find its nested Obj class and construct it with
+        // per-type-argument serializers composed from our serializer fields.
+        val objClass = subClass.declarations
+            .filterIsInstance<IrClass>()
+            .firstOrNull { it.name == FqConstants.OBJ }
+            ?: reportInternal(
+                "sub-service ${subClass.kotlinFqName.asString()} has no nested Obj class — " +
+                    "@KsService plugin did not run on the sub-service"
+            )
+        val objConstructor = objClass.constructors.first { it.isPrimary }
+        val typeArgs = simple.arguments.map { it.typeOrFail }
+        return builder.irCallConstructor(objConstructor.symbol, typeArgs).apply {
+            this.type = objClass.typeWith(typeArgs)
+            val serArgs = typeArgs.map { arg ->
+                buildSerializer(builder, arg, serializerReceiver, serializerFields, method)
+            }.toTypedArray()
+            putArgs(*serArgs)
         }
     }
 
