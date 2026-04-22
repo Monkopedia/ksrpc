@@ -21,6 +21,7 @@ import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.backend.common.lower.irThrow
+import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.descriptors.Modality
@@ -79,6 +80,7 @@ import org.jetbrains.kotlin.name.Name
  */
 class ObjGeneration(
     context: IrPluginContext,
+    private val report: MessageCollector,
     private val classes: MutableMap<String, ServiceClass>,
     private val env: KsrpcGenerationEnvironment
 ) : AbstractTransformerForGenerator(context) {
@@ -101,8 +103,8 @@ class ObjGeneration(
         // Executors are pre-created by StubGeneration (parented to the Stub class) before
         // ObjGeneration runs. findEndpoint bodies look them up via `cls.genericExecutors`.
         check(cls.genericExecutors.isNotEmpty() || cls.methods.isEmpty()) {
-            "Expected generic executors to be pre-created by StubGeneration for " +
-                cls.irClass.kotlinFqName.asString()
+            "ksrpc internal: expected generic executors to be pre-created by " +
+                "StubGeneration for ${cls.irClass.kotlinFqName.asString()}"
         }
         // Eagerly emit property bodies for serviceName / endpoints so the IR visitor doesn't
         // need to rely on correspondingPropertySymbol being wired correctly across FIR2IR.
@@ -199,15 +201,23 @@ class ObjGeneration(
 
     private fun buildFindEndpoint(function: IrSimpleFunction, cls: ServiceClass): IrBlockBody {
         val thisRcv = function.dispatchReceiverParameter!!
-        val builder = GenericMethodIrBuilder(context, env, cls)
+        val builder = GenericMethodIrBuilder(context, env, report, cls)
         return context.irBuilder(function).irSynthBody {
             val input = function.parameters.first { !it.isDispatchReceiver }
             val branches = buildList {
                 for (method in cls.methods) {
                     val endpoint = method.ksMethodAnnotation.arguments[0].constString()
-                        ?: error("Lost endpoint")
+                        ?: reportInternal(
+                            "@KsMethod annotation on " +
+                                "${method.function.name.asString()} lost its endpoint " +
+                                "argument after validation"
+                        )
                     val executor = cls.genericExecutors[endpoint.trimStart('/')]
-                        ?: error("Executor missing for endpoint $endpoint")
+                        ?: reportInternal(
+                            "generic executor missing for endpoint $endpoint on " +
+                                cls.irClass.kotlinFqName.asString() +
+                                " — StubGeneration should have pre-created it"
+                        )
                     this += irBranch(
                         irEquals(irString(endpoint.trimStart('/')), irGet(input)),
                         builder.irCreateRpcMethod(
@@ -247,6 +257,7 @@ class ObjGeneration(
 internal class GenericMethodIrBuilder(
     private val context: IrPluginContext,
     private val env: KsrpcGenerationEnvironment,
+    private val report: MessageCollector,
     private val cls: ServiceClass
 ) {
     fun irCreateRpcMethod(
@@ -296,7 +307,7 @@ internal class GenericMethodIrBuilder(
                 SYNTHETIC_OFFSET,
                 SYNTHETIC_OFFSET
             )
-            args += MetadataIrBuilder(env, decl).buildMetadataList(metadataAnnotations)
+            args += MetadataIrBuilder(env, decl, report).buildMetadataList(metadataAnnotations)
         }
         call.putArgs(*args.toTypedArray())
         return call
@@ -351,7 +362,10 @@ internal class GenericMethodIrBuilder(
         }
         // Fallback: use kotlinx.serialization.serializer<T>().
         val serializerFn = env.serializerMethod
-            ?: error("Missing kotlinx.serialization.serializer<T>() reference")
+            ?: reportInternal(
+                "can't resolve kotlinx.serialization.serializer<T>() — " +
+                    "kotlinx-serialization-core must be on the compile classpath"
+            )
         return builder.irCall(serializerFn).apply {
             typeArguments[0] = type
             this.type = env.kSerializer.typeWith(type)
@@ -364,9 +378,9 @@ internal class GenericMethodIrBuilder(
         nullableType: IrType
     ): IrExpression {
         val getter = env.getSerializerNullable
-            ?: error(
+            ?: reportInternal(
                 "kotlinx.serialization's KSerializer.nullable extension is not on the " +
-                    "compile classpath; nullable type-parameter serialization unsupported."
+                    "compile classpath; nullable type-parameter serialization unsupported"
             )
         return builder.irCall(getter).apply {
             // Extension receiver is the base serializer. In 2.x IR, argument[0] is the

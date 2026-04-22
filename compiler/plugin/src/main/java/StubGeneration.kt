@@ -114,10 +114,14 @@ class StubGeneration(
         // `service.genericExecutors`) so both the stub body and Obj.findEndpoint produce
         // RpcMethod instances that reference the same executor class.
         val genericBuilder = if (declaration.typeParameters.isNotEmpty()) {
-            GenericMethodIrBuilder(context, env, service).also { builder ->
+            GenericMethodIrBuilder(context, env, messageCollector, service).also { builder ->
                 for (serviceMethod in service.methods) {
                     val endpoint = serviceMethod.ksMethodAnnotation.arguments[0].constString()
-                        ?: error("Lost endpoint")
+                        ?: reportInternal(
+                            "@KsMethod annotation on " +
+                                "${serviceMethod.function.name.asString()} lost its " +
+                                "endpoint argument after validation"
+                        )
                     val executor = builder.buildExecutor(serviceMethod.function, declaration)
                     service.genericExecutors[endpoint.trimStart('/')] = executor
                 }
@@ -133,7 +137,11 @@ class StubGeneration(
             service.methods.map { serviceMethod ->
                 if (genericBuilder != null) {
                     val endpoint = serviceMethod.ksMethodAnnotation.arguments[0].constString()
-                        ?: error("Lost endpoint")
+                        ?: reportInternal(
+                            "@KsMethod annotation on " +
+                                "${serviceMethod.function.name.asString()} lost its " +
+                                "endpoint argument after validation"
+                        )
                     add(
                         declaration.generateGenericMethodBody(
                             serviceMethod.function,
@@ -190,7 +198,10 @@ class StubGeneration(
             val thisParam = override.parameters[0]
             val inputParam = override.parameters[1]
             val executor = service.genericExecutors[endpoint.trimStart('/')]
-                ?: error("Executor missing for endpoint $endpoint")
+                ?: reportInternal(
+                    "generic executor missing for endpoint $endpoint on " +
+                        service.irClass.kotlinFqName.asString()
+                )
             +irReturn(
                 irCall(callChannel).apply {
                     type = substitutedReturn
@@ -287,7 +298,10 @@ class StubGeneration(
 
     private fun IrClass.generateCloseMethod(serviceClass: ServiceClass): IrSimpleFunction {
         val close = functions.find { it.name == FqConstants.CLOSE }
-            ?: error("Can't find close method")
+            ?: reportInternal(
+                "can't find close() on generated Stub for " +
+                    serviceClass.irClass.kotlinFqName.asString()
+            )
         val suspendClose = env.suspendCloseable.findMethod(FqConstants.CLOSE)
 
         return context.overrideMethod(this, close.symbol, close.returnType) { override ->
@@ -306,7 +320,10 @@ class StubGeneration(
         companion: IrClass,
         service: ServiceClass
     ): IrFunction {
-        val endpoint = annotation.arguments[0].constString() ?: error("Lost endpoint")
+        val endpoint = annotation.arguments[0].constString() ?: reportInternal(
+            "@KsMethod annotation on ${method.name.asString()} lost its endpoint " +
+                "argument after validation"
+        )
         val methodField =
             generateRpcMethod(env, endpoint, method, this, companion, metadataAnnotations)
 
@@ -321,7 +338,11 @@ class StubGeneration(
                         val overrideParams = override.parameters.map {
                             it.name.asString() to it.type.classFqName?.asString()
                         }
-                        error("Unexpected override parameters $overrideParams")
+                        reportInternal(
+                            "generated stub override for ${method.name.asString()} has " +
+                                "unexpected parameters $overrideParams (expected exactly " +
+                                "dispatch + single value parameter)"
+                        )
                     }
                     putArgs(
                         irCall(methodField).apply {
@@ -423,7 +444,7 @@ class StubGeneration(
                 }
             )
             if (supportsMetadata) {
-                args += MetadataIrBuilder(env, this@irCreateRpcMethod)
+                args += MetadataIrBuilder(env, this@irCreateRpcMethod, messageCollector)
                     .buildMetadataList(metadataAnnotations)
             }
             putArgs(*args.toTypedArray())
@@ -456,7 +477,12 @@ class StubGeneration(
     }
 
     private fun getSerializer(irBlockBodyBuilder: DeclarationIrBuilder, type: IrType) =
-        irBlockBodyBuilder.irCall(env.serializerMethod ?: error("Missing serializer")).apply {
+        irBlockBodyBuilder.irCall(
+            env.serializerMethod ?: reportInternal(
+                "can't resolve kotlinx.serialization.serializer<T>() — " +
+                    "kotlinx-serialization-core must be on the compile classpath"
+            )
+        ).apply {
             typeArguments[0] = type
             this.type = env.kSerializer.typeWith(type)
         }
@@ -486,7 +512,14 @@ class StubGeneration(
 fun KsrpcGenerationEnvironment.companionSymbol(outputType: IrType): IrClassSymbol {
     val clazz = outputType.getClass()
     val companionSymbol = clazz?.companionObject()?.symbol
-        ?: error("Missing companion ${outputType.classFqName?.asString()}")
+        // TODO (issue #27 follow-up): this can fire when a user returns an RpcService
+        // subtype that isn't annotated `@KsService`. Route through MessageCollector once
+        // StubGeneration.companionSymbol gets a location for the offending return type.
+        ?: error(
+            "ksrpc internal: missing companion on sub-service return type " +
+                "${outputType.classFqName?.asString()} — the return type must be an " +
+                "@KsService interface"
+        )
     return companionSymbol
 }
 

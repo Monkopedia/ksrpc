@@ -18,6 +18,7 @@
 package com.monkopedia.ksrpc.plugin
 
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
+import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.ir.builders.irBoolean
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irCallConstructor
@@ -55,11 +56,13 @@ import org.jetbrains.kotlin.ir.util.parentClassOrNull
  */
 class MetadataIrBuilder(
     private val env: KsrpcGenerationEnvironment,
-    private val builder: DeclarationIrBuilder
+    private val builder: DeclarationIrBuilder,
+    private val report: MessageCollector
 ) {
     init {
         check(env.metadataSupported) {
-            "MetadataIrBuilder created without metadata-capable dependencies"
+            "ksrpc internal: MetadataIrBuilder created without metadata-capable " +
+                "dependencies — caller should guard on env.metadataSupported"
         }
     }
 
@@ -78,9 +81,9 @@ class MetadataIrBuilder(
 
     private fun buildMetadata(annotation: IrConstructorCall): IrExpression {
         val annotationFqName = annotation.type.classFqName?.asString()
-            ?: error("Sibling annotation has no FQ name")
+            ?: reportInternal("sibling annotation has no FQ name")
         val annotationClass = annotation.symbol.owner.parentClassOrNull
-            ?: error("Sibling annotation $annotationFqName has no parent class")
+            ?: reportInternal("sibling annotation $annotationFqName has no parent class")
         val ctor = annotationClass.constructors.first()
         val pairs = mutableListOf<IrExpression>()
         for ((index, arg) in annotation.arguments.withIndex()) {
@@ -90,10 +93,20 @@ class MetadataIrBuilder(
             val expr = arg ?: continue
             val name = param.name.asString()
             val value = buildMetadataValue(expr)
-                ?: error(
-                    "Unsupported annotation argument $annotationFqName.$name: " +
-                        expr::class.simpleName
+            if (value == null) {
+                report.reportUserError(
+                    "@$annotationFqName: unsupported ksrpc method-metadata argument " +
+                        "`$name` (${expr::class.simpleName}). Supported shapes are " +
+                        "String/Int/Long/Boolean/Double/Float constants, KClass " +
+                        "literals, enum constants, and arrays/varargs of the above. " +
+                        "Nested annotations are not supported.",
+                    element = expr
                 )
+                // Emit a diagnostic and fall back to dropping this argument rather than
+                // crashing the compiler. The compilation will still fail because the
+                // ERROR diagnostic has been reported.
+                continue
+            }
             pairs.add(buildPair(name, value))
         }
 

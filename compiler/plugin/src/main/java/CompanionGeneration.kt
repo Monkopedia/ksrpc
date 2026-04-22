@@ -138,7 +138,10 @@ class CompanionGeneration(
         objectReference: IrClassReference
     ): IrConstructorCall {
         val primaryConstructor = rpcObjectKey.constructors.find { it.owner.isPrimary }
-            ?: error("No primary constructor")
+            ?: reportInternal(
+                "RpcObjectKey has no primary constructor — ksrpc-core runtime must " +
+                    "match the compiler plugin"
+            )
         return context.irBuilder(irClass).irCallConstructor(primaryConstructor, emptyList())
             .apply { putArgs(objectReference) }
     }
@@ -229,15 +232,15 @@ class CompanionGeneration(
     private fun buildCreateBody(function: IrSimpleFunction, cls: ServiceClass): IrBody {
         val objClass = cls.irClass.declarations.filterIsInstance<IrClass>()
             .firstOrNull { it.name == FqConstants.OBJ }
-            ?: error(
-                "Missing generated Obj class on ${cls.irClass.kotlinFqName.asString()}. " +
-                    "FirKsrpcObjGenerator did not run or generated under a different name."
+            ?: reportInternal(
+                "missing generated Obj class on ${cls.irClass.kotlinFqName.asString()} " +
+                    "— FirKsrpcObjGenerator did not run or generated under a different name"
             )
         val objConstructor = objClass.constructors.first { it.isPrimary }
         val resolveFn = env.resolveSerializerOrThrow
-            ?: error(
-                "Missing com.monkopedia.ksrpc.resolveSerializerOrThrow. Compile against a " +
-                    "ksrpc-core that includes RpcObjectFactory."
+            ?: reportInternal(
+                "missing com.monkopedia.ksrpc.resolveSerializerOrThrow — compile against " +
+                    "a ksrpc-core that includes RpcObjectFactory"
             )
         val arity = cls.irClass.typeParameters.size
         val serviceName = cls.irClass.kotlinFqName.asString()
@@ -261,15 +264,15 @@ class CompanionGeneration(
                 org.jetbrains.kotlin.name.FqName("kotlin"),
                 Name.identifier("IllegalArgumentException")
             )
-        ) ?: error("kotlin.IllegalArgumentException not found")
+        ) ?: reportInternal("kotlin.IllegalArgumentException not found on classpath")
         val iaeStringCtor = iaeClass.owner.declarations
             .filterIsInstance<IrConstructor>()
             .firstOrNull { ctor ->
                 val params = ctor.parameters.filter { !it.isDispatchReceiver }
                 params.size == 1 &&
                     params.single().type.classFqName?.asString() == "kotlin.String"
-            } ?: error(
-            "Could not locate kotlin.IllegalArgumentException(String) constructor"
+            } ?: reportInternal(
+            "can't locate kotlin.IllegalArgumentException(String) constructor"
         )
         return context.irBuilder(function).irSynthBody {
             val typeArgsParam = function.parameters.first { !it.isDispatchReceiver }
@@ -319,9 +322,9 @@ class CompanionGeneration(
     private fun buildInvokeFactoryBody(function: IrSimpleFunction, cls: ServiceClass): IrBody {
         val objClass = cls.irClass.declarations.filterIsInstance<IrClass>()
             .firstOrNull { it.name == FqConstants.OBJ }
-            ?: error(
-                "Missing generated Obj class on ${cls.irClass.kotlinFqName.asString()}. " +
-                    "FirKsrpcObjGenerator did not run or generated under a different name."
+            ?: reportInternal(
+                "missing generated Obj class on ${cls.irClass.kotlinFqName.asString()} " +
+                    "— FirKsrpcObjGenerator did not run or generated under a different name"
             )
         val objConstructor = objClass.constructors.first { it.isPrimary }
         val invokeTypeParams = function.typeParameters
