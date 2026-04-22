@@ -105,7 +105,25 @@ final class com.monkopedia.ksrpc.packets.internal/PacketCallId : com.monkopedia.
     final fun toString(): kotlin/String // com.monkopedia.ksrpc.packets.internal/PacketCallId.toString|toString(){}[0]
 }
 
+final class com.monkopedia.ksrpc.packets/ByteReadChannelBinaryData : com.monkopedia.ksrpc.channels/RpcBinaryData { // com.monkopedia.ksrpc.packets/ByteReadChannelBinaryData|null[0]
+    constructor <init>(io.ktor.utils.io/ByteReadChannel, kotlin/Long? = ...) // com.monkopedia.ksrpc.packets/ByteReadChannelBinaryData.<init>|<init>(io.ktor.utils.io.ByteReadChannel;kotlin.Long?){}[0]
+
+    final val size // com.monkopedia.ksrpc.packets/ByteReadChannelBinaryData.size|{}size[0]
+        final fun <get-size>(): kotlin/Long? // com.monkopedia.ksrpc.packets/ByteReadChannelBinaryData.size.<get-size>|<get-size>(){}[0]
+
+    final suspend fun close() // com.monkopedia.ksrpc.packets/ByteReadChannelBinaryData.close|close(){}[0]
+    final suspend fun transferTo(kotlin.coroutines/SuspendFunction3<kotlin/ByteArray, kotlin/Int, kotlin/Int, kotlin/Unit>) // com.monkopedia.ksrpc.packets/ByteReadChannelBinaryData.transferTo|transferTo(kotlin.coroutines.SuspendFunction3<kotlin.ByteArray,kotlin.Int,kotlin.Int,kotlin.Unit>){}[0]
+}
+
+final object com.monkopedia.ksrpc.packets/ByteReadChannelTransformer : com.monkopedia.ksrpc/BinaryDataTransformer, com.monkopedia.ksrpc/Transformer<io.ktor.utils.io/ByteReadChannel> { // com.monkopedia.ksrpc.packets/ByteReadChannelTransformer|null[0]
+    final suspend fun <#A1: kotlin/Any?> transform(io.ktor.utils.io/ByteReadChannel, com.monkopedia.ksrpc.channels/SerializedService<#A1>): com.monkopedia.ksrpc.channels/CallData<#A1> // com.monkopedia.ksrpc.packets/ByteReadChannelTransformer.transform|transform(io.ktor.utils.io.ByteReadChannel;com.monkopedia.ksrpc.channels.SerializedService<0:0>){0§<kotlin.Any?>}[0]
+    final suspend fun <#A1: kotlin/Any?> untransform(com.monkopedia.ksrpc.channels/CallData<#A1>, com.monkopedia.ksrpc.channels/SerializedService<#A1>): io.ktor.utils.io/ByteReadChannel // com.monkopedia.ksrpc.packets/ByteReadChannelTransformer.untransform|untransform(com.monkopedia.ksrpc.channels.CallData<0:0>;com.monkopedia.ksrpc.channels.SerializedService<0:0>){0§<kotlin.Any?>}[0]
+}
+
 final const val com.monkopedia.ksrpc.packets.internal/CONTENT_LENGTH // com.monkopedia.ksrpc.packets.internal/CONTENT_LENGTH|{}CONTENT_LENGTH[0]
     final fun <get-CONTENT_LENGTH>(): kotlin/String // com.monkopedia.ksrpc.packets.internal/CONTENT_LENGTH.<get-CONTENT_LENGTH>|<get-CONTENT_LENGTH>(){}[0]
 final const val com.monkopedia.ksrpc.packets.internal/CONTENT_TYPE // com.monkopedia.ksrpc.packets.internal/CONTENT_TYPE|{}CONTENT_TYPE[0]
     final fun <get-CONTENT_TYPE>(): kotlin/String // com.monkopedia.ksrpc.packets.internal/CONTENT_TYPE.<get-CONTENT_TYPE>|<get-CONTENT_TYPE>(){}[0]
+
+final fun (com.monkopedia.ksrpc.channels/RpcBinaryData).com.monkopedia.ksrpc.packets/asByteReadChannel(kotlinx.coroutines/CoroutineScope = ...): io.ktor.utils.io/ByteReadChannel // com.monkopedia.ksrpc.packets/asByteReadChannel|asByteReadChannel@com.monkopedia.ksrpc.channels.RpcBinaryData(kotlinx.coroutines.CoroutineScope){}[0]
+final fun (io.ktor.utils.io/ByteReadChannel).com.monkopedia.ksrpc.packets/asRpcBinaryData(kotlin/Long? = ...): com.monkopedia.ksrpc.channels/RpcBinaryData // com.monkopedia.ksrpc.packets/asRpcBinaryData|asRpcBinaryData@io.ktor.utils.io.ByteReadChannel(kotlin.Long?){}[0]

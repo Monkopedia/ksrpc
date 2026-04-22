@@ -18,6 +18,8 @@ package com.monkopedia.ksrpc
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
+import com.monkopedia.ksrpc.packets.ByteReadChannelTransformer
+import com.monkopedia.ksrpc.packets.asByteReadChannel
 import io.ktor.utils.io.ByteChannel
 import kotlin.test.Test
 import kotlin.test.assertSame
@@ -43,11 +45,11 @@ class BinaryTransformerTest {
         val service = BinaryTransformerTestService(env)
         val binary = ByteChannel(autoFlush = true)
 
-        val transformed = BinaryTransformer.transform(binary, service)
-        val untransformed = BinaryTransformer.untransform(transformed, service)
+        val transformed = ByteReadChannelTransformer.transform(binary, service)
+        val untransformed = ByteReadChannelTransformer.untransform(transformed, service)
 
         assertTrue(transformed.isBinary)
-        assertSame(binary, transformed.readBinary())
+        assertSame(binary, transformed.readBinary().asByteReadChannel())
         assertSame(binary, untransformed)
     }
 }

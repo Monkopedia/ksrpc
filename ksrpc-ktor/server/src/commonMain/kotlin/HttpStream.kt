@@ -28,6 +28,7 @@ import com.monkopedia.ksrpc.channels.ChannelId
 import com.monkopedia.ksrpc.channels.SerializedChannel
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
+import com.monkopedia.ksrpc.packets.asRpcBinaryData
 import com.monkopedia.ksrpc.serialized
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.decodeURLPart
@@ -38,7 +39,7 @@ import io.ktor.server.routing.Routing
 import io.ktor.server.routing.RoutingContext
 import io.ktor.server.routing.post
 import io.ktor.utils.io.ByteReadChannel
-import io.ktor.utils.io.copyTo
+import io.ktor.utils.io.writeFully
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
@@ -88,7 +89,7 @@ fun Routing.serve(
 
 private suspend fun RoutingContext.execCall(channel: SerializedChannel<String>, method: String) {
     val content = if (call.request.headers[KSRPC_BINARY]?.toBoolean() == true) {
-        CallData.createBinary(call.receive<ByteReadChannel>())
+        CallData.createBinary(call.receive<ByteReadChannel>().asRpcBinaryData())
     } else {
         CallData.create(call.receive<String>())
     }
@@ -106,7 +107,9 @@ private suspend fun RoutingContext.execCall(channel: SerializedChannel<String>, 
         )
         call.response.headers.append(KSRPC_BINARY, "true")
         call.respondBytesWriter {
-            response.readBinary().copyTo(this)
+            response.readBinary().transferTo { bytes, offset, length ->
+                writeFully(bytes, offset, length)
+            }
         }
     } else {
         channel.env.logger.debug(

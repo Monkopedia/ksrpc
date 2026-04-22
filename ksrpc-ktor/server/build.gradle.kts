@@ -26,6 +26,11 @@ ksrpcModule(
 
 kotlin {
     sourceSets["commonMain"].dependencies {
+        // ksrpc-packets carries the stopgap `ByteReadChannelTransformer` the
+        // compiler plugin emits for `ByteReadChannel` service signatures until
+        // the dedicated `ksrpc-binary-ktor` module lands (#72). Exposed as
+        // `api` so consumers of the HTTP transport don't need to declare it.
+        api(project(":ksrpc-packets"))
         api(libs.ktor.server)
     }
 }

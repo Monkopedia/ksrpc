@@ -150,7 +150,7 @@ internal fun RpcMethod<*, *, *>.outputRpcDataType(): RpcDataType = outputTransfo
 internal val Transformer<*>.rpcDataType: RpcDataType
     get() {
         return when (this) {
-            BinaryTransformer -> RpcDataType.BinaryData
+            is BinaryDataTransformer -> RpcDataType.BinaryData
             is SerializerTransformer<*> -> RpcDataType.DataStructure(serializer)
             is SubserviceTransformer<*> -> RpcDataType.Service(serviceObject.serviceName)
             // Out-of-module transformers (e.g. ksrpc-flow's `FlowTransformer`) surface

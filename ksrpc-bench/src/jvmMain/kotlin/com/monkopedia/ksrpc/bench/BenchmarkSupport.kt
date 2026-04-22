@@ -19,6 +19,8 @@ import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
+import com.monkopedia.ksrpc.packets.asByteReadChannel
+import com.monkopedia.ksrpc.packets.asRpcBinaryData
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.toByteArray
 import java.net.InetSocketAddress
@@ -75,9 +77,9 @@ internal suspend fun callBinaryEcho(
     service: SerializedService<String>,
     payload: ByteArray
 ): ByteArray {
-    val input = CallData.createBinary<String>(ByteReadChannel(payload))
+    val input = CallData.createBinary<String>(ByteReadChannel(payload).asRpcBinaryData())
     val output = service.call("binaryEcho", input, callId = null)
-    return output.readBinary().toByteArray()
+    return output.readBinary().asByteReadChannel().toByteArray()
 }
 
 internal fun createComplexPayload(payloadSize: Int): ComplexEchoPayload {

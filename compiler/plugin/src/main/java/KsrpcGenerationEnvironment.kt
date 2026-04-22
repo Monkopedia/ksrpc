@@ -43,7 +43,14 @@ class KsrpcGenerationEnvironment(
     val rpcMethod = referenceClass(FqConstants.RPC_METHOD)
     val serviceExecutor = referenceClass(FqConstants.SERVICE_EXECUTOR)
     val serializerTransformer = referenceClass(FqConstants.SERIALIZER_TRANSFORMER)
-    val binaryTransformer = referenceObject(FqConstants.BINARY_TRANSFORMER)
+    // The `ByteReadChannel` adapter lives in `ksrpc-packets` (stopgap until the
+    // dedicated `ksrpc-binary-ktor` module from issue #72 ships). Resolved
+    // optionally so modules that never declare a `ByteReadChannel` service
+    // signature — including `ksrpc-core` itself, which applies this plugin —
+    // compile even when `ksrpc-packets` is not on the classpath. Callers that
+    // need this symbol emit a user-error diagnostic when the lookup misses.
+    val binaryTransformer: IrClassSymbol? =
+        maybeReferenceClass(FqConstants.BYTE_READ_CHANNEL_TRANSFORMER)
     val introspectionImpl: IrClassSymbol by lazy {
         referenceClass(FqConstants.INTROSPECTION_SERVICE_IMPL)
     }

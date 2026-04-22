@@ -75,6 +75,12 @@ kotlin {
     }
     sourceSets["commonMain"].dependencies {
         implementation(project(":ksrpc-introspection"))
+        // Tests use `ByteReadChannel` directly; the dedicated `ksrpc-binary-ktor`
+        // module (#72) will bundle this transitively, but for the stopgap in #71
+        // declare it here plus `ksrpc-packets`, which carries the compiler-plugin
+        // target for `ByteReadChannel` service signatures.
+        implementation(project(":ksrpc-packets"))
+        implementation(libs.ktor.io)
     }
     sourceSets["commonTest"].dependencies {
         implementation(project(":ksrpc-core"))

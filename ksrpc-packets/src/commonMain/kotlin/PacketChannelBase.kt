@@ -30,10 +30,9 @@ import com.monkopedia.ksrpc.internal.HostChannelContext
 import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
 import com.monkopedia.ksrpc.internal.MultiChannel
 import com.monkopedia.ksrpc.internal.SubserviceChannel
+import com.monkopedia.ksrpc.packets.asRpcBinaryData
 import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.close
-import io.ktor.utils.io.core.readBytes
-import io.ktor.utils.io.readRemaining
 import io.ktor.utils.io.writeFully
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CancellationException
@@ -210,11 +209,19 @@ abstract class PacketChannelBase<T>(
                 )
             )
             launch {
-                val channel = response.readBinary()
+                val binaryData = response.readBinary()
                 var id = 0
-                while (!channel.isClosedForRead) {
-                    val packet = channel.readRemaining(maxSize).readBytes()
-                    if (packet.isNotEmpty()) {
+                val packetMax = maxSize.toInt().coerceAtLeast(1)
+                binaryData.transferTo { bytes, offset, length ->
+                    if (length <= 0) return@transferTo
+                    // Re-chunk the incoming sink buffer into packets bounded by
+                    // [maxSize]. The upstream transport guarantees nothing about
+                    // per-call sizes, so split here.
+                    var remaining = length
+                    var cursor = offset
+                    while (remaining > 0) {
+                        val take = if (remaining > packetMax) packetMax else remaining
+                        val packet = bytes.copyOfRange(cursor, cursor + take)
                         send(
                             Packet(
                                 input = input,
@@ -229,6 +236,8 @@ abstract class PacketChannelBase<T>(
                                 ).readSerialized()
                             )
                         )
+                        cursor += take
+                        remaining -= take
                     }
                 }
                 send(
@@ -268,7 +277,7 @@ abstract class PacketChannelBase<T>(
     private suspend fun getCallData(packet: Packet<T>): CallData<T> = if (packet.startBinary) {
         val callData = CallData.create(packet.data)
         val decoded = env.serialization.decodeCallData(String.serializer(), callData)
-        CallData.createBinary(getByteChannel(decoded))
+        CallData.createBinary(getByteChannel(decoded).asRpcBinaryData())
     } else if (packet.binary) {
         error("Unexpected binary packet")
     } else {

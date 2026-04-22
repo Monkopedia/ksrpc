@@ -26,8 +26,6 @@ import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.channels.ChannelClient.Companion.DEFAULT
 import com.monkopedia.ksrpc.internal.HostSerializedServiceImpl
 import com.monkopedia.ksrpc.rpcObject
-import io.ktor.utils.io.ByteReadChannel
-import io.ktor.utils.io.availableForRead
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -202,20 +200,20 @@ sealed class CallData<T> private constructor() {
     abstract fun readSerialized(): T
 
     /**
-     * Get the [ByteReadChannel] for the binary data held by this call..
+     * Get the [RpcBinaryData] for the binary data held by this call.
      * If this is not binary data then throws [IllegalStateException].
      */
-    abstract fun readBinary(): ByteReadChannel
+    abstract fun readBinary(): RpcBinaryData
 
-    data class Binary<T>(private val value: ByteReadChannel) : CallData<T>() {
+    data class Binary<T>(private val value: RpcBinaryData) : CallData<T>() {
         override val isBinary: Boolean
             get() = true
 
         override fun readSerialized(): T = error("Cannot read serialization out of binary data.")
 
-        override fun readBinary(): ByteReadChannel = value
+        override fun readBinary(): RpcBinaryData = value
 
-        override fun toString(): String = "binary(${(value as? ByteReadChannel)?.availableForRead})"
+        override fun toString(): String = "binary(size=${value.size})"
     }
 
     data class Serialized<T>(private val value: T) : CallData<T>() {
@@ -224,7 +222,7 @@ sealed class CallData<T> private constructor() {
 
         override fun readSerialized(): T = value
 
-        override fun readBinary(): ByteReadChannel {
+        override fun readBinary(): RpcBinaryData {
             error("Cannot read binary data out of serialized content.")
         }
 
@@ -242,8 +240,8 @@ sealed class CallData<T> private constructor() {
         fun createEndpointNotFoundError(str: String) = Serialized(ENDPOINT_NOT_FOUND_PREFIX + str)
 
         /**
-         * Create a CallData wrapping a [ByteReadChannel] for reading binary data.
+         * Create a CallData wrapping a [RpcBinaryData] for reading binary data.
          */
-        fun <T> createBinary(binary: ByteReadChannel): CallData<T> = Binary(binary)
+        fun <T> createBinary(binary: RpcBinaryData): CallData<T> = Binary(binary)
     }
 }

@@ -1,7 +1,10 @@
-public final class com/monkopedia/ksrpc/BinaryTransformer : com/monkopedia/ksrpc/Transformer {
+public abstract interface class com/monkopedia/ksrpc/BinaryDataTransformer {
+}
+
+public final class com/monkopedia/ksrpc/BinaryTransformer : com/monkopedia/ksrpc/BinaryDataTransformer, com/monkopedia/ksrpc/Transformer {
 	public static final field INSTANCE Lcom/monkopedia/ksrpc/BinaryTransformer;
 	public fun getHasContent ()Z
-	public fun transform (Lio/ktor/utils/io/ByteReadChannel;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun transform (Lcom/monkopedia/ksrpc/channels/RpcBinaryData;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public synthetic fun transform (Ljava/lang/Object;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun unpackError (Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/SerializedService;)V
 	public fun untransform (Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -308,25 +311,25 @@ public abstract interface class com/monkopedia/ksrpc/UnhandledMethodHandler {
 public abstract class com/monkopedia/ksrpc/channels/CallData {
 	public static final field Companion Lcom/monkopedia/ksrpc/channels/CallData$Companion;
 	public abstract fun isBinary ()Z
-	public abstract fun readBinary ()Lio/ktor/utils/io/ByteReadChannel;
+	public abstract fun readBinary ()Lcom/monkopedia/ksrpc/channels/RpcBinaryData;
 	public abstract fun readSerialized ()Ljava/lang/Object;
 }
 
 public final class com/monkopedia/ksrpc/channels/CallData$Binary : com/monkopedia/ksrpc/channels/CallData {
-	public fun <init> (Lio/ktor/utils/io/ByteReadChannel;)V
-	public final fun copy (Lio/ktor/utils/io/ByteReadChannel;)Lcom/monkopedia/ksrpc/channels/CallData$Binary;
-	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/channels/CallData$Binary;Lio/ktor/utils/io/ByteReadChannel;ILjava/lang/Object;)Lcom/monkopedia/ksrpc/channels/CallData$Binary;
+	public fun <init> (Lcom/monkopedia/ksrpc/channels/RpcBinaryData;)V
+	public final fun copy (Lcom/monkopedia/ksrpc/channels/RpcBinaryData;)Lcom/monkopedia/ksrpc/channels/CallData$Binary;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/channels/CallData$Binary;Lcom/monkopedia/ksrpc/channels/RpcBinaryData;ILjava/lang/Object;)Lcom/monkopedia/ksrpc/channels/CallData$Binary;
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public fun isBinary ()Z
-	public fun readBinary ()Lio/ktor/utils/io/ByteReadChannel;
+	public fun readBinary ()Lcom/monkopedia/ksrpc/channels/RpcBinaryData;
 	public fun readSerialized ()Ljava/lang/Object;
 	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/monkopedia/ksrpc/channels/CallData$Companion {
 	public final fun create (Ljava/lang/Object;)Lcom/monkopedia/ksrpc/channels/CallData$Serialized;
-	public final fun createBinary (Lio/ktor/utils/io/ByteReadChannel;)Lcom/monkopedia/ksrpc/channels/CallData;
+	public final fun createBinary (Lcom/monkopedia/ksrpc/channels/RpcBinaryData;)Lcom/monkopedia/ksrpc/channels/CallData;
 	public final fun createEndpointNotFoundError (Ljava/lang/String;)Lcom/monkopedia/ksrpc/channels/CallData$Serialized;
 	public final fun createError (Ljava/lang/String;)Lcom/monkopedia/ksrpc/channels/CallData$Serialized;
 }
@@ -338,7 +341,7 @@ public final class com/monkopedia/ksrpc/channels/CallData$Serialized : com/monko
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public fun isBinary ()Z
-	public fun readBinary ()Lio/ktor/utils/io/ByteReadChannel;
+	public fun readBinary ()Lcom/monkopedia/ksrpc/channels/RpcBinaryData;
 	public fun readSerialized ()Ljava/lang/Object;
 	public fun toString ()Ljava/lang/String;
 }
@@ -428,6 +431,15 @@ public final class com/monkopedia/ksrpc/channels/CurrentRpcCallElement$CurrentRp
 
 public final class com/monkopedia/ksrpc/channels/CurrentRpcCallElementKt {
 	public static final fun currentRpcCall (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class com/monkopedia/ksrpc/channels/RpcBinaryData : com/monkopedia/ksrpc/SuspendCloseable {
+	public fun getSize ()Ljava/lang/Long;
+	public abstract fun transferTo (Lkotlin/jvm/functions/Function4;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/monkopedia/ksrpc/channels/RpcBinaryData$DefaultImpls {
+	public static fun getSize (Lcom/monkopedia/ksrpc/channels/RpcBinaryData;)Ljava/lang/Long;
 }
 
 public abstract interface class com/monkopedia/ksrpc/channels/RpcCallId {
