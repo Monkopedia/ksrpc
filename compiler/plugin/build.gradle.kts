@@ -60,12 +60,20 @@ dependencies {
             project.rootDir.resolve("../ksrpc-flow/build/libs/ksrpc-flow-jvm-0.11.1.jar")
         )
     )
-    // Locally-built `ksrpc-packets` — hosts the stopgap `ByteReadChannelTransformer`
-    // (issue #71) that the plugin emits for `ByteReadChannel` signatures until
-    // the `ksrpc-binary-ktor` adapter module (#72) lands.
+    // Locally-built `ksrpc-packets` — required transitively by `ksrpc-binary-ktor`
+    // for plugin tests that compile `ByteReadChannel` signatures.
     testImplementation(
         files(
             project.rootDir.resolve("../ksrpc-packets/build/libs/ksrpc-packets-jvm-0.11.1.jar")
+        )
+    )
+    // Locally-built `ksrpc-binary-ktor` — hosts the `ByteReadChannelTransformer`
+    // the plugin emits for `ByteReadChannel` service signatures (issue #72).
+    testImplementation(
+        files(
+            project.rootDir.resolve(
+                "../ksrpc-binary-ktor/build/libs/ksrpc-binary-ktor-jvm-0.11.1.jar"
+            )
         )
     )
     testImplementation(kotlin("test-junit"))

@@ -484,7 +484,7 @@ class StubGeneration(
         RpcType.BINARY -> declarationIrBuilder.irGetObject(
             env.binaryTransformer
                 ?: reportInternal(
-                    "ByteReadChannel adapter (ksrpc-packets) missing on the compile classpath"
+                    "ByteReadChannel adapter (ksrpc-binary-ktor) missing on the compile classpath"
                 )
         )
 
