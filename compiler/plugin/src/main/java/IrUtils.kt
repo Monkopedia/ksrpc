@@ -98,7 +98,9 @@ fun createClassReference(
 
 fun IrClassSymbol.findMethod(name: Name) = functions.find {
     it.owner.name == name
-} ?: error("Can't find ${name.asString()} method")
+} ?: reportInternal(
+    "can't find ${name.asString()} on ${owner.fqNameWhenAvailable?.asString() ?: owner.name.asString()}"
+)
 
 fun IrPluginContext.irBuilder(owner: IrSymbolOwner) = irBuilder(owner.symbol)
 

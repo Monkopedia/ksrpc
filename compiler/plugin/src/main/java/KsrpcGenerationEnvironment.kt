@@ -18,7 +18,6 @@
 package com.monkopedia.ksrpc.plugin
 
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.ERROR
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.ir.declarations.IrParameterKind
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
@@ -32,7 +31,9 @@ import org.jetbrains.kotlin.name.Name
 
 class KsrpcGenerationEnvironment(
     val context: IrPluginContext,
-    private val messageCollector: MessageCollector
+    // Retained so future bootstrap lookups can surface warnings through the
+    // plugin's MessageCollector without restructuring callers.
+    @Suppress("unused") private val messageCollector: MessageCollector
 ) {
     private val endpointException =
         referenceClass(FqConstants.RPC_ENDPOINT_EXCEPTION)
@@ -87,10 +88,7 @@ class KsrpcGenerationEnvironment(
             val regularParams = fn.owner.parameters.filter { it.kind == IrParameterKind.Regular }
             regularParams.size == 1 && regularParams.single().varargElementType != null
         }
-            ?: run {
-                messageCollector.report(ERROR, "Can't find kotlin.collections.listOf")
-                error("Can't find kotlin.collections.listOf")
-            }
+            ?: reportInternal("can't resolve kotlin.collections.listOf (vararg overload)")
 
     // Metadata propagation support is optional so the compiler plugin continues
     // to work against older ksrpc-core artifacts that predate #11.
@@ -134,14 +132,13 @@ class KsrpcGenerationEnvironment(
 
     private fun maybeReferenceClass(name: ClassId): IrClassSymbol? = context.referenceClass(name)
 
-    private fun referenceClass(name: ClassId): IrClassSymbol = maybeReferenceClass(name) ?: run {
-        messageCollector.report(ERROR, "Can't find $name in dependencies")
-        error("Can't find $name in dependencies")
-    }
+    private fun referenceClass(name: ClassId): IrClassSymbol =
+        maybeReferenceClass(name) ?: reportInternal(
+            "can't resolve $name on the compile classpath — ksrpc-core must be a dependency"
+        )
 
     private fun referenceObject(name: ClassId): IrClassSymbol =
-        context.referenceClass(name) ?: run {
-            messageCollector.report(ERROR, "Can't find $name in dependencies")
-            error("Can't find $name in dependencies")
-        }
+        context.referenceClass(name) ?: reportInternal(
+            "can't resolve $name on the compile classpath — ksrpc-core must be a dependency"
+        )
 }

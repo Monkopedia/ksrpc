@@ -31,6 +31,7 @@ import org.jetbrains.kotlin.ir.expressions.IrBlockBody
 import org.jetbrains.kotlin.ir.expressions.IrBody
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.util.companionObject
+import org.jetbrains.kotlin.ir.util.kotlinFqName
 
 class IntrospectionGeneration(
     context: IrPluginContext,
@@ -61,7 +62,11 @@ class IntrospectionGeneration(
                 irCallConstructor(env.introspectionConstructor, emptyList()).apply {
                     putArgs(
                         irGetObject(
-                            cls.irClass.companionObject()?.symbol ?: error("Companion is missing")
+                            cls.irClass.companionObject()?.symbol ?: reportInternal(
+                                "companion is missing on " +
+                                    cls.irClass.kotlinFqName.asString() +
+                                    " — CompanionGeneration should have produced it"
+                            )
                         )
                     )
                 }

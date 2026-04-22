@@ -77,7 +77,8 @@ abstract class AbstractTransformerForGenerator(protected val context: IrPluginCo
             return
         }
         require(declaration.body == null) {
-            "Found body for method ${declaration.name.asString()}"
+            "ksrpc internal: unexpected body on FIR-generated method " +
+                "${declaration.name.asString()}"
         }
         declaration.body = generateBodyForFunction(declaration, origin.pluginKey)
     }
