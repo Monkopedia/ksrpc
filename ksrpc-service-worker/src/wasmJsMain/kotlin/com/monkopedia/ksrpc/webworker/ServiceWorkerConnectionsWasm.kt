@@ -20,6 +20,7 @@ package com.monkopedia.ksrpc.webworker
 
 import com.monkopedia.ksrpc.CallDataSerializer
 import com.monkopedia.ksrpc.KsrpcEnvironment
+import com.monkopedia.ksrpc.annotation.ExperimentalKsrpc
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.Connection
 import com.monkopedia.ksrpc.packets.internal.Packet
@@ -32,6 +33,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.serializer
 
+@ExperimentalKsrpc
 actual fun createServiceWorkerWithConnection(
     workerScriptPath: String,
     env: KsrpcEnvironment<String>
