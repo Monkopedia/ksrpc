@@ -1,0 +1,25 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, js, linuxArm64, linuxX64, macosArm64, macosX64, mingwX64, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <com.monkopedia.ksrpc:ksrpc-binary-kotlinx-io>
+final class com.monkopedia.ksrpc.binary.kxio/SourceBinaryData : com.monkopedia.ksrpc.channels/RpcBinaryData { // com.monkopedia.ksrpc.binary.kxio/SourceBinaryData|null[0]
+    constructor <init>(kotlinx.io/Source, kotlin/Long? = ...) // com.monkopedia.ksrpc.binary.kxio/SourceBinaryData.<init>|<init>(kotlinx.io.Source;kotlin.Long?){}[0]
+
+    final val size // com.monkopedia.ksrpc.binary.kxio/SourceBinaryData.size|{}size[0]
+        final fun <get-size>(): kotlin/Long? // com.monkopedia.ksrpc.binary.kxio/SourceBinaryData.size.<get-size>|<get-size>(){}[0]
+
+    final suspend fun close() // com.monkopedia.ksrpc.binary.kxio/SourceBinaryData.close|close(){}[0]
+    final suspend fun transferTo(kotlin.coroutines/SuspendFunction3<kotlin/ByteArray, kotlin/Int, kotlin/Int, kotlin/Unit>) // com.monkopedia.ksrpc.binary.kxio/SourceBinaryData.transferTo|transferTo(kotlin.coroutines.SuspendFunction3<kotlin.ByteArray,kotlin.Int,kotlin.Int,kotlin.Unit>){}[0]
+}
+
+final object com.monkopedia.ksrpc.binary.kxio/SourceTransformer : com.monkopedia.ksrpc/BinaryDataTransformer, com.monkopedia.ksrpc/Transformer<kotlinx.io/Source> { // com.monkopedia.ksrpc.binary.kxio/SourceTransformer|null[0]
+    final suspend fun <#A1: kotlin/Any?> transform(kotlinx.io/Source, com.monkopedia.ksrpc.channels/SerializedService<#A1>): com.monkopedia.ksrpc.channels/CallData<#A1> // com.monkopedia.ksrpc.binary.kxio/SourceTransformer.transform|transform(kotlinx.io.Source;com.monkopedia.ksrpc.channels.SerializedService<0:0>){0§<kotlin.Any?>}[0]
+    final suspend fun <#A1: kotlin/Any?> untransform(com.monkopedia.ksrpc.channels/CallData<#A1>, com.monkopedia.ksrpc.channels/SerializedService<#A1>): kotlinx.io/Source // com.monkopedia.ksrpc.binary.kxio/SourceTransformer.untransform|untransform(com.monkopedia.ksrpc.channels.CallData<0:0>;com.monkopedia.ksrpc.channels.SerializedService<0:0>){0§<kotlin.Any?>}[0]
+}
+
+final fun (kotlinx.io/Source).com.monkopedia.ksrpc.binary.kxio/asRpcBinaryData(kotlin/Long? = ...): com.monkopedia.ksrpc.channels/RpcBinaryData // com.monkopedia.ksrpc.binary.kxio/asRpcBinaryData|asRpcBinaryData@kotlinx.io.Source(kotlin.Long?){}[0]
+final suspend fun (com.monkopedia.ksrpc.channels/RpcBinaryData).com.monkopedia.ksrpc.binary.kxio/asSource(): kotlinx.io/Source // com.monkopedia.ksrpc.binary.kxio/asSource|asSource@com.monkopedia.ksrpc.channels.RpcBinaryData(){}[0]

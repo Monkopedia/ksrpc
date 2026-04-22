@@ -30,6 +30,7 @@ include(":ksrpc-jsonrpc")
 
 include(":ksrpc-packets")
 include(":ksrpc-binary-ktor")
+include(":ksrpc-binary-kotlinx-io")
 include(":ksrpc-server")
 include(":ksrpc-sockets")
 include(":ksrpc-service-worker")
