@@ -28,6 +28,8 @@ import com.monkopedia.ksrpc.channels.SerializedChannel
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.internal.ClientChannelContext
 import com.monkopedia.ksrpc.internal.SubserviceChannel
+import com.monkopedia.ksrpc.packets.asByteReadChannel
+import com.monkopedia.ksrpc.packets.asRpcBinaryData
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
@@ -67,11 +69,13 @@ internal class HttpSerializedChannel(
             accept(ContentType.Application.Json)
             headers[KSRPC_BINARY] = data.isBinary.toString()
             headers[KSRPC_CHANNEL] = channelId.id
-            setBody(if (data.isBinary) data.readBinary() else data.readSerialized())
+            setBody(
+                if (data.isBinary) data.readBinary().asByteReadChannel() else data.readSerialized()
+            )
         }
         response.checkErrors()
         if (response.headers[KSRPC_BINARY]?.toBoolean() == true) {
-            return CallData.createBinary(response.body<ByteReadChannel>())
+            return CallData.createBinary(response.body<ByteReadChannel>().asRpcBinaryData())
         }
         return CallData.create(response.body<String>())
     }
