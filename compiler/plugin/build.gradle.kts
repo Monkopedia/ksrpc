@@ -37,7 +37,29 @@ dependencies {
     ksp(libs.autoservice)
     compileOnly(libs.autoservice.annotations)
 
+    // Locally-built `ksrpc-core` jvmJar, listed BEFORE the published `ksrpctest`
+    // coordinate so the local (non-sealed) `Transformer` interface takes
+    // precedence over the published (sealed) one. The FlowSupportTest (#39) needs
+    // this because `FlowTransformer` in the locally-built `ksrpc-flow` extends
+    // `Transformer`; the published 0.11.1 sealed version would reject the
+    // extension at user-code compile time.
+    testImplementation(
+        files(
+            project.rootDir.resolve("../ksrpc-core/build/libs/ksrpc-core-jvm-0.11.1.jar")
+        )
+    )
     testImplementation(libs.ksrpctest)
+    // Locally-built `ksrpc-flow` jvmJar — see FlowSupportTest (#39). The compiler
+    // plugin sits in an included build, so `project(":ksrpc-flow")` cannot reach
+    // the main build's module; we stitch the jvmJar file onto the test classpath
+    // by path. Consumers must run `:ksrpc-flow:jvmJar` (and `:ksrpc-core:jvmJar`)
+    // in the main build before `:compiler:ksrpc-compiler-plugin:test`; CI already
+    // does this implicitly because the plugin tests run after the main build.
+    testImplementation(
+        files(
+            project.rootDir.resolve("../ksrpc-flow/build/libs/ksrpc-flow-jvm-0.11.1.jar")
+        )
+    )
     testImplementation(kotlin("test-junit"))
     testImplementation("org.jetbrains.kotlin:kotlin-compiler-embeddable")
     testImplementation(libs.kotlin.compiletesting)
