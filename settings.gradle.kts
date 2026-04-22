@@ -23,6 +23,7 @@ pluginManagement {
 rootProject.name = "ksrpc"
 include(":ksrpc-api")
 include(":ksrpc-core")
+include(":ksrpc-flow")
 include(":ksrpc-introspection")
 
 include(":ksrpc-jsonrpc")
