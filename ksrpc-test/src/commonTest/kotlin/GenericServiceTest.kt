@@ -41,6 +41,78 @@ private class GenericEchoStringImpl : GenericEcho<String> {
 }
 
 /**
+ * Exercises wrapper-type serializer composition for generic `@KsService`s:
+ * `List<T>`, `Set<T>`, `Map<K, V>`, nullable variants, and nesting. The generated
+ * `Stub` and `Obj` compose serializers via `ListSerializer`/`SetSerializer`/
+ * `MapSerializer` from `kotlinx.serialization.builtins`, threading the injected
+ * `KSerializer<T>` through. See issue #44.
+ */
+@KsService
+interface WrappedEcho<T> : RpcService {
+    @KsMethod("/list")
+    suspend fun list(items: List<T>): List<T>
+
+    @KsMethod("/set")
+    suspend fun set(items: Set<T>): Set<T>
+
+    @KsMethod("/map")
+    suspend fun map(entries: Map<String, T>): Map<String, T>
+
+    @KsMethod("/nullable")
+    suspend fun nullable(item: T?): T?
+
+    @KsMethod("/listOfNullable")
+    suspend fun listOfNullable(items: List<T?>): List<T?>
+
+    @KsMethod("/nested")
+    suspend fun nested(items: List<List<T>>): List<List<T>>
+
+    @KsMethod("/nullableList")
+    suspend fun nullableList(items: List<T>?): List<T>?
+}
+
+private class WrappedEchoStringImpl : WrappedEcho<String> {
+    override suspend fun list(items: List<String>): List<String> = items.map { "l:$it" }
+    override suspend fun set(items: Set<String>): Set<String> = items.map { "s:$it" }.toSet()
+    override suspend fun map(entries: Map<String, String>): Map<String, String> =
+        entries.mapValues { "m:${it.value}" }
+    override suspend fun nullable(item: String?): String? = item?.let { "n:$it" }
+    override suspend fun listOfNullable(items: List<String?>): List<String?> =
+        items.map { it?.let { "ln:$it" } }
+    override suspend fun nested(items: List<List<String>>): List<List<String>> =
+        items.map { row -> row.map { "nd:$it" } }
+    override suspend fun nullableList(items: List<String>?): List<String>? =
+        items?.map { "nl:$it" }
+    override suspend fun close() = Unit
+}
+
+class GenericServiceWrappedRoundTripTest :
+    RpcFunctionalityTest(
+        serializedChannel = {
+            val impl: WrappedEcho<String> = WrappedEchoStringImpl()
+            impl.serialized<WrappedEcho<String>, String>(ksrpcEnvironment { })
+        },
+        verifyOnChannel = { serializedChannel ->
+            val stub = serializedChannel.toStub<WrappedEcho<String>, String>()
+            assertEquals(listOf("l:a", "l:b"), stub.list(listOf("a", "b")))
+            assertEquals(setOf("s:a", "s:b"), stub.set(setOf("a", "b")))
+            assertEquals(mapOf("k" to "m:v"), stub.map(mapOf("k" to "v")))
+            assertEquals("n:x", stub.nullable("x"))
+            assertNull(stub.nullable(null))
+            assertEquals(
+                listOf("ln:a", null, "ln:b"),
+                stub.listOfNullable(listOf("a", null, "b"))
+            )
+            assertEquals(
+                listOf(listOf("nd:a"), listOf("nd:b", "nd:c")),
+                stub.nested(listOf(listOf("a"), listOf("b", "c")))
+            )
+            assertEquals(listOf("nl:x"), stub.nullableList(listOf("x")))
+            assertNull(stub.nullableList(null))
+        }
+    )
+
+/**
  * End-to-end round-trip tests for a generic `@KsService` with `T` and `T?` method
  * signatures. Exercises the companion's `invoke(serializer)` factory, the generated
  * `Obj<T>` RpcObject, and the Stub's ability to push method calls over a SerializedService

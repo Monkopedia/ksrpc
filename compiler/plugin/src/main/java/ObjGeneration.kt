@@ -64,6 +64,8 @@ import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.defaultType
 import org.jetbrains.kotlin.ir.types.isMarkedNullable
 import org.jetbrains.kotlin.ir.types.makeNotNull
+import org.jetbrains.kotlin.ir.types.typeOrFail
+import org.jetbrains.kotlin.ir.types.typeOrNull
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
 import org.jetbrains.kotlin.ir.util.addChild
@@ -71,6 +73,7 @@ import org.jetbrains.kotlin.ir.util.constructors
 import org.jetbrains.kotlin.ir.util.createThisReceiverParameter
 import org.jetbrains.kotlin.ir.util.kotlinFqName
 import org.jetbrains.kotlin.ir.util.parentAsClass
+import org.jetbrains.kotlin.ir.util.render
 import org.jetbrains.kotlin.name.Name
 
 /**
@@ -287,9 +290,9 @@ internal class GenericMethodIrBuilder(
         }
 
         val inputConverter =
-            createTypeConverter(builder, inputType, serializerReceiver, serializerFields)
+            createTypeConverter(builder, inputType, serializerReceiver, serializerFields, method)
         val outputConverter =
-            createTypeConverter(builder, outputType, serializerReceiver, serializerFields)
+            createTypeConverter(builder, outputType, serializerReceiver, serializerFields, method)
         val executorInstance = builder.irCallConstructor(
             executor.constructors.first().symbol,
             emptyList()
@@ -319,7 +322,8 @@ internal class GenericMethodIrBuilder(
         builder: IrBuilderWithScope,
         type: IrType,
         serializerReceiver: IrValueParameter,
-        serializerFields: List<IrField>
+        serializerFields: List<IrField>,
+        method: IrSimpleFunction
     ): IrExpression {
         // BINARY (ByteReadChannel) transformer.
         if (type.classFqName == FqConstants.BYTE_READ_CHANNEL) {
@@ -334,16 +338,53 @@ internal class GenericMethodIrBuilder(
             listOf(type)
         ).apply {
             this.type = env.serializerTransformer.typeWith(type)
-            putArgs(buildSerializer(builder, type, serializerReceiver, serializerFields))
+            putArgs(buildSerializer(builder, type, serializerReceiver, serializerFields, method))
         }
     }
 
+    /**
+     * Recursively compose a `KSerializer<type>` IR expression.
+     *
+     * - Bare service-level type parameter (`T`): emit a field read against the injected
+     *   `KSerializer<T>` on [serializerReceiver].
+     * - `List<X>` / `Set<X>`: emit `ListSerializer(...)` / `SetSerializer(...)` with a
+     *   recursively built element serializer.
+     * - `Map<K, V>`: emit `MapSerializer(keySer, valueSer)` with recursively built arg
+     *   serializers.
+     * - Anything that doesn't transitively reference a class-level type parameter: fall
+     *   back to the static `kotlinx.serialization.serializer<T>()` lookup — the stock
+     *   behaviour already used by the non-generic codegen path.
+     * - A type that references a type parameter but isn't one of the recognized wrapper
+     *   shapes (e.g. a user-defined `@Serializable class Box<T>(val v: T)`): report a
+     *   clear user error. Supporting user-defined generic wrappers is tracked as a
+     *   follow-up on #44 and would require resolving the user type's serializer factory.
+     *
+     * Nullable wrapping is applied per layer — `List<T?>?` composes as
+     * `ListSerializer(T.nullable).nullable`, matching kotlinx.serialization's own rules.
+     */
     private fun buildSerializer(
         builder: IrBuilderWithScope,
         type: IrType,
         serializerReceiver: IrValueParameter,
-        serializerFields: List<IrField>
+        serializerFields: List<IrField>,
+        method: IrSimpleFunction
     ): IrExpression {
+        // If this type doesn't mention a class-level type parameter anywhere, we don't
+        // need to compose anything — kotlinx.serialization's reified `serializer<T>()`
+        // knows how to resolve it at runtime. This also matches how the non-generic
+        // (all-concrete) path builds its transforms.
+        if (!referencesTypeParameter(type)) {
+            val serializerFn = env.serializerMethod
+                ?: reportInternal(
+                    "can't resolve kotlinx.serialization.serializer<T>() — " +
+                        "kotlinx-serialization-core must be on the compile classpath"
+                )
+            return builder.irCall(serializerFn).apply {
+                typeArguments[0] = type
+                this.type = env.kSerializer.typeWith(type)
+            }
+        }
+
         val classifier = (type as? IrSimpleType)?.classifier
         val serviceTps = cls.irClass.typeParameters
         val tpIndex = if (classifier is org.jetbrains.kotlin.ir.symbols.IrTypeParameterSymbol) {
@@ -362,7 +403,62 @@ internal class GenericMethodIrBuilder(
                 baseExpr
             }
         }
-        // Fallback: use kotlinx.serialization.serializer<T>().
+
+        // Recognized collection wrappers: List / Set / Map from kotlin.collections.
+        val classFq = type.classFqName?.asString()
+        val simple = type as? IrSimpleType
+        val composed: IrExpression? = when (classFq) {
+            "kotlin.collections.List" ->
+                buildListSerializer(
+                    builder,
+                    simple,
+                    serializerReceiver,
+                    serializerFields,
+                    method
+                )
+
+            "kotlin.collections.Set" ->
+                buildSetSerializer(
+                    builder,
+                    simple,
+                    serializerReceiver,
+                    serializerFields,
+                    method
+                )
+
+            "kotlin.collections.Map" ->
+                buildMapSerializer(
+                    builder,
+                    simple,
+                    serializerReceiver,
+                    serializerFields,
+                    method
+                )
+
+            else -> null
+        }
+        if (composed != null) {
+            return if (type.isMarkedNullable()) {
+                wrapNullable(builder, composed, type)
+            } else {
+                composed
+            }
+        }
+
+        // A non-wrapper type that references a class-level type parameter — e.g.
+        // `Box<T>` on a user-defined `@Serializable class Box<T>(...)`. We cannot
+        // compose its serializer without resolving the user type's companion/factory,
+        // which is out of scope for this change. Surface a clear user error at the
+        // offending method.
+        report.reportUserError(
+            "Cannot compose a KSerializer for ${type.render()} on " +
+                "${cls.irClass.kotlinFqName.asString()}.${method.name.asString()} — " +
+                "only List/Set/Map wrappers of a service type parameter are supported. " +
+                "Refactor to a concrete or supported wrapper type.",
+            element = method
+        )
+        // Fall back to the static serializer<T>() call so codegen doesn't crash after
+        // reporting the diagnostic; the user already sees an ERROR above.
         val serializerFn = env.serializerMethod
             ?: reportInternal(
                 "can't resolve kotlinx.serialization.serializer<T>() — " +
@@ -371,6 +467,112 @@ internal class GenericMethodIrBuilder(
         return builder.irCall(serializerFn).apply {
             typeArguments[0] = type
             this.type = env.kSerializer.typeWith(type)
+        }
+    }
+
+    private fun buildListSerializer(
+        builder: IrBuilderWithScope,
+        simple: IrSimpleType?,
+        serializerReceiver: IrValueParameter,
+        serializerFields: List<IrField>,
+        method: IrSimpleFunction
+    ): IrExpression? {
+        val elementType = simple?.arguments?.singleOrNull()?.typeOrFail ?: return null
+        val listFn = env.listSerializerBuilder ?: run {
+            report.reportUserError(
+                "kotlinx.serialization.builtins.ListSerializer is not on the compile " +
+                    "classpath; cannot compose a serializer for List<...> on " +
+                    "${cls.irClass.kotlinFqName.asString()}.${method.name.asString()}",
+                element = method
+            )
+            return null
+        }
+        val elementSer =
+            buildSerializer(builder, elementType, serializerReceiver, serializerFields, method)
+        return builder.irCall(listFn).apply {
+            typeArguments[0] = elementType
+            val listType = context.irBuiltIns.listClass.typeWith(elementType)
+            this.type = env.kSerializer.typeWith(listType)
+            arguments[0] = elementSer
+        }
+    }
+
+    private fun buildSetSerializer(
+        builder: IrBuilderWithScope,
+        simple: IrSimpleType?,
+        serializerReceiver: IrValueParameter,
+        serializerFields: List<IrField>,
+        method: IrSimpleFunction
+    ): IrExpression? {
+        val elementType = simple?.arguments?.singleOrNull()?.typeOrFail ?: return null
+        val setFn = env.setSerializerBuilder ?: run {
+            report.reportUserError(
+                "kotlinx.serialization.builtins.SetSerializer is not on the compile " +
+                    "classpath; cannot compose a serializer for Set<...> on " +
+                    "${cls.irClass.kotlinFqName.asString()}.${method.name.asString()}",
+                element = method
+            )
+            return null
+        }
+        val elementSer =
+            buildSerializer(builder, elementType, serializerReceiver, serializerFields, method)
+        return builder.irCall(setFn).apply {
+            typeArguments[0] = elementType
+            val setType = context.irBuiltIns.setClass.typeWith(elementType)
+            this.type = env.kSerializer.typeWith(setType)
+            arguments[0] = elementSer
+        }
+    }
+
+    private fun buildMapSerializer(
+        builder: IrBuilderWithScope,
+        simple: IrSimpleType?,
+        serializerReceiver: IrValueParameter,
+        serializerFields: List<IrField>,
+        method: IrSimpleFunction
+    ): IrExpression? {
+        val args = simple?.arguments ?: return null
+        if (args.size != 2) return null
+        val keyType = args[0].typeOrFail
+        val valueType = args[1].typeOrFail
+        val mapFn = env.mapSerializerBuilder ?: run {
+            report.reportUserError(
+                "kotlinx.serialization.builtins.MapSerializer is not on the compile " +
+                    "classpath; cannot compose a serializer for Map<..., ...> on " +
+                    "${cls.irClass.kotlinFqName.asString()}.${method.name.asString()}",
+                element = method
+            )
+            return null
+        }
+        val keySer =
+            buildSerializer(builder, keyType, serializerReceiver, serializerFields, method)
+        val valueSer =
+            buildSerializer(builder, valueType, serializerReceiver, serializerFields, method)
+        return builder.irCall(mapFn).apply {
+            typeArguments[0] = keyType
+            typeArguments[1] = valueType
+            val mapType = context.irBuiltIns.mapClass.typeWith(keyType, valueType)
+            this.type = env.kSerializer.typeWith(mapType)
+            arguments[0] = keySer
+            arguments[1] = valueSer
+        }
+    }
+
+    /**
+     * True iff [type] transitively references one of [cls]'s class-level type parameters.
+     * Used to short-circuit the recursive composer onto the static
+     * `kotlinx.serialization.serializer<T>()` path for types that don't need any
+     * per-instance serializer injection.
+     */
+    private fun referencesTypeParameter(type: IrType): Boolean {
+        val simple = type as? IrSimpleType ?: return false
+        val classifier = simple.classifier
+        if (classifier is org.jetbrains.kotlin.ir.symbols.IrTypeParameterSymbol) {
+            return cls.irClass.typeParameters.any { it.symbol == classifier }
+        }
+        return simple.arguments.any { arg ->
+            val argType = arg.typeOrNull ?: return@any false
+            referencesTypeParameter(argType)
         }
     }
 
