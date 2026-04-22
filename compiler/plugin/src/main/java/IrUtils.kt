@@ -219,6 +219,12 @@ internal fun IrPluginContext.buildAnonymousServiceExecutor(
         }
     }
     val invokeMethod = env.serviceExecutor.findMethod(FqConstants.INVOKE)
+    // The referenced user function may be declared with 0 or 1 value parameters.
+    // ServiceExecutor.invoke always passes (service, input: Any?); for 0-arg functions
+    // we simply discard the input and call with just the dispatch receiver.
+    val referencedValueParams = referencedFunction.parameters.filter {
+        it != referencedFunction.dispatchReceiverParameter
+    }
     val override = overrideMethod(
         executorClass,
         invokeMethod,
@@ -227,16 +233,22 @@ internal fun IrPluginContext.buildAnonymousServiceExecutor(
         +irReturn(
             irCall(referencedFunction).apply {
                 type = referencedFunction.returnType
-                putArgs(
-                    irImplicitCast(
-                        irGet(override.parameters[1]),
-                        referencedFunction.dispatchReceiverParameter?.type!!
-                    ),
-                    irImplicitCast(
-                        irGet(override.parameters[2]),
-                        referencedFunction.parameters[1].type
-                    )
+                val dispatchArg = irImplicitCast(
+                    irGet(override.parameters[1]),
+                    referencedFunction.dispatchReceiverParameter?.type!!
                 )
+                if (referencedValueParams.isEmpty()) {
+                    // 0-arg @KsMethod: ignore the `input: Any?` parameter entirely.
+                    putArgs(dispatchArg)
+                } else {
+                    putArgs(
+                        dispatchArg,
+                        irImplicitCast(
+                            irGet(override.parameters[2]),
+                            referencedValueParams[0].type
+                        )
+                    )
+                }
             }
         )
     }

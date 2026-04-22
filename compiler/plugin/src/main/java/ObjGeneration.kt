@@ -269,7 +269,9 @@ internal class GenericMethodIrBuilder(
         metadataAnnotations: List<IrConstructorCall>,
         executor: IrClass
     ): IrConstructorCall {
-        val inputType = method.parameters.first { !it.isDispatchReceiver }.type
+        // 0-arg @KsMethod functions fall back to Unit as the input type.
+        val inputType = method.parameters.firstOrNull { !it.isDispatchReceiver }?.type
+            ?: context.irBuiltIns.unitType
         val outputType = method.returnType
         val serviceType = cls.irClass.typeWith(
             cls.irClass.typeParameters.map { it.defaultType }
