@@ -1,0 +1,25 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, js, linuxArm64, linuxX64, macosArm64, macosX64, mingwX64, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <com.monkopedia.ksrpc:ksrpc-binary-okio>
+final class com.monkopedia.ksrpc.binary.okio/BufferedSourceBinaryData : com.monkopedia.ksrpc.channels/RpcBinaryData { // com.monkopedia.ksrpc.binary.okio/BufferedSourceBinaryData|null[0]
+    constructor <init>(okio/BufferedSource, kotlin/Long? = ...) // com.monkopedia.ksrpc.binary.okio/BufferedSourceBinaryData.<init>|<init>(okio.BufferedSource;kotlin.Long?){}[0]
+
+    final val size // com.monkopedia.ksrpc.binary.okio/BufferedSourceBinaryData.size|{}size[0]
+        final fun <get-size>(): kotlin/Long? // com.monkopedia.ksrpc.binary.okio/BufferedSourceBinaryData.size.<get-size>|<get-size>(){}[0]
+
+    final suspend fun close() // com.monkopedia.ksrpc.binary.okio/BufferedSourceBinaryData.close|close(){}[0]
+    final suspend fun transferTo(kotlin.coroutines/SuspendFunction3<kotlin/ByteArray, kotlin/Int, kotlin/Int, kotlin/Unit>) // com.monkopedia.ksrpc.binary.okio/BufferedSourceBinaryData.transferTo|transferTo(kotlin.coroutines.SuspendFunction3<kotlin.ByteArray,kotlin.Int,kotlin.Int,kotlin.Unit>){}[0]
+}
+
+final object com.monkopedia.ksrpc.binary.okio/BufferedSourceTransformer : com.monkopedia.ksrpc/BinaryDataTransformer, com.monkopedia.ksrpc/Transformer<okio/BufferedSource> { // com.monkopedia.ksrpc.binary.okio/BufferedSourceTransformer|null[0]
+    final suspend fun <#A1: kotlin/Any?> transform(okio/BufferedSource, com.monkopedia.ksrpc.channels/SerializedService<#A1>): com.monkopedia.ksrpc.channels/CallData<#A1> // com.monkopedia.ksrpc.binary.okio/BufferedSourceTransformer.transform|transform(okio.BufferedSource;com.monkopedia.ksrpc.channels.SerializedService<0:0>){0§<kotlin.Any?>}[0]
+    final suspend fun <#A1: kotlin/Any?> untransform(com.monkopedia.ksrpc.channels/CallData<#A1>, com.monkopedia.ksrpc.channels/SerializedService<#A1>): okio/BufferedSource // com.monkopedia.ksrpc.binary.okio/BufferedSourceTransformer.untransform|untransform(com.monkopedia.ksrpc.channels.CallData<0:0>;com.monkopedia.ksrpc.channels.SerializedService<0:0>){0§<kotlin.Any?>}[0]
+}
+
+final fun (okio/BufferedSource).com.monkopedia.ksrpc.binary.okio/asRpcBinaryData(kotlin/Long? = ...): com.monkopedia.ksrpc.channels/RpcBinaryData // com.monkopedia.ksrpc.binary.okio/asRpcBinaryData|asRpcBinaryData@okio.BufferedSource(kotlin.Long?){}[0]
+final suspend fun (com.monkopedia.ksrpc.channels/RpcBinaryData).com.monkopedia.ksrpc.binary.okio/asBufferedSource(): okio/BufferedSource // com.monkopedia.ksrpc.binary.okio/asBufferedSource|asBufferedSource@com.monkopedia.ksrpc.channels.RpcBinaryData(){}[0]
