@@ -228,7 +228,8 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
             )
             isValid = false
         }
-        if (method.parameters.filter { !it.isDispatchReceiver }.size > 1) {
+        val valueParams = method.parameters.filter { !it.isDispatchReceiver }
+        if (valueParams.size > 1) {
             val fqName = irClass.kotlinFqName.asString()
             report.reportUserError(
                 "$fqName.${method.name.asString()} cannot have more than 1 parameter",
@@ -255,7 +256,10 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
             )
             isValid = false
         }
-        val inputType = method.parameters[0].type.classFqName
+        // valueParams may be empty for 0-arg @KsMethod functions; the RpcMethod is
+        // generated with `Unit` as the input type in that case, so there is no
+        // user-declared input to check against ByteReadChannel.
+        val inputType = valueParams.firstOrNull()?.type?.classFqName
         val outputType = method.returnType.classFqName
         if (inputType == BYTE_READ_CHANNEL && outputType == BYTE_READ_CHANNEL) {
             val fqName = irClass.kotlinFqName.asString()

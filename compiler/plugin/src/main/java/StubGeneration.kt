@@ -59,6 +59,7 @@ import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.expressions.IrBody
 import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
+import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
@@ -189,6 +190,7 @@ class StubGeneration(
         val callChannel = env.rpcMethod.findMethod(FqConstants.CALL_CHANNEL)
         val substitutor = stubTypeSubstitutor(service, this)
         val substitutedReturn = substitutor.substitute(method.returnType)
+        val hasValueParam = method.parameters.any { !it.isDispatchReceiver }
         return context.overrideMethodWithSubstitution(
             this,
             method.symbol,
@@ -196,7 +198,13 @@ class StubGeneration(
             substitutedReturn
         ) { override ->
             val thisParam = override.parameters[0]
-            val inputParam = override.parameters[1]
+            // For 0-arg @KsMethod functions the override has only the dispatch receiver
+            // and we pass Unit as the call input.
+            val inputExpr: IrExpression = if (hasValueParam) {
+                irGet(override.parameters[1])
+            } else {
+                irGetObject(context.irBuiltIns.unitClass)
+            }
             val executor = service.genericExecutors[endpoint.trimStart('/')]
                 ?: reportInternal(
                     "generic executor missing for endpoint $endpoint on " +
@@ -216,7 +224,7 @@ class StubGeneration(
                             executor = executor
                         ),
                         irGetField(irGet(thisParam), service.channel),
-                        irGet(inputParam)
+                        inputExpr
                     )
                 }
             )
@@ -330,26 +338,36 @@ class StubGeneration(
         service.addEndpoint(endpoint, methodField)
         val callChannel = env.rpcMethod.findMethod(FqConstants.CALL_CHANNEL)
 
+        val valueParams = method.parameters.filter { !it.isDispatchReceiver }
         return context.overrideMethod(this, method.symbol) { override ->
             +irReturn(
                 irCall(callChannel).apply {
                     type = method.returnType
-                    if (override.parameters.size != 2) {
+                    // Expected override params: dispatch receiver + 0 or 1 value
+                    // parameters (0 for @KsMethod functions with no declared input).
+                    val expectedSize = 1 + valueParams.size
+                    if (override.parameters.size != expectedSize) {
                         val overrideParams = override.parameters.map {
                             it.name.asString() to it.type.classFqName?.asString()
                         }
                         reportInternal(
                             "generated stub override for ${method.name.asString()} has " +
-                                "unexpected parameters $overrideParams (expected exactly " +
-                                "dispatch + single value parameter)"
+                                "unexpected parameters $overrideParams (expected " +
+                                "dispatch + $valueParams.size value parameter(s))"
                         )
+                    }
+                    val inputExpr: IrExpression = if (valueParams.isEmpty()) {
+                        // 0-arg @KsMethod: synthesize Unit as the call input.
+                        irGetObject(context.irBuiltIns.unitClass)
+                    } else {
+                        irGet(override.parameters[1])
                     }
                     putArgs(
                         irCall(methodField).apply {
                             putArgs(irGetObject(companion.symbol))
                         },
                         irGetField(irGet(override.parameters[0]), service.channel),
-                        irGet(override.parameters[1])
+                        inputExpr
                     )
                 }
             )
@@ -411,7 +429,10 @@ class StubGeneration(
         method: IrSimpleFunction,
         metadataAnnotations: List<IrConstructorCall>
     ): IrConstructorCall {
-        val inputType = method.parameters.first { !it.isDispatchReceiver }.type
+        // 0-arg @KsMethod functions have no user-declared input; fall back to Unit
+        // so the generated RpcMethod is shaped as `RpcMethod<Service, Unit, Out>`.
+        val inputType = method.parameters.firstOrNull { !it.isDispatchReceiver }?.type
+            ?: context.irBuiltIns.unitType
         val outputType = method.returnType
         val inputRpcType = determineType(inputType)
         val outputRpcType = determineType(outputType)
