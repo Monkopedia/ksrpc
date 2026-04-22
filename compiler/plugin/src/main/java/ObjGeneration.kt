@@ -330,6 +330,18 @@ internal class GenericMethodIrBuilder(
         if (type.classFqName == FqConstants.BYTE_READ_CHANNEL) {
             return builder.irGetObject(env.binaryTransformer)
         }
+        // Flow<T> is bridged to the KsFlowService sub-service protocol. Only reachable when
+        // ksrpc-flow is on the compile classpath — otherwise we fall through to the generic
+        // serializer path, which will produce a clearer "no serializer" diagnostic.
+        if (env.flowSupported && type.classFqName == FqConstants.FLOW) {
+            return buildFlowTransformer(
+                builder,
+                type,
+                serializerReceiver,
+                serializerFields,
+                method
+            )
+        }
         // Sub-service transformer when `type` is itself an @KsService. Both non-generic
         // sub-services (companion is the `RpcObject`) and generic sub-services (companion
         // is an `RpcObjectFactory`, and we materialize a concrete `Obj<T, ...>` via the
@@ -678,4 +690,63 @@ internal class GenericMethodIrBuilder(
 
     fun buildExecutor(referencedFunction: IrSimpleFunction, container: IrClass): IrClass =
         context.buildAnonymousServiceExecutor(env, referencedFunction, container)
+
+    /**
+     * Emit `FlowTransformer<T>(KsFlowService.Obj<T>(Tser))` for a `Flow<T>` parameter or
+     * return type on a method belonging to a generic `@KsService`. The element type's
+     * `KSerializer` is composed via [buildSerializer] so it can reference the outer
+     * service's type parameters. Mirrors the non-generic path in
+     * [StubGeneration.buildFlowTransformer] but threads the generic serializer
+     * composition through.
+     */
+    private fun buildFlowTransformer(
+        builder: IrBuilderWithScope,
+        flowType: IrType,
+        serializerReceiver: IrValueParameter,
+        serializerFields: List<IrField>,
+        method: IrSimpleFunction
+    ): IrExpression {
+        val simple = flowType as? IrSimpleType ?: reportInternal(
+            "Flow<T> type ${flowType.render()} is not IrSimpleType"
+        )
+        val elementType = simple.arguments.singleOrNull()?.typeOrFail
+            ?: reportInternal(
+                "Flow<T> type ${flowType.render()} has no type argument — cannot emit " +
+                    "FlowTransformer"
+            )
+        val flowTransformerSymbol = env.flowTransformer
+            ?: reportInternal(
+                "FlowTransformer symbol missing but Flow<T> detection fired — " +
+                    "ksrpc-flow must be on the compile classpath"
+            )
+        val ksFlowServiceSymbol = env.ksFlowService
+            ?: reportInternal(
+                "KsFlowService symbol missing but Flow<T> detection fired — " +
+                    "ksrpc-flow must be on the compile classpath"
+            )
+        val objClass = ksFlowServiceSymbol.owner.declarations
+            .filterIsInstance<IrClass>()
+            .firstOrNull { it.name == FqConstants.OBJ }
+            ?: reportInternal(
+                "KsFlowService has no nested Obj class — the ksrpc compiler plugin " +
+                    "must have processed ksrpc-flow"
+            )
+        val objConstructor = objClass.constructors.first { it.isPrimary }
+        val rpcObjectExpr = builder.irCallConstructor(
+            objConstructor.symbol,
+            listOf(elementType)
+        ).apply {
+            this.type = objClass.typeWith(elementType)
+            putArgs(
+                buildSerializer(builder, elementType, serializerReceiver, serializerFields, method)
+            )
+        }
+        return builder.irCallConstructor(
+            flowTransformerSymbol.constructors.first(),
+            listOf(elementType)
+        ).apply {
+            this.type = flowTransformerSymbol.typeWith(elementType)
+            putArgs(rpcObjectExpr)
+        }
+    }
 }

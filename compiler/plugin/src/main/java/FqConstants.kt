@@ -96,4 +96,13 @@ object FqConstants {
 
     val PAIR = ClassId(FqName("kotlin"), Name.identifier("Pair"))
     val TO_FUNCTION = CallableId(FqName("kotlin"), Name.identifier("to"))
+
+    // ksrpc-flow runtime types — referenced by StubGeneration / ObjGeneration when
+    // emitting `FlowTransformer<T>(KsFlowService.Obj<T>(serializer))` IR for
+    // `Flow<T>` signatures (issue #39). Resolved optimistically; the compiler
+    // guards with `KsrpcGenerationEnvironment.flowSupported`.
+    val FLOW = FqName("kotlinx.coroutines.flow.Flow")
+    val KSRPC_FLOW_PKG = FqName("com.monkopedia.ksrpc.flow")
+    val KS_FLOW_SERVICE = ClassId(KSRPC_FLOW_PKG, Name.identifier("KsFlowService"))
+    val FLOW_TRANSFORMER = ClassId(KSRPC_FLOW_PKG, Name.identifier("FlowTransformer"))
 }
