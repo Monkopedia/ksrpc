@@ -46,8 +46,9 @@ class IntrospectionGeneration(
         key: GeneratedDeclarationKey?
     ): IrBody? {
         val k = key as FirKsrpcIntrospectionGenerator.Key
-        val cls = classes[k.type]
-            ?: error("Invalid synthetic declaration for ${k.type} in ${classes.keys}")
+        // Class may have been removed by validation (issue #45). Errors are already
+        // reported; skip body generation to avoid crashing.
+        val cls = classes[k.type] ?: return null
         return when (function.name) {
             FqConstants.GET_INTROSPECTION -> buildIntrospectionBody(function, cls)
             else -> null

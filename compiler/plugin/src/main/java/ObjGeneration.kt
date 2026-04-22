@@ -91,8 +91,9 @@ class ObjGeneration(
         key: GeneratedDeclarationKey?
     ): Collection<IrDeclaration> {
         val k = key as FirKsrpcObjGenerator.Key
-        val cls = classes[k.target]
-            ?: error("Invalid synthetic Obj for ${k.target}")
+        // Class may have been removed by validation (issue #45 — @KsService subtype of
+        // another @KsService). Errors are already reported; skip to avoid crashing.
+        val cls = classes[k.target] ?: return emptyList()
         val serializerFields =
             context.buildSerializerFieldsForTypeParams(declaration, env, attach = true)
         cls.setObjClass(declaration)
