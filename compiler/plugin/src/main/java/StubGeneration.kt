@@ -479,13 +479,25 @@ class StubGeneration(
         declarationIrBuilder: DeclarationIrBuilder
     ) = when (outputRpcType) {
         // The paired `ObjGeneration.createTypeConverter` already emits a user
-        // diagnostic when the `ByteReadChannel` adapter is missing; by the
-        // time we reach stub generation the classpath must satisfy it.
+        // diagnostic when the underlying adapter is missing; by the time we
+        // reach stub generation the classpath must satisfy it. Dispatch on
+        // the user-facing type FQN to pick the correct transformer object.
         RpcType.BINARY -> declarationIrBuilder.irGetObject(
-            env.binaryTransformer
-                ?: reportInternal(
-                    "ByteReadChannel adapter (ksrpc-binary-ktor) missing on the compile classpath"
-                )
+            when (outputType.classFqName) {
+                FqConstants.KOTLINX_IO_SOURCE ->
+                    env.sourceTransformer
+                        ?: reportInternal(
+                            "kotlinx.io.Source adapter (ksrpc-binary-kotlinx-io) missing " +
+                                "on the compile classpath"
+                        )
+
+                else ->
+                    env.binaryTransformer
+                        ?: reportInternal(
+                            "ByteReadChannel adapter (ksrpc-binary-ktor) missing " +
+                                "on the compile classpath"
+                        )
+            }
         )
 
         RpcType.FLOW -> buildFlowTransformer(outputType, declarationIrBuilder)
@@ -630,6 +642,7 @@ class StubGeneration(
         env.flowSupported && type.classFqName == FqConstants.FLOW -> RpcType.FLOW
         type.extends(env.rpcService) -> RpcType.SERVICE
         type.classFqName == BYTE_READ_CHANNEL -> RpcType.BINARY
+        type.classFqName == FqConstants.KOTLINX_IO_SOURCE -> RpcType.BINARY
         else -> RpcType.DEFAULT
     }
 
