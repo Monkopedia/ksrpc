@@ -16,6 +16,7 @@
 package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.channels.ChannelId
+import com.monkopedia.ksrpc.packets.asByteReadChannel
 import com.monkopedia.ksrpc.packets.internal.Packet
 import com.monkopedia.ksrpc.packets.internal.PacketChannelBase
 import io.ktor.utils.io.toByteArray
@@ -93,7 +94,7 @@ class PacketChannelBinaryOrderingTest {
             channel.incomingPackets.send(binaryPacket(2, ByteArray(0)))
 
             val response = responseDeferred.await()
-            val payload = response.readBinary().toByteArray()
+            val payload = response.readBinary().asByteReadChannel().toByteArray()
             assertContentEquals("firstsecond".encodeToByteArray(), payload)
         } finally {
             runCatching { channel.close() }

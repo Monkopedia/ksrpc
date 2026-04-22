@@ -16,6 +16,8 @@
 package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.channels.CallData
+import com.monkopedia.ksrpc.packets.asByteReadChannel
+import com.monkopedia.ksrpc.packets.asRpcBinaryData
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.core.readBytes
 import io.ktor.utils.io.readRemaining
@@ -40,10 +42,12 @@ class CallDataAccessTest {
 
     @Test
     fun binaryCallDataCanBeReadAsBinaryOnly() = runBlockingUnit {
-        val callData = CallData.createBinary<String>(ByteReadChannel("payload".encodeToByteArray()))
+        val callData = CallData.createBinary<String>(
+            ByteReadChannel("payload".encodeToByteArray()).asRpcBinaryData()
+        )
 
         assertTrue(callData.isBinary)
-        val bytes = callData.readBinary().readRemaining().readBytes()
+        val bytes = callData.readBinary().asByteReadChannel().readRemaining().readBytes()
         assertEquals("payload", bytes.decodeToString())
         assertFailsWith<IllegalStateException> {
             callData.readSerialized()
