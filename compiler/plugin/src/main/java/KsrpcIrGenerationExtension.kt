@@ -94,7 +94,13 @@
  *   [KsrpcIrGenerationExtension.validate] runs before transformation, rejecting
  *   services with non-RpcService supertypes, non-invariant class type parameters,
  *   method-level type parameters, duplicate endpoint names, `ByteReadChannel`-on-both-
- *   sides, and `@KsNotification` methods that don't return `Unit`.
+ *   sides, and `@KsNotification` methods that don't return `Unit`. Diagnostics go
+ *   through [PluginReporter.reportUserError], which resolves a source line/column
+ *   from the offending IR element so the user sees a clean pointer at the declaration.
+ *
+ *   TODO: these validations currently run in the IR phase which limits IDE
+ *   integration — a FIR-phase checker with `KtSourceElement` would produce a red
+ *   squiggle directly on the offending element. Tracked as a 1.0+ follow-up.
  */
 
 @file:OptIn(UnsafeDuringIrConstructionAPI::class)
@@ -107,8 +113,6 @@ import com.monkopedia.ksrpc.plugin.FqConstants.INTROSPECTABLE_RPC_SERVICE
 import com.monkopedia.ksrpc.plugin.FqConstants.KS_SERVICE
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.ERROR
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.WARNING
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.ir.backend.js.utils.isDispatchReceiver
 import org.jetbrains.kotlin.ir.declarations.IrClass
@@ -133,7 +137,7 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
         val env = KsrpcGenerationEnvironment(pluginContext, report)
         val transformers = listOf(
             StubGeneration(pluginContext, report, classes, env),
-            ObjGeneration(pluginContext, classes, env),
+            ObjGeneration(pluginContext, report, classes, env),
             CompanionGeneration(pluginContext, classes, env),
             IntrospectionGeneration(pluginContext, classes, env)
         )
@@ -175,19 +179,21 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
                 superClass.annotations.any { it.type.classFqName == KS_SERVICE }
             }
         if (ksServiceSuper != null) {
-            report.error(
+            report.reportUserError(
                 "@KsService cannot be applied to ${irClass.kotlinFqName.asString()} because " +
                     "its supertype ${ksServiceSuper.kotlinFqName.asString()} is already " +
                     "@KsService. Remove @KsService from " +
                     "${irClass.kotlinFqName.asString()}; rpcObject<" +
                     "${irClass.name.asString()}>() will find the parent's companion " +
-                    "automatically."
+                    "automatically.",
+                element = irClass
             )
             isValid = false
         }
         if (!hasRpcServiceSuper && !hasIntrospectableSuper && ksServiceSuper == null) {
-            report.error(
-                "${irClass.kotlinFqName.asString()} does not extend ${FQRPC_SERVICE.asString()}"
+            report.reportUserError(
+                "${irClass.kotlinFqName.asString()} does not extend ${FQRPC_SERVICE.asString()}",
+                element = irClass
             )
             isValid = false
         }
@@ -196,9 +202,10 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
         // implemented in codegen.
         for (tp in irClass.typeParameters) {
             if (tp.variance != Variance.INVARIANT) {
-                report.error(
+                report.reportUserError(
                     "${irClass.kotlinFqName.asString()}: type parameter ${tp.name.asString()} " +
-                        "must be invariant (got ${tp.variance.label})"
+                        "must be invariant (got ${tp.variance.label})",
+                    element = tp
                 )
                 isValid = false
             }
@@ -215,12 +222,18 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
         var isValid = true
         if (method.typeParameters.isNotEmpty()) {
             val fqName = irClass.kotlinFqName.asString()
-            report.error("$fqName.${method.name.asString()} cannot have type parameters")
+            report.reportUserError(
+                "$fqName.${method.name.asString()} cannot have type parameters",
+                element = method
+            )
             isValid = false
         }
         if (method.parameters.filter { !it.isDispatchReceiver }.size > 1) {
             val fqName = irClass.kotlinFqName.asString()
-            report.error("$fqName.${method.name.asString()} cannot have more than 1 parameter")
+            report.reportUserError(
+                "$fqName.${method.name.asString()} cannot have more than 1 parameter",
+                element = method
+            )
             isValid = false
         }
         val annotationArg = annotation.arguments[0]
@@ -228,12 +241,18 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
         if (name == null) {
             val fqName = irClass.kotlinFqName.asString()
             val methodName = method.name.asString()
-            report.error("$fqName.$methodName: could not parse annotation argument $annotationArg")
+            report.reportUserError(
+                "$fqName.$methodName: could not parse annotation argument $annotationArg",
+                element = method
+            )
             isValid = false
         } else if (!names.add(name)) {
             val fqName = irClass.kotlinFqName.asString()
             val methodName = method.name.asString()
-            report.error("$fqName.$methodName: cannot use endpoint $name, it has already been used")
+            report.reportUserError(
+                "$fqName.$methodName: cannot use endpoint $name, it has already been used",
+                element = method
+            )
             isValid = false
         }
         val inputType = method.parameters[0].type.classFqName
@@ -241,8 +260,9 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
         if (inputType == BYTE_READ_CHANNEL && outputType == BYTE_READ_CHANNEL) {
             val fqName = irClass.kotlinFqName.asString()
             val methodName = method.name.asString()
-            report.error(
-                "$fqName.$methodName: ByteReadChannel not yet supported for both input and output"
+            report.reportUserError(
+                "$fqName.$methodName: ByteReadChannel not yet supported for both input and output",
+                element = method
             )
             isValid = false
         }
@@ -258,17 +278,15 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
         if (returnType?.asString() != "kotlin.Unit") {
             val fqName = irClass.kotlinFqName.asString()
             val methodName = serviceMethod.function.name.asString()
-            report.error(
+            report.reportUserError(
                 "$fqName.$methodName: @KsNotification methods must return Unit, " +
-                    "but returns $returnType"
+                    "but returns $returnType",
+                element = serviceMethod.function
             )
             return false
         }
         return true
     }
 }
-
-fun MessageCollector.error(msg: String) = report(ERROR, msg)
-fun MessageCollector.warn(msg: String) = report(WARNING, msg)
 
 fun IrExpression?.constString() = (this as? IrConst)?.value as? String

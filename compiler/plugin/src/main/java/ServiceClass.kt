@@ -17,7 +17,6 @@
 
 package com.monkopedia.ksrpc.plugin
 
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.declarations.IrClass
@@ -55,7 +54,9 @@ private class Visitor(private val messageCollector: MessageCollector) : IrElemen
         val ret = super.visitClass(declaration)
         if (annotation != null) {
             classes[declaration.fqNameForIrSerialization.asString()] = currentService
-                ?: error("Internal error, lost service")
+                ?: reportInternal(
+                    "lost currentService while visiting ${declaration.name.asString()}"
+                )
         }
         currentService = lastService
         return ret
@@ -86,21 +87,22 @@ private class Visitor(private val messageCollector: MessageCollector) : IrElemen
                 if (declaration.dispatchReceiverParameter?.type?.classFqName !=
                     FqConstants.FQ_INTROSPECTABLE_RPC_SERVICE
                 ) {
-                    messageCollector.report(
-                        CompilerMessageSeverity.ERROR,
-                        "${
-                            declaration.name.asString()
-                        } declared as KsMethod but not inside a KsService (${declaration.dispatchReceiverParameter?.type?.classFqName})"
+                    val receiverFqName =
+                        declaration.dispatchReceiverParameter?.type?.classFqName
+                    messageCollector.reportUserError(
+                        "@KsMethod can only be applied to functions declared inside a " +
+                            "@KsService interface. ${declaration.name.asString()} is " +
+                            "declared on $receiverFqName.",
+                        element = declaration
                     )
                 }
             }
         } else {
             if (currentService != null && declaration.overriddenSymbols.isEmpty()) {
-                messageCollector.report(
-                    CompilerMessageSeverity.WARNING,
-                    "${
-                        declaration.name.asString()
-                    } declared within KsService without KsMethod annotation"
+                messageCollector.reportUserWarning(
+                    "${declaration.name.asString()} declared inside a @KsService " +
+                        "without @KsMethod — the function will not be exposed over RPC.",
+                    element = declaration
                 )
             }
         }
@@ -117,9 +119,10 @@ private class SubclassVisitor(
             classes[it.fqNameForIrSerialization.asString()]
         }.also {
             if (it.size > 1) {
-                messageCollector.error(
+                messageCollector.reportUserError(
                     "${declaration.fqNameForIrSerialization.asString()} has " +
-                        "multiple RPC super classes, which is not supported"
+                        "multiple @KsService super types, which is not supported.",
+                    element = declaration
                 )
             }
         }.singleOrNull()?.irClassAndImpls?.add(declaration)
