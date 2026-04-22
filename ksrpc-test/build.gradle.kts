@@ -82,6 +82,8 @@ kotlin {
         implementation(project(":ksrpc-binary-ktor"))
         // Exercises the kotlinx.io `Source` adapter alongside the ktor one.
         implementation(project(":ksrpc-binary-kotlinx-io"))
+        // Exercises the okio `BufferedSource` adapter alongside the others.
+        implementation(project(":ksrpc-binary-okio"))
     }
     sourceSets["commonTest"].dependencies {
         implementation(project(":ksrpc-core"))
