@@ -170,6 +170,7 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
                 } else {
                     emptyList()
                 }
+
                 else -> emptyList()
             }
         }
@@ -352,11 +353,13 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
         val key = origin?.key as? Key
         return when {
             key == null -> setOf(FIND_ENDPOINT, CREATE_STUB, SERVICE_NAME, ENDPOINTS)
+
             key.isGeneric -> if (factorySupported) {
                 setOf(INVOKE, CREATE, ARITY, SpecialNames.INIT)
             } else {
                 setOf(INVOKE, SpecialNames.INIT)
             }
+
             else -> setOf(FIND_ENDPOINT, CREATE_STUB, SERVICE_NAME, ENDPOINTS, SpecialNames.INIT)
         }
     }

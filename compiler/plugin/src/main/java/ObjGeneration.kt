@@ -93,18 +93,8 @@ class ObjGeneration(
         val k = key as FirKsrpcObjGenerator.Key
         val cls = classes[k.target]
             ?: error("Invalid synthetic Obj for ${k.target}")
-        val serializerFields = declaration.typeParameters.map { tp ->
-            declaration.addField {
-                startOffset = SYNTHETIC_OFFSET
-                endOffset = SYNTHETIC_OFFSET
-                name = Name.identifier(tp.name.asString() + "Serializer")
-                origin = IrDeclarationOrigin.DELEGATE
-                visibility = DescriptorVisibilities.PRIVATE
-                type = env.kSerializer.typeWith(tp.defaultType)
-                isFinal = true
-                isStatic = false
-            }
-        }
+        val serializerFields =
+            context.buildSerializerFieldsForTypeParams(declaration, env, attach = true)
         cls.setObjClass(declaration)
         cls.setObjSerializerFields(serializerFields)
         // Executors are pre-created by StubGeneration (parented to the Stub class) before
@@ -385,58 +375,6 @@ internal class GenericMethodIrBuilder(
         }
     }
 
-    fun buildExecutor(referencedFunction: IrSimpleFunction, container: IrClass): IrClass {
-        val executorClass = context.irFactory.buildClass {
-            startOffset = referencedFunction.startOffset
-            endOffset = referencedFunction.endOffset
-            name = Name.identifier(
-                "Anonymous${referencedFunction.name.asString().replaceFirstChar { it.uppercase() }}"
-            )
-            visibility = DescriptorVisibilities.INTERNAL
-            kind = ClassKind.CLASS
-            modality = Modality.FINAL
-            isCompanion = false
-        }
-        executorClass.parent = container
-        executorClass.superTypes = listOf(env.serviceExecutor.typeWith())
-        executorClass.createThisReceiverParameter()
-
-        executorClass.addConstructor {
-            startOffset = SYNTHETIC_OFFSET
-            endOffset = SYNTHETIC_OFFSET
-            isPrimary = true
-        }.apply {
-            body = context.irBuilder(symbol).irBlockBody {
-                +irDelegatingConstructorCall(
-                    context.irBuiltIns.anyClass.owner.constructors.single()
-                )
-            }
-        }
-        val invokeMethod = env.serviceExecutor.findMethod(FqConstants.INVOKE)
-        val override = context.overrideMethod(
-            executorClass,
-            invokeMethod,
-            referencedFunction.returnType
-        ) { override ->
-            +irReturn(
-                irCall(referencedFunction).apply {
-                    type = referencedFunction.returnType
-                    putArgs(
-                        irImplicitCast(
-                            irGet(override.parameters[1]),
-                            referencedFunction.dispatchReceiverParameter?.type!!
-                        ),
-                        irImplicitCast(
-                            irGet(override.parameters[2]),
-                            referencedFunction.parameters[1].type
-                        )
-                    )
-                }
-            )
-        }
-        executorClass.addChild(override)
-        container.addChild(executorClass)
-        return executorClass
-    }
+    fun buildExecutor(referencedFunction: IrSimpleFunction, container: IrClass): IrClass =
+        context.buildAnonymousServiceExecutor(env, referencedFunction, container)
 }
-

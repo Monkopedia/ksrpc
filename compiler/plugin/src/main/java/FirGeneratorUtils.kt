@@ -27,19 +27,13 @@ import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
-/**
- * Helpers shared across the FIR declaration generators. Patterns captured here appear in
- * two or more of [FirCompanionDeclarationGenerator], [FirKsrpcObjGenerator] and
- * [FirKsrpcStubGenerator].
- */
-
-/**
- * Build the name used for the per-type-parameter `KSerializer<T>` field/parameter on
- * generated `Obj`, `Stub` and factory `invoke`. Single source of truth for the naming
- * scheme so FIR and IR sides agree.
- */
-internal fun serializerParameterName(typeParameterName: Name): Name =
-    Name.identifier(typeParameterName.asString() + "Serializer")
+// Helpers shared across the FIR declaration generators. Patterns captured here appear in
+// two or more of FirCompanionDeclarationGenerator, FirKsrpcObjGenerator and
+// FirKsrpcStubGenerator.
+//
+// The per-type-parameter `KSerializer<T>` field/parameter naming helper lives in
+// IrUtils.kt (`serializerFieldName`) and is reused here so the FIR declaration side and
+// the IR body/field side agree byte-for-byte on the generated names.
 
 /**
  * Adds a `KSerializer<Tn>` value parameter for each service/stub/obj type parameter, named
@@ -52,7 +46,7 @@ internal fun FunctionBuildingContext<*>.addSerializerValueParameters(
 ) {
     for ((idx, tp) in typeParams.withIndex()) {
         valueParameter(
-            serializerParameterName(tp.name),
+            serializerFieldName(tp.name),
             typeProvider = { refs ->
                 KSERIALIZER.createConeType(
                     session,
