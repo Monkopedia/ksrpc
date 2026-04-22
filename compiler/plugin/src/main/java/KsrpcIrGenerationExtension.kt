@@ -13,6 +13,90 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/*
+ * Generation pipeline overview
+ * ============================
+ *
+ * The ksrpc compiler plugin operates in two phases. FIR declaration generators synthesize
+ * the public shape of the generated code (classes, members, signatures), then IR
+ * transformers attach field definitions, fill in bodies and register behavior.
+ *
+ * FIR phase — declaration shape
+ * -----------------------------
+ *
+ *   KsrpcComponentRegistrar wires FirKsrpcRegistrar, which registers four declaration
+ *   generators (see FqConstants for FQ names):
+ *
+ *   - FirKsrpcStubGenerator           Emits a nested `Stub<T...>` class on every
+ *                                     `@KsService` interface. The stub implements the
+ *                                     service and holds the `SerializedService` channel
+ *                                     plus one `KSerializer<Tn>` per service type param.
+ *
+ *   - FirCompanionDeclarationGenerator Emits a Companion object on every @KsService.
+ *                                     For non-generic services the companion directly
+ *                                     extends `RpcObject<Service>` and exposes
+ *                                     `findEndpoint`/`createStub`/`serviceName`/`endpoints`.
+ *                                     For generic services the companion instead extends
+ *                                     `RpcObjectFactory<Service<*, ...>>` and exposes
+ *                                     `operator fun <T...> invoke(serializers...)` plus
+ *                                     `arity` and `create(typeArgs)`.
+ *
+ *   - FirKsrpcObjGenerator            Only runs for generic services. Emits a nested
+ *                                     `Obj<T...>` class which implements
+ *                                     `RpcObject<Service<T...>>`. Obj is what Companion's
+ *                                     `invoke` returns and what `create` instantiates.
+ *
+ *   - FirKsrpcIntrospectionGenerator  Emits `getIntrospection()` on services that opt in
+ *                                     via `@KsIntrospectable`.
+ *
+ *   Shared FIR helpers live in `FirGeneratorUtils.kt` (serializer value parameters,
+ *   cone-type threading, kotlin.collections.List ClassId).
+ *
+ * IR phase — bodies and implementation
+ * ------------------------------------
+ *
+ *   KsrpcIrGenerationExtension (this file) runs four transformers in order, each
+ *   matching against the `GeneratedDeclarationKey` emitted by its FIR counterpart:
+ *
+ *   - StubGeneration         Attaches the channel field, per-TP serializer fields,
+ *                            per-endpoint executor classes, method bodies that call
+ *                            `RpcMethod.callChannel(...)`, and a `close()` override.
+ *                            For non-generic services each method is backed by a lazy
+ *                            RpcMethod on the Stub.Companion; for generic services we
+ *                            emit a fresh `RpcMethod` per call, wiring in the stub
+ *                            instance's serializer fields. Also pre-creates the
+ *                            per-endpoint ServiceExecutor classes that ObjGeneration
+ *                            later reuses via `ServiceClass.genericExecutors`.
+ *
+ *   - ObjGeneration          For generic services only: fills in Obj's serializer
+ *                            fields, primary constructor body, `createStub`,
+ *                            `findEndpoint`, and the `serviceName`/`endpoints`
+ *                            properties. Emits RpcMethod constructor calls that resolve
+ *                            type-parameter-bearing serializers from the Obj instance
+ *                            fields (see [GenericMethodIrBuilder]).
+ *
+ *   - CompanionGeneration    Fills in `findEndpoint`, `createStub` (non-generic),
+ *                            `invoke` and `create` (generic), plus the
+ *                            `serviceName`/`endpoints`/`arity` property bodies and the
+ *                            `@RpcObjectKey` annotation that points runtime dispatch
+ *                            at this companion.
+ *
+ *   - IntrospectionGeneration Fills in `getIntrospection()` body.
+ *
+ *   Shared IR helpers live in `IrUtils.kt` (listOf<String>, serializer field creation,
+ *   anonymous ServiceExecutor class, overrideMethod, etc.). Metadata propagation from
+ *   sibling `@KsMethodMetadata` annotations is handled by `MetadataIrBuilder.kt`.
+ *
+ * Validation
+ * ----------
+ *
+ *   [KsrpcIrGenerationExtension.validate] runs before transformation, rejecting
+ *   services with non-RpcService supertypes, non-invariant class type parameters,
+ *   method-level type parameters, duplicate endpoint names, `ByteReadChannel`-on-both-
+ *   sides, and `@KsNotification` methods that don't return `Unit`.
+ */
+
 package com.monkopedia.ksrpc.plugin
 
 import com.monkopedia.ksrpc.plugin.FqConstants.BYTE_READ_CHANNEL

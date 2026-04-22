@@ -22,7 +22,6 @@ import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.irThrow
 import org.jetbrains.kotlin.ir.backend.js.utils.isDispatchReceiver
 import org.jetbrains.kotlin.ir.builders.IrBlockBodyBuilder
-import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irBranch
 import org.jetbrains.kotlin.ir.builders.irCall
@@ -36,12 +35,10 @@ import org.jetbrains.kotlin.ir.builders.irInt
 import org.jetbrains.kotlin.ir.builders.irNotEquals
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irString
-import org.jetbrains.kotlin.ir.builders.irVararg
 import org.jetbrains.kotlin.ir.builders.irWhen
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrConstructor
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
-import org.jetbrains.kotlin.ir.declarations.IrParameterKind
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.expressions.IrBlockBody
@@ -105,7 +102,7 @@ class CompanionGeneration(
             .firstOrNull { it.name == FqConstants.ENDPOINTS }
             ?.let { property ->
                 val endpoints = cls.endpoints.keys.map { it.trimStart('/') }
-                val listExpr = context.irBuilder(property).irListOfStrings(endpoints)
+                val listExpr = context.irBuilder(property).irListOfStrings(env, endpoints)
                 property.backingField?.initializer =
                     irFactory.createExpressionBody(
                         SYNTHETIC_OFFSET,
@@ -113,7 +110,7 @@ class CompanionGeneration(
                         listExpr
                     )
                 property.getter?.body = context.irBuilder(property.getter!!).irSynthBody {
-                    +irReturn(irListOfStrings(endpoints))
+                    +irReturn(irListOfStrings(env, endpoints))
                 }
             }
         // For generic service companions, eagerly emit the `arity` getter body — the
@@ -160,7 +157,7 @@ class CompanionGeneration(
             if (propertyName == FqConstants.ENDPOINTS) {
                 val endpoints = cls.endpoints.keys.map { it.trimStart('/') }
                 return context.irBuilder(function).irSynthBody {
-                    +irReturn(irListOfStrings(endpoints))
+                    +irReturn(irListOfStrings(env, endpoints))
                 }
             }
             if (propertyName == FqConstants.ARITY) {
@@ -339,16 +336,6 @@ class CompanionGeneration(
             )
         }
     }
-
-    private fun IrBuilderWithScope.irListOfStrings(values: List<String>) =
-        irCall(env.listOfFunction)
-            .apply {
-                typeArguments[0] = context.irBuiltIns.stringType
-                val varargParameter = env.listOfFunction.owner.parameters
-                    .single { it.kind == IrParameterKind.Regular }
-                arguments[varargParameter] =
-                    irVararg(context.irBuiltIns.stringType, values.map { irString(it) })
-            }
 
     override fun generateBodyForConstructor(
         constructor: IrConstructor,

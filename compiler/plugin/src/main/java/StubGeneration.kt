@@ -101,20 +101,10 @@ class StubGeneration(
         val target = (key as? FirKsrpcStubGenerator.Key)?.target
         val service = classes[target] ?: return emptyList()
         // For generic services, also add per-instance serializer fields on the Stub so
-        // method bodies can reach the injected KSerializer<T>.
+        // method bodies can reach the injected KSerializer<T>. We build these free-standing
+        // (attach = false) so `generateChildrenForClass` can add them via its returned list.
         val stubSerializerFields = if (declaration.typeParameters.isNotEmpty()) {
-            declaration.typeParameters.map { tp ->
-                irFactory.buildField {
-                    startOffset = SYNTHETIC_OFFSET
-                    endOffset = SYNTHETIC_OFFSET
-                    name = Name.identifier(tp.name.asString() + "Serializer")
-                    origin = IrDeclarationOrigin.DELEGATE
-                    visibility = DescriptorVisibilities.PRIVATE
-                    type = env.kSerializer.typeWith(tp.defaultType)
-                    isFinal = true
-                    isStatic = false
-                }
-            }
+            context.buildSerializerFieldsForTypeParams(declaration, env, attach = false)
         } else {
             emptyList()
         }
@@ -421,7 +411,9 @@ class StubGeneration(
                 createTypeConverter(inputRpcType, inputType, this@irCreateRpcMethod),
                 createTypeConverter(outputRpcType, outputType, this@irCreateRpcMethod),
                 irBlock {
-                    val createServiceExecutor = irCreateServiceExecutor(method, serviceInterface)
+                    val createServiceExecutor =
+                        this@StubGeneration.context
+                            .buildAnonymousServiceExecutor(env, method, serviceInterface)
                     +irCallConstructor(
                         createServiceExecutor.constructors.first().symbol,
                         emptyList()
@@ -462,60 +454,6 @@ class StubGeneration(
             putArgs(getSerializer(declarationIrBuilder, outputType))
         }
     }
-
-    private fun irCreateServiceExecutor(referencedFunction: IrSimpleFunction, receiver: IrClass) =
-        context.irFactory.buildClass {
-            startOffset = referencedFunction.startOffset
-            endOffset = referencedFunction.endOffset
-            name = Name.identifier(
-                "Anonymous${referencedFunction.name.asString().capitalizeAsciiOnly()}"
-            )
-            visibility = DescriptorVisibilities.INTERNAL
-            kind = ClassKind.CLASS
-            modality = Modality.FINAL
-            isCompanion = false
-        }.apply {
-            this.parent = receiver
-            superTypes = listOf(env.serviceExecutor.typeWith())
-            createThisReceiverParameter()
-
-            addConstructor {
-                startOffset = SYNTHETIC_OFFSET
-                endOffset = SYNTHETIC_OFFSET
-                isPrimary = true
-            }.apply {
-                body = context.irBuilder(symbol).irBlockBody {
-                    +irDelegatingConstructorCall(
-                        context.irBuiltIns.anyClass.owner.constructors.single()
-                    )
-                }
-            }
-            val invoke = env.serviceExecutor.findMethod(INVOKE)
-            val override = context.overrideMethod(
-                this,
-                invoke,
-                referencedFunction.returnType
-            ) { override ->
-                +irReturn(
-                    irCall(referencedFunction).apply {
-                        type = referencedFunction.returnType
-
-                        putArgs(
-                            irImplicitCast(
-                                irGet(override.parameters[1]),
-                                referencedFunction.dispatchReceiverParameter?.type!!
-                            ),
-                            irImplicitCast(
-                                irGet(override.parameters[2]),
-                                referencedFunction.parameters[1].type
-                            )
-                        )
-                    }
-                )
-            }
-            this.addChild(override)
-            receiver.addChild(this)
-        }
 
     private fun getSerializer(irBlockBodyBuilder: DeclarationIrBuilder, type: IrType) =
         irBlockBodyBuilder.irCall(env.serializerMethod ?: error("Missing serializer")).apply {
