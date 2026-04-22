@@ -18,13 +18,13 @@ package com.monkopedia.ksrpc
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.ChannelId
 import com.monkopedia.ksrpc.channels.CurrentRpcCallElement
+import com.monkopedia.ksrpc.channels.RpcBinaryData
 import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.channels.randomUuid
 import com.monkopedia.ksrpc.channels.registerHost
 import com.monkopedia.ksrpc.internal.client
 import com.monkopedia.ksrpc.internal.host
-import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
@@ -80,21 +80,31 @@ class SerializerTransformer<I>(val serializer: KSerializer<I>) : Transformer<I> 
     }
 }
 
-object BinaryTransformer : Transformer<ByteReadChannel> {
+/**
+ * Marker for transformers whose wire representation is `CallData.Binary` /
+ * [RpcBinaryData], regardless of the user-facing type they adapt. Consumers
+ * (e.g. introspection, diagnostics) should treat any implementor as "binary
+ * payload" rather than enumerating individual adapter objects.
+ */
+interface BinaryDataTransformer
+
+object BinaryTransformer :
+    Transformer<RpcBinaryData>,
+    BinaryDataTransformer {
     override suspend fun <T> transform(
-        input: ByteReadChannel,
+        input: RpcBinaryData,
         channel: SerializedService<T>
     ): CallData<T> {
-        channel.env.logger.debug("Transformer", "Serializing ByteReadChannel to CallData")
+        channel.env.logger.debug("Transformer", "Serializing RpcBinaryData to CallData")
         return CallData.createBinary(input)
     }
 
     override suspend fun <T> untransform(
         data: CallData<T>,
         channel: SerializedService<T>
-    ): ByteReadChannel {
+    ): RpcBinaryData {
         unpackError(data, channel)
-        channel.env.logger.debug("Transformer", "Deserializing ByteReadChannel to CallData")
+        channel.env.logger.debug("Transformer", "Deserializing CallData to RpcBinaryData")
         return data.readBinary()
     }
 }

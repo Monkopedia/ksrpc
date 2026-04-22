@@ -118,7 +118,16 @@ abstract interface com.monkopedia.ksrpc.channels/ContextContainer { // com.monko
         open fun <get-context>(): kotlin.coroutines/CoroutineContext // com.monkopedia.ksrpc.channels/ContextContainer.context.<get-context>|<get-context>(){}[0]
 }
 
+abstract interface com.monkopedia.ksrpc.channels/RpcBinaryData : com.monkopedia.ksrpc/SuspendCloseable { // com.monkopedia.ksrpc.channels/RpcBinaryData|null[0]
+    open val size // com.monkopedia.ksrpc.channels/RpcBinaryData.size|{}size[0]
+        open fun <get-size>(): kotlin/Long? // com.monkopedia.ksrpc.channels/RpcBinaryData.size.<get-size>|<get-size>(){}[0]
+
+    abstract suspend fun transferTo(kotlin.coroutines/SuspendFunction3<kotlin/ByteArray, kotlin/Int, kotlin/Int, kotlin/Unit>) // com.monkopedia.ksrpc.channels/RpcBinaryData.transferTo|transferTo(kotlin.coroutines.SuspendFunction3<kotlin.ByteArray,kotlin.Int,kotlin.Int,kotlin.Unit>){}[0]
+}
+
 abstract interface com.monkopedia.ksrpc.channels/RpcCallId // com.monkopedia.ksrpc.channels/RpcCallId|null[0]
+
+abstract interface com.monkopedia.ksrpc/BinaryDataTransformer // com.monkopedia.ksrpc/BinaryDataTransformer|null[0]
 
 abstract interface com.monkopedia.ksrpc/Logger { // com.monkopedia.ksrpc/Logger|null[0]
     open fun debug(kotlin/String, kotlin/String, kotlin/Throwable? = ...) // com.monkopedia.ksrpc/Logger.debug|debug(kotlin.String;kotlin.String;kotlin.Throwable?){}[0]
@@ -321,19 +330,19 @@ sealed class <#A: kotlin/Any?> com.monkopedia.ksrpc.channels/CallData { // com.m
     abstract val isBinary // com.monkopedia.ksrpc.channels/CallData.isBinary|{}isBinary[0]
         abstract fun <get-isBinary>(): kotlin/Boolean // com.monkopedia.ksrpc.channels/CallData.isBinary.<get-isBinary>|<get-isBinary>(){}[0]
 
-    abstract fun readBinary(): io.ktor.utils.io/ByteReadChannel // com.monkopedia.ksrpc.channels/CallData.readBinary|readBinary(){}[0]
+    abstract fun readBinary(): com.monkopedia.ksrpc.channels/RpcBinaryData // com.monkopedia.ksrpc.channels/CallData.readBinary|readBinary(){}[0]
     abstract fun readSerialized(): #A // com.monkopedia.ksrpc.channels/CallData.readSerialized|readSerialized(){}[0]
 
     final class <#A1: kotlin/Any?> Binary : com.monkopedia.ksrpc.channels/CallData<#A1> { // com.monkopedia.ksrpc.channels/CallData.Binary|null[0]
-        constructor <init>(io.ktor.utils.io/ByteReadChannel) // com.monkopedia.ksrpc.channels/CallData.Binary.<init>|<init>(io.ktor.utils.io.ByteReadChannel){}[0]
+        constructor <init>(com.monkopedia.ksrpc.channels/RpcBinaryData) // com.monkopedia.ksrpc.channels/CallData.Binary.<init>|<init>(com.monkopedia.ksrpc.channels.RpcBinaryData){}[0]
 
         final val isBinary // com.monkopedia.ksrpc.channels/CallData.Binary.isBinary|{}isBinary[0]
             final fun <get-isBinary>(): kotlin/Boolean // com.monkopedia.ksrpc.channels/CallData.Binary.isBinary.<get-isBinary>|<get-isBinary>(){}[0]
 
-        final fun copy(io.ktor.utils.io/ByteReadChannel = ...): com.monkopedia.ksrpc.channels/CallData.Binary<#A1> // com.monkopedia.ksrpc.channels/CallData.Binary.copy|copy(io.ktor.utils.io.ByteReadChannel){}[0]
+        final fun copy(com.monkopedia.ksrpc.channels/RpcBinaryData = ...): com.monkopedia.ksrpc.channels/CallData.Binary<#A1> // com.monkopedia.ksrpc.channels/CallData.Binary.copy|copy(com.monkopedia.ksrpc.channels.RpcBinaryData){}[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc.channels/CallData.Binary.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc.channels/CallData.Binary.hashCode|hashCode(){}[0]
-        final fun readBinary(): io.ktor.utils.io/ByteReadChannel // com.monkopedia.ksrpc.channels/CallData.Binary.readBinary|readBinary(){}[0]
+        final fun readBinary(): com.monkopedia.ksrpc.channels/RpcBinaryData // com.monkopedia.ksrpc.channels/CallData.Binary.readBinary|readBinary(){}[0]
         final fun readSerialized(): #A1 // com.monkopedia.ksrpc.channels/CallData.Binary.readSerialized|readSerialized(){}[0]
         final fun toString(): kotlin/String // com.monkopedia.ksrpc.channels/CallData.Binary.toString|toString(){}[0]
     }
@@ -347,14 +356,14 @@ sealed class <#A: kotlin/Any?> com.monkopedia.ksrpc.channels/CallData { // com.m
         final fun copy(#A1 = ...): com.monkopedia.ksrpc.channels/CallData.Serialized<#A1> // com.monkopedia.ksrpc.channels/CallData.Serialized.copy|copy(1:0){}[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc.channels/CallData.Serialized.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc.channels/CallData.Serialized.hashCode|hashCode(){}[0]
-        final fun readBinary(): io.ktor.utils.io/ByteReadChannel // com.monkopedia.ksrpc.channels/CallData.Serialized.readBinary|readBinary(){}[0]
+        final fun readBinary(): com.monkopedia.ksrpc.channels/RpcBinaryData // com.monkopedia.ksrpc.channels/CallData.Serialized.readBinary|readBinary(){}[0]
         final fun readSerialized(): #A1 // com.monkopedia.ksrpc.channels/CallData.Serialized.readSerialized|readSerialized(){}[0]
         final fun toString(): kotlin/String // com.monkopedia.ksrpc.channels/CallData.Serialized.toString|toString(){}[0]
     }
 
     final object Companion { // com.monkopedia.ksrpc.channels/CallData.Companion|null[0]
         final fun <#A2: kotlin/Any?> create(#A2): com.monkopedia.ksrpc.channels/CallData.Serialized<#A2> // com.monkopedia.ksrpc.channels/CallData.Companion.create|create(0:0){0§<kotlin.Any?>}[0]
-        final fun <#A2: kotlin/Any?> createBinary(io.ktor.utils.io/ByteReadChannel): com.monkopedia.ksrpc.channels/CallData<#A2> // com.monkopedia.ksrpc.channels/CallData.Companion.createBinary|createBinary(io.ktor.utils.io.ByteReadChannel){0§<kotlin.Any?>}[0]
+        final fun <#A2: kotlin/Any?> createBinary(com.monkopedia.ksrpc.channels/RpcBinaryData): com.monkopedia.ksrpc.channels/CallData<#A2> // com.monkopedia.ksrpc.channels/CallData.Companion.createBinary|createBinary(com.monkopedia.ksrpc.channels.RpcBinaryData){0§<kotlin.Any?>}[0]
         final fun createEndpointNotFoundError(kotlin/String): com.monkopedia.ksrpc.channels/CallData.Serialized<kotlin/String> // com.monkopedia.ksrpc.channels/CallData.Companion.createEndpointNotFoundError|createEndpointNotFoundError(kotlin.String){}[0]
         final fun createError(kotlin/String): com.monkopedia.ksrpc.channels/CallData.Serialized<kotlin/String> // com.monkopedia.ksrpc.channels/CallData.Companion.createError|createError(kotlin.String){}[0]
     }
@@ -479,9 +488,9 @@ sealed class com.monkopedia.ksrpc/MetadataValue { // com.monkopedia.ksrpc/Metada
     }
 }
 
-final object com.monkopedia.ksrpc/BinaryTransformer : com.monkopedia.ksrpc/Transformer<io.ktor.utils.io/ByteReadChannel> { // com.monkopedia.ksrpc/BinaryTransformer|null[0]
-    final suspend fun <#A1: kotlin/Any?> transform(io.ktor.utils.io/ByteReadChannel, com.monkopedia.ksrpc.channels/SerializedService<#A1>): com.monkopedia.ksrpc.channels/CallData<#A1> // com.monkopedia.ksrpc/BinaryTransformer.transform|transform(io.ktor.utils.io.ByteReadChannel;com.monkopedia.ksrpc.channels.SerializedService<0:0>){0§<kotlin.Any?>}[0]
-    final suspend fun <#A1: kotlin/Any?> untransform(com.monkopedia.ksrpc.channels/CallData<#A1>, com.monkopedia.ksrpc.channels/SerializedService<#A1>): io.ktor.utils.io/ByteReadChannel // com.monkopedia.ksrpc/BinaryTransformer.untransform|untransform(com.monkopedia.ksrpc.channels.CallData<0:0>;com.monkopedia.ksrpc.channels.SerializedService<0:0>){0§<kotlin.Any?>}[0]
+final object com.monkopedia.ksrpc/BinaryTransformer : com.monkopedia.ksrpc/BinaryDataTransformer, com.monkopedia.ksrpc/Transformer<com.monkopedia.ksrpc.channels/RpcBinaryData> { // com.monkopedia.ksrpc/BinaryTransformer|null[0]
+    final suspend fun <#A1: kotlin/Any?> transform(com.monkopedia.ksrpc.channels/RpcBinaryData, com.monkopedia.ksrpc.channels/SerializedService<#A1>): com.monkopedia.ksrpc.channels/CallData<#A1> // com.monkopedia.ksrpc/BinaryTransformer.transform|transform(com.monkopedia.ksrpc.channels.RpcBinaryData;com.monkopedia.ksrpc.channels.SerializedService<0:0>){0§<kotlin.Any?>}[0]
+    final suspend fun <#A1: kotlin/Any?> untransform(com.monkopedia.ksrpc.channels/CallData<#A1>, com.monkopedia.ksrpc.channels/SerializedService<#A1>): com.monkopedia.ksrpc.channels/RpcBinaryData // com.monkopedia.ksrpc/BinaryTransformer.untransform|untransform(com.monkopedia.ksrpc.channels.CallData<0:0>;com.monkopedia.ksrpc.channels.SerializedService<0:0>){0§<kotlin.Any?>}[0]
 }
 
 final const val com.monkopedia.ksrpc/ENDPOINT_NOT_FOUND_PREFIX // com.monkopedia.ksrpc/ENDPOINT_NOT_FOUND_PREFIX|{}ENDPOINT_NOT_FOUND_PREFIX[0]
