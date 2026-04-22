@@ -118,6 +118,16 @@ class KsrpcGenerationEnvironment(
                 fn.owner.typeParameters.size == 2
         }
 
+    // ksrpc-flow runtime types — optional. When unresolved (ksrpc-flow not on the
+    // compile classpath), the plugin does not auto-wire `Flow<T>` and the
+    // surrounding error for a missing serializer will fire on the user code as
+    // usual. `flowSupported` gates the detection path.
+    val ksFlowService = maybeReferenceClass(FqConstants.KS_FLOW_SERVICE)
+    val flowTransformer = maybeReferenceClass(FqConstants.FLOW_TRANSFORMER)
+
+    /** True when `Flow<T>` signatures can be auto-wired via the ksrpc-flow runtime. */
+    val flowSupported: Boolean = ksFlowService != null && flowTransformer != null
+
     val threadLocal = referenceClass(FqConstants.THREAD_LOCAL)
     val listOfFunction =
         context.referenceFunctions(

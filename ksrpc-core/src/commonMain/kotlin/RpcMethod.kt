@@ -48,7 +48,7 @@ val RpcMethod<*, *, *>.timeoutMillis: Long?
         return millis + seconds * 1000 + minutes * 60_000
     }
 
-sealed interface Transformer<T> {
+interface Transformer<T> {
     val hasContent: Boolean
         get() = true
 

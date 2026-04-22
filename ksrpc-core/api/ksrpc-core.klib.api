@@ -97,6 +97,15 @@ abstract interface <#A: kotlin/Any?> com.monkopedia.ksrpc/KsrpcEnvironment { // 
     }
 }
 
+abstract interface <#A: kotlin/Any?> com.monkopedia.ksrpc/Transformer { // com.monkopedia.ksrpc/Transformer|null[0]
+    open val hasContent // com.monkopedia.ksrpc/Transformer.hasContent|{}hasContent[0]
+        open fun <get-hasContent>(): kotlin/Boolean // com.monkopedia.ksrpc/Transformer.hasContent.<get-hasContent>|<get-hasContent>(){}[0]
+
+    abstract suspend fun <#A1: kotlin/Any?> transform(#A, com.monkopedia.ksrpc.channels/SerializedService<#A1>): com.monkopedia.ksrpc.channels/CallData<#A1> // com.monkopedia.ksrpc/Transformer.transform|transform(1:0;com.monkopedia.ksrpc.channels.SerializedService<0:0>){0§<kotlin.Any?>}[0]
+    abstract suspend fun <#A1: kotlin/Any?> untransform(com.monkopedia.ksrpc.channels/CallData<#A1>, com.monkopedia.ksrpc.channels/SerializedService<#A1>): #A // com.monkopedia.ksrpc/Transformer.untransform|untransform(com.monkopedia.ksrpc.channels.CallData<0:0>;com.monkopedia.ksrpc.channels.SerializedService<0:0>){0§<kotlin.Any?>}[0]
+    open fun <#A1: kotlin/Any?> unpackError(com.monkopedia.ksrpc.channels/CallData<#A1>, com.monkopedia.ksrpc.channels/SerializedService<#A1>) // com.monkopedia.ksrpc/Transformer.unpackError|unpackError(com.monkopedia.ksrpc.channels.CallData<0:0>;com.monkopedia.ksrpc.channels.SerializedService<0:0>){0§<kotlin.Any?>}[0]
+}
+
 abstract interface com.monkopedia.ksrpc.channels/CancellationSupport { // com.monkopedia.ksrpc.channels/CancellationSupport|null[0]
     abstract fun cancelHandler(com.monkopedia.ksrpc.channels/RpcCallId, kotlin.coroutines.cancellation/CancellationException? = ...) // com.monkopedia.ksrpc.channels/CancellationSupport.cancelHandler|cancelHandler(com.monkopedia.ksrpc.channels.RpcCallId;kotlin.coroutines.cancellation.CancellationException?){}[0]
     abstract fun registerHandler(com.monkopedia.ksrpc.channels/RpcCallId, kotlinx.coroutines/Job) // com.monkopedia.ksrpc.channels/CancellationSupport.registerHandler|registerHandler(com.monkopedia.ksrpc.channels.RpcCallId;kotlinx.coroutines.Job){}[0]
@@ -128,15 +137,6 @@ abstract interface com.monkopedia.ksrpc/SuspendCloseableObservable : com.monkope
 
 abstract interface com.monkopedia.ksrpc/UnhandledMethodHandler { // com.monkopedia.ksrpc/UnhandledMethodHandler|null[0]
     abstract suspend fun <#A1: kotlin/Any?> onUnhandled(kotlin/String, com.monkopedia.ksrpc.channels/CallData<#A1>): com.monkopedia.ksrpc.channels/CallData<#A1> // com.monkopedia.ksrpc/UnhandledMethodHandler.onUnhandled|onUnhandled(kotlin.String;com.monkopedia.ksrpc.channels.CallData<0:0>){0§<kotlin.Any?>}[0]
-}
-
-sealed interface <#A: kotlin/Any?> com.monkopedia.ksrpc/Transformer { // com.monkopedia.ksrpc/Transformer|null[0]
-    open val hasContent // com.monkopedia.ksrpc/Transformer.hasContent|{}hasContent[0]
-        open fun <get-hasContent>(): kotlin/Boolean // com.monkopedia.ksrpc/Transformer.hasContent.<get-hasContent>|<get-hasContent>(){}[0]
-
-    abstract suspend fun <#A1: kotlin/Any?> transform(#A, com.monkopedia.ksrpc.channels/SerializedService<#A1>): com.monkopedia.ksrpc.channels/CallData<#A1> // com.monkopedia.ksrpc/Transformer.transform|transform(1:0;com.monkopedia.ksrpc.channels.SerializedService<0:0>){0§<kotlin.Any?>}[0]
-    abstract suspend fun <#A1: kotlin/Any?> untransform(com.monkopedia.ksrpc.channels/CallData<#A1>, com.monkopedia.ksrpc.channels/SerializedService<#A1>): #A // com.monkopedia.ksrpc/Transformer.untransform|untransform(com.monkopedia.ksrpc.channels.CallData<0:0>;com.monkopedia.ksrpc.channels.SerializedService<0:0>){0§<kotlin.Any?>}[0]
-    open fun <#A1: kotlin/Any?> unpackError(com.monkopedia.ksrpc.channels/CallData<#A1>, com.monkopedia.ksrpc.channels/SerializedService<#A1>) // com.monkopedia.ksrpc/Transformer.unpackError|unpackError(com.monkopedia.ksrpc.channels.CallData<0:0>;com.monkopedia.ksrpc.channels.SerializedService<0:0>){0§<kotlin.Any?>}[0]
 }
 
 final class <#A: com.monkopedia.ksrpc/RpcService, #B: kotlin/Any?, #C: kotlin/Any?> com.monkopedia.ksrpc/RpcMethod { // com.monkopedia.ksrpc/RpcMethod|null[0]

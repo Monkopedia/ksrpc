@@ -70,6 +70,7 @@ import org.jetbrains.kotlin.ir.types.defaultType
 import org.jetbrains.kotlin.ir.types.getClass
 import org.jetbrains.kotlin.ir.types.makeNullable
 import org.jetbrains.kotlin.ir.types.starProjectedType
+import org.jetbrains.kotlin.ir.types.typeOrFail
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
 import org.jetbrains.kotlin.ir.util.addChild
@@ -479,13 +480,14 @@ class StubGeneration(
     ) = when (outputRpcType) {
         RpcType.BINARY -> declarationIrBuilder.irGetObject(env.binaryTransformer)
 
+        RpcType.FLOW -> buildFlowTransformer(outputType, declarationIrBuilder)
+
         RpcType.SERVICE -> declarationIrBuilder.irCallConstructor(
             env.subserviceTransformer.constructors.first(),
             listOf(outputType)
         ).apply {
             type = env.subserviceTransformer.typeWith(outputType)
-            val companionSymbol = env.companionSymbol(outputType)
-            putArgs(declarationIrBuilder.irGetObject(companionSymbol))
+            putArgs(buildNonGenericSubserviceRpcObject(outputType, declarationIrBuilder))
         }
 
         else -> declarationIrBuilder.irCallConstructor(
@@ -494,6 +496,114 @@ class StubGeneration(
         ).apply {
             type = env.serializerTransformer.typeWith(outputType)
             putArgs(getSerializer(declarationIrBuilder, outputType))
+        }
+    }
+
+    /**
+     * Emit `FlowTransformer<T>(KsFlowService.Obj<T>(Tser))` for a `Flow<T>` parameter or
+     * return type. The constructed `KsFlowService.Obj<T>` is the generic sub-service's
+     * compiler-generated `RpcObject` factory instance — mirrors
+     * [GenericMethodIrBuilder.buildSubserviceRpcObject] for the generic service path.
+     *
+     * Only reachable when [KsrpcGenerationEnvironment.flowSupported] — callers guard via
+     * [determineType] returning [RpcType.FLOW].
+     */
+    private fun buildFlowTransformer(
+        flowType: IrType,
+        declarationIrBuilder: DeclarationIrBuilder
+    ): IrExpression {
+        val elementType = (flowType as? org.jetbrains.kotlin.ir.types.IrSimpleType)
+            ?.arguments
+            ?.singleOrNull()
+            ?.typeOrFail
+            ?: reportInternal(
+                "Flow<T> type ${flowType.classFqName?.asString()} has no type argument — " +
+                    "cannot emit FlowTransformer"
+            )
+        val flowTransformerSymbol = env.flowTransformer
+            ?: reportInternal(
+                "FlowTransformer symbol missing but Flow<T> detection fired — " +
+                    "ksrpc-flow must be on the compile classpath"
+            )
+        val ksFlowServiceSymbol = env.ksFlowService
+            ?: reportInternal(
+                "KsFlowService symbol missing but Flow<T> detection fired — " +
+                    "ksrpc-flow must be on the compile classpath"
+            )
+        val rpcObjectExpr = buildKsFlowServiceRpcObject(
+            declarationIrBuilder,
+            ksFlowServiceSymbol,
+            elementType
+        )
+        return declarationIrBuilder.irCallConstructor(
+            flowTransformerSymbol.constructors.first(),
+            listOf(elementType)
+        ).apply {
+            type = flowTransformerSymbol.typeWith(elementType)
+            putArgs(rpcObjectExpr)
+        }
+    }
+
+    /**
+     * Build `KsFlowService.Obj<T>(serializer<T>())`.
+     */
+    private fun buildKsFlowServiceRpcObject(
+        builder: DeclarationIrBuilder,
+        ksFlowServiceSymbol: IrClassSymbol,
+        elementType: IrType
+    ): IrExpression {
+        val objClass = ksFlowServiceSymbol.owner.declarations
+            .filterIsInstance<IrClass>()
+            .firstOrNull { it.name == FqConstants.OBJ }
+            ?: reportInternal(
+                "KsFlowService has no nested Obj class — the ksrpc compiler plugin " +
+                    "must have processed ksrpc-flow"
+            )
+        val objConstructor = objClass.constructors.first { it.isPrimary }
+        return builder.irCallConstructor(objConstructor.symbol, listOf(elementType)).apply {
+            type = objClass.typeWith(elementType)
+            putArgs(getSerializer(builder, elementType))
+        }
+    }
+
+    /**
+     * Build an `RpcObject<Sub>` IR expression for a sub-service return/parameter on a
+     * non-generic outer service.
+     *
+     * - If the sub-service has no type parameters, its companion IS already an
+     *   `RpcObject<Sub>` and we emit `irGetObject(Sub.Companion)`.
+     * - Otherwise (the sub-service is generic, e.g. `KsFlowService<Update>` returned
+     *   by a non-generic service method), we construct `Sub.Obj<TArgs>(serializers)`
+     *   using `kotlinx.serialization.serializer<T>()` per type argument — since the
+     *   outer service is non-generic, every type argument is concrete and reified
+     *   lookup works. Mirrors [GenericMethodIrBuilder.buildSubserviceRpcObject] for
+     *   the non-generic outer path.
+     */
+    private fun buildNonGenericSubserviceRpcObject(
+        type: IrType,
+        builder: DeclarationIrBuilder
+    ): IrExpression {
+        val simple = type as? org.jetbrains.kotlin.ir.types.IrSimpleType
+            ?: return builder.irGetObject(env.companionSymbol(type))
+        val subClassSymbol = simple.classifier as? IrClassSymbol
+        val subClass = subClassSymbol?.owner
+            ?: return builder.irGetObject(env.companionSymbol(type))
+        if (subClass.typeParameters.isEmpty()) {
+            return builder.irGetObject(env.companionSymbol(type))
+        }
+        val objClass = subClass.declarations
+            .filterIsInstance<IrClass>()
+            .firstOrNull { it.name == FqConstants.OBJ }
+            ?: reportInternal(
+                "generic sub-service ${subClass.kotlinFqName.asString()} has no nested Obj " +
+                    "class — @KsService plugin did not run on the sub-service"
+            )
+        val objConstructor = objClass.constructors.first { it.isPrimary }
+        val typeArgs = simple.arguments.map { it.typeOrFail }
+        return builder.irCallConstructor(objConstructor.symbol, typeArgs).apply {
+            this.type = objClass.typeWith(typeArgs)
+            val serArgs = typeArgs.map { getSerializer(builder, it) }.toTypedArray()
+            putArgs(*serArgs)
         }
     }
 
@@ -509,6 +619,7 @@ class StubGeneration(
         }
 
     private fun determineType(type: IrType): RpcType = when {
+        env.flowSupported && type.classFqName == FqConstants.FLOW -> RpcType.FLOW
         type.extends(env.rpcService) -> RpcType.SERVICE
         type.classFqName == BYTE_READ_CHANNEL -> RpcType.BINARY
         else -> RpcType.DEFAULT
@@ -526,7 +637,8 @@ class StubGeneration(
     private enum class RpcType {
         DEFAULT,
         BINARY,
-        SERVICE
+        SERVICE,
+        FLOW
     }
 }
 

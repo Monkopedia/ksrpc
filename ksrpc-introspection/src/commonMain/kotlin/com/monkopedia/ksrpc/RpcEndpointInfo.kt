@@ -153,5 +153,11 @@ internal val Transformer<*>.rpcDataType: RpcDataType
             BinaryTransformer -> RpcDataType.BinaryData
             is SerializerTransformer<*> -> RpcDataType.DataStructure(serializer)
             is SubserviceTransformer<*> -> RpcDataType.Service(serviceObject.serviceName)
+            // Out-of-module transformers (e.g. ksrpc-flow's `FlowTransformer`) surface
+            // as a generic Service entry — they delegate to `SubserviceTransformer`
+            // under the hood and their sub-service name is not recoverable from the
+            // introspection classpath. Introspection callers that need the exact
+            // sub-service should look at the underlying `SubserviceTransformer`.
+            else -> RpcDataType.Service(this::class.simpleName ?: "Unknown")
         }
     }
