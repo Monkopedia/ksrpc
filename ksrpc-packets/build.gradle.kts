@@ -22,12 +22,6 @@ plugins {
 ksrpcModule()
 
 kotlin {
-    sourceSets["commonMain"].dependencies {
-        // ksrpc-packets uses ktor-io for its internal BinaryChannel. Declared
-        // here rather than relying on the (now removed) ksrpc-core transitive,
-        // until a dedicated binary adapter module ships (#72).
-        api(libs.ktor.io)
-    }
     sourceSets["jvmMain"].dependencies {
 
         implementation(libs.kotlinx.serialization)

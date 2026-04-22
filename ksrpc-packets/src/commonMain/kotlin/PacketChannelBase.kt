@@ -21,6 +21,7 @@ import com.monkopedia.ksrpc.channels.CancellationSupport
 import com.monkopedia.ksrpc.channels.ChannelHost
 import com.monkopedia.ksrpc.channels.ChannelId
 import com.monkopedia.ksrpc.channels.Connection
+import com.monkopedia.ksrpc.channels.RpcBinaryData
 import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.channels.awaitRequestCancellable
@@ -30,16 +31,14 @@ import com.monkopedia.ksrpc.internal.HostChannelContext
 import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
 import com.monkopedia.ksrpc.internal.MultiChannel
 import com.monkopedia.ksrpc.internal.SubserviceChannel
-import com.monkopedia.ksrpc.packets.asRpcBinaryData
-import io.ktor.utils.io.ByteChannel
-import io.ktor.utils.io.close
-import io.ktor.utils.io.writeFully
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -167,7 +166,7 @@ abstract class PacketChannelBase<T>(
             }
         } catch (t: Throwable) {
             env.logger.warn("MultiChannel", "Exception in multichannel", t)
-            binaryChannels.values.forEach { it.channel.close(t) }
+            binaryChannels.values.forEach { it.closeWithError(t) }
             multiChannel.close(CancellationException("Multi-channel failure", t))
         }
     }
@@ -277,7 +276,7 @@ abstract class PacketChannelBase<T>(
     private suspend fun getCallData(packet: Packet<T>): CallData<T> = if (packet.startBinary) {
         val callData = CallData.create(packet.data)
         val decoded = env.serialization.decodeCallData(String.serializer(), callData)
-        CallData.createBinary(getByteChannel(decoded).asRpcBinaryData())
+        CallData.createBinary(getBinaryData(decoded))
     } else if (packet.binary) {
         error("Unexpected binary packet")
     } else {
@@ -309,9 +308,9 @@ abstract class PacketChannelBase<T>(
         }
     }
 
-    private suspend fun getByteChannel(data: String): ByteChannel {
+    private suspend fun getBinaryData(data: String): RpcBinaryData {
         val binaryChannel = getBinaryChannel(data)
-        return binaryChannel.getByteChannel().also {
+        return binaryChannel.getBinaryData().also {
             removeBinaryChannelIfDone(binaryChannel)
         }
     }
@@ -374,7 +373,7 @@ abstract class PacketChannelBase<T>(
             }
             handlers.clear()
             binaryChannels.values.forEach {
-                it.channel.close()
+                it.closeWithError(null)
             }
             serviceChannel.close()
             isClosed = true
@@ -432,10 +431,17 @@ abstract class PacketChannelBase<T>(
 
     // endregion
 
+    /**
+     * Bridges inbound binary packets onto the transport-agnostic [RpcBinaryData]
+     * surface consumed by `ksrpc-core`. Uses a [Channel] of `ByteArray` chunks
+     * rather than a ktor `ByteChannel` so `ksrpc-packets` does not need the
+     * ktor-io dependency — the ktor-io adapter now lives in the dedicated
+     * `ksrpc-binary-ktor` module.
+     */
     private class BinaryChannel<T>(
         val id: String,
         val env: KsrpcEnvironment<T>,
-        val channel: ByteChannel = ByteChannel(),
+        private val chunks: Channel<ByteArray> = Channel(Channel.UNLIMITED),
         var currentPacket: Int = 0,
         var pending: MutableMap<Int, Packet<T>> = mutableMapOf()
     ) {
@@ -459,19 +465,46 @@ abstract class PacketChannelBase<T>(
                     CallData.create(nextPacket.data)
                 )
                 if (data.isEmpty()) {
-                    channel.flush()
-                    channel.close()
+                    chunks.close()
                     hasClosedChannel = true
                     return true
                 }
-                channel.writeFully(data, 0, data.size)
+                chunks.send(data)
                 nextPacket = if (pending.isEmpty()) null else pending.remove(currentPacket)
             }
             return false
         }
 
-        fun getByteChannel(): ByteChannel = channel.also {
+        fun getBinaryData(): RpcBinaryData {
             hasGottenChannel = true
+            return ChannelBinaryData(chunks)
+        }
+
+        fun closeWithError(cause: Throwable?) {
+            chunks.close(cause)
+        }
+    }
+
+    /**
+     * Adapter that drains a [Channel] of `ByteArray` chunks into the
+     * [RpcBinaryData.transferTo] sink.
+     */
+    private class ChannelBinaryData(private val chunks: Channel<ByteArray>) : RpcBinaryData {
+        override suspend fun transferTo(
+            sink: suspend (bytes: ByteArray, offset: Int, length: Int) -> Unit
+        ) {
+            try {
+                while (true) {
+                    val chunk = chunks.receive()
+                    if (chunk.isNotEmpty()) sink(chunk, 0, chunk.size)
+                }
+            } catch (_: ClosedReceiveChannelException) {
+                // Normal end-of-stream.
+            }
+        }
+
+        override suspend fun close() {
+            chunks.cancel()
         }
     }
     suspend fun send(packet: Packet<T>) = sendLock.withLock {
