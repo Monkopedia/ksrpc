@@ -261,7 +261,11 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
         // user-declared input to check against ByteReadChannel.
         val inputType = valueParams.firstOrNull()?.type?.classFqName
         val outputType = method.returnType.classFqName
-        val binaryFqNames = setOf(BYTE_READ_CHANNEL, FqConstants.KOTLINX_IO_SOURCE)
+        val binaryFqNames = setOf(
+            BYTE_READ_CHANNEL,
+            FqConstants.KOTLINX_IO_SOURCE,
+            FqConstants.OKIO_BUFFERED_SOURCE
+        )
         if (inputType in binaryFqNames && outputType in binaryFqNames) {
             val fqName = irClass.kotlinFqName.asString()
             val methodName = method.name.asString()
