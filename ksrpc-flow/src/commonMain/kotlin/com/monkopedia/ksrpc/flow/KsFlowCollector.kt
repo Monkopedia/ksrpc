@@ -30,6 +30,11 @@ import com.monkopedia.ksrpc.annotation.KsService
  *
  * [onError] and [onComplete] are terminal — after either is called, no more
  * [onItem] calls will be made on this collector.
+ *
+ * The `@KsNotification` annotation on [onError] and [onComplete] is a
+ * transport-level hint — on JSON-RPC transports that honor notifications, the
+ * call is sent fire-and-forget. On other transports it is a normal call whose
+ * `Unit` response is ignored.
  */
 @KsService
 interface KsFlowCollector<T> : RpcService {
@@ -43,18 +48,14 @@ interface KsFlowCollector<T> : RpcService {
     suspend fun onItem(item: T)
 
     /**
-     * Signal that the flow terminated with an error.
-     *
-     * This is a notification (fire-and-forget). Terminal for this collection.
+     * Signal that the flow terminated with an error. Terminal for this collection.
      */
     @KsMethod("/onError")
     @KsNotification
     suspend fun onError(error: RpcFailure)
 
     /**
-     * Signal that the flow completed normally.
-     *
-     * This is a notification (fire-and-forget). Terminal for this collection.
+     * Signal that the flow completed normally. Terminal for this collection.
      */
     @KsMethod("/onComplete")
     @KsNotification

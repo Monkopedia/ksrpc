@@ -25,14 +25,16 @@ import com.monkopedia.ksrpc.annotation.KsService
  * to cancel an active collection.
  *
  * Calling [cancelCollection] cancels the server-side collection coroutine.
- * This is a notification (fire-and-forget).
+ *
+ * The `@KsNotification` annotation on [cancelCollection] is a transport-level
+ * hint — on JSON-RPC transports that honor notifications, the call is sent
+ * fire-and-forget with no response. On other transports it is a normal call
+ * whose `Unit` response is ignored.
  */
 @KsService
 interface KsCollectionToken : RpcService {
     /**
      * Cancel the active collection associated with this token.
-     *
-     * This is a notification — no response is expected.
      */
     @KsMethod("/cancel")
     @KsNotification
