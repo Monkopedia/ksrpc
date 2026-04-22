@@ -13,8 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(ExperimentalKsrpc::class)
+
 package com.monkopedia.ksrpc.webworker.test
 
+import com.monkopedia.ksrpc.annotation.ExperimentalKsrpc
 import com.monkopedia.ksrpc.channels.registerDefault
 import com.monkopedia.ksrpc.ksrpcEnvironment
 import com.monkopedia.ksrpc.webworker.onServiceWorkerConnection

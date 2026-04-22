@@ -16,11 +16,17 @@
 package com.monkopedia.ksrpc.webworker
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
+import com.monkopedia.ksrpc.annotation.ExperimentalKsrpc
 import com.monkopedia.ksrpc.channels.Connection
 
 /**
  * Creates a connection to a service worker registered at [workerScriptPath].
+ *
+ * This is an experimental API — the service-worker transport has limited test
+ * coverage and its behavior may change without notice. Opt in explicitly with
+ * `@OptIn(ExperimentalKsrpc::class)`.
  */
+@ExperimentalKsrpc
 expect fun createServiceWorkerWithConnection(
     workerScriptPath: String,
     env: KsrpcEnvironment<String>

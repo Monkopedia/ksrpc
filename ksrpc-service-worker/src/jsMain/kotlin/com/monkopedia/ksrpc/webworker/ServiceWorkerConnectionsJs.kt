@@ -19,6 +19,7 @@ package com.monkopedia.ksrpc.webworker
 
 import com.monkopedia.ksrpc.CallDataSerializer
 import com.monkopedia.ksrpc.KsrpcEnvironment
+import com.monkopedia.ksrpc.annotation.ExperimentalKsrpc
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.Connection
 import com.monkopedia.ksrpc.packets.internal.Packet
@@ -34,6 +35,7 @@ import org.w3c.dom.MessageChannel
 import org.w3c.dom.MessageEvent
 import org.w3c.dom.MessagePort
 
+@ExperimentalKsrpc
 actual fun createServiceWorkerWithConnection(
     workerScriptPath: String,
     env: KsrpcEnvironment<String>
@@ -57,7 +59,11 @@ actual fun createServiceWorkerWithConnection(
 
 /**
  * Listens for "ksrpc-connect" to attach a port and provides callback to initialize a [Connection].
+ *
+ * This is an experimental API — the service-worker transport has limited test
+ * coverage and its behavior may change without notice.
  */
+@ExperimentalKsrpc
 fun onServiceWorkerConnection(
     env: KsrpcEnvironment<String>,
     onConnection: suspend (Connection<String>) -> Unit
