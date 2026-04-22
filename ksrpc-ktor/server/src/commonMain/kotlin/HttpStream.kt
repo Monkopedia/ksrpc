@@ -22,13 +22,13 @@ import com.monkopedia.ksrpc.RpcEndpointException
 import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.RpcService
 import com.monkopedia.ksrpc.asString
+import com.monkopedia.ksrpc.binary.ktor.asRpcBinaryData
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.ChannelClient
 import com.monkopedia.ksrpc.channels.ChannelId
 import com.monkopedia.ksrpc.channels.SerializedChannel
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
-import com.monkopedia.ksrpc.packets.asRpcBinaryData
 import com.monkopedia.ksrpc.serialized
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.decodeURLPart

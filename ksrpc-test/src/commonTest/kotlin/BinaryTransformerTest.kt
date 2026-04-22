@@ -15,11 +15,11 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.binary.ktor.ByteReadChannelTransformer
+import com.monkopedia.ksrpc.binary.ktor.asByteReadChannel
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
-import com.monkopedia.ksrpc.packets.ByteReadChannelTransformer
-import com.monkopedia.ksrpc.packets.asByteReadChannel
 import io.ktor.utils.io.ByteChannel
 import kotlin.test.Test
 import kotlin.test.assertSame

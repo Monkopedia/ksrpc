@@ -15,8 +15,8 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.binary.ktor.asByteReadChannel
 import com.monkopedia.ksrpc.channels.ChannelId
-import com.monkopedia.ksrpc.packets.asByteReadChannel
 import com.monkopedia.ksrpc.packets.internal.Packet
 import com.monkopedia.ksrpc.packets.internal.PacketChannelBase
 import io.ktor.utils.io.toByteArray

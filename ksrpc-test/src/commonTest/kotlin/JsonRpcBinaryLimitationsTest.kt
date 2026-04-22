@@ -15,13 +15,13 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.binary.ktor.asRpcBinaryData
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcChannel
 import com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcSerializedChannel
 import com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcServiceWrapper
-import com.monkopedia.ksrpc.packets.asRpcBinaryData
 import io.ktor.utils.io.ByteReadChannel
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -66,7 +66,9 @@ class JsonRpcBinaryLimitationsTest {
             assertFailsWith<IllegalArgumentException> {
                 serializedChannel.call(
                     endpoint = "binaryEndpoint",
-                    input = CallData.createBinary(ByteReadChannel(byteArrayOf(1, 2, 3)).asRpcBinaryData()),
+                    input = CallData.createBinary(
+                        ByteReadChannel(byteArrayOf(1, 2, 3)).asRpcBinaryData()
+                    ),
                     callId = null
                 )
             }
@@ -86,7 +88,8 @@ class JsonRpcBinaryLimitationsTest {
                     endpoint: String,
                     input: CallData<String>,
                     callId: RpcCallId?
-                ): CallData<String> = CallData.createBinary(ByteReadChannel(byteArrayOf(9, 9, 9)).asRpcBinaryData())
+                ): CallData<String> =
+                    CallData.createBinary(ByteReadChannel(byteArrayOf(9, 9, 9)).asRpcBinaryData())
 
                 override suspend fun close() {}
 
@@ -119,7 +122,8 @@ class JsonRpcBinaryLimitationsTest {
                     endpoint: String,
                     input: CallData<String>,
                     callId: RpcCallId?
-                ): CallData<String> = CallData.createBinary(ByteReadChannel(byteArrayOf(7, 7, 7)).asRpcBinaryData())
+                ): CallData<String> =
+                    CallData.createBinary(ByteReadChannel(byteArrayOf(7, 7, 7)).asRpcBinaryData())
 
                 override suspend fun close() {}
 
