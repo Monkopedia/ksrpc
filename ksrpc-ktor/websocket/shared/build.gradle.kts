@@ -24,6 +24,9 @@ ksrpcModule()
 kotlin {
     sourceSets["commonMain"].dependencies {
         api(project(":ksrpc-packets"))
+        // `ksrpc-binary-ktor` supplies the `ByteReadChannelTransformer` the
+        // compiler plugin emits for `ByteReadChannel` service signatures.
+        api(project(":ksrpc-binary-ktor"))
         api(libs.ktor.websockets)
         api(libs.ktor.websockets.serialization)
         api(libs.ktor.kotlinx.serialization)

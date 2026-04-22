@@ -44,6 +44,7 @@ kotlin {
     sourceSets["jvmMain"].resources.srcDir(projectDir.resolve("build/generated/lib/resources"))
     sourceSets["jvmMain"].dependencies {
         implementation(project(":ksrpc-jni"))
+        implementation(project(":ksrpc-binary-ktor"))
         implementation(project(":ksrpc-sockets"))
         implementation(project(":ksrpc-ktor-client"))
         implementation(project(":ksrpc-ktor-server"))

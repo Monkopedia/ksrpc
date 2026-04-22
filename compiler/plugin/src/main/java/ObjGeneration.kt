@@ -326,14 +326,13 @@ internal class GenericMethodIrBuilder(
         serializerFields: List<IrField>,
         method: IrSimpleFunction
     ): IrExpression {
-        // BINARY (ByteReadChannel) transformer. Emits the stopgap
-        // `ByteReadChannelTransformer` from `ksrpc-packets` — future versions
-        // will dispatch via the adapter registry planned in #75.
+        // BINARY (ByteReadChannel) transformer. Emits the
+        // `ByteReadChannelTransformer` from `ksrpc-binary-ktor` — future
+        // versions will dispatch via the adapter registry planned in #75.
         if (type.classFqName == FqConstants.BYTE_READ_CHANNEL) {
             val binaryTransformer = env.binaryTransformer ?: run {
                 report.reportUserError(
-                    "ByteReadChannel in @KsMethod requires `ksrpc-packets` " +
-                        "(stopgap until `ksrpc-binary-ktor` from #72 lands) " +
+                    "ByteReadChannel in @KsMethod requires `ksrpc-binary-ktor` " +
                         "on the compile classpath for " +
                         "${cls.irClass.kotlinFqName.asString()}.${method.name.asString()}",
                     element = method

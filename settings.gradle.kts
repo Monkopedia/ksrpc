@@ -29,6 +29,7 @@ include(":ksrpc-introspection")
 include(":ksrpc-jsonrpc")
 
 include(":ksrpc-packets")
+include(":ksrpc-binary-ktor")
 include(":ksrpc-server")
 include(":ksrpc-sockets")
 include(":ksrpc-service-worker")

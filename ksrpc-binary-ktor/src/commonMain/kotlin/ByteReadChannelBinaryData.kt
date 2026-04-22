@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.monkopedia.ksrpc.packets
+package com.monkopedia.ksrpc.binary.ktor
 
 import com.monkopedia.ksrpc.channels.RpcBinaryData
 import io.ktor.utils.io.ByteChannel
@@ -27,12 +27,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
- * Temporary stopgap bridge from ktor's [ByteReadChannel] onto the
- * transport-agnostic [RpcBinaryData] interface. Lives here (rather than in
- * `ksrpc-core`) so that `ksrpc-core` does not publicly depend on ktor.
- *
- * Will be replaced by the proper `ksrpc-binary-ktor` adapter module from
- * issue #72.
+ * Bridge from ktor's [ByteReadChannel] onto the transport-agnostic
+ * [RpcBinaryData] interface. Lives here (rather than in `ksrpc-core`) so that
+ * `ksrpc-core` does not publicly depend on ktor — consumers opt in to the
+ * ktor-io adapter by adding `ksrpc-binary-ktor` to their classpath.
  */
 class ByteReadChannelBinaryData(
     private val channel: ByteReadChannel,
@@ -61,7 +59,7 @@ class ByteReadChannelBinaryData(
 }
 
 /**
- * Wrap a [ByteReadChannel] as an [RpcBinaryData]. Stopgap until #72 lands.
+ * Wrap a [ByteReadChannel] as an [RpcBinaryData].
  */
 fun ByteReadChannel.asRpcBinaryData(size: Long? = null): RpcBinaryData =
     ByteReadChannelBinaryData(this, size)
@@ -71,8 +69,6 @@ fun ByteReadChannel.asRpcBinaryData(size: Long? = null): RpcBinaryData =
  * underlying data is already a [ByteReadChannelBinaryData]; otherwise spins up
  * a pump coroutine that drains [RpcBinaryData.transferTo] into a new ktor
  * [ByteChannel].
- *
- * Stopgap until #72 lands.
  */
 fun RpcBinaryData.asByteReadChannel(
     scope: CoroutineScope = CoroutineScope(Dispatchers.Default)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Jason Monk
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,17 +22,7 @@ plugins {
 ksrpcModule()
 
 kotlin {
-    sourceSets["jvmMain"].dependencies {
-
-        implementation(libs.kotlinx.serialization)
-        implementation(libs.kotlinx.serialization.json)
-    }
-    sourceSets["jvmTest"].dependencies {
-    }
-    sourceSets["jsTest"].dependencies {
-    }
-    sourceSets["jsMain"].dependencies {
-    }
-    sourceSets["nativeMain"].dependencies {
+    sourceSets["commonMain"].dependencies {
+        api(libs.ktor.io)
     }
 }

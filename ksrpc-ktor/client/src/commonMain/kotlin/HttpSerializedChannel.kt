@@ -20,6 +20,8 @@ import com.monkopedia.ksrpc.ERROR_PREFIX
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.RpcEndpointException
 import com.monkopedia.ksrpc.RpcFailure
+import com.monkopedia.ksrpc.binary.ktor.asByteReadChannel
+import com.monkopedia.ksrpc.binary.ktor.asRpcBinaryData
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.ChannelClient
 import com.monkopedia.ksrpc.channels.ChannelId
@@ -28,8 +30,6 @@ import com.monkopedia.ksrpc.channels.SerializedChannel
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.internal.ClientChannelContext
 import com.monkopedia.ksrpc.internal.SubserviceChannel
-import com.monkopedia.ksrpc.packets.asByteReadChannel
-import com.monkopedia.ksrpc.packets.asRpcBinaryData
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.accept

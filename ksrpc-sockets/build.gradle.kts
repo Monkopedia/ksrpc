@@ -26,6 +26,10 @@ ksrpcModule(
 kotlin {
     sourceSets["commonMain"].dependencies {
         api(project(":ksrpc-packets"))
+        // ksrpc-sockets wraps socket-style byte streams via ktor-io's
+        // ByteReadChannel / ByteWriteChannel — declare the dependency
+        // explicitly (ksrpc-packets no longer re-exports ktor-io after #72).
+        api(libs.ktor.io)
     }
     sourceSets["jvmMain"].dependencies {
         implementation(libs.kotlinx.serialization)

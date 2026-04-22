@@ -45,15 +45,16 @@ object FqConstants {
     val BINARY_TRANSFORMER = ClassId(FQPKG, Name.identifier("BinaryTransformer"))
 
     /**
-     * Stopgap transformer emitted for methods with `ByteReadChannel` inputs or
-     * outputs. Lives in `ksrpc-packets` (the `ksrpc-binary-ktor` module from
-     * issue #72 will eventually replace it). Falling back through the general
-     * "cannot resolve" diagnostic is acceptable when the module isn't on the
-     * compile classpath; consumers use `ByteReadChannel` through one of the
-     * ktor transports, which all pull in `ksrpc-packets`.
+     * Transformer emitted for methods with `ByteReadChannel` inputs or outputs.
+     * Lives in `ksrpc-binary-ktor`, the dedicated ktor-io adapter module.
+     * Resolved optionally: consumers who never use `ByteReadChannel` in a
+     * service signature do not need `ksrpc-binary-ktor` on their classpath.
+     * The ktor transports depend on it transitively, so any consumer using
+     * `ByteReadChannel` through one of them gets the symbol for free; direct
+     * users (no transport) opt in by declaring `ksrpc-binary-ktor`.
      */
     val BYTE_READ_CHANNEL_TRANSFORMER = ClassId(
-        FqName("com.monkopedia.ksrpc.packets"),
+        FqName("com.monkopedia.ksrpc.binary.ktor"),
         Name.identifier("ByteReadChannelTransformer")
     )
     val SUBSERVICE_TRANSFORMER = ClassId(FQPKG, Name.identifier("SubserviceTransformer"))

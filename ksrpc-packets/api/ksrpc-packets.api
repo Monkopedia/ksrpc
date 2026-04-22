@@ -1,27 +1,3 @@
-public final class com/monkopedia/ksrpc/packets/ByteReadChannelBinaryData : com/monkopedia/ksrpc/channels/RpcBinaryData {
-	public fun <init> (Lio/ktor/utils/io/ByteReadChannel;Ljava/lang/Long;)V
-	public synthetic fun <init> (Lio/ktor/utils/io/ByteReadChannel;Ljava/lang/Long;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun close (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun getSize ()Ljava/lang/Long;
-	public fun transferTo (Lkotlin/jvm/functions/Function4;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public final class com/monkopedia/ksrpc/packets/ByteReadChannelBinaryDataKt {
-	public static final fun asByteReadChannel (Lcom/monkopedia/ksrpc/channels/RpcBinaryData;Lkotlinx/coroutines/CoroutineScope;)Lio/ktor/utils/io/ByteReadChannel;
-	public static synthetic fun asByteReadChannel$default (Lcom/monkopedia/ksrpc/channels/RpcBinaryData;Lkotlinx/coroutines/CoroutineScope;ILjava/lang/Object;)Lio/ktor/utils/io/ByteReadChannel;
-	public static final fun asRpcBinaryData (Lio/ktor/utils/io/ByteReadChannel;Ljava/lang/Long;)Lcom/monkopedia/ksrpc/channels/RpcBinaryData;
-	public static synthetic fun asRpcBinaryData$default (Lio/ktor/utils/io/ByteReadChannel;Ljava/lang/Long;ILjava/lang/Object;)Lcom/monkopedia/ksrpc/channels/RpcBinaryData;
-}
-
-public final class com/monkopedia/ksrpc/packets/ByteReadChannelTransformer : com/monkopedia/ksrpc/BinaryDataTransformer, com/monkopedia/ksrpc/Transformer {
-	public static final field INSTANCE Lcom/monkopedia/ksrpc/packets/ByteReadChannelTransformer;
-	public fun getHasContent ()Z
-	public fun transform (Lio/ktor/utils/io/ByteReadChannel;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public synthetic fun transform (Ljava/lang/Object;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun unpackError (Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/SerializedService;)V
-	public fun untransform (Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
 public final class com/monkopedia/ksrpc/packets/internal/ConstantsKt {
 	public static final field CONTENT_LENGTH Ljava/lang/String;
 	public static final field CONTENT_TYPE Ljava/lang/String;

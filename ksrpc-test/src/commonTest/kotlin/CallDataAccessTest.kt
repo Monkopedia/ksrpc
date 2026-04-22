@@ -15,9 +15,9 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.binary.ktor.asByteReadChannel
+import com.monkopedia.ksrpc.binary.ktor.asRpcBinaryData
 import com.monkopedia.ksrpc.channels.CallData
-import com.monkopedia.ksrpc.packets.asByteReadChannel
-import com.monkopedia.ksrpc.packets.asRpcBinaryData
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.core.readBytes
 import io.ktor.utils.io.readRemaining

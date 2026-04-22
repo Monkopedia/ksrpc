@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.monkopedia.ksrpc.packets
+package com.monkopedia.ksrpc.binary.ktor
 
 import com.monkopedia.ksrpc.BinaryDataTransformer
 import com.monkopedia.ksrpc.BinaryTransformer
@@ -23,14 +23,15 @@ import com.monkopedia.ksrpc.channels.SerializedService
 import io.ktor.utils.io.ByteReadChannel
 
 /**
- * Temporary stopgap compiler-plugin target for `ByteReadChannel` parameters.
- * Adapts ktor's [ByteReadChannel] onto the transport-agnostic
+ * Compiler-plugin target for `ByteReadChannel` parameters. Adapts ktor's
+ * [ByteReadChannel] onto the transport-agnostic
  * [RpcBinaryData][com.monkopedia.ksrpc.channels.RpcBinaryData] surface used by
  * `ksrpc-core`'s [BinaryTransformer].
  *
- * Will be replaced by the proper `ksrpc-binary-ktor` adapter module from
- * issue #72; until then the compiler plugin hard-wires `ByteReadChannel`
- * signatures to this transformer so `ksrpc-core` can stay ktor-free.
+ * The compiler plugin emits this transformer for `ByteReadChannel` service
+ * signatures; users opt in to ktor-io binary support by adding
+ * `ksrpc-binary-ktor` to their compile classpath (the ktor transports already
+ * do so transitively).
  */
 object ByteReadChannelTransformer :
     Transformer<ByteReadChannel>,
