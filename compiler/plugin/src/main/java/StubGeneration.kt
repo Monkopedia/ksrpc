@@ -478,7 +478,15 @@ class StubGeneration(
         outputType: IrType,
         declarationIrBuilder: DeclarationIrBuilder
     ) = when (outputRpcType) {
-        RpcType.BINARY -> declarationIrBuilder.irGetObject(env.binaryTransformer)
+        // The paired `ObjGeneration.createTypeConverter` already emits a user
+        // diagnostic when the `ByteReadChannel` adapter is missing; by the
+        // time we reach stub generation the classpath must satisfy it.
+        RpcType.BINARY -> declarationIrBuilder.irGetObject(
+            env.binaryTransformer
+                ?: reportInternal(
+                    "ByteReadChannel adapter (ksrpc-packets) missing on the compile classpath"
+                )
+        )
 
         RpcType.FLOW -> buildFlowTransformer(outputType, declarationIrBuilder)
 

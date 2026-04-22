@@ -36,7 +36,26 @@ object FqConstants {
 
     val SERVICE_EXECUTOR = ClassId(FQPKG, Name.identifier("ServiceExecutor"))
     val SERIALIZER_TRANSFORMER = ClassId(FQPKG, Name.identifier("SerializerTransformer"))
+
+    /**
+     * Core transport-agnostic binary transformer (operates on `RpcBinaryData`).
+     * Not emitted directly for user `ByteReadChannel` signatures — those go
+     * through [BYTE_READ_CHANNEL_TRANSFORMER] which adapts onto this one.
+     */
     val BINARY_TRANSFORMER = ClassId(FQPKG, Name.identifier("BinaryTransformer"))
+
+    /**
+     * Stopgap transformer emitted for methods with `ByteReadChannel` inputs or
+     * outputs. Lives in `ksrpc-packets` (the `ksrpc-binary-ktor` module from
+     * issue #72 will eventually replace it). Falling back through the general
+     * "cannot resolve" diagnostic is acceptable when the module isn't on the
+     * compile classpath; consumers use `ByteReadChannel` through one of the
+     * ktor transports, which all pull in `ksrpc-packets`.
+     */
+    val BYTE_READ_CHANNEL_TRANSFORMER = ClassId(
+        FqName("com.monkopedia.ksrpc.packets"),
+        Name.identifier("ByteReadChannelTransformer")
+    )
     val SUBSERVICE_TRANSFORMER = ClassId(FQPKG, Name.identifier("SubserviceTransformer"))
     val SUSPEND_CLOSEABLE = ClassId(FQPKG, Name.identifier("SuspendCloseable"))
 

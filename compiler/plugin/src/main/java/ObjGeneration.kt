@@ -326,9 +326,28 @@ internal class GenericMethodIrBuilder(
         serializerFields: List<IrField>,
         method: IrSimpleFunction
     ): IrExpression {
-        // BINARY (ByteReadChannel) transformer.
+        // BINARY (ByteReadChannel) transformer. Emits the stopgap
+        // `ByteReadChannelTransformer` from `ksrpc-packets` — future versions
+        // will dispatch via the adapter registry planned in #75.
         if (type.classFqName == FqConstants.BYTE_READ_CHANNEL) {
-            return builder.irGetObject(env.binaryTransformer)
+            val binaryTransformer = env.binaryTransformer ?: run {
+                report.reportUserError(
+                    "ByteReadChannel in @KsMethod requires `ksrpc-packets` " +
+                        "(stopgap until `ksrpc-binary-ktor` from #72 lands) " +
+                        "on the compile classpath for " +
+                        "${cls.irClass.kotlinFqName.asString()}.${method.name.asString()}",
+                    element = method
+                )
+                // Fall back to `Unit` serializer transformer so codegen doesn't crash
+                // after reporting the diagnostic.
+                return builder.irCallConstructor(
+                    env.serializerTransformer.constructors.first(),
+                    listOf(context.irBuiltIns.unitType)
+                ).apply {
+                    this.type = env.serializerTransformer.typeWith(context.irBuiltIns.unitType)
+                }
+            }
+            return builder.irGetObject(binaryTransformer)
         }
         // Flow<T> is bridged to the KsFlowService sub-service protocol. Only reachable when
         // ksrpc-flow is on the compile classpath — otherwise we fall through to the generic
