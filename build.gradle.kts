@@ -125,6 +125,7 @@ dokka {
 
 dependencies {
     dokka(project(":ksrpc-api"))
+    dokka(project(":ksrpc-binary-ktor"))
     dokka(project(":ksrpc-core"))
     dokka(project(":ksrpc-introspection"))
     dokka(project(":ksrpc-jni"))
