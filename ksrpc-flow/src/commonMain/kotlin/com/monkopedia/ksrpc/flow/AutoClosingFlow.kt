@@ -1,0 +1,42 @@
+/*
+ * Copyright (C) 2026 Jason Monk <monkopedia@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.monkopedia.ksrpc.flow
+
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
+
+/**
+ * A [Flow] wrapper that closes the underlying [KsFlowService] after
+ * collection completes or fails.
+ *
+ * Used by the compiler for `Flow<T>` return types — the client gets a
+ * single-use flow that automatically cleans up the sub-service. This is an
+ * internal implementation detail; user code should declare `Flow<T>` in
+ * service signatures and let the compiler plugin insert this wrapper (see
+ * issue #39).
+ */
+@OptIn(KsrpcInternal::class)
+@KsrpcInternal
+class AutoClosingFlow<T>(private val delegate: KsFlowService<T>) : Flow<T> {
+    override suspend fun collect(collector: FlowCollector<T>) {
+        try {
+            delegate.collect(collector)
+        } finally {
+            delegate.close()
+        }
+    }
+}
