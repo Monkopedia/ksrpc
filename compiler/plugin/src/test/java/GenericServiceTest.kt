@@ -317,6 +317,86 @@ interface HasMethodGeneric: RpcService {
     }
 
     @Test
+    fun `generic ksservice with KsNotification on Unit method compiles`() {
+        // Sanity check that metadata sibling annotations combine with generic services.
+        // Regressions here would surface as either a companion/stub generation failure or a
+        // surprise "must return Unit" misfire on a generic method whose return type is T.
+        val annotations = SourceFile.kotlin(
+            "Annotations.kt",
+            """
+package com.monkopedia.ksrpc.annotation
+
+@Target(AnnotationTarget.ANNOTATION_CLASS)
+@Retention(AnnotationRetention.BINARY)
+annotation class KsMethodMetadata
+
+@KsMethodMetadata
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.BINARY)
+annotation class KsNotification
+"""
+        )
+        val source = SourceFile.kotlin(
+            "main.kt",
+            """
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsNotification
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.RpcService
+
+@KsService
+interface GenericWithNotification<T> : RpcService {
+    @KsMethod("/publish")
+    @KsNotification
+    suspend fun publish(item: T)
+}
+"""
+        )
+        val result = compile(listOf(annotations, source))
+        assertEquals(
+            KotlinCompilation.ExitCode.OK,
+            result.exitCode,
+            "messages: ${result.messages}"
+        )
+    }
+
+    @Test
+    fun `generic ksservice with multiple type parameters compiles`() {
+        // Services with more than one invariant type parameter must generate a Stub/Obj
+        // whose primary constructors take one KSerializer per type parameter in declaration
+        // order. Catching a regression here means we verified argument-ordering between FIR
+        // stub synthesis and IR body generation doesn't drift.
+        val source = SourceFile.kotlin(
+            "main.kt",
+            """
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.channels.SerializedService
+import kotlinx.serialization.KSerializer
+
+@KsService
+interface KsPairStream<A, B> : RpcService {
+    @KsMethod("/next")
+    suspend fun next(u: Unit): Map<A, B>
+}
+
+fun <S> useStub(
+    channel: SerializedService<S>,
+    a: KSerializer<String>,
+    b: KSerializer<Int>
+): KsPairStream<String, Int> = KsPairStream.Stub<String, Int>(channel, a, b)
+"""
+        )
+        val result = compile(sourceFile = source)
+        assertEquals(
+            KotlinCompilation.ExitCode.OK,
+            result.exitCode,
+            "messages: ${result.messages}"
+        )
+    }
+
+    @Test
     fun `out-variance on class type params is rejected`() {
         val source = SourceFile.kotlin(
             "main.kt",
