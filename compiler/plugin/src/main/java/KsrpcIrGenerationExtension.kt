@@ -97,11 +97,14 @@
  *   sides, and `@KsNotification` methods that don't return `Unit`.
  */
 
+@file:OptIn(UnsafeDuringIrConstructionAPI::class)
+
 package com.monkopedia.ksrpc.plugin
 
 import com.monkopedia.ksrpc.plugin.FqConstants.BYTE_READ_CHANNEL
 import com.monkopedia.ksrpc.plugin.FqConstants.FQRPC_SERVICE
 import com.monkopedia.ksrpc.plugin.FqConstants.INTROSPECTABLE_RPC_SERVICE
+import com.monkopedia.ksrpc.plugin.FqConstants.KS_SERVICE
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.ERROR
@@ -114,7 +117,9 @@ import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.expressions.IrConst
 import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
+import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.classFqName
+import org.jetbrains.kotlin.ir.types.classOrNull
 import org.jetbrains.kotlin.ir.util.kotlinFqName
 import org.jetbrains.kotlin.ir.visitors.acceptChildrenVoid
 import org.jetbrains.kotlin.types.Variance
@@ -158,7 +163,29 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
         val hasRpcServiceSuper = superTypeNames.contains(FQRPC_SERVICE)
         val hasIntrospectableSuper =
             superTypeNames.contains(INTROSPECTABLE_RPC_SERVICE.asSingleFqName())
-        if (!hasRpcServiceSuper && !hasIntrospectableSuper) {
+        // Reject `@KsService` applied to a subtype of another `@KsService` interface.
+        // The parent's @KsService annotation already drives codegen, and `rpcObject<Sub>()`
+        // walks supertypes to find the parent's `RpcObject`/`RpcObjectFactory` companion
+        // automatically. Allowing @KsService on the subtype would produce a duplicate
+        // companion that has no working stub/obj of its own and previously crashed
+        // CompanionGeneration with "Invalid synthetic declaration for ..." (issue #45).
+        val ksServiceSuper = irClass.superTypes
+            .mapNotNull { it.classOrNull?.owner }
+            .firstOrNull { superClass ->
+                superClass.annotations.any { it.type.classFqName == KS_SERVICE }
+            }
+        if (ksServiceSuper != null) {
+            report.error(
+                "@KsService cannot be applied to ${irClass.kotlinFqName.asString()} because " +
+                    "its supertype ${ksServiceSuper.kotlinFqName.asString()} is already " +
+                    "@KsService. Remove @KsService from " +
+                    "${irClass.kotlinFqName.asString()}; rpcObject<" +
+                    "${irClass.name.asString()}>() will find the parent's companion " +
+                    "automatically."
+            )
+            isValid = false
+        }
+        if (!hasRpcServiceSuper && !hasIntrospectableSuper && ksServiceSuper == null) {
             report.error(
                 "${irClass.kotlinFqName.asString()} does not extend ${FQRPC_SERVICE.asString()}"
             )

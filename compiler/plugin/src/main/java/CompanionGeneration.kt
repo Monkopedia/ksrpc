@@ -70,8 +70,10 @@ class CompanionGeneration(
         key: GeneratedDeclarationKey?
     ): Collection<IrDeclaration> {
         val k = key as FirCompanionDeclarationGenerator.Key
-        val cls = classes[k.type]
-            ?: error("Invalid synthetic declaration for ${k.type} in ${classes.keys}")
+        // The class may have been removed from `classes` by validation (e.g. a @KsService
+        // subtype of another @KsService — see issue #45). In that case validation has
+        // already reported an error; just skip body generation so we don't crash.
+        val cls = classes[k.type] ?: return emptyList()
         // Emit @RpcObjectKey pointing at the companion. For non-generic services the
         // companion is the `RpcObject`; for generic services it's the `RpcObjectFactory`.
         // `rpcObject<T>()` inspects the returned instance and, when it's a factory,
@@ -146,8 +148,8 @@ class CompanionGeneration(
         key: GeneratedDeclarationKey?
     ): IrBody? {
         val k = key as FirCompanionDeclarationGenerator.Key
-        val cls = classes[k.type]
-            ?: error("Invalid synthetic declaration for ${k.type} in ${classes.keys}")
+        // See generateChildrenForClass: validation may have removed the entry.
+        val cls = classes[k.type] ?: return null
         function.correspondingPropertySymbol?.owner?.name?.let { propertyName ->
             if (propertyName == FqConstants.SERVICE_NAME) {
                 return context.irBuilder(function).irSynthBody {
