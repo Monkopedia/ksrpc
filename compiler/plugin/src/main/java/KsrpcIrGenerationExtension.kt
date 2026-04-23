@@ -126,6 +126,7 @@ import com.monkopedia.ksrpc.plugin.FqConstants.KS_SERVICE
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
+import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.ir.backend.js.utils.isDispatchReceiver
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrFunction
@@ -176,6 +177,25 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
 
     private fun validateClass(irClass: IrClass): Boolean {
         var isValid = true
+        // `@KsService` is contractually interface-only. Generated code (Stub, companion,
+        // Obj) assumes the annotated declaration is an interface: the Stub's primary
+        // constructor delegates to the owning supertype, which requires the owner to be
+        // implementable without invoking a no-arg constructor. Classes (abstract or
+        // concrete), objects, enum classes, and annotation classes all produce malformed
+        // generated code. Reject them here with a user-facing error so IDEs show a clean
+        // diagnostic instead of confusing generated-code crashes downstream (#53).
+        if (irClass.kind != ClassKind.INTERFACE) {
+            val fqName = irClass.kotlinFqName.asString()
+            val simpleName = irClass.name.asString()
+            report.reportUserError(
+                "@KsService can only be applied to interfaces. Change `$simpleName` to an " +
+                    "interface.",
+                element = irClass
+            )
+            // Bail out early — downstream validations (supertypes, type parameters) assume
+            // the declaration is an interface and would emit noisy secondary diagnostics.
+            return false
+        }
         val superTypeNames = irClass.superTypes.map { it.classFqName }
         val hasRpcServiceSuper = superTypeNames.contains(FQRPC_SERVICE)
         val hasIntrospectableSuper =
