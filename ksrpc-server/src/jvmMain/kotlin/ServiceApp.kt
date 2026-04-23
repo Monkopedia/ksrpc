@@ -20,7 +20,7 @@ import com.github.ajalt.clikt.parameters.options.multiple
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.int
 import com.monkopedia.ksrpc.ktor.websocket.serveWebsocket
-import com.monkopedia.ksrpc.sockets.asSocketConnection
+import com.monkopedia.ksrpc.sockets.asConnection
 import io.ktor.server.application.Application
 import io.ktor.server.engine.EmbeddedServer
 import io.ktor.server.engine.embeddedServer
@@ -72,7 +72,7 @@ actual abstract class ServiceApp actual constructor(appName: String) : BaseServi
                         val context = newSingleThreadContext("$appName-socket-$p")
                         withContext(context) {
                             val connection = (s.getInputStream() to s.getOutputStream())
-                                .asSocketConnection(env)
+                                .asConnection(env)
                             connection.registerDefault(createChannel())
                         }
                         context.close()

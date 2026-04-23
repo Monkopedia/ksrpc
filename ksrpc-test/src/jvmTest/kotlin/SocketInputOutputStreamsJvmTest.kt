@@ -19,7 +19,7 @@ import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.Connection
 import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
-import com.monkopedia.ksrpc.sockets.asSocketConnection
+import com.monkopedia.ksrpc.sockets.asConnection
 import java.io.PipedInputStream
 import java.io.PipedOutputStream
 import java.util.concurrent.Executors
@@ -44,8 +44,8 @@ class SocketInputOutputStreamsJvmTest {
                     val clientOutput = PipedOutputStream(serverInput)
                     val clientInput = PipedInputStream(pipeSize)
                     val serverOutput = PipedOutputStream(clientInput)
-                    (clientInput to clientOutput).asSocketConnection(env) to
-                        (serverInput to serverOutput).asSocketConnection(env)
+                    (clientInput to clientOutput).asConnection(env) to
+                        (serverInput to serverOutput).asConnection(env)
                 }
             }
             val (client, server) = setupFuture.get(3, TimeUnit.SECONDS)

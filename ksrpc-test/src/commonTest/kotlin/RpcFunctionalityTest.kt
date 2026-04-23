@@ -20,7 +20,7 @@ import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
 import com.monkopedia.ksrpc.internal.asClient
 import com.monkopedia.ksrpc.ktor.asHttpChannelClient
 import com.monkopedia.ksrpc.ktor.websocket.asWebsocketConnection
-import com.monkopedia.ksrpc.sockets.asSocketConnection
+import com.monkopedia.ksrpc.sockets.asConnection
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.utils.io.ByteReadChannel
@@ -66,8 +66,8 @@ abstract class RpcFunctionalityTest(
         if (TestType.PIPE !in supportedTypes) return@runBlockingUnit
         val (output, input) = createPipe()
         val (so, si) = createPipe()
-        val serverConnection = (si to output).asSocketConnection(createEnv())
-        val clientConnection = (input to so).asSocketConnection(createEnv())
+        val serverConnection = (si to output).asConnection(createEnv())
+        val clientConnection = (input to so).asConnection(createEnv())
         val serverJob = launch(Dispatchers.Default) {
             val serializedChannel = serializedChannel()
             serverConnection.registerDefault(serializedChannel)

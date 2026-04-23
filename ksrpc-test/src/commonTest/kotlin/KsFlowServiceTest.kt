@@ -22,7 +22,7 @@ import com.monkopedia.ksrpc.flow.KsCollectionToken
 import com.monkopedia.ksrpc.flow.KsFlowCollector
 import com.monkopedia.ksrpc.flow.KsFlowService
 import com.monkopedia.ksrpc.flow.asKsFlow
-import com.monkopedia.ksrpc.sockets.asSocketConnection
+import com.monkopedia.ksrpc.sockets.asConnection
 import io.ktor.utils.io.close
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -240,12 +240,12 @@ class KsFlowServiceTest {
     ) = runBlockingUnit {
         val (output, input) = createPipe()
         val (so, si) = createPipe()
-        val serviceChannel = (si to output).asSocketConnection(
+        val serviceChannel = (si to output).asConnection(
             ksrpcEnvironment {
                 errorListener = ErrorListener { }
             }
         )
-        val clientChannel = (input to so).asSocketConnection(
+        val clientChannel = (input to so).asConnection(
             ksrpcEnvironment {
                 errorListener = ErrorListener { }
             }

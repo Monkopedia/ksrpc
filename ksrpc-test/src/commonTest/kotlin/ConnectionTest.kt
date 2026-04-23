@@ -19,7 +19,7 @@ import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
 import com.monkopedia.ksrpc.channels.Connection
 import com.monkopedia.ksrpc.channels.registerDefault
-import com.monkopedia.ksrpc.sockets.asSocketConnection
+import com.monkopedia.ksrpc.sockets.asConnection
 import io.ktor.utils.io.close
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -279,14 +279,14 @@ class ConnectionTest {
         if (RpcFunctionalityTest.TestType.PIPE !in supportedTypes) return@runBlockingUnit
         val (output, input) = createPipe()
         val (so, si) = createPipe()
-        val serviceChannel = (si to output).asSocketConnection(
+        val serviceChannel = (si to output).asConnection(
             ksrpcEnvironment {
                 errorListener = ErrorListener { t ->
                     t.printStackTrace()
                 }
             }
         )
-        val clientChannel = (input to so).asSocketConnection(
+        val clientChannel = (input to so).asConnection(
             ksrpcEnvironment {
                 errorListener = ErrorListener { t ->
                     t.printStackTrace()

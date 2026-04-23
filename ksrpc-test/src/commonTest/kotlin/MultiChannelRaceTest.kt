@@ -17,7 +17,7 @@ package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
-import com.monkopedia.ksrpc.sockets.asSocketConnection
+import com.monkopedia.ksrpc.sockets.asConnection
 import io.ktor.utils.io.close
 import kotlin.test.Test
 import kotlin.test.assertFalse
@@ -64,8 +64,8 @@ class MultiChannelRaceTest {
 
                 val (serverWrite, clientRead) = createPipe()
                 val (clientWrite, serverRead) = createPipe()
-                val server = (serverRead to serverWrite).asSocketConnection(env)
-                val client = (clientRead to clientWrite).asSocketConnection(env)
+                val server = (serverRead to serverWrite).asConnection(env)
+                val client = (clientRead to clientWrite).asConnection(env)
 
                 try {
                     server.registerDefault(

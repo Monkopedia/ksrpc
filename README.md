@@ -309,7 +309,7 @@ while (true) {
     val socket = serverSocket.accept()
     GlobalScope.launch(hostingContext) {
         val connection = (socket.getInputStream() to socket.getOutputStream())
-            .asSocketConnection(env)
+            .asConnection(env)
         connection.registerDefault(service)
     }
 }
@@ -368,9 +368,9 @@ Client side or bidirectional connection methods:
 
  - [HttpClient.asHttpChannelClient(baseUrl, env)](https://monkopedia.github.io/ksrpc/ksrpc-ktor-client/com.monkopedia.ksrpc.ktor/as-http-channel-client.html) (HTTP is request/response only, returns `ChannelClient`)
  - [HttpClient.asWebsocketConnection(baseUrl, env)](https://monkopedia.github.io/ksrpc/ksrpc-ktor-websocket-client/com.monkopedia.ksrpc.ktor.websocket/as-websocket-connection.html)
- - [Pair<ByteReadChannel, ByteWriteChannel>.asSocketConnection(env)](https://monkopedia.github.io/ksrpc/ksrpc-sockets/com.monkopedia.ksrpc.sockets/as-socket-connection.html)
- - [Pair<InputStream, OutputStream>.asSocketConnection(env)](https://monkopedia.github.io/ksrpc/ksrpc-sockets/com.monkopedia.ksrpc.sockets/as-socket-connection.html)
- - [ProcessBuilder.asSocketConnection(env)](https://monkopedia.github.io/ksrpc/ksrpc-sockets/com.monkopedia.ksrpc.sockets/as-socket-connection.html)
+ - [Pair<ByteReadChannel, ByteWriteChannel>.asConnection(env)](https://monkopedia.github.io/ksrpc/ksrpc-sockets/com.monkopedia.ksrpc.sockets/as-connection.html)
+ - [Pair<InputStream, OutputStream>.asConnection(env)](https://monkopedia.github.io/ksrpc/ksrpc-sockets/com.monkopedia.ksrpc.sockets/as-connection.html)
+ - [ProcessBuilder.asConnection(env)](https://monkopedia.github.io/ksrpc/ksrpc-sockets/com.monkopedia.ksrpc.sockets/as-connection.html)
  - [Pair<ByteReadChannel, ByteWriteChannel>.asJsonRpcConnection(env)](https://monkopedia.github.io/ksrpc/ksrpc-jsonrpc/com.monkopedia.ksrpc.jsonrpc/as-json-rpc-connection.html)
 
 Server side hosting methods:

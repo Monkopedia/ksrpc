@@ -22,7 +22,7 @@ import com.monkopedia.ksrpc.channels.currentRpcCall
 import com.monkopedia.ksrpc.jsonrpc.JsonRpcCallId
 import com.monkopedia.ksrpc.jsonrpc.asJsonRpcConnection
 import com.monkopedia.ksrpc.packets.internal.PacketCallId
-import com.monkopedia.ksrpc.sockets.asSocketConnection
+import com.monkopedia.ksrpc.sockets.asConnection
 import io.ktor.utils.io.close
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -85,10 +85,10 @@ class CurrentRpcCallTest {
         val (serverToClient, clientFromServer) = createPipe()
         val probe = CapturingProbe()
 
-        val serverConnection = (serverFromClient to serverToClient).asSocketConnection(
+        val serverConnection = (serverFromClient to serverToClient).asConnection(
             ksrpcEnvironment { }
         )
-        val clientConnection = (clientFromServer to clientToServer).asSocketConnection(
+        val clientConnection = (clientFromServer to clientToServer).asConnection(
             ksrpcEnvironment { }
         )
         val serverJob = launch(Dispatchers.Default) {
@@ -249,10 +249,10 @@ class CurrentRpcCallTest {
             override suspend fun notifyOnly(value: String) = Unit
         }
 
-        val serverConnection = (serverFromClient to serverToClient).asSocketConnection(
+        val serverConnection = (serverFromClient to serverToClient).asConnection(
             ksrpcEnvironment { }
         )
-        val clientConnection = (clientFromServer to clientToServer).asSocketConnection(
+        val clientConnection = (clientFromServer to clientToServer).asConnection(
             ksrpcEnvironment { }
         )
 
@@ -307,10 +307,10 @@ class CurrentRpcCallTest {
             override suspend fun notifyOnly(value: String) = Unit
         }
 
-        val serverConnection = (serverFromClient to serverToClient).asSocketConnection(
+        val serverConnection = (serverFromClient to serverToClient).asConnection(
             ksrpcEnvironment { }
         )
-        val clientConnection = (clientFromServer to clientToServer).asSocketConnection(
+        val clientConnection = (clientFromServer to clientToServer).asConnection(
             ksrpcEnvironment { }
         )
         val serverJob = launch(Dispatchers.Default) {

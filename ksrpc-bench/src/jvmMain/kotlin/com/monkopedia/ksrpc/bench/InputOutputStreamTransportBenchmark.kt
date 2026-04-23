@@ -18,7 +18,7 @@ package com.monkopedia.ksrpc.bench
 import com.monkopedia.ksrpc.channels.Connection
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.ksrpcEnvironment
-import com.monkopedia.ksrpc.sockets.asSocketConnection
+import com.monkopedia.ksrpc.sockets.asConnection
 import java.io.PipedInputStream
 import java.io.PipedOutputStream
 import kotlinx.benchmark.Benchmark
@@ -67,8 +67,8 @@ open class InputOutputStreamTransportBenchmark {
             clientOutput = PipedOutputStream(serverInput)
             clientInput = PipedInputStream(pipeSize)
             serverOutput = PipedOutputStream(clientInput)
-            clientConnection = (clientInput to clientOutput).asSocketConnection(env)
-            serverConnection = (serverInput to serverOutput).asSocketConnection(env)
+            clientConnection = (clientInput to clientOutput).asConnection(env)
+            serverConnection = (serverInput to serverOutput).asConnection(env)
             serverJob = scope.launch {
                 serverConnection.registerDefault(EchoSerializedService(env))
             }
