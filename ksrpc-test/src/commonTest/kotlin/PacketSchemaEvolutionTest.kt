@@ -83,7 +83,12 @@ class PacketSchemaEvolutionTest {
             wire
         )
 
-        assertEquals(packet, roundTripped)
+        // Packet is no longer a data class (see #23), so compare field by field.
+        assertEquals(packet.type, roundTripped.type)
+        assertEquals(packet.id, roundTripped.id)
+        assertEquals(packet.messageId, roundTripped.messageId)
+        assertEquals(packet.endpoint, roundTripped.endpoint)
+        assertEquals(packet.data, roundTripped.data)
     }
 
     @Test
