@@ -15,6 +15,7 @@
  */
 package com.monkopedia.ksrpc.internal
 
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
@@ -22,6 +23,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
+@KsrpcInternal
 class MultiChannel<T> {
 
     private var isClosed: Boolean = false

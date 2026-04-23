@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(KsrpcInternal::class)
+
 package com.monkopedia.ksrpc.internal
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
@@ -23,6 +25,7 @@ import com.monkopedia.ksrpc.RpcService
 import com.monkopedia.ksrpc.SuspendCloseable
 import com.monkopedia.ksrpc.TrackingService
 import com.monkopedia.ksrpc.UnhandledMethodHandler
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.asString
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.ChannelClient
@@ -38,6 +41,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.serializer
 
+@KsrpcInternal
 class HostSerializedChannelImpl<T>(
     override val env: KsrpcEnvironment<T>,
     channelContext: CoroutineContext? = null
@@ -137,6 +141,7 @@ class HostSerializedChannelImpl<T>(
         get() = (this as? HostSerializedServiceImpl<*, T>)?.service as? TrackingService
 }
 
+@KsrpcInternal
 val <T> SerializedChannel<T>.asClient: ChannelClient<T>
     get() = object : ChannelClient<T>, SerializedChannel<T> by this {
         override suspend fun wrapChannel(channelId: ChannelId): SerializedService<T> {

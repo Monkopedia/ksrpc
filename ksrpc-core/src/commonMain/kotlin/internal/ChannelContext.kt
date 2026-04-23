@@ -15,12 +15,14 @@
  */
 package com.monkopedia.ksrpc.internal
 
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.channels.ChannelClient
 import com.monkopedia.ksrpc.channels.ChannelHost
 import com.monkopedia.ksrpc.internal.ClientChannelContext.Key
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
 
+@KsrpcInternal
 class HostChannelContext<T>(val channel: ChannelHost<T>) : CoroutineContext.Element {
     override val key: CoroutineContext.Key<*>
         get() = Key
@@ -28,6 +30,7 @@ class HostChannelContext<T>(val channel: ChannelHost<T>) : CoroutineContext.Elem
     object Key : CoroutineContext.Key<HostChannelContext<*>>
 }
 
+@KsrpcInternal
 class ClientChannelContext<T>(val channel: ChannelClient<T>) : CoroutineContext.Element {
     override val key: CoroutineContext.Key<*>
         get() = Key
@@ -35,11 +38,13 @@ class ClientChannelContext<T>(val channel: ChannelClient<T>) : CoroutineContext.
     object Key : CoroutineContext.Key<ClientChannelContext<*>>
 }
 
+@OptIn(KsrpcInternal::class)
 internal suspend fun <T> host(): ChannelHost<T>? {
     @Suppress("UNCHECKED_CAST")
     return coroutineContext[HostChannelContext.Key]?.channel as ChannelHost<T>?
 }
 
+@OptIn(KsrpcInternal::class)
 internal suspend fun <T> client(): ChannelClient<T>? {
     @Suppress("UNCHECKED_CAST")
     return coroutineContext[Key]?.channel as ChannelClient<T>?

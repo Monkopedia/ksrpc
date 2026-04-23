@@ -15,6 +15,8 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
+
 /**
  * Interface used for handling any errors that occur during hosting.
  */
@@ -30,5 +32,8 @@ fun interface ErrorListener {
 
 expect val Throwable.asString: String
 
+@KsrpcInternal
 const val ERROR_PREFIX = "ERROR:"
+
+@KsrpcInternal
 const val ENDPOINT_NOT_FOUND_PREFIX = "ENDPOINT_NOT_FOUND:"

@@ -15,6 +15,8 @@
  */
 package com.monkopedia.ksrpc.channels
 
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import nanoid.NanoIdUtils
 
+@KsrpcInternal
 actual fun randomUuid(): String = NanoIdUtils.randomNanoId()
