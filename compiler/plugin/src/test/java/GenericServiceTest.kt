@@ -467,6 +467,60 @@ interface GenericHolder<T> : RpcService {
     }
 
     @Test
+    fun `generic ksservice with many methods does not trigger ConcurrentModificationException`() {
+        // Regression test for #58 / original crash from #41. Before the fix in PR #42, a
+        // generic `@KsService` with multiple methods would throw a
+        // ConcurrentModificationException during IR generation because body-time codegen for
+        // each method (via ObjGeneration / StubGeneration) created a fresh nested executor
+        // class as a side effect while the visitor was still iterating the parent class's
+        // declarations. The fix pre-creates those executors in
+        // `generateChildrenForClass` and stashes them on `ServiceClass.genericExecutors`, so
+        // body generation only has to look them up.
+        //
+        // A refactor that moves executor creation back inline would re-introduce the CME on
+        // the exact shape below. The assertion is that compilation SUCCEEDS and the compile
+        // messages do not mention ConcurrentModificationException (the compile-testing
+        // framework surfaces IR-time exceptions through `result.messages`).
+        val source = SourceFile.kotlin(
+            "main.kt",
+            """
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.RpcService
+
+@KsService
+interface ManyMethods<T> : RpcService {
+    @KsMethod("/a")
+    suspend fun a(x: T): T
+
+    @KsMethod("/b")
+    suspend fun b(x: List<T>): List<T>
+
+    @KsMethod("/c")
+    suspend fun c(x: Map<String, T>): T
+
+    @KsMethod("/d")
+    suspend fun d(x: Set<T>): Set<T>
+
+    @KsMethod("/e")
+    suspend fun e(x: T?): T?
+}
+"""
+        )
+        val result = compile(sourceFile = source)
+        assertEquals(
+            KotlinCompilation.ExitCode.OK,
+            result.exitCode,
+            "messages: ${result.messages}"
+        )
+        assertTrue(
+            !result.messages.contains("ConcurrentModificationException"),
+            "Compile output must not mention ConcurrentModificationException (regression " +
+                "for #58 / original crash from #41). messages: ${result.messages}"
+        )
+    }
+
+    @Test
     fun `out-variance on class type params is rejected`() {
         val source = SourceFile.kotlin(
             "main.kt",
