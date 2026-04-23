@@ -45,7 +45,19 @@ actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> {
                     "Star projection not supported in rpcObject<${T::class.simpleName}<...>>()"
                 )
             }
-            return (obj as RpcObjectFactory<T>).create(typeArgs)
+            val factory = obj as RpcObjectFactory<T>
+            // See parallel comment in nativeMain/RpcObject.kt — issue #64.
+            if (typeArgs.size != factory.arity) {
+                error(
+                    "Can't resolve rpc companion for ${T::class.simpleName}: " +
+                        "associated factory expects ${factory.arity} type argument(s) but " +
+                        "typeOf<${T::class.simpleName}>() supplied ${typeArgs.size}. If " +
+                        "${T::class.simpleName} is a plain Kotlin subtype of a generic " +
+                        "@KsService, call the parent's factory directly with " +
+                        "explicit type arguments (see issue #64)."
+                )
+            }
+            return factory.create(typeArgs)
         }
     }
     return error("Can't find rpc companion for ${T::class}")

@@ -46,7 +46,24 @@ actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> {
                     "Star projection not supported in rpcObject<${T::class.simpleName}<...>>()"
                 )
             }
-            return (obj as RpcObjectFactory<T>).create(typeArgs)
+            val factory = obj as RpcObjectFactory<T>
+            // When typeArgs.size != factory.arity the most common cause is a plain-Kotlin
+            // subtype of a generic @KsService — e.g. `interface XYZ : GenericEcho<String>`.
+            // `findAssociatedObject` resolved the parent's factory (arity 1) but
+            // `typeOf<XYZ>()` has no arguments, so the resolver can't supply the baked-in
+            // type arg. This is issue #64 — the workaround today on Native/JS/WASM is to
+            // call the parent factory directly, e.g. `GenericEcho.create(listOf(typeOf<String>()))`.
+            if (typeArgs.size != factory.arity) {
+                error(
+                    "Can't resolve rpc companion for ${T::class.simpleName}: " +
+                        "associated factory expects ${factory.arity} type argument(s) but " +
+                        "typeOf<${T::class.simpleName}>() supplied ${typeArgs.size}. If " +
+                        "${T::class.simpleName} is a plain Kotlin subtype of a generic " +
+                        "@KsService, call the parent's factory directly with " +
+                        "explicit type arguments (see issue #64)."
+                )
+            }
+            return factory.create(typeArgs)
         }
     }
     return error("Can't find rpc companion for ${T::class}")

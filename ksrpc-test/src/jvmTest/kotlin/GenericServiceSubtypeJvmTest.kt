@@ -38,9 +38,17 @@ import kotlin.test.assertTrue
  * JVM-only: the kotlin.reflect-based supertype walk in `rpcObject()`'s JVM actual picks
  * up `GenericEcho<String>` from `TypedGenericEchoJvm`'s supertypes with `String`
  * preserved in `KType.arguments`, then feeds that to `GenericEcho.create(...)`. On
- * Native/JS/WASM `findAssociatedObject<RpcObjectKey>()` does not walk supertypes, so
- * `rpcObject<Subtype>()` is not supported on those platforms for this pattern — callers
- * there should use `rpcObject<ParentGeneric<T>>()` directly.
+ * Native/JS/WASM `findAssociatedObject<RpcObjectKey>()` returns the parent's factory but
+ * `typeOf<Subtype>().arguments` is empty (the subtype has no type params), so the
+ * resulting `factory.create(emptyList())` throws an arity mismatch. Lifting this path
+ * to all platforms requires either new FIR-phase declaration generation on the subtype
+ * (to synthesize a per-subtype companion with baked-in type args) or runtime access to
+ * the subtype's supertype `KType` without `kotlin.reflect.full.allSupertypes` (which
+ * isn't available on Native/JS/WASM). Tracked as a follow-up off issue #64.
+ *
+ * Cross-platform callers should today use the `RpcObjectFactory` route instead —
+ * `GenericEcho.create(listOf(typeOf<String>()))` works on every platform (see
+ * `GenericServiceSubtypeTest.scenario1_factoryCreateWithConcreteArg`).
  */
 private interface TypedGenericEchoJvm : GenericEcho<String>
 
