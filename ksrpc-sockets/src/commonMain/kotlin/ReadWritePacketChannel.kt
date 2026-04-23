@@ -17,11 +17,10 @@
 
 package com.monkopedia.ksrpc.sockets.internal
 
-import com.monkopedia.ksrpc.CallDataSerializer
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.annotation.KsrpcInternal
-import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.packets.internal.CONTENT_LENGTH
+import com.monkopedia.ksrpc.packets.internal.PACKET_JSON
 import com.monkopedia.ksrpc.packets.internal.Packet
 import com.monkopedia.ksrpc.packets.internal.PacketChannelBase
 import io.ktor.utils.io.ByteReadChannel
@@ -47,11 +46,10 @@ internal class ReadWritePacketChannel(
     }
 
     override suspend fun sendLocked(packet: Packet<String>) {
-        write.send(packet, env.serialization, packetSerializer)
+        write.send(packet, packetSerializer)
     }
 
-    override suspend fun receiveLocked(): Packet<String> =
-        read.readPacket(env.serialization, packetSerializer)
+    override suspend fun receiveLocked(): Packet<String> = read.readPacket(packetSerializer)
 
     override suspend fun close() {
         super.close()
@@ -62,13 +60,9 @@ internal class ReadWritePacketChannel(
 
 private suspend fun ByteWriteChannel.send(
     packet: Packet<String>,
-    serialization: CallDataSerializer<String>,
     packetSerializer: KSerializer<Packet<String>>
 ) {
-    val content =
-        serialization.createCallData(packetSerializer, packet)
-            .readSerialized()
-            .encodeToByteArray()
+    val content = PACKET_JSON.encodeToString(packetSerializer, packet).encodeToByteArray()
     writeStringUtf8(CONTENT_LENGTH)
     writeStringUtf8(": ")
     writeStringUtf8(content.size.toString())
@@ -78,14 +72,12 @@ private suspend fun ByteWriteChannel.send(
 }
 
 private suspend fun ByteReadChannel.readPacket(
-    serialization: CallDataSerializer<String>,
     packetSerializer: KSerializer<Packet<String>>
 ): Packet<String> {
     while (true) {
         val params = readFields()
         val data = readContent(params) ?: continue
-        val callData = CallData.create(data)
-        return serialization.decodeCallData(packetSerializer, callData)
+        return PACKET_JSON.decodeFromString(packetSerializer, data)
     }
 }
 

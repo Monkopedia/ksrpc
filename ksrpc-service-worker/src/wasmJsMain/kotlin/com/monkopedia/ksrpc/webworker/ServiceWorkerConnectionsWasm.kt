@@ -18,12 +18,11 @@
 
 package com.monkopedia.ksrpc.webworker
 
-import com.monkopedia.ksrpc.CallDataSerializer
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.annotation.ExperimentalKsrpc
 import com.monkopedia.ksrpc.annotation.KsrpcInternal
-import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.Connection
+import com.monkopedia.ksrpc.packets.internal.PACKET_JSON
 import com.monkopedia.ksrpc.packets.internal.Packet
 import com.monkopedia.ksrpc.packets.internal.PacketChannelBase
 import kotlin.js.Promise
@@ -81,12 +80,12 @@ private class ServiceWorkerPacketChannel(scope: CoroutineScope, env: KsrpcEnviro
     }
 
     fun handleIncoming(payload: String) {
-        val packet = decodePacket(payload, env.serialization)
+        val packet = decodePacket(payload)
         incoming.trySend(packet)
     }
 
     override suspend fun sendLocked(packet: Packet<String>) {
-        val message = encodePacket(packet, env.serialization)
+        val message = encodePacket(packet)
         postMessage(portDeferred.await(), message)
     }
 
@@ -101,20 +100,11 @@ private class ServiceWorkerPacketChannel(scope: CoroutineScope, env: KsrpcEnviro
     }
 }
 
-private fun encodePacket(
-    packet: Packet<String>,
-    serialization: CallDataSerializer<String>
-): String = serialization
-    .createCallData(SERVICE_WORKER_PACKET_SERIALIZER, packet)
-    .readSerialized()
+private fun encodePacket(packet: Packet<String>): String =
+    PACKET_JSON.encodeToString(SERVICE_WORKER_PACKET_SERIALIZER, packet)
 
-private fun decodePacket(
-    payload: String,
-    serialization: CallDataSerializer<String>
-): Packet<String> {
-    val callData = CallData.create(payload)
-    return serialization.decodeCallData(SERVICE_WORKER_PACKET_SERIALIZER, callData)
-}
+private fun decodePacket(payload: String): Packet<String> =
+    PACKET_JSON.decodeFromString(SERVICE_WORKER_PACKET_SERIALIZER, payload)
 
 private val SERVICE_WORKER_PACKET_SERIALIZER = Packet.serializer(String.serializer())
 
