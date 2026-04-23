@@ -202,17 +202,12 @@ public final class com/monkopedia/ksrpc/MethodMetadata {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class com/monkopedia/ksrpc/RpcChannelKt {
-	public static final field ENDPOINT_NOT_FOUND_PREFIX Ljava/lang/String;
-	public static final field ERROR_PREFIX Ljava/lang/String;
-}
-
 public class com/monkopedia/ksrpc/RpcEndpointException : java/lang/IllegalArgumentException {
 	public fun <init> (Ljava/lang/String;)V
 }
 
 public final class com/monkopedia/ksrpc/RpcMethod {
-	public fun <init> (Ljava/lang/String;Lcom/monkopedia/ksrpc/Transformer;Lcom/monkopedia/ksrpc/Transformer;Lcom/monkopedia/ksrpc/ServiceExecutor;Ljava/util/List;)V
+	public fun <init> (Ljava/lang/String;Lcom/monkopedia/ksrpc/Transformer;Lcom/monkopedia/ksrpc/Transformer;Lcom/monkopedia/ksrpc/internal/ServiceExecutor;Ljava/util/List;)V
 	public final fun call (Lcom/monkopedia/ksrpc/channels/SerializedService;Lcom/monkopedia/ksrpc/RpcService;Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/RpcCallId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun callChannel (Lcom/monkopedia/ksrpc/channels/SerializedService;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun findSubserviceTransformers ()Ljava/util/List;
@@ -263,10 +258,6 @@ public final class com/monkopedia/ksrpc/SerializerTransformer : com/monkopedia/k
 	public fun transform (Ljava/lang/Object;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun unpackError (Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/SerializedService;)V
 	public fun untransform (Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public abstract interface class com/monkopedia/ksrpc/ServiceExecutor {
-	public abstract fun invoke (Lcom/monkopedia/ksrpc/RpcService;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class com/monkopedia/ksrpc/ServiceNameKt {
@@ -480,10 +471,6 @@ public abstract interface class com/monkopedia/ksrpc/channels/SingleChannelHost 
 	public abstract fun registerDefault (Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
-public final class com/monkopedia/ksrpc/channels/UtilsJvmKt {
-	public static final fun randomUuid ()Ljava/lang/String;
-}
-
 public final class com/monkopedia/ksrpc/internal/ClientChannelContext : kotlin/coroutines/CoroutineContext$Element {
 	public fun <init> (Lcom/monkopedia/ksrpc/channels/ChannelClient;)V
 	public fun fold (Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
@@ -496,6 +483,11 @@ public final class com/monkopedia/ksrpc/internal/ClientChannelContext : kotlin/c
 
 public final class com/monkopedia/ksrpc/internal/ClientChannelContext$Key : kotlin/coroutines/CoroutineContext$Key {
 	public static final field INSTANCE Lcom/monkopedia/ksrpc/internal/ClientChannelContext$Key;
+}
+
+public final class com/monkopedia/ksrpc/internal/ErrorPrefixesKt {
+	public static final field ENDPOINT_NOT_FOUND_PREFIX Ljava/lang/String;
+	public static final field ERROR_PREFIX Ljava/lang/String;
 }
 
 public final class com/monkopedia/ksrpc/internal/HostChannelContext : kotlin/coroutines/CoroutineContext$Element {
@@ -540,6 +532,14 @@ public final class com/monkopedia/ksrpc/internal/MultiChannel {
 	public final fun close (Ljava/util/concurrent/CancellationException;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun close$default (Lcom/monkopedia/ksrpc/internal/MultiChannel;Ljava/util/concurrent/CancellationException;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun send (Ljava/lang/String;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/monkopedia/ksrpc/internal/RandomUuidJvmKt {
+	public static final fun randomUuid ()Ljava/lang/String;
+}
+
+public abstract interface class com/monkopedia/ksrpc/internal/ServiceExecutor {
+	public abstract fun invoke (Lcom/monkopedia/ksrpc/RpcService;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class com/monkopedia/ksrpc/internal/SubserviceChannel : com/monkopedia/ksrpc/channels/SerializedService {

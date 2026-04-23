@@ -13,9 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(KsrpcInternal::class)
+
 package com.monkopedia.ksrpc.jsonrpc
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.channels.SingleChannelConnection
 import com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcWriterBase
 import com.monkopedia.ksrpc.jsonrpc.internal.jsonHeader

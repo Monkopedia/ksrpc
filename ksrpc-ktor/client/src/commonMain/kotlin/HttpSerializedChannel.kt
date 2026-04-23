@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(KsrpcInternal::class)
+
 package com.monkopedia.ksrpc.ktor.internal
 
-import com.monkopedia.ksrpc.ENDPOINT_NOT_FOUND_PREFIX
-import com.monkopedia.ksrpc.ERROR_PREFIX
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.RpcEndpointException
 import com.monkopedia.ksrpc.RpcFailure
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.binary.ktor.asByteReadChannel
 import com.monkopedia.ksrpc.binary.ktor.asRpcBinaryData
 import com.monkopedia.ksrpc.channels.CallData
@@ -29,6 +30,8 @@ import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedChannel
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.internal.ClientChannelContext
+import com.monkopedia.ksrpc.internal.ENDPOINT_NOT_FOUND_PREFIX
+import com.monkopedia.ksrpc.internal.ERROR_PREFIX
 import com.monkopedia.ksrpc.internal.SubserviceChannel
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body

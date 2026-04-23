@@ -29,6 +29,3 @@ fun interface ErrorListener {
 }
 
 expect val Throwable.asString: String
-
-const val ERROR_PREFIX = "ERROR:"
-const val ENDPOINT_NOT_FOUND_PREFIX = "ENDPOINT_NOT_FOUND:"

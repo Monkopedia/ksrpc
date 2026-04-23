@@ -13,10 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(KsrpcInternal::class)
+
 package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.sockets.asConnection
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -62,6 +65,7 @@ private object PendingCallCounter {
 
 private class TrackingCancelService : CancelTestService {
     val started = CompletableDeferred<Unit>()
+
     // Plain volatile-style flags; tests run on a single-thread test dispatcher and only do
     // simple read/write so a value class slot is sufficient. Avoids hitting the atomicfu
     // transformer's restriction against `atomic(...)` outside class init in lambda scopes.

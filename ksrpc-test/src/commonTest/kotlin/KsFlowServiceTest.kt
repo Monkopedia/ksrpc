@@ -225,9 +225,12 @@ class KsFlowServiceTest {
             assertEquals(listOf("fast-1", "fast-2", "fast-3"), items)
             assertEquals(
                 listOf(
-                    "start-fast-1", "end-fast-1",
-                    "start-fast-2", "end-fast-2",
-                    "start-fast-3", "end-fast-3"
+                    "start-fast-1",
+                    "end-fast-1",
+                    "start-fast-2",
+                    "end-fast-2",
+                    "start-fast-3",
+                    "end-fast-3"
                 ),
                 processOrder
             )
@@ -256,10 +259,18 @@ class KsFlowServiceTest {
         try {
             clientJob(clientChannel)
         } finally {
-            try { clientChannel.close() } catch (_: Throwable) {}
-            try { serviceChannel.close() } catch (_: Throwable) {}
-            try { input.cancel(null) } catch (_: Throwable) {}
-            try { si.cancel(null) } catch (_: Throwable) {}
+            try {
+                clientChannel.close()
+            } catch (_: Throwable) {}
+            try {
+                serviceChannel.close()
+            } catch (_: Throwable) {}
+            try {
+                input.cancel(null)
+            } catch (_: Throwable) {}
+            try {
+                si.cancel(null)
+            } catch (_: Throwable) {}
             output.close(null)
             so.close(null)
             bgJob.join()

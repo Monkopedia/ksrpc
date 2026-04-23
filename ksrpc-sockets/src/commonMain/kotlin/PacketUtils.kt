@@ -15,12 +15,14 @@
  */
 package com.monkopedia.ksrpc.sockets.internal
 
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.errors.IOException
 import io.ktor.utils.io.readUTF8Line
 import io.ktor.utils.io.writeStringUtf8
 
+@KsrpcInternal
 inline fun swallow(function: () -> Unit) {
     try {
         function()
@@ -28,11 +30,13 @@ inline fun swallow(function: () -> Unit) {
     }
 }
 
+@KsrpcInternal
 suspend fun ByteWriteChannel.appendLine(s: String = "") {
     writeStringUtf8(s)
     writeStringUtf8("\r\n")
 }
 
+@KsrpcInternal
 suspend fun ByteReadChannel.readFields(): Map<String, String> {
     val fields = LinkedHashMap<String, String>()
     while (true) {

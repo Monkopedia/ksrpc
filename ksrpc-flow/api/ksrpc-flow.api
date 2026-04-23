@@ -40,7 +40,7 @@ public final class com/monkopedia/ksrpc/flow/KsCollectionToken$Stub : com/monkop
 	public final synthetic fun close (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
-public final class com/monkopedia/ksrpc/flow/KsCollectionToken$Stub$AnonymousCancelCollection : com/monkopedia/ksrpc/ServiceExecutor {
+public final class com/monkopedia/ksrpc/flow/KsCollectionToken$Stub$AnonymousCancelCollection : com/monkopedia/ksrpc/internal/ServiceExecutor {
 	public fun <init> ()V
 	public final synthetic fun invoke (Lcom/monkopedia/ksrpc/RpcService;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
@@ -85,17 +85,17 @@ public final class com/monkopedia/ksrpc/flow/KsFlowCollector$Stub : com/monkoped
 	public final synthetic fun onItem (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
-public final class com/monkopedia/ksrpc/flow/KsFlowCollector$Stub$AnonymousOnComplete : com/monkopedia/ksrpc/ServiceExecutor {
+public final class com/monkopedia/ksrpc/flow/KsFlowCollector$Stub$AnonymousOnComplete : com/monkopedia/ksrpc/internal/ServiceExecutor {
 	public fun <init> ()V
 	public final synthetic fun invoke (Lcom/monkopedia/ksrpc/RpcService;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
-public final class com/monkopedia/ksrpc/flow/KsFlowCollector$Stub$AnonymousOnError : com/monkopedia/ksrpc/ServiceExecutor {
+public final class com/monkopedia/ksrpc/flow/KsFlowCollector$Stub$AnonymousOnError : com/monkopedia/ksrpc/internal/ServiceExecutor {
 	public fun <init> ()V
 	public final synthetic fun invoke (Lcom/monkopedia/ksrpc/RpcService;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
-public final class com/monkopedia/ksrpc/flow/KsFlowCollector$Stub$AnonymousOnItem : com/monkopedia/ksrpc/ServiceExecutor {
+public final class com/monkopedia/ksrpc/flow/KsFlowCollector$Stub$AnonymousOnItem : com/monkopedia/ksrpc/internal/ServiceExecutor {
 	public fun <init> ()V
 	public final synthetic fun invoke (Lcom/monkopedia/ksrpc/RpcService;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
@@ -137,7 +137,7 @@ public final class com/monkopedia/ksrpc/flow/KsFlowService$Stub : com/monkopedia
 	public final synthetic fun startCollection (Lcom/monkopedia/ksrpc/flow/KsFlowCollector;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
-public final class com/monkopedia/ksrpc/flow/KsFlowService$Stub$AnonymousStartCollection : com/monkopedia/ksrpc/ServiceExecutor {
+public final class com/monkopedia/ksrpc/flow/KsFlowService$Stub$AnonymousStartCollection : com/monkopedia/ksrpc/internal/ServiceExecutor {
 	public fun <init> ()V
 	public final synthetic fun invoke (Lcom/monkopedia/ksrpc/RpcService;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }

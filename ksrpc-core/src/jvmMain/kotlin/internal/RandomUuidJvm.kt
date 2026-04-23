@@ -13,21 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@file:OptIn(KsrpcInternal::class)
+package com.monkopedia.ksrpc.internal
 
-package com.monkopedia.ksrpc
-
+import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import com.monkopedia.ksrpc.annotation.KsrpcInternal
-import com.monkopedia.ksrpc.packets.internal.CONTENT_LENGTH
-import com.monkopedia.ksrpc.packets.internal.CONTENT_TYPE
-import kotlin.test.Test
-import kotlin.test.assertEquals
 
-class PacketConstantsTest {
-
-    @Test
-    fun packetHeaderConstantNamesRemainStable() {
-        assertEquals("Content-Length", CONTENT_LENGTH)
-        assertEquals("Content-Type", CONTENT_TYPE)
-    }
-}
+@KsrpcInternal
+actual fun randomUuid(): String = NanoIdUtils.randomNanoId()

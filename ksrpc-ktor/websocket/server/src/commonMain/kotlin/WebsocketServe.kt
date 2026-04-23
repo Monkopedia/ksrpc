@@ -13,10 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(KsrpcInternal::class)
+
 package com.monkopedia.ksrpc.ktor.websocket
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.channels.connect
 import com.monkopedia.ksrpc.ktor.websocket.internal.WebsocketPacketChannel

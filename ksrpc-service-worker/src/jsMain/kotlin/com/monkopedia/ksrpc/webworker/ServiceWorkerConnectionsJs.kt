@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 @file:Suppress("UnsafeCastFromDynamic")
+@file:OptIn(KsrpcInternal::class)
 
 package com.monkopedia.ksrpc.webworker
 
 import com.monkopedia.ksrpc.CallDataSerializer
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.annotation.ExperimentalKsrpc
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.Connection
 import com.monkopedia.ksrpc.packets.internal.Packet

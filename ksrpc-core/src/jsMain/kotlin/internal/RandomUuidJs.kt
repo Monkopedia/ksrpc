@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.monkopedia.ksrpc.channels
+package com.monkopedia.ksrpc.internal
 
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import nanoid.nanoid
 
+@KsrpcInternal
 actual fun randomUuid(): String = nanoid()

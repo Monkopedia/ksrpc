@@ -13,21 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@file:OptIn(KsrpcInternal::class)
+package com.monkopedia.ksrpc.internal
 
-package com.monkopedia.ksrpc
-
+import com.monkopedia.ksrpc.RpcService
 import com.monkopedia.ksrpc.annotation.KsrpcInternal
-import com.monkopedia.ksrpc.packets.internal.CONTENT_LENGTH
-import com.monkopedia.ksrpc.packets.internal.CONTENT_TYPE
-import kotlin.test.Test
-import kotlin.test.assertEquals
 
-class PacketConstantsTest {
-
-    @Test
-    fun packetHeaderConstantNamesRemainStable() {
-        assertEquals("Content-Length", CONTENT_LENGTH)
-        assertEquals("Content-Type", CONTENT_TYPE)
-    }
+/**
+ * Plumbing interface emitted by the ksrpc compiler plugin to adapt reflective
+ * invocation of generated service implementations. Not part of the supported
+ * API surface — user code should never implement or directly call this, and
+ * the plugin emits the implementation automatically.
+ */
+@KsrpcInternal
+interface ServiceExecutor {
+    suspend fun invoke(service: RpcService, input: Any?): Any?
 }

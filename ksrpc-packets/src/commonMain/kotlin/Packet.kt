@@ -16,9 +16,11 @@
 package com.monkopedia.ksrpc.packets.internal
 
 import com.monkopedia.ksrpc.SuspendCloseable
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+@KsrpcInternal
 @Serializable
 data class Packet<T>(
     @SerialName("t")
@@ -65,6 +67,7 @@ data class Packet<T>(
     )
 }
 
+@KsrpcInternal
 internal interface PacketChannel<T> : SuspendCloseable {
     suspend fun sendLocked(packet: Packet<T>)
     suspend fun receiveLocked(): Packet<T>

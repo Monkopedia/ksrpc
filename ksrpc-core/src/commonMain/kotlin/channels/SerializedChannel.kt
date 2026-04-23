@@ -13,17 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(KsrpcInternal::class)
+
 package com.monkopedia.ksrpc.channels
 
-import com.monkopedia.ksrpc.ENDPOINT_NOT_FOUND_PREFIX
-import com.monkopedia.ksrpc.ERROR_PREFIX
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.RpcMethod
 import com.monkopedia.ksrpc.RpcObject
 import com.monkopedia.ksrpc.RpcService
 import com.monkopedia.ksrpc.SuspendCloseableObservable
 import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.channels.ChannelClient.Companion.DEFAULT
+import com.monkopedia.ksrpc.internal.ENDPOINT_NOT_FOUND_PREFIX
+import com.monkopedia.ksrpc.internal.ERROR_PREFIX
 import com.monkopedia.ksrpc.internal.HostSerializedServiceImpl
 import com.monkopedia.ksrpc.rpcObject
 import kotlin.coroutines.CoroutineContext
@@ -183,8 +186,6 @@ interface SerializedService<T> :
         callId: RpcCallId?
     ): CallData<T> = call(endpoint.endpoint, input, callId)
 }
-
-expect fun randomUuid(): String
 
 /**
  * Wrapper around data being serialized through calls.

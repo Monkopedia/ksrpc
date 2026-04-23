@@ -15,6 +15,12 @@
  */
 package com.monkopedia.ksrpc.packets.internal
 
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
+
+@KsrpcInternal
 const val CONTENT_LENGTH = "Content-Length"
+
+@KsrpcInternal
 const val CONTENT_TYPE = "Content-Type"
+
 internal const val METHOD = "Method"

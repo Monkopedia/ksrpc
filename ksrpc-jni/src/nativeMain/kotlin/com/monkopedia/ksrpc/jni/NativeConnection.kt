@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@file:OptIn(ExperimentalForeignApi::class, ExperimentalNativeApi::class)
+@file:OptIn(ExperimentalForeignApi::class, ExperimentalNativeApi::class, KsrpcInternal::class)
 
 package com.monkopedia.ksrpc.jni
 
@@ -27,6 +27,7 @@ import com.monkopedia.jnitest.initThread
 import com.monkopedia.jnitest.threadEnv
 import com.monkopedia.jnitest.threadJni
 import com.monkopedia.ksrpc.KsrpcEnvironment
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.packets.internal.Packet
 import com.monkopedia.ksrpc.packets.internal.PacketChannelBase

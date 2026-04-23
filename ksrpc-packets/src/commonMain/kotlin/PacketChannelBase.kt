@@ -13,9 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(KsrpcInternal::class)
+
 package com.monkopedia.ksrpc.packets.internal
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.CancellationSupport
 import com.monkopedia.ksrpc.channels.ChannelHost
@@ -25,12 +28,12 @@ import com.monkopedia.ksrpc.channels.RpcBinaryData
 import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.channels.awaitRequestCancellable
-import com.monkopedia.ksrpc.channels.randomUuid
 import com.monkopedia.ksrpc.internal.ClientChannelContext
 import com.monkopedia.ksrpc.internal.HostChannelContext
 import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
 import com.monkopedia.ksrpc.internal.MultiChannel
 import com.monkopedia.ksrpc.internal.SubserviceChannel
+import com.monkopedia.ksrpc.internal.randomUuid
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
@@ -50,6 +53,7 @@ import kotlinx.serialization.builtins.serializer
 private const val DEFAULT_MAX_SIZE = 16 * 1024L
 private const val RECEIVE_LOOP_START_GRACE_MS = 500L
 
+@KsrpcInternal
 abstract class PacketChannelBase<T>(
     protected val scope: CoroutineScope,
     final override val env: KsrpcEnvironment<T>

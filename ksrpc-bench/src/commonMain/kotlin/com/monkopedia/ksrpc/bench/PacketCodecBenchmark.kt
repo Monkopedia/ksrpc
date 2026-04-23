@@ -13,8 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(KsrpcInternal::class)
+
 package com.monkopedia.ksrpc.bench
 
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.ksrpcEnvironment
 import com.monkopedia.ksrpc.packets.internal.Packet
@@ -53,14 +56,17 @@ open class PacketCodecBenchmark {
         .createCallData(Packet.serializer(String.serializer()), packet)
         .readSerialized()
 
+    // Returns `Any` rather than `Packet<String>` so the kotlinx-benchmark generated
+    // descriptor classes (in `kotlinx.benchmark.generated.*`) do not need to opt in to
+    // `@KsrpcInternal` — they reference the benchmark function's return type.
     @Benchmark
-    fun decodePacket(): Packet<String> = env.serialization.decodeCallData(
+    fun decodePacket(): Any = env.serialization.decodeCallData(
         Packet.serializer(String.serializer()),
         CallData.create(encodedPacket)
     )
 
     @Benchmark
-    fun encodeThenDecodePacket(): Packet<String> = env.serialization.decodeCallData(
+    fun encodeThenDecodePacket(): Any = env.serialization.decodeCallData(
         Packet.serializer(String.serializer()),
         CallData.create(encodePacket())
     )

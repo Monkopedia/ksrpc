@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.monkopedia.ksrpc.channels
+package com.monkopedia.ksrpc.internal
 
-import com.aventrix.jnanoid.jnanoid.NanoIdUtils
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 
-actual fun randomUuid(): String = NanoIdUtils.randomNanoId()
+@KsrpcInternal
+expect fun randomUuid(): String

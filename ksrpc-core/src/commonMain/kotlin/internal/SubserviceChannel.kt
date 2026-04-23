@@ -16,6 +16,7 @@
 package com.monkopedia.ksrpc.internal
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.ChannelClient
 import com.monkopedia.ksrpc.channels.ChannelId
@@ -23,6 +24,7 @@ import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
 import kotlin.coroutines.CoroutineContext
 
+@KsrpcInternal
 class SubserviceChannel<T>(
     private val baseChannel: ChannelClient<T>,
     private val serviceId: ChannelId

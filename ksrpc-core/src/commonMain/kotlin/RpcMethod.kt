@@ -13,18 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(KsrpcInternal::class)
+
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.ChannelId
 import com.monkopedia.ksrpc.channels.CurrentRpcCallElement
 import com.monkopedia.ksrpc.channels.RpcBinaryData
 import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
-import com.monkopedia.ksrpc.channels.randomUuid
 import com.monkopedia.ksrpc.channels.registerHost
+import com.monkopedia.ksrpc.internal.ServiceExecutor
 import com.monkopedia.ksrpc.internal.client
 import com.monkopedia.ksrpc.internal.host
+import com.monkopedia.ksrpc.internal.randomUuid
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
@@ -126,10 +130,6 @@ class SubserviceTransformer<T : RpcService>(private val serviceObj: RpcObject<T>
         channel.env.logger.info("Transformer", "Deserializing CallData($serviceId) to Stub")
         return serviceObj.createStub(client.wrapChannel(ChannelId(serviceId)))
     }
-}
-
-interface ServiceExecutor {
-    suspend fun invoke(service: RpcService, input: Any?): Any?
 }
 
 /**
