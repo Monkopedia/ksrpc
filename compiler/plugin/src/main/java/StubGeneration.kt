@@ -147,6 +147,7 @@ class StubGeneration(
                             serviceMethod.function,
                             endpoint,
                             serviceMethod.metadataAnnotations,
+                            serviceMethod.errorAnnotations,
                             service,
                             genericBuilder
                         )
@@ -157,6 +158,7 @@ class StubGeneration(
                             serviceMethod.function,
                             serviceMethod.ksMethodAnnotation,
                             serviceMethod.metadataAnnotations,
+                            serviceMethod.errorAnnotations,
                             companion,
                             service
                         )
@@ -183,6 +185,7 @@ class StubGeneration(
         method: IrSimpleFunction,
         endpoint: String,
         metadataAnnotations: List<IrConstructorCall>,
+        errorAnnotations: List<IrConstructorCall>,
         service: ServiceClass,
         builder: GenericMethodIrBuilder
     ): IrFunction {
@@ -220,6 +223,7 @@ class StubGeneration(
                             endpoint,
                             method,
                             metadataAnnotations,
+                            errorAnnotations,
                             executor = executor
                         ),
                         irGetField(irGet(thisParam), service.channel),
@@ -324,6 +328,7 @@ class StubGeneration(
         method: IrSimpleFunction,
         annotation: IrConstructorCall,
         metadataAnnotations: List<IrConstructorCall>,
+        errorAnnotations: List<IrConstructorCall>,
         companion: IrClass,
         service: ServiceClass
     ): IrFunction {
@@ -332,7 +337,15 @@ class StubGeneration(
                 "argument after validation"
         )
         val methodField =
-            generateRpcMethod(env, endpoint, method, this, companion, metadataAnnotations)
+            generateRpcMethod(
+                env,
+                endpoint,
+                method,
+                this,
+                companion,
+                metadataAnnotations,
+                errorAnnotations
+            )
 
         service.addEndpoint(endpoint, methodField)
         val callChannel = env.rpcMethod.findMethod(FqConstants.CALL_CHANNEL)
@@ -379,7 +392,8 @@ class StubGeneration(
         method: IrSimpleFunction,
         serviceInterface: IrClass,
         companion: IrClass,
-        metadataAnnotations: List<IrConstructorCall>
+        metadataAnnotations: List<IrConstructorCall>,
+        errorAnnotations: List<IrConstructorCall>
     ): IrFunction {
         val field = companion.addField {
             startOffset = SYNTHETIC_OFFSET
@@ -413,7 +427,8 @@ class StubGeneration(
                             serviceInterface,
                             endpoint,
                             method,
-                            metadataAnnotations
+                            metadataAnnotations,
+                            errorAnnotations
                         )
                     )
                 )
@@ -426,7 +441,8 @@ class StubGeneration(
         serviceInterface: IrClass,
         endpoint: String,
         method: IrSimpleFunction,
-        metadataAnnotations: List<IrConstructorCall>
+        metadataAnnotations: List<IrConstructorCall>,
+        errorAnnotations: List<IrConstructorCall>
     ): IrConstructorCall {
         // 0-arg @KsMethod functions have no user-declared input; fall back to Unit
         // so the generated RpcMethod is shaped as `RpcMethod<Service, Unit, Out>`.
@@ -442,6 +458,7 @@ class StubGeneration(
         // MethodMetadata is available, always emit the five-arg shape and pass
         // `emptyList()` when there is no metadata.
         val supportsMetadata = env.metadataSupported && constructor.owner.parameters.size >= 5
+        val supportsErrorMapping = env.errorMappingSupported
         return irCallConstructor(
             constructor,
             listOf(serviceInterface.typeWith(), inputType, outputType)
@@ -466,6 +483,10 @@ class StubGeneration(
             if (supportsMetadata) {
                 args += MetadataIrBuilder(env, this@irCreateRpcMethod, messageCollector)
                     .buildMetadataList(metadataAnnotations)
+            }
+            if (supportsErrorMapping) {
+                args += ErrorMappingIrBuilder(env, this@irCreateRpcMethod, messageCollector)
+                    .buildErrorMappingList(errorAnnotations)
             }
             putArgs(*args.toTypedArray())
         }

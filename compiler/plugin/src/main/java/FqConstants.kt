@@ -120,6 +120,15 @@ object FqConstants {
     val KS_INTROSPECTABLE = FqName("com.monkopedia.ksrpc.annotation.KsIntrospectable")
     val KS_METHOD_METADATA = FqName("com.monkopedia.ksrpc.annotation.KsMethodMetadata")
     val KS_NOTIFICATION = FqName("com.monkopedia.ksrpc.annotation.KsNotification")
+    val KS_ERROR = FqName("com.monkopedia.ksrpc.annotation.KsError")
+
+    // kotlinx.serialization.Serializable annotation FQN — used by @KsError validation
+    // to check that the bound error payload type is @Serializable.
+    val KOTLINX_SERIALIZABLE = FqName("kotlinx.serialization.Serializable")
+
+    // Ksrpc runtime classes used to materialize @KsError bindings into
+    // `List<KsErrorMapping>` at codegen time.
+    val KS_ERROR_MAPPING = ClassId(FQPKG, Name.identifier("KsErrorMapping"))
 
     val METHOD_METADATA = ClassId(FQPKG, Name.identifier("MethodMetadata"))
     val METADATA_VALUE = ClassId(FQPKG, Name.identifier("MetadataValue"))

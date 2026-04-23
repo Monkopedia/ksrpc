@@ -40,6 +40,7 @@ private class Visitor(private val messageCollector: MessageCollector) : IrElemen
     private val method = FqName("com.monkopedia.ksrpc.annotation.KsMethod")
     private val service = FqName("com.monkopedia.ksrpc.annotation.KsService")
     private val metadataMarker = FqConstants.KS_METHOD_METADATA
+    private val ksError = FqConstants.KS_ERROR
 
     override fun visitClass(declaration: IrClass): IrStatement {
         val annotation = declaration.annotations.find { annotation ->
@@ -76,11 +77,18 @@ private class Visitor(private val messageCollector: MessageCollector) : IrElemen
                             it.type.classFqName == metadataMarker
                         } == true
                 }
+                // Capture @KsError bindings. `@Repeatable` annotations may appear
+                // either as individual entries or wrapped in a synthesized
+                // Container class — preserve declaration order across either shape.
+                val errorAnnotations = declaration.annotations.filter {
+                    it.type.classFqName == ksError
+                }
                 current.methods.add(
                     ServiceMethod(
                         function = declaration,
                         ksMethodAnnotation = annotation,
-                        metadataAnnotations = metadataAnnotations
+                        metadataAnnotations = metadataAnnotations,
+                        errorAnnotations = errorAnnotations
                     )
                 )
             } else if (!declaration.isFakeOverride) {
@@ -133,7 +141,13 @@ private class SubclassVisitor(
 data class ServiceMethod(
     val function: IrSimpleFunction,
     val ksMethodAnnotation: IrConstructorCall,
-    val metadataAnnotations: List<IrConstructorCall> = emptyList()
+    val metadataAnnotations: List<IrConstructorCall> = emptyList(),
+    /**
+     * `@KsError(code, type)` annotations captured in declaration order. The
+     * compiler plugin emits one [com.monkopedia.ksrpc.KsErrorMapping] entry per
+     * annotation into the generated `RpcMethod.errorMappings` list. See #77.
+     */
+    val errorAnnotations: List<IrConstructorCall> = emptyList()
 )
 
 data class ServiceClass(
