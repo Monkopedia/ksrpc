@@ -21,7 +21,7 @@ import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
 import com.monkopedia.ksrpc.internal.asClient
-import com.monkopedia.ksrpc.ktor.asConnection
+import com.monkopedia.ksrpc.ktor.asHttpChannelClient
 import com.monkopedia.ksrpc.ktor.websocket.asWebsocketConnection
 import com.monkopedia.ksrpc.sockets.asConnection
 import io.ktor.client.HttpClient
@@ -123,7 +123,7 @@ abstract class RpcFunctionalityTest(
             test = {
                 val client = HttpClient()
                 try {
-                    client.asConnection("http://localhost:$it$path", createEnv())
+                    client.asHttpChannelClient("http://localhost:$it$path", createEnv())
                         .use { channel ->
                             verifyOnChannel(channel.defaultChannel())
                         }

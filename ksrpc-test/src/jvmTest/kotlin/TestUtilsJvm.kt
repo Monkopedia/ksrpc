@@ -16,7 +16,7 @@
 package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.channels.SerializedService
-import com.monkopedia.ksrpc.ktor.serve as jvmServe
+import com.monkopedia.ksrpc.ktor.serveHttp as jvmServe
 import com.monkopedia.ksrpc.ktor.websocket.serveWebsocket
 import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
 import io.ktor.server.application.install

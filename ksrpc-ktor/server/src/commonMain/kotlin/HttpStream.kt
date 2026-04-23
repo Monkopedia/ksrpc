@@ -49,16 +49,16 @@ import kotlinx.serialization.json.Json
 private const val KSRPC_BINARY = "binary"
 private const val KSRPC_CHANNEL = "channel"
 
-inline fun <reified T : RpcService> Routing.serve(
+inline fun <reified T : RpcService> Routing.serveHttp(
     basePath: String,
     service: T,
     env: KsrpcEnvironment<String>
 ) {
     val serializedService = service.serialized(env)
-    serve(basePath, serializedService, env)
+    serveHttp(basePath, serializedService, env)
 }
 
-fun Routing.serve(
+fun Routing.serveHttp(
     basePath: String,
     serializedService: SerializedService<String>,
     env: KsrpcEnvironment<String>
@@ -68,10 +68,10 @@ fun Routing.serve(
             it.registerDefault(serializedService)
         }
     }
-    serve(basePath, channel, env)
+    serveHttp(basePath, channel, env)
 }
 
-fun Routing.serve(
+fun Routing.serveHttp(
     basePath: String,
     channel: SerializedChannel<String>,
     env: KsrpcEnvironment<String>

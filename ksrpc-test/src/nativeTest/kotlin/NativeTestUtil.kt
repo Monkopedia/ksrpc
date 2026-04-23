@@ -18,7 +18,7 @@
 package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.channels.SerializedService
-import com.monkopedia.ksrpc.ktor.serve as nativeServe
+import com.monkopedia.ksrpc.ktor.serveHttp as nativeServe
 import com.monkopedia.ksrpc.sockets.posixFileReadChannel
 import com.monkopedia.ksrpc.sockets.posixFileWriteChannel
 import io.ktor.server.cio.CIO

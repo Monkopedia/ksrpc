@@ -21,7 +21,7 @@ val connection = stdInConnection(env)
 connection.registerDefault(MyServiceImpl())
 
 // Or call over HTTP
-val service = HttpClient { }.asConnection("http://localhost:8080/my_service", env)
+val service = HttpClient { }.asHttpChannelClient("http://localhost:8080/my_service", env)
     .defaultChannel().toStub<MyService>()
 ```
 
@@ -358,7 +358,7 @@ the current platforms capabilities. Those can then by turned into the hosted API
 
 ```kotlin
 val env = ksrpcEnvironment { }
-val connection = HttpClient { }.asConnection("http://localhost:8080/my_service", env)
+val connection = HttpClient { }.asHttpChannelClient("http://localhost:8080/my_service", env)
 val service = connection.defaultChannel().toStub<MyService>()
 
 val output = service.mRpcCall(MyInputSerializable())
@@ -366,7 +366,7 @@ val output = service.mRpcCall(MyInputSerializable())
 
 Client side or bidirectional connection methods:
 
- - [HttpClient.asConnection(baseUrl, env)](https://monkopedia.github.io/ksrpc/ksrpc-ktor-client/com.monkopedia.ksrpc.ktor/as-connection.html)
+ - [HttpClient.asHttpChannelClient(baseUrl, env)](https://monkopedia.github.io/ksrpc/ksrpc-ktor-client/com.monkopedia.ksrpc.ktor/as-http-channel-client.html) (HTTP is request/response only, returns `ChannelClient`)
  - [HttpClient.asWebsocketConnection(baseUrl, env)](https://monkopedia.github.io/ksrpc/ksrpc-ktor-websocket-client/com.monkopedia.ksrpc.ktor.websocket/as-websocket-connection.html)
  - [Pair<ByteReadChannel, ByteWriteChannel>.asConnection(env)](https://monkopedia.github.io/ksrpc/ksrpc-sockets/com.monkopedia.ksrpc.sockets/as-connection.html)
  - [Pair<InputStream, OutputStream>.asConnection(env)](https://monkopedia.github.io/ksrpc/ksrpc-sockets/com.monkopedia.ksrpc.sockets/as-connection.html)
@@ -374,7 +374,7 @@ Client side or bidirectional connection methods:
  - [Pair<ByteReadChannel, ByteWriteChannel>.asJsonRpcConnection(env)](https://monkopedia.github.io/ksrpc/ksrpc-jsonrpc/com.monkopedia.ksrpc.jsonrpc/as-json-rpc-connection.html)
 
 Server side hosting methods:
- - [Routing.serve(basePath, service, env)](https://monkopedia.github.io/ksrpc/ksrpc-ktor-server/com.monkopedia.ksrpc.ktor/serve.html)
+ - [Routing.serveHttp(basePath, service, env)](https://monkopedia.github.io/ksrpc/ksrpc-ktor-server/com.monkopedia.ksrpc.ktor/serve-http.html)
  - [Routing.serveWebsocket(basePath, service, env)[https://monkopedia.github.io/ksrpc/ksrpc-ktor-websocket-server/com.monkopedia.ksrpc.ktor.websocket/serve-websocket.html]
  - [withStdInOut(env, withConnection)](https://monkopedia.github.io/ksrpc/ksrpc-sockets/com.monkopedia.ksrpc.sockets/with-std-in-out.html)
  - [ServiceApp](https://monkopedia.github.io/ksrpc/ksrpc-server/com.monkopedia.ksrpc.server/-service-app/index.html)

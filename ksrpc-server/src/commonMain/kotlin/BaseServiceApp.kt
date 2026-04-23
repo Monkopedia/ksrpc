@@ -23,7 +23,7 @@ import com.github.ajalt.clikt.parameters.types.int
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.ksrpcEnvironment
-import com.monkopedia.ksrpc.ktor.serve
+import com.monkopedia.ksrpc.ktor.serveHttp
 import com.monkopedia.ksrpc.sockets.withStdInOut
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -88,7 +88,7 @@ abstract class BaseServiceApp internal constructor(val appName: String) : CliktC
     abstract fun embeddedServer(port: Int, function: Application.() -> Unit): EmbeddedServer<*, *>
 
     protected open fun createRouting(routing: Routing) {
-        routing.serve("/${appName.decapitalize()}", createChannel(), env)
+        routing.serveHttp("/${appName.decapitalize()}", createChannel(), env)
     }
 
     open val env: KsrpcEnvironment<String> by lazy {

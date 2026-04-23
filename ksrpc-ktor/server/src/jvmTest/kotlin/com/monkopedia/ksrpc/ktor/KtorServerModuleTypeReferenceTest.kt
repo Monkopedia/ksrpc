@@ -31,7 +31,7 @@ class KtorServerModuleTypeReferenceTest {
                 SerializedService<String>,
                 KsrpcEnvironment<String>
             ) -> Unit = { routing, basePath, service, env ->
-                routing.serve(basePath, service, env)
+                routing.serveHttp(basePath, service, env)
             }
 
         assertNotNull(function)
