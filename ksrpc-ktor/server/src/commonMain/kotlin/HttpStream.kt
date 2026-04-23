@@ -17,8 +17,6 @@
 
 package com.monkopedia.ksrpc.ktor
 
-import com.monkopedia.ksrpc.ENDPOINT_NOT_FOUND_PREFIX
-import com.monkopedia.ksrpc.ERROR_PREFIX
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.RpcEndpointException
 import com.monkopedia.ksrpc.RpcFailure
@@ -31,6 +29,8 @@ import com.monkopedia.ksrpc.channels.ChannelClient
 import com.monkopedia.ksrpc.channels.ChannelId
 import com.monkopedia.ksrpc.channels.SerializedChannel
 import com.monkopedia.ksrpc.channels.SerializedService
+import com.monkopedia.ksrpc.internal.ENDPOINT_NOT_FOUND_PREFIX
+import com.monkopedia.ksrpc.internal.ERROR_PREFIX
 import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
 import com.monkopedia.ksrpc.serialized
 import io.ktor.http.HttpStatusCode

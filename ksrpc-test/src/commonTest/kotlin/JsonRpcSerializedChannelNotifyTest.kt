@@ -20,6 +20,7 @@ package com.monkopedia.ksrpc
 import com.monkopedia.ksrpc.MethodMetadata
 import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.channels.CallData
+import com.monkopedia.ksrpc.internal.ServiceExecutor
 import com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcChannel
 import com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcSerializedChannel
 import kotlin.test.Test

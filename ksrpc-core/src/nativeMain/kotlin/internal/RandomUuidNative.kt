@@ -13,19 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.monkopedia.ksrpc
+package com.monkopedia.ksrpc.internal
 
-/**
- * Interface used for handling any errors that occur during hosting.
- */
-fun interface ErrorListener {
-    /**
-     * Called when an error has occured during a hosted (incoming) call.
-     *
-     * The error will also be passed back to the client, this is purely for
-     * monitoring purposes.
-     */
-    fun onError(t: Throwable)
-}
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
+import nanoid.NanoIdUtils
 
-expect val Throwable.asString: String
+@KsrpcInternal
+actual fun randomUuid(): String = NanoIdUtils.randomNanoId()

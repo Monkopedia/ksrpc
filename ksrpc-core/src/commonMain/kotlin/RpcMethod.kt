@@ -24,10 +24,11 @@ import com.monkopedia.ksrpc.channels.CurrentRpcCallElement
 import com.monkopedia.ksrpc.channels.RpcBinaryData
 import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
-import com.monkopedia.ksrpc.channels.randomUuid
 import com.monkopedia.ksrpc.channels.registerHost
+import com.monkopedia.ksrpc.internal.ServiceExecutor
 import com.monkopedia.ksrpc.internal.client
 import com.monkopedia.ksrpc.internal.host
+import com.monkopedia.ksrpc.internal.randomUuid
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
@@ -129,17 +130,6 @@ class SubserviceTransformer<T : RpcService>(private val serviceObj: RpcObject<T>
         channel.env.logger.info("Transformer", "Deserializing CallData($serviceId) to Stub")
         return serviceObj.createStub(client.wrapChannel(ChannelId(serviceId)))
     }
-}
-
-/**
- * Plumbing interface emitted by the ksrpc compiler plugin to adapt reflective
- * invocation of generated service implementations. Not part of the supported
- * API surface — user code should never implement or directly call this, and
- * the plugin emits the implementation automatically.
- */
-@KsrpcInternal
-interface ServiceExecutor {
-    suspend fun invoke(service: RpcService, input: Any?): Any?
 }
 
 /**

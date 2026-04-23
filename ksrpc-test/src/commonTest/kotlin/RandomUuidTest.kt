@@ -18,7 +18,7 @@
 package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.annotation.KsrpcInternal
-import com.monkopedia.ksrpc.channels.randomUuid
+import com.monkopedia.ksrpc.internal.randomUuid
 import kotlin.test.Test
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue

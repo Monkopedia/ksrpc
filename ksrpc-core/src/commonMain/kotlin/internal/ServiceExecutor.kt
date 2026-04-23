@@ -13,19 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.monkopedia.ksrpc
+package com.monkopedia.ksrpc.internal
+
+import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 
 /**
- * Interface used for handling any errors that occur during hosting.
+ * Plumbing interface emitted by the ksrpc compiler plugin to adapt reflective
+ * invocation of generated service implementations. Not part of the supported
+ * API surface — user code should never implement or directly call this, and
+ * the plugin emits the implementation automatically.
  */
-fun interface ErrorListener {
-    /**
-     * Called when an error has occured during a hosted (incoming) call.
-     *
-     * The error will also be passed back to the client, this is purely for
-     * monitoring purposes.
-     */
-    fun onError(t: Throwable)
+@KsrpcInternal
+interface ServiceExecutor {
+    suspend fun invoke(service: RpcService, input: Any?): Any?
 }
-
-expect val Throwable.asString: String

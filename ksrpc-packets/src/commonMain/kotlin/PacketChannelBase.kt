@@ -28,12 +28,12 @@ import com.monkopedia.ksrpc.channels.RpcBinaryData
 import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.channels.awaitRequestCancellable
-import com.monkopedia.ksrpc.channels.randomUuid
 import com.monkopedia.ksrpc.internal.ClientChannelContext
 import com.monkopedia.ksrpc.internal.HostChannelContext
 import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
 import com.monkopedia.ksrpc.internal.MultiChannel
 import com.monkopedia.ksrpc.internal.SubserviceChannel
+import com.monkopedia.ksrpc.internal.randomUuid
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred

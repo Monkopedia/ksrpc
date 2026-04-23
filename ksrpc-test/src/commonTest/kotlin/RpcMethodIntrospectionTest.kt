@@ -19,6 +19,7 @@ package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.channels.SerializedService
+import com.monkopedia.ksrpc.internal.ServiceExecutor
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

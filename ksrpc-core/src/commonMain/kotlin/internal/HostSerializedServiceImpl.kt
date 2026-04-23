@@ -34,7 +34,6 @@ import com.monkopedia.ksrpc.channels.Connection
 import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedChannel
 import com.monkopedia.ksrpc.channels.SerializedService
-import com.monkopedia.ksrpc.channels.randomUuid
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Job

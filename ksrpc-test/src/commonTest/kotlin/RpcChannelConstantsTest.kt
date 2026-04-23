@@ -18,6 +18,8 @@
 package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.annotation.KsrpcInternal
+import com.monkopedia.ksrpc.internal.ENDPOINT_NOT_FOUND_PREFIX
+import com.monkopedia.ksrpc.internal.ERROR_PREFIX
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

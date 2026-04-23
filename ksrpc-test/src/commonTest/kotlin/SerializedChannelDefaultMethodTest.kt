@@ -23,6 +23,7 @@ import com.monkopedia.ksrpc.channels.ChannelClient
 import com.monkopedia.ksrpc.channels.ChannelId
 import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
+import com.monkopedia.ksrpc.internal.ServiceExecutor
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.serialization.builtins.serializer

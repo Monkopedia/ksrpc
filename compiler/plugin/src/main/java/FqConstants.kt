@@ -34,7 +34,8 @@ object FqConstants {
     val INTROSPECTION_SERVICE_IMPL = ClassId(FQPKG, Name.identifier("IntrospectionServiceImpl"))
     val FQRPC_SERVICE = FqName("com.monkopedia.ksrpc.RpcService")
 
-    val SERVICE_EXECUTOR = ClassId(FQPKG, Name.identifier("ServiceExecutor"))
+    val SERVICE_EXECUTOR =
+        ClassId(FqName("com.monkopedia.ksrpc.internal"), Name.identifier("ServiceExecutor"))
     val SERIALIZER_TRANSFORMER = ClassId(FQPKG, Name.identifier("SerializerTransformer"))
 
     /**

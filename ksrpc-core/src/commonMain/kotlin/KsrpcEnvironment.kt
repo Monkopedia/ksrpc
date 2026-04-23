@@ -19,6 +19,8 @@ package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.channels.CallData
+import com.monkopedia.ksrpc.internal.ENDPOINT_NOT_FOUND_PREFIX
+import com.monkopedia.ksrpc.internal.ERROR_PREFIX
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope

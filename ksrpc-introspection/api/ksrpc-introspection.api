@@ -45,22 +45,22 @@ public final class com/monkopedia/ksrpc/IntrospectionService$Stub : com/monkoped
 	public final synthetic fun getServiceName (Lkotlin/Unit;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
-public final class com/monkopedia/ksrpc/IntrospectionService$Stub$AnonymousGetEndpointInfo : com/monkopedia/ksrpc/ServiceExecutor {
+public final class com/monkopedia/ksrpc/IntrospectionService$Stub$AnonymousGetEndpointInfo : com/monkopedia/ksrpc/internal/ServiceExecutor {
 	public fun <init> ()V
 	public final synthetic fun invoke (Lcom/monkopedia/ksrpc/RpcService;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
-public final class com/monkopedia/ksrpc/IntrospectionService$Stub$AnonymousGetEndpoints : com/monkopedia/ksrpc/ServiceExecutor {
+public final class com/monkopedia/ksrpc/IntrospectionService$Stub$AnonymousGetEndpoints : com/monkopedia/ksrpc/internal/ServiceExecutor {
 	public fun <init> ()V
 	public final synthetic fun invoke (Lcom/monkopedia/ksrpc/RpcService;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
-public final class com/monkopedia/ksrpc/IntrospectionService$Stub$AnonymousGetIntrospectionFor : com/monkopedia/ksrpc/ServiceExecutor {
+public final class com/monkopedia/ksrpc/IntrospectionService$Stub$AnonymousGetIntrospectionFor : com/monkopedia/ksrpc/internal/ServiceExecutor {
 	public fun <init> ()V
 	public final synthetic fun invoke (Lcom/monkopedia/ksrpc/RpcService;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
-public final class com/monkopedia/ksrpc/IntrospectionService$Stub$AnonymousGetServiceName : com/monkopedia/ksrpc/ServiceExecutor {
+public final class com/monkopedia/ksrpc/IntrospectionService$Stub$AnonymousGetServiceName : com/monkopedia/ksrpc/internal/ServiceExecutor {
 	public fun <init> ()V
 	public final synthetic fun invoke (Lcom/monkopedia/ksrpc/RpcService;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
