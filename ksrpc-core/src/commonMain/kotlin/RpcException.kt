@@ -15,13 +15,16 @@
  */
 package com.monkopedia.ksrpc
 
-import kotlinx.serialization.Serializable
+/**
+ * Wrapper around exceptions thrown in remote calls.
+ *
+ * Pins [code] to `-1` — a generic "remote error" classification. Typed
+ * binding of error codes to `@Serializable` data classes via `@KsError`
+ * will surface as bare [KsrpcException] instances with mapped `code`/`data`.
+ */
+class RpcException(message: String) : KsrpcException(code = -1, message = message)
 
 /**
- * Serializable wrapper around exceptions thrown in remote calls.
- *
- * The concrete `toException` builder lives in `ksrpc-core`, where the
- * `RpcException`/`KsrpcException` hierarchy is declared.
+ * Build an [RpcException] carrying the stack captured in this [RpcFailure].
  */
-@Serializable
-data class RpcFailure(val stack: String)
+fun RpcFailure.toException(): RpcException = RpcException(stack)
