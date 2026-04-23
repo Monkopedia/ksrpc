@@ -496,7 +496,7 @@ class StubGeneration(
             declarationIrBuilder.irGetObject(transformer)
         }
 
-        RpcType.FLOW -> buildFlowTransformer(outputType, declarationIrBuilder)
+        RpcType.FLOW -> buildFlowSubserviceTransformer(outputType, declarationIrBuilder)
 
         RpcType.SERVICE -> declarationIrBuilder.irCallConstructor(
             env.subserviceTransformer.constructors.first(),
@@ -516,7 +516,7 @@ class StubGeneration(
     }
 
     /**
-     * Emit `FlowTransformer<T>(KsFlowService.Obj<T>(Tser))` for a `Flow<T>` parameter or
+     * Emit `FlowSubserviceTransformer<T>(KsFlowService.Obj<T>(Tser))` for a `Flow<T>` parameter or
      * return type. The constructed `KsFlowService.Obj<T>` is the generic sub-service's
      * compiler-generated `RpcObject` factory instance — mirrors
      * [GenericMethodIrBuilder.buildSubserviceRpcObject] for the generic service path.
@@ -524,7 +524,7 @@ class StubGeneration(
      * Only reachable when [KsrpcGenerationEnvironment.flowSupported] — callers guard via
      * [determineType] returning [RpcType.FLOW].
      */
-    private fun buildFlowTransformer(
+    private fun buildFlowSubserviceTransformer(
         flowType: IrType,
         declarationIrBuilder: DeclarationIrBuilder
     ): IrExpression {
@@ -534,12 +534,12 @@ class StubGeneration(
             ?.typeOrFail
             ?: reportInternal(
                 "Flow<T> type ${flowType.classFqName?.asString()} has no type argument — " +
-                    "cannot emit FlowTransformer"
+                    "cannot emit FlowSubserviceTransformer"
             )
         val flowTransformerSymbol = env.flowTransformer
             ?: reportInternal(
                 "Flow detection fired despite flowSupported=false " +
-                    "(FlowTransformer symbol missing)"
+                    "(FlowSubserviceTransformer symbol missing)"
             )
         val ksFlowServiceSymbol = env.ksFlowService
             ?: reportInternal(

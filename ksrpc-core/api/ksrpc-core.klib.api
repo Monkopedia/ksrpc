@@ -148,6 +148,18 @@ abstract interface com.monkopedia.ksrpc/UnhandledMethodHandler { // com.monkoped
     abstract suspend fun <#A1: kotlin/Any?> onUnhandled(kotlin/String, com.monkopedia.ksrpc.channels/CallData<#A1>): com.monkopedia.ksrpc.channels/CallData<#A1> // com.monkopedia.ksrpc/UnhandledMethodHandler.onUnhandled|onUnhandled(kotlin.String;com.monkopedia.ksrpc.channels.CallData<0:0>){0§<kotlin.Any?>}[0]
 }
 
+abstract class <#A: com.monkopedia.ksrpc/RpcService, #B: kotlin/Any?> com.monkopedia.ksrpc/BaseSubserviceTransformer : com.monkopedia.ksrpc/Transformer<#B> { // com.monkopedia.ksrpc/BaseSubserviceTransformer|null[0]
+    constructor <init>() // com.monkopedia.ksrpc/BaseSubserviceTransformer.<init>|<init>(){}[0]
+
+    abstract val serviceObject // com.monkopedia.ksrpc/BaseSubserviceTransformer.serviceObject|{}serviceObject[0]
+        abstract fun <get-serviceObject>(): com.monkopedia.ksrpc/RpcObject<#A> // com.monkopedia.ksrpc/BaseSubserviceTransformer.serviceObject.<get-serviceObject>|<get-serviceObject>(){}[0]
+
+    abstract fun fromService(#A): #B // com.monkopedia.ksrpc/BaseSubserviceTransformer.fromService|fromService(1:0){}[0]
+    abstract fun toService(#B): #A // com.monkopedia.ksrpc/BaseSubserviceTransformer.toService|toService(1:1){}[0]
+    open suspend fun <#A1: kotlin/Any?> transform(#B, com.monkopedia.ksrpc.channels/SerializedService<#A1>): com.monkopedia.ksrpc.channels/CallData<#A1> // com.monkopedia.ksrpc/BaseSubserviceTransformer.transform|transform(1:1;com.monkopedia.ksrpc.channels.SerializedService<0:0>){0§<kotlin.Any?>}[0]
+    open suspend fun <#A1: kotlin/Any?> untransform(com.monkopedia.ksrpc.channels/CallData<#A1>, com.monkopedia.ksrpc.channels/SerializedService<#A1>): #B // com.monkopedia.ksrpc/BaseSubserviceTransformer.untransform|untransform(com.monkopedia.ksrpc.channels.CallData<0:0>;com.monkopedia.ksrpc.channels.SerializedService<0:0>){0§<kotlin.Any?>}[0]
+}
+
 final class <#A: com.monkopedia.ksrpc/RpcService, #B: kotlin/Any?, #C: kotlin/Any?> com.monkopedia.ksrpc/RpcMethod { // com.monkopedia.ksrpc/RpcMethod|null[0]
     constructor <init>(kotlin/String, com.monkopedia.ksrpc/Transformer<#B>, com.monkopedia.ksrpc/Transformer<#C>, com.monkopedia.ksrpc.internal/ServiceExecutor, kotlin.collections/List<com.monkopedia.ksrpc/MethodMetadata>) // com.monkopedia.ksrpc/RpcMethod.<init>|<init>(kotlin.String;com.monkopedia.ksrpc.Transformer<1:1>;com.monkopedia.ksrpc.Transformer<1:2>;com.monkopedia.ksrpc.internal.ServiceExecutor;kotlin.collections.List<com.monkopedia.ksrpc.MethodMetadata>){}[0]
 
@@ -162,20 +174,17 @@ final class <#A: com.monkopedia.ksrpc/RpcService, #B: kotlin/Any?, #C: kotlin/An
     final val outputTransform // com.monkopedia.ksrpc/RpcMethod.outputTransform|{}outputTransform[0]
         final fun <get-outputTransform>(): com.monkopedia.ksrpc/Transformer<#C> // com.monkopedia.ksrpc/RpcMethod.outputTransform.<get-outputTransform>|<get-outputTransform>(){}[0]
 
-    final fun findSubserviceTransformers(): kotlin.collections/List<com.monkopedia.ksrpc/SubserviceTransformer<out com.monkopedia.ksrpc/RpcService>> // com.monkopedia.ksrpc/RpcMethod.findSubserviceTransformers|findSubserviceTransformers(){}[0]
+    final fun findSubserviceTransformers(): kotlin.collections/List<com.monkopedia.ksrpc/BaseSubserviceTransformer<*, *>> // com.monkopedia.ksrpc/RpcMethod.findSubserviceTransformers|findSubserviceTransformers(){}[0]
     final fun metadata(kotlin/String): com.monkopedia.ksrpc/MethodMetadata? // com.monkopedia.ksrpc/RpcMethod.metadata|metadata(kotlin.String){}[0]
     final suspend fun <#A1: kotlin/Any?> call(com.monkopedia.ksrpc.channels/SerializedService<#A1>, com.monkopedia.ksrpc/RpcService, com.monkopedia.ksrpc.channels/CallData<#A1>, com.monkopedia.ksrpc.channels/RpcCallId?): com.monkopedia.ksrpc.channels/CallData<#A1> // com.monkopedia.ksrpc/RpcMethod.call|call(com.monkopedia.ksrpc.channels.SerializedService<0:0>;com.monkopedia.ksrpc.RpcService;com.monkopedia.ksrpc.channels.CallData<0:0>;com.monkopedia.ksrpc.channels.RpcCallId?){0§<kotlin.Any?>}[0]
     final suspend fun <#A1: kotlin/Any?> callChannel(com.monkopedia.ksrpc.channels/SerializedService<#A1>, kotlin/Any?): kotlin/Any? // com.monkopedia.ksrpc/RpcMethod.callChannel|callChannel(com.monkopedia.ksrpc.channels.SerializedService<0:0>;kotlin.Any?){0§<kotlin.Any?>}[0]
 }
 
-final class <#A: com.monkopedia.ksrpc/RpcService> com.monkopedia.ksrpc/SubserviceTransformer : com.monkopedia.ksrpc/Transformer<#A> { // com.monkopedia.ksrpc/SubserviceTransformer|null[0]
+final class <#A: com.monkopedia.ksrpc/RpcService> com.monkopedia.ksrpc/SubserviceTransformer : com.monkopedia.ksrpc/BaseSubserviceTransformer<#A, #A> { // com.monkopedia.ksrpc/SubserviceTransformer|null[0]
     constructor <init>(com.monkopedia.ksrpc/RpcObject<#A>) // com.monkopedia.ksrpc/SubserviceTransformer.<init>|<init>(com.monkopedia.ksrpc.RpcObject<1:0>){}[0]
 
     final val serviceObject // com.monkopedia.ksrpc/SubserviceTransformer.serviceObject|{}serviceObject[0]
         final fun <get-serviceObject>(): com.monkopedia.ksrpc/RpcObject<#A> // com.monkopedia.ksrpc/SubserviceTransformer.serviceObject.<get-serviceObject>|<get-serviceObject>(){}[0]
-
-    final suspend fun <#A1: kotlin/Any?> transform(#A, com.monkopedia.ksrpc.channels/SerializedService<#A1>): com.monkopedia.ksrpc.channels/CallData<#A1> // com.monkopedia.ksrpc/SubserviceTransformer.transform|transform(1:0;com.monkopedia.ksrpc.channels.SerializedService<0:0>){0§<kotlin.Any?>}[0]
-    final suspend fun <#A1: kotlin/Any?> untransform(com.monkopedia.ksrpc.channels/CallData<#A1>, com.monkopedia.ksrpc.channels/SerializedService<#A1>): #A // com.monkopedia.ksrpc/SubserviceTransformer.untransform|untransform(com.monkopedia.ksrpc.channels.CallData<0:0>;com.monkopedia.ksrpc.channels.SerializedService<0:0>){0§<kotlin.Any?>}[0]
 }
 
 final class <#A: kotlin/Any?> com.monkopedia.ksrpc.internal/ClientChannelContext : kotlin.coroutines/CoroutineContext.Element { // com.monkopedia.ksrpc.internal/ClientChannelContext|null[0]

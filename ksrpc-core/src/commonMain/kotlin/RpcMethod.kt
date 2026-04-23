@@ -113,23 +113,51 @@ object BinaryTransformer :
     }
 }
 
-class SubserviceTransformer<T : RpcService>(private val serviceObj: RpcObject<T>) : Transformer<T> {
-    val serviceObject: RpcObject<T>
-        get() = serviceObj
-    override suspend fun <S> transform(input: T, channel: SerializedService<S>): CallData<S> {
+/**
+ * Shared abstract base for transformers whose wire representation is a
+ * sub-service reference (a channel id registered on the host, resolved to a
+ * client stub on the peer). The base holds the register / lookup machinery
+ * operating on the service-facing type [T]; concrete subclasses adapt a
+ * (possibly different) user-facing type [O] to [T] via [toService] /
+ * [fromService].
+ *
+ * Introspection consumers pattern-match on this base class to recover the
+ * underlying sub-service name regardless of the user-facing adapter shape —
+ * e.g. `SubserviceTransformer<T>` (trivial `O == T`) and
+ * `com.monkopedia.ksrpc.flow.FlowSubserviceTransformer<T>` (adapts
+ * `Flow<T>` onto `KsFlowService<T>`) both surface via the same branch.
+ */
+@KsrpcInternal
+abstract class BaseSubserviceTransformer<T : RpcService, O> : Transformer<O> {
+    abstract val serviceObject: RpcObject<T>
+
+    protected abstract fun toService(value: O): T
+    protected abstract fun fromService(service: T): O
+
+    override suspend fun <S> transform(input: O, channel: SerializedService<S>): CallData<S> {
+        val service = toService(input)
         val host = host<S>() ?: error("Cannot transform service type to non-hosting channel")
-        val serviceId = host.registerHost(input, serviceObj)
+        val serviceId = host.registerHost(service, serviceObject)
         channel.env.logger.info("Transformer", "Serializing Service to CallData(${serviceId.id})")
         return channel.env.serialization.createCallData(String.serializer(), serviceId.id)
     }
 
-    override suspend fun <S> untransform(data: CallData<S>, channel: SerializedService<S>): T {
+    override suspend fun <S> untransform(data: CallData<S>, channel: SerializedService<S>): O {
         val client = client<S>() ?: error("Cannot untransform service type from non-client channel")
         unpackError(data, channel)
         val serviceId = channel.env.serialization.decodeCallData(String.serializer(), data)
         channel.env.logger.info("Transformer", "Deserializing CallData($serviceId) to Stub")
-        return serviceObj.createStub(client.wrapChannel(ChannelId(serviceId)))
+        val service = serviceObject.createStub(client.wrapChannel(ChannelId(serviceId)))
+        return fromService(service)
     }
+}
+
+@OptIn(KsrpcInternal::class)
+class SubserviceTransformer<T : RpcService>(
+    override val serviceObject: RpcObject<T>
+) : BaseSubserviceTransformer<T, T>() {
+    override fun toService(value: T): T = value
+    override fun fromService(service: T): T = service
 }
 
 /**
@@ -217,8 +245,10 @@ class RpcMethod<T : RpcService, I, O>(
         }
     }
 
-    fun findSubserviceTransformers(): List<SubserviceTransformer<out RpcService>> = listOfNotNull(
-        inputTransform as? SubserviceTransformer<*>,
-        outputTransform as? SubserviceTransformer<*>
-    )
+    @OptIn(KsrpcInternal::class)
+    fun findSubserviceTransformers(): List<BaseSubserviceTransformer<*, *>> =
+        listOfNotNull(
+            inputTransform as? BaseSubserviceTransformer<*, *>,
+            outputTransform as? BaseSubserviceTransformer<*, *>
+        )
 }

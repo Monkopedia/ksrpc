@@ -39,6 +39,7 @@ private object IntrospectionSubserviceObject : RpcObject<IntrospectionSubservice
     override fun findEndpoint(endpoint: String): RpcMethod<*, *, *> = error("unused")
 }
 
+@OptIn(KsrpcInternal::class)
 class RpcMethodIntrospectionTest {
 
     @Test
@@ -93,5 +94,44 @@ class RpcMethodIntrospectionTest {
         assertEquals(2, found.size)
         assertSame(subserviceIn, found[0])
         assertSame(subserviceOut, found[1])
+    }
+
+    /**
+     * Custom adapter transformers built on [BaseSubserviceTransformer] (the
+     * pattern used by ksrpc-flow's `FlowSubserviceTransformer` to adapt
+     * `Flow<T>` onto a `KsFlowService<T>` sub-service) surface directly from
+     * [RpcMethod.findSubserviceTransformers] via the shared base class — no
+     * delegation peel required — so introspection resolves them to the
+     * underlying sub-service name.
+     */
+    @Test
+    fun findSubserviceTransformersMatchesBaseSubserviceTransformerSubclasses() {
+        val adapter = object : BaseSubserviceTransformer<IntrospectionSubservice, String>() {
+            override val serviceObject: RpcObject<IntrospectionSubservice> =
+                IntrospectionSubserviceObject
+
+            override fun toService(value: String): IntrospectionSubservice = error("not used")
+            override fun fromService(service: IntrospectionSubservice): String = error("not used")
+        }
+
+        val method =
+            RpcMethod<RpcService, String, String>(
+                endpoint = "/adapter",
+                inputTransform = adapter,
+                outputTransform = adapter,
+                method = object : ServiceExecutor {
+                    override suspend fun invoke(service: RpcService, input: Any?): Any? = input
+                },
+                metadata = emptyList()
+            )
+
+        val found = method.findSubserviceTransformers()
+        assertEquals(2, found.size)
+        assertSame(adapter, found[0])
+        assertSame(adapter, found[1])
+        assertEquals(
+            "IntrospectionSubservice",
+            found[0].serviceObject.serviceName
+        )
     }
 }

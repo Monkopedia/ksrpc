@@ -1,3 +1,14 @@
+public abstract class com/monkopedia/ksrpc/BaseSubserviceTransformer : com/monkopedia/ksrpc/Transformer {
+	public fun <init> ()V
+	protected abstract fun fromService (Lcom/monkopedia/ksrpc/RpcService;)Ljava/lang/Object;
+	public fun getHasContent ()Z
+	public abstract fun getServiceObject ()Lcom/monkopedia/ksrpc/RpcObject;
+	protected abstract fun toService (Ljava/lang/Object;)Lcom/monkopedia/ksrpc/RpcService;
+	public fun transform (Ljava/lang/Object;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun unpackError (Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/SerializedService;)V
+	public fun untransform (Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
 public abstract interface class com/monkopedia/ksrpc/BinaryDataTransformer {
 }
 
@@ -265,14 +276,11 @@ public final class com/monkopedia/ksrpc/ServiceNameKt {
 	public static final fun serviceNameFor (Lkotlin/reflect/KClass;)Ljava/lang/String;
 }
 
-public final class com/monkopedia/ksrpc/SubserviceTransformer : com/monkopedia/ksrpc/Transformer {
+public final class com/monkopedia/ksrpc/SubserviceTransformer : com/monkopedia/ksrpc/BaseSubserviceTransformer {
 	public fun <init> (Lcom/monkopedia/ksrpc/RpcObject;)V
-	public fun getHasContent ()Z
-	public final fun getServiceObject ()Lcom/monkopedia/ksrpc/RpcObject;
-	public fun transform (Lcom/monkopedia/ksrpc/RpcService;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public synthetic fun transform (Ljava/lang/Object;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun unpackError (Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/SerializedService;)V
-	public fun untransform (Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public synthetic fun fromService (Lcom/monkopedia/ksrpc/RpcService;)Ljava/lang/Object;
+	public fun getServiceObject ()Lcom/monkopedia/ksrpc/RpcObject;
+	public synthetic fun toService (Ljava/lang/Object;)Lcom/monkopedia/ksrpc/RpcService;
 }
 
 public abstract interface class com/monkopedia/ksrpc/SuspendCloseableObservable : com/monkopedia/ksrpc/SuspendCloseable {

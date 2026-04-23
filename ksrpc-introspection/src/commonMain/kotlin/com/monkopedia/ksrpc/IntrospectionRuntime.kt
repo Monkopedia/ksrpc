@@ -15,6 +15,8 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
+
 internal const val SERVICE_NAME_ENDPOINT = "service_name"
 internal const val ENDPOINTS_ENDPOINT = "endpoints"
 internal const val ENDPOINT_INFO_ENDPOINT = "endpoint_info"
@@ -37,6 +39,7 @@ internal data class IntrospectionServiceImpl(private val rpcObject: RpcObject<*>
         )
     }
 
+    @OptIn(KsrpcInternal::class)
     private val subserviceRpcObjects: Map<String, RpcObject<*>> by lazy {
         rpcObject.endpoints.flatMap { endpoint ->
             val method = rpcObject.findEndpoint(endpoint)

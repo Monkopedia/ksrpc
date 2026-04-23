@@ -40,7 +40,7 @@ dependencies {
     // Locally-built `ksrpc-core` jvmJar, listed BEFORE the published `ksrpctest`
     // coordinate so the local (non-sealed) `Transformer` interface takes
     // precedence over the published (sealed) one. The FlowSupportTest (#39) needs
-    // this because `FlowTransformer` in the locally-built `ksrpc-flow` extends
+    // this because `FlowSubserviceTransformer` in the locally-built `ksrpc-flow` extends
     // `Transformer`; the published 0.11.1 sealed version would reject the
     // extension at user-code compile time.
     testImplementation(
