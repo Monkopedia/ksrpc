@@ -20,7 +20,7 @@ import com.monkopedia.ksrpc.annotation.KsService
 import com.monkopedia.ksrpc.annotation.KsTimeout
 import com.monkopedia.ksrpc.jsonrpc.JsonRpcCancellationConvention
 import com.monkopedia.ksrpc.jsonrpc.asJsonRpcConnection
-import com.monkopedia.ksrpc.sockets.asConnection
+import com.monkopedia.ksrpc.sockets.asSocketConnection
 import io.ktor.utils.io.close
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -75,10 +75,10 @@ class KsTimeoutCancellationTest {
         val (clientToServer, serverFromClient) = createPipe()
         val (serverToClient, clientFromServer) = createPipe()
 
-        val serverConnection = (serverFromClient to serverToClient).asConnection(
+        val serverConnection = (serverFromClient to serverToClient).asSocketConnection(
             ksrpcEnvironment { }
         )
-        val clientConnection = (clientFromServer to clientToServer).asConnection(
+        val clientConnection = (clientFromServer to clientToServer).asSocketConnection(
             ksrpcEnvironment { }
         )
 

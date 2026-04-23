@@ -19,7 +19,7 @@ import com.monkopedia.ksrpc.channels.Connection
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.channels.registerDefault
 import com.monkopedia.ksrpc.ksrpcEnvironment
-import com.monkopedia.ksrpc.sockets.asConnection
+import com.monkopedia.ksrpc.sockets.asSocketConnection
 import io.ktor.utils.io.ByteChannel
 import kotlinx.benchmark.Benchmark
 import kotlinx.benchmark.Param
@@ -60,8 +60,8 @@ open class SocketTransportBenchmark {
         timedRunner.run(timeoutMillis = 10_000) {
             val clientToServer = ByteChannel(autoFlush = true)
             val serverToClient = ByteChannel(autoFlush = true)
-            clientConnection = (serverToClient to clientToServer).asConnection(scope, env)
-            serverConnection = (clientToServer to serverToClient).asConnection(scope, env)
+            clientConnection = (serverToClient to clientToServer).asSocketConnection(scope, env)
+            serverConnection = (clientToServer to serverToClient).asSocketConnection(scope, env)
             serverJob = scope.launch {
                 serverConnection.registerDefault(EchoSerializedService(env))
             }

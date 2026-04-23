@@ -17,7 +17,7 @@ package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
-import com.monkopedia.ksrpc.sockets.asConnection
+import com.monkopedia.ksrpc.sockets.asSocketConnection
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -95,10 +95,10 @@ class PacketCancellationTest {
 
         // Pipe 1 ferries client -> server (client writes `clientToServer`, server reads
         // `serverFromClient`). Pipe 2 ferries the return direction.
-        val serverConnection = (serverFromClient to serverToClient).asConnection(
+        val serverConnection = (serverFromClient to serverToClient).asSocketConnection(
             ksrpcEnvironment { }
         )
-        val clientConnection = (clientFromServer to clientToServer).asConnection(
+        val clientConnection = (clientFromServer to clientToServer).asSocketConnection(
             ksrpcEnvironment { }
         )
 
@@ -155,10 +155,10 @@ class PacketCancellationTest {
 
         // Pipe 1 ferries client -> server (client writes `clientToServer`, server reads
         // `serverFromClient`). Pipe 2 ferries the return direction.
-        val serverConnection = (serverFromClient to serverToClient).asConnection(
+        val serverConnection = (serverFromClient to serverToClient).asSocketConnection(
             ksrpcEnvironment { }
         )
-        val clientConnection = (clientFromServer to clientToServer).asConnection(
+        val clientConnection = (clientFromServer to clientToServer).asSocketConnection(
             ksrpcEnvironment { }
         )
 
@@ -212,10 +212,10 @@ class PacketCancellationTest {
 
         // Pipe 1 ferries client -> server (client writes `clientToServer`, server reads
         // `serverFromClient`). Pipe 2 ferries the return direction.
-        val serverConnection = (serverFromClient to serverToClient).asConnection(
+        val serverConnection = (serverFromClient to serverToClient).asSocketConnection(
             ksrpcEnvironment { }
         )
-        val clientConnection = (clientFromServer to clientToServer).asConnection(
+        val clientConnection = (clientFromServer to clientToServer).asSocketConnection(
             ksrpcEnvironment { }
         )
 

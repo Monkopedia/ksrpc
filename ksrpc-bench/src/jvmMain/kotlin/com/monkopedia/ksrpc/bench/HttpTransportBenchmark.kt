@@ -18,8 +18,8 @@ package com.monkopedia.ksrpc.bench
 import com.monkopedia.ksrpc.channels.ChannelClient
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.ksrpcEnvironment
-import com.monkopedia.ksrpc.ktor.asConnection
-import com.monkopedia.ksrpc.ktor.serve
+import com.monkopedia.ksrpc.ktor.asHttpChannelClient
+import com.monkopedia.ksrpc.ktor.serveHttp
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
@@ -59,7 +59,7 @@ open class HttpTransportBenchmark {
         timedRunner.run(timeoutMillis = 15_000) {
             server = embeddedServer(Netty, 0) {
                 routing {
-                    serve("/rpc", EchoSerializedService(env), env)
+                    serveHttp("/rpc", EchoSerializedService(env), env)
                 }
             }.start(wait = false)
             val port = server.engine.resolvedConnectors().first().port
@@ -71,7 +71,7 @@ open class HttpTransportBenchmark {
                     socketTimeoutMillis = 5_000
                 }
             }
-            connection = client.asConnection("http://127.0.0.1:$port/rpc", env)
+            connection = client.asHttpChannelClient("http://127.0.0.1:$port/rpc", env)
             clientChannel = connection.defaultChannel()
         }
     }

@@ -19,7 +19,7 @@ import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
 import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
 import com.monkopedia.ksrpc.internal.asClient
-import com.monkopedia.ksrpc.sockets.asConnection
+import com.monkopedia.ksrpc.sockets.asSocketConnection
 import io.ktor.utils.io.close
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -74,8 +74,8 @@ class KsMethodZeroArgTest {
         val env = ksrpcEnvironment { }
         val (output, input) = createPipe()
         val (so, si) = createPipe()
-        val serverConnection = (si to output).asConnection(env)
-        val clientConnection = (input to so).asConnection(env)
+        val serverConnection = (si to output).asSocketConnection(env)
+        val clientConnection = (input to so).asSocketConnection(env)
         val serverJob = launch(Dispatchers.Default) {
             val impl: ZeroArgTestService = ZeroArgTestServiceImpl()
             serverConnection.registerDefault(
