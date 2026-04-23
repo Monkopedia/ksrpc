@@ -538,13 +538,13 @@ class StubGeneration(
             )
         val flowTransformerSymbol = env.flowTransformer
             ?: reportInternal(
-                "FlowTransformer symbol missing but Flow<T> detection fired — " +
-                    "ksrpc-flow must be on the compile classpath"
+                "Flow detection fired despite flowSupported=false " +
+                    "(FlowTransformer symbol missing)"
             )
         val ksFlowServiceSymbol = env.ksFlowService
             ?: reportInternal(
-                "KsFlowService symbol missing but Flow<T> detection fired — " +
-                    "ksrpc-flow must be on the compile classpath"
+                "Flow detection fired despite flowSupported=false " +
+                    "(KsFlowService symbol missing)"
             )
         val rpcObjectExpr = buildKsFlowServiceRpcObject(
             declarationIrBuilder,
