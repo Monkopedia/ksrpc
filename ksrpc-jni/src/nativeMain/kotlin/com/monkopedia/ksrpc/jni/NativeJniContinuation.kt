@@ -23,6 +23,7 @@ import com.monkopedia.jni.jobject
 import com.monkopedia.jnitest.JNI
 import com.monkopedia.jnitest.initThread
 import com.monkopedia.ksrpc.RpcFailure
+import com.monkopedia.ksrpc.toException
 import kotlin.coroutines.Continuation
 import kotlin.experimental.ExperimentalNativeApi
 import kotlinx.cinterop.CPointed

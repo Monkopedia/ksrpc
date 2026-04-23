@@ -19,13 +19,9 @@ import kotlinx.serialization.Serializable
 
 /**
  * Serializable wrapper around exceptions thrown in remote calls.
+ *
+ * The concrete `toException` builder lives in `ksrpc-core`, where the
+ * `RpcException`/`KsrpcException` hierarchy is declared.
  */
 @Serializable
-data class RpcFailure(val stack: String) {
-    fun toException(): RuntimeException = RpcException(stack)
-}
-
-/**
- * Wrapper around exceptions thrown in remote calls.
- */
-class RpcException(override val message: String) : RuntimeException(message)
+data class RpcFailure(val stack: String)

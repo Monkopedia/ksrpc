@@ -10,6 +10,15 @@ open annotation class com.monkopedia.ksrpc.annotation/ExperimentalKsrpc : kotlin
     constructor <init>() // com.monkopedia.ksrpc.annotation/ExperimentalKsrpc.<init>|<init>(){}[0]
 }
 
+open annotation class com.monkopedia.ksrpc.annotation/KsError : kotlin/Annotation { // com.monkopedia.ksrpc.annotation/KsError|null[0]
+    constructor <init>(kotlin/Int, kotlin.reflect/KClass<*>) // com.monkopedia.ksrpc.annotation/KsError.<init>|<init>(kotlin.Int;kotlin.reflect.KClass<*>){}[0]
+
+    final val code // com.monkopedia.ksrpc.annotation/KsError.code|{}code[0]
+        final fun <get-code>(): kotlin/Int // com.monkopedia.ksrpc.annotation/KsError.code.<get-code>|<get-code>(){}[0]
+    final val type // com.monkopedia.ksrpc.annotation/KsError.type|{}type[0]
+        final fun <get-type>(): kotlin.reflect/KClass<*> // com.monkopedia.ksrpc.annotation/KsError.type.<get-type>|<get-type>(){}[0]
+}
+
 open annotation class com.monkopedia.ksrpc.annotation/KsMethod : kotlin/Annotation { // com.monkopedia.ksrpc.annotation/KsMethod|null[0]
     constructor <init>(kotlin/String) // com.monkopedia.ksrpc.annotation/KsMethod.<init>|<init>(kotlin.String){}[0]
 
@@ -52,13 +61,6 @@ abstract interface com.monkopedia.ksrpc/SuspendCloseable { // com.monkopedia.ksr
     abstract suspend fun close() // com.monkopedia.ksrpc/SuspendCloseable.close|close(){}[0]
 }
 
-final class com.monkopedia.ksrpc/RpcException : kotlin/RuntimeException { // com.monkopedia.ksrpc/RpcException|null[0]
-    constructor <init>(kotlin/String) // com.monkopedia.ksrpc/RpcException.<init>|<init>(kotlin.String){}[0]
-
-    final val message // com.monkopedia.ksrpc/RpcException.message|{}message[0]
-        final fun <get-message>(): kotlin/String // com.monkopedia.ksrpc/RpcException.message.<get-message>|<get-message>(){}[0]
-}
-
 final class com.monkopedia.ksrpc/RpcFailure { // com.monkopedia.ksrpc/RpcFailure|null[0]
     constructor <init>(kotlin/String) // com.monkopedia.ksrpc/RpcFailure.<init>|<init>(kotlin.String){}[0]
 
@@ -69,7 +71,6 @@ final class com.monkopedia.ksrpc/RpcFailure { // com.monkopedia.ksrpc/RpcFailure
     final fun copy(kotlin/String = ...): com.monkopedia.ksrpc/RpcFailure // com.monkopedia.ksrpc/RpcFailure.copy|copy(kotlin.String){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc/RpcFailure.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc/RpcFailure.hashCode|hashCode(){}[0]
-    final fun toException(): kotlin/RuntimeException // com.monkopedia.ksrpc/RpcFailure.toException|toException(){}[0]
     final fun toString(): kotlin/String // com.monkopedia.ksrpc/RpcFailure.toString|toString(){}[0]
 
     final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<com.monkopedia.ksrpc/RpcFailure> { // com.monkopedia.ksrpc/RpcFailure.$serializer|null[0]

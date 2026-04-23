@@ -15,24 +15,16 @@
  */
 package com.monkopedia.ksrpc
 
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertIs
+/**
+ * Wrapper around exceptions thrown in remote calls.
+ *
+ * Pins [code] to `-1` — a generic "remote error" classification. Typed
+ * binding of error codes to `@Serializable` data classes via `@KsError`
+ * will surface as bare [KsrpcException] instances with mapped `code`/`data`.
+ */
+class RpcException(message: String) : KsrpcException(code = -1, message = message)
 
-class RpcEndpointExceptionTest {
-
-    @Test
-    fun rpcEndpointExceptionIsKsrpcExceptionWithMessage() {
-        val exception = RpcEndpointException("missing endpoint")
-
-        assertIs<KsrpcException>(exception)
-        assertEquals("missing endpoint", exception.message)
-    }
-
-    @Test
-    fun rpcEndpointExceptionPinsJsonRpcMethodNotFoundCode() {
-        val exception = RpcEndpointException("missing endpoint")
-
-        assertEquals(-32601, exception.code)
-    }
-}
+/**
+ * Build an [RpcException] carrying the stack captured in this [RpcFailure].
+ */
+fun RpcFailure.toException(): RpcException = RpcException(stack)
