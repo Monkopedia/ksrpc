@@ -13,10 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(KsrpcInternal::class)
+
 package com.monkopedia.ksrpc.ktor.websocket.internal
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.annotation.KsrpcInternal
+import com.monkopedia.ksrpc.packets.internal.PACKET_JSON
 import com.monkopedia.ksrpc.packets.internal.Packet
 import com.monkopedia.ksrpc.packets.internal.PacketChannelBase
 import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
@@ -26,7 +29,6 @@ import io.ktor.utils.io.charsets.Charsets
 import io.ktor.websocket.DefaultWebSocketSession
 import io.ktor.websocket.close
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.serialization.json.Json
 
 @KsrpcInternal
 @OptIn(InternalAPI::class)
@@ -35,7 +37,7 @@ class WebsocketPacketChannel(
     private val socketSession: DefaultWebSocketSession,
     env: KsrpcEnvironment<String>
 ) : PacketChannelBase<String>(scope, env) {
-    private val converter = KotlinxWebsocketSerializationConverter(Json)
+    private val converter = KotlinxWebsocketSerializationConverter(PACKET_JSON)
 
     init {
         startReceiveLoop()
