@@ -18,6 +18,7 @@
 package com.monkopedia.ksrpc.jni
 
 import com.monkopedia.ksrpc.RpcFailure
+import com.monkopedia.ksrpc.toException
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException

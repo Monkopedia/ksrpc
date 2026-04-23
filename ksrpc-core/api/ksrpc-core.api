@@ -64,6 +64,14 @@ public final class com/monkopedia/ksrpc/KsrpcEnvironmentKt {
 	public static final fun reconfigure (Lcom/monkopedia/ksrpc/KsrpcEnvironment;Lkotlin/jvm/functions/Function1;)Lcom/monkopedia/ksrpc/KsrpcEnvironment;
 }
 
+public class com/monkopedia/ksrpc/KsrpcException : java/lang/RuntimeException {
+	public fun <init> (ILjava/lang/String;Ljava/lang/Object;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/Object;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getCode ()I
+	public final fun getData ()Ljava/lang/Object;
+	public fun getMessage ()Ljava/lang/String;
+}
+
 public abstract interface class com/monkopedia/ksrpc/Logger {
 	public fun debug (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)V
 	public static synthetic fun debug$default (Lcom/monkopedia/ksrpc/Logger;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;ILjava/lang/Object;)V
@@ -207,8 +215,16 @@ public final class com/monkopedia/ksrpc/RpcChannelKt {
 	public static final field ERROR_PREFIX Ljava/lang/String;
 }
 
-public class com/monkopedia/ksrpc/RpcEndpointException : java/lang/IllegalArgumentException {
+public class com/monkopedia/ksrpc/RpcEndpointException : com/monkopedia/ksrpc/KsrpcException {
 	public fun <init> (Ljava/lang/String;)V
+}
+
+public final class com/monkopedia/ksrpc/RpcException : com/monkopedia/ksrpc/KsrpcException {
+	public fun <init> (Ljava/lang/String;)V
+}
+
+public final class com/monkopedia/ksrpc/RpcExceptionKt {
+	public static final fun toException (Lcom/monkopedia/ksrpc/RpcFailure;)Lcom/monkopedia/ksrpc/RpcException;
 }
 
 public final class com/monkopedia/ksrpc/RpcMethod {

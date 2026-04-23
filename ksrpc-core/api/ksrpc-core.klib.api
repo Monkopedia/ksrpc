@@ -322,7 +322,22 @@ final class com.monkopedia.ksrpc/MethodMetadata { // com.monkopedia.ksrpc/Method
     final fun toString(): kotlin/String // com.monkopedia.ksrpc/MethodMetadata.toString|toString(){}[0]
 }
 
-open class com.monkopedia.ksrpc/RpcEndpointException : kotlin/IllegalArgumentException { // com.monkopedia.ksrpc/RpcEndpointException|null[0]
+final class com.monkopedia.ksrpc/RpcException : com.monkopedia.ksrpc/KsrpcException { // com.monkopedia.ksrpc/RpcException|null[0]
+    constructor <init>(kotlin/String) // com.monkopedia.ksrpc/RpcException.<init>|<init>(kotlin.String){}[0]
+}
+
+open class com.monkopedia.ksrpc/KsrpcException : kotlin/RuntimeException { // com.monkopedia.ksrpc/KsrpcException|null[0]
+    constructor <init>(kotlin/Int, kotlin/String, kotlin/Any? = ..., kotlin/Throwable? = ...) // com.monkopedia.ksrpc/KsrpcException.<init>|<init>(kotlin.Int;kotlin.String;kotlin.Any?;kotlin.Throwable?){}[0]
+
+    final val code // com.monkopedia.ksrpc/KsrpcException.code|{}code[0]
+        final fun <get-code>(): kotlin/Int // com.monkopedia.ksrpc/KsrpcException.code.<get-code>|<get-code>(){}[0]
+    final val data // com.monkopedia.ksrpc/KsrpcException.data|{}data[0]
+        final fun <get-data>(): kotlin/Any? // com.monkopedia.ksrpc/KsrpcException.data.<get-data>|<get-data>(){}[0]
+    open val message // com.monkopedia.ksrpc/KsrpcException.message|{}message[0]
+        open fun <get-message>(): kotlin/String // com.monkopedia.ksrpc/KsrpcException.message.<get-message>|<get-message>(){}[0]
+}
+
+open class com.monkopedia.ksrpc/RpcEndpointException : com.monkopedia.ksrpc/KsrpcException { // com.monkopedia.ksrpc/RpcEndpointException|null[0]
     constructor <init>(kotlin/String) // com.monkopedia.ksrpc/RpcEndpointException.<init>|<init>(kotlin.String){}[0]
 }
 
@@ -505,6 +520,7 @@ final val com.monkopedia.ksrpc/asString // com.monkopedia.ksrpc/asString|@kotlin
 final val com.monkopedia.ksrpc/timeoutMillis // com.monkopedia.ksrpc/timeoutMillis|@com.monkopedia.ksrpc.RpcMethod<*,*,*>{}timeoutMillis[0]
     final fun (com.monkopedia.ksrpc/RpcMethod<*, *, *>).<get-timeoutMillis>(): kotlin/Long? // com.monkopedia.ksrpc/timeoutMillis.<get-timeoutMillis>|<get-timeoutMillis>@com.monkopedia.ksrpc.RpcMethod<*,*,*>(){}[0]
 
+final fun (com.monkopedia.ksrpc/RpcFailure).com.monkopedia.ksrpc/toException(): com.monkopedia.ksrpc/RpcException // com.monkopedia.ksrpc/toException|toException@com.monkopedia.ksrpc.RpcFailure(){}[0]
 final fun (com.monkopedia.ksrpc/RpcObject<*>).com.monkopedia.ksrpc/serviceInterfaceName(): kotlin/String // com.monkopedia.ksrpc/serviceInterfaceName|serviceInterfaceName@com.monkopedia.ksrpc.RpcObject<*>(){}[0]
 final fun <#A: com.monkopedia.ksrpc/RpcService, #B: kotlin/Any?> (#A).com.monkopedia.ksrpc/serialized(com.monkopedia.ksrpc/RpcObject<#A>, com.monkopedia.ksrpc/KsrpcEnvironment<#B>): com.monkopedia.ksrpc.channels/SerializedService<#B> // com.monkopedia.ksrpc/serialized|serialized@0:0(com.monkopedia.ksrpc.RpcObject<0:0>;com.monkopedia.ksrpc.KsrpcEnvironment<0:1>){0§<com.monkopedia.ksrpc.RpcService>;1§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (com.monkopedia.ksrpc/KsrpcEnvironment<#A>).com.monkopedia.ksrpc/onError(com.monkopedia.ksrpc/ErrorListener): com.monkopedia.ksrpc/KsrpcEnvironment<#A> // com.monkopedia.ksrpc/onError|onError@com.monkopedia.ksrpc.KsrpcEnvironment<0:0>(com.monkopedia.ksrpc.ErrorListener){0§<kotlin.Any?>}[0]

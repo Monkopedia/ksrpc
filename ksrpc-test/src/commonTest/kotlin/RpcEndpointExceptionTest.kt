@@ -22,10 +22,17 @@ import kotlin.test.assertIs
 class RpcEndpointExceptionTest {
 
     @Test
-    fun rpcEndpointExceptionIsIllegalArgumentExceptionWithMessage() {
+    fun rpcEndpointExceptionIsKsrpcExceptionWithMessage() {
         val exception = RpcEndpointException("missing endpoint")
 
-        assertIs<IllegalArgumentException>(exception)
+        assertIs<KsrpcException>(exception)
         assertEquals("missing endpoint", exception.message)
+    }
+
+    @Test
+    fun rpcEndpointExceptionPinsJsonRpcMethodNotFoundCode() {
+        val exception = RpcEndpointException("missing endpoint")
+
+        assertEquals(-32601, exception.code)
     }
 }
