@@ -25,6 +25,7 @@ import com.monkopedia.ksrpc.channels.randomUuid
 import com.monkopedia.ksrpc.channels.registerHost
 import com.monkopedia.ksrpc.internal.client
 import com.monkopedia.ksrpc.internal.host
+import kotlin.reflect.KClass
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
@@ -133,19 +134,58 @@ interface ServiceExecutor {
 }
 
 /**
+ * Describes one `@KsError(code, type)` binding captured by the ksrpc compiler
+ * plugin on a `@KsMethod` function. The plugin emits one entry per annotation
+ * in declaration order into [RpcMethod.errorMappings]. Runtime routing (#78)
+ * consumes these via the [forwardErrorMap] / [reverseErrorMap] helpers on
+ * [RpcMethod] — forward maps for client-side deserialization by incoming wire
+ * code, reverse maps for server-side resolution of a thrown `data::class` back
+ * to its code + serializer.
+ */
+class KsErrorMapping(val code: Int, val dataType: KClass<*>, val dataSerializer: KSerializer<*>)
+
+/**
+ * Forward lookup built from [RpcMethod.errorMappings]: code → mapping. Used by
+ * the client-side error-decoder to resolve an incoming wire-level code back to
+ * the captured [KSerializer] for deserializing the payload. Entries from later
+ * `@KsError` annotations that share a code overwrite earlier ones; duplicate
+ * codes on a single method are a programming error that transport validation
+ * can surface.
+ */
+val RpcMethod<*, *, *>.forwardErrorMap: Map<Int, KsErrorMapping>
+    get() = errorMappings.associateBy { it.code }
+
+/**
+ * Reverse lookup built from [RpcMethod.errorMappings]: `data::class` → mapping.
+ * Used by the server-side error-encoder to resolve the thrown `data::class`
+ * back to its bound code + captured [KSerializer]. Later entries overwrite
+ * earlier ones for the same type.
+ */
+val RpcMethod<*, *, *>.reverseErrorMap: Map<KClass<*>, KsErrorMapping>
+    get() = errorMappings.associateBy { it.dataType }
+
+/**
  * A wrapper around calling into or from stubs/serialization.
  *
  * The optional [metadata] list carries sibling-annotation metadata captured by
  * the ksrpc compiler plugin from annotations on the source method that are
  * themselves annotated `@KsMethodMetadata`. Transport layers can read it to
  * customize how a call is serialized.
+ *
+ * The optional [errorMappings] list carries `@KsError(code, type)` bindings
+ * captured by the compiler plugin on the source method. Each entry pairs a
+ * wire-level integer code with the `@Serializable` payload type and its
+ * [KSerializer]. Runtime routing (see [forwardErrorMap] / [reverseErrorMap])
+ * uses these to translate between thrown exception data and wire-level error
+ * envelopes.
  */
 class RpcMethod<T : RpcService, I, O>(
     val endpoint: String,
     val inputTransform: Transformer<I>,
     val outputTransform: Transformer<O>,
     private val method: ServiceExecutor,
-    val metadata: List<MethodMetadata>
+    val metadata: List<MethodMetadata>,
+    val errorMappings: List<KsErrorMapping> = emptyList()
 ) {
 
     val hasReturnType: Boolean

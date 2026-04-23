@@ -23,6 +23,13 @@ public abstract interface class com/monkopedia/ksrpc/ErrorListener {
 	public abstract fun onError (Ljava/lang/Throwable;)V
 }
 
+public final class com/monkopedia/ksrpc/KsErrorMapping {
+	public fun <init> (ILkotlin/reflect/KClass;Lkotlinx/serialization/KSerializer;)V
+	public final fun getCode ()I
+	public final fun getDataSerializer ()Lkotlinx/serialization/KSerializer;
+	public final fun getDataType ()Lkotlin/reflect/KClass;
+}
+
 public abstract interface class com/monkopedia/ksrpc/KsrpcEnvironment {
 	public abstract fun getCoroutineExceptionHandler ()Lkotlinx/coroutines/CoroutineExceptionHandler;
 	public abstract fun getDefaultScope ()Lkotlinx/coroutines/CoroutineScope;
@@ -228,11 +235,13 @@ public final class com/monkopedia/ksrpc/RpcExceptionKt {
 }
 
 public final class com/monkopedia/ksrpc/RpcMethod {
-	public fun <init> (Ljava/lang/String;Lcom/monkopedia/ksrpc/Transformer;Lcom/monkopedia/ksrpc/Transformer;Lcom/monkopedia/ksrpc/ServiceExecutor;Ljava/util/List;)V
+	public fun <init> (Ljava/lang/String;Lcom/monkopedia/ksrpc/Transformer;Lcom/monkopedia/ksrpc/Transformer;Lcom/monkopedia/ksrpc/ServiceExecutor;Ljava/util/List;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcom/monkopedia/ksrpc/Transformer;Lcom/monkopedia/ksrpc/Transformer;Lcom/monkopedia/ksrpc/ServiceExecutor;Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun call (Lcom/monkopedia/ksrpc/channels/SerializedService;Lcom/monkopedia/ksrpc/RpcService;Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/RpcCallId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun callChannel (Lcom/monkopedia/ksrpc/channels/SerializedService;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun findSubserviceTransformers ()Ljava/util/List;
 	public final fun getEndpoint ()Ljava/lang/String;
+	public final fun getErrorMappings ()Ljava/util/List;
 	public final fun getHasReturnType ()Z
 	public final fun getInputTransform ()Lcom/monkopedia/ksrpc/Transformer;
 	public final fun getMetadata ()Ljava/util/List;
@@ -241,6 +250,8 @@ public final class com/monkopedia/ksrpc/RpcMethod {
 }
 
 public final class com/monkopedia/ksrpc/RpcMethodKt {
+	public static final fun getForwardErrorMap (Lcom/monkopedia/ksrpc/RpcMethod;)Ljava/util/Map;
+	public static final fun getReverseErrorMap (Lcom/monkopedia/ksrpc/RpcMethod;)Ljava/util/Map;
 	public static final fun getTimeoutMillis (Lcom/monkopedia/ksrpc/RpcMethod;)Ljava/lang/Long;
 }
 
