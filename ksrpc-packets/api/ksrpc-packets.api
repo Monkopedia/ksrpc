@@ -5,17 +5,18 @@ public final class com/monkopedia/ksrpc/packets/internal/ConstantsKt {
 
 public final class com/monkopedia/ksrpc/packets/internal/Packet {
 	public static final field Companion Lcom/monkopedia/ksrpc/packets/internal/Packet$Companion;
-	public fun <init> (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;)V
-	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun <init> (ZZZZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;)V
-	public synthetic fun <init> (ZZZZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;Ljava/util/Map;)V
+	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZZZZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;Ljava/util/Map;)V
+	public synthetic fun <init> (ZZZZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()I
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Ljava/lang/String;
 	public final fun component5 ()Ljava/lang/Object;
-	public final fun copy (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;)Lcom/monkopedia/ksrpc/packets/internal/Packet;
-	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/packets/internal/Packet;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;ILjava/lang/Object;)Lcom/monkopedia/ksrpc/packets/internal/Packet;
+	public final fun component6 ()Ljava/util/Map;
+	public final fun copy (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;Ljava/util/Map;)Lcom/monkopedia/ksrpc/packets/internal/Packet;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/packets/internal/Packet;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;Ljava/util/Map;ILjava/lang/Object;)Lcom/monkopedia/ksrpc/packets/internal/Packet;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBinary ()Z
 	public final fun getCancel ()Z
@@ -24,6 +25,7 @@ public final class com/monkopedia/ksrpc/packets/internal/Packet {
 	public final fun getId ()Ljava/lang/String;
 	public final fun getInput ()Z
 	public final fun getMessageId ()Ljava/lang/String;
+	public final fun getMetadata ()Ljava/util/Map;
 	public final fun getStartBinary ()Z
 	public final fun getType ()I
 	public fun hashCode ()I
@@ -79,5 +81,11 @@ public abstract class com/monkopedia/ksrpc/packets/internal/PacketChannelBase : 
 	protected final fun startReceiveLoop ()V
 	public fun unregisterHandler (Lcom/monkopedia/ksrpc/channels/RpcCallId;)V
 	public fun wrapChannel (Lcom/monkopedia/ksrpc/channels/ChannelId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/monkopedia/ksrpc/packets/internal/PacketTlv {
+	public static final field CONTEXT_MAP I
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/packets/internal/PacketTlv;
+	public static final field MAX_TAG I
 }
 

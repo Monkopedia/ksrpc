@@ -35,8 +35,8 @@ abstract class <#A: kotlin/Any?> com.monkopedia.ksrpc.packets.internal/PacketCha
 }
 
 final class <#A: kotlin/Any?> com.monkopedia.ksrpc.packets.internal/Packet { // com.monkopedia.ksrpc.packets.internal/Packet|null[0]
-    constructor <init>(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/String, kotlin/String, kotlin/String, #A) // com.monkopedia.ksrpc.packets.internal/Packet.<init>|<init>(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.String;kotlin.String;kotlin.String;1:0){}[0]
-    constructor <init>(kotlin/Int = ..., kotlin/String, kotlin/String, kotlin/String, #A) // com.monkopedia.ksrpc.packets.internal/Packet.<init>|<init>(kotlin.Int;kotlin.String;kotlin.String;kotlin.String;1:0){}[0]
+    constructor <init>(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/String, kotlin/String, kotlin/String, #A, kotlin.collections/Map<kotlin/Int, kotlin/ByteArray> = ...) // com.monkopedia.ksrpc.packets.internal/Packet.<init>|<init>(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.String;kotlin.String;kotlin.String;1:0;kotlin.collections.Map<kotlin.Int,kotlin.ByteArray>){}[0]
+    constructor <init>(kotlin/Int = ..., kotlin/String, kotlin/String, kotlin/String, #A, kotlin.collections/Map<kotlin/Int, kotlin/ByteArray> = ...) // com.monkopedia.ksrpc.packets.internal/Packet.<init>|<init>(kotlin.Int;kotlin.String;kotlin.String;kotlin.String;1:0;kotlin.collections.Map<kotlin.Int,kotlin.ByteArray>){}[0]
 
     final val binary // com.monkopedia.ksrpc.packets.internal/Packet.binary|{}binary[0]
         final fun <get-binary>(): kotlin/Boolean // com.monkopedia.ksrpc.packets.internal/Packet.binary.<get-binary>|<get-binary>(){}[0]
@@ -52,6 +52,8 @@ final class <#A: kotlin/Any?> com.monkopedia.ksrpc.packets.internal/Packet { // 
         final fun <get-input>(): kotlin/Boolean // com.monkopedia.ksrpc.packets.internal/Packet.input.<get-input>|<get-input>(){}[0]
     final val messageId // com.monkopedia.ksrpc.packets.internal/Packet.messageId|{}messageId[0]
         final fun <get-messageId>(): kotlin/String // com.monkopedia.ksrpc.packets.internal/Packet.messageId.<get-messageId>|<get-messageId>(){}[0]
+    final val metadata // com.monkopedia.ksrpc.packets.internal/Packet.metadata|{}metadata[0]
+        final fun <get-metadata>(): kotlin.collections/Map<kotlin/Int, kotlin/ByteArray> // com.monkopedia.ksrpc.packets.internal/Packet.metadata.<get-metadata>|<get-metadata>(){}[0]
     final val startBinary // com.monkopedia.ksrpc.packets.internal/Packet.startBinary|{}startBinary[0]
         final fun <get-startBinary>(): kotlin/Boolean // com.monkopedia.ksrpc.packets.internal/Packet.startBinary.<get-startBinary>|<get-startBinary>(){}[0]
     final val type // com.monkopedia.ksrpc.packets.internal/Packet.type|{}type[0]
@@ -62,7 +64,8 @@ final class <#A: kotlin/Any?> com.monkopedia.ksrpc.packets.internal/Packet { // 
     final fun component3(): kotlin/String // com.monkopedia.ksrpc.packets.internal/Packet.component3|component3(){}[0]
     final fun component4(): kotlin/String // com.monkopedia.ksrpc.packets.internal/Packet.component4|component4(){}[0]
     final fun component5(): #A // com.monkopedia.ksrpc.packets.internal/Packet.component5|component5(){}[0]
-    final fun copy(kotlin/Int = ..., kotlin/String = ..., kotlin/String = ..., kotlin/String = ..., #A = ...): com.monkopedia.ksrpc.packets.internal/Packet<#A> // com.monkopedia.ksrpc.packets.internal/Packet.copy|copy(kotlin.Int;kotlin.String;kotlin.String;kotlin.String;1:0){}[0]
+    final fun component6(): kotlin.collections/Map<kotlin/Int, kotlin/ByteArray> // com.monkopedia.ksrpc.packets.internal/Packet.component6|component6(){}[0]
+    final fun copy(kotlin/Int = ..., kotlin/String = ..., kotlin/String = ..., kotlin/String = ..., #A = ..., kotlin.collections/Map<kotlin/Int, kotlin/ByteArray> = ...): com.monkopedia.ksrpc.packets.internal/Packet<#A> // com.monkopedia.ksrpc.packets.internal/Packet.copy|copy(kotlin.Int;kotlin.String;kotlin.String;kotlin.String;1:0;kotlin.collections.Map<kotlin.Int,kotlin.ByteArray>){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc.packets.internal/Packet.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc.packets.internal/Packet.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // com.monkopedia.ksrpc.packets.internal/Packet.toString|toString(){}[0]
@@ -83,6 +86,7 @@ final class <#A: kotlin/Any?> com.monkopedia.ksrpc.packets.internal/Packet { // 
     final object Companion : kotlinx.serialization.internal/SerializerFactory { // com.monkopedia.ksrpc.packets.internal/Packet.Companion|null[0]
         final val $cachedDescriptor // com.monkopedia.ksrpc.packets.internal/Packet.Companion.$cachedDescriptor|{}$cachedDescriptor[0]
             final fun <get-$cachedDescriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // com.monkopedia.ksrpc.packets.internal/Packet.Companion.$cachedDescriptor.<get-$cachedDescriptor>|<get-$cachedDescriptor>(){}[0]
+        final val $childSerializers // com.monkopedia.ksrpc.packets.internal/Packet.Companion.$childSerializers|{}$childSerializers[0]
 
         final fun <#A2: kotlin/Any?> serializer(kotlinx.serialization/KSerializer<#A2>): kotlinx.serialization/KSerializer<com.monkopedia.ksrpc.packets.internal/Packet<#A2>> // com.monkopedia.ksrpc.packets.internal/Packet.Companion.serializer|serializer(kotlinx.serialization.KSerializer<0:0>){0§<kotlin.Any?>}[0]
         final fun serializer(kotlin/Array<out kotlinx.serialization/KSerializer<*>>...): kotlinx.serialization/KSerializer<*> // com.monkopedia.ksrpc.packets.internal/Packet.Companion.serializer|serializer(kotlin.Array<out|kotlinx.serialization.KSerializer<*>>...){}[0]
@@ -103,6 +107,13 @@ final class com.monkopedia.ksrpc.packets.internal/PacketCallId : com.monkopedia.
     final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc.packets.internal/PacketCallId.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc.packets.internal/PacketCallId.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // com.monkopedia.ksrpc.packets.internal/PacketCallId.toString|toString(){}[0]
+}
+
+final object com.monkopedia.ksrpc.packets.internal/PacketTlv { // com.monkopedia.ksrpc.packets.internal/PacketTlv|null[0]
+    final const val CONTEXT_MAP // com.monkopedia.ksrpc.packets.internal/PacketTlv.CONTEXT_MAP|{}CONTEXT_MAP[0]
+        final fun <get-CONTEXT_MAP>(): kotlin/Int // com.monkopedia.ksrpc.packets.internal/PacketTlv.CONTEXT_MAP.<get-CONTEXT_MAP>|<get-CONTEXT_MAP>(){}[0]
+    final const val MAX_TAG // com.monkopedia.ksrpc.packets.internal/PacketTlv.MAX_TAG|{}MAX_TAG[0]
+        final fun <get-MAX_TAG>(): kotlin/Int // com.monkopedia.ksrpc.packets.internal/PacketTlv.MAX_TAG.<get-MAX_TAG>|<get-MAX_TAG>(){}[0]
 }
 
 final const val com.monkopedia.ksrpc.packets.internal/CONTENT_LENGTH // com.monkopedia.ksrpc.packets.internal/CONTENT_LENGTH|{}CONTENT_LENGTH[0]
