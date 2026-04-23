@@ -13,9 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(KsrpcInternal::class)
+
 package com.monkopedia.ksrpc.packets.internal
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.CancellationSupport
 import com.monkopedia.ksrpc.channels.ChannelHost
@@ -50,6 +53,7 @@ import kotlinx.serialization.builtins.serializer
 private const val DEFAULT_MAX_SIZE = 16 * 1024L
 private const val RECEIVE_LOOP_START_GRACE_MS = 500L
 
+@KsrpcInternal
 abstract class PacketChannelBase<T>(
     protected val scope: CoroutineScope,
     final override val env: KsrpcEnvironment<T>

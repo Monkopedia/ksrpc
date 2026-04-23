@@ -15,6 +15,7 @@
  */
 package com.monkopedia.ksrpc.packets.internal
 
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.channels.RpcCallId
 
 /**
@@ -22,4 +23,5 @@ import com.monkopedia.ksrpc.channels.RpcCallId
  * sub-service on the remote side) with the [messageId] allocated from the pending call's
  * `MultiChannel`.
  */
+@KsrpcInternal
 data class PacketCallId(val channelId: String, val messageId: String) : RpcCallId
