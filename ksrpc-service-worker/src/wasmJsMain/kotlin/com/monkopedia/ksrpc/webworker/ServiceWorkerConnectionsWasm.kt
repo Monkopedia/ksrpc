@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@file:OptIn(ExperimentalWasmJsInterop::class)
+@file:OptIn(ExperimentalWasmJsInterop::class, KsrpcInternal::class)
 @file:Suppress("UnsafeCastFromDynamic")
 
 package com.monkopedia.ksrpc.webworker
@@ -21,6 +21,7 @@ package com.monkopedia.ksrpc.webworker
 import com.monkopedia.ksrpc.CallDataSerializer
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.annotation.ExperimentalKsrpc
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.Connection
 import com.monkopedia.ksrpc.packets.internal.Packet
