@@ -33,6 +33,7 @@ import com.monkopedia.ksrpc.internal.ClientChannelContext
 import com.monkopedia.ksrpc.internal.ENDPOINT_NOT_FOUND_PREFIX
 import com.monkopedia.ksrpc.internal.ERROR_PREFIX
 import com.monkopedia.ksrpc.internal.SubserviceChannel
+import com.monkopedia.ksrpc.toException
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.accept

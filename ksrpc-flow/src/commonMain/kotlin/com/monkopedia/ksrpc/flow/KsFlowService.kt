@@ -17,6 +17,7 @@ package com.monkopedia.ksrpc.flow
 
 import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.toException
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
 import kotlinx.coroutines.CancellationException

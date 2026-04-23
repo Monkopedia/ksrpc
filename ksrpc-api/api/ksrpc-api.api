@@ -1,8 +1,3 @@
-public final class com/monkopedia/ksrpc/RpcException : java/lang/RuntimeException {
-	public fun <init> (Ljava/lang/String;)V
-	public fun getMessage ()Ljava/lang/String;
-}
-
 public final class com/monkopedia/ksrpc/RpcFailure {
 	public static final field Companion Lcom/monkopedia/ksrpc/RpcFailure$Companion;
 	public fun <init> (Ljava/lang/String;)V
@@ -12,7 +7,6 @@ public final class com/monkopedia/ksrpc/RpcFailure {
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getStack ()Ljava/lang/String;
 	public fun hashCode ()I
-	public final fun toException ()Ljava/lang/RuntimeException;
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -44,6 +38,15 @@ public abstract interface class com/monkopedia/ksrpc/SuspendCloseable {
 }
 
 public abstract interface annotation class com/monkopedia/ksrpc/annotation/ExperimentalKsrpc : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class com/monkopedia/ksrpc/annotation/KsError : java/lang/annotation/Annotation {
+	public abstract fun code ()I
+	public abstract fun type ()Ljava/lang/Class;
+}
+
+public abstract interface annotation class com/monkopedia/ksrpc/annotation/KsError$Container : java/lang/annotation/Annotation {
+	public abstract fun value ()[Lcom/monkopedia/ksrpc/annotation/KsError;
 }
 
 public abstract interface annotation class com/monkopedia/ksrpc/annotation/KsMethod : java/lang/annotation/Annotation {

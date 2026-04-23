@@ -29,6 +29,7 @@ import com.monkopedia.ksrpc.channels.awaitRequestCancellable
 import com.monkopedia.ksrpc.internal.MultiChannel
 import com.monkopedia.ksrpc.jsonrpc.JsonRpcCallId
 import com.monkopedia.ksrpc.jsonrpc.JsonRpcCancellationConvention
+import com.monkopedia.ksrpc.toException
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred

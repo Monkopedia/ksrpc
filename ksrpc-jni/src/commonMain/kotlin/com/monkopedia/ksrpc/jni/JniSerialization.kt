@@ -21,6 +21,7 @@ import com.monkopedia.ksrpc.CallDataSerializer
 import com.monkopedia.ksrpc.RpcEndpointException
 import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.channels.CallData
+import com.monkopedia.ksrpc.toException
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
