@@ -15,6 +15,7 @@
  */
 package com.monkopedia.ksrpc.plugin
 
+import com.monkopedia.ksrpc.plugin.fir.KsrpcFirCheckersComponent
 import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrar
 
 class FirKsrpcRegistrar : FirExtensionRegistrar() {
@@ -23,5 +24,6 @@ class FirKsrpcRegistrar : FirExtensionRegistrar() {
         +::FirCompanionDeclarationGenerator
         +::FirKsrpcObjGenerator
         +::FirKsrpcIntrospectionGenerator
+        +::KsrpcFirCheckersComponent
     }
 }

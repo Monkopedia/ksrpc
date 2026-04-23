@@ -91,16 +91,29 @@
  * Validation
  * ----------
  *
- *   [KsrpcIrGenerationExtension.validate] runs before transformation, rejecting
- *   services with non-RpcService supertypes, non-invariant class type parameters,
- *   method-level type parameters, duplicate endpoint names, `ByteReadChannel`-on-both-
- *   sides, and `@KsNotification` methods that don't return `Unit`. Diagnostics go
- *   through [PluginReporter.reportUserError], which resolves a source line/column
- *   from the offending IR element so the user sees a clean pointer at the declaration.
+ *   The user-reachable validation now lives in FIR-phase `FirDeclarationChecker`s
+ *   — see [com.monkopedia.ksrpc.plugin.fir.KsServiceClassChecker] and
+ *   [com.monkopedia.ksrpc.plugin.fir.KsMethodFunctionChecker]. FIR errors halt
+ *   compilation before IR runs, so the IR-phase checks below are a belt-and-braces
+ *   safety net; they fire only if the FIR extension is not registered (e.g. a
+ *   downstream consumer builds with an old plugin jar on the classpath).
  *
- *   TODO: these validations currently run in the IR phase which limits IDE
- *   integration — a FIR-phase checker with `KtSourceElement` would produce a red
- *   squiggle directly on the offending element. Tracked as a 1.0+ follow-up.
+ *   [KsrpcIrGenerationExtension.validate] rejects services with non-RpcService
+ *   supertypes, non-invariant class type parameters, method-level type parameters,
+ *   duplicate endpoint names, `ByteReadChannel`-on-both-sides, and `@KsNotification`
+ *   methods that don't return `Unit`. Diagnostics go through
+ *   [PluginReporter.reportUserError], which resolves a source line/column from the
+ *   offending IR element so the user sees a clean pointer at the declaration.
+ *
+ *   Sites that intentionally remain IR-phase-only, because they depend on
+ *   resolved IR type / constant information not readily available in FIR:
+ *
+ *    - [MetadataIrBuilder]'s "unsupported ksrpc method-metadata argument" error
+ *      — needs a resolved IR expression to classify the argument shape.
+ *    - [ObjGeneration]'s "cannot compose a KSerializer for ..." — depends on
+ *      composed serializer builders that are resolved at IR time.
+ *
+ *   See issue #65 for the migration context.
  */
 
 @file:OptIn(UnsafeDuringIrConstructionAPI::class)
