@@ -16,6 +16,7 @@
 package com.monkopedia.ksrpc.ktor.websocket.internal
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.packets.internal.Packet
 import com.monkopedia.ksrpc.packets.internal.PacketChannelBase
 import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
@@ -27,6 +28,7 @@ import io.ktor.websocket.close
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.json.Json
 
+@KsrpcInternal
 @OptIn(InternalAPI::class)
 class WebsocketPacketChannel(
     scope: CoroutineScope,
