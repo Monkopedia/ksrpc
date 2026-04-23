@@ -180,6 +180,20 @@ class KsrpcGenerationEnvironment(
         }
             ?: reportInternal("can't resolve kotlin.collections.listOf (vararg overload)")
 
+    // Error-binding (#77) support is optional so the compiler plugin continues
+    // to work against older ksrpc-core artifacts that predate the `KsErrorMapping`
+    // type. When unresolved, the plugin does not emit the seventh constructor
+    // argument on `RpcMethod` and the generated service carries no error maps.
+    val ksErrorMapping = maybeReferenceClass(FqConstants.KS_ERROR_MAPPING)
+
+    /**
+     * True when `KsErrorMapping` was resolved — the ksrpc-core on the compile
+     * classpath supports the `@KsError` bidirectional binding (Part 2 of #13).
+     * Also requires the 6-argument `RpcMethod` constructor.
+     */
+    val errorMappingSupported: Boolean get() = ksErrorMapping != null &&
+        rpcMethod.constructors.first().owner.parameters.size >= 6
+
     // Metadata propagation support is optional so the compiler plugin continues
     // to work against older ksrpc-core artifacts that predate #11.
     val methodMetadata = maybeReferenceClass(FqConstants.METHOD_METADATA)

@@ -231,6 +231,7 @@ class ObjGeneration(
                             endpoint,
                             method.function,
                             method.metadataAnnotations,
+                            method.errorAnnotations,
                             executor = executor
                         )
                     )
@@ -271,6 +272,7 @@ internal class GenericMethodIrBuilder(
         endpoint: String,
         method: IrSimpleFunction,
         metadataAnnotations: List<IrConstructorCall>,
+        errorAnnotations: List<IrConstructorCall>,
         executor: IrClass
     ): IrConstructorCall {
         // 0-arg @KsMethod functions fall back to Unit as the input type.
@@ -306,14 +308,18 @@ internal class GenericMethodIrBuilder(
             outputConverter,
             executorInstance
         )
+        val decl = DeclarationIrBuilder(
+            context,
+            method.symbol,
+            SYNTHETIC_OFFSET,
+            SYNTHETIC_OFFSET
+        )
         if (supportsMetadata) {
-            val decl = DeclarationIrBuilder(
-                context,
-                method.symbol,
-                SYNTHETIC_OFFSET,
-                SYNTHETIC_OFFSET
-            )
             args += MetadataIrBuilder(env, decl, report).buildMetadataList(metadataAnnotations)
+        }
+        if (env.errorMappingSupported) {
+            args += ErrorMappingIrBuilder(env, decl, report)
+                .buildErrorMappingList(errorAnnotations)
         }
         call.putArgs(*args.toTypedArray())
         return call
