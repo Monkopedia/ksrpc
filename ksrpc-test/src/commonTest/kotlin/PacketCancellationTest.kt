@@ -17,9 +17,9 @@
 
 package com.monkopedia.ksrpc
 
-import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.sockets.asConnection
 import kotlin.test.Test
 import kotlin.test.assertEquals
