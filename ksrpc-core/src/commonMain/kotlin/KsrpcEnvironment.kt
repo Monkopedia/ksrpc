@@ -59,8 +59,7 @@ interface CallDataSerializer<T> {
 fun <T> KsrpcEnvironment<T>.reconfigure(
     builder: KsrpcEnvironmentBuilder<T>.() -> Unit
 ): KsrpcEnvironment<T> {
-    val b = (this as? KsrpcEnvironmentBuilder)?.copy()
-        ?: KsrpcEnvironmentBuilder(serialization, defaultScope, logger, errorListener)
+    val b = KsrpcEnvironmentBuilder(serialization, defaultScope, logger, errorListener)
     b.builder()
     return b
 }
@@ -69,8 +68,7 @@ fun <T> KsrpcEnvironment<T>.reconfigure(
  * Convenience method for easily creating a copy of [KsrpcEnvironment] with a local error listener.
  */
 fun <T> KsrpcEnvironment<T>.onError(listener: ErrorListener): KsrpcEnvironment<T> {
-    val b = (this as? KsrpcEnvironmentBuilder)?.copy()
-        ?: KsrpcEnvironmentBuilder(serialization, defaultScope, logger, errorListener)
+    val b = KsrpcEnvironmentBuilder(serialization, defaultScope, logger, errorListener)
     b.errorListener = listener
     return b
 }
@@ -126,7 +124,7 @@ private class StringSerializer(val stringFormat: StringFormat = Json) : CallData
     }
 }
 
-data class KsrpcEnvironmentBuilder<T> internal constructor(
+class KsrpcEnvironmentBuilder<T> internal constructor(
     override var serialization: CallDataSerializer<T>,
     override var defaultScope: CoroutineScope = GlobalScope,
     override var logger: Logger = object : Logger {},

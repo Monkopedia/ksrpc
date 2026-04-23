@@ -47,24 +47,15 @@ public abstract interface class com/monkopedia/ksrpc/KsrpcEnvironment$Element {
 }
 
 public final class com/monkopedia/ksrpc/KsrpcEnvironmentBuilder : com/monkopedia/ksrpc/KsrpcEnvironment {
-	public final fun component1 ()Lcom/monkopedia/ksrpc/CallDataSerializer;
-	public final fun component2 ()Lkotlinx/coroutines/CoroutineScope;
-	public final fun component3 ()Lcom/monkopedia/ksrpc/Logger;
-	public final fun component4 ()Lcom/monkopedia/ksrpc/ErrorListener;
-	public final fun copy (Lcom/monkopedia/ksrpc/CallDataSerializer;Lkotlinx/coroutines/CoroutineScope;Lcom/monkopedia/ksrpc/Logger;Lcom/monkopedia/ksrpc/ErrorListener;)Lcom/monkopedia/ksrpc/KsrpcEnvironmentBuilder;
-	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/KsrpcEnvironmentBuilder;Lcom/monkopedia/ksrpc/CallDataSerializer;Lkotlinx/coroutines/CoroutineScope;Lcom/monkopedia/ksrpc/Logger;Lcom/monkopedia/ksrpc/ErrorListener;ILjava/lang/Object;)Lcom/monkopedia/ksrpc/KsrpcEnvironmentBuilder;
-	public fun equals (Ljava/lang/Object;)Z
 	public fun getCoroutineExceptionHandler ()Lkotlinx/coroutines/CoroutineExceptionHandler;
 	public fun getDefaultScope ()Lkotlinx/coroutines/CoroutineScope;
 	public fun getErrorListener ()Lcom/monkopedia/ksrpc/ErrorListener;
 	public fun getLogger ()Lcom/monkopedia/ksrpc/Logger;
 	public fun getSerialization ()Lcom/monkopedia/ksrpc/CallDataSerializer;
-	public fun hashCode ()I
 	public fun setDefaultScope (Lkotlinx/coroutines/CoroutineScope;)V
 	public fun setErrorListener (Lcom/monkopedia/ksrpc/ErrorListener;)V
 	public fun setLogger (Lcom/monkopedia/ksrpc/Logger;)V
 	public fun setSerialization (Lcom/monkopedia/ksrpc/CallDataSerializer;)V
-	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/monkopedia/ksrpc/KsrpcEnvironmentKt {

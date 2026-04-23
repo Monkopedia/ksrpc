@@ -265,15 +265,6 @@ final class <#A: kotlin/Any?> com.monkopedia.ksrpc/KsrpcEnvironmentBuilder : com
     final var serialization // com.monkopedia.ksrpc/KsrpcEnvironmentBuilder.serialization|{}serialization[0]
         final fun <get-serialization>(): com.monkopedia.ksrpc/CallDataSerializer<#A> // com.monkopedia.ksrpc/KsrpcEnvironmentBuilder.serialization.<get-serialization>|<get-serialization>(){}[0]
         final fun <set-serialization>(com.monkopedia.ksrpc/CallDataSerializer<#A>) // com.monkopedia.ksrpc/KsrpcEnvironmentBuilder.serialization.<set-serialization>|<set-serialization>(com.monkopedia.ksrpc.CallDataSerializer<1:0>){}[0]
-
-    final fun component1(): com.monkopedia.ksrpc/CallDataSerializer<#A> // com.monkopedia.ksrpc/KsrpcEnvironmentBuilder.component1|component1(){}[0]
-    final fun component2(): kotlinx.coroutines/CoroutineScope // com.monkopedia.ksrpc/KsrpcEnvironmentBuilder.component2|component2(){}[0]
-    final fun component3(): com.monkopedia.ksrpc/Logger // com.monkopedia.ksrpc/KsrpcEnvironmentBuilder.component3|component3(){}[0]
-    final fun component4(): com.monkopedia.ksrpc/ErrorListener // com.monkopedia.ksrpc/KsrpcEnvironmentBuilder.component4|component4(){}[0]
-    final fun copy(com.monkopedia.ksrpc/CallDataSerializer<#A> = ..., kotlinx.coroutines/CoroutineScope = ..., com.monkopedia.ksrpc/Logger = ..., com.monkopedia.ksrpc/ErrorListener = ...): com.monkopedia.ksrpc/KsrpcEnvironmentBuilder<#A> // com.monkopedia.ksrpc/KsrpcEnvironmentBuilder.copy|copy(com.monkopedia.ksrpc.CallDataSerializer<1:0>;kotlinx.coroutines.CoroutineScope;com.monkopedia.ksrpc.Logger;com.monkopedia.ksrpc.ErrorListener){}[0]
-    final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc/KsrpcEnvironmentBuilder.equals|equals(kotlin.Any?){}[0]
-    final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc/KsrpcEnvironmentBuilder.hashCode|hashCode(){}[0]
-    final fun toString(): kotlin/String // com.monkopedia.ksrpc/KsrpcEnvironmentBuilder.toString|toString(){}[0]
 }
 
 final class <#A: kotlin/Any?> com.monkopedia.ksrpc/SerializerTransformer : com.monkopedia.ksrpc/Transformer<#A> { // com.monkopedia.ksrpc/SerializerTransformer|null[0]
