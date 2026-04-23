@@ -13,12 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(KsrpcInternal::class)
+
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.MetadataValue
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
 import com.monkopedia.ksrpc.annotation.KsTimeout
-import com.monkopedia.ksrpc.MetadataValue
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
 import com.monkopedia.ksrpc.internal.asClient
 import kotlin.test.Test

@@ -13,11 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(KsrpcInternal::class)
+
 package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.RpcFunctionalityTest.TestType
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
 import com.monkopedia.ksrpc.internal.asClient
 import kotlin.test.Test
@@ -123,9 +126,8 @@ private fun leakyRootImpl(): LeakTestRootInterface = object : LeakTestRootInterf
                 }
             }
 
-            override suspend fun fail(value: String): String {
+            override suspend fun fail(value: String): String =
                 throw IllegalStateException("intentional-failure:$value")
-            }
 
             override suspend fun close() {
                 LeakTracker.onClose()

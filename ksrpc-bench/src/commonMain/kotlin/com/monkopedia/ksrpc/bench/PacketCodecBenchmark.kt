@@ -13,8 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(KsrpcInternal::class)
+
 package com.monkopedia.ksrpc.bench
 
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.ksrpcEnvironment
 import com.monkopedia.ksrpc.packets.internal.Packet
