@@ -143,6 +143,10 @@ tasks.withType<KotlinCompile> {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_1_8)
         freeCompilerArgs.add("-Xjvm-default=all")
+        // Required for the FIR-phase `FirDeclarationChecker.check` overrides added
+        // in issue #65 — Kotlin 2.3+ declares `check` with `context(CheckerContext,
+        // DiagnosticReporter)` parameters, which subclasses must match.
+        freeCompilerArgs.add("-Xcontext-parameters")
     }
 }
 
