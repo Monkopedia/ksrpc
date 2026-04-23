@@ -1,15 +1,15 @@
 public final class com/monkopedia/ksrpc/sockets/InputOutputStreamsKt {
-	public static final fun asConnection (Lkotlin/Pair;Lcom/monkopedia/ksrpc/KsrpcEnvironment;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun asSocketConnection (Lkotlin/Pair;Lcom/monkopedia/ksrpc/KsrpcEnvironment;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class com/monkopedia/ksrpc/sockets/ProcessStreamKt {
-	public static final fun asConnection (Ljava/lang/ProcessBuilder;Lcom/monkopedia/ksrpc/KsrpcEnvironment;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun asSocketConnection (Ljava/lang/ProcessBuilder;Lcom/monkopedia/ksrpc/KsrpcEnvironment;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final fun withStdInOut (Lcom/monkopedia/ksrpc/KsrpcEnvironment;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class com/monkopedia/ksrpc/sockets/ReadWriteChannelsKt {
-	public static final fun asConnection (Lkotlin/Pair;Lcom/monkopedia/ksrpc/KsrpcEnvironment;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static final fun asConnection (Lkotlin/Pair;Lkotlinx/coroutines/CoroutineScope;Lcom/monkopedia/ksrpc/KsrpcEnvironment;)Lcom/monkopedia/ksrpc/channels/Connection;
+	public static final fun asSocketConnection (Lkotlin/Pair;Lcom/monkopedia/ksrpc/KsrpcEnvironment;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun asSocketConnection (Lkotlin/Pair;Lkotlinx/coroutines/CoroutineScope;Lcom/monkopedia/ksrpc/KsrpcEnvironment;)Lcom/monkopedia/ksrpc/channels/Connection;
 }
 
 public final class com/monkopedia/ksrpc/sockets/internal/PacketUtilsKt {

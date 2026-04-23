@@ -30,14 +30,14 @@ internal const val MESSAGE = "Message"
 /**
  * Create a [Connection] for the given input/output channel.
  */
-suspend fun Pair<ByteReadChannel, ByteWriteChannel>.asConnection(
+suspend fun Pair<ByteReadChannel, ByteWriteChannel>.asSocketConnection(
     env: KsrpcEnvironment<String>
-): Connection<String> = asConnection(CoroutineScope(coroutineContext), env)
+): Connection<String> = asSocketConnection(CoroutineScope(coroutineContext), env)
 
 /**
  * Create a [Connection] for the given input/output channel using a caller-provided scope.
  */
-fun Pair<ByteReadChannel, ByteWriteChannel>.asConnection(
+fun Pair<ByteReadChannel, ByteWriteChannel>.asSocketConnection(
     scope: CoroutineScope,
     env: KsrpcEnvironment<String>
 ): Connection<String> = ReadWritePacketChannel(

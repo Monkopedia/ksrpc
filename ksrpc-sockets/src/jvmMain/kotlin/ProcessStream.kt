@@ -27,7 +27,7 @@ actual suspend inline fun withStdInOut(
 ) {
     val input = System.`in`
     val output = System.out
-    val connection = (input to output).asConnection(ksrpcEnvironment)
+    val connection = (input to output).asSocketConnection(ksrpcEnvironment)
     try {
         withConnection(connection)
     } finally {
@@ -39,13 +39,13 @@ actual suspend inline fun withStdInOut(
  * Create a [Connection] that starts the process and uses the
  * [Process.getInputStream] and [Process.getOutputStream] as the streams for communication
  */
-suspend fun ProcessBuilder.asConnection(env: KsrpcEnvironment<String>): Connection<String> {
+suspend fun ProcessBuilder.asSocketConnection(env: KsrpcEnvironment<String>): Connection<String> {
     val process = redirectInput(ProcessBuilder.Redirect.PIPE)
         .redirectOutput(ProcessBuilder.Redirect.PIPE)
         .start()
     val input = process.inputStream
     val output = process.outputStream
-    return (input to output).asConnection(env).also {
+    return (input to output).asSocketConnection(env).also {
         it.onClose {
             withContext(Dispatchers.IO) {
                 swallow { input.close() }

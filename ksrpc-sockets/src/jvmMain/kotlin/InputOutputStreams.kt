@@ -33,9 +33,9 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 /**
- * Helper that calls into Pair<ByteReadChannel, ByteWriteChannel>.asConnection.
+ * Helper that calls into Pair<ByteReadChannel, ByteWriteChannel>.asSocketConnection.
  */
-suspend fun Pair<InputStream, OutputStream>.asConnection(
+suspend fun Pair<InputStream, OutputStream>.asSocketConnection(
     env: KsrpcEnvironment<String>
 ): Connection<String> {
     val (input, output) = this
@@ -45,7 +45,7 @@ suspend fun Pair<InputStream, OutputStream>.asConnection(
         channel.copyToAndFlush(output)
     }
     return (input.toByteReadChannel(Dispatchers.IO) to channel)
-        .asConnection(connectionScope, env)
+        .asSocketConnection(connectionScope, env)
         .also {
             it.onClose {
                 swallow { connectionScope.cancel() }

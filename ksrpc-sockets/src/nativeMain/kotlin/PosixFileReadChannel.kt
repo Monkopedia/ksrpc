@@ -55,7 +55,7 @@ actual suspend inline fun withStdInOut(
     val input = posixFileReadChannel(STDIN_FILENO)
     val output = posixFileWriteChannel(STDOUT_FILENO)
     withoutIcanon {
-        val connection = (input to output).asConnection(ksrpcEnvironment)
+        val connection = (input to output).asSocketConnection(ksrpcEnvironment)
         try {
             withConnection(connection)
         } finally {
