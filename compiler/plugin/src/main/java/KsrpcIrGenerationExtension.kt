@@ -294,6 +294,29 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
                 isValid = false
             }
         }
+        // Classpath-missing diagnostic for `Flow<T>`: when a @KsMethod references
+        // `kotlinx.coroutines.flow.Flow` in its input or output type but `ksrpc-flow`
+        // is not on the compile classpath, `determineType` falls through to
+        // `RpcType.DEFAULT` and `serializer<Flow<T>>()` fails with a confusing
+        // "Serializer for class 'Flow' not found" error from kotlinx.serialization.
+        // Surface a user-facing error pointing at the module to add instead.
+        if (!env.flowSupported) {
+            val hasFlow =
+                inputType == FqConstants.FLOW || outputType == FqConstants.FLOW
+            if (hasFlow) {
+                val fqName = irClass.kotlinFqName.asString()
+                val methodName = method.name.asString()
+                report.reportUserError(
+                    "@KsMethod `$fqName.$methodName` uses " +
+                        "`kotlinx.coroutines.flow.Flow` but ksrpc-flow is not on the " +
+                        "compile classpath. Add " +
+                        "`implementation(\"com.monkopedia:ksrpc-flow\")` to your " +
+                        "dependencies.",
+                    element = method
+                )
+                isValid = false
+            }
+        }
         return isValid
     }
 
