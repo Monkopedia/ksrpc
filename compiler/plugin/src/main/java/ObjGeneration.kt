@@ -355,7 +355,7 @@ internal class GenericMethodIrBuilder(
         // ksrpc-flow is on the compile classpath — otherwise we fall through to the generic
         // serializer path, which will produce a clearer "no serializer" diagnostic.
         if (env.flowSupported && type.classFqName == FqConstants.FLOW) {
-            return buildFlowTransformer(
+            return buildFlowSubserviceTransformer(
                 builder,
                 type,
                 serializerReceiver,
@@ -713,14 +713,14 @@ internal class GenericMethodIrBuilder(
         context.buildAnonymousServiceExecutor(env, referencedFunction, container)
 
     /**
-     * Emit `FlowTransformer<T>(KsFlowService.Obj<T>(Tser))` for a `Flow<T>` parameter or
+     * Emit `FlowSubserviceTransformer<T>(KsFlowService.Obj<T>(Tser))` for a `Flow<T>` parameter or
      * return type on a method belonging to a generic `@KsService`. The element type's
      * `KSerializer` is composed via [buildSerializer] so it can reference the outer
      * service's type parameters. Mirrors the non-generic path in
-     * [StubGeneration.buildFlowTransformer] but threads the generic serializer
+     * [StubGeneration.buildFlowSubserviceTransformer] but threads the generic serializer
      * composition through.
      */
-    private fun buildFlowTransformer(
+    private fun buildFlowSubserviceTransformer(
         builder: IrBuilderWithScope,
         flowType: IrType,
         serializerReceiver: IrValueParameter,
@@ -733,12 +733,12 @@ internal class GenericMethodIrBuilder(
         val elementType = simple.arguments.singleOrNull()?.typeOrFail
             ?: reportInternal(
                 "Flow<T> type ${flowType.render()} has no type argument — cannot emit " +
-                    "FlowTransformer"
+                    "FlowSubserviceTransformer"
             )
         val flowTransformerSymbol = env.flowTransformer
             ?: reportInternal(
                 "Flow detection fired despite flowSupported=false " +
-                    "(FlowTransformer symbol missing)"
+                    "(FlowSubserviceTransformer symbol missing)"
             )
         val ksFlowServiceSymbol = env.ksFlowService
             ?: reportInternal(

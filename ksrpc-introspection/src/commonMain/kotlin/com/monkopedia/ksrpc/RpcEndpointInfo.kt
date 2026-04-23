@@ -15,6 +15,7 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import kotlin.collections.associate
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
@@ -147,17 +148,25 @@ internal fun RpcMethod<*, *, *>.inputRpcDataType(): RpcDataType = inputTransform
 
 internal fun RpcMethod<*, *, *>.outputRpcDataType(): RpcDataType = outputTransform.rpcDataType
 
+@OptIn(KsrpcInternal::class)
 internal val Transformer<*>.rpcDataType: RpcDataType
-    get() {
-        return when (this) {
-            is BinaryDataTransformer -> RpcDataType.BinaryData
-            is SerializerTransformer<*> -> RpcDataType.DataStructure(serializer)
-            is SubserviceTransformer<*> -> RpcDataType.Service(serviceObject.serviceName)
-            // Out-of-module transformers (e.g. ksrpc-flow's `FlowTransformer`) surface
-            // as a generic Service entry — they delegate to `SubserviceTransformer`
-            // under the hood and their sub-service name is not recoverable from the
-            // introspection classpath. Introspection callers that need the exact
-            // sub-service should look at the underlying `SubserviceTransformer`.
-            else -> RpcDataType.Service(this::class.simpleName ?: "Unknown")
-        }
+    get() = when (this) {
+        is BinaryDataTransformer -> RpcDataType.BinaryData
+
+        is SerializerTransformer<*> -> RpcDataType.DataStructure(serializer)
+
+        // Matches `SubserviceTransformer<T>` (trivial adapter) as well as any
+        // user-facing adapter built on the same base — e.g. ksrpc-flow's
+        // `FlowSubserviceTransformer<T>` which adapts `Flow<T>` onto a
+        // `KsFlowService<T>` sub-service. All such transformers expose the
+        // underlying `RpcObject<T>` via `serviceObject`, so introspection can
+        // recover the real sub-service name regardless of the user-facing
+        // wrapper shape.
+        is BaseSubserviceTransformer<*, *> -> RpcDataType.Service(serviceObject.serviceName)
+
+        // Truly unknown transformer — fall back to the simple class name so
+        // at least something is reported. Callers will not be able to
+        // resolve it via `getIntrospectionFor`, but that's the best we can
+        // do without an in-tree bridge.
+        else -> RpcDataType.Service(this::class.simpleName ?: "Unknown")
     }

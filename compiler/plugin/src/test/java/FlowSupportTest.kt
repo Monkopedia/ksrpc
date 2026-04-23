@@ -31,7 +31,7 @@ import org.junit.Test
  * (wired via the `files(...)` test dependency in `build.gradle.kts`) so the
  * user code under test can resolve `kotlinx.coroutines.flow.Flow`,
  * `com.monkopedia.ksrpc.flow.KsFlowService<T>`, and
- * `com.monkopedia.ksrpc.flow.FlowTransformer<T>`.
+ * `com.monkopedia.ksrpc.flow.FlowSubserviceTransformer<T>`.
  */
 class FlowSupportTest {
 
