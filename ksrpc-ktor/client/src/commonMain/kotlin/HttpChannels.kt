@@ -23,7 +23,13 @@ import io.ktor.client.HttpClient
 /**
  * Turn an [HttpClient] into a [ChannelClient] for a specified baseUrl.
  *
+ * HTTP is a request/response transport only: the returned value is a [ChannelClient] (client-only),
+ * not a bidirectional [com.monkopedia.ksrpc.channels.Connection]. For a bidirectional connection,
+ * use the WebSocket or JSON-RPC transports instead.
+ *
  * This is functionally equivalent to baseUrl.toKsrpcUri().connect(env).
  */
-fun HttpClient.asConnection(baseUrl: String, env: KsrpcEnvironment<String>): ChannelClient<String> =
-    HttpSerializedChannel(this, baseUrl.trimEnd('/'), env)
+fun HttpClient.asHttpChannelClient(
+    baseUrl: String,
+    env: KsrpcEnvironment<String>
+): ChannelClient<String> = HttpSerializedChannel(this, baseUrl.trimEnd('/'), env)
