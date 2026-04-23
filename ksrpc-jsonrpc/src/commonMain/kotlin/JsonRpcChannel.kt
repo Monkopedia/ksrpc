@@ -17,11 +17,13 @@ package com.monkopedia.ksrpc.jsonrpc.internal
 
 import com.monkopedia.ksrpc.KsrpcEnvironment.Element
 import com.monkopedia.ksrpc.SuspendCloseable
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import kotlinx.serialization.Required
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
 
+@KsrpcInternal
 interface JsonRpcChannel :
     SuspendCloseable,
     Element<String> {
@@ -33,6 +35,7 @@ interface JsonRpcChannel :
     ): JsonElement?
 }
 
+@KsrpcInternal
 @Serializable
 data class JsonRpcRequest(
     @Required
@@ -42,6 +45,7 @@ data class JsonRpcRequest(
     val id: JsonPrimitive? = null
 )
 
+@KsrpcInternal
 @Serializable
 data class JsonRpcResponse(
     @Required
@@ -51,6 +55,7 @@ data class JsonRpcResponse(
     val id: JsonPrimitive? = null
 )
 
+@KsrpcInternal
 @Serializable
 data class JsonRpcError(val code: Int, val message: String, val data: JsonElement? = null) {
     companion object {

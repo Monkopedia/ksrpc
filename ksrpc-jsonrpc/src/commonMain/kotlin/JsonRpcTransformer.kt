@@ -13,9 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(KsrpcInternal::class)
+
 package com.monkopedia.ksrpc.jsonrpc.internal
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.packets.internal.CONTENT_LENGTH
 import com.monkopedia.ksrpc.packets.internal.CONTENT_TYPE
 import com.monkopedia.ksrpc.sockets.internal.appendLine
@@ -30,8 +33,10 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 
+@KsrpcInternal
 const val DEFAULT_CONTENT_TYPE = "application/vscode-jsonrpc; charset=utf-8"
 
+@KsrpcInternal
 abstract class JsonRpcTransformer {
     abstract val isOpen: Boolean
 
@@ -40,6 +45,7 @@ abstract class JsonRpcTransformer {
     abstract fun close(cause: Throwable?)
 }
 
+@KsrpcInternal
 fun Pair<ByteReadChannel, ByteWriteChannel>.jsonHeader(
     env: KsrpcEnvironment<String>
 ): JsonRpcTransformer = JsonRpcHeader(env, first, second)
@@ -100,6 +106,7 @@ internal class JsonRpcHeader(
     }
 }
 
+@KsrpcInternal
 fun Pair<ByteReadChannel, ByteWriteChannel>.jsonLine(
     env: KsrpcEnvironment<String>
 ): JsonRpcTransformer = JsonRpcLine(env, first, second)

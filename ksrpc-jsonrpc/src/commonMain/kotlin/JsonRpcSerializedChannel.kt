@@ -17,6 +17,7 @@ package com.monkopedia.ksrpc.jsonrpc.internal
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.RpcMethod
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
@@ -29,6 +30,7 @@ import kotlinx.serialization.json.JsonElement
 private val RpcMethod<*, *, *>.isNotification: Boolean
     get() = metadata("com.monkopedia.ksrpc.annotation.KsNotification") != null
 
+@KsrpcInternal
 class JsonRpcSerializedChannel(
     override val context: CoroutineContext,
     private val channel: JsonRpcChannel,
