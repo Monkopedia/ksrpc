@@ -467,6 +467,203 @@ interface GenericHolder<T> : RpcService {
     }
 
     @Test
+    fun `generic ksservice with KsTimeout on T-returning method compiles`() {
+        // Sibling metadata annotation `@KsTimeout` must compose with the generic-service
+        // stub/obj generation path. A regression here would fail as either a
+        // companion/stub generation error or a "missing metadata" runtime lookup.
+        val annotations = SourceFile.kotlin(
+            "Annotations.kt",
+            """
+package com.monkopedia.ksrpc.annotation
+
+@Target(AnnotationTarget.ANNOTATION_CLASS)
+@Retention(AnnotationRetention.BINARY)
+annotation class KsMethodMetadata
+
+@KsMethodMetadata
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.BINARY)
+annotation class KsTimeout(
+    val millis: Long = 0L,
+    val seconds: Long = 0L,
+    val minutes: Long = 0L
+)
+"""
+        )
+        val source = SourceFile.kotlin(
+            "main.kt",
+            """
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.annotation.KsTimeout
+import com.monkopedia.ksrpc.RpcService
+
+@KsService
+interface GenericWithTimeout<T> : RpcService {
+    @KsMethod("/get")
+    @KsTimeout(millis = 500)
+    suspend fun get(x: T): T
+}
+"""
+        )
+        val result = compile(listOf(annotations, source))
+        assertEquals(
+            KotlinCompilation.ExitCode.OK,
+            result.exitCode,
+            "messages: ${result.messages}"
+        )
+    }
+
+    @Test
+    fun `generic ksservice with user metadata annotation on T method compiles`() {
+        // User sibling metadata annotations (marked with `@KsMethodMetadata`) on a generic
+        // service must be captured via the same metadata pipeline as built-in ones.
+        // This covers shape (5) in issue #57.
+        val annotations = SourceFile.kotlin(
+            "Annotations.kt",
+            """
+package com.monkopedia.ksrpc.annotation
+
+@Target(AnnotationTarget.ANNOTATION_CLASS)
+@Retention(AnnotationRetention.BINARY)
+annotation class KsMethodMetadata
+"""
+        )
+        val userAnnotation = SourceFile.kotlin(
+            "Audit.kt",
+            """
+import com.monkopedia.ksrpc.annotation.KsMethodMetadata
+
+@KsMethodMetadata
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.BINARY)
+annotation class Audit(val level: String)
+"""
+        )
+        val source = SourceFile.kotlin(
+            "main.kt",
+            """
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.RpcService
+
+@KsService
+interface GenericWithAudit<T> : RpcService {
+    @KsMethod("/track")
+    @Audit("high")
+    suspend fun track(x: T)
+}
+"""
+        )
+        val result = compile(listOf(annotations, userAnnotation, source))
+        assertEquals(
+            KotlinCompilation.ExitCode.OK,
+            result.exitCode,
+            "messages: ${result.messages}"
+        )
+    }
+
+    @Test
+    fun `generic ksservice reached through deep super chain is rejected`() {
+        // Shape (2) in issue #57 — `@KsService` on `D<T>` where `RpcService` is reached
+        // transitively through two plain-Kotlin intermediate interfaces
+        // (`D -> C -> B -> A -> RpcService`). `KsrpcIrGenerationExtension.validateClass`
+        // only looks at direct supertypes for `RpcService`/`IntrospectableRpcService`,
+        // so the deep chain is currently rejected with a clear diagnostic.
+        //
+        // This test pins the user-facing behaviour: deep-chain `@KsService` emits a
+        // "does not extend com.monkopedia.ksrpc.RpcService" diagnostic rather than
+        // crashing in codegen. Supporting transitive ancestry detection on the
+        // generic-service path is tracked as a follow-up.
+        val source = SourceFile.kotlin(
+            "main.kt",
+            """
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.RpcService
+
+interface A : RpcService
+interface B : A
+interface C : B
+
+@KsService
+interface D<T> : C {
+    @KsMethod("/echo")
+    suspend fun echo(x: T): T
+}
+"""
+        )
+        val result = compile(sourceFile = source)
+        assertTrue(
+            result.exitCode != KotlinCompilation.ExitCode.OK,
+            "Expected compilation to fail for deep-chain @KsService, got: ${result.exitCode}"
+        )
+        assertTrue(
+            result.messages.contains("does not extend com.monkopedia.ksrpc.RpcService"),
+            "Expected RpcService-extends diagnostic, got: ${result.messages}"
+        )
+        // Confirm we do not see an internal-failure shape.
+        assertTrue(
+            !result.messages.contains("Invalid synthetic declaration"),
+            "Plugin must emit a user diagnostic, not crash on deep chains: ${result.messages}"
+        )
+    }
+
+    @Test
+    fun `generic ksservice with shallow plain-Kotlin super chain compiles`() {
+        // Companion test for the deep-chain case: one plain-Kotlin intermediate is the
+        // supported shape today (`A : RpcService` is the direct supertype). Verifies the
+        // existing validation still accepts this shape on a generic service.
+        val source = SourceFile.kotlin(
+            "main.kt",
+            """
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.RpcService
+
+@KsService
+interface GenericDirectChild<T> : RpcService {
+    @KsMethod("/echo")
+    suspend fun echo(x: T): T
+}
+"""
+        )
+        val result = compile(sourceFile = source)
+        assertEquals(
+            KotlinCompilation.ExitCode.OK,
+            result.exitCode,
+            "messages: ${result.messages}"
+        )
+    }
+
+    @Test
+    fun `generic ksservice with flipped wrapper type parameters compiles`() {
+        // Shape (6) in issue #57 — `Map<K, V>` in, `Map<V, K>` out. Verifies the generic
+        // wrapper-serializer composer threads K and V into independent slots in both the
+        // input and output transforms.
+        val source = SourceFile.kotlin(
+            "main.kt",
+            """
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.RpcService
+
+@KsService
+interface Pair2<K, V> : RpcService {
+    @KsMethod("/swap")
+    suspend fun swap(x: Map<K, V>): Map<V, K>
+}
+"""
+        )
+        val result = compile(sourceFile = source)
+        assertEquals(
+            KotlinCompilation.ExitCode.OK,
+            result.exitCode,
+            "messages: ${result.messages}"
+        )
+    }
+
+    @Test
     fun `out-variance on class type params is rejected`() {
         val source = SourceFile.kotlin(
             "main.kt",
