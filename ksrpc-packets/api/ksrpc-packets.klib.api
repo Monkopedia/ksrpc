@@ -57,16 +57,6 @@ final class <#A: kotlin/Any?> com.monkopedia.ksrpc.packets.internal/Packet { // 
     final val type // com.monkopedia.ksrpc.packets.internal/Packet.type|{}type[0]
         final fun <get-type>(): kotlin/Int // com.monkopedia.ksrpc.packets.internal/Packet.type.<get-type>|<get-type>(){}[0]
 
-    final fun component1(): kotlin/Int // com.monkopedia.ksrpc.packets.internal/Packet.component1|component1(){}[0]
-    final fun component2(): kotlin/String // com.monkopedia.ksrpc.packets.internal/Packet.component2|component2(){}[0]
-    final fun component3(): kotlin/String // com.monkopedia.ksrpc.packets.internal/Packet.component3|component3(){}[0]
-    final fun component4(): kotlin/String // com.monkopedia.ksrpc.packets.internal/Packet.component4|component4(){}[0]
-    final fun component5(): #A // com.monkopedia.ksrpc.packets.internal/Packet.component5|component5(){}[0]
-    final fun copy(kotlin/Int = ..., kotlin/String = ..., kotlin/String = ..., kotlin/String = ..., #A = ...): com.monkopedia.ksrpc.packets.internal/Packet<#A> // com.monkopedia.ksrpc.packets.internal/Packet.copy|copy(kotlin.Int;kotlin.String;kotlin.String;kotlin.String;1:0){}[0]
-    final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc.packets.internal/Packet.equals|equals(kotlin.Any?){}[0]
-    final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc.packets.internal/Packet.hashCode|hashCode(){}[0]
-    final fun toString(): kotlin/String // com.monkopedia.ksrpc.packets.internal/Packet.toString|toString(){}[0]
-
     final class <#A1: kotlin/Any?> $serializer : kotlinx.serialization.internal/GeneratedSerializer<com.monkopedia.ksrpc.packets.internal/Packet<#A1>> { // com.monkopedia.ksrpc.packets.internal/Packet.$serializer|null[0]
         constructor <init>(kotlinx.serialization/KSerializer<#A1>) // com.monkopedia.ksrpc.packets.internal/Packet.$serializer.<init>|<init>(kotlinx.serialization.KSerializer<1:0>){}[0]
 

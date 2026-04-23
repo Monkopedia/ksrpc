@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
 
 @KsrpcInternal
 @Serializable
-data class Packet<T>(
+class Packet<T>(
     @SerialName("t")
     val type: Int = 0,
     @SerialName("i")
