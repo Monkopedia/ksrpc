@@ -76,6 +76,31 @@ dependencies {
             )
         )
     )
+    // Locally-built `ksrpc-binary-kotlinx-io` — hosts the `SourceTransformer`
+    // the plugin emits for `kotlinx.io.Source` service signatures (issue #73).
+    testImplementation(
+        files(
+            project.rootDir.resolve(
+                "../ksrpc-binary-kotlinx-io/build/libs/" +
+                    "ksrpc-binary-kotlinx-io-jvm-0.11.1.jar"
+            )
+        )
+    )
+    // Locally-built `ksrpc-binary-okio` — hosts the `BufferedSourceTransformer`
+    // the plugin emits for `okio.BufferedSource` service signatures (issue #74).
+    testImplementation(
+        files(
+            project.rootDir.resolve(
+                "../ksrpc-binary-okio/build/libs/ksrpc-binary-okio-jvm-0.11.1.jar"
+            )
+        )
+    )
+    // User-facing binary types must be resolvable at test-compile time. The
+    // adapter jars above depend on these transitively, but BinaryAdapterDiagnosticTest
+    // intentionally strips an adapter jar from the compile classpath and still
+    // needs the user type to resolve — pull the sibling runtime jars directly.
+    testImplementation(libs.kotlinx.io)
+    testImplementation(libs.okio)
     testImplementation(kotlin("test-junit"))
     testImplementation("org.jetbrains.kotlin:kotlin-compiler-embeddable")
     testImplementation(libs.kotlin.compiletesting)

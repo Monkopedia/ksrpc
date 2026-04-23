@@ -107,7 +107,6 @@
 
 package com.monkopedia.ksrpc.plugin
 
-import com.monkopedia.ksrpc.plugin.FqConstants.BYTE_READ_CHANNEL
 import com.monkopedia.ksrpc.plugin.FqConstants.FQRPC_SERVICE
 import com.monkopedia.ksrpc.plugin.FqConstants.INTROSPECTABLE_RPC_SERVICE
 import com.monkopedia.ksrpc.plugin.FqConstants.KS_SERVICE
@@ -132,9 +131,9 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
 
     override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
         val classes = ServiceClass.findServices(report, moduleFragment)
-        classes.values.removeIf { !validate(it) }
-
         val env = KsrpcGenerationEnvironment(pluginContext, report)
+        classes.values.removeIf { !validate(it, env) }
+
         val transformers = listOf(
             StubGeneration(pluginContext, report, classes, env),
             ObjGeneration(pluginContext, report, classes, env),
@@ -146,14 +145,15 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
         }
     }
 
-    private fun validate(cls: ServiceClass): Boolean {
+    private fun validate(cls: ServiceClass, env: KsrpcGenerationEnvironment): Boolean {
         val names = mutableSetOf<String>()
         return cls.methods.fold(validateClass(cls.irClass)) { current, serviceMethod ->
             validateMethod(
                 cls.irClass,
                 serviceMethod.function,
                 serviceMethod.ksMethodAnnotation,
-                names
+                names,
+                env
             ) && validateNotification(
                 cls.irClass,
                 serviceMethod
@@ -217,7 +217,8 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
         irClass: IrClass,
         method: IrFunction,
         annotation: IrConstructorCall,
-        names: MutableSet<String>
+        names: MutableSet<String>,
+        env: KsrpcGenerationEnvironment
     ): Boolean {
         var isValid = true
         if (method.typeParameters.isNotEmpty()) {
@@ -258,14 +259,10 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
         }
         // valueParams may be empty for 0-arg @KsMethod functions; the RpcMethod is
         // generated with `Unit` as the input type in that case, so there is no
-        // user-declared input to check against ByteReadChannel.
+        // user-declared input to check against a binary adapter type.
         val inputType = valueParams.firstOrNull()?.type?.classFqName
         val outputType = method.returnType.classFqName
-        val binaryFqNames = setOf(
-            BYTE_READ_CHANNEL,
-            FqConstants.KOTLINX_IO_SOURCE,
-            FqConstants.OKIO_BUFFERED_SOURCE
-        )
+        val binaryFqNames = env.binaryUserFqNames
         if (inputType in binaryFqNames && outputType in binaryFqNames) {
             val fqName = irClass.kotlinFqName.asString()
             val methodName = method.name.asString()
@@ -275,6 +272,27 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
                 element = method
             )
             isValid = false
+        }
+        // Classpath-missing diagnostic: when a @KsMethod uses a known binary type but the
+        // matching ksrpc-binary-* adapter module is not on the compile classpath, surface
+        // a user-facing error pointing at the module to add. Without this diagnostic, the
+        // compilation later fails with a confusing `reportInternal` crash deep inside
+        // StubGeneration when it tries to emit the missing transformer.
+        for (sideType in listOfNotNull(inputType, outputType)) {
+            val adapter = env.findAdapterByFqName(sideType) ?: continue
+            if (adapter.transformerClass == null) {
+                val fqName = irClass.kotlinFqName.asString()
+                val methodName = method.name.asString()
+                report.reportUserError(
+                    "@KsMethod `$fqName.$methodName` uses " +
+                        "`${adapter.userFqName.asString()}` but the adapter module is not " +
+                        "on the compile classpath. Add " +
+                        "`implementation(\"com.monkopedia:${adapter.moduleHint}\")` to " +
+                        "your dependencies.",
+                    element = method
+                )
+                isValid = false
+            }
         }
         return isValid
     }

@@ -44,30 +44,48 @@ class KsrpcGenerationEnvironment(
     val serviceExecutor = referenceClass(FqConstants.SERVICE_EXECUTOR)
     val serializerTransformer = referenceClass(FqConstants.SERIALIZER_TRANSFORMER)
 
-    // The `ByteReadChannel` adapter lives in `ksrpc-binary-ktor`. Resolved
-    // optionally so modules that never declare a `ByteReadChannel` service
-    // signature — including `ksrpc-core` itself, which applies this plugin —
-    // compile even when `ksrpc-binary-ktor` is not on the classpath. Callers
-    // that need this symbol emit a user-error diagnostic when the lookup
-    // misses.
-    val binaryTransformer: IrClassSymbol? =
-        maybeReferenceClass(FqConstants.BYTE_READ_CHANNEL_TRANSFORMER)
+    /**
+     * Registry of binary adapters the plugin knows about. Each entry pairs a
+     * user-facing binary type (seen in an `@KsMethod` signature) with the
+     * adapter `Transformer` object that lives in a dedicated `ksrpc-binary-*`
+     * module. Adapter modules are optional on the compile classpath: a
+     * consumer that never declares one of these types in a service signature
+     * does not need the corresponding adapter jar. Call sites that depend on
+     * a specific adapter look it up via [findAdapterForUserType] /
+     * [findAdapterByFqName] and emit a user-error diagnostic pointing at
+     * [BinaryAdapter.moduleHint] when the adapter is missing.
+     *
+     * Adding a new binary adapter is a matter of adding a new entry here and
+     * the matching pair of FQN constants in [FqConstants] — no per-type
+     * branches elsewhere in the plugin.
+     */
+    internal val binaryAdapters: List<BinaryAdapter> = listOf(
+        BinaryAdapter(
+            userFqName = FqConstants.BYTE_READ_CHANNEL,
+            transformerFqName = FqConstants.BYTE_READ_CHANNEL_TRANSFORMER,
+            moduleHint = "ksrpc-binary-ktor",
+            transformerClass = maybeReferenceClass(FqConstants.BYTE_READ_CHANNEL_TRANSFORMER)
+        ),
+        BinaryAdapter(
+            userFqName = FqConstants.KOTLINX_IO_SOURCE,
+            transformerFqName = FqConstants.SOURCE_TRANSFORMER,
+            moduleHint = "ksrpc-binary-kotlinx-io",
+            transformerClass = maybeReferenceClass(FqConstants.SOURCE_TRANSFORMER)
+        ),
+        BinaryAdapter(
+            userFqName = FqConstants.OKIO_BUFFERED_SOURCE,
+            transformerFqName = FqConstants.BUFFERED_SOURCE_TRANSFORMER,
+            moduleHint = "ksrpc-binary-okio",
+            transformerClass = maybeReferenceClass(FqConstants.BUFFERED_SOURCE_TRANSFORMER)
+        )
+    )
 
-    // The `kotlinx.io.Source` adapter lives in `ksrpc-binary-kotlinx-io`.
-    // Same optional-resolution pattern as [binaryTransformer]: consumers
-    // that never declare a `Source` service signature don't need the
-    // adapter on their classpath; callers emit a user-error diagnostic
-    // when the lookup misses.
-    val sourceTransformer: IrClassSymbol? =
-        maybeReferenceClass(FqConstants.SOURCE_TRANSFORMER)
+    /** FQN lookup used by method-shape validation and dispatcher paths. */
+    internal val binaryUserFqNames: Set<FqName> = binaryAdapters.map { it.userFqName }.toSet()
 
-    // The `okio.BufferedSource` adapter lives in `ksrpc-binary-okio`.
-    // Same optional-resolution pattern as [binaryTransformer]: consumers
-    // that never declare a `BufferedSource` service signature don't need
-    // the adapter on their classpath; callers emit a user-error diagnostic
-    // when the lookup misses.
-    val bufferedSourceTransformer: IrClassSymbol? =
-        maybeReferenceClass(FqConstants.BUFFERED_SOURCE_TRANSFORMER)
+    /** Find the adapter for a user-facing [FqName], or null if unknown. */
+    internal fun findAdapterByFqName(fqName: FqName?): BinaryAdapter? =
+        fqName?.let { name -> binaryAdapters.firstOrNull { it.userFqName == name } }
     val introspectionImpl: IrClassSymbol by lazy {
         referenceClass(FqConstants.INTROSPECTION_SERVICE_IMPL)
     }
@@ -208,9 +226,23 @@ class KsrpcGenerationEnvironment(
         maybeReferenceClass(name) ?: reportInternal(
             "can't resolve $name on the compile classpath — ksrpc-core must be a dependency"
         )
-
-    private fun referenceObject(name: ClassId): IrClassSymbol =
-        context.referenceClass(name) ?: reportInternal(
-            "can't resolve $name on the compile classpath — ksrpc-core must be a dependency"
-        )
 }
+
+/**
+ * One entry in the plugin's binary-adapter registry.
+ *
+ * @property userFqName     User-facing type FQN (e.g. `io.ktor.utils.io.ByteReadChannel`).
+ * @property transformerFqName `Transformer` implementation FQN in the adapter module
+ *                          (e.g. `com.monkopedia.ksrpc.binary.ktor.ByteReadChannelTransformer`).
+ * @property moduleHint     The gradle-coordinate name of the adapter module, surfaced in the
+ *                          missing-on-classpath diagnostic (e.g. `"ksrpc-binary-ktor"`).
+ * @property transformerClass Resolved symbol for the transformer, or `null` when the adapter
+ *                          module is not on the compile classpath. Call sites check this
+ *                          and emit a user diagnostic pointing at [moduleHint].
+ */
+internal data class BinaryAdapter(
+    val userFqName: FqName,
+    val transformerFqName: ClassId,
+    val moduleHint: String,
+    val transformerClass: IrClassSymbol?
+)

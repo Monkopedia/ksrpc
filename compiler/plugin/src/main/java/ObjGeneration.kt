@@ -326,15 +326,18 @@ internal class GenericMethodIrBuilder(
         serializerFields: List<IrField>,
         method: IrSimpleFunction
     ): IrExpression {
-        // BINARY (ByteReadChannel) transformer. Emits the
-        // `ByteReadChannelTransformer` from `ksrpc-binary-ktor` — future
-        // versions will dispatch via the adapter registry planned in #75.
-        if (type.classFqName == FqConstants.BYTE_READ_CHANNEL) {
-            val binaryTransformer = env.binaryTransformer ?: run {
+        // Binary adapters (ByteReadChannel, kotlinx.io.Source, okio.BufferedSource, ...).
+        // Dispatch via the adapter registry — see [KsrpcGenerationEnvironment.binaryAdapters].
+        val binaryAdapter = env.findAdapterByFqName(type.classFqName)
+        if (binaryAdapter != null) {
+            val transformer = binaryAdapter.transformerClass ?: run {
                 report.reportUserError(
-                    "ByteReadChannel in @KsMethod requires `ksrpc-binary-ktor` " +
-                        "on the compile classpath for " +
-                        "${cls.irClass.kotlinFqName.asString()}.${method.name.asString()}",
+                    "@KsMethod `${cls.irClass.kotlinFqName.asString()}." +
+                        "${method.name.asString()}` uses " +
+                        "`${binaryAdapter.userFqName.asString()}` but the adapter module " +
+                        "is not on the compile classpath. Add " +
+                        "`implementation(\"com.monkopedia:${binaryAdapter.moduleHint}\")` " +
+                        "to your dependencies.",
                     element = method
                 )
                 // Fall back to `Unit` serializer transformer so codegen doesn't crash
@@ -346,48 +349,7 @@ internal class GenericMethodIrBuilder(
                     this.type = env.serializerTransformer.typeWith(context.irBuiltIns.unitType)
                 }
             }
-            return builder.irGetObject(binaryTransformer)
-        }
-        // BINARY (kotlinx.io.Source) transformer. Emits the
-        // `SourceTransformer` from `ksrpc-binary-kotlinx-io` — same optional-
-        // resolution pattern as [BYTE_READ_CHANNEL] above.
-        if (type.classFqName == FqConstants.KOTLINX_IO_SOURCE) {
-            val sourceTransformer = env.sourceTransformer ?: run {
-                report.reportUserError(
-                    "kotlinx.io.Source in @KsMethod requires `ksrpc-binary-kotlinx-io` " +
-                        "on the compile classpath for " +
-                        "${cls.irClass.kotlinFqName.asString()}.${method.name.asString()}",
-                    element = method
-                )
-                return builder.irCallConstructor(
-                    env.serializerTransformer.constructors.first(),
-                    listOf(context.irBuiltIns.unitType)
-                ).apply {
-                    this.type = env.serializerTransformer.typeWith(context.irBuiltIns.unitType)
-                }
-            }
-            return builder.irGetObject(sourceTransformer)
-        }
-        // BINARY (okio.BufferedSource) transformer. Emits the
-        // `BufferedSourceTransformer` from `ksrpc-binary-okio` — same
-        // optional-resolution pattern as [BYTE_READ_CHANNEL] and
-        // [KOTLINX_IO_SOURCE] above.
-        if (type.classFqName == FqConstants.OKIO_BUFFERED_SOURCE) {
-            val bufferedSourceTransformer = env.bufferedSourceTransformer ?: run {
-                report.reportUserError(
-                    "okio.BufferedSource in @KsMethod requires `ksrpc-binary-okio` " +
-                        "on the compile classpath for " +
-                        "${cls.irClass.kotlinFqName.asString()}.${method.name.asString()}",
-                    element = method
-                )
-                return builder.irCallConstructor(
-                    env.serializerTransformer.constructors.first(),
-                    listOf(context.irBuiltIns.unitType)
-                ).apply {
-                    this.type = env.serializerTransformer.typeWith(context.irBuiltIns.unitType)
-                }
-            }
-            return builder.irGetObject(bufferedSourceTransformer)
+            return builder.irGetObject(transformer)
         }
         // Flow<T> is bridged to the KsFlowService sub-service protocol. Only reachable when
         // ksrpc-flow is on the compile classpath — otherwise we fall through to the generic
