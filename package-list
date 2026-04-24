@@ -16,6 +16,8 @@ $dokka.location:com.monkopedia.ksrpc.server/ServiceApp/run/#/PointingToDeclarati
 module:ksrpc-api
 com.monkopedia.ksrpc
 com.monkopedia.ksrpc.annotation
+module:ksrpc-binary-ktor
+com.monkopedia.ksrpc.binary.ktor
 module:ksrpc-core
 com.monkopedia.ksrpc
 com.monkopedia.ksrpc.channels
