@@ -131,6 +131,7 @@ import org.jetbrains.kotlin.ir.backend.js.utils.isDispatchReceiver
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
+import org.jetbrains.kotlin.ir.expressions.IrClassReference
 import org.jetbrains.kotlin.ir.expressions.IrConst
 import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
@@ -169,6 +170,9 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
                 names,
                 env
             ) && validateNotification(
+                cls.irClass,
+                serviceMethod
+            ) && validateErrorBindings(
                 cls.irClass,
                 serviceMethod
             ) && current
@@ -346,6 +350,43 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
                         "`implementation(\"com.monkopedia:ksrpc-flow\")` to your " +
                         "dependencies.",
                     element = method
+                )
+                isValid = false
+            }
+        }
+        return isValid
+    }
+
+    /**
+     * Reject `@KsError(type = ...)` bindings whose payload type is not
+     * `@Serializable`. The compiler plugin captures the `type` argument as an
+     * `IrClassReference` and emits `serializer<type>()` at codegen; without
+     * `@Serializable`, that lookup fails at runtime with a confusing
+     * `SerializationException`. Catching it here gives the user a clear
+     * pointer at the offending annotation.
+     *
+     * IR-phase validation was chosen because the plugin does not yet register
+     * FIR checkers (a FIR-phase checker would give an IDE red-squiggle;
+     * tracked by #65 as a 1.0+ follow-up).
+     */
+    private fun validateErrorBindings(irClass: IrClass, serviceMethod: ServiceMethod): Boolean {
+        var isValid = true
+        for (annotation in serviceMethod.errorAnnotations) {
+            val typeArg = annotation.arguments.getOrNull(1) as? IrClassReference ?: continue
+            val payloadClass = typeArg.classType.classOrNull?.owner ?: continue
+            val isSerializable = payloadClass.annotations.any {
+                it.type.classFqName == FqConstants.KOTLINX_SERIALIZABLE
+            }
+            if (!isSerializable) {
+                val fqName = irClass.kotlinFqName.asString()
+                val methodName = serviceMethod.function.name.asString()
+                val payloadFqName = payloadClass.kotlinFqName.asString()
+                report.reportUserError(
+                    "@KsError on $fqName.$methodName: type `$payloadFqName` must be " +
+                        "`@Serializable`. Annotate `$payloadFqName` with " +
+                        "`@kotlinx.serialization.Serializable` or remove this " +
+                        "@KsError binding.",
+                    element = serviceMethod.function
                 )
                 isValid = false
             }

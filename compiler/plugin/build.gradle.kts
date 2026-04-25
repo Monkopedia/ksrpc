@@ -37,6 +37,15 @@ dependencies {
     ksp(libs.autoservice)
     compileOnly(libs.autoservice.annotations)
 
+    // Locally-built `ksrpc-api` jvmJar, listed BEFORE the published `ksrpctest`
+    // coordinate so the newly-added `@KsError` annotation (#77, Part 2 of #13)
+    // is visible to the test sources. The published 0.11.1 ksrpc-api coordinate
+    // predates the annotation.
+    testImplementation(
+        files(
+            project.rootDir.resolve("../ksrpc-api/build/libs/ksrpc-api-jvm-0.11.1.jar")
+        )
+    )
     // Locally-built `ksrpc-core` jvmJar, listed BEFORE the published `ksrpctest`
     // coordinate so the local (non-sealed) `Transformer` interface takes
     // precedence over the published (sealed) one. The FlowSupportTest (#39) needs
@@ -103,6 +112,14 @@ dependencies {
     testImplementation(libs.okio)
     testImplementation(kotlin("test-junit"))
     testImplementation("org.jetbrains.kotlin:kotlin-compiler-embeddable")
+    // Exposes `SerializationComponentRegistrar` so tests that need to round-trip
+    // through kotlinx-serialization (e.g. KsErrorBindingTest verifying the
+    // captured `KSerializer` resolves at runtime) can chain the kotlinx.serialization
+    // plugin alongside the ksrpc plugin via compile-testing. Kept out of the main
+    // classpath to avoid leaking onto production builds.
+    testImplementation(
+        "org.jetbrains.kotlin:kotlin-serialization-compiler-plugin-embeddable"
+    )
     testImplementation(libs.kotlin.compiletesting)
 }
 
