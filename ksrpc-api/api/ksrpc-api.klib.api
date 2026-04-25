@@ -10,6 +10,13 @@ open annotation class com.monkopedia.ksrpc.annotation/ExperimentalKsrpc : kotlin
     constructor <init>() // com.monkopedia.ksrpc.annotation/ExperimentalKsrpc.<init>|<init>(){}[0]
 }
 
+open annotation class com.monkopedia.ksrpc.annotation/KsContext : kotlin/Annotation { // com.monkopedia.ksrpc.annotation/KsContext|null[0]
+    constructor <init>(kotlin.reflect/KClass<out com.monkopedia.ksrpc/KsContextBinding<*>>) // com.monkopedia.ksrpc.annotation/KsContext.<init>|<init>(kotlin.reflect.KClass<out|com.monkopedia.ksrpc.KsContextBinding<*>>){}[0]
+
+    final val binding // com.monkopedia.ksrpc.annotation/KsContext.binding|{}binding[0]
+        final fun <get-binding>(): kotlin.reflect/KClass<out com.monkopedia.ksrpc/KsContextBinding<*>> // com.monkopedia.ksrpc.annotation/KsContext.binding.<get-binding>|<get-binding>(){}[0]
+}
+
 open annotation class com.monkopedia.ksrpc.annotation/KsError : kotlin/Annotation { // com.monkopedia.ksrpc.annotation/KsError|null[0]
     constructor <init>(kotlin/Int, kotlin.reflect/KClass<*>) // com.monkopedia.ksrpc.annotation/KsError.<init>|<init>(kotlin.Int;kotlin.reflect.KClass<*>){}[0]
 
@@ -51,6 +58,16 @@ open annotation class com.monkopedia.ksrpc.annotation/KsTimeout : kotlin/Annotat
 
 open annotation class com.monkopedia.ksrpc.annotation/KsrpcInternal : kotlin/Annotation { // com.monkopedia.ksrpc.annotation/KsrpcInternal|null[0]
     constructor <init>() // com.monkopedia.ksrpc.annotation/KsrpcInternal.<init>|<init>(){}[0]
+}
+
+abstract interface <#A: kotlin.coroutines/CoroutineContext.Element> com.monkopedia.ksrpc/KsContextBinding { // com.monkopedia.ksrpc/KsContextBinding|null[0]
+    abstract val contextKey // com.monkopedia.ksrpc/KsContextBinding.contextKey|{}contextKey[0]
+        abstract fun <get-contextKey>(): kotlin.coroutines/CoroutineContext.Key<#A> // com.monkopedia.ksrpc/KsContextBinding.contextKey.<get-contextKey>|<get-contextKey>(){}[0]
+    abstract val wireKey // com.monkopedia.ksrpc/KsContextBinding.wireKey|{}wireKey[0]
+        abstract fun <get-wireKey>(): kotlin/String // com.monkopedia.ksrpc/KsContextBinding.wireKey.<get-wireKey>|<get-wireKey>(){}[0]
+
+    abstract fun fromWire(kotlin/String): #A // com.monkopedia.ksrpc/KsContextBinding.fromWire|fromWire(kotlin.String){}[0]
+    abstract fun toWire(#A): kotlin/String // com.monkopedia.ksrpc/KsContextBinding.toWire|toWire(1:0){}[0]
 }
 
 abstract interface com.monkopedia.ksrpc/RpcService : com.monkopedia.ksrpc/SuspendCloseable { // com.monkopedia.ksrpc/RpcService|null[0]
