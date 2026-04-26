@@ -359,11 +359,15 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
 
     /**
      * Reject `@KsError(type = ...)` bindings whose payload type is not
-     * `@Serializable`. The compiler plugin captures the `type` argument as an
-     * `IrClassReference` and emits `serializer<type>()` at codegen; without
-     * `@Serializable`, that lookup fails at runtime with a confusing
-     * `SerializationException`. Catching it here gives the user a clear
-     * pointer at the offending annotation.
+     * `@Serializable` or does not extend `kotlin.Throwable`. The compiler
+     * plugin captures the `type` argument as an `IrClassReference` and emits
+     * `serializer<type>()` at codegen; without `@Serializable`, that lookup
+     * fails at runtime with a confusing `SerializationException`. The
+     * runtime decoder also requires the deserialized payload to be castable
+     * to `Throwable` so it can be re-thrown — without that constraint the
+     * `as? Throwable` guard in [com.monkopedia.ksrpc.RpcMethod.decodeError]
+     * silently degrades to the forward-compat path. Catching both at compile
+     * time gives the user a clear pointer at the offending annotation.
      *
      * IR-phase validation was chosen because the plugin does not yet register
      * FIR checkers (a FIR-phase checker would give an IDE red-squiggle;
@@ -377,15 +381,26 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
             val isSerializable = payloadClass.annotations.any {
                 it.type.classFqName == FqConstants.KOTLINX_SERIALIZABLE
             }
+            val fqName = irClass.kotlinFqName.asString()
+            val methodName = serviceMethod.function.name.asString()
+            val payloadFqName = payloadClass.kotlinFqName.asString()
             if (!isSerializable) {
-                val fqName = irClass.kotlinFqName.asString()
-                val methodName = serviceMethod.function.name.asString()
-                val payloadFqName = payloadClass.kotlinFqName.asString()
                 report.reportUserError(
                     "@KsError on $fqName.$methodName: type `$payloadFqName` must be " +
                         "`@Serializable`. Annotate `$payloadFqName` with " +
                         "`@kotlinx.serialization.Serializable` or remove this " +
                         "@KsError binding.",
+                    element = serviceMethod.function
+                )
+                isValid = false
+            }
+            val isThrowable = payloadClass.isSubclassOfFqName("kotlin.Throwable")
+            if (!isThrowable) {
+                report.reportUserError(
+                    "@KsError on $fqName.$methodName: type `$payloadFqName` must extend " +
+                        "`kotlin.Throwable` (typically `RuntimeException`). The bound " +
+                        "type IS the thrown class — handlers `throw $payloadFqName(...)` " +
+                        "directly and clients catch the same type.",
                     element = serviceMethod.function
                 )
                 isValid = false
