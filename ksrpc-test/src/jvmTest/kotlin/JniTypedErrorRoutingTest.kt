@@ -37,8 +37,9 @@ import kotlinx.serialization.Serializable
  * `@KsError` payload attached. The JNI envelope's flat-list shape no longer cares about
  * "is error" — error frames are carried as [CallData.Error] by the routing layer
  * ([RpcMethod.encodeError] / [RpcMethod.decodeError]) and the JNI [JniSerialization] only
- * round-trips successful payloads. This test pins the encode/decode contract end-to-end so
- * any future tweak to the JNI envelope can't silently drop the typed-error round-trip.
+ * round-trips successful payloads. Under the typed-Throwable contract the bound type IS
+ * the thrown class, so the encode side is fed a `JniError` directly (not a wrapper) and
+ * the decode side reconstitutes the same typed Throwable.
  *
  * Lives in `ksrpc-test/jvmTest` because [JniSerialization] eagerly initializes the native
  * bindings and that requires the test native lib (built by this module) to be loaded first.
@@ -46,12 +47,14 @@ import kotlinx.serialization.Serializable
 class JniTypedErrorRoutingTest {
 
     @Serializable
-    data class JniErrorPayload(val retry: Boolean, val reason: String)
+    class JniError(val retry: Boolean, val reason: String) : RuntimeException() {
+        override val message: String get() = "init failed: $reason"
+    }
 
     @KsService
     interface JniTypedService : RpcService {
         @KsMethod("/init")
-        @KsError(code = 100, type = JniErrorPayload::class)
+        @KsError(code = 100, type = JniError::class)
         suspend fun init(input: String): String
     }
 
@@ -61,32 +64,23 @@ class JniTypedErrorRoutingTest {
         val env = jniEnv()
         val rpcObject = rpcObject<JniTypedService>()
         val initMethod = rpcObject.findEndpoint("init")
-        val payload = JniErrorPayload(retry = true, reason = "bad input")
+        val thrown = JniError(retry = true, reason = "bad input")
 
-        // Server-side encode: thrown KsrpcException with bound payload becomes a
-        // CallData.Error<JniSerialized> whose errorData is the payload encoded via
-        // JniSerialization.
-        val encoded = initMethod.encodeError(
-            KsrpcException(code = 100, message = "init failed", data = payload),
-            env
-        )
+        // Server-side encode: thrown JniError becomes a CallData.Error<JniSerialized>
+        // whose errorData is the throwable encoded via JniSerialization. The wire `code`
+        // is sourced from the @KsError binding, not from any wrapper.
+        val encoded = initMethod.encodeError(thrown, env)
         assertIs<CallData.Error<JniSerialized>>(encoded)
         assertEquals(100, encoded.errorCode)
-        // [Throwable.asString] on JVM is the full stack — match contains rather than equals.
-        kotlin.test.assertTrue(
-            encoded.errorMessage.contains("init failed"),
-            encoded.errorMessage
-        )
+        assertEquals("init failed: bad input", encoded.errorMessage)
         assertNotNull(encoded.errorData, "Typed payload must survive JNI encode")
 
-        // Client-side decode: CallData.Error -> KsrpcException with deserialized typed data.
+        // Client-side decode: CallData.Error -> typed JniError Throwable.
         val decoded = initMethod.decodeError(encoded, env)
-        assertIs<KsrpcException>(decoded)
-        assertEquals(100, decoded.code)
-        kotlin.test.assertTrue(decoded.message.contains("init failed"), decoded.message)
-        val data = decoded.data
-        assertIs<JniErrorPayload>(data)
-        assertEquals(payload, data)
+        assertIs<JniError>(decoded)
+        assertEquals(true, decoded.retry)
+        assertEquals("bad input", decoded.reason)
+        assertEquals("init failed: bad input", decoded.message)
     }
 
     @Test

@@ -26,24 +26,24 @@ import com.monkopedia.ksrpc.ktor.asHttpChannelClient
 import com.monkopedia.ksrpc.ktor.serveHttp
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post
-import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
-import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.fail
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class HttpInitErrorPayload(val retry: Boolean, val reason: String)
+class HttpInitError(val retry: Boolean, val reason: String) : RuntimeException() {
+    override val message: String get() = "init failed: $reason"
+}
 
 @KsService
 interface HttpTypedErrorService : RpcService {
     @KsMethod("/init")
-    @KsError(code = 100, type = HttpInitErrorPayload::class)
+    @KsError(code = 100, type = HttpInitError::class)
     suspend fun init(input: String): String
 
     @KsMethod("/missing-only")
@@ -55,19 +55,15 @@ class HttpTypedErrorRoutingTest {
     /**
      * Verifies the default error-code-to-status map: thrown
      * [com.monkopedia.ksrpc.RpcEndpointException] surfaces as HTTP 404, the typed-payload
-     * round-trip reaches the client as a [KsrpcException], and the user-defined code 100 (no
-     * default mapping) lands on HTTP 500 with the original code recoverable from the
-     * `X-Ksrpc-Error-Code` header.
+     * round-trip reaches the client as the bound [HttpInitError] Throwable, and the
+     * user-defined code 100 (no default mapping) lands on HTTP 500 with the original code
+     * recoverable from the `X-Ksrpc-Error-Code` header.
      */
     @Test
     fun typedErrorRoundTripsOverHttp() = runBlockingUnit {
         val service = object : HttpTypedErrorService {
             override suspend fun init(input: String): String {
-                throw KsrpcException(
-                    code = 100,
-                    message = "user failure",
-                    data = HttpInitErrorPayload(retry = true, reason = "input was: $input")
-                )
+                throw HttpInitError(retry = true, reason = "input was: $input")
             }
 
             override suspend fun missingOnly(input: String): String = "ok"
@@ -87,14 +83,11 @@ class HttpTypedErrorRoutingTest {
                     val stub = client.defaultChannel().toStub<HttpTypedErrorService, String>()
                     try {
                         stub.init("seed")
-                        fail("Expected KsrpcException")
+                        fail("Expected HttpInitError")
                     } catch (t: Throwable) {
-                        assertIs<KsrpcException>(t)
-                        assertEquals(100, t.code)
-                        val payload = t.data
-                        assertIs<HttpInitErrorPayload>(payload)
-                        assertEquals(true, payload.retry)
-                        assertEquals("input was: seed", payload.reason)
+                        assertIs<HttpInitError>(t)
+                        assertEquals(true, t.retry)
+                        assertEquals("input was: seed", t.reason)
                     }
                 } finally {
                     httpClient.close()
@@ -142,19 +135,18 @@ class HttpTypedErrorRoutingTest {
     /**
      * Custom-code fallback: a user code outside the default map lands on HTTP 500 with
      * `X-Ksrpc-Error-Code` carrying the original code so the client can recover it for
-     * `@KsError`-bound payload routing.
+     * `@KsError`-bound payload routing. The client side here has no @KsError binding
+     * for code 100 on the called endpoint (the call goes via the raw HTTP transport with
+     * no service-side stub) — under the typed-Throwable contract that means the forward-
+     * compat path on [com.monkopedia.ksrpc.RpcMethod.decodeError] would surface a generic
+     * [KsrpcException] with the raw payload, but here we exercise the wire envelope
+     * directly to verify the header carries the user code.
      */
     @Test
     fun customCodeFallsBackToHeader() = runBlockingUnit {
         val service = object : HttpTypedErrorService {
             override suspend fun init(input: String): String {
-                // 100 isn't in the default code-to-status map, so the server responds 500
-                // with X-Ksrpc-Error-Code: 100.
-                throw KsrpcException(
-                    code = 100,
-                    message = "user failure",
-                    data = HttpInitErrorPayload(retry = false, reason = "fallback")
-                )
+                throw KsrpcException(code = 100, message = "user failure")
             }
 
             override suspend fun missingOnly(input: String): String = "ok"
@@ -177,7 +169,7 @@ class HttpTypedErrorRoutingTest {
                             // dispatch fails before reaching the handler and the response
                             // shape is the generic INTERNAL_ERROR_CODE 500, not the
                             // user-coded 100 fallback we're testing.
-                            setBody("\"hello\"")
+                            io.ktor.client.request.setBody("\"hello\"")
                         }
                     assertEquals(HttpStatusCode.InternalServerError, raw.status)
                     assertEquals("100", raw.headers[KSRPC_ERROR_CODE_HEADER])
@@ -192,17 +184,13 @@ class HttpTypedErrorRoutingTest {
     /**
      * Custom error-code-to-status map: when user maps 100 -> 401, the response status is
      * 401 (no header fallback needed), and the client's matching map decodes 401 back to
-     * code 100 for typed-payload routing.
+     * code 100 for typed-payload routing — yielding the bound [HttpInitError] Throwable.
      */
     @Test
     fun customErrorMappingIsRespectedRoundTrip() = runBlockingUnit {
         val service = object : HttpTypedErrorService {
             override suspend fun init(input: String): String {
-                throw KsrpcException(
-                    code = 100,
-                    message = "auth needed",
-                    data = HttpInitErrorPayload(retry = true, reason = "session expired")
-                )
+                throw HttpInitError(retry = true, reason = "session expired")
             }
 
             override suspend fun missingOnly(input: String): String = "ok"
@@ -228,12 +216,10 @@ class HttpTypedErrorRoutingTest {
                     val stub = client.defaultChannel().toStub<HttpTypedErrorService, String>()
                     try {
                         stub.init("seed")
-                        fail("Expected KsrpcException")
+                        fail("Expected HttpInitError")
                     } catch (t: Throwable) {
-                        assertIs<KsrpcException>(t)
-                        assertEquals(100, t.code)
-                        val payload = assertNotNull(t.data as? HttpInitErrorPayload)
-                        assertEquals("session expired", payload.reason)
+                        assertIs<HttpInitError>(t)
+                        assertEquals("session expired", t.reason)
                     }
                 } finally {
                     httpClient.close()
