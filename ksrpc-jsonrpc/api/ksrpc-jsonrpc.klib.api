@@ -178,6 +178,17 @@ final class com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcSerializedChannel : com
     final suspend fun onClose(kotlin.coroutines/SuspendFunction0<kotlin/Unit>) // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcSerializedChannel.onClose|onClose(kotlin.coroutines.SuspendFunction0<kotlin.Unit>){}[0]
 }
 
+final class com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcServerError : kotlin/RuntimeException { // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcServerError|null[0]
+    constructor <init>(kotlin/Int, kotlin/String, kotlinx.serialization.json/JsonElement?) // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcServerError.<init>|<init>(kotlin.Int;kotlin.String;kotlinx.serialization.json.JsonElement?){}[0]
+
+    final val data // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcServerError.data|{}data[0]
+        final fun <get-data>(): kotlinx.serialization.json/JsonElement? // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcServerError.data.<get-data>|<get-data>(){}[0]
+    final val errorCode // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcServerError.errorCode|{}errorCode[0]
+        final fun <get-errorCode>(): kotlin/Int // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcServerError.errorCode.<get-errorCode>|<get-errorCode>(){}[0]
+    final val message // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcServerError.message|{}message[0]
+        final fun <get-message>(): kotlin/String // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcServerError.message.<get-message>|<get-message>(){}[0]
+}
+
 final class com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcServiceWrapper : com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcChannel, com.monkopedia.ksrpc/KsrpcEnvironment.Element<kotlin/String> { // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcServiceWrapper|null[0]
     constructor <init>(com.monkopedia.ksrpc.channels/SerializedService<kotlin/String>) // com.monkopedia.ksrpc.jsonrpc.internal/JsonRpcServiceWrapper.<init>|<init>(com.monkopedia.ksrpc.channels.SerializedService<kotlin.String>){}[0]
 

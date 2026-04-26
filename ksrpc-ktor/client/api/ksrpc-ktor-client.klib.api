@@ -6,4 +6,12 @@
 // - Show declarations: true
 
 // Library unique name: <com.monkopedia.ksrpc:ksrpc-ktor-client>
-final fun (io.ktor.client/HttpClient).com.monkopedia.ksrpc.ktor/asHttpChannelClient(kotlin/String, com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String>): com.monkopedia.ksrpc.channels/ChannelClient<kotlin/String> // com.monkopedia.ksrpc.ktor/asHttpChannelClient|asHttpChannelClient@io.ktor.client.HttpClient(kotlin.String;com.monkopedia.ksrpc.KsrpcEnvironment<kotlin.String>){}[0]
+final const val com.monkopedia.ksrpc.ktor/KSRPC_ERROR_CODE_HEADER // com.monkopedia.ksrpc.ktor/KSRPC_ERROR_CODE_HEADER|{}KSRPC_ERROR_CODE_HEADER[0]
+    final fun <get-KSRPC_ERROR_CODE_HEADER>(): kotlin/String // com.monkopedia.ksrpc.ktor/KSRPC_ERROR_CODE_HEADER.<get-KSRPC_ERROR_CODE_HEADER>|<get-KSRPC_ERROR_CODE_HEADER>(){}[0]
+final const val com.monkopedia.ksrpc.ktor/KSRPC_ERROR_MESSAGE_HEADER // com.monkopedia.ksrpc.ktor/KSRPC_ERROR_MESSAGE_HEADER|{}KSRPC_ERROR_MESSAGE_HEADER[0]
+    final fun <get-KSRPC_ERROR_MESSAGE_HEADER>(): kotlin/String // com.monkopedia.ksrpc.ktor/KSRPC_ERROR_MESSAGE_HEADER.<get-KSRPC_ERROR_MESSAGE_HEADER>|<get-KSRPC_ERROR_MESSAGE_HEADER>(){}[0]
+
+final val com.monkopedia.ksrpc.ktor/DEFAULT_KSRPC_ERROR_CODE_TO_HTTP_STATUS // com.monkopedia.ksrpc.ktor/DEFAULT_KSRPC_ERROR_CODE_TO_HTTP_STATUS|{}DEFAULT_KSRPC_ERROR_CODE_TO_HTTP_STATUS[0]
+    final fun <get-DEFAULT_KSRPC_ERROR_CODE_TO_HTTP_STATUS>(): kotlin.collections/Map<kotlin/Int, kotlin/Int> // com.monkopedia.ksrpc.ktor/DEFAULT_KSRPC_ERROR_CODE_TO_HTTP_STATUS.<get-DEFAULT_KSRPC_ERROR_CODE_TO_HTTP_STATUS>|<get-DEFAULT_KSRPC_ERROR_CODE_TO_HTTP_STATUS>(){}[0]
+
+final fun (io.ktor.client/HttpClient).com.monkopedia.ksrpc.ktor/asHttpChannelClient(kotlin/String, com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String>, kotlin.collections/Map<kotlin/Int, kotlin/Int> = ...): com.monkopedia.ksrpc.channels/ChannelClient<kotlin/String> // com.monkopedia.ksrpc.ktor/asHttpChannelClient|asHttpChannelClient@io.ktor.client.HttpClient(kotlin.String;com.monkopedia.ksrpc.KsrpcEnvironment<kotlin.String>;kotlin.collections.Map<kotlin.Int,kotlin.Int>){}[0]
