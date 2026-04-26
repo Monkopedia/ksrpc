@@ -66,25 +66,28 @@ private object PendingCallCounter {
 private class TrackingCancelService : CancelTestService {
     val started = CompletableDeferred<Unit>()
 
-    // Plain volatile-style flags; tests run on a single-thread test dispatcher and only do
-    // simple read/write so a value class slot is sufficient. Avoids hitting the atomicfu
-    // transformer's restriction against `atomic(...)` outside class init in lambda scopes.
-    private val state = BooleanArray(2)
-    val cancelled: Boolean get() = state[0]
-    val completed: Boolean get() = state[1]
+    // Deterministic latches: tests await these directly rather than poll a Boolean. The
+    // earlier polling-with-`yield` pattern was timing-sensitive (see issue #31) — switching
+    // to explicit `CompletableDeferred` lets the test wait on the exact signal the handler
+    // produces, with no busy-wait between handler completion and observation.
+    val cancelObserved = CompletableDeferred<Unit>()
+    val completedObserved = CompletableDeferred<Unit>()
+
+    val cancelled: Boolean get() = cancelObserved.isCompleted
+    val completed: Boolean get() = completedObserved.isCompleted
 
     override suspend fun blockForever(value: String): String {
         started.complete(Unit)
         try {
             awaitCancellation()
         } catch (t: CancellationException) {
-            state[0] = true
+            cancelObserved.complete(Unit)
             throw t
         }
     }
 
     override suspend fun finishesQuickly(value: String): String {
-        state[1] = true
+        completedObserved.complete(Unit)
         return "echo:$value"
     }
 }
@@ -125,12 +128,11 @@ class PacketCancellationTest {
                 // expected
             }
 
-            // Server handler must be cancelled by the cancel frame.
-            withTimeout(5_000) {
-                while (!service.cancelled) {
-                    yield()
-                }
-            }
+            // Server handler must be cancelled by the cancel frame. Await the latch the
+            // handler completes inside its CancellationException catch block — this fires
+            // exactly when the handler observes the cancel, with no polling window between
+            // completion and observation.
+            withTimeout(5_000) { service.cancelObserved.await() }
             assertTrue(service.cancelled, "server handler must observe cancellation")
 
             // Subsequent unrelated calls still work — the connection stays healthy.
