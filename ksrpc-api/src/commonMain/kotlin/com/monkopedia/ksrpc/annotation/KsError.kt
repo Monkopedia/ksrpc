@@ -18,8 +18,8 @@ package com.monkopedia.ksrpc.annotation
 import kotlin.reflect.KClass
 
 /**
- * Binds a thrown error payload to a wire-level integer error code on a
- * [KsMethod]-annotated function.
+ * Binds a `@Serializable` `Throwable` subclass to a wire-level integer
+ * error code on a [KsMethod]-annotated function.
  *
  * Declared at the call site with one entry per bindable error type:
  *
@@ -30,17 +30,41 @@ import kotlin.reflect.KClass
  * suspend fun initialize(params: InitParams): InitResult
  * ```
  *
- * [type] must be a `@Serializable` data class (validated by the ksrpc
- * compiler plugin in Part 2 of #13). The plugin captures
- * `KSerializer<type>` and exposes a bidirectional map on the generated
- * `RpcMethod` descriptor — forward (code → KSerializer) for client-side
- * deserialization, reverse (KClass → code + KSerializer) for server-side
- * resolution of a thrown `data::class`.
+ * The handler throws an instance of the bound type directly (no wrapper
+ * required); ksrpc encodes the throwable using its `KSerializer` and emits
+ * the bound `code` on the wire. The client deserializes back into the bound
+ * type and re-throws — callers `catch (e: MyError)` typed.
  *
- * Unlike sibling annotations propagated via `@KsMethodMetadata`, this
- * marker is consumed by the compiler plugin directly because the binding
- * requires a real serializer reference and a dedicated lookup table, not
- * an opaque metadata bag.
+ * The `code` on the binding is the single source of truth for the wire
+ * code; there is no per-throw override mechanism. If you want a different
+ * code for the same data, bind it differently.
+ *
+ * The bound `type` must:
+ *   - Be `@Serializable` (validated by the ksrpc compiler plugin)
+ *   - Extend `Throwable` (or any subclass — typically `RuntimeException`)
+ *   - Declare only fields safe to serialize (no `cause`, no inherited
+ *     `stackTrace`); `message` is typically computed from the serialized
+ *     fields:
+ *
+ * ```
+ * @Serializable
+ * class InitError(val retry: Boolean, val reason: String) : RuntimeException() {
+ *     override val message: String get() = "init failed: $reason"
+ * }
+ * ```
+ *
+ * The server stack trace is NOT propagated across the wire — clients see a
+ * stack from local deserialization. Use `message` and the serialized fields
+ * for diagnostic info.
+ *
+ * The plugin captures `KSerializer<type>` and exposes a bidirectional map
+ * on the generated `RpcMethod` descriptor — forward (code → KSerializer)
+ * for client-side deserialization, reverse (KClass → code + KSerializer)
+ * for server-side resolution of a thrown `t::class`. Unlike sibling
+ * annotations propagated via `@KsMethodMetadata`, this marker is consumed
+ * by the compiler plugin directly because the binding requires a real
+ * serializer reference and a dedicated lookup table, not an opaque
+ * metadata bag.
  */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.BINARY)
