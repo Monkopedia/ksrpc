@@ -62,7 +62,18 @@ class JsonRpcSerializedChannel(
         val message = json.decodeFromString<JsonElement?>(input.readSerialized())
         // Outbound stub path: no server-side id to forward. The wire id (if any) is allocated
         // by the underlying JsonRpcChannel.
-        val response = channel.execute(endpoint, message, isNotify, id = null)
+        val response = try {
+            channel.execute(endpoint, message, isNotify, id = null)
+        } catch (e: JsonRpcServerError) {
+            // Translate the native JSON-RPC error envelope back into a CallData.Error so the
+            // routing layer (RpcMethod.decodeError) can rebuild a typed Throwable using the
+            // method's @KsError forwardErrorMap.
+            return CallData.Error(
+                errorCode = e.errorCode,
+                errorMessage = e.message,
+                errorData = e.data?.let { json.encodeToString(JsonElement.serializer(), it) }
+            )
+        }
 
         return CallData.create(
             if (isNotify) {

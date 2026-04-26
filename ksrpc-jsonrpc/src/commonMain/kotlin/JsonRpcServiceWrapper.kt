@@ -46,6 +46,14 @@ class JsonRpcServiceWrapper(private val channel: SerializedService<String>) :
             CallData.create(json.encodeToString(message)),
             callId
         )
+        if (response is com.monkopedia.ksrpc.channels.CallData.Error<String>) {
+            // Native JSON-RPC error envelope: code/message/data map directly. Built-in
+            // sentinels (-32601, -32603) collide deliberately with the JSON-RPC reserved
+            // codes so vanilla JSON-RPC consumers see the right semantics without any
+            // translation layer.
+            val data = response.errorData?.let { json.decodeFromString<JsonElement>(it) }
+            throw JsonRpcServerError(response.errorCode, response.errorMessage, data)
+        }
         require(!response.isBinary) {
             "JsonRpc does not support binary data"
         }
@@ -56,3 +64,15 @@ class JsonRpcServiceWrapper(private val channel: SerializedService<String>) :
         channel.close()
     }
 }
+
+/**
+ * Internal control-flow exception carrying the wire-level JSON-RPC error envelope from
+ * [JsonRpcServiceWrapper.execute] up to [JsonRpcWriterBase]'s request handler, which then
+ * encodes it as the `error` field of a [JsonRpcResponse]. Not exposed to user code.
+ */
+@KsrpcInternal
+class JsonRpcServerError(
+    val errorCode: Int,
+    override val message: String,
+    val data: JsonElement?
+) : RuntimeException(message)
