@@ -30,6 +30,7 @@ import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.fail
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.serializer
 
@@ -54,6 +55,19 @@ data class InitErrorPayload(val retry: Boolean, val reason: String)
 @Serializable
 data class VersionErrorPayload(val expected: Int, val actual: Int)
 
+@Serializable
+sealed class CategoryError {
+    abstract val tag: String
+}
+
+@Serializable
+@SerialName("retry")
+data class RetryableError(override val tag: String, val backoffMs: Long) : CategoryError()
+
+@Serializable
+@SerialName("permanent")
+data class PermanentError(override val tag: String) : CategoryError()
+
 @KsService
 interface TypedErrorService : RpcService {
     @KsMethod("/init")
@@ -63,6 +77,15 @@ interface TypedErrorService : RpcService {
 
     @KsMethod("/plain")
     suspend fun plain(input: String): String
+
+    /**
+     * Bound to the sealed base [CategoryError]. Throwing any subclass instance
+     * (e.g. [RetryableError], [PermanentError]) should match this binding via
+     * the assignable-class lookup in [com.monkopedia.ksrpc.RpcMethod.encodeError].
+     */
+    @KsMethod("/category")
+    @KsError(code = 200, type = CategoryError::class)
+    suspend fun category(input: String): String
 }
 
 class KsErrorRoutingTest {
@@ -83,6 +106,7 @@ class KsErrorRoutingTest {
             }
 
             override suspend fun plain(input: String): String = error("unused")
+            override suspend fun category(input: String): String = error("unused")
         }
         withInProcessChannel(service) { stub ->
             try {
@@ -118,6 +142,7 @@ class KsErrorRoutingTest {
             }
 
             override suspend fun plain(input: String): String = error("unused")
+            override suspend fun category(input: String): String = error("unused")
         }
         withInProcessChannel(service) { stub ->
             try {
@@ -155,6 +180,7 @@ class KsErrorRoutingTest {
             }
 
             override suspend fun plain(input: String): String = error("unused")
+            override suspend fun category(input: String): String = error("unused")
         }
         val env = ksrpcEnvironment { }
         val channel = HostSerializedChannelImpl(env)
@@ -190,6 +216,7 @@ class KsErrorRoutingTest {
             }
 
             override suspend fun plain(input: String): String = error("unused")
+            override suspend fun category(input: String): String = error("unused")
         }
         withInProcessChannel(service) { stub ->
             try {
@@ -217,6 +244,7 @@ class KsErrorRoutingTest {
             }
 
             override suspend fun plain(input: String): String = error("unused")
+            override suspend fun category(input: String): String = error("unused")
         }
         withInProcessChannel(service) { stub ->
             try {
@@ -231,11 +259,46 @@ class KsErrorRoutingTest {
     }
 
     /**
-     * @KsError-annotated method called with a thrown payload whose runtime class ISN'T in
-     * the reverse map (e.g. user nests a non-bound payload inside a KsrpcException) — the
-     * server emits a [CallData.Error] without typed payload, and the client decodes
-     * RpcException without typed data. Verifies the reverse-map lookup is by exact
-     * `payload::class`.
+     * Subclass of a bound base type matches via assignable-class lookup. The @KsError on
+     * /category is `type = CategoryError::class` (a sealed base); throwing a
+     * [RetryableError] subclass instance should resolve to that binding through
+     * `errorMappings.firstOrNull { it.dataType.isInstance(value) }` rather than requiring
+     * an exact `dataType == value::class` match. The sealed serializer reconstructs the
+     * concrete subclass on the client side via the polymorphic discriminator.
+     */
+    @Test
+    fun subclassThrowMatchesBaseBinding() = runBlockingUnit {
+        val service = object : TypedErrorService {
+            override suspend fun init(input: String): String = error("unused")
+            override suspend fun plain(input: String): String = error("unused")
+            override suspend fun category(input: String): String {
+                throw KsrpcException(
+                    code = 200,
+                    message = "transient failure",
+                    data = RetryableError(tag = "io", backoffMs = 250L)
+                )
+            }
+        }
+        withInProcessChannel(service) { stub ->
+            try {
+                stub.category("anything")
+                fail("Expected KsrpcException")
+            } catch (t: Throwable) {
+                assertIs<KsrpcException>(t)
+                assertEquals(200, t.code)
+                val payload = t.data
+                // Sealed serializer round-trips the concrete subclass.
+                assertIs<RetryableError>(payload)
+                assertEquals("io", payload.tag)
+                assertEquals(250L, payload.backoffMs)
+            }
+        }
+    }
+
+    /**
+     * @KsError-annotated method called with a thrown payload whose runtime class isn't
+     * assignable to any binding's dataType — the server emits a [CallData.Error] without
+     * typed payload, and the client decodes RpcException without typed data.
      */
     @Test
     fun unboundPayloadClassFallsBack() = runBlockingUnit {
@@ -250,6 +313,7 @@ class KsErrorRoutingTest {
             }
 
             override suspend fun plain(input: String): String = error("unused")
+            override suspend fun category(input: String): String = error("unused")
         }
         withInProcessChannel(service) { stub ->
             try {
@@ -272,6 +336,7 @@ class KsErrorRoutingTest {
         val service = object : TypedErrorService {
             override suspend fun init(input: String): String = "ok"
             override suspend fun plain(input: String): String = "ok"
+            override suspend fun category(input: String): String = "ok"
         }
         val env = ksrpcEnvironment { }
         val channel = HostSerializedChannelImpl(env)
@@ -373,6 +438,7 @@ class KsErrorRoutingPipeTest :
                 }
 
                 override suspend fun plain(input: String): String = "ok"
+                override suspend fun category(input: String): String = "ok"
             }
             service.serialized(ksrpcEnvironment { })
         },
@@ -411,6 +477,7 @@ class KsErrorRoutingPipeFallbackTest :
                 }
 
                 override suspend fun plain(input: String): String = "ok"
+                override suspend fun category(input: String): String = "ok"
             }
             service.serialized(ksrpcEnvironment { })
         },

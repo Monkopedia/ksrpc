@@ -318,7 +318,14 @@ class RpcMethod<T : RpcService, I, O>(
     fun <S> encodeError(t: Throwable, env: KsrpcEnvironment<S>): CallData.Error<S> {
         val ksException = t as? KsrpcException
         val payloadValue = ksException?.data
-        val mapping = payloadValue?.let { reverseErrorMap[it::class] }
+        // Walk errorMappings in declaration order, picking the first binding whose
+        // dataType is assignable from the actual payload's class. This mirrors normal
+        // `catch (e: BaseError)` semantics — a binding for a base type catches
+        // subclass instances. Declaration order serves as precedence when multiple
+        // bindings could match.
+        val mapping = payloadValue?.let { value ->
+            errorMappings.firstOrNull { it.dataType.isInstance(value) }
+        }
         val payloadT: S? = mapping?.let { m ->
             runCatching {
                 val ser = m.dataSerializer as KSerializer<Any?>
