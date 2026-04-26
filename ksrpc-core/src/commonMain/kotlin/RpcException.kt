@@ -18,11 +18,14 @@ package com.monkopedia.ksrpc
 /**
  * Wrapper around exceptions thrown in remote calls.
  *
- * Pins [code] to `-1` — a generic "remote error" classification. Typed
- * binding of error codes to `@Serializable` data classes via `@KsError`
- * will surface as bare [KsrpcException] instances with mapped `code`/`data`.
+ * Pins [code] to [KsrpcException.INTERNAL_ERROR_CODE] (`-32603`, matching the
+ * JSON-RPC "internal error" reserved code) — the generic "remote error"
+ * classification. Typed binding of error codes to `@Serializable` data classes
+ * via `@KsError` surfaces as bare [KsrpcException] instances with mapped
+ * `code` / `data`.
  */
-class RpcException(message: String) : KsrpcException(code = -1, message = message)
+class RpcException(message: String) :
+    KsrpcException(code = INTERNAL_ERROR_CODE, message = message)
 
 /**
  * Build an [RpcException] carrying the stack captured in this [RpcFailure].
