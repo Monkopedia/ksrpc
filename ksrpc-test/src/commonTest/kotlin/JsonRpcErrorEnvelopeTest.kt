@@ -24,6 +24,7 @@ import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcError
 import com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcRequest
 import com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcResponse
+import com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcServerError
 import com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcTransformer
 import com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcWriterBase
 import kotlin.coroutines.CoroutineContext
@@ -262,16 +263,20 @@ class JsonRpcErrorEnvelopeTest {
             )
 
         val thrown =
-            assertFailsWith<IllegalStateException> {
+            assertFailsWith<JsonRpcServerError> {
                 writer.execute("explode", JsonPrimitive("input"), isNotify = false, id = null)
             }
 
-        assertTrue(thrown.message?.contains("JsonRpcError(-32603): server exploded") == true)
+        assertEquals(JsonRpcError.INTERNAL_ERROR, thrown.errorCode)
+        assertEquals("server exploded", thrown.message)
         writer.close()
     }
 
     @Test
-    fun testExecuteThrowsRpcExceptionFromErrorData() = runBlockingUnit {
+    fun testExecuteSurfacesErrorDataAsJsonRpcServerError() = runBlockingUnit {
+        // The native JSON-RPC envelope's error.data is now passed through verbatim to the
+        // routing layer (RpcMethod.decodeError) for typed @KsError reconstruction. The
+        // transport itself no longer attempts a RpcFailure decode.
         val transformer =
             RequestAwareErrorTransformer(
                 errorMessage = "server exploded",
@@ -289,11 +294,12 @@ class JsonRpcErrorEnvelopeTest {
             )
 
         val thrown =
-            assertFailsWith<RpcException> {
+            assertFailsWith<JsonRpcServerError> {
                 writer.execute("explode", JsonPrimitive("input"), isNotify = false, id = null)
             }
 
-        assertTrue(thrown.message.contains("remote stack"))
+        assertEquals(JsonRpcError.INTERNAL_ERROR, thrown.errorCode)
+        assertNotNull(thrown.data)
         writer.close()
     }
 
@@ -313,11 +319,14 @@ class JsonRpcErrorEnvelopeTest {
             )
 
         val thrown =
-            assertFailsWith<IllegalStateException> {
+            assertFailsWith<JsonRpcServerError> {
                 writer.execute("explode", JsonPrimitive("input"), isNotify = false, id = null)
             }
 
-        assertTrue(thrown.message?.contains("JsonRpcError(-32603): server exploded") == true)
+        assertEquals(JsonRpcError.INTERNAL_ERROR, thrown.errorCode)
+        // Malformed-shaped error data is still surfaced unchanged for the routing layer to
+        // attempt a typed decode against the receiver's @KsError forwardErrorMap.
+        assertEquals(JsonPrimitive("not-an-rpc-failure"), thrown.data)
         writer.close()
     }
 
@@ -370,11 +379,12 @@ class JsonRpcErrorEnvelopeTest {
             )
 
         val thrown =
-            assertFailsWith<IllegalStateException> {
+            assertFailsWith<JsonRpcServerError> {
                 writer.execute("ping", JsonPrimitive("input"), isNotify = false, id = null)
             }
 
-        assertTrue(thrown.message?.contains("JsonRpcError(-32603): mixed response") == true)
+        assertEquals(JsonRpcError.INTERNAL_ERROR, thrown.errorCode)
+        assertEquals("mixed response", thrown.message)
         writer.close()
     }
 

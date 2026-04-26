@@ -15,7 +15,7 @@
  */
 package com.monkopedia.ksrpc.bench
 
-import com.monkopedia.ksrpc.RpcFailure
+import com.monkopedia.ksrpc.KsrpcException
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.ksrpcEnvironment
 import kotlinx.benchmark.Benchmark
@@ -39,19 +39,18 @@ open class StringSerializerErrorBenchmark {
     @Setup
     fun setup() {
         val payload = "x".repeat(payloadSize)
-        val failure = RpcFailure(payload)
         normalCallData = env.serialization.createCallData(String.serializer(), payload)
-        errorCallData = env.serialization.createErrorCallData(RpcFailure.serializer(), failure)
+        errorCallData = CallData.Error(KsrpcException.INTERNAL_ERROR_CODE, payload)
         endpointMissingCallData =
-            env.serialization.createEndpointNotFoundCallData(RpcFailure.serializer(), failure)
+            CallData.Error(KsrpcException.ENDPOINT_NOT_FOUND_CODE, payload)
     }
 
     @Benchmark
-    fun isErrorNormal(): Boolean = env.serialization.isError(normalCallData)
+    fun isErrorNormal(): Boolean = normalCallData.isError
 
     @Benchmark
-    fun isErrorError(): Boolean = env.serialization.isError(errorCallData)
+    fun isErrorError(): Boolean = errorCallData.isError
 
     @Benchmark
-    fun isErrorEndpointMissing(): Boolean = env.serialization.isError(endpointMissingCallData)
+    fun isErrorEndpointMissing(): Boolean = endpointMissingCallData.isError
 }

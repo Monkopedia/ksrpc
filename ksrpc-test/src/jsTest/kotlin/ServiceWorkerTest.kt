@@ -146,11 +146,10 @@ class ServiceWorkerTest {
         createServiceWorkerWithConnection(jsWorkerUrl(), ksrpcEnvironment { }).use { connection ->
             val channel = connection.defaultChannel()
             val response = channel.call("ping", CallData.create("123"), callId = null)
-            assertTrue(connection.env.serialization.isError(response))
+            assertTrue(response.isError)
 
-            val error = connection.env.serialization.decodeErrorCallData(response)
-            assertTrue(error is RpcException, "Expected RpcException, but got: $error")
-            assertTrue((error.message ?: "").isNotBlank())
+            val message = response.errorMessage ?: ""
+            assertTrue(message.isNotBlank())
         }
         null
     }
