@@ -1,6 +1,5 @@
-public abstract interface class com/monkopedia/ksrpc/KsContextBinding {
+public abstract interface class com/monkopedia/ksrpc/KsContextBinding : kotlin/coroutines/CoroutineContext$Key {
 	public abstract fun fromWire (Ljava/lang/String;)Lkotlin/coroutines/CoroutineContext$Element;
-	public abstract fun getContextKey ()Lkotlin/coroutines/CoroutineContext$Key;
 	public abstract fun getWireKey ()Ljava/lang/String;
 	public abstract fun toWire (Lkotlin/coroutines/CoroutineContext$Element;)Ljava/lang/String;
 }

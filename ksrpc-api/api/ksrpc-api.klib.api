@@ -60,9 +60,7 @@ open annotation class com.monkopedia.ksrpc.annotation/KsrpcInternal : kotlin/Ann
     constructor <init>() // com.monkopedia.ksrpc.annotation/KsrpcInternal.<init>|<init>(){}[0]
 }
 
-abstract interface <#A: kotlin.coroutines/CoroutineContext.Element> com.monkopedia.ksrpc/KsContextBinding { // com.monkopedia.ksrpc/KsContextBinding|null[0]
-    abstract val contextKey // com.monkopedia.ksrpc/KsContextBinding.contextKey|{}contextKey[0]
-        abstract fun <get-contextKey>(): kotlin.coroutines/CoroutineContext.Key<#A> // com.monkopedia.ksrpc/KsContextBinding.contextKey.<get-contextKey>|<get-contextKey>(){}[0]
+abstract interface <#A: kotlin.coroutines/CoroutineContext.Element> com.monkopedia.ksrpc/KsContextBinding : kotlin.coroutines/CoroutineContext.Key<#A> { // com.monkopedia.ksrpc/KsContextBinding|null[0]
     abstract val wireKey // com.monkopedia.ksrpc/KsContextBinding.wireKey|{}wireKey[0]
         abstract fun <get-wireKey>(): kotlin/String // com.monkopedia.ksrpc/KsContextBinding.wireKey.<get-wireKey>|<get-wireKey>(){}[0]
 

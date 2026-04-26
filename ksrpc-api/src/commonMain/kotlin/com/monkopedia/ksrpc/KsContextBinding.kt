@@ -24,15 +24,37 @@ import kotlin.coroutines.CoroutineContext
  * meta-annotation and are responsible for:
  *
  *  - identifying the value on the wire ([wireKey]);
- *  - identifying the value in the coroutine context ([contextKey]);
  *  - encoding / decoding the value for transports that carry it as a string
  *    ([toWire] / [fromWire]).
  *
- * On the handler side, propagated values are surfaced through the standard
- * coroutine-context lookup. A handler reads its value back out with:
+ * The binding *is* the [CoroutineContext.Key] for its element — a single
+ * source of truth for both the wire identity and the coroutine-context
+ * identity. The recommended shape is to declare the binding as a named
+ * companion object on the element type itself:
  *
  * ```
- * val value = coroutineContext[SomeBinding.contextKey]
+ * class AuthToken(val token: String) : CoroutineContext.Element {
+ *     override val key get() = Key
+ *
+ *     companion object Key : KsContextBinding<AuthToken> {
+ *         override val wireKey = "x-auth-token"
+ *         override fun toWire(value: AuthToken) = value.token
+ *         override fun fromWire(encoded: String) = AuthToken(encoded)
+ *     }
+ * }
+ * ```
+ *
+ * Reference the binding at the annotation site by its companion name:
+ *
+ * ```
+ * @KsContext(binding = AuthToken.Key::class)
+ * ```
+ *
+ * Handlers then read the propagated value with the standard coroutine-context
+ * lookup, naming the element type directly:
+ *
+ * ```
+ * val token = coroutineContext[AuthToken]
  * ```
  *
  * The element type [T] must be a [CoroutineContext.Element] so it can sit
@@ -41,7 +63,7 @@ import kotlin.coroutines.CoroutineContext
  * Implementations should be stateless and safe to reference from a
  * `KClass`-literal in an annotation argument.
  */
-interface KsContextBinding<T : CoroutineContext.Element> {
+interface KsContextBinding<T : CoroutineContext.Element> : CoroutineContext.Key<T> {
     /**
      * Stable, transport-neutral identifier for this context entry. Transport
      * layers use this string to name the field that carries the encoded
@@ -53,13 +75,6 @@ interface KsContextBinding<T : CoroutineContext.Element> {
      * time.
      */
     val wireKey: String
-
-    /**
-     * Coroutine-context key under which the propagated value is exposed to
-     * handlers. The standard `coroutineContext[binding.contextKey]` lookup
-     * returns the value (or `null` if no value was provided for the call).
-     */
-    val contextKey: CoroutineContext.Key<T>
 
     /** Encode a value of type [T] for transports that carry it as a string. */
     fun toWire(value: T): String

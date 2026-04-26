@@ -30,9 +30,10 @@ import kotlin.reflect.KClass
  *
  *  - A stable wire-level key ([KsContextBinding.wireKey]) used by transport
  *    layers to encode the value.
- *  - A coroutine-context [kotlin.coroutines.CoroutineContext.Key] under which
+ *  - The [kotlin.coroutines.CoroutineContext.Key] identity itself —
+ *    [KsContextBinding] extends [kotlin.coroutines.CoroutineContext.Key], so
  *    handlers find the propagated value via the standard
- *    `coroutineContext[SomeBinding.contextKey]` lookup.
+ *    `coroutineContext[SomeBinding]` lookup naming the binding directly.
  *  - String encode / decode functions ([KsContextBinding.toWire] /
  *    [KsContextBinding.fromWire]) used by transport layers that carry the
  *    context value as a textual representation.

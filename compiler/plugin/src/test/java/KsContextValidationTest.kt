@@ -58,9 +58,8 @@ package com.monkopedia.ksrpc
 
 import kotlin.coroutines.CoroutineContext
 
-interface KsContextBinding<T : CoroutineContext.Element> {
+interface KsContextBinding<T : CoroutineContext.Element> : CoroutineContext.Key<T> {
     val wireKey: String
-    val contextKey: CoroutineContext.Key<T>
     fun toWire(value: T): String
     fun fromWire(encoded: String): T
 }
@@ -82,18 +81,15 @@ import com.monkopedia.ksrpc.RpcService
 import kotlin.coroutines.CoroutineContext
 
 class TraceId(val value: String) : CoroutineContext.Element {
-    override val key: CoroutineContext.Key<*> get() = Key
-    companion object Key : CoroutineContext.Key<TraceId>
+    override val key get() = Key
+    companion object Key : KsContextBinding<TraceId> {
+        override val wireKey: String = "x-trace-id"
+        override fun toWire(value: TraceId): String = value.value
+        override fun fromWire(encoded: String): TraceId = TraceId(encoded)
+    }
 }
 
-object TraceIdBinding : KsContextBinding<TraceId> {
-    override val wireKey: String = "x-trace-id"
-    override val contextKey: CoroutineContext.Key<TraceId> = TraceId.Key
-    override fun toWire(value: TraceId): String = value.value
-    override fun fromWire(encoded: String): TraceId = TraceId(encoded)
-}
-
-@KsContext(binding = TraceIdBinding::class)
+@KsContext(binding = TraceId.Key::class)
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.BINARY)
 annotation class WithTrace
@@ -127,18 +123,15 @@ import com.monkopedia.ksrpc.RpcService
 import kotlin.coroutines.CoroutineContext
 
 class TraceId(val value: String) : CoroutineContext.Element {
-    override val key: CoroutineContext.Key<*> get() = Key
-    companion object Key : CoroutineContext.Key<TraceId>
+    override val key get() = Key
+    companion object Key : KsContextBinding<TraceId> {
+        override val wireKey: String = "x-trace-id"
+        override fun toWire(value: TraceId): String = value.value
+        override fun fromWire(encoded: String): TraceId = TraceId(encoded)
+    }
 }
 
-object TraceIdBinding : KsContextBinding<TraceId> {
-    override val wireKey: String = "x-trace-id"
-    override val contextKey: CoroutineContext.Key<TraceId> = TraceId.Key
-    override fun toWire(value: TraceId): String = value.value
-    override fun fromWire(encoded: String): TraceId = TraceId(encoded)
-}
-
-@KsContext(binding = TraceIdBinding::class)
+@KsContext(binding = TraceId.Key::class)
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.BINARY)
 annotation class WithTrace
@@ -210,34 +203,28 @@ import com.monkopedia.ksrpc.RpcService
 import kotlin.coroutines.CoroutineContext
 
 class TraceId(val value: String) : CoroutineContext.Element {
-    override val key: CoroutineContext.Key<*> get() = Key
-    companion object Key : CoroutineContext.Key<TraceId>
+    override val key get() = Key
+    companion object Key : KsContextBinding<TraceId> {
+        override val wireKey: String = "x-shared"
+        override fun toWire(value: TraceId): String = value.value
+        override fun fromWire(encoded: String): TraceId = TraceId(encoded)
+    }
 }
 class SpanId(val value: String) : CoroutineContext.Element {
-    override val key: CoroutineContext.Key<*> get() = Key
-    companion object Key : CoroutineContext.Key<SpanId>
+    override val key get() = Key
+    companion object Key : KsContextBinding<SpanId> {
+        override val wireKey: String = "x-shared"
+        override fun toWire(value: SpanId): String = value.value
+        override fun fromWire(encoded: String): SpanId = SpanId(encoded)
+    }
 }
 
-object TraceIdBinding : KsContextBinding<TraceId> {
-    override val wireKey: String = "x-shared"
-    override val contextKey: CoroutineContext.Key<TraceId> = TraceId.Key
-    override fun toWire(value: TraceId): String = value.value
-    override fun fromWire(encoded: String): TraceId = TraceId(encoded)
-}
-
-object SpanIdBinding : KsContextBinding<SpanId> {
-    override val wireKey: String = "x-shared"
-    override val contextKey: CoroutineContext.Key<SpanId> = SpanId.Key
-    override fun toWire(value: SpanId): String = value.value
-    override fun fromWire(encoded: String): SpanId = SpanId(encoded)
-}
-
-@KsContext(binding = TraceIdBinding::class)
+@KsContext(binding = TraceId.Key::class)
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.BINARY)
 annotation class WithTrace
 
-@KsContext(binding = SpanIdBinding::class)
+@KsContext(binding = SpanId.Key::class)
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.BINARY)
 annotation class WithSpan
