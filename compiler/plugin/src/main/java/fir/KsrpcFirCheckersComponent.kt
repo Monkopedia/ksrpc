@@ -31,9 +31,9 @@ class KsrpcFirCheckersComponent(session: FirSession) : FirAdditionalCheckersExte
 
     override val declarationCheckers: DeclarationCheckers = object : DeclarationCheckers() {
         override val classCheckers: Set<FirDeclarationChecker<FirClass>> =
-            setOf(KsServiceClassChecker)
+            setOf(KsServiceClassChecker, KsContextClassChecker)
 
         override val simpleFunctionCheckers: Set<FirDeclarationChecker<FirNamedFunction>> =
-            setOf(KsMethodFunctionChecker)
+            setOf(KsMethodFunctionChecker, KsContextMethodChecker)
     }
 }

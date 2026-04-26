@@ -1,3 +1,9 @@
+public abstract interface class com/monkopedia/ksrpc/KsContextBinding : kotlin/coroutines/CoroutineContext$Key {
+	public abstract fun fromWire (Ljava/lang/String;)Lkotlin/coroutines/CoroutineContext$Element;
+	public abstract fun getWireKey ()Ljava/lang/String;
+	public abstract fun toWire (Lkotlin/coroutines/CoroutineContext$Element;)Ljava/lang/String;
+}
+
 public final class com/monkopedia/ksrpc/RpcFailure {
 	public static final field Companion Lcom/monkopedia/ksrpc/RpcFailure$Companion;
 	public fun <init> (Ljava/lang/String;)V
@@ -38,6 +44,10 @@ public abstract interface class com/monkopedia/ksrpc/SuspendCloseable {
 }
 
 public abstract interface annotation class com/monkopedia/ksrpc/annotation/ExperimentalKsrpc : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class com/monkopedia/ksrpc/annotation/KsContext : java/lang/annotation/Annotation {
+	public abstract fun binding ()Ljava/lang/Class;
 }
 
 public abstract interface annotation class com/monkopedia/ksrpc/annotation/KsError : java/lang/annotation/Annotation {
