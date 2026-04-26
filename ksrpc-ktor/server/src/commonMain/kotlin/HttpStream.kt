@@ -22,7 +22,6 @@ import com.monkopedia.ksrpc.KsrpcException
 import com.monkopedia.ksrpc.RpcEndpointException
 import com.monkopedia.ksrpc.RpcService
 import com.monkopedia.ksrpc.annotation.KsrpcInternal
-import com.monkopedia.ksrpc.asString
 import com.monkopedia.ksrpc.binary.ktor.asRpcBinaryData
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.ChannelClient
@@ -206,10 +205,10 @@ private suspend inline fun RoutingContext.runCatching(
         if (mappedStatus == null) {
             call.response.headers.append(KSRPC_ERROR_CODE_HEADER, code.toString())
         }
-        call.response.headers.append(
-            KSRPC_ERROR_MESSAGE_HEADER,
-            t.asString.replace('\n', ' ')
-        )
-        call.respond(HttpStatusCode.fromValue(mappedStatus ?: 500), t.asString)
+        // Concise message only — full stack stays server-side via the logger above,
+        // not in HTTP headers or response body. Header-safe (no embedded newlines).
+        val concise = (t.message ?: t.toString()).replace('\n', ' ')
+        call.response.headers.append(KSRPC_ERROR_MESSAGE_HEADER, concise)
+        call.respond(HttpStatusCode.fromValue(mappedStatus ?: 500), concise)
     }
 }

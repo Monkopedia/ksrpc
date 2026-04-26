@@ -19,7 +19,6 @@ package com.monkopedia.ksrpc.jsonrpc.internal
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.annotation.KsrpcInternal
-import com.monkopedia.ksrpc.asString
 import com.monkopedia.ksrpc.channels.CancellationSupport
 import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
@@ -152,7 +151,9 @@ class JsonRpcWriterBase(
                             JsonRpcResponse(
                                 error = JsonRpcError(
                                     JsonRpcError.INTERNAL_ERROR,
-                                    t.asString,
+                                    // Concise message only — full stack is logged via
+                                    // env.errorListener above, not propagated to the peer.
+                                    t.message ?: t.toString(),
                                     null
                                 ),
                                 id = id
