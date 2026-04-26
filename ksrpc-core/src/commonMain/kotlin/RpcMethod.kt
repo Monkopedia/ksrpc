@@ -304,50 +304,63 @@ class RpcMethod<T : RpcService, I, O>(
 
     /**
      * Server-side: convert a thrown exception into a [CallData.Error] using
-     * this method's [reverseErrorMap]. When the thrown exception is a
-     * [KsrpcException] carrying typed `data` whose runtime class is bound via
-     * `@KsError`, the bound code + serializer are used and the payload is
-     * encoded into the wire format `S` for inclusion in the error frame. The
-     * user's explicit [KsrpcException.code] always wins over the bound code if
-     * it differs, so callers retain control during version migrations. Falls
-     * back to sentinel-coded built-in errors for [RpcEndpointException]
-     * ([KsrpcException.ENDPOINT_NOT_FOUND_CODE]) and other Throwables
-     * ([KsrpcException.INTERNAL_ERROR_CODE]).
+     * this method's [reverseErrorMap]. The thrown class IS the wire payload's
+     * class — when the throwable's runtime class is assignable to a
+     * `@KsError`-bound type, the bound code + serializer are used and the
+     * throwable itself is encoded into the wire format `S` for inclusion in
+     * the error frame. There is no `KsrpcException` wrapper involved on the
+     * server side; users `throw MyTypedError(...)` directly.
+     *
+     * The `@KsError(code, ...)` binding's `code` is the single source of
+     * truth for the wire code — there is no per-throw override mechanism.
+     * Callers that want a different code for the same data should bind it
+     * differently. Falls back to sentinel-coded built-in errors:
+     * [RpcEndpointException] -> [KsrpcException.ENDPOINT_NOT_FOUND_CODE],
+     * a thrown [KsrpcException] without a binding -> its own
+     * [KsrpcException.code], any other Throwable ->
+     * [KsrpcException.INTERNAL_ERROR_CODE].
      */
     @Suppress("UNCHECKED_CAST")
     fun <S> encodeError(t: Throwable, env: KsrpcEnvironment<S>): CallData.Error<S> {
-        val ksException = t as? KsrpcException
-        val payloadValue = ksException?.data
         // Walk errorMappings in declaration order, picking the first binding whose
-        // dataType is assignable from the actual payload's class. This mirrors normal
-        // `catch (e: BaseError)` semantics — a binding for a base type catches
+        // dataType is assignable from the throwable's runtime class. This mirrors
+        // normal `catch (e: BaseError)` semantics — a binding for a base type catches
         // subclass instances. Declaration order serves as precedence when multiple
         // bindings could match.
-        val mapping = payloadValue?.let { value ->
-            errorMappings.firstOrNull { it.dataType.isInstance(value) }
-        }
+        val mapping = errorMappings.firstOrNull { it.dataType.isInstance(t) }
         val payloadT: S? = mapping?.let { m ->
             runCatching {
                 val ser = m.dataSerializer as KSerializer<Any?>
-                (env.serialization.createCallData(ser, payloadValue) as CallData.Serialized<S>)
+                (env.serialization.createCallData(ser, t) as CallData.Serialized<S>)
                     .readSerialized()
             }.getOrNull()
         }
-        val code = ksException?.code ?: when (t) {
-            is RpcEndpointException -> KsrpcException.ENDPOINT_NOT_FOUND_CODE
+        val code = when {
+            mapping != null -> mapping.code
+            t is RpcEndpointException -> KsrpcException.ENDPOINT_NOT_FOUND_CODE
+            t is KsrpcException -> t.code
             else -> KsrpcException.INTERNAL_ERROR_CODE
         }
-        return CallData.Error(code, t.asString, payloadT)
+        return CallData.Error(code, t.message ?: t.toString(), payloadT)
     }
 
     /**
      * Client-side: convert a [CallData.Error] into a [Throwable] using this
      * method's [forwardErrorMap]. When [CallData.Error.errorCode] matches a
      * `@KsError` binding and [CallData.Error.errorData] decodes successfully
-     * with the bound serializer, the result is a [KsrpcException] carrying the
-     * typed payload as [KsrpcException.data]. Falls back to [RpcEndpointException]
-     * for [KsrpcException.ENDPOINT_NOT_FOUND_CODE], and to [RpcException] for
-     * everything else.
+     * with the bound serializer, the deserialized typed Throwable itself is
+     * returned (and re-thrown by [callChannel]) — callers `catch (e: MyError)`
+     * typed.
+     *
+     * For built-in sentinels the result is [RpcEndpointException]
+     * ([KsrpcException.ENDPOINT_NOT_FOUND_CODE]) or [RpcException]
+     * ([KsrpcException.INTERNAL_ERROR_CODE]).
+     *
+     * Forward-compat: any other unknown wire code (e.g. a newer server's typed
+     * error not bound on this client) surfaces a generic [KsrpcException]
+     * carrying the raw wire-format payload bytes as [KsrpcException.data], so
+     * callers can still inspect the payload manually rather than losing the
+     * information.
      */
     @Suppress("UNCHECKED_CAST")
     fun <S> decodeError(error: CallData.Error<S>, env: KsrpcEnvironment<S>): Throwable {
@@ -355,17 +368,27 @@ class RpcMethod<T : RpcService, I, O>(
         val typed = if (mapping != null && error.errorData != null) {
             runCatching {
                 val ser = mapping.dataSerializer as KSerializer<Any?>
-                env.serialization.decodeCallData(ser, CallData.Serialized<S>(error.errorData))
+                env.serialization.decodeCallData(
+                    ser,
+                    CallData.Serialized<S>(error.errorData)
+                ) as? Throwable
             }.getOrNull()
         } else {
             null
         }
-        return when {
-            typed != null -> KsrpcException(error.errorCode, error.errorMessage, typed)
-            error.errorCode == KsrpcException.ENDPOINT_NOT_FOUND_CODE ->
-                RpcEndpointException(error.errorMessage)
-
-            else -> RpcException(error.errorMessage)
+        if (typed != null) return typed
+        return when (error.errorCode) {
+            KsrpcException.ENDPOINT_NOT_FOUND_CODE -> RpcEndpointException(error.errorMessage)
+            KsrpcException.INTERNAL_ERROR_CODE -> RpcException(error.errorMessage)
+            // Forward-compat: unknown wire code (e.g. newer server's typed error not
+            // bound here) — surface a generic KsrpcException carrying the raw
+            // wire-format payload so callers can still inspect the data even without
+            // the @KsError binding.
+            else -> KsrpcException(
+                code = error.errorCode,
+                message = error.errorMessage,
+                data = error.errorData
+            )
         }
     }
 
