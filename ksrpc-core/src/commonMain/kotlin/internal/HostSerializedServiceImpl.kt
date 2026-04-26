@@ -26,7 +26,6 @@ import com.monkopedia.ksrpc.SuspendCloseable
 import com.monkopedia.ksrpc.TrackingService
 import com.monkopedia.ksrpc.UnhandledMethodHandler
 import com.monkopedia.ksrpc.annotation.KsrpcInternal
-import com.monkopedia.ksrpc.asString
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.ChannelClient
 import com.monkopedia.ksrpc.channels.ChannelId
@@ -94,7 +93,11 @@ class HostSerializedChannelImpl<T>(
             is KsrpcException -> t.code
             else -> KsrpcException.INTERNAL_ERROR_CODE
         }
-        CallData.Error(code, t.asString)
+        // Concise message only — the full stack is logged server-side via env.logger
+        // above, not propagated to the client. Matches RpcMethod.encodeError's
+        // convention so wire frames are consistent regardless of which catch
+        // produced them.
+        CallData.Error(code, t.message ?: t.toString())
     }
 
     override suspend fun close(id: ChannelId) {
