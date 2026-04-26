@@ -26,6 +26,7 @@ import com.monkopedia.ksrpc.ktor.asHttpChannelClient
 import com.monkopedia.ksrpc.ktor.serveHttp
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
 import kotlin.test.Test
@@ -169,7 +170,7 @@ class HttpTypedErrorRoutingTest {
                             // dispatch fails before reaching the handler and the response
                             // shape is the generic INTERNAL_ERROR_CODE 500, not the
                             // user-coded 100 fallback we're testing.
-                            io.ktor.client.request.setBody("\"hello\"")
+                            setBody("\"hello\"")
                         }
                     assertEquals(HttpStatusCode.InternalServerError, raw.status)
                     assertEquals("100", raw.headers[KSRPC_ERROR_CODE_HEADER])
