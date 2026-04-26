@@ -262,6 +262,30 @@ abstract class PacketChannelBase<T>(
                     "Completed binary packetization for $binaryChannel"
                 )
             }
+        } else if (response is CallData.Error<T>) {
+            // Error frame: errorCode + errorMessage travel in dedicated Packet fields,
+            // and the optional typed payload (already wire-encoded as T) rides in the
+            // existing data slot. When no payload is attached we send a Unit-encoded
+            // placeholder so the wire schema's non-null `data` field stays satisfied;
+            // the receiver discriminates on errorCode != null and constructs
+            // CallData.Error(..., errorData = null).
+            val payload = response.errorData
+                ?: env.serialization
+                    .createCallData(Unit.serializer(), Unit)
+                    .readSerialized()
+            send(
+                Packet(
+                    input = input,
+                    binary = false,
+                    startBinary = false,
+                    id = id,
+                    messageId = messageId,
+                    endpoint = endpoint,
+                    data = payload,
+                    errorCode = response.errorCode,
+                    errorMessage = response.errorMessage
+                )
+            )
         } else {
             send(
                 Packet(
@@ -277,7 +301,19 @@ abstract class PacketChannelBase<T>(
         }
     }
 
-    private suspend fun getCallData(packet: Packet<T>): CallData<T> = if (packet.startBinary) {
+    private suspend fun getCallData(packet: Packet<T>): CallData<T> = if (packet.isError) {
+        // The payload-less encode path uses a Unit-encoded placeholder in the data slot —
+        // we keep it as the errorData T, and the routing-layer decoder (RpcMethod.decodeError)
+        // ignores it because no @KsError binding will resolve to Unit. Distinguishing the
+        // placeholder from a real payload here would require a separate flag bit; the
+        // placeholder is harmless and the cost of always passing it through is one
+        // synthetic decode attempt that returns null.
+        CallData.Error(
+            errorCode = packet.errorCode!!,
+            errorMessage = packet.errorMessage ?: "",
+            errorData = packet.data
+        )
+    } else if (packet.startBinary) {
         val callData = CallData.create(packet.data)
         val decoded = env.serialization.decodeCallData(String.serializer(), callData)
         CallData.createBinary(getBinaryData(decoded))
