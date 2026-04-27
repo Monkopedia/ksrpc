@@ -274,7 +274,7 @@ class RpcMethod<T : RpcService, I, O>(
             ?: coroutineContext[WireContextMap]
         val currentCall = CurrentRpcCallElement(method = this, id = realCallId)
         val contextElements = decodeWireContextFrom(wireCtx)
-        return withContext(currentCall + contextElements) {
+        return withContext(channel.context.minusKey(Job) + currentCall + contextElements) {
             try {
                 val transformedInput = inputTransform.untransform(input, channel)
                 val logId = randomUuid()
