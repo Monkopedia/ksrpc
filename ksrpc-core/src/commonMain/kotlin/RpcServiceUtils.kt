@@ -51,7 +51,9 @@ inline fun <reified T : RpcService, S> SerializedService<S>.toStub(): T =
  * Thrown when an endpoint cannot be found.
  * Could happen from version mismatch or other programmer errors.
  *
- * Pins [code] to `-32601` to align with the JSON-RPC "method not found"
- * error code; HTTP transports translate this to `404` in Part 4 of #13.
+ * Pins [code] to [KsrpcException.ENDPOINT_NOT_FOUND_CODE] (`-32601`) to align
+ * with the JSON-RPC "method not found" error code; HTTP transports translate
+ * this to `404` by default.
  */
-open class RpcEndpointException(str: String) : KsrpcException(code = -32601, message = str)
+open class RpcEndpointException(str: String) :
+    KsrpcException(code = KsrpcException.ENDPOINT_NOT_FOUND_CODE, message = str)

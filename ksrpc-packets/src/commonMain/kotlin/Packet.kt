@@ -32,7 +32,25 @@ class Packet<T>(
     @SerialName("e")
     val endpoint: String,
     @SerialName("d")
-    val data: T
+    val data: T,
+    /**
+     * Optional error code. When non-null, this frame carries a [com.monkopedia.ksrpc.channels.CallData.Error]
+     * response: [data] holds the wire-format-encoded error payload (or a serializer-supplied
+     * placeholder when no payload), and [errorMessage] holds the human-readable message. The
+     * field's nullability is the discriminator — there is no separate flag bit. Older peers
+     * that don't understand this field tolerate it via `ignoreUnknownKeys` on the packet JSON
+     * (see [PACKET_JSON]) and will continue to decode the frame as a non-error response, so
+     * back-compat for older receivers requires either a bumped wire version or a graceful
+     * handler on the user side.
+     */
+    @SerialName("ec")
+    val errorCode: Int? = null,
+    /**
+     * Optional human-readable error message accompanying [errorCode]. Always non-null when
+     * [errorCode] is non-null; null otherwise.
+     */
+    @SerialName("em")
+    val errorMessage: String? = null
 ) {
     val input: Boolean get() = (type and 1) != 0
     val binary: Boolean get() = (type and 2) != 0
@@ -46,6 +64,11 @@ class Packet<T>(
      */
     val cancel: Boolean get() = (type and 8) != 0
 
+    /**
+     * Convenience: true iff this frame represents an error response (i.e. [errorCode] is set).
+     */
+    val isError: Boolean get() = errorCode != null
+
     constructor(
         input: Boolean = false,
         binary: Boolean = false,
@@ -54,7 +77,9 @@ class Packet<T>(
         id: String,
         messageId: String,
         endpoint: String,
-        data: T
+        data: T,
+        errorCode: Int? = null,
+        errorMessage: String? = null
     ) : this(
         (if (input) 1 else 0) or
             (if (binary) 2 else 0) or
@@ -63,7 +88,9 @@ class Packet<T>(
         id,
         messageId,
         endpoint,
-        data
+        data,
+        errorCode,
+        errorMessage
     )
 }
 

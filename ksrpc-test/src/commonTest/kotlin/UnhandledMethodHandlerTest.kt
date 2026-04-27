@@ -43,9 +43,8 @@ class RpcUnhandledMethodHandlerNotImplementedTest :
         },
         verifyOnChannel = { channel ->
             val response = channel.call("missing", CallData.create("ignored"), callId = null)
-            assertTrue(channel.env.serialization.isError(response))
-            val exception = channel.env.serialization.decodeErrorCallData(response)
-            val message = exception.message ?: ""
+            assertTrue(response.isError)
+            val message = response.errorMessage ?: ""
             assertTrue(
                 message.contains("Unknown endpoint: missing"),
                 message
@@ -96,7 +95,7 @@ class RpcUnhandledMethodHandlerImplementedTest :
                 ),
                 callId = null
             )
-            assertFalse(channel.env.serialization.isError(knownResponse))
+            assertFalse(knownResponse.isError)
             assertEquals(
                 "known:hi",
                 channel.env.serialization.decodeCallData(
@@ -114,7 +113,7 @@ class RpcUnhandledMethodHandlerImplementedTest :
                 ),
                 callId = null
             )
-            assertFalse(channel.env.serialization.isError(unknownResponse))
+            assertFalse(unknownResponse.isError)
             assertEquals(
                 "handled:missing:payload",
                 channel.env.serialization.decodeCallData(
@@ -155,9 +154,8 @@ class RpcUnhandledMethodHandlerThrowsTest :
                 ),
                 callId = null
             )
-            assertTrue(channel.env.serialization.isError(response))
-            val exception = channel.env.serialization.decodeErrorCallData(response)
-            val message = exception.message ?: ""
+            assertTrue(response.isError)
+            val message = response.errorMessage ?: ""
             assertTrue(
                 message.contains("boom:missing"),
                 message

@@ -35,8 +35,8 @@ abstract class <#A: kotlin/Any?> com.monkopedia.ksrpc.packets.internal/PacketCha
 }
 
 final class <#A: kotlin/Any?> com.monkopedia.ksrpc.packets.internal/Packet { // com.monkopedia.ksrpc.packets.internal/Packet|null[0]
-    constructor <init>(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/String, kotlin/String, kotlin/String, #A) // com.monkopedia.ksrpc.packets.internal/Packet.<init>|<init>(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.String;kotlin.String;kotlin.String;1:0){}[0]
-    constructor <init>(kotlin/Int = ..., kotlin/String, kotlin/String, kotlin/String, #A) // com.monkopedia.ksrpc.packets.internal/Packet.<init>|<init>(kotlin.Int;kotlin.String;kotlin.String;kotlin.String;1:0){}[0]
+    constructor <init>(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/String, kotlin/String, kotlin/String, #A, kotlin/Int? = ..., kotlin/String? = ...) // com.monkopedia.ksrpc.packets.internal/Packet.<init>|<init>(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.String;kotlin.String;kotlin.String;1:0;kotlin.Int?;kotlin.String?){}[0]
+    constructor <init>(kotlin/Int = ..., kotlin/String, kotlin/String, kotlin/String, #A, kotlin/Int? = ..., kotlin/String? = ...) // com.monkopedia.ksrpc.packets.internal/Packet.<init>|<init>(kotlin.Int;kotlin.String;kotlin.String;kotlin.String;1:0;kotlin.Int?;kotlin.String?){}[0]
 
     final val binary // com.monkopedia.ksrpc.packets.internal/Packet.binary|{}binary[0]
         final fun <get-binary>(): kotlin/Boolean // com.monkopedia.ksrpc.packets.internal/Packet.binary.<get-binary>|<get-binary>(){}[0]
@@ -46,10 +46,16 @@ final class <#A: kotlin/Any?> com.monkopedia.ksrpc.packets.internal/Packet { // 
         final fun <get-data>(): #A // com.monkopedia.ksrpc.packets.internal/Packet.data.<get-data>|<get-data>(){}[0]
     final val endpoint // com.monkopedia.ksrpc.packets.internal/Packet.endpoint|{}endpoint[0]
         final fun <get-endpoint>(): kotlin/String // com.monkopedia.ksrpc.packets.internal/Packet.endpoint.<get-endpoint>|<get-endpoint>(){}[0]
+    final val errorCode // com.monkopedia.ksrpc.packets.internal/Packet.errorCode|{}errorCode[0]
+        final fun <get-errorCode>(): kotlin/Int? // com.monkopedia.ksrpc.packets.internal/Packet.errorCode.<get-errorCode>|<get-errorCode>(){}[0]
+    final val errorMessage // com.monkopedia.ksrpc.packets.internal/Packet.errorMessage|{}errorMessage[0]
+        final fun <get-errorMessage>(): kotlin/String? // com.monkopedia.ksrpc.packets.internal/Packet.errorMessage.<get-errorMessage>|<get-errorMessage>(){}[0]
     final val id // com.monkopedia.ksrpc.packets.internal/Packet.id|{}id[0]
         final fun <get-id>(): kotlin/String // com.monkopedia.ksrpc.packets.internal/Packet.id.<get-id>|<get-id>(){}[0]
     final val input // com.monkopedia.ksrpc.packets.internal/Packet.input|{}input[0]
         final fun <get-input>(): kotlin/Boolean // com.monkopedia.ksrpc.packets.internal/Packet.input.<get-input>|<get-input>(){}[0]
+    final val isError // com.monkopedia.ksrpc.packets.internal/Packet.isError|{}isError[0]
+        final fun <get-isError>(): kotlin/Boolean // com.monkopedia.ksrpc.packets.internal/Packet.isError.<get-isError>|<get-isError>(){}[0]
     final val messageId // com.monkopedia.ksrpc.packets.internal/Packet.messageId|{}messageId[0]
         final fun <get-messageId>(): kotlin/String // com.monkopedia.ksrpc.packets.internal/Packet.messageId.<get-messageId>|<get-messageId>(){}[0]
     final val startBinary // com.monkopedia.ksrpc.packets.internal/Packet.startBinary|{}startBinary[0]

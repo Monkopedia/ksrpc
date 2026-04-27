@@ -31,5 +31,7 @@ import io.ktor.client.HttpClient
  */
 fun HttpClient.asHttpChannelClient(
     baseUrl: String,
-    env: KsrpcEnvironment<String>
-): ChannelClient<String> = HttpSerializedChannel(this, baseUrl.trimEnd('/'), env)
+    env: KsrpcEnvironment<String>,
+    errorCodeToHttpStatus: Map<Int, Int> = DEFAULT_KSRPC_ERROR_CODE_TO_HTTP_STATUS
+): ChannelClient<String> =
+    HttpSerializedChannel(this, baseUrl.trimEnd('/'), env, errorCodeToHttpStatus)

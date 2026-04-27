@@ -35,4 +35,18 @@ open class KsrpcException(
     override val message: String,
     val data: Any? = null,
     cause: Throwable? = null
-) : RuntimeException(message, cause)
+) : RuntimeException(message, cause) {
+    companion object {
+        /**
+         * Sentinel code for [RpcEndpointException] — matches JSON-RPC "method not found".
+         * HTTP transport maps this to 404 by default.
+         */
+        const val ENDPOINT_NOT_FOUND_CODE: Int = -32601
+
+        /**
+         * Sentinel code for [RpcException] (generic wire error with no `@KsError` mapping)
+         * — matches JSON-RPC "internal error". HTTP transport maps this to 500 by default.
+         */
+        const val INTERNAL_ERROR_CODE: Int = -32603
+    }
+}

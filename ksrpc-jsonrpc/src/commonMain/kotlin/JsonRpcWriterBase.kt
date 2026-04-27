@@ -18,9 +18,7 @@
 package com.monkopedia.ksrpc.jsonrpc.internal
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
-import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.annotation.KsrpcInternal
-import com.monkopedia.ksrpc.asString
 import com.monkopedia.ksrpc.channels.CancellationSupport
 import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
@@ -29,7 +27,6 @@ import com.monkopedia.ksrpc.channels.awaitRequestCancellable
 import com.monkopedia.ksrpc.internal.MultiChannel
 import com.monkopedia.ksrpc.jsonrpc.JsonRpcCallId
 import com.monkopedia.ksrpc.jsonrpc.JsonRpcCancellationConvention
-import com.monkopedia.ksrpc.toException
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
@@ -132,6 +129,20 @@ class JsonRpcWriterBase(
                 // response is sent — jsonrpc cancellation conventions universally treat the
                 // cancelled request as abandoned rather than completed.
                 throw t
+            } catch (t: JsonRpcServerError) {
+                // Native JSON-RPC error envelope from the SerializedService layer (see
+                // [JsonRpcServiceWrapper.execute]). Pass code / message / data through
+                // unchanged — the typed `data` was already wire-encoded as a JsonElement.
+                if (id != null) {
+                    comm.send(
+                        json.encodeToJsonElement(
+                            JsonRpcResponse(
+                                error = JsonRpcError(t.errorCode, t.message, t.data),
+                                id = id
+                            )
+                        )
+                    )
+                }
             } catch (t: Throwable) {
                 env.errorListener.onError(t)
                 if (id != null) {
@@ -140,8 +151,10 @@ class JsonRpcWriterBase(
                             JsonRpcResponse(
                                 error = JsonRpcError(
                                     JsonRpcError.INTERNAL_ERROR,
-                                    t.asString,
-                                    json.encodeToJsonElement(RpcFailure(t.asString))
+                                    // Concise message only — full stack is logged via
+                                    // env.errorListener above, not propagated to the peer.
+                                    t.message ?: t.toString(),
+                                    null
                                 ),
                                 id = id
                             )
@@ -187,16 +200,14 @@ class JsonRpcWriterBase(
             throw t
         }
         if (response.error != null) {
-            val error = response.error.data?.let {
-                try {
-                    json.decodeFromJsonElement<RpcFailure>(it).toException()
-                } catch (_: Throwable) {
-                    null
-                }
-            } ?: IllegalStateException(
-                "JsonRpcError(${response.error.code}): ${response.error.message}"
+            // Surface the native JSON-RPC error envelope to the caller so the routing
+            // layer (RpcMethod.decodeError, after JsonRpcSerializedChannel translation)
+            // can rebuild a typed Throwable from the @KsError forwardErrorMap.
+            throw JsonRpcServerError(
+                response.error.code,
+                response.error.message,
+                response.error.data
             )
-            throw error
         }
         return response.result
     }

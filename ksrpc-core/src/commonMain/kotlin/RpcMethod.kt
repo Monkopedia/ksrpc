@@ -30,6 +30,7 @@ import com.monkopedia.ksrpc.internal.client
 import com.monkopedia.ksrpc.internal.host
 import com.monkopedia.ksrpc.internal.randomUuid
 import kotlin.reflect.KClass
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
@@ -53,20 +54,18 @@ val RpcMethod<*, *, *>.timeoutMillis: Long?
         return millis + seconds * 1000 + minutes * 60_000
     }
 
+/**
+ * Adapts a user-facing type to the wire-level [CallData] representation. Only
+ * non-error variants flow through transformers — [CallData.Error] frames are
+ * intercepted by [RpcMethod.callChannel] and converted to a thrown [Throwable]
+ * via [RpcMethod.decodeError] before any transformer sees them.
+ */
 interface Transformer<T> {
     val hasContent: Boolean
         get() = true
 
     suspend fun <S> transform(input: T, channel: SerializedService<S>): CallData<S>
     suspend fun <S> untransform(data: CallData<S>, channel: SerializedService<S>): T
-
-    fun <S> unpackError(data: CallData<S>, channel: SerializedService<S>) {
-        if (!data.isBinary && channel.env.serialization.isError(data)) {
-            throw channel.env.serialization.decodeErrorCallData(data).also {
-                channel.env.logger.info("Transformer", "Decoding Throwable form CallData", it)
-            }
-        }
-    }
 }
 
 class SerializerTransformer<I>(val serializer: KSerializer<I>) : Transformer<I> {
@@ -79,7 +78,6 @@ class SerializerTransformer<I>(val serializer: KSerializer<I>) : Transformer<I> 
     }
 
     override suspend fun <T> untransform(data: CallData<T>, channel: SerializedService<T>): I {
-        unpackError(data, channel)
         channel.env.logger.debug("Transformer", "Deserializing CallData to type")
         return channel.env.serialization.decodeCallData(serializer, data)
     }
@@ -108,7 +106,6 @@ object BinaryTransformer :
         data: CallData<T>,
         channel: SerializedService<T>
     ): RpcBinaryData {
-        unpackError(data, channel)
         channel.env.logger.debug("Transformer", "Deserializing CallData to RpcBinaryData")
         return data.readBinary()
     }
@@ -145,7 +142,6 @@ abstract class BaseSubserviceTransformer<T : RpcService, O> : Transformer<O> {
 
     override suspend fun <S> untransform(data: CallData<S>, channel: SerializedService<S>): O {
         val client = client<S>() ?: error("Cannot untransform service type from non-client channel")
-        unpackError(data, channel)
         val serviceId = channel.env.serialization.decodeCallData(String.serializer(), data)
         channel.env.logger.info("Transformer", "Deserializing CallData($serviceId) to Stub")
         val service = serviceObject.createStub(client.wrapChannel(ChannelId(serviceId)))
@@ -241,12 +237,24 @@ class RpcMethod<T : RpcService, I, O>(
         // needed.
         val currentCall = CurrentRpcCallElement(method = this, id = callId)
         return withContext(channel.context.minusKey(Job) + currentCall) {
-            val transformedInput = inputTransform.untransform(input, channel)
-            val logId = randomUuid()
-            channel.env.logger.info("Transformer", "($logId) Calling endpoint $endpoint")
-            val output = method.invoke(service as T, transformedInput)
-            channel.env.logger.debug("Transformer", "($logId) Completed endpoint $endpoint")
-            outputTransform.transform(output as O, channel)
+            try {
+                val transformedInput = inputTransform.untransform(input, channel)
+                val logId = randomUuid()
+                channel.env.logger.info("Transformer", "($logId) Calling endpoint $endpoint")
+                val output = method.invoke(service as T, transformedInput)
+                channel.env.logger.debug("Transformer", "($logId) Completed endpoint $endpoint")
+                outputTransform.transform(output as O, channel)
+            } catch (t: CancellationException) {
+                throw t
+            } catch (t: Throwable) {
+                channel.env.logger.info(
+                    "RpcMethod",
+                    "Exception thrown from endpoint $endpoint",
+                    t
+                )
+                channel.env.errorListener.onError(t)
+                encodeError(t, channel.env)
+            }
         }
     }
 
@@ -275,6 +283,15 @@ class RpcMethod<T : RpcService, I, O>(
                     "Transformer",
                     "($id) Completed remote endpoint $endpoint"
                 )
+                if (transformedOutput is CallData.Error<S>) {
+                    val decoded = decodeError(transformedOutput, channel.env)
+                    channel.env.logger.info(
+                        "RpcMethod",
+                        "Decoded error response from endpoint $endpoint",
+                        decoded
+                    )
+                    throw decoded
+                }
                 outputTransform.untransform(transformedOutput, channel)
             }
             if (timeout != null && timeout > 0) {
@@ -282,6 +299,96 @@ class RpcMethod<T : RpcService, I, O>(
             } else {
                 body()
             }
+        }
+    }
+
+    /**
+     * Server-side: convert a thrown exception into a [CallData.Error] using
+     * this method's [reverseErrorMap]. The thrown class IS the wire payload's
+     * class — when the throwable's runtime class is assignable to a
+     * `@KsError`-bound type, the bound code + serializer are used and the
+     * throwable itself is encoded into the wire format `S` for inclusion in
+     * the error frame. There is no `KsrpcException` wrapper involved on the
+     * server side; users `throw MyTypedError(...)` directly.
+     *
+     * The `@KsError(code, ...)` binding's `code` is the single source of
+     * truth for the wire code — there is no per-throw override mechanism.
+     * Callers that want a different code for the same data should bind it
+     * differently. Falls back to sentinel-coded built-in errors:
+     * [RpcEndpointException] -> [KsrpcException.ENDPOINT_NOT_FOUND_CODE],
+     * a thrown [KsrpcException] without a binding -> its own
+     * [KsrpcException.code], any other Throwable ->
+     * [KsrpcException.INTERNAL_ERROR_CODE].
+     */
+    @Suppress("UNCHECKED_CAST")
+    fun <S> encodeError(t: Throwable, env: KsrpcEnvironment<S>): CallData.Error<S> {
+        // Walk errorMappings in declaration order, picking the first binding whose
+        // dataType is assignable from the throwable's runtime class. This mirrors
+        // normal `catch (e: BaseError)` semantics — a binding for a base type catches
+        // subclass instances. Declaration order serves as precedence when multiple
+        // bindings could match.
+        val mapping = errorMappings.firstOrNull { it.dataType.isInstance(t) }
+        val payloadT: S? = mapping?.let { m ->
+            runCatching {
+                val ser = m.dataSerializer as KSerializer<Any?>
+                (env.serialization.createCallData(ser, t) as CallData.Serialized<S>)
+                    .readSerialized()
+            }.getOrNull()
+        }
+        val code = when {
+            mapping != null -> mapping.code
+            t is RpcEndpointException -> KsrpcException.ENDPOINT_NOT_FOUND_CODE
+            t is KsrpcException -> t.code
+            else -> KsrpcException.INTERNAL_ERROR_CODE
+        }
+        return CallData.Error(code, t.message ?: t.toString(), payloadT)
+    }
+
+    /**
+     * Client-side: convert a [CallData.Error] into a [Throwable] using this
+     * method's [forwardErrorMap]. When [CallData.Error.errorCode] matches a
+     * `@KsError` binding and [CallData.Error.errorData] decodes successfully
+     * with the bound serializer, the deserialized typed Throwable itself is
+     * returned (and re-thrown by [callChannel]) — callers `catch (e: MyError)`
+     * typed.
+     *
+     * For built-in sentinels the result is [RpcEndpointException]
+     * ([KsrpcException.ENDPOINT_NOT_FOUND_CODE]) or [RpcException]
+     * ([KsrpcException.INTERNAL_ERROR_CODE]).
+     *
+     * Forward-compat: any other unknown wire code (e.g. a newer server's typed
+     * error not bound on this client) surfaces a generic [KsrpcException]
+     * carrying the raw wire-format payload bytes as [KsrpcException.data], so
+     * callers can still inspect the payload manually rather than losing the
+     * information.
+     */
+    @Suppress("UNCHECKED_CAST")
+    fun <S> decodeError(error: CallData.Error<S>, env: KsrpcEnvironment<S>): Throwable {
+        val mapping = forwardErrorMap[error.errorCode]
+        val typed = if (mapping != null && error.errorData != null) {
+            runCatching {
+                val ser = mapping.dataSerializer as KSerializer<Any?>
+                env.serialization.decodeCallData(
+                    ser,
+                    CallData.Serialized<S>(error.errorData)
+                ) as? Throwable
+            }.getOrNull()
+        } else {
+            null
+        }
+        if (typed != null) return typed
+        return when (error.errorCode) {
+            KsrpcException.ENDPOINT_NOT_FOUND_CODE -> RpcEndpointException(error.errorMessage)
+            KsrpcException.INTERNAL_ERROR_CODE -> RpcException(error.errorMessage)
+            // Forward-compat: unknown wire code (e.g. newer server's typed error not
+            // bound here) — surface a generic KsrpcException carrying the raw
+            // wire-format payload so callers can still inspect the data even without
+            // the @KsError binding.
+            else -> KsrpcException(
+                code = error.errorCode,
+                message = error.errorMessage,
+                data = error.errorData
+            )
         }
     }
 

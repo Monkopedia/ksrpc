@@ -84,7 +84,9 @@ class JsonRpcOutOfOrderResponseTest {
         val firstResult = first.await()
         val secondResult = second.await()
         assertTrue(firstResult.isFailure)
-        assertTrue(firstResult.exceptionOrNull()?.message?.contains("first failed") == true)
+        // execute() now surfaces the native JSON-RPC error envelope verbatim — message comes
+        // from `error.message`, the `data` payload is left for the routing layer to decode.
+        assertTrue(firstResult.exceptionOrNull()?.message?.contains("first exploded") == true)
         assertEquals(JsonPrimitive("second-result"), secondResult.getOrThrow())
         writer.close()
     }

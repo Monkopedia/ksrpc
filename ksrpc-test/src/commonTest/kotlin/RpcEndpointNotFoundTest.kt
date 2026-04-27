@@ -19,6 +19,7 @@ import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
 import com.monkopedia.ksrpc.channels.CallData
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
@@ -38,9 +39,9 @@ class RpcEndpointNotFoundTransportTest :
         },
         verifyOnChannel = { channel ->
             val response = channel.call("missing", CallData.create("ignored"), callId = null)
-            assertTrue(channel.env.serialization.isError(response))
-            val exception = channel.env.serialization.decodeErrorCallData(response)
-            val message = exception.message ?: ""
+            assertTrue(response.isError)
+            assertEquals(KsrpcException.ENDPOINT_NOT_FOUND_CODE, response.errorCode)
+            val message = response.errorMessage ?: ""
             assertTrue(
                 message.contains("Unknown endpoint: missing"),
                 message

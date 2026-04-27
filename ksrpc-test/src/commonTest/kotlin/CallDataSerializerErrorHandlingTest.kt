@@ -19,50 +19,49 @@ import com.monkopedia.ksrpc.channels.CallData
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertIs
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
+/**
+ * The [CallData] hierarchy gained a third variant — [CallData.Error] — and
+ * `CallDataSerializer` collapsed to just `createCallData`/`decodeCallData`.
+ * The variant *is* the discriminator now (no string prefixes, no
+ * `isError(callData)` round-trip through the serializer).
+ */
 class CallDataSerializerErrorHandlingTest {
 
     @Test
-    fun createAndDecodeStandardErrorPayload() {
-        val env = ksrpcEnvironment { }
-        val callData = env.serialization.createErrorCallData(
-            RpcFailure.serializer(),
-            RpcFailure("remote stack")
+    fun errorVariantHasErrorFieldsAndPredicate() {
+        val error = CallData.Error<String>(
+            errorCode = KsrpcException.INTERNAL_ERROR_CODE,
+            errorMessage = "boom",
+            errorData = null
         )
 
-        assertTrue(env.serialization.isError(callData))
-
-        val throwable = env.serialization.decodeErrorCallData(callData)
-        assertIs<RpcException>(throwable)
-        assertEquals("remote stack", throwable.message)
+        assertTrue(error.isError)
+        assertEquals(KsrpcException.INTERNAL_ERROR_CODE, error.errorCode)
+        assertEquals("boom", error.errorMessage)
+        assertNull(error.errorData)
+        assertFalse(error.isBinary)
     }
 
     @Test
-    fun createAndDecodeEndpointNotFoundPayload() {
-        val env = ksrpcEnvironment { }
-        val callData = env.serialization.createEndpointNotFoundCallData(
-            RpcFailure.serializer(),
-            RpcFailure("missing endpoint")
-        )
-
-        assertTrue(env.serialization.isError(callData))
-
-        val throwable = env.serialization.decodeErrorCallData(callData)
-        assertIs<RpcEndpointException>(throwable)
-        assertEquals("missing endpoint", throwable.message)
+    fun serializedVariantReportsNotErrorAndExposesNullErrorFields() {
+        val data = CallData.create("hello")
+        assertFalse(data.isError)
+        assertNull(data.errorCode)
+        assertNull(data.errorMessage)
     }
 
     @Test
-    fun decodeErrorCallDataReturnsUnknownPayloadExceptionForNonErrorData() {
-        val env = ksrpcEnvironment { }
-        val plainData = CallData.create("plain data")
-
-        assertFalse(env.serialization.isError(plainData))
-
-        val throwable = env.serialization.decodeErrorCallData(plainData)
-        assertIs<RpcException>(throwable)
-        assertEquals("Unknown error payload: plain data", throwable.message)
+    fun errorReadSerializedReturnsErrorDataWhenPresent() {
+        val error = CallData.Error(
+            errorCode = 100,
+            errorMessage = "bad input",
+            errorData = "{\"retry\":true}"
+        )
+        // Error.readSerialized returns the wire-encoded errorData — same shape as
+        // a Serialized<T>, so transports can reuse the same machinery for both.
+        assertEquals("{\"retry\":true}", error.readSerialized())
     }
 }

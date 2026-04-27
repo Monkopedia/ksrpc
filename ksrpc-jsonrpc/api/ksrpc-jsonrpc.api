@@ -168,6 +168,13 @@ public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcSerializedChanne
 	public fun onClose (Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
+public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcServerError : java/lang/RuntimeException {
+	public fun <init> (ILjava/lang/String;Lkotlinx/serialization/json/JsonElement;)V
+	public final fun getData ()Lkotlinx/serialization/json/JsonElement;
+	public final fun getErrorCode ()I
+	public fun getMessage ()Ljava/lang/String;
+}
+
 public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcServiceWrapper : com/monkopedia/ksrpc/KsrpcEnvironment$Element, com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcChannel {
 	public fun <init> (Lcom/monkopedia/ksrpc/channels/SerializedService;)V
 	public fun close (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;

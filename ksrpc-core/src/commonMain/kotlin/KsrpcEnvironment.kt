@@ -19,8 +19,6 @@ package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.channels.CallData
-import com.monkopedia.ksrpc.internal.ENDPOINT_NOT_FOUND_PREFIX
-import com.monkopedia.ksrpc.internal.ERROR_PREFIX
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
@@ -43,13 +41,22 @@ interface KsrpcEnvironment<T> {
     }
 }
 
+/**
+ * Bridges the user's wire-format `T` (a JSON string, a JNI [Any?] graph, etc.)
+ * to / from typed values. Implementations are tied to a specific wire format:
+ * a `StringSerializer` round-trips through `kotlinx.serialization`'s string
+ * formats, a `JniSerialization` round-trips through the JNI `Any?` envelope,
+ * and so on.
+ *
+ * Only successful payloads pass through this interface. Error responses are
+ * carried as the [CallData.Error] variant by the routing layer; transports
+ * encode and decode that variant natively (HTTP status codes, JSON-RPC error
+ * envelopes, packet error fields, etc.) and never round-trip an error through
+ * this serializer.
+ */
 interface CallDataSerializer<T> {
     fun <I> createCallData(serializer: KSerializer<I>, input: I): CallData<T>
-    fun <I> createErrorCallData(serializer: KSerializer<I>, input: I): CallData<T>
-    fun <I> createEndpointNotFoundCallData(serializer: KSerializer<I>, input: I): CallData<T>
     fun <I> decodeCallData(serializer: KSerializer<I>, data: CallData<T>): I
-    fun decodeErrorCallData(callData: CallData<T>): Throwable
-    fun isError(data: CallData<T>): Boolean
 }
 
 /**
@@ -87,41 +94,8 @@ private class StringSerializer(val stringFormat: StringFormat = Json) : CallData
     override fun <I> createCallData(serializer: KSerializer<I>, input: I): CallData<String> =
         CallData.create(stringFormat.encodeToString(serializer, input))
 
-    override fun <I> createErrorCallData(serializer: KSerializer<I>, input: I): CallData<String> =
-        CallData.createError(stringFormat.encodeToString(serializer, input))
-
-    override fun <I> createEndpointNotFoundCallData(
-        serializer: KSerializer<I>,
-        input: I
-    ): CallData<String> =
-        CallData.createEndpointNotFoundError(stringFormat.encodeToString(serializer, input))
-
     override fun <I> decodeCallData(serializer: KSerializer<I>, data: CallData<String>): I =
         stringFormat.decodeFromString(serializer, data.readSerialized())
-
-    override fun decodeErrorCallData(callData: CallData<String>): Throwable {
-        val serialized = callData.readSerialized()
-        return when {
-            serialized.startsWith(ENDPOINT_NOT_FOUND_PREFIX) -> {
-                val errorStr = serialized.substring(ENDPOINT_NOT_FOUND_PREFIX.length)
-                val failure = stringFormat.decodeFromString(RpcFailure.serializer(), errorStr)
-                RpcEndpointException(failure.stack)
-            }
-
-            serialized.startsWith(ERROR_PREFIX) -> {
-                val errorStr = serialized.substring(ERROR_PREFIX.length)
-                stringFormat.decodeFromString(RpcFailure.serializer(), errorStr).toException()
-            }
-
-            else -> RpcException("Unknown error payload: $serialized")
-        }
-    }
-
-    override fun isError(data: CallData<String>): Boolean {
-        val serialized = data.readSerialized()
-        return serialized.startsWith(ERROR_PREFIX) ||
-            serialized.startsWith(ENDPOINT_NOT_FOUND_PREFIX)
-    }
 }
 
 class KsrpcEnvironmentBuilder<T> internal constructor(

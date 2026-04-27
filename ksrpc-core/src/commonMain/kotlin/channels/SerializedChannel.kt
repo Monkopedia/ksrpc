@@ -25,8 +25,6 @@ import com.monkopedia.ksrpc.SuspendCloseableObservable
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.channels.ChannelClient.Companion.DEFAULT
-import com.monkopedia.ksrpc.internal.ENDPOINT_NOT_FOUND_PREFIX
-import com.monkopedia.ksrpc.internal.ERROR_PREFIX
 import com.monkopedia.ksrpc.internal.HostSerializedServiceImpl
 import com.monkopedia.ksrpc.rpcObject
 import kotlin.coroutines.CoroutineContext
@@ -189,14 +187,39 @@ interface SerializedService<T> :
 
 /**
  * Wrapper around data being serialized through calls.
- * Could be a reference to a string for a serialized object or to binary data.
+ *
+ * Has three variants:
+ *   - [Serialized] — a normal successful payload encoded in the wire format `T`.
+ *   - [Binary] — a binary payload (streamed via [RpcBinaryData]).
+ *   - [Error] — an error response carrying an integer code, a human-readable
+ *     message, and an optional typed payload encoded in `T` (matching the
+ *     successful-payload encoding so a transport can reuse the same
+ *     serialization machinery for both).
+ *
+ * The variant *is* the discriminator. Transports must natively encode and
+ * decode each variant rather than smuggling errors through [Serialized] with
+ * out-of-band markers.
  */
 sealed class CallData<T> private constructor() {
     abstract val isBinary: Boolean
 
+    /** Convenience: true iff this is an [Error] variant. */
+    open val isError: Boolean get() = false
+
+    /**
+     * Code for [Error] variants; `null` otherwise. Lets transports populate
+     * native error fields without pattern-matching on the variant.
+     */
+    open val errorCode: Int? get() = null
+
+    /**
+     * Human-readable message for [Error] variants; `null` otherwise.
+     */
+    open val errorMessage: String? get() = null
+
     /**
      * Read the serialized content of this object.
-     * If this is not a string then throws [IllegalStateException].
+     * If this is binary data then throws [IllegalStateException].
      */
     abstract fun readSerialized(): T
 
@@ -230,15 +253,39 @@ sealed class CallData<T> private constructor() {
         override fun toString(): String = value.toString()
     }
 
+    /**
+     * Error response. [errorCode] discriminates the error type — typically a
+     * `@KsError`-bound user code, with sentinels
+     * [com.monkopedia.ksrpc.KsrpcException.ENDPOINT_NOT_FOUND_CODE] and
+     * [com.monkopedia.ksrpc.KsrpcException.INTERNAL_ERROR_CODE] for the
+     * built-in cases. [errorMessage] is human-readable. [errorData] is the
+     * optional typed payload encoded in the wire format's native type `T` —
+     * `null` when no `@KsError` binding matched. [readSerialized] returns
+     * [errorData] (it is the same wire-format `T` as a [Serialized] payload —
+     * naturally reusable by transports / serializers).
+     */
+    data class Error<T>(
+        override val errorCode: Int,
+        override val errorMessage: String,
+        val errorData: T? = null
+    ) : CallData<T>() {
+        override val isBinary: Boolean = false
+        override val isError: Boolean = true
+        override fun readSerialized(): T = errorData
+            ?: error("Error CallData has no payload data (errorCode=$errorCode)")
+
+        override fun readBinary(): RpcBinaryData =
+            error("Cannot read binary data from error CallData")
+
+        override fun toString(): String =
+            "error(code=$errorCode, message=$errorMessage, hasData=${errorData != null})"
+    }
+
     companion object {
         /**
          * Create a CallData holding content serialized in a string.
          */
         fun <T> create(str: T) = Serialized(str)
-
-        fun createError(str: String) = Serialized(ERROR_PREFIX + str)
-
-        fun createEndpointNotFoundError(str: String) = Serialized(ENDPOINT_NOT_FOUND_PREFIX + str)
 
         /**
          * Create a CallData wrapping a [RpcBinaryData] for reading binary data.

@@ -53,7 +53,7 @@ import com.monkopedia.ksrpc.RpcService
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class InitError(val retry: Boolean)
+class InitError(val retry: Boolean) : RuntimeException()
 
 @KsService
 interface MyService : RpcService {
@@ -97,10 +97,10 @@ import com.monkopedia.ksrpc.RpcService
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class InitError(val retry: Boolean)
+class InitError(val retry: Boolean) : RuntimeException()
 
 @Serializable
-data class VersionError(val expected: Int, val actual: Int)
+class VersionError(val expected: Int, val actual: Int) : RuntimeException()
 
 @KsService
 interface MultiService : RpcService {
@@ -168,7 +168,7 @@ import com.monkopedia.ksrpc.annotation.KsService
 import com.monkopedia.ksrpc.RpcService
 
 // Deliberately NOT @Serializable — the plugin must reject this with a clear diagnostic.
-data class NotSerializable(val value: String)
+class NotSerializable(val value: String) : RuntimeException()
 
 @KsService
 interface BadService : RpcService {
@@ -188,6 +188,44 @@ interface BadService : RpcService {
                 result.messages.contains("NotSerializable") &&
                 result.messages.contains("@Serializable"),
             "Expected @Serializable-validation diagnostic naming NotSerializable, " +
+                "got: ${result.messages}"
+        )
+    }
+
+    @Test
+    fun `non-Throwable error payload type is rejected at compile time`() {
+        val source = SourceFile.kotlin(
+            "main.kt",
+            """
+import com.monkopedia.ksrpc.annotation.KsError
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.RpcService
+import kotlinx.serialization.Serializable
+
+// Serializable but does NOT extend Throwable. Under the typed-Throwable contract the
+// bound class IS the thrown class, so this must fail at compile time.
+@Serializable
+data class NotThrowable(val value: String)
+
+@KsService
+interface BadService : RpcService {
+    @KsMethod("/op")
+    @KsError(code = 42, type = NotThrowable::class)
+    suspend fun op(input: String): String
+}
+"""
+        )
+        val result = compile(listOf(source))
+        assertTrue(
+            result.exitCode != KotlinCompilation.ExitCode.OK,
+            "Expected compilation to fail; messages: ${result.messages}"
+        )
+        assertTrue(
+            result.messages.contains("@KsError") &&
+                result.messages.contains("NotThrowable") &&
+                result.messages.contains("Throwable"),
+            "Expected Throwable-validation diagnostic naming NotThrowable, " +
                 "got: ${result.messages}"
         )
     }

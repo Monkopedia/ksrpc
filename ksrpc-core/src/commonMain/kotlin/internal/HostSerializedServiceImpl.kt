@@ -18,15 +18,14 @@
 package com.monkopedia.ksrpc.internal
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
+import com.monkopedia.ksrpc.KsrpcException
 import com.monkopedia.ksrpc.RpcEndpointException
-import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.RpcObject
 import com.monkopedia.ksrpc.RpcService
 import com.monkopedia.ksrpc.SuspendCloseable
 import com.monkopedia.ksrpc.TrackingService
 import com.monkopedia.ksrpc.UnhandledMethodHandler
 import com.monkopedia.ksrpc.annotation.KsrpcInternal
-import com.monkopedia.ksrpc.asString
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.ChannelClient
 import com.monkopedia.ksrpc.channels.ChannelId
@@ -35,6 +34,7 @@ import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedChannel
 import com.monkopedia.ksrpc.channels.SerializedService
 import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
@@ -64,7 +64,9 @@ class HostSerializedChannelImpl<T>(
         val channel = if (channelId.id.isEmpty()) {
             baseChannel.await()
         } else {
-            serviceMap[channelId.id] ?: error("Cannot find service ${channelId.id}")
+            serviceMap[channelId.id] ?: throw RpcEndpointException(
+                "Cannot find service ${channelId.id}"
+            )
         }
         // [context] is stored on this channel and typically carries the channel's Job — we
         // strip it so cancellation from the caller (the handler coroutine on the server, or
@@ -74,18 +76,28 @@ class HostSerializedChannelImpl<T>(
                 close(channelId)
                 env.serialization.createCallData(Unit.serializer(), Unit)
             } else {
+                // Errors thrown out of channel.call are now produced by RpcMethod.call as
+                // CallData.Error frames — this channel is oblivious to error encoding and
+                // simply forwards whatever variant comes back. Only routing-level failures
+                // (channel lookup miss, top-level dispatch issues) hit the catch below.
                 channel.call(endpoint, data, callId)
             }
         }
+    } catch (t: CancellationException) {
+        throw t
     } catch (t: Throwable) {
         env.logger.info("SerializedChannel", "Exception thrown during dispatching", t)
         env.errorListener.onError(t)
-        val failure = RpcFailure(t.asString)
-        if (t is RpcEndpointException) {
-            env.serialization.createEndpointNotFoundCallData(RpcFailure.serializer(), failure)
-        } else {
-            env.serialization.createErrorCallData(RpcFailure.serializer(), failure)
+        val code = when (t) {
+            is RpcEndpointException -> KsrpcException.ENDPOINT_NOT_FOUND_CODE
+            is KsrpcException -> t.code
+            else -> KsrpcException.INTERNAL_ERROR_CODE
         }
+        // Concise message only — the full stack is logged server-side via env.logger
+        // above, not propagated to the client. Matches RpcMethod.encodeError's
+        // convention so wire frames are consistent regardless of which catch
+        // produced them.
+        CallData.Error(code, t.message ?: t.toString())
     }
 
     override suspend fun close(id: ChannelId) {
