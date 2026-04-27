@@ -148,6 +148,7 @@ class StubGeneration(
                             endpoint,
                             serviceMethod.metadataAnnotations,
                             serviceMethod.errorAnnotations,
+                            serviceMethod.contextAnnotations,
                             service,
                             genericBuilder
                         )
@@ -159,6 +160,7 @@ class StubGeneration(
                             serviceMethod.ksMethodAnnotation,
                             serviceMethod.metadataAnnotations,
                             serviceMethod.errorAnnotations,
+                            serviceMethod.contextAnnotations,
                             companion,
                             service
                         )
@@ -186,6 +188,7 @@ class StubGeneration(
         endpoint: String,
         metadataAnnotations: List<IrConstructorCall>,
         errorAnnotations: List<IrConstructorCall>,
+        contextAnnotations: List<IrConstructorCall>,
         service: ServiceClass,
         builder: GenericMethodIrBuilder
     ): IrFunction {
@@ -224,6 +227,7 @@ class StubGeneration(
                             method,
                             metadataAnnotations,
                             errorAnnotations,
+                            contextAnnotations,
                             executor = executor
                         ),
                         irGetField(irGet(thisParam), service.channel),
@@ -329,6 +333,7 @@ class StubGeneration(
         annotation: IrConstructorCall,
         metadataAnnotations: List<IrConstructorCall>,
         errorAnnotations: List<IrConstructorCall>,
+        contextAnnotations: List<IrConstructorCall>,
         companion: IrClass,
         service: ServiceClass
     ): IrFunction {
@@ -344,7 +349,8 @@ class StubGeneration(
                 this,
                 companion,
                 metadataAnnotations,
-                errorAnnotations
+                errorAnnotations,
+                contextAnnotations
             )
 
         service.addEndpoint(endpoint, methodField)
@@ -393,7 +399,8 @@ class StubGeneration(
         serviceInterface: IrClass,
         companion: IrClass,
         metadataAnnotations: List<IrConstructorCall>,
-        errorAnnotations: List<IrConstructorCall>
+        errorAnnotations: List<IrConstructorCall>,
+        contextAnnotations: List<IrConstructorCall>
     ): IrFunction {
         val field = companion.addField {
             startOffset = SYNTHETIC_OFFSET
@@ -428,7 +435,8 @@ class StubGeneration(
                             endpoint,
                             method,
                             metadataAnnotations,
-                            errorAnnotations
+                            errorAnnotations,
+                            contextAnnotations
                         )
                     )
                 )
@@ -442,7 +450,8 @@ class StubGeneration(
         endpoint: String,
         method: IrSimpleFunction,
         metadataAnnotations: List<IrConstructorCall>,
-        errorAnnotations: List<IrConstructorCall>
+        errorAnnotations: List<IrConstructorCall>,
+        contextAnnotations: List<IrConstructorCall>
     ): IrConstructorCall {
         // 0-arg @KsMethod functions have no user-declared input; fall back to Unit
         // so the generated RpcMethod is shaped as `RpcMethod<Service, Unit, Out>`.
@@ -487,6 +496,10 @@ class StubGeneration(
             if (supportsErrorMapping) {
                 args += ErrorMappingIrBuilder(env, this@irCreateRpcMethod, messageCollector)
                     .buildErrorMappingList(errorAnnotations)
+            }
+            if (env.contextBindingSupported) {
+                args += ContextBindingIrBuilder(env, this@irCreateRpcMethod, messageCollector)
+                    .buildContextBindingList(contextAnnotations)
             }
             putArgs(*args.toTypedArray())
         }

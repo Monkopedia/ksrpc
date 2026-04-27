@@ -24,11 +24,16 @@ import com.monkopedia.ksrpc.channels.CurrentRpcCallElement
 import com.monkopedia.ksrpc.channels.RpcBinaryData
 import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
+import com.monkopedia.ksrpc.channels.WireContextCallId
+import com.monkopedia.ksrpc.channels.WireContextMap
 import com.monkopedia.ksrpc.channels.registerHost
 import com.monkopedia.ksrpc.internal.ServiceExecutor
 import com.monkopedia.ksrpc.internal.client
 import com.monkopedia.ksrpc.internal.host
 import com.monkopedia.ksrpc.internal.randomUuid
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.coroutines.coroutineContext
 import kotlin.reflect.KClass
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -169,6 +174,22 @@ class SubserviceTransformer<T : RpcService>(
 class KsErrorMapping(val code: Int, val dataType: KClass<*>, val dataSerializer: KSerializer<*>)
 
 /**
+ * Describes one `@KsContext`-meta-annotated binding captured by the ksrpc
+ * compiler plugin on a `@KsMethod` function or its enclosing `@KsService`
+ * interface. Each entry holds a reference to the [KsContextBinding] singleton
+ * that knows how to encode/decode the context element for wire transport.
+ *
+ * At call time the stub reads the current [kotlin.coroutines.CoroutineContext]
+ * for each binding, encodes present values via [KsContextBinding.toWire], and
+ * installs a [WireContextMap] so transports can propagate them. On the server
+ * side [RpcMethod.call] reverses the process: it reads [WireContextMap] from
+ * the coroutine context, decodes values via [KsContextBinding.fromWire], and
+ * installs them as real [kotlin.coroutines.CoroutineContext.Element]s so
+ * handlers see them via the standard `coroutineContext[MyElement]` lookup.
+ */
+class KsContextMapping(val binding: KsContextBinding<*>)
+
+/**
  * Forward lookup built from [RpcMethod.errorMappings]: code → mapping. Used by
  * the client-side error-decoder to resolve an incoming wire-level code back to
  * the captured [KSerializer] for deserializing the payload. Entries from later
@@ -202,6 +223,12 @@ val RpcMethod<*, *, *>.reverseErrorMap: Map<KClass<*>, KsErrorMapping>
  * [KSerializer]. Runtime routing (see [forwardErrorMap] / [reverseErrorMap])
  * uses these to translate between thrown exception data and wire-level error
  * envelopes.
+ *
+ * The optional [contextBindings] list carries `@KsContext`-meta-annotated
+ * bindings captured by the compiler plugin from the source method and its
+ * enclosing `@KsService` interface. Each entry holds a [KsContextBinding]
+ * singleton used to propagate per-call coroutine-context values across the
+ * wire. See [KsContextMapping] for details.
  */
 class RpcMethod<T : RpcService, I, O>(
     val endpoint: String,
@@ -209,7 +236,8 @@ class RpcMethod<T : RpcService, I, O>(
     val outputTransform: Transformer<O>,
     private val method: ServiceExecutor,
     val metadata: List<MethodMetadata>,
-    val errorMappings: List<KsErrorMapping> = emptyList()
+    val errorMappings: List<KsErrorMapping> = emptyList(),
+    val contextBindings: List<KsContextMapping> = emptyList()
 ) {
 
     val hasReturnType: Boolean
@@ -235,8 +263,18 @@ class RpcMethod<T : RpcService, I, O>(
         // just pass the id through. Nested outbound calls that re-enter RpcMethod.call on the
         // far side naturally get a fresh element installed, so no caller-side stripping is
         // needed.
-        val currentCall = CurrentRpcCallElement(method = this, id = callId)
-        return withContext(channel.context.minusKey(Job) + currentCall) {
+        // Extract the real callId and WireContextMap from a WireContextCallId wrapper
+        // if present. The in-process channel path passes context this way because
+        // intermediate withContext switches may lose the WireContextMap from
+        // coroutineContext. Transport paths (PIPE, HTTP) install WireContextMap in
+        // coroutineContext directly.
+        val wireCallId = callId as? WireContextCallId
+        val realCallId = wireCallId?.delegate ?: callId
+        val wireCtx = wireCallId?.wireContextMap
+            ?: coroutineContext[WireContextMap]
+        val currentCall = CurrentRpcCallElement(method = this, id = realCallId)
+        val contextElements = decodeWireContextFrom(wireCtx)
+        return withContext(currentCall + contextElements) {
             try {
                 val transformedInput = inputTransform.untransform(input, channel)
                 val logId = randomUuid()
@@ -261,11 +299,17 @@ class RpcMethod<T : RpcService, I, O>(
     @Suppress("UNCHECKED_CAST")
     suspend fun <S> callChannel(channel: SerializedService<S>, input: Any?): Any? {
         val timeout = timeoutMillis
+        // Build a WireContextMap from the CALLER's coroutineContext BEFORE switching
+        // to the channel's context — the withContext below replaces the context, so
+        // the caller's context elements would be lost if we read them inside.
+        val wireCtx = buildWireContext(coroutineContext)
         // Drop the Job element from the channel's context so the caller's Job remains the
         // parent for cancellation propagation — otherwise cancelling the caller wouldn't
         // surface inside the remote call (it would only cancel this [withContext] body's
         // own child scope, which is unreachable from the caller's cancel signal).
-        return withContext(channel.context.minusKey(Job)) {
+        val baseContext = channel.context.minusKey(Job)
+        val channelContext = if (wireCtx != null) baseContext + wireCtx else baseContext
+        return withContext(channelContext) {
             val body: suspend () -> Any? = {
                 val input = inputTransform.transform(input as I, channel)
                 val id = randomUuid()
@@ -277,8 +321,16 @@ class RpcMethod<T : RpcService, I, O>(
                 // wire-level id at the transport if needed, and any server-side handler
                 // reached via the remote transport will have its own
                 // CurrentRpcCallElement installed by that transport's RpcMethod.call
-                // invocation.
-                val transformedOutput = channel.call(this@RpcMethod, input, callId = null)
+                // invocation. For the in-process path, we forward the WireContextMap
+                // via a WireContextCallId wrapper so RpcMethod.call can decode
+                // @KsContext bindings even if the coroutine context doesn't survive
+                // through intermediate withContext switches.
+                val wireCallId = if (wireCtx != null) {
+                    WireContextCallId(delegate = null, wireContextMap = wireCtx)
+                } else {
+                    null
+                }
+                val transformedOutput = channel.call(this@RpcMethod, input, callId = wireCallId)
                 channel.env.logger.debug(
                     "Transformer",
                     "($id) Completed remote endpoint $endpoint"
@@ -398,4 +450,41 @@ class RpcMethod<T : RpcService, I, O>(
             inputTransform as? BaseSubserviceTransformer<*, *>,
             outputTransform as? BaseSubserviceTransformer<*, *>
         )
+
+    /**
+     * Client-side: extract context values from the current [CoroutineContext]
+     * using this method's [contextBindings] and build a [WireContextMap] for
+     * transports to propagate. Returns null if no bindings are declared or no
+     * context elements are present.
+     */
+    @Suppress("UNCHECKED_CAST")
+    @OptIn(KsrpcInternal::class)
+    private fun buildWireContext(context: CoroutineContext): WireContextMap? {
+        if (contextBindings.isEmpty()) return null
+        val map = mutableMapOf<String, String>()
+        for (mapping in contextBindings) {
+            val binding = mapping.binding as KsContextBinding<CoroutineContext.Element>
+            val element = context[binding] ?: continue
+            map[binding.wireKey] = binding.toWire(element)
+        }
+        return if (map.isEmpty()) null else WireContextMap(map)
+    }
+
+    /**
+     * Server-side: decode [WireContextMap] values into real
+     * [CoroutineContext.Element]s using this method's [contextBindings].
+     * Returns [EmptyCoroutineContext] if no bindings are declared or the
+     * wire context map is null.
+     */
+    @OptIn(KsrpcInternal::class)
+    private fun decodeWireContextFrom(wireCtx: WireContextMap?): CoroutineContext {
+        if (contextBindings.isEmpty() || wireCtx == null) return EmptyCoroutineContext
+        val wireMap = wireCtx.values
+        var result: CoroutineContext = EmptyCoroutineContext
+        for (mapping in contextBindings) {
+            val encoded = wireMap[mapping.binding.wireKey] ?: continue
+            result += mapping.binding.fromWire(encoded)
+        }
+        return result
+    }
 }

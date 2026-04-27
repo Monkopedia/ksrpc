@@ -131,6 +131,11 @@ object FqConstants {
     // `List<KsErrorMapping>` at codegen time.
     val KS_ERROR_MAPPING = ClassId(FQPKG, Name.identifier("KsErrorMapping"))
 
+    // Ksrpc runtime class used to materialize @KsContext bindings into
+    // `List<KsContextMapping>` at codegen time.
+    val KS_CONTEXT_MAPPING = ClassId(FQPKG, Name.identifier("KsContextMapping"))
+    val KS_CONTEXT = FqName("com.monkopedia.ksrpc.annotation.KsContext")
+
     val METHOD_METADATA = ClassId(FQPKG, Name.identifier("MethodMetadata"))
     val METADATA_VALUE = ClassId(FQPKG, Name.identifier("MetadataValue"))
     val METADATA_VALUE_STRING =

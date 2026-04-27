@@ -232,6 +232,7 @@ class ObjGeneration(
                             method.function,
                             method.metadataAnnotations,
                             method.errorAnnotations,
+                            method.contextAnnotations,
                             executor = executor
                         )
                     )
@@ -273,6 +274,7 @@ internal class GenericMethodIrBuilder(
         method: IrSimpleFunction,
         metadataAnnotations: List<IrConstructorCall>,
         errorAnnotations: List<IrConstructorCall>,
+        contextAnnotations: List<IrConstructorCall> = emptyList(),
         executor: IrClass
     ): IrConstructorCall {
         // 0-arg @KsMethod functions fall back to Unit as the input type.
@@ -320,6 +322,10 @@ internal class GenericMethodIrBuilder(
         if (env.errorMappingSupported) {
             args += ErrorMappingIrBuilder(env, decl, report)
                 .buildErrorMappingList(errorAnnotations)
+        }
+        if (env.contextBindingSupported) {
+            args += ContextBindingIrBuilder(env, decl, report)
+                .buildContextBindingList(contextAnnotations)
         }
         call.putArgs(*args.toTypedArray())
         return call

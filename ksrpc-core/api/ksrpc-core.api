@@ -28,6 +28,11 @@ public abstract interface class com/monkopedia/ksrpc/ErrorListener {
 	public abstract fun onError (Ljava/lang/Throwable;)V
 }
 
+public final class com/monkopedia/ksrpc/KsContextMapping {
+	public fun <init> (Lcom/monkopedia/ksrpc/KsContextBinding;)V
+	public final fun getBinding ()Lcom/monkopedia/ksrpc/KsContextBinding;
+}
+
 public final class com/monkopedia/ksrpc/KsErrorMapping {
 	public fun <init> (ILkotlin/reflect/KClass;Lkotlinx/serialization/KSerializer;)V
 	public final fun getCode ()I
@@ -232,13 +237,14 @@ public final class com/monkopedia/ksrpc/RpcExceptionKt {
 }
 
 public final class com/monkopedia/ksrpc/RpcMethod {
-	public fun <init> (Ljava/lang/String;Lcom/monkopedia/ksrpc/Transformer;Lcom/monkopedia/ksrpc/Transformer;Lcom/monkopedia/ksrpc/internal/ServiceExecutor;Ljava/util/List;Ljava/util/List;)V
-	public synthetic fun <init> (Ljava/lang/String;Lcom/monkopedia/ksrpc/Transformer;Lcom/monkopedia/ksrpc/Transformer;Lcom/monkopedia/ksrpc/internal/ServiceExecutor;Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lcom/monkopedia/ksrpc/Transformer;Lcom/monkopedia/ksrpc/Transformer;Lcom/monkopedia/ksrpc/internal/ServiceExecutor;Ljava/util/List;Ljava/util/List;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcom/monkopedia/ksrpc/Transformer;Lcom/monkopedia/ksrpc/Transformer;Lcom/monkopedia/ksrpc/internal/ServiceExecutor;Ljava/util/List;Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun call (Lcom/monkopedia/ksrpc/channels/SerializedService;Lcom/monkopedia/ksrpc/RpcService;Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/RpcCallId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun callChannel (Lcom/monkopedia/ksrpc/channels/SerializedService;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun decodeError (Lcom/monkopedia/ksrpc/channels/CallData$Error;Lcom/monkopedia/ksrpc/KsrpcEnvironment;)Ljava/lang/Throwable;
 	public final fun encodeError (Ljava/lang/Throwable;Lcom/monkopedia/ksrpc/KsrpcEnvironment;)Lcom/monkopedia/ksrpc/channels/CallData$Error;
 	public final fun findSubserviceTransformers ()Ljava/util/List;
+	public final fun getContextBindings ()Ljava/util/List;
 	public final fun getEndpoint ()Ljava/lang/String;
 	public final fun getErrorMappings ()Ljava/util/List;
 	public final fun getHasReturnType ()Z
@@ -515,6 +521,26 @@ public abstract interface class com/monkopedia/ksrpc/channels/SingleChannelConne
 
 public abstract interface class com/monkopedia/ksrpc/channels/SingleChannelHost : com/monkopedia/ksrpc/KsrpcEnvironment$Element {
 	public abstract fun registerDefault (Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/monkopedia/ksrpc/channels/WireContextCallId : com/monkopedia/ksrpc/channels/RpcCallId {
+	public fun <init> (Lcom/monkopedia/ksrpc/channels/RpcCallId;Lcom/monkopedia/ksrpc/channels/WireContextMap;)V
+	public final fun getDelegate ()Lcom/monkopedia/ksrpc/channels/RpcCallId;
+	public final fun getWireContextMap ()Lcom/monkopedia/ksrpc/channels/WireContextMap;
+}
+
+public final class com/monkopedia/ksrpc/channels/WireContextMap : kotlin/coroutines/CoroutineContext$Element {
+	public static final field Key Lcom/monkopedia/ksrpc/channels/WireContextMap$Key;
+	public fun <init> (Ljava/util/Map;)V
+	public fun fold (Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
+	public fun get (Lkotlin/coroutines/CoroutineContext$Key;)Lkotlin/coroutines/CoroutineContext$Element;
+	public fun getKey ()Lkotlin/coroutines/CoroutineContext$Key;
+	public final fun getValues ()Ljava/util/Map;
+	public fun minusKey (Lkotlin/coroutines/CoroutineContext$Key;)Lkotlin/coroutines/CoroutineContext;
+	public fun plus (Lkotlin/coroutines/CoroutineContext;)Lkotlin/coroutines/CoroutineContext;
+}
+
+public final class com/monkopedia/ksrpc/channels/WireContextMap$Key : kotlin/coroutines/CoroutineContext$Key {
 }
 
 public final class com/monkopedia/ksrpc/internal/ClientChannelContext : kotlin/coroutines/CoroutineContext$Element {

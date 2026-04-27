@@ -41,6 +41,7 @@ private class Visitor(private val messageCollector: MessageCollector) : IrElemen
     private val service = FqName("com.monkopedia.ksrpc.annotation.KsService")
     private val metadataMarker = FqConstants.KS_METHOD_METADATA
     private val ksError = FqConstants.KS_ERROR
+    private val ksContext = FqConstants.KS_CONTEXT
 
     override fun visitClass(declaration: IrClass): IrStatement {
         val annotation = declaration.annotations.find { annotation ->
@@ -83,12 +84,25 @@ private class Visitor(private val messageCollector: MessageCollector) : IrElemen
                 val errorAnnotations = declaration.annotations.filter {
                     it.type.classFqName == ksError
                 }
+                // Capture @KsContext-meta-annotated annotations from both the
+                // method and its enclosing @KsService class. Union of both.
+                val isKsContextMeta = { ann: IrConstructorCall ->
+                    ann.type.classOrNull?.owner?.annotations?.any {
+                        it.type.classFqName == ksContext
+                    } == true
+                }
+                val methodContextAnnotations = declaration.annotations
+                    .filter(isKsContextMeta)
+                val classContextAnnotations = currentService?.irClass?.annotations
+                    ?.filter(isKsContextMeta) ?: emptyList()
+                val contextAnnotations = classContextAnnotations + methodContextAnnotations
                 current.methods.add(
                     ServiceMethod(
                         function = declaration,
                         ksMethodAnnotation = annotation,
                         metadataAnnotations = metadataAnnotations,
-                        errorAnnotations = errorAnnotations
+                        errorAnnotations = errorAnnotations,
+                        contextAnnotations = contextAnnotations
                     )
                 )
             } else if (!declaration.isFakeOverride) {
@@ -147,7 +161,14 @@ data class ServiceMethod(
      * compiler plugin emits one [com.monkopedia.ksrpc.KsErrorMapping] entry per
      * annotation into the generated `RpcMethod.errorMappings` list. See #77.
      */
-    val errorAnnotations: List<IrConstructorCall> = emptyList()
+    val errorAnnotations: List<IrConstructorCall> = emptyList(),
+    /**
+     * `@KsContext`-meta-annotated annotations captured from both the method
+     * and its enclosing `@KsService` class. The compiler plugin emits one
+     * [com.monkopedia.ksrpc.KsContextMapping] entry per unique binding into
+     * the generated `RpcMethod.contextBindings` list. See #81.
+     */
+    val contextAnnotations: List<IrConstructorCall> = emptyList()
 )
 
 data class ServiceClass(

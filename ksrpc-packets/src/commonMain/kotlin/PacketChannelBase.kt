@@ -27,6 +27,7 @@ import com.monkopedia.ksrpc.channels.Connection
 import com.monkopedia.ksrpc.channels.RpcBinaryData
 import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
+import com.monkopedia.ksrpc.channels.WireContextMap
 import com.monkopedia.ksrpc.channels.awaitRequestCancellable
 import com.monkopedia.ksrpc.internal.ClientChannelContext
 import com.monkopedia.ksrpc.internal.HostChannelContext
@@ -35,6 +36,7 @@ import com.monkopedia.ksrpc.internal.MultiChannel
 import com.monkopedia.ksrpc.internal.SubserviceChannel
 import com.monkopedia.ksrpc.internal.randomUuid
 import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -150,7 +152,15 @@ abstract class PacketChannelBase<T>(
                             // the cancellation must flow through into serviceChannel.call.
                             // The CurrentRpcCallElement is installed centrally in
                             // RpcMethod.call via the callId we pass through here.
-                            val response = withContext(context.minusKey(Job)) {
+                            // Install WireContextMap from the packet so RpcMethod.call can
+                            // decode @KsContext bindings into real coroutine-context elements.
+                            val wireCtx = p.contextMap?.let { WireContextMap(it) }
+                            val handlerContext = if (wireCtx != null) {
+                                context.minusKey(Job) + wireCtx
+                            } else {
+                                context.minusKey(Job)
+                            }
+                            val response = withContext(handlerContext) {
                                 serviceChannel.call(
                                     ChannelId(p.id),
                                     p.endpoint,
@@ -189,7 +199,8 @@ abstract class PacketChannelBase<T>(
         id: String,
         messageId: String,
         endpoint: String,
-        response: CallData<T>
+        response: CallData<T>,
+        contextMap: Map<String, String>? = null
     ) {
         if (response.isBinary) {
             val binaryChannel = randomUuid()
@@ -208,7 +219,8 @@ abstract class PacketChannelBase<T>(
                     data = env.serialization.createCallData(
                         String.serializer(),
                         binaryChannel
-                    ).readSerialized()
+                    ).readSerialized(),
+                    contextMap = contextMap
                 )
             )
             launch {
@@ -295,7 +307,8 @@ abstract class PacketChannelBase<T>(
                     id = id,
                     messageId = messageId,
                     endpoint = endpoint,
-                    data = response.readSerialized()
+                    data = response.readSerialized(),
+                    contextMap = contextMap
                 )
             )
         }
@@ -372,7 +385,8 @@ abstract class PacketChannelBase<T>(
             "SerializedChannel",
             "Sending call ${channelId.id}/$endpoint -  $messageId"
         )
-        scope.sendPacket(true, channelId.id, messageId, endpoint, data)
+        val wireCtx = coroutineContext[WireContextMap]?.values
+        scope.sendPacket(true, channelId.id, messageId, endpoint, data, contextMap = wireCtx)
         val packet = try {
             awaitRequestCancellable(wireCallId, response)
         } catch (t: CancellationException) {

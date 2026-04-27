@@ -50,7 +50,16 @@ class Packet<T>(
      * [errorCode] is non-null; null otherwise.
      */
     @SerialName("em")
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    /**
+     * Optional map of wire-encoded `@KsContext` values. When non-null on an input frame,
+     * the receiver installs a [com.monkopedia.ksrpc.channels.WireContextMap] so the
+     * handler's [com.monkopedia.ksrpc.RpcMethod.call] can decode the values and install
+     * them as real coroutine-context elements. Older peers that don't understand this field
+     * tolerate it via `ignoreUnknownKeys` on [PACKET_JSON].
+     */
+    @SerialName("cx")
+    val contextMap: Map<String, String>? = null
 ) {
     val input: Boolean get() = (type and 1) != 0
     val binary: Boolean get() = (type and 2) != 0
@@ -79,7 +88,8 @@ class Packet<T>(
         endpoint: String,
         data: T,
         errorCode: Int? = null,
-        errorMessage: String? = null
+        errorMessage: String? = null,
+        contextMap: Map<String, String>? = null
     ) : this(
         (if (input) 1 else 0) or
             (if (binary) 2 else 0) or
@@ -90,7 +100,8 @@ class Packet<T>(
         endpoint,
         data,
         errorCode,
-        errorMessage
+        errorMessage,
+        contextMap
     )
 }
 
