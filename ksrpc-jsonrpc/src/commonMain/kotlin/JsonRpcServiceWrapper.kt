@@ -46,7 +46,7 @@ class JsonRpcServiceWrapper(private val channel: SerializedService<String>) :
             CallData.create(json.encodeToString(message)),
             callId
         )
-        if (response is com.monkopedia.ksrpc.channels.CallData.Error<String>) {
+        if (response is CallData.Error<String>) {
             // Native JSON-RPC error envelope: code/message/data map directly. Built-in
             // sentinels (-32601, -32603) collide deliberately with the JSON-RPC reserved
             // codes so vanilla JSON-RPC consumers see the right semantics without any
