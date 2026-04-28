@@ -27,6 +27,7 @@ import org.jetbrains.kotlin.fir.declarations.FirRegularClass
 import org.jetbrains.kotlin.fir.declarations.FirTypeParameter
 import org.jetbrains.kotlin.fir.declarations.hasAnnotation
 import org.jetbrains.kotlin.fir.declarations.utils.classId
+import org.jetbrains.kotlin.fir.symbols.SymbolInternals
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassSymbol
 import org.jetbrains.kotlin.fir.types.toRegularClassSymbol
 import org.jetbrains.kotlin.name.ClassId
@@ -121,10 +122,9 @@ internal object KsServiceClassChecker :
             return
         }
 
-        val superTypeFqNames = declaration.superTypeRefs
-            .mapNotNull { it.toRegularClassSymbol(session)?.classId?.asSingleFqName() }
-        val hasRpcServiceSuper = superTypeFqNames.any { it == FQRPC_SERVICE }
-        val hasIntrospectableSuper = superTypeFqNames.any { it == FQ_INTROSPECTABLE_RPC_SERVICE }
+        val allSuperFqNames = collectAllSuperFqNames(declaration, session)
+        val hasRpcServiceSuper = allSuperFqNames.contains(FQRPC_SERVICE)
+        val hasIntrospectableSuper = allSuperFqNames.contains(FQ_INTROSPECTABLE_RPC_SERVICE)
 
         val ksServiceSuper = ksServiceSuperSymbols.firstOrNull()
         if (ksServiceSuper != null) {
@@ -173,5 +173,29 @@ internal object KsServiceClassChecker :
                 }
             }
         }
+    }
+
+    /**
+     * Collect FQ names of all transitive supertypes of [declaration], including direct ones.
+     */
+    @OptIn(SymbolInternals::class)
+    private fun collectAllSuperFqNames(
+        declaration: FirClass,
+        session: org.jetbrains.kotlin.fir.FirSession
+    ): Set<FqName> {
+        val result = mutableSetOf<FqName>()
+        val queue = ArrayDeque<FirClass>()
+        queue.add(declaration)
+        while (queue.isNotEmpty()) {
+            val current = queue.removeFirst()
+            for (superRef in current.superTypeRefs) {
+                val superSymbol = superRef.toRegularClassSymbol(session) ?: continue
+                val fqName = superSymbol.classId.asSingleFqName()
+                if (result.add(fqName)) {
+                    superSymbol.fir.let { queue.add(it) }
+                }
+            }
+        }
+        return result
     }
 }
