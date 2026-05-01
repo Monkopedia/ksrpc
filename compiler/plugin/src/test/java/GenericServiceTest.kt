@@ -703,6 +703,89 @@ interface GenericDirectChild<T> : RpcService {
     }
 
     @Test
+    fun `non-generic subtype of generic ksservice compiles`() {
+        // Issue #95 — Scenario 1: plain Kotlin interface that specializes a generic
+        // @KsService with concrete type args.
+        val source = SourceFile.kotlin(
+            "main.kt",
+            """
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.RpcService
+
+@KsService
+interface GenericSvc<T> : RpcService {
+    @KsMethod("/echo")
+    suspend fun echo(item: T): T
+}
+
+interface TypedSvc : GenericSvc<String>
+"""
+        )
+        val result = compile(sourceFile = source)
+        assertEquals(
+            KotlinCompilation.ExitCode.OK,
+            result.exitCode,
+            "messages: ${result.messages}"
+        )
+    }
+
+    @Test
+    fun `generic subtype of generic ksservice compiles`() {
+        // Issue #95 — Scenario 2: plain Kotlin interface that forwards type params
+        // to a generic @KsService.
+        val source = SourceFile.kotlin(
+            "main.kt",
+            """
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.RpcService
+
+@KsService
+interface GenericSvc<T> : RpcService {
+    @KsMethod("/echo")
+    suspend fun echo(item: T): T
+}
+
+interface TypedSvcT<T> : GenericSvc<T>
+"""
+        )
+        val result = compile(sourceFile = source)
+        assertEquals(
+            KotlinCompilation.ExitCode.OK,
+            result.exitCode,
+            "messages: ${result.messages}"
+        )
+    }
+
+    @Test
+    fun `non-generic subtype of non-generic ksservice compiles`() {
+        // Issue #95 — plain subtype of a non-generic @KsService.
+        val source = SourceFile.kotlin(
+            "main.kt",
+            """
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.RpcService
+
+@KsService
+interface SimpleSvc : RpcService {
+    @KsMethod("/ping")
+    suspend fun ping(msg: String): String
+}
+
+interface SubSimpleSvc : SimpleSvc
+"""
+        )
+        val result = compile(sourceFile = source)
+        assertEquals(
+            KotlinCompilation.ExitCode.OK,
+            result.exitCode,
+            "messages: ${result.messages}"
+        )
+    }
+
+    @Test
     fun `generic ksservice with flipped wrapper type parameters compiles`() {
         // Shape (6) in issue #57 — `Map<K, V>` in, `Map<V, K>` out. Verifies the generic
         // wrapper-serializer composer threads K and V into independent slots in both the

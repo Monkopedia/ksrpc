@@ -155,6 +155,7 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
             StubGeneration(pluginContext, report, classes, env),
             ObjGeneration(pluginContext, report, classes, env),
             CompanionGeneration(pluginContext, classes, env),
+            SubtypeCompanionGeneration(pluginContext, env),
             IntrospectionGeneration(pluginContext, classes, env)
         )
         for (transformer in transformers) {
