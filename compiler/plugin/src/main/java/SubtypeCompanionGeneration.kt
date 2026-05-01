@@ -24,6 +24,7 @@ import org.jetbrains.kotlin.ir.builders.IrBlockBodyBuilder
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irCallConstructor
+import org.jetbrains.kotlin.ir.builders.irDelegatingConstructorCall
 import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.builders.irGetObject
 import org.jetbrains.kotlin.ir.builders.irInt
@@ -483,5 +484,9 @@ class SubtypeCompanionGeneration(
     override fun generateBodyForConstructor(
         constructor: IrConstructor,
         key: GeneratedDeclarationKey?
-    ): IrBody = context.irBuilder(constructor).irSynthBody { }
+    ): IrBody = context.irBuilder(constructor).irSynthBody {
+        +irDelegatingConstructorCall(
+            context.irBuiltIns.anyClass.owner.constructors.single()
+        )
+    }
 }

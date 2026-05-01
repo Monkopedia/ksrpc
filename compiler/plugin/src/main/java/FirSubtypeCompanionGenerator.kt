@@ -33,6 +33,7 @@ import org.jetbrains.kotlin.fir.extensions.predicate.LookupPredicate
 import org.jetbrains.kotlin.fir.extensions.predicateBasedProvider
 import org.jetbrains.kotlin.fir.plugin.createCompanionObject
 import org.jetbrains.kotlin.fir.plugin.createConeType
+import org.jetbrains.kotlin.fir.plugin.createConstructor
 import org.jetbrains.kotlin.fir.plugin.createDefaultPrivateConstructor
 import org.jetbrains.kotlin.fir.plugin.createMemberFunction
 import org.jetbrains.kotlin.fir.plugin.createMemberProperty
@@ -40,6 +41,7 @@ import org.jetbrains.kotlin.fir.resolve.defaultType
 import org.jetbrains.kotlin.fir.resolve.providers.symbolProvider
 import org.jetbrains.kotlin.fir.scopes.impl.toConeType
 import org.jetbrains.kotlin.fir.symbols.SymbolInternals
+import org.jetbrains.kotlin.fir.types.FirResolvedTypeRef
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassLikeSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirConstructorSymbol
@@ -48,7 +50,6 @@ import org.jetbrains.kotlin.fir.symbols.impl.FirPropertySymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirRegularClassSymbol
 import org.jetbrains.kotlin.fir.types.ConeClassLikeType
 import org.jetbrains.kotlin.fir.types.ConeStarProjection
-import org.jetbrains.kotlin.fir.types.FirResolvedTypeRef
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
@@ -75,11 +76,15 @@ import org.jetbrains.kotlin.name.SpecialNames
 class FirSubtypeCompanionGenerator(session: FirSession) :
     FirDeclarationGenerationExtension(session) {
 
-    // Use the same predicates as FirCompanionDeclarationGenerator to identify @KsService
-    // classes. The predicateBasedProvider is safe to query during the generation phase
-    // because it's built from annotation indices, not resolved type refs.
+    // Predicates for identifying @KsService-annotated classes (same as
+    // FirCompanionDeclarationGenerator).
     private val ksServicePredicates =
         listOf(KS_METHOD, KS_SERVICE).map { LookupPredicate.create { annotated(it) } }
+
+    // Predicate that matches classes annotated with @KsService OR whose supertypes are.
+    // `annotatedOrUnder` checks annotations transitively through the supertype chain.
+    private val annotatedOrUnderPredicates =
+        listOf(KS_SERVICE).map { LookupPredicate.create { annotatedOrUnder(it) } }
 
     // Older versions of ksrpc-core (pre-#41) don't ship RpcObjectFactory. When that class
     // isn't on the classpath we skip the factory supertype and the arity/create callables.
@@ -92,14 +97,13 @@ class FirSubtypeCompanionGenerator(session: FirSession) :
     private val ksServiceAncestorCache = mutableMapOf<ClassId, ClassId?>()
 
     override fun FirDeclarationPredicateRegistrar.registerPredicates() {
-        // Register the same predicates so the predicateBasedProvider knows about @KsService
-        // classes. This is required for `predicateBasedProvider.matches()` to work.
-        register(ksServicePredicates)
+        register(annotatedOrUnderPredicates)
     }
 
     /**
      * Check if [symbol] is annotated with @KsService or @KsMethod using the predicate-based
-     * provider, which is safe to call during the generation phase.
+     * provider, which is safe to call during the generation phase. The predicates are
+     * registered by [FirCompanionDeclarationGenerator], not by this generator.
      */
     private fun isKsService(symbol: FirClassSymbol<*>): Boolean =
         session.predicateBasedProvider.matches(ksServicePredicates, symbol)
@@ -108,11 +112,14 @@ class FirSubtypeCompanionGenerator(session: FirSession) :
      * Walk supertypes of [classId] to find the nearest @KsService-annotated ancestor.
      * Returns null if no @KsService ancestor exists.
      *
-     * Only inspects resolved supertype refs to avoid triggering resolution of unresolved
-     * types during the companion generation phase.
+     * Uses `resolvedSuperTypeRefs` to safely walk the supertype chain. When supertypes
+     * haven't been resolved yet (FirUserTypeRef), we attempt to resolve the ClassId from
+     * the type ref's text and look it up via the symbol provider. This handles the common
+     * case where the @KsService parent is in a different file/module and has already been
+     * resolved, but the subtype's FIR tree still has unresolved type refs.
      */
     @OptIn(SymbolInternals::class)
-    private fun findKsServiceAncestor(classId: ClassId): ClassId? {
+    private fun findKsServiceAncestor(classId: ClassId, ownerPackage: FqName): ClassId? {
         ksServiceAncestorCache[classId]?.let { return it }
         val visited = mutableSetOf<ClassId>()
         val queue = ArrayDeque<ClassId>()
@@ -126,15 +133,91 @@ class FirSubtypeCompanionGenerator(session: FirSession) :
                 ksServiceAncestorCache[classId] = current
                 return current
             }
-            // Only walk resolved supertype refs to avoid triggering resolution.
+            // Walk supertype refs, handling both resolved and unresolved cases.
             for (superRef in symbol.fir.superTypeRefs) {
-                val resolvedRef = superRef as? FirResolvedTypeRef ?: continue
-                val coneType = resolvedRef.coneType as? ConeClassLikeType ?: continue
-                queue.add(coneType.lookupTag.classId)
+                val superClassId = extractClassId(superRef, ownerPackage)
+                if (superClassId != null) {
+                    queue.add(superClassId)
+                }
             }
         }
         ksServiceAncestorCache[classId] = null
         return null
+    }
+
+    /**
+     * Extract a ClassId from a FirTypeRef, handling both resolved and unresolved cases.
+     */
+    private fun extractClassId(
+        typeRef: org.jetbrains.kotlin.fir.types.FirTypeRef,
+        ownerPackage: FqName
+    ): ClassId? {
+        // Resolved type ref — extract directly from the cone type.
+        if (typeRef is FirResolvedTypeRef) {
+            val coneType = typeRef.coneType as? ConeClassLikeType ?: return null
+            return coneType.lookupTag.classId
+        }
+        // Unresolved user type ref — try to reconstruct the ClassId from qualifier segments.
+        if (typeRef is org.jetbrains.kotlin.fir.types.FirUserTypeRef) {
+            return resolveUserTypeRef(typeRef, ownerPackage)
+        }
+        return null
+    }
+
+    /**
+     * Attempt to resolve a FirUserTypeRef to a ClassId by building candidate FQNs from
+     * the qualifier segments and checking the symbol provider.
+     */
+    private fun resolveUserTypeRef(
+        userTypeRef: org.jetbrains.kotlin.fir.types.FirUserTypeRef,
+        ownerPackage: FqName
+    ): ClassId? {
+        val qualifiers = userTypeRef.qualifier
+        if (qualifiers.isEmpty()) return null
+        val segments = qualifiers.map { it.name }
+        // Try single-segment name (common case: imported or same-package type)
+        if (segments.size == 1) {
+            val simpleName = segments[0]
+            // Try the owner's package first (most common case)
+            val samePackageCandidate = ClassId(ownerPackage, simpleName)
+            if (session.symbolProvider.getClassLikeSymbolByClassId(samePackageCandidate) != null) {
+                return samePackageCandidate
+            }
+            // Look up in common ksrpc packages
+            for (pkg in COMMON_PACKAGES) {
+                if (pkg == ownerPackage) continue // already tried
+                val candidate = ClassId(pkg, simpleName)
+                if (session.symbolProvider.getClassLikeSymbolByClassId(candidate) != null) {
+                    return candidate
+                }
+            }
+            // Try root package
+            val rootCandidate = ClassId(FqName.ROOT, simpleName)
+            if (session.symbolProvider.getClassLikeSymbolByClassId(rootCandidate) != null) {
+                return rootCandidate
+            }
+        }
+        // Try multi-segment qualified name
+        for (splitAt in 1..segments.size) {
+            val packageParts = segments.subList(0, splitAt).map { it.asString() }
+            val classNameParts = segments.subList(splitAt, segments.size)
+            if (classNameParts.isEmpty()) continue
+            val packageFqName = FqName(packageParts.joinToString("."))
+            val className = classNameParts[0]
+            val candidate = ClassId(packageFqName, className)
+            if (session.symbolProvider.getClassLikeSymbolByClassId(candidate) != null) {
+                return candidate
+            }
+        }
+        return null
+    }
+
+    companion object {
+        // Common packages where @KsService interfaces are likely declared.
+        private val COMMON_PACKAGES = listOf(
+            FqName("com.monkopedia.ksrpc"),
+            FqName("com.monkopedia.ksrpc.flow")
+        )
     }
 
     override fun getNestedClassifiersNames(
@@ -149,7 +232,11 @@ class FirSubtypeCompanionGenerator(session: FirSession) :
         if (regularSymbol.classKind != org.jetbrains.kotlin.descriptors.ClassKind.INTERFACE) {
             return emptySet()
         }
-        val ksServiceAncestor = findKsServiceAncestor(regularSymbol.classId) ?: return emptySet()
+        // Find the specific @KsService ancestor. Use the class's own package as a hint
+        // for resolving unqualified user type refs.
+        val ownerPackage = regularSymbol.classId.packageFqName
+        val ksServiceAncestor = findKsServiceAncestor(regularSymbol.classId, ownerPackage)
+            ?: return emptySet()
         // Found a @KsService ancestor — advertise the companion.
         return setOf(SpecialNames.DEFAULT_NAME_FOR_COMPANION_OBJECT)
     }
@@ -161,7 +248,9 @@ class FirSubtypeCompanionGenerator(session: FirSession) :
     ): FirClassLikeSymbol<*>? {
         if (name != SpecialNames.DEFAULT_NAME_FOR_COMPANION_OBJECT) return null
         val regularOwner = owner as? FirRegularClassSymbol ?: return null
-        val parentServiceId = findKsServiceAncestor(regularOwner.classId) ?: return null
+        val ownerPackage = regularOwner.classId.packageFqName
+        val parentServiceId = findKsServiceAncestor(regularOwner.classId, ownerPackage)
+            ?: return null
 
         val isGeneric = regularOwner.typeParameterSymbols.isNotEmpty()
 
@@ -208,7 +297,15 @@ class FirSubtypeCompanionGenerator(session: FirSession) :
         context: MemberGenerationContext
     ): List<FirConstructorSymbol> {
         val ownerKey = checkOwnerKey(context) ?: return emptyList()
-        val constructor = createDefaultPrivateConstructor(context.owner, ownerKey)
+        // Use createConstructor instead of createDefaultPrivateConstructor to avoid
+        // "Required value was null" errors on Native when the companion's supertypes
+        // (RpcObject/RpcObjectFactory) are interfaces without a no-arg constructor.
+        val constructor = createConstructor(
+            context.owner,
+            ownerKey,
+            isPrimary = true,
+            generateDelegatedNoArgConstructorCall = false
+        )
         return listOf(constructor.symbol)
     }
 
