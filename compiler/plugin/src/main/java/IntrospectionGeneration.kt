@@ -20,7 +20,6 @@ package com.monkopedia.ksrpc.plugin
 import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.ir.builders.irBlockBody
-import org.jetbrains.kotlin.ir.builders.irCallConstructor
 import org.jetbrains.kotlin.ir.builders.irGetObject
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.declarations.IrClass
@@ -59,17 +58,16 @@ class IntrospectionGeneration(
     private fun buildIntrospectionBody(function: IrSimpleFunction, cls: ServiceClass): IrBlockBody =
         context.irBuilder(function).irBlockBody {
             +irReturn(
-                irCallConstructor(env.introspectionConstructor, emptyList()).apply {
-                    putArgs(
-                        irGetObject(
-                            cls.irClass.companionObject()?.symbol ?: reportInternal(
-                                "companion is missing on " +
-                                    cls.irClass.kotlinFqName.asString() +
-                                    " — CompanionGeneration should have produced it"
-                            )
+                irConstructOf(
+                    env.introspectionImpl,
+                    irGetObject(
+                        cls.irClass.companionObject()?.symbol ?: reportInternal(
+                            "companion is missing on " +
+                                cls.irClass.kotlinFqName.asString() +
+                                " — CompanionGeneration should have produced it"
                         )
                     )
-                }
+                )
             )
         }
 

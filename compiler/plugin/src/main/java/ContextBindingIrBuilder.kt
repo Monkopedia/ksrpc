@@ -19,11 +19,7 @@ package com.monkopedia.ksrpc.plugin
 
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
-import org.jetbrains.kotlin.ir.builders.irCall
-import org.jetbrains.kotlin.ir.builders.irCallConstructor
 import org.jetbrains.kotlin.ir.builders.irGetObject
-import org.jetbrains.kotlin.ir.builders.irVararg
-import org.jetbrains.kotlin.ir.declarations.IrParameterKind
 import org.jetbrains.kotlin.ir.expressions.IrClassReference
 import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
@@ -31,7 +27,6 @@ import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.classOrNull
 import org.jetbrains.kotlin.ir.types.starProjectedType
-import org.jetbrains.kotlin.ir.util.constructors
 import org.jetbrains.kotlin.ir.util.kotlinFqName
 
 /**
@@ -76,7 +71,8 @@ class ContextBindingIrBuilder(
             if (!seen.add(bindingSymbol)) return@mapNotNull null
             buildMapping(bindingSymbol)
         }
-        return buildListOf(
+        return builder.irBuildListOf(
+            env,
             ksContextMapping.starProjectedType,
             uniqueMappings
         )
@@ -102,22 +98,9 @@ class ContextBindingIrBuilder(
     }
 
     private fun buildMapping(bindingSymbol: IrClassSymbol): IrExpression {
-        return builder.irCallConstructor(
-            ksContextMapping.constructors.first(),
-            emptyList()
-        ).apply {
-            type = ksContextMapping.starProjectedType
-            putArgs(builder.irGetObject(bindingSymbol))
-        }
-    }
-
-    private fun buildListOf(
-        elementType: org.jetbrains.kotlin.ir.types.IrType,
-        items: List<IrExpression>
-    ): IrExpression = builder.irCall(env.listOfFunction).apply {
-        typeArguments[0] = elementType
-        val varargParameter = env.listOfFunction.owner.parameters
-            .single { it.kind == IrParameterKind.Regular }
-        arguments[varargParameter] = builder.irVararg(elementType, items)
+        return builder.irConstructOf(
+            ksContextMapping,
+            builder.irGetObject(bindingSymbol)
+        )
     }
 }

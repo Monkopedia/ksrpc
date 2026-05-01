@@ -20,10 +20,7 @@ package com.monkopedia.ksrpc.plugin
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.ir.builders.irCall
-import org.jetbrains.kotlin.ir.builders.irCallConstructor
 import org.jetbrains.kotlin.ir.builders.irInt
-import org.jetbrains.kotlin.ir.builders.irVararg
-import org.jetbrains.kotlin.ir.declarations.IrParameterKind
 import org.jetbrains.kotlin.ir.expressions.IrClassReference
 import org.jetbrains.kotlin.ir.expressions.IrConst
 import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
@@ -31,7 +28,6 @@ import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.starProjectedType
 import org.jetbrains.kotlin.ir.types.typeWith
-import org.jetbrains.kotlin.ir.util.constructors
 
 /**
  * Builds IR that materializes the `@KsError(code, type)` annotations captured
@@ -63,7 +59,7 @@ class ErrorMappingIrBuilder(
     private val ksErrorMapping = env.ksErrorMapping!!
 
     fun buildErrorMappingList(errorAnnotations: List<IrConstructorCall>): IrExpression =
-        buildListOf(ksErrorMapping.starProjectedType, errorAnnotations.map { buildMapping(it) })
+        builder.irBuildListOf(env, ksErrorMapping.starProjectedType, errorAnnotations.map { buildMapping(it) })
 
     private fun buildMapping(annotation: IrConstructorCall): IrExpression {
         // Named-arg resolution: @KsError(code: Int, type: KClass<*>). The FIR/IR
@@ -88,26 +84,12 @@ class ErrorMappingIrBuilder(
             typeArguments[0] = errorType
             type = env.kSerializer.typeWith(errorType)
         }
-        return builder.irCallConstructor(
-            ksErrorMapping.constructors.first(),
-            emptyList()
-        ).apply {
-            type = ksErrorMapping.starProjectedType
-            putArgs(
-                builder.irInt(codeValue),
-                typeExpr,
-                serializerCall
-            )
-        }
+        return builder.irConstructOf(
+            ksErrorMapping,
+            builder.irInt(codeValue),
+            typeExpr,
+            serializerCall
+        )
     }
 
-    private fun buildListOf(
-        elementType: org.jetbrains.kotlin.ir.types.IrType,
-        items: List<IrExpression>
-    ): IrExpression = builder.irCall(env.listOfFunction).apply {
-        typeArguments[0] = elementType
-        val varargParameter = env.listOfFunction.owner.parameters
-            .single { it.kind == IrParameterKind.Regular }
-        arguments[varargParameter] = builder.irVararg(elementType, items)
-    }
 }
