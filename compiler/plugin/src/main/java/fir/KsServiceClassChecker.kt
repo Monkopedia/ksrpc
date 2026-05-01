@@ -16,6 +16,7 @@
 package com.monkopedia.ksrpc.plugin.fir
 
 import com.monkopedia.ksrpc.plugin.FqConstants
+import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.diagnostics.DiagnosticReporter
 import org.jetbrains.kotlin.diagnostics.reportOn
 import org.jetbrains.kotlin.fir.analysis.checkers.MppCheckerKind
@@ -39,6 +40,7 @@ import org.jetbrains.kotlin.types.Variance
  * `KsrpcIrGenerationExtension.validateClass` and
  * `ServiceClass.SubclassVisitor`:
  *
+ *  - `@KsService` on a non-interface declaration (class, object, enum, annotation) (#53, #108)
  *  - `@KsService` on a subtype of another `@KsService` (issue #45)
  *  - `@KsService` class without `RpcService` (or `IntrospectableRpcService`) supertype
  *  - Class-level variant type parameter (`out T` / `in T`) — not yet supported
@@ -100,6 +102,25 @@ internal object KsServiceClassChecker :
     ) {
         val source = declaration.source ?: return
         val session = context.session
+
+        // #0: @KsService is contractually interface-only. Generated code (Stub, companion,
+        // Obj) assumes the annotated declaration is an interface. Classes, objects, enums,
+        // and annotation classes all produce malformed generated code. Reject them here so
+        // IDEs show a clean diagnostic instead of confusing crashes downstream (#53, #108).
+        if (declaration.classKind != ClassKind.INTERFACE) {
+            val simpleName = symbol.classId.shortClassName.asString()
+            reporter.reportOn(
+                source,
+                KsrpcDiagnostics.NOT_INTERFACE,
+                "@KsService can only be applied to interfaces. Change `$simpleName` to an " +
+                    "interface.",
+                context
+            )
+            // Bail out early — downstream validations (supertypes, type parameters) assume
+            // the declaration is an interface and would emit noisy secondary diagnostics.
+            return
+        }
+
         val superTypeFqNames = declaration.superTypeRefs
             .mapNotNull { it.toRegularClassSymbol(session)?.classId?.asSingleFqName() }
         val hasRpcServiceSuper = superTypeFqNames.any { it == FQRPC_SERVICE }

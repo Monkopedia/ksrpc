@@ -39,6 +39,9 @@ import org.jetbrains.kotlin.psi.KtElement
 @Suppress("detekt:ObjectPropertyNaming")
 object KsrpcDiagnostics : KtDiagnosticsContainer() {
 
+    // 0: @KsService applied to a non-interface (class, object, enum, annotation)
+    val NOT_INTERFACE: KtDiagnosticFactory1<String> by error1<KtElement, String>()
+
     // 1: @KsService applied to a subtype of another @KsService
     val KSSERVICE_SUBTYPE_OF_KSSERVICE: KtDiagnosticFactory1<String> by error1<KtElement, String>()
 
@@ -94,6 +97,7 @@ private object KsrpcDiagnosticRenderers : BaseDiagnosticRendererFactory() {
         "ksrpc"
     ) { map ->
         with(KsrpcDiagnostics) {
+            map.put(NOT_INTERFACE, "{0}", CommonRenderers.STRING)
             map.put(KSSERVICE_SUBTYPE_OF_KSSERVICE, "{0}", CommonRenderers.STRING)
             map.put(NOT_RPC_SERVICE, "{0}", CommonRenderers.STRING)
             map.put(VARIANT_TYPE_PARAMETER, "{0}", CommonRenderers.STRING)
