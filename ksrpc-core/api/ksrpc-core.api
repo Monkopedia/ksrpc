@@ -3,6 +3,7 @@ public abstract class com/monkopedia/ksrpc/BaseSubserviceTransformer : com/monko
 	protected abstract fun fromService (Lcom/monkopedia/ksrpc/RpcService;)Ljava/lang/Object;
 	public fun getHasContent ()Z
 	public abstract fun getServiceObject ()Lcom/monkopedia/ksrpc/RpcObject;
+	public fun getTypeArgSerializers ()Ljava/util/List;
 	protected abstract fun toService (Ljava/lang/Object;)Lcom/monkopedia/ksrpc/RpcService;
 	public fun transform (Ljava/lang/Object;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun untransform (Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -302,9 +303,11 @@ public final class com/monkopedia/ksrpc/ServiceNameKt {
 }
 
 public final class com/monkopedia/ksrpc/SubserviceTransformer : com/monkopedia/ksrpc/BaseSubserviceTransformer {
-	public fun <init> (Lcom/monkopedia/ksrpc/RpcObject;)V
+	public fun <init> (Lcom/monkopedia/ksrpc/RpcObject;Ljava/util/List;)V
+	public synthetic fun <init> (Lcom/monkopedia/ksrpc/RpcObject;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun fromService (Lcom/monkopedia/ksrpc/RpcService;)Ljava/lang/Object;
 	public fun getServiceObject ()Lcom/monkopedia/ksrpc/RpcObject;
+	public fun getTypeArgSerializers ()Ljava/util/List;
 	public synthetic fun toService (Ljava/lang/Object;)Lcom/monkopedia/ksrpc/RpcService;
 }
 

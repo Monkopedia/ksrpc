@@ -186,13 +186,16 @@ sealed class com.monkopedia.ksrpc/RpcDataType { // com.monkopedia.ksrpc/RpcDataT
     }
 
     final class Service : com.monkopedia.ksrpc/RpcDataType { // com.monkopedia.ksrpc/RpcDataType.Service|null[0]
-        constructor <init>(kotlin/String) // com.monkopedia.ksrpc/RpcDataType.Service.<init>|<init>(kotlin.String){}[0]
+        constructor <init>(kotlin/String, kotlin.collections/List<com.monkopedia.ksrpc/RpcDataType> = ...) // com.monkopedia.ksrpc/RpcDataType.Service.<init>|<init>(kotlin.String;kotlin.collections.List<com.monkopedia.ksrpc.RpcDataType>){}[0]
 
         final val qualifiedName // com.monkopedia.ksrpc/RpcDataType.Service.qualifiedName|{}qualifiedName[0]
             final fun <get-qualifiedName>(): kotlin/String // com.monkopedia.ksrpc/RpcDataType.Service.qualifiedName.<get-qualifiedName>|<get-qualifiedName>(){}[0]
+        final val typeArgs // com.monkopedia.ksrpc/RpcDataType.Service.typeArgs|{}typeArgs[0]
+            final fun <get-typeArgs>(): kotlin.collections/List<com.monkopedia.ksrpc/RpcDataType> // com.monkopedia.ksrpc/RpcDataType.Service.typeArgs.<get-typeArgs>|<get-typeArgs>(){}[0]
 
         final fun component1(): kotlin/String // com.monkopedia.ksrpc/RpcDataType.Service.component1|component1(){}[0]
-        final fun copy(kotlin/String = ...): com.monkopedia.ksrpc/RpcDataType.Service // com.monkopedia.ksrpc/RpcDataType.Service.copy|copy(kotlin.String){}[0]
+        final fun component2(): kotlin.collections/List<com.monkopedia.ksrpc/RpcDataType> // com.monkopedia.ksrpc/RpcDataType.Service.component2|component2(){}[0]
+        final fun copy(kotlin/String = ..., kotlin.collections/List<com.monkopedia.ksrpc/RpcDataType> = ...): com.monkopedia.ksrpc/RpcDataType.Service // com.monkopedia.ksrpc/RpcDataType.Service.copy|copy(kotlin.String;kotlin.collections.List<com.monkopedia.ksrpc.RpcDataType>){}[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // com.monkopedia.ksrpc/RpcDataType.Service.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // com.monkopedia.ksrpc/RpcDataType.Service.hashCode|hashCode(){}[0]
         final fun toString(): kotlin/String // com.monkopedia.ksrpc/RpcDataType.Service.toString|toString(){}[0]
@@ -207,6 +210,8 @@ sealed class com.monkopedia.ksrpc/RpcDataType { // com.monkopedia.ksrpc/RpcDataT
         }
 
         final object Companion { // com.monkopedia.ksrpc/RpcDataType.Service.Companion|null[0]
+            final val $childSerializers // com.monkopedia.ksrpc/RpcDataType.Service.Companion.$childSerializers|{}$childSerializers[0]
+
             final fun serializer(): kotlinx.serialization/KSerializer<com.monkopedia.ksrpc/RpcDataType.Service> // com.monkopedia.ksrpc/RpcDataType.Service.Companion.serializer|serializer(){}[0]
         }
     }

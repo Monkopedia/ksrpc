@@ -60,7 +60,10 @@ sealed class RpcDataType {
     object BinaryData : RpcDataType()
 
     @Serializable
-    data class Service(val qualifiedName: String) : RpcDataType()
+    data class Service(
+        val qualifiedName: String,
+        val typeArgs: List<RpcDataType> = emptyList()
+    ) : RpcDataType()
 }
 
 /**
@@ -161,8 +164,13 @@ internal val Transformer<*>.rpcDataType: RpcDataType
         // `KsFlowService<T>` sub-service. All such transformers expose the
         // underlying `RpcObject<T>` via `serviceObject`, so introspection can
         // recover the real sub-service name regardless of the user-facing
-        // wrapper shape.
-        is BaseSubserviceTransformer<*, *> -> RpcDataType.Service(serviceObject.serviceName)
+        // wrapper shape. Type arguments (if any) are derived from the
+        // transformer's `typeArgSerializers` so callers can see the full
+        // parameterization (e.g. `KsFlowService<Update>`).
+        is BaseSubserviceTransformer<*, *> -> RpcDataType.Service(
+            qualifiedName = serviceObject.serviceName,
+            typeArgs = typeArgSerializers.map { RpcDataType.DataStructure(it) }
+        )
 
         // Truly unknown transformer — fall back to the simple class name so
         // at least something is reported. Callers will not be able to

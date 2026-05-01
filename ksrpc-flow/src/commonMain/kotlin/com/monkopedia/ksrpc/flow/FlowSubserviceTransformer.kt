@@ -47,8 +47,11 @@ import kotlinx.coroutines.flow.Flow
 @OptIn(KsrpcInternal::class)
 @KsrpcInternal
 class FlowSubserviceTransformer<T>(
-    override val serviceObject: RpcObject<KsFlowService<T>>
+    override val serviceObject: RpcObject<KsFlowService<T>>,
+    private val elementSerializer: kotlinx.serialization.KSerializer<T>? = null
 ) : BaseSubserviceTransformer<KsFlowService<T>, Flow<T>>() {
+    override val typeArgSerializers: List<kotlinx.serialization.KSerializer<*>>
+        get() = listOfNotNull(elementSerializer)
     override fun toService(value: Flow<T>): KsFlowService<T> = if (value is KsFlowService<*>) {
         @Suppress("UNCHECKED_CAST")
         value as KsFlowService<T>

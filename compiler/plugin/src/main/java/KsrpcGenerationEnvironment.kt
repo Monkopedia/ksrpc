@@ -180,6 +180,12 @@ class KsrpcGenerationEnvironment(
         }
             ?: reportInternal("can't resolve kotlin.collections.listOf (vararg overload)")
 
+    val emptyListFunction =
+        context.referenceFunctions(
+            CallableId(FqName("kotlin.collections"), Name.identifier("emptyList"))
+        ).firstOrNull()
+            ?: reportInternal("can't resolve kotlin.collections.emptyList")
+
     // Error-binding (#77) support is optional so the compiler plugin continues
     // to work against older ksrpc-core artifacts that predate the `KsErrorMapping`
     // type. When unresolved, the plugin does not emit the seventh constructor

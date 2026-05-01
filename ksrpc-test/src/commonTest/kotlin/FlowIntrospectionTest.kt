@@ -72,6 +72,25 @@ class FlowIntrospectionTest {
     }
 
     @Test
+    fun flowReturnEndpointInfoCarriesTypeArgs() = runBlockingUnit {
+        val channel = impl.serialized<FlowIntrospectionService, String>(ksrpcEnvironment { })
+        val stub = channel.toStub<FlowIntrospectionService, String>()
+        val introspection = stub.getIntrospection()
+        val info = introspection.getEndpointInfo("updates")
+        val output = info.output
+        assertTrue(
+            output is RpcDataType.Service,
+            "expected Flow<Update> to surface as RpcDataType.Service, got $output"
+        )
+        assertEquals(1, output.typeArgs.size, "expected 1 type arg for KsFlowService<Update>")
+        val typeArg = output.typeArgs[0]
+        assertTrue(
+            typeArg is RpcDataType.DataStructure,
+            "expected type arg to be DataStructure, got $typeArg"
+        )
+    }
+
+    @Test
     fun flowReturnGetIntrospectionForResolvesKsFlowService() = runBlockingUnit {
         val channel = impl.serialized<FlowIntrospectionService, String>(ksrpcEnvironment { })
         val stub = channel.toStub<FlowIntrospectionService, String>()

@@ -49,6 +49,7 @@ import org.jetbrains.kotlin.ir.builders.irImplicitCast
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irSetField
 import org.jetbrains.kotlin.ir.builders.irString
+import org.jetbrains.kotlin.ir.builders.irVararg
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrConstructor
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
@@ -535,7 +536,8 @@ class StubGeneration(
         RpcType.SERVICE -> declarationIrBuilder.irConstructOf(
             env.subserviceTransformer,
             listOf(outputType),
-            buildNonGenericSubserviceRpcObject(outputType, declarationIrBuilder)
+            buildNonGenericSubserviceRpcObject(outputType, declarationIrBuilder),
+            buildTypeArgSerializersList(outputType, declarationIrBuilder)
         )
 
         else -> declarationIrBuilder.irConstructOf(
@@ -581,10 +583,12 @@ class StubGeneration(
             ksFlowServiceSymbol,
             elementType
         )
+        val elementSerializerExpr = getSerializer(declarationIrBuilder, elementType)
         return declarationIrBuilder.irConstructOf(
             flowTransformerSymbol,
             listOf(elementType),
-            rpcObjectExpr
+            rpcObjectExpr,
+            elementSerializerExpr
         )
     }
 
@@ -648,6 +652,39 @@ class StubGeneration(
             this.type = objClass.typeWith(typeArgs)
             val serArgs = typeArgs.map { getSerializer(builder, it) }.toTypedArray()
             putArgs(*serArgs)
+        }
+    }
+
+    /**
+     * Emit a `listOf<KSerializer<*>>(ser0, ser1, ...)` IR expression for the type arguments
+     * of a sub-service type. For non-generic sub-services returns `emptyList()`.
+     */
+    private fun buildTypeArgSerializersList(
+        type: IrType,
+        builder: DeclarationIrBuilder
+    ): IrExpression {
+        val simple = type as? org.jetbrains.kotlin.ir.types.IrSimpleType
+        val typeArgs = simple?.arguments?.mapNotNull { it.typeOrFail } ?: emptyList()
+        if (typeArgs.isEmpty()) {
+            return builder.irCall(env.emptyListFunction).apply {
+                typeArguments[0] = env.kSerializer.starProjectedType
+                this.type = context.irBuiltIns.listClass.typeWith(
+                    env.kSerializer.starProjectedType
+                )
+            }
+        }
+        val serializerExprs = typeArgs.map { getSerializer(builder, it) }
+        return builder.irCall(env.listOfFunction).apply {
+            typeArguments[0] = env.kSerializer.starProjectedType
+            val varargParameter = env.listOfFunction.owner.parameters
+                .single { it.kind == org.jetbrains.kotlin.ir.declarations.IrParameterKind.Regular }
+            arguments[varargParameter] = builder.irVararg(
+                env.kSerializer.starProjectedType,
+                serializerExprs
+            )
+            this.type = context.irBuiltIns.listClass.typeWith(
+                env.kSerializer.starProjectedType
+            )
         }
     }
 
