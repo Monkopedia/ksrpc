@@ -644,17 +644,11 @@ interface GenericWithAudit<T> : RpcService {
     }
 
     @Test
-    fun `generic ksservice reached through deep super chain is rejected`() {
-        // Shape (2) in issue #57 — `@KsService` on `D<T>` where `RpcService` is reached
+    fun `generic ksservice reached through deep super chain compiles`() {
+        // Issue #102 — `@KsService` on `D<T>` where `RpcService` is reached
         // transitively through two plain-Kotlin intermediate interfaces
-        // (`D -> C -> B -> A -> RpcService`). `KsrpcIrGenerationExtension.validateClass`
-        // only looks at direct supertypes for `RpcService`/`IntrospectableRpcService`,
-        // so the deep chain is currently rejected with a clear diagnostic.
-        //
-        // This test pins the user-facing behaviour: deep-chain `@KsService` emits a
-        // "does not extend com.monkopedia.ksrpc.RpcService" diagnostic rather than
-        // crashing in codegen. Supporting transitive ancestry detection on the
-        // generic-service path is tracked as a follow-up.
+        // (`D -> C -> B -> A -> RpcService`). The plugin now walks transitive
+        // supertypes so this shape compiles successfully.
         val source = SourceFile.kotlin(
             "main.kt",
             """
@@ -674,18 +668,10 @@ interface D<T> : C {
 """
         )
         val result = compile(sourceFile = source)
-        assertTrue(
-            result.exitCode != KotlinCompilation.ExitCode.OK,
-            "Expected compilation to fail for deep-chain @KsService, got: ${result.exitCode}"
-        )
-        assertTrue(
-            result.messages.contains("does not extend com.monkopedia.ksrpc.RpcService"),
-            "Expected RpcService-extends diagnostic, got: ${result.messages}"
-        )
-        // Confirm we do not see an internal-failure shape.
-        assertTrue(
-            !result.messages.contains("Invalid synthetic declaration"),
-            "Plugin must emit a user diagnostic, not crash on deep chains: ${result.messages}"
+        assertEquals(
+            KotlinCompilation.ExitCode.OK,
+            result.exitCode,
+            "messages: ${result.messages}"
         )
     }
 

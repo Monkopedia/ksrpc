@@ -138,6 +138,8 @@ import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.classOrNull
+import org.jetbrains.kotlin.ir.util.fqNameForIrSerialization
+import org.jetbrains.kotlin.ir.util.getAllSuperclasses
 import org.jetbrains.kotlin.ir.util.kotlinFqName
 import org.jetbrains.kotlin.ir.visitors.acceptChildrenVoid
 import org.jetbrains.kotlin.types.Variance
@@ -200,10 +202,12 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
             // the declaration is an interface and would emit noisy secondary diagnostics.
             return false
         }
-        val superTypeNames = irClass.superTypes.map { it.classFqName }
-        val hasRpcServiceSuper = superTypeNames.contains(FQRPC_SERVICE)
+        val allSuperFqNames = (irClass.superTypes.mapNotNull { it.classFqName } +
+            irClass.getAllSuperclasses().map { it.fqNameForIrSerialization })
+            .toSet()
+        val hasRpcServiceSuper = allSuperFqNames.contains(FQRPC_SERVICE)
         val hasIntrospectableSuper =
-            superTypeNames.contains(INTROSPECTABLE_RPC_SERVICE.asSingleFqName())
+            allSuperFqNames.contains(INTROSPECTABLE_RPC_SERVICE.asSingleFqName())
         // Reject `@KsService` applied to a subtype of another `@KsService` interface.
         // The parent's @KsService annotation already drives codegen, and `rpcObject<Sub>()`
         // walks supertypes to find the parent's `RpcObject`/`RpcObjectFactory` companion
