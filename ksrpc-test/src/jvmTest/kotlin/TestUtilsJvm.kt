@@ -15,6 +15,7 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.channels.Connection
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.ktor.serveHttp as jvmServe
 import com.monkopedia.ksrpc.ktor.websocket.serveWebsocket
@@ -49,7 +50,7 @@ internal const val MAX_BIND_ATTEMPTS = 32
 actual typealias Routing = io.ktor.server.routing.Routing
 
 internal actual fun platformSupportedTestTypes(): Set<RpcFunctionalityTest.TestType> =
-    RpcFunctionalityTest.TestType.values().toSet()
+    RpcFunctionalityTest.TestType.values().toSet() - RpcFunctionalityTest.TestType.SERVICE_WORKER
 
 actual suspend inline fun httpTest(
     crossinline serve: suspend Routing.() -> Unit,
@@ -107,6 +108,13 @@ actual fun Routing.testServeWebsocket(
     channel: SerializedService<String>,
     env: KsrpcEnvironment<String>
 ) = serveWebsocket(basePath, channel, env)
+
+internal actual suspend fun serviceWorkerTest(
+    serviceName: String?,
+    test: suspend (Connection<String>) -> Unit
+) {
+    // Service workers are not supported on JVM.
+}
 
 actual fun createPipe(): Pair<ByteWriteChannel, ByteReadChannel> {
     val channel = ByteChannel(autoFlush = true)

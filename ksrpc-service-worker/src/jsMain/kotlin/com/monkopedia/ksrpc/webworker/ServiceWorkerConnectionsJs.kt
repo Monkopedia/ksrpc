@@ -39,7 +39,8 @@ import org.w3c.dom.MessagePort
 @ExperimentalKsrpc
 actual fun createServiceWorkerWithConnection(
     workerScriptPath: String,
-    env: KsrpcEnvironment<String>
+    env: KsrpcEnvironment<String>,
+    serviceName: String?
 ): Connection<String> {
     val connection = ServiceWorkerPacketChannel(env.defaultScope, env)
     env.defaultScope.launch {
@@ -53,7 +54,12 @@ actual fun createServiceWorkerWithConnection(
         }
         val channel = MessageChannel()
         connection.attachPort(channel.port1)
-        worker.postMessage("ksrpc-connect", arrayOf(channel.port2))
+        val connectMessage = if (serviceName != null) {
+            "ksrpc-connect:$serviceName"
+        } else {
+            "ksrpc-connect"
+        }
+        worker.postMessage(connectMessage, arrayOf(channel.port2))
     }
     return connection
 }
@@ -61,29 +67,42 @@ actual fun createServiceWorkerWithConnection(
 /**
  * Listens for "ksrpc-connect" to attach a port and provides callback to initialize a [Connection].
  *
+ * The connect message may optionally carry a service name as
+ * `"ksrpc-connect:<serviceName>"`. The [onConnection] callback receives
+ * the parsed service name (or `null` if none was provided).
+ *
  * This is an experimental API — the service-worker transport has limited test
  * coverage and its behavior may change without notice.
  */
 @ExperimentalKsrpc
 fun onServiceWorkerConnection(
     env: KsrpcEnvironment<String>,
-    onConnection: suspend (Connection<String>) -> Unit
+    onConnection: suspend (connection: Connection<String>, serviceName: String?) -> Unit
 ) {
     val global = js("self")
     val handler: (MessageEvent) -> Unit = handler@{ event ->
-        val message = event.data as? String
-        if (message != "ksrpc-connect") return@handler
+        val message = event.data as? String ?: return@handler
+        if (!message.startsWith("ksrpc-connect")) return@handler
+        val serviceName = if (message.length > "ksrpc-connect:".length &&
+            message[KSRPC_CONNECT_PREFIX.length] == ':'
+        ) {
+            message.substring(KSRPC_CONNECT_PREFIX.length + 1)
+        } else {
+            null
+        }
         val connection = ServiceWorkerPacketChannel(env.defaultScope, env)
         val port = event.ports.getOrNull(0)
         if (port != null) {
             connection.attachPort(port)
         }
         env.defaultScope.launch {
-            onConnection(connection)
+            onConnection(connection, serviceName)
         }
     }
     global.addEventListener("message", handler)
 }
+
+private const val KSRPC_CONNECT_PREFIX = "ksrpc-connect"
 
 private fun ServiceWorkerPacketChannel.attachPort(port: MessagePort) {
     if (!setPort(port)) return

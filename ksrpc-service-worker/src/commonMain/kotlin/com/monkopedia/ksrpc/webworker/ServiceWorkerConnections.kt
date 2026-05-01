@@ -22,6 +22,10 @@ import com.monkopedia.ksrpc.channels.Connection
 /**
  * Creates a connection to a service worker registered at [workerScriptPath].
  *
+ * When [serviceName] is non-null the connect handshake sends
+ * `"ksrpc-connect:<serviceName>"` instead of plain `"ksrpc-connect"`, allowing
+ * the worker to select a service from a catalog.
+ *
  * This is an experimental API — the service-worker transport has limited test
  * coverage and its behavior may change without notice. Opt in explicitly with
  * `@OptIn(ExperimentalKsrpc::class)`.
@@ -29,5 +33,6 @@ import com.monkopedia.ksrpc.channels.Connection
 @ExperimentalKsrpc
 expect fun createServiceWorkerWithConnection(
     workerScriptPath: String,
-    env: KsrpcEnvironment<String>
+    env: KsrpcEnvironment<String>,
+    serviceName: String? = null
 ): Connection<String>

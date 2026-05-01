@@ -17,6 +17,7 @@
 
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.channels.Connection
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.ktor.serveHttp as nativeServe
 import com.monkopedia.ksrpc.sockets.posixFileReadChannel
@@ -112,6 +113,13 @@ actual fun Routing.testServeWebsocket(
     channel: SerializedService<String>,
     env: KsrpcEnvironment<String>
 ) = Unit
+
+internal actual suspend fun serviceWorkerTest(
+    serviceName: String?,
+    test: suspend (Connection<String>) -> Unit
+) {
+    // Service workers are not supported on native.
+}
 
 actual fun createPipe(): Pair<ByteWriteChannel, ByteReadChannel> {
     memScoped {
