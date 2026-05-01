@@ -35,13 +35,15 @@ abstract class <#A: kotlin/Any?> com.monkopedia.ksrpc.packets.internal/PacketCha
 }
 
 final class <#A: kotlin/Any?> com.monkopedia.ksrpc.packets.internal/Packet { // com.monkopedia.ksrpc.packets.internal/Packet|null[0]
-    constructor <init>(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/String, kotlin/String, kotlin/String, #A, kotlin/Int? = ..., kotlin/String? = ...) // com.monkopedia.ksrpc.packets.internal/Packet.<init>|<init>(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.String;kotlin.String;kotlin.String;1:0;kotlin.Int?;kotlin.String?){}[0]
-    constructor <init>(kotlin/Int = ..., kotlin/String, kotlin/String, kotlin/String, #A, kotlin/Int? = ..., kotlin/String? = ...) // com.monkopedia.ksrpc.packets.internal/Packet.<init>|<init>(kotlin.Int;kotlin.String;kotlin.String;kotlin.String;1:0;kotlin.Int?;kotlin.String?){}[0]
+    constructor <init>(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/String, kotlin/String, kotlin/String, #A, kotlin/Int? = ..., kotlin/String? = ..., kotlin.collections/Map<kotlin/String, kotlin/String>? = ...) // com.monkopedia.ksrpc.packets.internal/Packet.<init>|<init>(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.String;kotlin.String;kotlin.String;1:0;kotlin.Int?;kotlin.String?;kotlin.collections.Map<kotlin.String,kotlin.String>?){}[0]
+    constructor <init>(kotlin/Int = ..., kotlin/String, kotlin/String, kotlin/String, #A, kotlin/Int? = ..., kotlin/String? = ..., kotlin.collections/Map<kotlin/String, kotlin/String>? = ...) // com.monkopedia.ksrpc.packets.internal/Packet.<init>|<init>(kotlin.Int;kotlin.String;kotlin.String;kotlin.String;1:0;kotlin.Int?;kotlin.String?;kotlin.collections.Map<kotlin.String,kotlin.String>?){}[0]
 
     final val binary // com.monkopedia.ksrpc.packets.internal/Packet.binary|{}binary[0]
         final fun <get-binary>(): kotlin/Boolean // com.monkopedia.ksrpc.packets.internal/Packet.binary.<get-binary>|<get-binary>(){}[0]
     final val cancel // com.monkopedia.ksrpc.packets.internal/Packet.cancel|{}cancel[0]
         final fun <get-cancel>(): kotlin/Boolean // com.monkopedia.ksrpc.packets.internal/Packet.cancel.<get-cancel>|<get-cancel>(){}[0]
+    final val contextMap // com.monkopedia.ksrpc.packets.internal/Packet.contextMap|{}contextMap[0]
+        final fun <get-contextMap>(): kotlin.collections/Map<kotlin/String, kotlin/String>? // com.monkopedia.ksrpc.packets.internal/Packet.contextMap.<get-contextMap>|<get-contextMap>(){}[0]
     final val data // com.monkopedia.ksrpc.packets.internal/Packet.data|{}data[0]
         final fun <get-data>(): #A // com.monkopedia.ksrpc.packets.internal/Packet.data.<get-data>|<get-data>(){}[0]
     final val endpoint // com.monkopedia.ksrpc.packets.internal/Packet.endpoint|{}endpoint[0]
@@ -79,6 +81,7 @@ final class <#A: kotlin/Any?> com.monkopedia.ksrpc.packets.internal/Packet { // 
     final object Companion : kotlinx.serialization.internal/SerializerFactory { // com.monkopedia.ksrpc.packets.internal/Packet.Companion|null[0]
         final val $cachedDescriptor // com.monkopedia.ksrpc.packets.internal/Packet.Companion.$cachedDescriptor|{}$cachedDescriptor[0]
             final fun <get-$cachedDescriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // com.monkopedia.ksrpc.packets.internal/Packet.Companion.$cachedDescriptor.<get-$cachedDescriptor>|<get-$cachedDescriptor>(){}[0]
+        final val $childSerializers // com.monkopedia.ksrpc.packets.internal/Packet.Companion.$childSerializers|{}$childSerializers[0]
 
         final fun <#A2: kotlin/Any?> serializer(kotlinx.serialization/KSerializer<#A2>): kotlinx.serialization/KSerializer<com.monkopedia.ksrpc.packets.internal/Packet<#A2>> // com.monkopedia.ksrpc.packets.internal/Packet.Companion.serializer|serializer(kotlinx.serialization.KSerializer<0:0>){0§<kotlin.Any?>}[0]
         final fun serializer(kotlin/Array<out kotlinx.serialization/KSerializer<*>>...): kotlinx.serialization/KSerializer<*> // com.monkopedia.ksrpc.packets.internal/Packet.Companion.serializer|serializer(kotlin.Array<out|kotlinx.serialization.KSerializer<*>>...){}[0]

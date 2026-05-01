@@ -194,6 +194,20 @@ class KsrpcGenerationEnvironment(
     val errorMappingSupported: Boolean get() = ksErrorMapping != null &&
         rpcMethod.constructors.first().owner.parameters.size >= 6
 
+    // Context-binding (#81) support is optional so the compiler plugin continues
+    // to work against older ksrpc-core artifacts that predate the `KsContextMapping`
+    // type. When unresolved, the plugin does not emit the eighth constructor
+    // argument on `RpcMethod` and the generated service carries no context bindings.
+    val ksContextMapping = maybeReferenceClass(FqConstants.KS_CONTEXT_MAPPING)
+
+    /**
+     * True when `KsContextMapping` was resolved — the ksrpc-core on the compile
+     * classpath supports the `@KsContext` context propagation (issue #81).
+     * Also requires the 7-argument `RpcMethod` constructor.
+     */
+    val contextBindingSupported: Boolean get() = ksContextMapping != null &&
+        rpcMethod.constructors.first().owner.parameters.size >= 7
+
     // Metadata propagation support is optional so the compiler plugin continues
     // to work against older ksrpc-core artifacts that predate #11.
     val methodMetadata = maybeReferenceClass(FqConstants.METHOD_METADATA)
