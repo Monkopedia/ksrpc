@@ -163,7 +163,7 @@ abstract class BaseSubserviceTransformer<T : RpcService, O> : Transformer<O> {
     }
 }
 
-@OptIn(KsrpcInternal::class)
+@KsrpcInternal
 class SubserviceTransformer<T : RpcService>(
     override val serviceObject: RpcObject<T>,
     override val typeArgSerializers: List<KSerializer<*>> = emptyList()
@@ -454,7 +454,7 @@ class RpcMethod<T : RpcService, I, O>(
         }
     }
 
-    @OptIn(KsrpcInternal::class)
+    @KsrpcInternal
     fun findSubserviceTransformers(): List<BaseSubserviceTransformer<*, *>> =
         listOfNotNull(
             inputTransform as? BaseSubserviceTransformer<*, *>,

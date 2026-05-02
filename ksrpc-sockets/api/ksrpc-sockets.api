@@ -12,10 +12,3 @@ public final class com/monkopedia/ksrpc/sockets/ReadWriteChannelsKt {
 	public static final fun asConnection (Lkotlin/Pair;Lkotlinx/coroutines/CoroutineScope;Lcom/monkopedia/ksrpc/KsrpcEnvironment;)Lcom/monkopedia/ksrpc/channels/Connection;
 }
 
-public final class com/monkopedia/ksrpc/sockets/internal/PacketUtilsKt {
-	public static final fun appendLine (Lio/ktor/utils/io/ByteWriteChannel;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun appendLine$default (Lio/ktor/utils/io/ByteWriteChannel;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static final fun readFields (Lio/ktor/utils/io/ByteReadChannel;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static final fun swallow (Lkotlin/jvm/functions/Function0;)V
-}
-

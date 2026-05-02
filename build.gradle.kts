@@ -50,7 +50,8 @@ allprojects {
 
 // == BCV setup ==
 apiValidation {
-    ignoredProjects.addAll(listOf("ksrpc-test", "ksrpc-bench", "ksrpc-samples"))
+    ignoredProjects.addAll(listOf("ksrpc-test", "ksrpc-bench", "ksrpc-samples", "ksrpc-service-worker-test"))
+    nonPublicMarkers += "com.monkopedia.ksrpc.annotation.KsrpcInternal"
     @OptIn(ExperimentalBCVApi::class)
     klib {
         enabled = true
