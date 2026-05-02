@@ -40,14 +40,17 @@ internal actual fun platformSupportedTestTypes(): Set<RpcFunctionalityTest.TestT
 
 private fun hasWindow(): Boolean = js("typeof window !== 'undefined'") as Boolean
 
-private fun jsWorkerUrl(): String = "base/kotlin/ksrpc-service-worker-test.js"
+private fun jsWorkerUrl(serviceName: String?): String {
+    val base = "base/kotlin/ksrpc-service-worker-test.js"
+    return if (serviceName != null) "$base?service=$serviceName" else base
+}
 
 internal actual suspend fun serviceWorkerTest(
     serviceName: String?,
     test: suspend (Connection<String>) -> Unit
 ) {
     val env = ksrpcEnvironment { }
-    createServiceWorkerWithConnection(jsWorkerUrl(), env, serviceName).use { connection ->
+    createServiceWorkerWithConnection(jsWorkerUrl(serviceName), env).use { connection ->
         test(connection)
     }
 }

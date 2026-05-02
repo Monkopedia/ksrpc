@@ -34,9 +34,26 @@ private val serviceCatalog: Map<String, suspend (Connection<String>) -> Unit> = 
     }
 )
 
+/**
+ * Extracts the `service` query parameter from the worker script URL.
+ * For example, if the worker was registered at `/worker.js?service=Foo`,
+ * `self.location.search` will be `"?service=Foo"` and this returns `"Foo"`.
+ */
+private fun parseServiceName(): String? {
+    val search: String = js("self.location.search") as String
+    if (search.isEmpty()) return null
+    // Parse simple query string: ?service=Name or ?service=Name&other=...
+    return search.removePrefix("?")
+        .split("&")
+        .map { it.split("=", limit = 2) }
+        .firstOrNull { it[0] == "service" }
+        ?.getOrNull(1)
+}
+
 fun main() {
     val env = ksrpcEnvironment { }
-    onServiceWorkerConnection(env) { connection, serviceName ->
+    val serviceName = parseServiceName()
+    onServiceWorkerConnection(env) { connection ->
         val registrar = if (serviceName != null) {
             serviceCatalog[serviceName]
                 ?: error("Unknown service in catalog: $serviceName")

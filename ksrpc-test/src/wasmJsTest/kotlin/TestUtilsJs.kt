@@ -33,7 +33,10 @@ import kotlinx.coroutines.promise
 private val hasWindow: () -> Boolean =
     js("() => typeof window !== 'undefined'")
 
-private fun wasmWorkerUrl(): String = "base/kotlin/ksrpc-service-worker-test.js"
+private fun wasmWorkerUrl(serviceName: String?): String {
+    val base = "base/kotlin/ksrpc-service-worker-test.js"
+    return if (serviceName != null) "$base?service=$serviceName" else base
+}
 
 internal actual fun platformSupportedTestTypes(): Set<RpcFunctionalityTest.TestType> = buildSet {
     add(RpcFunctionalityTest.TestType.SERIALIZE)
@@ -48,7 +51,7 @@ internal actual suspend fun serviceWorkerTest(
     test: suspend (Connection<String>) -> Unit
 ) {
     val env = ksrpcEnvironment { }
-    createServiceWorkerWithConnection(wasmWorkerUrl(), env, serviceName).use { connection ->
+    createServiceWorkerWithConnection(wasmWorkerUrl(serviceName), env).use { connection ->
         test(connection)
     }
 }

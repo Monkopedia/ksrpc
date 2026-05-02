@@ -36,8 +36,7 @@ import kotlinx.serialization.builtins.serializer
 @ExperimentalKsrpc
 actual fun createServiceWorkerWithConnection(
     workerScriptPath: String,
-    env: KsrpcEnvironment<String>,
-    serviceName: String?
+    env: KsrpcEnvironment<String>
 ): Connection<String> {
     val connection = ServiceWorkerPacketChannel(env.defaultScope, env)
     env.defaultScope.launch {
@@ -51,12 +50,7 @@ actual fun createServiceWorkerWithConnection(
         }
         val channel = createMessageChannel()
         connection.attachPort(messageChannelPort1(channel))
-        val connectMessage = if (serviceName != null) {
-            "ksrpc-connect:$serviceName"
-        } else {
-            "ksrpc-connect"
-        }
-        postServiceWorkerConnect(worker, connectMessage, messageChannelPort2(channel))
+        postServiceWorkerConnect(worker, messageChannelPort2(channel))
     }
     return connection
 }
@@ -135,8 +129,8 @@ private val messageChannelPort1: (JsAny) -> JsAny =
 private val messageChannelPort2: (JsAny) -> JsAny =
     js("(channel) => channel.port2")
 
-private val postServiceWorkerConnect: (JsAny, String, JsAny) -> Unit =
-    js("(worker, message, port) => worker.postMessage(message, [port])")
+private val postServiceWorkerConnect: (JsAny, JsAny) -> Unit =
+    js("(worker, port) => worker.postMessage('ksrpc-connect', [port])")
 
 private val postMessage: (JsAny, String) -> Unit =
     js("(port, message) => port.postMessage(message)")
