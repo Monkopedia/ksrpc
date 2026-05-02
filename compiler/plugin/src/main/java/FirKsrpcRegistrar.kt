@@ -23,6 +23,7 @@ class FirKsrpcRegistrar : FirExtensionRegistrar() {
         +::FirKsrpcStubGenerator
         +::FirCompanionDeclarationGenerator
         +::FirKsrpcObjGenerator
+        +::FirSubtypeCompanionGenerator
         +::FirKsrpcIntrospectionGenerator
         +::KsrpcFirCheckersComponent
     }

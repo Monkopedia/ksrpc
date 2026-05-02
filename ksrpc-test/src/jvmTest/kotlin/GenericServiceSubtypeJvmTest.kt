@@ -50,7 +50,7 @@ import kotlin.test.assertTrue
  * `GenericEcho.create(listOf(typeOf<String>()))` works on every platform (see
  * `GenericServiceSubtypeTest.scenario1_factoryCreateWithConcreteArg`).
  */
-private interface TypedGenericEchoJvm : GenericEcho<String>
+internal interface TypedGenericEchoJvm : GenericEcho<String>
 
 private class TypedGenericEchoJvmImpl : GenericEcho<String> {
     override suspend fun echo(item: String): String = "typed-echo:$item"

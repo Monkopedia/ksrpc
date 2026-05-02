@@ -23,7 +23,7 @@ import kotlin.test.assertTrue
 
 /**
  * Cross-platform coverage for the "plain Kotlin subtype of generic `@KsService`" pattern
- * (issue #64).
+ * (issue #64 / #95).
  *
  * Two shapes of subtype are considered:
  * - Scenario 1 — non-generic subtype of a generic service (concrete type arg baked in):
@@ -31,23 +31,17 @@ import kotlin.test.assertTrue
  * - Scenario 2 — generic subtype of a generic service (type param forwarded):
  *   `interface TypedGenericEchoT<T> : GenericEcho<T>`
  *
- * These tests exercise the path that *does* work on every platform today: callers who
- * have (or can construct) a `KType` for the concrete type argument can reach the parent
- * service's [RpcObjectFactory] companion directly and call `create(listOf(...))`. This is
- * the pattern documented in #64 as the stable cross-platform entry point while broader
- * `rpcObject<Subtype>()` supertype-walking support is in progress.
+ * Issue #95 added compiler plugin support to synthesize companion objects on these
+ * subtypes, so `rpcObject<TypedGenericEchoSubtype>()` and
+ * `rpcObject<TypedGenericEchoT<String>>()` now work on all platforms (JVM, Native,
+ * JS, WASM).
  *
- * A JVM-only round-trip for `rpcObject<Subtype>()` itself lives in
- * `GenericServiceSubtypeJvmTest`. Non-JVM platforms currently fail that reified-subtype
- * call with an arity mismatch (the subtype has 0 type params but the parent's factory
- * wants 1) — see the follow-up tracked off #64 for the remaining work required to lift
- * that path to Native/JS/WASM.
+ * The factory-based workaround tests (scenario1_factoryCreateWithConcreteArg,
+ * scenario2_factoryCreateForwardedTypeArg) remain to ensure backwards compatibility.
  */
-@Suppress("unused")
-private interface TypedGenericEchoSubtype : GenericEcho<String>
+internal interface TypedGenericEchoSubtype : GenericEcho<String>
 
-@Suppress("unused")
-private interface TypedGenericEchoT<T> : GenericEcho<T>
+internal interface TypedGenericEchoT<T> : GenericEcho<T>
 
 private class TypedGenericEchoImpl : GenericEcho<String> {
     override suspend fun echo(item: String): String = "typed-echo:$item"
@@ -105,5 +99,68 @@ class GenericServiceSubtypeTest {
         assertEquals("com.monkopedia.ksrpc.GenericEcho", obj.serviceName)
         assertTrue("echo" in obj.endpoints)
         assertTrue("maybe" in obj.endpoints)
+    }
+
+    /**
+     * Scenario 1 — rpcObject<TypedGenericEchoSubtype>() resolves the companion synthesized
+     * by the compiler plugin (#95). Works on all platforms via @RpcObjectKey.
+     */
+    @Test
+    fun scenario1_rpcObjectOnNonGenericSubtype() = runBlockingUnit {
+        val obj = rpcObject<TypedGenericEchoSubtype>()
+        assertEquals("com.monkopedia.ksrpc.GenericEcho", obj.serviceName)
+        assertTrue("echo" in obj.endpoints)
+        assertTrue("maybe" in obj.endpoints)
+    }
+
+    /**
+     * Scenario 1 — full round trip through a serialized channel using rpcObject<Subtype>().
+     * The RpcObject delegates to the parent GenericEcho's Obj, so the stub implements
+     * GenericEcho<String> (not TypedGenericEchoSubtype). Use the parent's factory directly
+     * to get a properly typed RpcObject for the round-trip.
+     */
+    @Test
+    fun scenario1_rpcObjectRoundTrip() = runBlockingUnit {
+        // Verify the subtype companion resolves; then use the parent factory for round-trip
+        val subtypeObj = rpcObject<TypedGenericEchoSubtype>()
+        assertEquals("com.monkopedia.ksrpc.GenericEcho", subtypeObj.serviceName)
+
+        @Suppress("UNCHECKED_CAST")
+        val obj = GenericEcho.create(listOf(typeOf<String>())) as RpcObject<GenericEcho<String>>
+        val impl: GenericEcho<String> = TypedGenericEchoImpl()
+        val channel = impl.serialized(obj, ksrpcEnvironment { })
+        val stub = obj.createStub(channel)
+        assertEquals("typed-echo:hello", stub.echo("hello"))
+        assertEquals("typed-maybe:world", stub.maybe("world"))
+        assertNull(stub.maybe(null))
+    }
+
+    /**
+     * Scenario 2 — rpcObject<TypedGenericEchoT<String>>() resolves the factory companion
+     * synthesized by the compiler plugin (#95). Works on all platforms via @RpcObjectKey.
+     */
+    @Test
+    fun scenario2_rpcObjectOnGenericSubtype() = runBlockingUnit {
+        val obj = rpcObject<TypedGenericEchoT<String>>()
+        assertEquals("com.monkopedia.ksrpc.GenericEcho", obj.serviceName)
+        assertTrue("echo" in obj.endpoints)
+        assertTrue("maybe" in obj.endpoints)
+    }
+
+    /**
+     * Scenario 2 — full round trip through a serialized channel using
+     * rpcObject<TypedGenericEchoT<String>>(). The stub is GenericEcho.Stub<String>,
+     * so we cast to the parent type for the round-trip.
+     */
+    @Test
+    fun scenario2_rpcObjectRoundTrip() = runBlockingUnit {
+        @Suppress("UNCHECKED_CAST")
+        val obj = rpcObject<TypedGenericEchoT<String>>() as RpcObject<GenericEcho<String>>
+        val impl: GenericEcho<String> = TypedGenericEchoImpl()
+        val channel = impl.serialized(obj, ksrpcEnvironment { })
+        val stub = obj.createStub(channel)
+        assertEquals("typed-echo:abc", stub.echo("abc"))
+        assertEquals("typed-maybe:def", stub.maybe("def"))
+        assertNull(stub.maybe(null))
     }
 }
