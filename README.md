@@ -26,7 +26,7 @@ class GreetingServiceImpl : GreetingService {
 // Host over HTTP
 val env = ksrpcEnvironment { }
 embeddedServer(Netty, 8080) {
-    routing { serve("/api", GreetingServiceImpl(), env) }
+    routing { serveHttp("/api", GreetingServiceImpl(), env) }
 }.start()
 
 // Call from any platform

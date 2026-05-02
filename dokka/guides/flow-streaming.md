@@ -12,7 +12,7 @@ Add the flow dependency:
 implementation("com.monkopedia.ksrpc:ksrpc-flow:$KSRPC_VERSION")
 ```
 
-Flow streaming requires a bidirectional transport (WebSockets, sockets, or service workers) because the flow protocol uses sub-services internally.
+> **Important**: Flow streaming requires a bidirectional transport (WebSockets, sockets, or service workers) because the flow protocol uses sub-services internally. HTTP does **not** support `Flow<T>` and will fail at runtime. If you need streaming over HTTP, consider a polling pattern or switch to a WebSocket transport.
 
 ## Using Flow in service signatures
 
