@@ -59,6 +59,7 @@ fun Project.ksrpcModule(
 
     plugins.apply("org.jetbrains.kotlin.multiplatform")
     plugins.apply("org.jetbrains.kotlin.plugin.serialization")
+    plugins.apply("org.jetbrains.kotlinx.kover")
 
     plugins.apply("org.jetbrains.dokka")
     if (applyKsrpcPlugin && name != "ksrpc-api") {

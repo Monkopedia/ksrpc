@@ -30,6 +30,7 @@ dependencies {
     implementation(libs.vannik.publish)
     api(libs.kotlin.gradle)
     api(libs.bundles.dokka)
+    implementation(libs.kover.gradle)
 }
 
 java {

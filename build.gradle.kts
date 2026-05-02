@@ -35,6 +35,7 @@ plugins {
 
     alias(libs.plugins.gmazzo.buildconfig) apply false
     alias(libs.plugins.vannik.publish) apply false
+    alias(libs.plugins.kover)
     id("ksrpc-generate-module")
     id("com.monkopedia.ksrpc.plugin") apply false
 }
@@ -125,6 +126,26 @@ dokka {
 }
 
 dependencies {
+    kover(project(":ksrpc-api"))
+    kover(project(":ksrpc-binary-kotlinx-io"))
+    kover(project(":ksrpc-binary-ktor"))
+    kover(project(":ksrpc-binary-okio"))
+    kover(project(":ksrpc-core"))
+    kover(project(":ksrpc-flow"))
+    kover(project(":ksrpc-introspection"))
+    kover(project(":ksrpc-jni"))
+    kover(project(":ksrpc-jsonrpc"))
+    kover(project(":ksrpc-ktor-client"))
+    kover(project(":ksrpc-ktor-server"))
+    kover(project(":ksrpc-ktor-websocket-client"))
+    kover(project(":ksrpc-ktor-websocket-server"))
+    kover(project(":ksrpc-ktor-websocket-shared"))
+    kover(project(":ksrpc-packets"))
+    kover(project(":ksrpc-server"))
+    kover(project(":ksrpc-service-worker"))
+    kover(project(":ksrpc-sockets"))
+    kover(project(":ksrpc-test"))
+
     dokka(project(":ksrpc-api"))
     dokka(project(":ksrpc-binary-ktor"))
     dokka(project(":ksrpc-core"))
