@@ -27,28 +27,13 @@ import kotlin.test.assertTrue
  * another `@KsService` (the validation in `KsrpcIrGenerationExtension.validateClass`
  * looks only at direct super-types for `RpcService`/`IntrospectableRpcService`).
  *
- * The supported pattern for subtype-specialization today is to rely on the parent's
- * `@KsService` annotation and reach the parent's `RpcObjectFactory` companion via
- * `rpcObject()` supertype walking. The resulting `RpcObject`/`Stub` is the parent's
- * (e.g. `GenericEcho<String>`), not the subtype's — so callers cannot expect a
- * `rpcObject<TypedGenericEchoJvm>()` result to be usable as a stub for
- * `TypedGenericEchoJvm` directly. Generating a dedicated companion/stub for
- * `@KsService` subtypes of generic services is tracked as a follow-up.
- *
- * JVM-only: the kotlin.reflect-based supertype walk in `rpcObject()`'s JVM actual picks
- * up `GenericEcho<String>` from `TypedGenericEchoJvm`'s supertypes with `String`
- * preserved in `KType.arguments`, then feeds that to `GenericEcho.create(...)`. On
- * Native/JS/WASM `findAssociatedObject<RpcObjectKey>()` returns the parent's factory but
- * `typeOf<Subtype>().arguments` is empty (the subtype has no type params), so the
- * resulting `factory.create(emptyList())` throws an arity mismatch. Lifting this path
- * to all platforms requires either new FIR-phase declaration generation on the subtype
- * (to synthesize a per-subtype companion with baked-in type args) or runtime access to
- * the subtype's supertype `KType` without `kotlin.reflect.full.allSupertypes` (which
- * isn't available on Native/JS/WASM). Tracked as a follow-up off issue #64.
- *
- * Cross-platform callers should today use the `RpcObjectFactory` route instead —
- * `GenericEcho.create(listOf(typeOf<String>()))` works on every platform (see
- * `GenericServiceSubtypeTest.scenario1_factoryCreateWithConcreteArg`).
+ * The compiler plugin synthesizes an `RpcObjectFactory` companion (with arity 0) on this
+ * subtype, so `rpcObject<TypedGenericEchoJvm>()` resolves on all platforms. The factory's
+ * `create(emptyList())` constructs the parent's `Obj<String>` directly, returning the
+ * parent's `RpcObject` — whose `createStub()` returns `GenericEcho.Stub<String>`. This
+ * avoids the JVM bridge-method `ClassCastException` that would occur if the companion
+ * directly implemented `RpcObject<TypedGenericEchoJvm>` (the parent's Stub doesn't
+ * implement `TypedGenericEchoJvm`). See issue #136.
  */
 internal interface TypedGenericEchoJvm : GenericEcho<String>
 
@@ -61,10 +46,10 @@ private class TypedGenericEchoJvmImpl : GenericEcho<String> {
 class GenericServiceSubtypeJvmTest {
 
     /**
-     * `rpcObject<TypedGenericEchoJvm>()` should find no direct companion on
-     * `TypedGenericEchoJvm`, walk its supertypes, discover `GenericEcho`'s
-     * `RpcObjectFactory` companion, extract `String` from the `GenericEcho<String>`
-     * supertype, and return a working `RpcObject` for that specialization.
+     * `rpcObject<TypedGenericEchoJvm>()` should find the synthesized `RpcObjectFactory`
+     * companion on `TypedGenericEchoJvm`, call `create(emptyList())`, and get back the
+     * parent's `RpcObject<GenericEcho<String>>` — a fully working `RpcObject` whose
+     * `createStub` returns `GenericEcho.Stub<String>`.
      */
     @Test
     fun rpcObjectResolvesGenericSupertype() = runBlockingUnit {

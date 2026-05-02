@@ -34,12 +34,10 @@ import org.jetbrains.kotlin.fir.extensions.predicateBasedProvider
 import org.jetbrains.kotlin.fir.plugin.createCompanionObject
 import org.jetbrains.kotlin.fir.plugin.createConeType
 import org.jetbrains.kotlin.fir.plugin.createConstructor
-import org.jetbrains.kotlin.fir.plugin.createDefaultPrivateConstructor
 import org.jetbrains.kotlin.fir.plugin.createMemberFunction
 import org.jetbrains.kotlin.fir.plugin.createMemberProperty
 import org.jetbrains.kotlin.fir.resolve.defaultType
 import org.jetbrains.kotlin.fir.resolve.providers.symbolProvider
-import org.jetbrains.kotlin.fir.scopes.impl.toConeType
 import org.jetbrains.kotlin.fir.symbols.SymbolInternals
 import org.jetbrains.kotlin.fir.types.FirResolvedTypeRef
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassLikeSymbol
@@ -255,7 +253,13 @@ class FirSubtypeCompanionGenerator(session: FirSession) :
         val isGeneric = regularOwner.typeParameterSymbols.isNotEmpty()
 
         return if (!isGeneric) {
-            // Scenario 1: non-generic subtype — companion implements RpcObject<Subtype>
+            // Scenario 1: non-generic subtype — companion implements RpcObjectFactory<Subtype>
+            // with arity 0. Using RpcObjectFactory instead of RpcObject avoids a JVM bridge-
+            // method ClassCastException: the parent's Stub class doesn't implement the subtype
+            // interface, so a direct RpcObject<Subtype>.createStub() would fail the checkcast
+            // inserted by the JVM bridge. With a factory, rpcObject<Subtype>() calls
+            // factory.create(emptyList()) which returns the parent's actual RpcObject whose
+            // createStub() returns the parent's Stub (no subtype checkcast). See issue #136.
             createCompanionObject(
                 owner,
                 Key(
@@ -264,7 +268,14 @@ class FirSubtypeCompanionGenerator(session: FirSession) :
                     isGeneric = false
                 )
             ) {
-                superType(RPC_OBJECT.createConeType(session, arrayOf(owner.defaultType())))
+                if (factorySupported) {
+                    superType(
+                        RPC_OBJECT_FACTORY.createConeType(
+                            session,
+                            arrayOf(owner.defaultType())
+                        )
+                    )
+                }
             }.symbol
         } else {
             // Scenario 2: generic subtype — companion implements RpcObjectFactory<Subtype<*,...>>
@@ -315,19 +326,7 @@ class FirSubtypeCompanionGenerator(session: FirSession) :
     ): List<FirNamedFunctionSymbol> {
         val ownerKey = context?.let(::checkOwnerKey) ?: return emptyList()
         return when (callableId.callableName) {
-            FqConstants.FIND_ENDPOINT -> if (!ownerKey.isGeneric) {
-                createFindEndpoint(callableId, context.owner, ownerKey)
-            } else {
-                emptyList()
-            }
-
-            FqConstants.CREATE_STUB -> if (!ownerKey.isGeneric) {
-                createCreateStub(callableId, context.owner, ownerKey)
-            } else {
-                emptyList()
-            }
-
-            CREATE -> if (ownerKey.isGeneric && factorySupported) {
+            CREATE -> if (factorySupported) {
                 createCreateFactory(callableId, context.owner, ownerKey)
             } else {
                 emptyList()
@@ -342,100 +341,15 @@ class FirSubtypeCompanionGenerator(session: FirSession) :
         context: MemberGenerationContext?
     ): List<FirPropertySymbol> {
         val ownerKey = context?.let(::checkOwnerKey) ?: return emptyList()
-        if (ownerKey.isGeneric) {
-            return when (callableId.callableName) {
-                FqConstants.ARITY -> if (factorySupported) {
-                    createArity(callableId, context.owner, ownerKey)
-                } else {
-                    emptyList()
-                }
-
-                else -> emptyList()
-            }
-        }
         return when (callableId.callableName) {
-            FqConstants.SERVICE_NAME -> createServiceName(callableId, context.owner, ownerKey)
-            FqConstants.ENDPOINTS -> createEndpoints(callableId, context.owner, ownerKey)
+            FqConstants.ARITY -> if (factorySupported) {
+                createArity(callableId, context.owner, ownerKey)
+            } else {
+                emptyList()
+            }
+
             else -> emptyList()
         }
-    }
-
-    private fun createCreateStub(
-        callableId: CallableId,
-        owner: FirClassSymbol<*>,
-        ownerKey: Key
-    ): List<FirNamedFunctionSymbol> {
-        val retType = ownerKey.subtypeClassId.createConeType(session)
-        val function =
-            createMemberFunction(owner, ownerKey, callableId.callableName, retType) {
-                modality = Modality.FINAL
-                typeParameter(Name.identifier("S"))
-                valueParameter(
-                    Name.identifier("channel"),
-                    { types ->
-                        FqConstants.SERIALIZED_SERVICE.createConeType(
-                            session,
-                            arrayOf(types[0].toConeType())
-                        )
-                    }
-                )
-            }
-        return listOf(function.symbol)
-    }
-
-    private fun createFindEndpoint(
-        callableId: CallableId,
-        owner: FirClassSymbol<*>,
-        ownerKey: Key
-    ): List<FirNamedFunctionSymbol> {
-        val retType =
-            FqConstants.RPC_METHOD.createConeType(session, Array(3) { ConeStarProjection })
-        val function = createMemberFunction(owner, ownerKey, callableId.callableName, retType) {
-            modality = Modality.FINAL
-            valueParameter(
-                Name.identifier("endpoint"),
-                session.builtinTypes.stringType.coneType
-            )
-        }
-        return listOf(function.symbol)
-    }
-
-    private fun createServiceName(
-        callableId: CallableId,
-        owner: FirClassSymbol<*>,
-        ownerKey: Key
-    ): List<FirPropertySymbol> {
-        val property = createMemberProperty(
-            owner,
-            ownerKey,
-            callableId.callableName,
-            session.builtinTypes.stringType.coneType,
-            isVal = true,
-            hasBackingField = false
-        ) {
-            modality = Modality.FINAL
-        }
-        return listOf(property.symbol)
-    }
-
-    private fun createEndpoints(
-        callableId: CallableId,
-        owner: FirClassSymbol<*>,
-        ownerKey: Key
-    ): List<FirPropertySymbol> {
-        val listType = LIST_CLASS_ID
-            .createConeType(session, arrayOf(session.builtinTypes.stringType.coneType))
-        val property = createMemberProperty(
-            owner,
-            ownerKey,
-            callableId.callableName,
-            listType,
-            isVal = true,
-            hasBackingField = false
-        ) {
-            modality = Modality.FINAL
-        }
-        return listOf(property.symbol)
     }
 
     private fun createArity(
@@ -469,12 +383,21 @@ class FirSubtypeCompanionGenerator(session: FirSession) :
                 as? FirRegularClassSymbol
                 ?: return emptyList()
         val subtypeTypeParams = subtypeSymbol.typeParameterSymbols
-        if (subtypeTypeParams.isEmpty()) return emptyList()
-        val starProjections = Array<org.jetbrains.kotlin.fir.types.ConeTypeProjection>(
-            subtypeTypeParams.size
-        ) { ConeStarProjection }
-        val subtypeStarType = ownerKey.subtypeClassId.createConeType(session, starProjections)
-        val retType = RPC_OBJECT.createConeType(session, arrayOf(subtypeStarType))
+        val retType = if (subtypeTypeParams.isEmpty()) {
+            // Non-generic subtype: RpcObject<Subtype>
+            RPC_OBJECT.createConeType(
+                session,
+                arrayOf(ownerKey.subtypeClassId.createConeType(session))
+            )
+        } else {
+            // Generic subtype: RpcObject<Subtype<*,...>>
+            val starProjections = Array<org.jetbrains.kotlin.fir.types.ConeTypeProjection>(
+                subtypeTypeParams.size
+            ) { ConeStarProjection }
+            val subtypeStarType =
+                ownerKey.subtypeClassId.createConeType(session, starProjections)
+            RPC_OBJECT.createConeType(session, arrayOf(subtypeStarType))
+        }
         val listOfKType =
             LIST_CLASS_ID.createConeType(session, arrayOf(KTYPE.createConeType(session)))
         val function = createMemberFunction(owner, ownerKey, callableId.callableName, retType) {
@@ -501,20 +424,10 @@ class FirSubtypeCompanionGenerator(session: FirSession) :
 
         val origin = classSymbol.origin as? FirDeclarationOrigin.Plugin
         val key = origin?.key as? Key ?: return emptySet()
-        return if (key.isGeneric) {
-            if (factorySupported) {
-                setOf(CREATE, FqConstants.ARITY, SpecialNames.INIT)
-            } else {
-                setOf(SpecialNames.INIT)
-            }
+        return if (factorySupported) {
+            setOf(CREATE, FqConstants.ARITY, SpecialNames.INIT)
         } else {
-            setOf(
-                FqConstants.FIND_ENDPOINT,
-                FqConstants.CREATE_STUB,
-                FqConstants.SERVICE_NAME,
-                FqConstants.ENDPOINTS,
-                SpecialNames.INIT
-            )
+            setOf(SpecialNames.INIT)
         }
     }
 
