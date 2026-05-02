@@ -28,6 +28,7 @@ import com.monkopedia.ksrpc.channels.ChannelClient
 import com.monkopedia.ksrpc.channels.ChannelId
 import com.monkopedia.ksrpc.channels.SerializedChannel
 import com.monkopedia.ksrpc.channels.SerializedService
+import com.monkopedia.ksrpc.channels.WireContextMap
 import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
 import com.monkopedia.ksrpc.serialized
 import io.ktor.http.HttpStatusCode
@@ -41,6 +42,7 @@ import io.ktor.server.routing.post
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.writeFully
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 private const val KSRPC_BINARY = "binary"
 private const val KSRPC_CHANNEL = "channel"
@@ -122,6 +124,21 @@ fun Routing.serveHttp(
     }
 }
 
+/** Headers that are transport-internal and should not be forwarded as wire context entries. */
+private val RESERVED_HTTP_CONTEXT_HEADERS = setOf(
+    KSRPC_BINARY.lowercase(),
+    KSRPC_CHANNEL.lowercase(),
+    KSRPC_ERROR_CODE_HEADER.lowercase(),
+    KSRPC_ERROR_MESSAGE_HEADER.lowercase(),
+    "content-type",
+    "content-length",
+    "accept",
+    "host",
+    "user-agent",
+    "connection",
+    "transfer-encoding"
+)
+
 private suspend fun RoutingContext.execCall(
     channel: SerializedChannel<String>,
     method: String,
@@ -134,11 +151,27 @@ private suspend fun RoutingContext.execCall(
     }
     val channelId = call.request.headers[KSRPC_CHANNEL] ?: ChannelClient.DEFAULT
     channel.env.logger.debug("HttpChannel", "Executing call $channelId/$method")
+    // Extract potential @KsContext wire entries from request headers. We forward all
+    // non-reserved headers; RpcMethod.decodeWireContextFrom filters to only the keys
+    // that match declared contextBindings on the target method.
+    val contextEntries = mutableMapOf<String, String>()
+    call.request.headers.forEach { name, values ->
+        if (name.lowercase() !in RESERVED_HTTP_CONTEXT_HEADERS && values.isNotEmpty()) {
+            contextEntries[name] = values.first()
+        }
+    }
+    val wireCtx = if (contextEntries.isNotEmpty()) WireContextMap(contextEntries) else null
     // HTTP has no wire-level request correlation id the handler would need to see; each
     // request is a synchronous round trip. Pass null as the callId — the server-side
     // RpcMethod.call will still install CurrentRpcCallElement so handlers can introspect
     // the method, with id == null indicating "no transport-level call id".
-    val response = channel.call(ChannelId(channelId), method, content, callId = null)
+    val response = if (wireCtx != null) {
+        withContext(wireCtx) {
+            channel.call(ChannelId(channelId), method, content, callId = null)
+        }
+    } else {
+        channel.call(ChannelId(channelId), method, content, callId = null)
+    }
     when {
         response is CallData.Error<String> -> {
             channel.env.logger.debug(
