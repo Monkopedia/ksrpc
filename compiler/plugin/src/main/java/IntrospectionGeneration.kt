@@ -20,6 +20,8 @@ package com.monkopedia.ksrpc.plugin
 import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.ir.builders.irBlockBody
+import org.jetbrains.kotlin.ir.builders.irCall
+import org.jetbrains.kotlin.ir.builders.irCallConstructor
 import org.jetbrains.kotlin.ir.builders.irGetObject
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.declarations.IrClass
@@ -28,8 +30,11 @@ import org.jetbrains.kotlin.ir.declarations.IrDeclaration
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.expressions.IrBlockBody
 import org.jetbrains.kotlin.ir.expressions.IrBody
+import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
+import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.companionObject
+import org.jetbrains.kotlin.ir.util.constructors
 import org.jetbrains.kotlin.ir.util.kotlinFqName
 
 class IntrospectionGeneration(
@@ -57,18 +62,50 @@ class IntrospectionGeneration(
 
     private fun buildIntrospectionBody(function: IrSimpleFunction, cls: ServiceClass): IrBlockBody =
         context.irBuilder(function).irBlockBody {
-            +irReturn(
-                irConstructOf(
-                    env.introspectionImpl,
-                    irGetObject(
-                        cls.irClass.companionObject()?.symbol ?: reportInternal(
-                            "companion is missing on " +
-                                cls.irClass.kotlinFqName.asString() +
-                                " — CompanionGeneration should have produced it"
-                        )
+            val rpcObjectExpr: IrExpression = if (cls.isGeneric) {
+                // For generic services the companion is an RpcObjectFactory, not an
+                // RpcObject. We construct the nested Obj class with dummy
+                // serializer<Any?>() args — introspection never performs actual
+                // (de)serialization, so the concrete serializers are irrelevant.
+                val objClass = cls.irClass.declarations
+                    .filterIsInstance<IrClass>()
+                    .firstOrNull { it.name == FqConstants.OBJ }
+                    ?: reportInternal(
+                        "missing generated Obj class on " +
+                            cls.irClass.kotlinFqName.asString() +
+                            " — FirKsrpcObjGenerator did not run"
+                    )
+                val objConstructor = objClass.constructors.first { it.isPrimary }
+                val arity = cls.irClass.typeParameters.size
+                // Use Unit as the dummy type argument — it is always
+                // @Serializable, unlike Any/Any? which have no serializer.
+                val unitType = context.irBuiltIns.unitType
+                val objTypeArgs = List(arity) { unitType }
+                val serializerFn = env.serializerMethod ?: reportInternal(
+                    "can't resolve kotlinx.serialization.serializer<T>() — " +
+                        "kotlinx-serialization-core must be on the compile classpath"
+                )
+                val dummySerializers = List(arity) {
+                    irCall(serializerFn).apply {
+                        typeArguments[0] = unitType
+                        type = env.kSerializer.typeWith(unitType)
+                    }
+                }
+                irCallConstructor(objConstructor.symbol, objTypeArgs).apply {
+                    type = objClass.typeWith(objTypeArgs)
+                    putArgs(*dummySerializers.toTypedArray())
+                }
+            } else {
+                // Non-generic: companion IS the RpcObject.
+                irGetObject(
+                    cls.irClass.companionObject()?.symbol ?: reportInternal(
+                        "companion is missing on " +
+                            cls.irClass.kotlinFqName.asString() +
+                            " — CompanionGeneration should have produced it"
                     )
                 )
-            )
+            }
+            +irReturn(irConstructOf(env.introspectionImpl, rpcObjectExpr))
         }
 
     override fun generateChildrenForClass(
