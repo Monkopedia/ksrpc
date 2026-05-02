@@ -9,14 +9,14 @@ The `ksrpc-flow` module lets you use `kotlinx.coroutines.Flow<T>` in `@KsMethod`
 Add the flow dependency:
 
 ```kotlin
-implementation("com.monkopedia.ksrpc:ksrpc-flow:0.11.1")
+implementation("com.monkopedia.ksrpc:ksrpc-flow:$KSRPC_VERSION")
 ```
 
 Flow streaming requires a bidirectional transport (WebSockets, sockets, or service workers) because the flow protocol uses sub-services internally.
 
 ## Using Flow in service signatures
 
-Declare `Flow<T>` as a return type on a `@KsMethod`:
+`Flow<T>` is supported as a **return type only** -- it cannot be used as an input parameter. Declare it as the return type on a `@KsMethod`:
 
 ```kotlin
 import kotlinx.coroutines.flow.Flow
@@ -60,7 +60,9 @@ service.streamEvents("error").collect { event ->
 
 ### Lifecycle
 
-When you use `Flow<T>` in a return type, the returned flow is single-use and auto-closing. After collection completes (normally, with an error, or via cancellation), the underlying sub-service is closed automatically.
+`Flow<T>` is only supported as a return type, not as an input parameter. If you need to send a stream of items to the server, use a sub-service callback pattern instead (see the [Bidirectional Communication guide](bidirectional.md)).
+
+The returned flow is single-use and auto-closing. After collection completes (normally, with an error, or via cancellation), the underlying sub-service is closed automatically.
 
 ### Cancellation
 
@@ -124,3 +126,9 @@ The flow protocol uses three sub-services:
 - **[KsCollectionToken]** -- a sub-service with a `cancelCollection` method for cancelling an active collection.
 
 The compiler plugin generates the `FlowSubserviceTransformer` that bridges between `Flow<T>` and `KsFlowService<T>` transparently.
+
+## Related guides
+
+- [Bidirectional Communication](bidirectional.md) -- required for flow streaming; also covers sub-service callback patterns for server-bound streams
+- [Service Declaration](service-declaration.md) -- `@KsMethod` signatures and type support
+- [Transports](transports.md) -- which transports support the bidirectional connections flow requires

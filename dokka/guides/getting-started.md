@@ -10,29 +10,39 @@ Add the ksrpc compiler plugin and runtime dependency to your `build.gradle.kts`:
 plugins {
     kotlin("multiplatform") version "2.3.0"
     kotlin("plugin.serialization") version "2.3.0"
-    id("com.monkopedia.ksrpc.plugin") version "0.11.1"
+    id("com.monkopedia.ksrpc.plugin") version "$KSRPC_VERSION"
 }
 
 kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation("com.monkopedia.ksrpc:ksrpc-core:0.11.1")
+                implementation("com.monkopedia.ksrpc:ksrpc-core:$KSRPC_VERSION")
             }
         }
     }
 }
 ```
 
-For transport-specific dependencies, add the appropriate module (see the [transports guide](transports.md)):
+For transport-specific dependencies, add the appropriate modules (see the [transports guide](transports.md)):
 
 ```kotlin
 // HTTP client
-implementation("com.monkopedia.ksrpc:ksrpc-ktor-client:0.11.1")
+implementation("com.monkopedia.ksrpc:ksrpc-ktor-client:$KSRPC_VERSION")
 // HTTP server
-implementation("com.monkopedia.ksrpc:ksrpc-ktor-server:0.11.1")
+implementation("com.monkopedia.ksrpc:ksrpc-ktor-server:$KSRPC_VERSION")
+// WebSocket client
+implementation("com.monkopedia.ksrpc:ksrpc-ktor-websocket-client:$KSRPC_VERSION")
+// WebSocket server
+implementation("com.monkopedia.ksrpc:ksrpc-ktor-websocket-server:$KSRPC_VERSION")
 // Sockets / stdin-out
-implementation("com.monkopedia.ksrpc:ksrpc-sockets:0.11.1")
+implementation("com.monkopedia.ksrpc:ksrpc-sockets:$KSRPC_VERSION")
+// JSON-RPC 2.0
+implementation("com.monkopedia.ksrpc:ksrpc-jsonrpc:$KSRPC_VERSION")
+// Flow streaming
+implementation("com.monkopedia.ksrpc:ksrpc-flow:$KSRPC_VERSION")
+// Introspection
+implementation("com.monkopedia.ksrpc:ksrpc-introspection:$KSRPC_VERSION")
 ```
 
 ## Define a service
@@ -121,3 +131,6 @@ See [KsrpcEnvironment] in the API docs for the full set of configurable fields.
 - [Transports](transports.md) -- all supported transports with setup code
 - [Bidirectional Communication](bidirectional.md) -- two-way connections and callbacks
 - [Error Handling](error-handling.md) -- typed errors with `@KsError`
+- [Context Propagation](context-propagation.md) -- propagating auth tokens, trace IDs, and other metadata
+- [Flow Streaming](flow-streaming.md) -- streaming data with `Flow<T>`
+- [Introspection](introspection.md) -- runtime service metadata discovery

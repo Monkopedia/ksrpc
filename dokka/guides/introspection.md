@@ -9,7 +9,7 @@ The `ksrpc-introspection` module lets clients discover service metadata at runti
 Add the introspection dependency:
 
 ```kotlin
-implementation("com.monkopedia.ksrpc:ksrpc-introspection:0.11.1")
+implementation("com.monkopedia.ksrpc:ksrpc-introspection:$KSRPC_VERSION")
 ```
 
 ## Opting in
@@ -102,3 +102,9 @@ val inputSchema = (info.input as RpcDataType.DataStructure).schema
 ```
 
 Recursive types are handled via the `id` field -- only the first occurrence has `elements` populated; subsequent occurrences reference the same `id` with an empty `elements` map.
+
+## Related guides
+
+- [Service Declaration](service-declaration.md) -- defining `@KsService` interfaces that can be introspected
+- [Flow Streaming](flow-streaming.md) -- flow endpoints appear as `KsFlowService<T>` sub-services in introspection
+- [Getting Started](getting-started.md) -- project setup and dependencies

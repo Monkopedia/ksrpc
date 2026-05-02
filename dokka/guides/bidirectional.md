@@ -46,7 +46,7 @@ connection.registerDefault(MyHostServiceImpl(client))
 
 ## Sub-service callbacks
 
-On transports that support `Connection` (sockets, WebSockets), you can pass `@KsService` interfaces as method parameters and return values. This enables contextual callback patterns:
+On transports that support `Connection` (sockets, WebSockets, JNI), you can pass `@KsService` interfaces as method parameters and return values. This enables contextual callback patterns:
 
 ```kotlin
 @KsService
@@ -126,6 +126,7 @@ interface Scheduler : RpcService {
 | WebSocket | Yes | Yes | Yes |
 | Sockets | Yes | Yes | Yes |
 | JSON-RPC | No | No | Yes (single channel) |
+| JNI | Yes | Yes | Yes |
 | Service Worker | Yes | Yes | Yes |
 
 For Flow-based streaming over bidirectional channels, see the [flow streaming guide](flow-streaming.md).

@@ -111,12 +111,19 @@ The compiler plugin performs these checks:
 - A `@KsContext`-annotated annotation must reference a `binding` class that implements [KsContextBinding].
 - Two `@KsContext` annotations on the same method (or inherited from the service level) must not declare the same `wireKey`.
 
-## Wire transport
+## Wire transport details
 
 Context values are carried differently depending on the transport:
 
-- **Packet protocol** (sockets, WebSockets): encoded in an optional `cx` field on the packet.
-- **HTTP**: could be carried as request headers keyed by `wireKey`.
-- **JSON-RPC**: could be carried in a metadata object on the request.
+- **Packet protocol** (sockets, WebSockets): encoded in an optional `cx` field on the packet. See the [Transports guide](transports.md) for socket and WebSocket setup.
+- **HTTP (ktor)**: context values are propagated as HTTP request headers keyed by the binding's `wireKey`. For example, an `AuthToken` binding with `wireKey = "x-auth-token"` becomes an `x-auth-token` HTTP header. See the [Transports guide](transports.md) for HTTP configuration.
+- **JSON-RPC**: context values are carried via the `RootSiblings` convention -- metadata is placed alongside the standard JSON-RPC fields in the request object. See the [Transports guide](transports.md) for JSON-RPC options.
 
-The exact wire encoding for each transport is handled internally. From your perspective, you set context with `withContext` and read it with `coroutineContext[Key]`.
+From your perspective, you set context with `withContext` and read it with `coroutineContext[Key]` -- the transport handles the encoding automatically.
+
+## Related guides
+
+- [Service Declaration](service-declaration.md) -- defining `@KsMethod` endpoints where `@KsContext` annotations are applied
+- [Error Handling](error-handling.md) -- typed errors with `@KsError`, another method-level annotation
+- [Transports](transports.md) -- transport-specific setup and wire format details
+- [Bidirectional Communication](bidirectional.md) -- context propagation works across bidirectional connections too

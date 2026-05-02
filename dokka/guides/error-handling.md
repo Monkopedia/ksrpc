@@ -42,7 +42,9 @@ Use `@KsError` to bind `@Serializable` exception types to integer error codes on
 
 ### Step 1: Define the error type
 
-The error class must be `@Serializable` and extend `Throwable` (typically `RuntimeException`). Only declare fields that are safe to serialize -- avoid `cause` and `stackTrace`:
+The error class must be `@Serializable` and extend `Throwable` (typically `RuntimeException`). Only declare fields that are safe to serialize -- avoid `cause` and `stackTrace`.
+
+> **Why both `@Serializable` and `Throwable`?** The class needs `@Serializable` so the runtime can encode it for wire transport, and it needs to extend `Throwable` so you can `throw` and `catch` it naturally. Note that the stack trace is NOT preserved across the RPC boundary -- only the serialized fields travel over the wire. The client receives a freshly deserialized instance with a local stack trace from the deserialization site.
 
 ```kotlin
 @Serializable
@@ -115,6 +117,34 @@ try {
 - The client deserializes back into the bound type and re-throws it.
 - Server stack traces are NOT propagated -- clients see a stack from local deserialization. Use `message` and serialized fields for diagnostics.
 
+## Unexpected error codes
+
+When the server throws a typed error whose code the client does not have a `@KsError` mapping for (e.g., the server was updated with new error types but the client was not), the client does not crash. Instead, the runtime surfaces a generic [KsrpcException] carrying the raw wire-level code, the error message, and the raw wire-format payload in `KsrpcException.data`. This lets callers inspect or log the payload even without the `@KsError` binding:
+
+```kotlin
+try {
+    service.someMethod("input")
+} catch (e: AuthError) {
+    // Known typed error
+} catch (e: KsrpcException) {
+    // Unknown error code from a newer server
+    // e.code -- the wire-level integer code
+    // e.message -- the error message string
+    // e.data -- the raw serialized payload (if any)
+    println("Unrecognized error code ${e.code}: ${e.message}")
+}
+```
+
+The built-in sentinel codes are always recognized: `ENDPOINT_NOT_FOUND_CODE` (-32601) produces [RpcEndpointException], and `INTERNAL_ERROR_CODE` (-32603) produces [RpcException].
+
+## Wire format by transport
+
+How typed errors appear on the wire depends on the transport:
+
+- **HTTP**: custom `@KsError` codes default to HTTP 500 with the original code in an `X-Ksrpc-Error-Code` header. You can customize the mapping -- see the [Transports guide](transports.md) for details on HTTP error mapping.
+- **JSON-RPC**: errors are carried in the standard JSON-RPC error envelope (`error.code`, `error.message`, `error.data`). See the [Transports guide](transports.md) for JSON-RPC specifics.
+- **Sockets / WebSockets**: errors are encoded in the packet protocol's error frame.
+
 ## ErrorListener
 
 Configure a global error listener in [KsrpcEnvironment] to observe all errors:
@@ -136,3 +166,9 @@ val localEnv = env.onError { t ->
 ```
 
 The `ErrorListener` is called for all errors -- both untyped and typed. It runs on the server side before the error is sent to the client.
+
+## Related guides
+
+- [Service Declaration](service-declaration.md) -- defining `@KsMethod` endpoints and the `@KsError` annotation target
+- [Transports](transports.md) -- how errors map to HTTP status codes and JSON-RPC error envelopes
+- [Getting Started](getting-started.md) -- environment configuration including `ErrorListener`

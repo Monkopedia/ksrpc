@@ -57,35 +57,30 @@ interface UserService : RpcService {
 
 ## Unit input and output
 
-For methods with no meaningful input, use `Unit` as the parameter type. For methods with no return value, omit the return type (it defaults to `Unit`):
+Methods with no parameters are supported directly -- you do not need a placeholder parameter:
 
 ```kotlin
 @KsService
 interface LifecycleService : RpcService {
     @KsMethod("/status")
-    suspend fun getStatus(u: Unit): StatusInfo
+    suspend fun getStatus(): StatusInfo
+
+    @KsMethod("/ping")
+    suspend fun ping(): String
 
     @KsMethod("/shutdown")
     suspend fun shutdown(reason: String)
 }
 ```
 
-## Zero-argument methods
+The compiler plugin synthesizes the `Unit` handling internally for zero-argument methods.
 
-Methods with no parameters are supported directly -- you do not need a `u: Unit` placeholder:
-
-```kotlin
-@KsService
-interface PingService : RpcService {
-    @KsMethod("/ping")
-    suspend fun ping(): String
-
-    @KsMethod("/count")
-    suspend fun count(): Int
-}
-```
-
-The compiler plugin synthesizes the `Unit` handling internally.
+> **Backward compatibility**: the older `u: Unit` parameter style still works and is equivalent to a zero-argument method. You may see it in older code:
+>
+> ```kotlin
+> // Legacy style -- still supported but no longer required
+> suspend fun getStatus(u: Unit): StatusInfo
+> ```
 
 ## Binary data
 
@@ -99,6 +94,41 @@ interface FileService : RpcService {
 
     @KsMethod("/download")
     suspend fun download(key: String): RpcBinaryData
+}
+```
+
+### Binary data adapters
+
+In addition to the core `RpcBinaryData` type, ksrpc provides adapter modules that let you use platform-specific binary stream types directly in your service signatures:
+
+| Type | Module | Dependency |
+|------|--------|------------|
+| `ByteReadChannel` (ktor) | `ksrpc-binary-ktor` | `implementation("com.monkopedia.ksrpc:ksrpc-binary-ktor:$KSRPC_VERSION")` |
+| `Source` (kotlinx-io) | `ksrpc-binary-kotlinx-io` | `implementation("com.monkopedia.ksrpc:ksrpc-binary-kotlinx-io:$KSRPC_VERSION")` |
+| `BufferedSource` (okio) | `ksrpc-binary-okio` | `implementation("com.monkopedia.ksrpc:ksrpc-binary-okio:$KSRPC_VERSION")` |
+
+Each adapter registers a transformer that converts between the platform type and `RpcBinaryData` on the wire. Usage is the same as `RpcBinaryData` -- just declare the adapter type in your method signature:
+
+```kotlin
+// Using ktor's ByteReadChannel (requires ksrpc-binary-ktor)
+@KsService
+interface StreamService : RpcService {
+    @KsMethod("/stream")
+    suspend fun stream(key: String): ByteReadChannel
+}
+
+// Using kotlinx-io Source (requires ksrpc-binary-kotlinx-io)
+@KsService
+interface IoService : RpcService {
+    @KsMethod("/read")
+    suspend fun read(key: String): Source
+}
+
+// Using okio BufferedSource (requires ksrpc-binary-okio)
+@KsService
+interface OkioService : RpcService {
+    @KsMethod("/read")
+    suspend fun read(key: String): BufferedSource
 }
 ```
 
@@ -183,3 +213,12 @@ val stub = channel.toStub<MyService>()
 ```
 
 See [RpcObject] in the API docs for the full generated companion API.
+
+## Related guides
+
+- [Error Handling](error-handling.md) -- typed errors with `@KsError` on `@KsMethod` functions
+- [Context Propagation](context-propagation.md) -- propagating request-scoped metadata with `@KsContext`
+- [Bidirectional Communication](bidirectional.md) -- sub-service parameters, callbacks, and `connect<H, C>`
+- [Flow Streaming](flow-streaming.md) -- using `Flow<T>` as a return type for streaming
+- [Introspection](introspection.md) -- runtime discovery of service metadata
+- [Transports](transports.md) -- which transports support binary data, sub-services, and notifications
