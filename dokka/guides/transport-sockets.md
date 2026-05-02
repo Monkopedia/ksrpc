@@ -2,7 +2,7 @@
 
 # Socket and Stdin/Stdout Transport
 
-The socket transport uses a content-length-prefixed packet protocol over raw byte streams. It supports bidirectional communication with full sub-service support, and is well suited for direct TCP connections and LSP-style subprocess communication.
+The socket transport uses a content-length-prefixed packet protocol over raw byte streams. It supports bidirectional communication with full sub-service support, and is well suited for direct TCP connections and subprocess stdin/stdout communication.
 
 ## Module and dependencies
 
@@ -56,7 +56,7 @@ On Kotlin/Native, use `ByteReadChannel` / `ByteWriteChannel` pairs instead of JV
 
 ## Stdin/stdout
 
-A convenience for the socket protocol over standard I/O streams. Useful for LSP-style subprocess communication where the parent process launches a child and communicates via its stdin/stdout.
+A convenience for the socket protocol over standard I/O streams. Useful for subprocess stdin/stdout communication where the parent process launches a child and communicates via its stdin/stdout.
 
 ```kotlin
 import com.monkopedia.ksrpc.sockets.withStdInOut
@@ -88,7 +88,7 @@ The connection's `onClose` handler automatically destroys the subprocess.
 - Returns a full `Connection<String>` supporting bidirectional communication
 - Supports sub-services in both directions
 - Binary data is buffered (not streamed like HTTP/WebSocket)
-- Compatible with the LSP base protocol's header framing
+- Content-Length header framing compatible with LSP and similar protocols
 
 ## See also
 

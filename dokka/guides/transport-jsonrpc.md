@@ -2,7 +2,7 @@
 
 # JSON-RPC 2.0 Transport
 
-The JSON-RPC transport implements the [JSON-RPC 2.0](https://www.jsonrpc.org/specification) protocol over byte streams. This makes ksrpc services interoperable with any JSON-RPC 2.0 client or server, including LSP implementations.
+The JSON-RPC transport communicates using the [JSON-RPC 2.0](https://www.jsonrpc.org/specification) protocol over byte streams, enabling interop with other JSON-RPC clients and servers.
 
 The JSON-RPC transport returns a `SingleChannelConnection` rather than a full `Connection` -- it does not support sub-services. Each `@KsMethod` name maps directly to the JSON-RPC `method` field.
 

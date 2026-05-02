@@ -84,22 +84,7 @@ The compiler plugin synthesizes the `Unit` handling internally for zero-argument
 
 ## Binary data
 
-Use [RpcBinaryData] for binary payloads. Binary transfer is streaming on HTTP and WebSocket transports. On socket transports the data is buffered in memory, and binary is not supported on JSON-RPC.
-
-```kotlin
-@KsService
-interface FileService : RpcService {
-    @KsMethod("/upload")
-    suspend fun upload(data: RpcBinaryData): String
-
-    @KsMethod("/download")
-    suspend fun download(key: String): RpcBinaryData
-}
-```
-
-### Binary data adapters
-
-In addition to the core `RpcBinaryData` type, ksrpc provides adapter modules that let you use platform-specific binary stream types directly in your service signatures:
+Binary payloads are supported through platform-specific stream types. Add the adapter module for the I/O library you use, then declare the type directly in your method signatures. Binary transfer is streaming on HTTP and WebSocket transports; on socket transports the data is buffered in memory. Binary is not supported on JSON-RPC.
 
 | Type | Module | Dependency |
 |------|--------|------------|
@@ -107,14 +92,15 @@ In addition to the core `RpcBinaryData` type, ksrpc provides adapter modules tha
 | `Source` (kotlinx-io) | `ksrpc-binary-kotlinx-io` | `implementation("com.monkopedia.ksrpc:ksrpc-binary-kotlinx-io:$KSRPC_VERSION")` |
 | `BufferedSource` (okio) | `ksrpc-binary-okio` | `implementation("com.monkopedia.ksrpc:ksrpc-binary-okio:$KSRPC_VERSION")` |
 
-Each adapter registers a transformer that converts between the platform type and `RpcBinaryData` on the wire. Usage is the same as `RpcBinaryData` -- just declare the adapter type in your method signature:
-
 ```kotlin
 // Using ktor's ByteReadChannel (requires ksrpc-binary-ktor)
 @KsService
-interface StreamService : RpcService {
-    @KsMethod("/stream")
-    suspend fun stream(key: String): ByteReadChannel
+interface FileService : RpcService {
+    @KsMethod("/upload")
+    suspend fun upload(data: ByteReadChannel): String
+
+    @KsMethod("/download")
+    suspend fun download(key: String): ByteReadChannel
 }
 
 // Using kotlinx-io Source (requires ksrpc-binary-kotlinx-io)
@@ -131,6 +117,8 @@ interface OkioService : RpcService {
     suspend fun read(key: String): BufferedSource
 }
 ```
+
+Each adapter module registers a transformer that the compiler plugin uses to convert between the platform type and the internal wire format. You only need the adapter module on your classpath -- no extra configuration required.
 
 ## Sub-services
 

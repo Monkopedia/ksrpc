@@ -2,7 +2,7 @@
 
 # JNI Transport
 
-The JNI transport bridges Kotlin/JVM and Kotlin/Native in the same process via JNI (Java Native Interface). It uses binary serialization rather than JSON, eliminating network overhead entirely. This is ideal for embedding a Kotlin/Native ksrpc service inside a JVM host application, or vice versa.
+The JNI transport provides a shared RPC interface across the JVM/Native boundary in the same process. It uses binary serialization rather than JSON, eliminating network overhead entirely.
 
 ## Module and dependencies
 
@@ -73,13 +73,6 @@ fun initializeService(connection: NativeConnection) {
 - Zero network overhead -- data passes through JNI method calls in the same process
 - Packet-based protocol using the same `PacketChannelBase` as other bidirectional transports
 - Coroutine continuations are bridged across the JNI boundary, preserving suspend semantics
-
-## Use cases
-
-- **Android apps** with Kotlin/Native shared libraries
-- **Desktop JVM applications** embedding native computation or platform APIs
-- **Shared business logic** compiled to Kotlin/Native and consumed by a JVM host
-- **Testing** native ksrpc services from JVM test frameworks
 
 ## See also
 
