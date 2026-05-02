@@ -50,7 +50,7 @@ allprojects {
 
 // == BCV setup ==
 apiValidation {
-    ignoredProjects.addAll(listOf("ksrpc-test", "ksrpc-bench"))
+    ignoredProjects.addAll(listOf("ksrpc-test", "ksrpc-bench", "ksrpc-samples"))
     @OptIn(ExperimentalBCVApi::class)
     klib {
         enabled = true
@@ -116,6 +116,7 @@ val dokkaStyleSheets = rootProject.file("dokka/styles").listFiles()?.toList().or
 dokka {
     dokkaPublications.named("html") {
         outputDirectory.set(projectDir.resolve("build/dokka"))
+        includes.from(fileTree("dokka/guides") { include("*.md") })
     }
     pluginsConfiguration.html {
         customAssets.from(dokkaAssets)
