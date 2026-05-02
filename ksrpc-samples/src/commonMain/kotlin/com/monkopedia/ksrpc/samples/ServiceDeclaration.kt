@@ -96,7 +96,7 @@ fun serializableTypes() {
  */
 fun unitInputOutput() {
     // Methods can omit the parameter (returns Unit) or the return type.
-    // suspend fun ping(): String        — no input
-    // suspend fun notify(message: String) — no output (returns Unit)
+    // suspend fun ping(): String        -- no input
+    // suspend fun notify(message: String) -- no output (returns Unit)
     val rpcObj = rpcObject<PingService>()
 }

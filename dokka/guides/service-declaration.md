@@ -1,0 +1,185 @@
+# Module service-declaration
+
+# Service Declaration
+
+## Basics
+
+Every ksrpc service is a Kotlin interface that:
+
+1. Extends [RpcService]
+2. Is annotated with `@KsService`
+3. Has methods annotated with `@KsMethod` with a unique name within the service
+
+```kotlin
+@KsService
+interface MyService : RpcService {
+    @KsMethod("/doWork")
+    suspend fun doWork(input: String): Int
+}
+```
+
+The compiler plugin generates a companion [RpcObject] that provides stub creation and serialization adapters. Any method on the interface that is not annotated with `@KsMethod` will produce a compiler warning.
+
+The `@KsMethod` name is the wire-level identifier. It must be unique within a single service but does not need to be globally unique. Choose stable names -- renaming breaks wire compatibility.
+
+## Primitive types
+
+Any primitive type supported by `kotlinx.serialization` can be used directly as an input or output: `String`, `Int`, `Long`, `Double`, `Float`, `Boolean`, `Byte`, `Short`, `Char`.
+
+```kotlin
+@KsService
+interface MathService : RpcService {
+    @KsMethod("/add")
+    suspend fun add(a: Int): Int
+
+    @KsMethod("/name")
+    suspend fun name(): String
+}
+```
+
+## Serializable types
+
+Any `@Serializable` class can be used as input or output:
+
+```kotlin
+@Serializable
+data class UserRequest(val name: String, val age: Int)
+
+@Serializable
+data class UserResponse(val id: String, val displayName: String)
+
+@KsService
+interface UserService : RpcService {
+    @KsMethod("/createUser")
+    suspend fun createUser(request: UserRequest): UserResponse
+}
+```
+
+## Unit input and output
+
+For methods with no meaningful input, use `Unit` as the parameter type. For methods with no return value, omit the return type (it defaults to `Unit`):
+
+```kotlin
+@KsService
+interface LifecycleService : RpcService {
+    @KsMethod("/status")
+    suspend fun getStatus(u: Unit): StatusInfo
+
+    @KsMethod("/shutdown")
+    suspend fun shutdown(reason: String)
+}
+```
+
+## Zero-argument methods
+
+Methods with no parameters are supported directly -- you do not need a `u: Unit` placeholder:
+
+```kotlin
+@KsService
+interface PingService : RpcService {
+    @KsMethod("/ping")
+    suspend fun ping(): String
+
+    @KsMethod("/count")
+    suspend fun count(): Int
+}
+```
+
+The compiler plugin synthesizes the `Unit` handling internally.
+
+## Binary data
+
+Use [RpcBinaryData] for binary payloads. Binary transfer is streaming on HTTP and WebSocket transports. On socket transports the data is buffered in memory, and binary is not supported on JSON-RPC.
+
+```kotlin
+@KsService
+interface FileService : RpcService {
+    @KsMethod("/upload")
+    suspend fun upload(data: RpcBinaryData): String
+
+    @KsMethod("/download")
+    suspend fun download(key: String): RpcBinaryData
+}
+```
+
+## Sub-services
+
+A `@KsMethod` can accept or return another `@KsService` interface. This enables contextual callback patterns and service hierarchies:
+
+```kotlin
+@KsService
+interface EntityService : RpcService {
+    @KsMethod("/name")
+    suspend fun getName(): String
+
+    @KsMethod("/content")
+    suspend fun getContent(): RpcBinaryData
+}
+
+@KsService
+interface CatalogService : RpcService {
+    @KsMethod("/get")
+    suspend fun getEntity(id: Int): EntityService
+
+    @KsMethod("/register")
+    suspend fun registerEntity(entity: EntityService): Int
+}
+```
+
+Sub-services as outputs require a transport that supports `ChannelHost` (HTTP server, `Connection`). Sub-services as inputs require `ChannelClient` (a `Connection`). See the [bidirectional guide](bidirectional.md) for details on callback patterns.
+
+## Notifications
+
+Use `@KsNotification` to mark a method as fire-and-forget on transports that support notification semantics (JSON-RPC):
+
+```kotlin
+@KsService
+interface LogService : RpcService {
+    @KsMethod("/log")
+    @KsNotification
+    suspend fun log(message: String)
+}
+```
+
+The method must return `Unit`. On transports without notification support (HTTP, sockets), the call behaves as a normal request.
+
+## Timeouts
+
+Use `@KsTimeout` to specify a client-side timeout for a method call:
+
+```kotlin
+@KsService
+interface SlowService : RpcService {
+    @KsMethod("/compute")
+    @KsTimeout(seconds = 30)
+    suspend fun compute(input: String): String
+}
+```
+
+The generated stub wraps the call in `withTimeout`. On transports with cancellation support, the cancellation propagates to the server.
+
+## Implementing services
+
+Implement a service by extending the interface:
+
+```kotlin
+class CatalogServiceImpl : CatalogService {
+    override suspend fun getEntity(id: Int): EntityService = EntityImpl(id)
+    override suspend fun registerEntity(entity: EntityService): Int {
+        val name = entity.getName()
+        return store.register(name)
+    }
+}
+```
+
+Convert between implementations and stubs using the generated companion:
+
+```kotlin
+// Implementation -> serialized service for hosting
+val serialized = myImpl.serialized(env)
+
+// Serialized channel -> typed stub for calling
+val stub = channel.toStub<MyService>()
+```
+
+See [RpcObject] in the API docs for the full generated companion API.

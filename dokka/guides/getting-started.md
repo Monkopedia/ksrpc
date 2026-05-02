@@ -1,0 +1,123 @@
+# Module getting-started
+
+# Getting Started
+
+## Gradle setup
+
+Add the ksrpc compiler plugin and runtime dependency to your `build.gradle.kts`:
+
+```kotlin
+plugins {
+    kotlin("multiplatform") version "2.3.0"
+    kotlin("plugin.serialization") version "2.3.0"
+    id("com.monkopedia.ksrpc.plugin") version "0.11.1"
+}
+
+kotlin {
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation("com.monkopedia.ksrpc:ksrpc-core:0.11.1")
+            }
+        }
+    }
+}
+```
+
+For transport-specific dependencies, add the appropriate module (see the [transports guide](transports.md)):
+
+```kotlin
+// HTTP client
+implementation("com.monkopedia.ksrpc:ksrpc-ktor-client:0.11.1")
+// HTTP server
+implementation("com.monkopedia.ksrpc:ksrpc-ktor-server:0.11.1")
+// Sockets / stdin-out
+implementation("com.monkopedia.ksrpc:ksrpc-sockets:0.11.1")
+```
+
+## Define a service
+
+Declare your service as an interface extending `RpcService`, annotated with `@KsService`. Tag each method with `@KsMethod` and a unique name:
+
+```kotlin
+import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+
+@KsService
+interface GreetingService : RpcService {
+    @KsMethod("/greet")
+    suspend fun greet(name: String): String
+}
+```
+
+The compiler plugin generates a companion `RpcObject` and stub implementations automatically.
+
+## Implement the service
+
+```kotlin
+class GreetingServiceImpl : GreetingService {
+    override suspend fun greet(name: String): String = "Hello, $name!"
+}
+```
+
+## Host over HTTP
+
+```kotlin
+import com.monkopedia.ksrpc.ksrpcEnvironment
+import com.monkopedia.ksrpc.ktor.serveHttp
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
+import io.ktor.server.routing.routing
+
+fun main() {
+    val env = ksrpcEnvironment { }
+    embeddedServer(Netty, port = 8080) {
+        routing {
+            serveHttp("/api/greeting", GreetingServiceImpl(), env)
+        }
+    }.start(wait = true)
+}
+```
+
+## Call from a client
+
+```kotlin
+import com.monkopedia.ksrpc.ksrpcEnvironment
+import com.monkopedia.ksrpc.ktor.asHttpChannelClient
+import com.monkopedia.ksrpc.toStub
+import io.ktor.client.HttpClient
+
+suspend fun main() {
+    val env = ksrpcEnvironment { }
+    val client = HttpClient { }
+        .asHttpChannelClient("http://localhost:8080/api/greeting", env)
+    val service = client.defaultChannel().toStub<GreetingService>()
+
+    println(service.greet("world")) // prints "Hello, world!"
+}
+```
+
+## Environment configuration
+
+All channels share a [KsrpcEnvironment] that holds the serialization format, default coroutine scope, and error handling:
+
+```kotlin
+val env = ksrpcEnvironment {
+    serialization = Json {
+        encodeDefaults = true
+    }
+    errorListener = ErrorListener { t ->
+        t.printStackTrace()
+    }
+}
+```
+
+See [KsrpcEnvironment] in the API docs for the full set of configurable fields.
+
+## Next steps
+
+- [Service Declaration](service-declaration.md) -- full reference on types, annotations, and patterns
+- [Transports](transports.md) -- all supported transports with setup code
+- [Bidirectional Communication](bidirectional.md) -- two-way connections and callbacks
+- [Error Handling](error-handling.md) -- typed errors with `@KsError`
