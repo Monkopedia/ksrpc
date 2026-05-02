@@ -78,7 +78,7 @@ class RpcServiceTest :
                 stub.rpc("Hello" to "world")
             )
         },
-        workerServiceName = "WebWorkerTestService"
+        workerServiceName = "TestInterface"
     ) {
     @Test
     fun testCreateInfo() = runBlockingUnit {
@@ -336,7 +336,7 @@ class RpcServiceTwoCallsTest :
                 stub.rpc("Hello" to "world")
             )
         },
-        workerServiceName = "WebWorkerTestService"
+        workerServiceName = "TestInterface"
     )
 
 private var cancelSignal: CompletableDeferred<CompletableDeferred<Unit>>? = null

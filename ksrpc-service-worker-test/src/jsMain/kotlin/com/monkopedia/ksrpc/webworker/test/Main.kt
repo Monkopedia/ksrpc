@@ -21,6 +21,7 @@ import com.monkopedia.ksrpc.annotation.ExperimentalKsrpc
 import com.monkopedia.ksrpc.channels.Connection
 import com.monkopedia.ksrpc.channels.registerDefault
 import com.monkopedia.ksrpc.ksrpcEnvironment
+import com.monkopedia.ksrpc.serialized
 import com.monkopedia.ksrpc.webworker.onServiceWorkerConnection
 
 /**
@@ -31,6 +32,23 @@ import com.monkopedia.ksrpc.webworker.onServiceWorkerConnection
 private val serviceCatalog: Map<String, suspend (Connection<String>) -> Unit> = mapOf(
     "WebWorkerTestService" to { connection ->
         connection.registerDefault(WebWorkerTestServiceImpl("js"))
+    },
+    "TestInterface" to { connection ->
+        val service = object : WorkerTestInterface {
+            override suspend fun rpc(u: Pair<String, String>): String = "${u.first} ${u.second}"
+        }
+        connection.registerDefault(service.serialized(ksrpcEnvironment { }))
+    },
+    "TestRootInterface" to { connection ->
+        val service = object : WorkerTestRootInterface {
+            override suspend fun rpc(u: Pair<String, String>): String = "${u.first} ${u.second}"
+            override suspend fun subservice(prefix: String): WorkerTestSubInterface =
+                object : WorkerTestSubInterface {
+                    override suspend fun rpc(u: Pair<String, String>): String =
+                        "$prefix ${u.first} ${u.second}"
+                }
+        }
+        connection.registerDefault(service.serialized(ksrpcEnvironment { }))
     }
 )
 
