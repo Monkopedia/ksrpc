@@ -61,7 +61,7 @@ class RpcSubserviceTest :
                 stub.subservice("oh,").rpc("Hello" to "world")
             )
         },
-        workerServiceName = "WebWorkerTestService"
+        workerServiceName = "TestRootInterface"
     ) {
     @Test
     fun testCreateInfo() = runBlockingUnit {
@@ -83,7 +83,7 @@ class RpcSubserviceTwoCallsTest :
                 stub.subservice("oh,").rpc("Hello" to "world")
             )
         },
-        workerServiceName = "WebWorkerTestService"
+        workerServiceName = "TestRootInterface"
     )
 
 private var closeCompletion: CompletableDeferred<Unit>? = null
