@@ -42,8 +42,60 @@ public final class com/monkopedia/ksrpc/jsonrpc/JsonRpcCancellationConvention$No
 }
 
 public final class com/monkopedia/ksrpc/jsonrpc/JsonRpcChannelsKt {
-	public static final fun asJsonRpcConnection (Lkotlin/Pair;Lcom/monkopedia/ksrpc/KsrpcEnvironment;ZLcom/monkopedia/ksrpc/jsonrpc/JsonRpcCancellationConvention;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun asJsonRpcConnection$default (Lkotlin/Pair;Lcom/monkopedia/ksrpc/KsrpcEnvironment;ZLcom/monkopedia/ksrpc/jsonrpc/JsonRpcCancellationConvention;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun asJsonRpcConnection (Lkotlin/Pair;Lcom/monkopedia/ksrpc/KsrpcEnvironment;ZLcom/monkopedia/ksrpc/jsonrpc/JsonRpcCancellationConvention;Lcom/monkopedia/ksrpc/jsonrpc/JsonRpcContextConvention;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun asJsonRpcConnection$default (Lkotlin/Pair;Lcom/monkopedia/ksrpc/KsrpcEnvironment;ZLcom/monkopedia/ksrpc/jsonrpc/JsonRpcCancellationConvention;Lcom/monkopedia/ksrpc/jsonrpc/JsonRpcContextConvention;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public abstract interface class com/monkopedia/ksrpc/jsonrpc/JsonRpcContextConvention {
+	public static final field Companion Lcom/monkopedia/ksrpc/jsonrpc/JsonRpcContextConvention$Companion;
+}
+
+public final class com/monkopedia/ksrpc/jsonrpc/JsonRpcContextConvention$Companion {
+	public final fun getRESERVED_FIELDS ()Ljava/util/Set;
+	public final fun validate (Lcom/monkopedia/ksrpc/jsonrpc/JsonRpcContextConvention;Ljava/util/Collection;)V
+}
+
+public final class com/monkopedia/ksrpc/jsonrpc/JsonRpcContextConvention$InParams : com/monkopedia/ksrpc/jsonrpc/JsonRpcContextConvention {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/monkopedia/ksrpc/jsonrpc/JsonRpcContextConvention$InParams;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/jsonrpc/JsonRpcContextConvention$InParams;Ljava/lang/String;ILjava/lang/Object;)Lcom/monkopedia/ksrpc/jsonrpc/JsonRpcContextConvention$InParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getParamsKey ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/monkopedia/ksrpc/jsonrpc/JsonRpcContextConvention$None : com/monkopedia/ksrpc/jsonrpc/JsonRpcContextConvention {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/jsonrpc/JsonRpcContextConvention$None;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/monkopedia/ksrpc/jsonrpc/JsonRpcContextConvention$RootField : com/monkopedia/ksrpc/jsonrpc/JsonRpcContextConvention {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/monkopedia/ksrpc/jsonrpc/JsonRpcContextConvention$RootField;
+	public static synthetic fun copy$default (Lcom/monkopedia/ksrpc/jsonrpc/JsonRpcContextConvention$RootField;Ljava/lang/String;ILjava/lang/Object;)Lcom/monkopedia/ksrpc/jsonrpc/JsonRpcContextConvention$RootField;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEnvelopeKey ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/monkopedia/ksrpc/jsonrpc/JsonRpcContextConvention$RootSiblings : com/monkopedia/ksrpc/jsonrpc/JsonRpcContextConvention {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/jsonrpc/JsonRpcContextConvention$RootSiblings;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/monkopedia/ksrpc/jsonrpc/JsonRpcContextConvention$TransportNative : com/monkopedia/ksrpc/jsonrpc/JsonRpcContextConvention {
+	public static final field INSTANCE Lcom/monkopedia/ksrpc/jsonrpc/JsonRpcContextConvention$TransportNative;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public abstract interface class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcChannel : com/monkopedia/ksrpc/KsrpcEnvironment$Element, com/monkopedia/ksrpc/SuspendCloseable {
@@ -197,8 +249,9 @@ public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcTransformerKt {
 }
 
 public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcWriterBase : com/monkopedia/ksrpc/channels/CancellationSupport, com/monkopedia/ksrpc/channels/SingleChannelConnection, com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcChannel {
-	public fun <init> (Lkotlinx/coroutines/CoroutineScope;Lkotlin/coroutines/CoroutineContext;Lcom/monkopedia/ksrpc/KsrpcEnvironment;Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcTransformer;Lcom/monkopedia/ksrpc/jsonrpc/JsonRpcCancellationConvention;)V
-	public synthetic fun <init> (Lkotlinx/coroutines/CoroutineScope;Lkotlin/coroutines/CoroutineContext;Lcom/monkopedia/ksrpc/KsrpcEnvironment;Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcTransformer;Lcom/monkopedia/ksrpc/jsonrpc/JsonRpcCancellationConvention;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public static final field Companion Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcWriterBase$Companion;
+	public fun <init> (Lkotlinx/coroutines/CoroutineScope;Lkotlin/coroutines/CoroutineContext;Lcom/monkopedia/ksrpc/KsrpcEnvironment;Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcTransformer;Lcom/monkopedia/ksrpc/jsonrpc/JsonRpcCancellationConvention;Lcom/monkopedia/ksrpc/jsonrpc/JsonRpcContextConvention;)V
+	public synthetic fun <init> (Lkotlinx/coroutines/CoroutineScope;Lkotlin/coroutines/CoroutineContext;Lcom/monkopedia/ksrpc/KsrpcEnvironment;Lcom/monkopedia/ksrpc/jsonrpc/internal/JsonRpcTransformer;Lcom/monkopedia/ksrpc/jsonrpc/JsonRpcCancellationConvention;Lcom/monkopedia/ksrpc/jsonrpc/JsonRpcContextConvention;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun cancelHandler (Lcom/monkopedia/ksrpc/channels/RpcCallId;Ljava/util/concurrent/CancellationException;)V
 	public fun close (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun defaultChannel (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -208,5 +261,8 @@ public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcWriterBase : com
 	public fun registerHandler (Lcom/monkopedia/ksrpc/channels/RpcCallId;Lkotlinx/coroutines/Job;)V
 	public fun sendCancel (Lcom/monkopedia/ksrpc/channels/RpcCallId;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun unregisterHandler (Lcom/monkopedia/ksrpc/channels/RpcCallId;)V
+}
+
+public final class com/monkopedia/ksrpc/jsonrpc/internal/JsonRpcWriterBase$Companion {
 }
 

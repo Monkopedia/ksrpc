@@ -23,11 +23,14 @@ import com.monkopedia.ksrpc.channels.CancellationSupport
 import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.channels.SingleChannelConnection
+import com.monkopedia.ksrpc.channels.WireContextMap
 import com.monkopedia.ksrpc.channels.awaitRequestCancellable
 import com.monkopedia.ksrpc.internal.MultiChannel
 import com.monkopedia.ksrpc.jsonrpc.JsonRpcCallId
 import com.monkopedia.ksrpc.jsonrpc.JsonRpcCancellationConvention
+import com.monkopedia.ksrpc.jsonrpc.JsonRpcContextConvention
 import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -40,6 +43,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 
@@ -50,11 +54,21 @@ class JsonRpcWriterBase(
     override val env: KsrpcEnvironment<String>,
     private val comm: JsonRpcTransformer,
     private val cancellationConvention: JsonRpcCancellationConvention =
-        JsonRpcCancellationConvention.None
+        JsonRpcCancellationConvention.None,
+    private val contextConvention: JsonRpcContextConvention =
+        JsonRpcContextConvention.RootSiblings
 ) : JsonRpcChannel,
     SingleChannelConnection<String>,
     CancellationSupport {
     private val json = (env.serialization as? Json) ?: Json
+
+    companion object {
+        /**
+         * Synthetic key used when [InParams] wraps a non-object params value so the
+         * original can be recovered on the receiving side.
+         */
+        private const val IN_PARAMS_WRAPPED_VALUE_KEY = "__ksrpc_value"
+    }
 
     private var baseChannel = CompletableDeferred<JsonRpcChannel>()
     private val multiChannel = MultiChannel<JsonRpcResponse>()
@@ -67,11 +81,17 @@ class JsonRpcWriterBase(
                     while (comm.isOpen) {
                         val p = comm.receive() ?: continue
                         if ((p as? JsonObject)?.containsKey("method") == true) {
-                            val request = json.decodeFromJsonElement<JsonRpcRequest>(p)
+                            val wireCtx = extractContext(p)
+                            val cleaned = stripContext(p)
+                            val request = json.decodeFromJsonElement<JsonRpcRequest>(cleaned)
                             if (isCancellationNotification(request)) {
                                 handleCancellationNotification(request)
                             } else {
-                                launchRequestHandler(baseChannel.await(), request)
+                                launchRequestHandler(
+                                    baseChannel.await(),
+                                    request,
+                                    wireCtx
+                                )
                             }
                         } else {
                             val response = json.decodeFromJsonElement<JsonRpcResponse>(p)
@@ -101,8 +121,13 @@ class JsonRpcWriterBase(
         cancelHandler(JsonRpcCallId(id))
     }
 
-    private fun launchRequestHandler(channel: JsonRpcChannel, message: JsonRpcRequest) {
-        scope.launch(context) {
+    private fun launchRequestHandler(
+        channel: JsonRpcChannel,
+        message: JsonRpcRequest,
+        wireCtx: WireContextMap?
+    ) {
+        val handlerContext = if (wireCtx != null) context + wireCtx else context
+        scope.launch(handlerContext) {
             val id = message.id
             val callId = id?.let { JsonRpcCallId(it) }
             if (callId != null) {
@@ -184,7 +209,9 @@ class JsonRpcWriterBase(
             params = message,
             id = JsonPrimitive(wireId)
         )
-        comm.send(json.encodeToJsonElement(request))
+        val wireCtx = coroutineContext[WireContextMap]
+        val requestJson = injectContext(json.encodeToJsonElement(request), wireCtx, message)
+        comm.send(requestJson)
         if (pending == null || wireId == null) return null
         val callId = JsonRpcCallId(JsonPrimitive(wireId))
         val response = try {
@@ -211,6 +238,162 @@ class JsonRpcWriterBase(
         }
         return response.result
     }
+
+    // region Context Convention Helpers
+
+    /**
+     * Injects [WireContextMap] entries into an outbound JSON-RPC request element
+     * according to the configured [contextConvention].
+     */
+    private fun injectContext(
+        requestJson: JsonElement,
+        wireCtx: WireContextMap?,
+        originalParams: JsonElement?
+    ): JsonElement {
+        if (wireCtx == null || wireCtx.values.isEmpty()) return requestJson
+        if (contextConvention is JsonRpcContextConvention.None ||
+            contextConvention is JsonRpcContextConvention.TransportNative
+        ) {
+            return requestJson
+        }
+        val obj = requestJson as? JsonObject ?: return requestJson
+        val ctxObj = buildJsonObject {
+            wireCtx.values.forEach { (k, v) -> put(k, JsonPrimitive(v)) }
+        }
+        return when (contextConvention) {
+            is JsonRpcContextConvention.RootSiblings -> buildJsonObject {
+                obj.forEach { (k, v) -> put(k, v) }
+                wireCtx.values.forEach { (k, v) -> put(k, JsonPrimitive(v)) }
+            }
+
+            is JsonRpcContextConvention.RootField -> buildJsonObject {
+                obj.forEach { (k, v) -> put(k, v) }
+                put(contextConvention.envelopeKey, ctxObj)
+            }
+
+            is JsonRpcContextConvention.InParams -> {
+                val params = obj["params"]
+                val newParams = if (params is JsonObject) {
+                    buildJsonObject {
+                        params.forEach { (k, v) -> put(k, v) }
+                        put(contextConvention.paramsKey, ctxObj)
+                    }
+                } else {
+                    // params is not an object — wrap both value and context so we
+                    // can recover the original on the receiving side.
+                    buildJsonObject {
+                        put(
+                            IN_PARAMS_WRAPPED_VALUE_KEY,
+                            params ?: kotlinx.serialization.json.JsonNull
+                        )
+                        put(contextConvention.paramsKey, ctxObj)
+                    }
+                }
+                buildJsonObject {
+                    obj.forEach { (k, v) ->
+                        if (k == "params") put(k, newParams) else put(k, v)
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Extracts [WireContextMap] from an inbound JSON-RPC request element
+     * according to the configured [contextConvention]. Returns null if no
+     * context entries are found or if the convention is [None]/[TransportNative].
+     */
+    private fun extractContext(obj: JsonObject): WireContextMap? {
+        if (contextConvention is JsonRpcContextConvention.None ||
+            contextConvention is JsonRpcContextConvention.TransportNative
+        ) {
+            return null
+        }
+        val map = mutableMapOf<String, String>()
+        when (contextConvention) {
+            is JsonRpcContextConvention.RootSiblings -> {
+                // All keys not in the standard JSON-RPC set are context entries
+                obj.forEach { (k, v) ->
+                    if (k !in JsonRpcContextConvention.RESERVED_FIELDS) {
+                        (v as? JsonPrimitive)?.contentOrNull?.let { map[k] = it }
+                    }
+                }
+            }
+
+            is JsonRpcContextConvention.RootField -> {
+                val ctxObj = obj[contextConvention.envelopeKey] as? JsonObject ?: return null
+                ctxObj.forEach { (k, v) ->
+                    (v as? JsonPrimitive)?.contentOrNull?.let { map[k] = it }
+                }
+            }
+
+            is JsonRpcContextConvention.InParams -> {
+                val params = obj["params"] as? JsonObject ?: return null
+                val ctxObj = params[contextConvention.paramsKey] as? JsonObject ?: return null
+                ctxObj.forEach { (k, v) ->
+                    (v as? JsonPrimitive)?.contentOrNull?.let { map[k] = it }
+                }
+            }
+        }
+        return if (map.isNotEmpty()) WireContextMap(map) else null
+    }
+
+    /**
+     * Strips injected context entries from the raw JSON-RPC object so the
+     * deserialized [JsonRpcRequest] sees only standard fields.
+     */
+    private fun stripContext(obj: JsonObject): JsonElement = when (contextConvention) {
+        is JsonRpcContextConvention.RootSiblings -> {
+            // Remove any non-standard keys that were context entries
+            buildJsonObject {
+                obj.forEach { (k, v) ->
+                    if (k in JsonRpcContextConvention.RESERVED_FIELDS) put(k, v)
+                }
+            }
+        }
+
+        is JsonRpcContextConvention.RootField -> {
+            buildJsonObject {
+                obj.forEach { (k, v) ->
+                    if (k != contextConvention.envelopeKey) put(k, v)
+                }
+            }
+        }
+
+        is JsonRpcContextConvention.InParams -> {
+            val params = obj["params"] as? JsonObject
+            if (params != null) {
+                // Check if this was a wrapped non-object params
+                val wrappedValue = params[IN_PARAMS_WRAPPED_VALUE_KEY]
+                if (wrappedValue != null) {
+                    // Unwrap: restore the original non-object params value
+                    buildJsonObject {
+                        obj.forEach { (k, v) ->
+                            if (k == "params") put(k, wrappedValue) else put(k, v)
+                        }
+                    }
+                } else {
+                    // Normal object params: strip the context key
+                    val cleanParams = buildJsonObject {
+                        params.forEach { (k, v) ->
+                            if (k != contextConvention.paramsKey) put(k, v)
+                        }
+                    }
+                    buildJsonObject {
+                        obj.forEach { (k, v) ->
+                            if (k == "params") put(k, cleanParams) else put(k, v)
+                        }
+                    }
+                }
+            } else {
+                obj
+            }
+        }
+
+        else -> obj
+    }
+
+    // endregion
 
     override suspend fun close() {
         try {

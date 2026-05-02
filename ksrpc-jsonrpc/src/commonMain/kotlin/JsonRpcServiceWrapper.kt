@@ -71,8 +71,5 @@ class JsonRpcServiceWrapper(private val channel: SerializedService<String>) :
  * encodes it as the `error` field of a [JsonRpcResponse]. Not exposed to user code.
  */
 @KsrpcInternal
-class JsonRpcServerError(
-    val errorCode: Int,
-    override val message: String,
-    val data: JsonElement?
-) : RuntimeException(message)
+class JsonRpcServerError(val errorCode: Int, override val message: String, val data: JsonElement?) :
+    RuntimeException(message)

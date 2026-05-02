@@ -28,6 +28,7 @@ import com.monkopedia.ksrpc.channels.ChannelId
 import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedChannel
 import com.monkopedia.ksrpc.channels.SerializedService
+import com.monkopedia.ksrpc.channels.WireContextMap
 import com.monkopedia.ksrpc.internal.ClientChannelContext
 import com.monkopedia.ksrpc.internal.SubserviceChannel
 import com.monkopedia.ksrpc.ktor.DEFAULT_KSRPC_ERROR_CODE_TO_HTTP_STATUS
@@ -43,6 +44,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.encodeURLPath
 import io.ktor.utils.io.ByteReadChannel
 import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.coroutineContext
 
 private const val KSRPC_BINARY = "binary"
 private const val KSRPC_CHANNEL = "channel"
@@ -69,12 +71,16 @@ internal class HttpSerializedChannel(
         data: CallData<String>,
         callId: RpcCallId?
     ): CallData<String> {
+        val wireCtx = coroutineContext[WireContextMap]
         val response = httpClient.post(
             "$baseStripped/call/${endpoint.encodeURLPath()}"
         ) {
             accept(ContentType.Application.Json)
             headers[KSRPC_BINARY] = data.isBinary.toString()
             headers[KSRPC_CHANNEL] = channelId.id
+            wireCtx?.values?.forEach { (key, value) ->
+                headers[key] = value
+            }
             setBody(
                 if (data.isBinary) data.readBinary().asByteReadChannel() else data.readSerialized()
             )
