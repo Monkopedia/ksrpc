@@ -88,7 +88,7 @@ sealed interface JsonRpcContextConvention {
          * JSON-RPC field.
          */
         fun validate(convention: JsonRpcContextConvention, wireKeys: Collection<String>) {
-            if (convention !is RootSiblings) return
+            if (convention != RootSiblings) return
             val collisions = wireKeys.filter { it in RESERVED_FIELDS }
             require(collisions.isEmpty()) {
                 "JsonRpcContextConvention.RootSiblings: wireKey(s) $collisions collide " +
