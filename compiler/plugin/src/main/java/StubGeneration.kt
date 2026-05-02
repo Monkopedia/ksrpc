@@ -532,21 +532,17 @@ class StubGeneration(
 
         RpcType.FLOW -> buildFlowSubserviceTransformer(outputType, declarationIrBuilder)
 
-        RpcType.SERVICE -> declarationIrBuilder.irCallConstructor(
-            env.subserviceTransformer.constructors.first(),
-            listOf(outputType)
-        ).apply {
-            type = env.subserviceTransformer.typeWith(outputType)
-            putArgs(buildNonGenericSubserviceRpcObject(outputType, declarationIrBuilder))
-        }
+        RpcType.SERVICE -> declarationIrBuilder.irConstructOf(
+            env.subserviceTransformer,
+            listOf(outputType),
+            buildNonGenericSubserviceRpcObject(outputType, declarationIrBuilder)
+        )
 
-        else -> declarationIrBuilder.irCallConstructor(
-            env.serializerTransformer.constructors.first(),
-            listOf(outputType)
-        ).apply {
-            type = env.serializerTransformer.typeWith(outputType)
-            putArgs(getSerializer(declarationIrBuilder, outputType))
-        }
+        else -> declarationIrBuilder.irConstructOf(
+            env.serializerTransformer,
+            listOf(outputType),
+            getSerializer(declarationIrBuilder, outputType)
+        )
     }
 
     /**
@@ -585,13 +581,11 @@ class StubGeneration(
             ksFlowServiceSymbol,
             elementType
         )
-        return declarationIrBuilder.irCallConstructor(
-            flowTransformerSymbol.constructors.first(),
-            listOf(elementType)
-        ).apply {
-            type = flowTransformerSymbol.typeWith(elementType)
-            putArgs(rpcObjectExpr)
-        }
+        return declarationIrBuilder.irConstructOf(
+            flowTransformerSymbol,
+            listOf(elementType),
+            rpcObjectExpr
+        )
     }
 
     /**

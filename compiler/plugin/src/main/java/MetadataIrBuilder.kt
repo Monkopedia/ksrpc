@@ -21,11 +21,9 @@ import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.ir.builders.irBoolean
 import org.jetbrains.kotlin.ir.builders.irCall
-import org.jetbrains.kotlin.ir.builders.irCallConstructor
 import org.jetbrains.kotlin.ir.builders.irInt
 import org.jetbrains.kotlin.ir.builders.irLong
 import org.jetbrains.kotlin.ir.builders.irString
-import org.jetbrains.kotlin.ir.builders.irVararg
 import org.jetbrains.kotlin.ir.declarations.IrParameterKind
 import org.jetbrains.kotlin.ir.expressions.IrClassReference
 import org.jetbrains.kotlin.ir.expressions.IrConst
@@ -74,10 +72,8 @@ class MetadataIrBuilder(
     private val metadataValueType = metadataValue.starProjectedType
     private val pairType = pair.typeWith(stringType, metadataValueType)
 
-    fun buildMetadataList(metadataAnnotations: List<IrConstructorCall>): IrExpression = buildListOf(
-        methodMetadata.starProjectedType,
-        metadataAnnotations.map { buildMetadata(it) }
-    )
+    fun buildMetadataList(metadataAnnotations: List<IrConstructorCall>): IrExpression =
+        builder.irBuildListOf(env, methodMetadata.starProjectedType, metadataAnnotations.map { buildMetadata(it) })
 
     private fun buildMetadata(annotation: IrConstructorCall): IrExpression {
         val annotationFqName = annotation.type.classFqName?.asString()
@@ -110,20 +106,15 @@ class MetadataIrBuilder(
             pairs.add(buildPair(name, value))
         }
 
-        return builder.irCallConstructor(
-            methodMetadata.constructors.first(),
-            emptyList()
-        ).apply {
-            type = methodMetadata.starProjectedType
-            putArgs(
-                builder.irString(annotationFqName),
-                buildPairsList(pairs)
-            )
-        }
+        return builder.irConstructOf(
+            methodMetadata,
+            builder.irString(annotationFqName),
+            buildPairsList(pairs)
+        )
     }
 
     private fun buildPairsList(pairs: List<IrExpression>): IrExpression =
-        buildListOf(pairType, pairs)
+        builder.irBuildListOf(env, pairType, pairs)
 
     private fun buildPair(name: String, value: IrExpression): IrExpression =
         builder.irCall(toFunction).apply {
@@ -179,23 +170,12 @@ class MetadataIrBuilder(
                 val itemExpr = element as? IrExpression ?: return@mapNotNull null
                 buildMetadataValue(itemExpr)
             }
-            ctor(env.metadataValueList!!, buildListOf(metadataValueType, items))
+            ctor(env.metadataValueList!!, builder.irBuildListOf(env, metadataValueType, items))
         }
 
         else -> null
     }
 
-    private fun buildListOf(elementType: IrType, items: List<IrExpression>): IrExpression =
-        builder.irCall(env.listOfFunction).apply {
-            typeArguments[0] = elementType
-            val varargParameter = env.listOfFunction.owner.parameters
-                .single { it.kind == IrParameterKind.Regular }
-            arguments[varargParameter] = builder.irVararg(elementType, items)
-        }
-
     private fun ctor(symbol: IrClassSymbol, vararg args: IrExpression): IrExpression =
-        builder.irCallConstructor(symbol.constructors.first(), emptyList()).apply {
-            type = symbol.starProjectedType
-            putArgs(*args)
-        }
+        builder.irConstructOf(symbol, *args)
 }

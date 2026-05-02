@@ -354,12 +354,10 @@ internal class GenericMethodIrBuilder(
                 )
                 // Fall back to `Unit` serializer transformer so codegen doesn't crash
                 // after reporting the diagnostic.
-                return builder.irCallConstructor(
-                    env.serializerTransformer.constructors.first(),
+                return builder.irConstructOf(
+                    env.serializerTransformer,
                     listOf(context.irBuiltIns.unitType)
-                ).apply {
-                    this.type = env.serializerTransformer.typeWith(context.irBuiltIns.unitType)
-                }
+                )
             }
             return builder.irGetObject(transformer)
         }
@@ -388,21 +386,17 @@ internal class GenericMethodIrBuilder(
                 serializerFields,
                 method
             )
-            return builder.irCallConstructor(
-                env.subserviceTransformer.constructors.first(),
-                listOf(type)
-            ).apply {
-                this.type = env.subserviceTransformer.typeWith(type)
-                putArgs(rpcObjectExpr)
-            }
+            return builder.irConstructOf(
+                env.subserviceTransformer,
+                listOf(type),
+                rpcObjectExpr
+            )
         }
-        return builder.irCallConstructor(
-            env.serializerTransformer.constructors.first(),
-            listOf(type)
-        ).apply {
-            this.type = env.serializerTransformer.typeWith(type)
-            putArgs(buildSerializer(builder, type, serializerReceiver, serializerFields, method))
-        }
+        return builder.irConstructOf(
+            env.serializerTransformer,
+            listOf(type),
+            buildSerializer(builder, type, serializerReceiver, serializerFields, method)
+        )
     }
 
     /** True iff [this] has `com.monkopedia.ksrpc.RpcService` anywhere in its supertype chain. */
@@ -774,12 +768,10 @@ internal class GenericMethodIrBuilder(
                 buildSerializer(builder, elementType, serializerReceiver, serializerFields, method)
             )
         }
-        return builder.irCallConstructor(
-            flowTransformerSymbol.constructors.first(),
-            listOf(elementType)
-        ).apply {
-            this.type = flowTransformerSymbol.typeWith(elementType)
-            putArgs(rpcObjectExpr)
-        }
+        return builder.irConstructOf(
+            flowTransformerSymbol,
+            listOf(elementType),
+            rpcObjectExpr
+        )
     }
 }

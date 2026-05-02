@@ -30,6 +30,7 @@ import org.jetbrains.kotlin.ir.builders.declarations.buildClass
 import org.jetbrains.kotlin.ir.builders.declarations.buildField
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irCall
+import org.jetbrains.kotlin.ir.builders.irCallConstructor
 import org.jetbrains.kotlin.ir.builders.irConcat
 import org.jetbrains.kotlin.ir.builders.irDelegatingConstructorCall
 import org.jetbrains.kotlin.ir.builders.irGet
@@ -44,6 +45,7 @@ import org.jetbrains.kotlin.ir.declarations.IrParameterKind
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.declarations.IrSymbolOwner
 import org.jetbrains.kotlin.ir.expressions.IrClassReference
+import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrMemberAccessExpression
 import org.jetbrains.kotlin.ir.expressions.impl.IrClassReferenceImpl
@@ -51,6 +53,7 @@ import org.jetbrains.kotlin.ir.expressions.impl.IrStringConcatenationImpl
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
+import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.defaultType
 import org.jetbrains.kotlin.ir.types.starProjectedType
 import org.jetbrains.kotlin.ir.types.typeWith
@@ -273,4 +276,73 @@ internal fun IrBuilderWithScope.irListOfStrings(
         context.irBuiltIns.stringType,
         values.map { irString(it) }
     )
+}
+
+// ---------------------------------------------------------------------------
+// IR builder DSL helpers (issue #66)
+// ---------------------------------------------------------------------------
+
+/**
+ * Construct an instance of [classSymbol] with no type arguments, setting [IrConstructorCall.type]
+ * to the class's star-projected type and passing [args] as positional value arguments.
+ *
+ * Covers the very common pattern:
+ * ```
+ * irCallConstructor(cls.constructors.first(), emptyList()).apply {
+ *     type = cls.starProjectedType
+ *     putArgs(a, b, c)
+ * }
+ * ```
+ */
+internal fun IrBuilderWithScope.irConstructOf(
+    classSymbol: IrClassSymbol,
+    vararg args: IrExpression
+): IrConstructorCall = irCallConstructor(
+    classSymbol.constructors.first(),
+    emptyList()
+).apply {
+    type = classSymbol.starProjectedType
+    putArgs(*args)
+}
+
+/**
+ * Construct an instance of [classSymbol] with the given [typeArguments], setting
+ * [IrConstructorCall.type] to `classSymbol.typeWith(typeArguments)` and passing [args]
+ * as positional value arguments.
+ *
+ * Covers the pattern:
+ * ```
+ * irCallConstructor(cls.constructors.first(), typeArgs).apply {
+ *     type = cls.typeWith(typeArgs)
+ *     putArgs(a, b, c)
+ * }
+ * ```
+ */
+internal fun IrBuilderWithScope.irConstructOf(
+    classSymbol: IrClassSymbol,
+    typeArguments: List<IrType>,
+    vararg args: IrExpression
+): IrConstructorCall = irCallConstructor(
+    classSymbol.constructors.first(),
+    typeArguments
+).apply {
+    type = classSymbol.typeWith(typeArguments)
+    putArgs(*args)
+}
+
+/**
+ * Emit a `listOf<E>(items...)` IR expression via the vararg overload of
+ * `kotlin.collections.listOf`. Shared by [ErrorMappingIrBuilder],
+ * [ContextBindingIrBuilder], and [MetadataIrBuilder] which all need to
+ * materialize `List<X>` at runtime.
+ */
+internal fun IrBuilderWithScope.irBuildListOf(
+    env: KsrpcGenerationEnvironment,
+    elementType: IrType,
+    items: List<IrExpression>
+): IrExpression = irCall(env.listOfFunction).apply {
+    typeArguments[0] = elementType
+    val varargParameter = env.listOfFunction.owner.parameters
+        .single { it.kind == IrParameterKind.Regular }
+    arguments[varargParameter] = irVararg(elementType, items)
 }
