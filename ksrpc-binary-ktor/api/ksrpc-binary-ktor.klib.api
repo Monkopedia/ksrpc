@@ -13,6 +13,7 @@ final class com.monkopedia.ksrpc.binary.ktor/ByteReadChannelBinaryData : com.mon
         final fun <get-size>(): kotlin/Long? // com.monkopedia.ksrpc.binary.ktor/ByteReadChannelBinaryData.size.<get-size>|<get-size>(){}[0]
 
     final suspend fun close() // com.monkopedia.ksrpc.binary.ktor/ByteReadChannelBinaryData.close|close(){}[0]
+    final suspend fun toByteArray(): kotlin/ByteArray // com.monkopedia.ksrpc.binary.ktor/ByteReadChannelBinaryData.toByteArray|toByteArray(){}[0]
     final suspend fun transferTo(kotlin.coroutines/SuspendFunction3<kotlin/ByteArray, kotlin/Int, kotlin/Int, kotlin/Unit>) // com.monkopedia.ksrpc.binary.ktor/ByteReadChannelBinaryData.transferTo|transferTo(kotlin.coroutines.SuspendFunction3<kotlin.ByteArray,kotlin.Int,kotlin.Int,kotlin.Unit>){}[0]
 }
 

@@ -21,6 +21,7 @@ import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.close
 import io.ktor.utils.io.core.readBytes
 import io.ktor.utils.io.readRemaining
+import io.ktor.utils.io.toByteArray
 import io.ktor.utils.io.writeFully
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -46,6 +47,8 @@ class ByteReadChannelBinaryData(
             }
         }
     }
+
+    override suspend fun toByteArray(): ByteArray = channel.toByteArray()
 
     override suspend fun close() {
         channel.cancel(null)

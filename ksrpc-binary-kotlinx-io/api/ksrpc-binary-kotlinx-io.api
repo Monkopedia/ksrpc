@@ -3,6 +3,7 @@ public final class com/monkopedia/ksrpc/binary/kxio/SourceBinaryData : com/monko
 	public synthetic fun <init> (Lkotlinx/io/Source;Ljava/lang/Long;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun close (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun getSize ()Ljava/lang/Long;
+	public fun toByteArray (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun transferTo (Lkotlin/jvm/functions/Function4;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
