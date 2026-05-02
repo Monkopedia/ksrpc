@@ -333,6 +333,15 @@ public abstract interface class com/monkopedia/ksrpc/UnhandledMethodHandler {
 	public abstract fun onUnhandled (Ljava/lang/String;Lcom/monkopedia/ksrpc/channels/CallData;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
+public final class com/monkopedia/ksrpc/channels/ByteArrayBinaryData : com/monkopedia/ksrpc/channels/RpcBinaryData {
+	public fun <init> ([BII)V
+	public synthetic fun <init> ([BIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun close (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getSize ()Ljava/lang/Long;
+	public fun toByteArray (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun transferTo (Lkotlin/jvm/functions/Function4;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
 public abstract class com/monkopedia/ksrpc/channels/CallData {
 	public static final field Companion Lcom/monkopedia/ksrpc/channels/CallData$Companion;
 	public fun getErrorCode ()Ljava/lang/Integer;
@@ -481,11 +490,13 @@ public final class com/monkopedia/ksrpc/channels/CurrentRpcCallElementKt {
 
 public abstract interface class com/monkopedia/ksrpc/channels/RpcBinaryData : com/monkopedia/ksrpc/SuspendCloseable {
 	public fun getSize ()Ljava/lang/Long;
+	public fun toByteArray (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun transferTo (Lkotlin/jvm/functions/Function4;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class com/monkopedia/ksrpc/channels/RpcBinaryData$DefaultImpls {
 	public static fun getSize (Lcom/monkopedia/ksrpc/channels/RpcBinaryData;)Ljava/lang/Long;
+	public static fun toByteArray (Lcom/monkopedia/ksrpc/channels/RpcBinaryData;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public abstract interface class com/monkopedia/ksrpc/channels/RpcCallId {

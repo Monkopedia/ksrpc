@@ -37,4 +37,60 @@ interface RpcBinaryData : SuspendCloseable {
      * the duration of the call.
      */
     suspend fun transferTo(sink: suspend (bytes: ByteArray, offset: Int, length: Int) -> Unit)
+
+    /**
+     * Drain this source into a single [ByteArray]. Default implementation
+     * accumulates [transferTo] chunks; subclasses that already hold the data
+     * in memory should override this to return it directly.
+     */
+    suspend fun toByteArray(): ByteArray {
+        val knownSize = size
+        if (knownSize != null && knownSize <= Int.MAX_VALUE) {
+            val out = ByteArray(knownSize.toInt())
+            var pos = 0
+            transferTo { bytes, offset, length ->
+                bytes.copyInto(out, pos, offset, offset + length)
+                pos += length
+            }
+            return out
+        }
+        val chunks = mutableListOf<ByteArray>()
+        var total = 0
+        transferTo { bytes, offset, length ->
+            chunks.add(bytes.copyOfRange(offset, offset + length))
+            total += length
+        }
+        val out = ByteArray(total)
+        var pos = 0
+        for (chunk in chunks) {
+            chunk.copyInto(out, pos)
+            pos += chunk.size
+        }
+        return out
+    }
+}
+
+/**
+ * [RpcBinaryData] backed by an in-memory [ByteArray]. Avoids all streaming
+ * and coroutine overhead — [transferTo] delivers the entire buffer in a single
+ * callback, and [toByteArray] returns the array directly.
+ */
+class ByteArrayBinaryData(
+    private val data: ByteArray,
+    private val offset: Int = 0,
+    private val length: Int = data.size - offset
+) : RpcBinaryData {
+    override val size: Long get() = length.toLong()
+
+    override suspend fun transferTo(
+        sink: suspend (bytes: ByteArray, offset: Int, length: Int) -> Unit
+    ) {
+        if (length > 0) sink(data, offset, length)
+    }
+
+    override suspend fun toByteArray(): ByteArray =
+        if (offset == 0 && length == data.size) data
+        else data.copyOfRange(offset, offset + length)
+
+    override suspend fun close() {} // nothing to release
 }

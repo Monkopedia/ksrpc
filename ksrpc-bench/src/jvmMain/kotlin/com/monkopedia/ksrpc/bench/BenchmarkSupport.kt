@@ -16,13 +16,10 @@
 package com.monkopedia.ksrpc.bench
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
-import com.monkopedia.ksrpc.binary.ktor.asByteReadChannel
-import com.monkopedia.ksrpc.binary.ktor.asRpcBinaryData
+import com.monkopedia.ksrpc.channels.ByteArrayBinaryData
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedService
-import io.ktor.utils.io.ByteReadChannel
-import io.ktor.utils.io.toByteArray
 import java.net.InetSocketAddress
 import java.net.Socket
 import java.util.concurrent.ExecutionException
@@ -77,9 +74,9 @@ internal suspend fun callBinaryEcho(
     service: SerializedService<String>,
     payload: ByteArray
 ): ByteArray {
-    val input = CallData.createBinary<String>(ByteReadChannel(payload).asRpcBinaryData())
+    val input = CallData.createBinary<String>(ByteArrayBinaryData(payload))
     val output = service.call("binaryEcho", input, callId = null)
-    return output.readBinary().asByteReadChannel().toByteArray()
+    return output.readBinary().toByteArray()
 }
 
 internal fun createComplexPayload(payloadSize: Int): ComplexEchoPayload {

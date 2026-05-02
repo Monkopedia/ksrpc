@@ -236,7 +236,10 @@ abstract class PacketChannelBase<T>(
                     var cursor = offset
                     while (remaining > 0) {
                         val take = if (remaining > packetMax) packetMax else remaining
-                        val packet = bytes.copyOfRange(cursor, cursor + take)
+                        // Avoid a copy when the chunk is already exactly the right
+                        // slice — common for small payloads that fit in one packet.
+                        val packet = if (cursor == 0 && take == bytes.size) bytes
+                            else bytes.copyOfRange(cursor, cursor + take)
                         send(
                             Packet(
                                 input = input,
@@ -555,6 +558,30 @@ abstract class PacketChannelBase<T>(
             } catch (_: ClosedReceiveChannelException) {
                 // Normal end-of-stream.
             }
+        }
+
+        override suspend fun toByteArray(): ByteArray {
+            val collected = mutableListOf<ByteArray>()
+            var total = 0
+            try {
+                while (true) {
+                    val chunk = chunks.receive()
+                    if (chunk.isNotEmpty()) {
+                        collected.add(chunk)
+                        total += chunk.size
+                    }
+                }
+            } catch (_: ClosedReceiveChannelException) {
+                // Normal end-of-stream.
+            }
+            if (collected.size == 1) return collected[0]
+            val out = ByteArray(total)
+            var pos = 0
+            for (chunk in collected) {
+                chunk.copyInto(out, pos)
+                pos += chunk.size
+            }
+            return out
         }
 
         override suspend fun close() {

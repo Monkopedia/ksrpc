@@ -28,4 +28,10 @@ import kotlinx.serialization.json.Json
  * method inputs/outputs, but the packet envelope itself is ksrpc's wire concern.
  */
 @KsrpcInternal
-val PACKET_JSON: Json = Json { ignoreUnknownKeys = true }
+val PACKET_JSON: Json = Json {
+    ignoreUnknownKeys = true
+    // Packet has nullable optional fields (ec, em, cx) that default to null.
+    // Explicitly skip them during encoding to avoid wire bloat and reduce
+    // serialization overhead — this is the default but stated for clarity.
+    encodeDefaults = false
+}

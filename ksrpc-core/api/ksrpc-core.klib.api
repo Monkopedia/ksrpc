@@ -118,6 +118,7 @@ abstract interface com.monkopedia.ksrpc.channels/RpcBinaryData : com.monkopedia.
         open fun <get-size>(): kotlin/Long? // com.monkopedia.ksrpc.channels/RpcBinaryData.size.<get-size>|<get-size>(){}[0]
 
     abstract suspend fun transferTo(kotlin.coroutines/SuspendFunction3<kotlin/ByteArray, kotlin/Int, kotlin/Int, kotlin/Unit>) // com.monkopedia.ksrpc.channels/RpcBinaryData.transferTo|transferTo(kotlin.coroutines.SuspendFunction3<kotlin.ByteArray,kotlin.Int,kotlin.Int,kotlin.Unit>){}[0]
+    open suspend fun toByteArray(): kotlin/ByteArray // com.monkopedia.ksrpc.channels/RpcBinaryData.toByteArray|toByteArray(){}[0]
 }
 
 abstract interface com.monkopedia.ksrpc.channels/RpcCallId // com.monkopedia.ksrpc.channels/RpcCallId|null[0]
@@ -282,6 +283,17 @@ final class <#A: kotlin/Any?> com.monkopedia.ksrpc/SerializerTransformer : com.m
 
     final suspend fun <#A1: kotlin/Any?> transform(#A, com.monkopedia.ksrpc.channels/SerializedService<#A1>): com.monkopedia.ksrpc.channels/CallData<#A1> // com.monkopedia.ksrpc/SerializerTransformer.transform|transform(1:0;com.monkopedia.ksrpc.channels.SerializedService<0:0>){0§<kotlin.Any?>}[0]
     final suspend fun <#A1: kotlin/Any?> untransform(com.monkopedia.ksrpc.channels/CallData<#A1>, com.monkopedia.ksrpc.channels/SerializedService<#A1>): #A // com.monkopedia.ksrpc/SerializerTransformer.untransform|untransform(com.monkopedia.ksrpc.channels.CallData<0:0>;com.monkopedia.ksrpc.channels.SerializedService<0:0>){0§<kotlin.Any?>}[0]
+}
+
+final class com.monkopedia.ksrpc.channels/ByteArrayBinaryData : com.monkopedia.ksrpc.channels/RpcBinaryData { // com.monkopedia.ksrpc.channels/ByteArrayBinaryData|null[0]
+    constructor <init>(kotlin/ByteArray, kotlin/Int = ..., kotlin/Int = ...) // com.monkopedia.ksrpc.channels/ByteArrayBinaryData.<init>|<init>(kotlin.ByteArray;kotlin.Int;kotlin.Int){}[0]
+
+    final val size // com.monkopedia.ksrpc.channels/ByteArrayBinaryData.size|{}size[0]
+        final fun <get-size>(): kotlin/Long // com.monkopedia.ksrpc.channels/ByteArrayBinaryData.size.<get-size>|<get-size>(){}[0]
+
+    final suspend fun close() // com.monkopedia.ksrpc.channels/ByteArrayBinaryData.close|close(){}[0]
+    final suspend fun toByteArray(): kotlin/ByteArray // com.monkopedia.ksrpc.channels/ByteArrayBinaryData.toByteArray|toByteArray(){}[0]
+    final suspend fun transferTo(kotlin.coroutines/SuspendFunction3<kotlin/ByteArray, kotlin/Int, kotlin/Int, kotlin/Unit>) // com.monkopedia.ksrpc.channels/ByteArrayBinaryData.transferTo|transferTo(kotlin.coroutines.SuspendFunction3<kotlin.ByteArray,kotlin.Int,kotlin.Int,kotlin.Unit>){}[0]
 }
 
 final class com.monkopedia.ksrpc.channels/ChannelId { // com.monkopedia.ksrpc.channels/ChannelId|null[0]
