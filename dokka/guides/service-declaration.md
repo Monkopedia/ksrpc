@@ -6,9 +6,9 @@
 
 Every ksrpc service is a Kotlin interface that:
 
-1. Extends [RpcService]
-2. Is annotated with `@KsService`
-3. Has methods annotated with `@KsMethod` with a unique name within the service
+1. Extends [`RpcService`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html)
+2. Is annotated with [`@KsService`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-ks-service/index.html)
+3. Has methods annotated with [`@KsMethod`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-ks-method/index.html) with a unique name within the service
 
 ```kotlin
 @KsService
@@ -18,7 +18,7 @@ interface MyService : RpcService {
 }
 ```
 
-The compiler plugin generates a companion [RpcObject] that provides stub creation and serialization adapters. Any method on the interface that is not annotated with `@KsMethod` will produce a compiler warning.
+The compiler plugin generates a companion [`RpcObject`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc/-rpc-object/index.html) that provides stub creation and serialization adapters. Any method on the interface that is not annotated with `@KsMethod` will produce a compiler warning.
 
 The `@KsMethod` name is the wire-level identifier. It must be unique within a single service but does not need to be globally unique. Choose stable names -- renaming breaks wire compatibility.
 
@@ -144,11 +144,11 @@ interface CatalogService : RpcService {
 }
 ```
 
-Sub-services as outputs require a transport that supports `ChannelHost` (HTTP server, `Connection`). Sub-services as inputs require `ChannelClient` (a `Connection`). See the [bidirectional guide](bidirectional.md) for details on callback patterns.
+Sub-services as outputs require a transport that supports [`ChannelHost`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-channel-host/index.html) (HTTP server, [`Connection`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html)). Sub-services as inputs require [`ChannelClient`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-channel-client/index.html) (a `Connection`). See the [bidirectional guide](bidirectional.md) for details on callback patterns.
 
 ## Notifications
 
-Use `@KsNotification` to mark a method as fire-and-forget on transports that support notification semantics (JSON-RPC):
+Use [`@KsNotification`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-ks-notification/index.html) to mark a method as fire-and-forget on transports that support notification semantics (JSON-RPC):
 
 ```kotlin
 @KsService
@@ -163,7 +163,7 @@ The method must return `Unit`. On transports without notification support (HTTP,
 
 ## Timeouts
 
-Use `@KsTimeout` to specify a client-side timeout for a method call:
+Use [`@KsTimeout`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-ks-timeout/index.html) to specify a client-side timeout for a method call:
 
 ```kotlin
 @KsService
@@ -200,12 +200,12 @@ val serialized = myImpl.serialized(env)
 val stub = channel.toStub<MyService>()
 ```
 
-See [RpcObject] in the API docs for the full generated companion API.
+See [`RpcObject`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc/-rpc-object/index.html) in the API docs for the full generated companion API.
 
 ## Related guides
 
-- [Error Handling](error-handling.md) -- typed errors with `@KsError` on `@KsMethod` functions
-- [Context Propagation](context-propagation.md) -- propagating request-scoped metadata with `@KsContext`
+- [Error Handling](error-handling.md) -- typed errors with [`@KsError`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-ks-error/index.html) on `@KsMethod` functions
+- [Context Propagation](context-propagation.md) -- propagating request-scoped metadata with [`@KsContext`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-ks-context/index.html)
 - [Bidirectional Communication](bidirectional.md) -- sub-service parameters, callbacks, and `connect<H, C>`
 - [Flow Streaming](flow-streaming.md) -- using `Flow<T>` as a return type for streaming
 - [Introspection](introspection.md) -- runtime discovery of service metadata

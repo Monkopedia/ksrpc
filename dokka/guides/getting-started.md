@@ -47,7 +47,7 @@ implementation("com.monkopedia.ksrpc:ksrpc-introspection:$KSRPC_VERSION")
 
 ## Define a service
 
-Declare your service as an interface extending `RpcService`, annotated with `@KsService`. Tag each method with `@KsMethod` and a unique name:
+Declare your service as an interface extending [`RpcService`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html), annotated with [`@KsService`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-ks-service/index.html). Tag each method with [`@KsMethod`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-ks-method/index.html) and a unique name:
 
 ```kotlin
 import com.monkopedia.ksrpc.RpcService
@@ -61,7 +61,7 @@ interface GreetingService : RpcService {
 }
 ```
 
-The compiler plugin generates a companion `RpcObject` and stub implementations automatically.
+The compiler plugin generates a companion [`RpcObject`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc/-rpc-object/index.html) and stub implementations automatically.
 
 ## Implement the service
 
@@ -110,7 +110,7 @@ suspend fun main() {
 
 ## Environment configuration
 
-All channels share a [KsrpcEnvironment] that holds the serialization format, default coroutine scope, and error handling:
+All channels share a [`KsrpcEnvironment`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc/-ksrpc-environment/index.html) that holds the serialization format, default coroutine scope, and error handling:
 
 ```kotlin
 val env = ksrpcEnvironment {
@@ -123,14 +123,14 @@ val env = ksrpcEnvironment {
 }
 ```
 
-See [KsrpcEnvironment] in the API docs for the full set of configurable fields.
+See [`KsrpcEnvironment`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc/-ksrpc-environment/index.html) in the API docs for the full set of configurable fields.
 
 ## Next steps
 
 - [Service Declaration](service-declaration.md) -- full reference on types, annotations, and patterns
 - [Transports](transports.md) -- all supported transports with setup code
 - [Bidirectional Communication](bidirectional.md) -- two-way connections and callbacks
-- [Error Handling](error-handling.md) -- typed errors with `@KsError`
-- [Context Propagation](context-propagation.md) -- propagating auth tokens, trace IDs, and other metadata
+- [Error Handling](error-handling.md) -- typed errors with [`@KsError`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-ks-error/index.html)
+- [Context Propagation](context-propagation.md) -- propagating auth tokens, trace IDs, and other metadata with [`@KsContext`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-ks-context/index.html)
 - [Flow Streaming](flow-streaming.md) -- streaming data with `Flow<T>`
 - [Introspection](introspection.md) -- runtime service metadata discovery

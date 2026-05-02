@@ -85,7 +85,7 @@ The connection's `onClose` handler automatically destroys the subprocess.
 ## Transport semantics
 
 - Uses Content-Length framing: each packet is prefixed with `Content-Length: N` headers followed by the JSON payload
-- Returns a full `Connection<String>` supporting bidirectional communication
+- Returns a full [`Connection`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html)`<String>` supporting bidirectional communication
 - Supports sub-services in both directions
 - Binary data is buffered (not streamed like HTTP/WebSocket)
 - Content-Length header framing compatible with LSP and similar protocols

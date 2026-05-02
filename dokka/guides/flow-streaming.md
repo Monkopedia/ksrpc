@@ -28,7 +28,7 @@ interface EventService : RpcService {
 }
 ```
 
-The compiler plugin handles the transformation automatically. On the wire, `Flow<T>` is backed by a [KsFlowService] sub-service.
+The compiler plugin handles the transformation automatically. On the wire, `Flow<T>` is backed by a [`KsFlowService`](https://monkopedia.github.io/ksrpc/ksrpc-flow/com.monkopedia.ksrpc.flow/-ks-flow-service/index.html) sub-service.
 
 ## Implementing a flow endpoint
 
@@ -89,7 +89,7 @@ If the server-side flow throws an exception, the client receives it as an `RpcFa
 
 ## Advanced: KsFlowService directly
 
-If you need multi-collection or explicit lifecycle control, declare [KsFlowService] directly instead of `Flow<T>`:
+If you need multi-collection or explicit lifecycle control, declare `KsFlowService` directly instead of `Flow<T>`:
 
 ```kotlin
 @KsService
@@ -103,7 +103,7 @@ With `KsFlowService<T>`:
 
 - You can call `collect` multiple times (each gets its own server-side collection job).
 - The service does NOT auto-close after collection -- you must call `close()` explicitly.
-- Each `startCollection` returns a [KsCollectionToken] that can cancel that specific collection.
+- Each `startCollection` returns a `KsCollectionToken` that can cancel that specific collection.
 
 ```kotlin
 val flowService = service.streamEvents("all")
@@ -121,9 +121,9 @@ try {
 
 The flow protocol uses three sub-services:
 
-- **[KsFlowService]** -- the main flow service, with a `startCollection` method that accepts a collector and returns a token.
-- **[KsFlowCollector]** -- a callback sub-service that receives `onItem`, `onComplete`, and `onError` signals. Terminal signals (`onComplete`, `onError`) are annotated with `@KsNotification`.
-- **[KsCollectionToken]** -- a sub-service with a `cancelCollection` method for cancelling an active collection.
+- **`KsFlowService`** -- the main flow service, with a `startCollection` method that accepts a collector and returns a token.
+- **`KsFlowCollector`** -- a callback sub-service that receives `onItem`, `onComplete`, and `onError` signals. Terminal signals (`onComplete`, `onError`) are annotated with [`@KsNotification`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-ks-notification/index.html).
+- **`KsCollectionToken`** -- a sub-service with a `cancelCollection` method for cancelling an active collection.
 
 The compiler plugin generates the `FlowSubserviceTransformer` that bridges between `Flow<T>` and `KsFlowService<T>` transparently.
 

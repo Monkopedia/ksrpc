@@ -23,11 +23,11 @@ ksrpc supports multiple transports, each suited to different platforms, protocol
 
 **Sockets / Stdin** use a content-length-prefixed packet protocol over raw byte streams. This is ideal for subprocess communication (LSP-style) or direct TCP connections without an HTTP stack. Supports JVM and POSIX Native.
 
-**JSON-RPC 2.0** implements the standard JSON-RPC 2.0 protocol, making ksrpc services interoperable with non-Kotlin JSON-RPC clients and servers. Returns a `SingleChannelConnection` (no sub-services). Supports `@KsNotification` for fire-and-forget messages.
+**JSON-RPC 2.0** implements the standard JSON-RPC 2.0 protocol, making ksrpc services interoperable with non-Kotlin JSON-RPC clients and servers. Returns a [`SingleChannelConnection`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-single-channel-connection/index.html) (no sub-services). Supports [`@KsNotification`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-ks-notification/index.html) for fire-and-forget messages.
 
 **JNI** bridges Kotlin/JVM and Kotlin/Native in the same process via JNI, using binary serialization with zero network overhead. Use it to embed a Kotlin/Native ksrpc service in a JVM host (or vice versa) via shared libraries.
 
-**Service Worker** (experimental) hosts a ksrpc service inside a browser service worker for JS and WASM targets. Requires `@OptIn(ExperimentalKsrpc::class)`.
+**Service Worker** (experimental) hosts a ksrpc service inside a browser service worker for JS and WASM targets. Requires `@OptIn(`[`ExperimentalKsrpc`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-experimental-ksrpc/index.html)`::class)`.
 
 ## See also
 

@@ -63,15 +63,15 @@ dependencies {
 
 ## Features
 
-- **Service declaration** -- Define services with `@KsService` and `@KsMethod`; the compiler plugin generates stubs and companions automatically. [Guide](https://monkopedia.github.io/ksrpc/)
+- **Service declaration** -- Define services with [`@KsService`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-ks-service/index.html) and [`@KsMethod`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-ks-method/index.html); the compiler plugin generates stubs and companions automatically. [Guide](https://monkopedia.github.io/ksrpc/)
 - **Sub-services** -- Pass services as method parameters or return values for contextual callbacks and hierarchical APIs. [Guide](https://monkopedia.github.io/ksrpc/)
-- **Bidirectional communication** -- `Connection` supports hosting and calling services simultaneously over the same channel. [Guide](https://monkopedia.github.io/ksrpc/)
-- **Binary data** -- Stream binary payloads via `RpcBinaryData` with adapters for ktor, kotlinx-io, and okio.
-- **Typed errors** -- Map exceptions to wire-format error codes with `@KsError` and `KsrpcException`. [Guide](https://monkopedia.github.io/ksrpc/)
-- **Context propagation** -- Propagate per-call context (auth tokens, trace IDs) across transports with `@KsContext`. [Guide](https://monkopedia.github.io/ksrpc/)
-- **Introspection** -- Opt in with `@KsIntrospectable` to expose endpoint metadata and schemas at runtime. [Guide](https://monkopedia.github.io/ksrpc/)
-- **Flow streaming** -- Use `Flow<T>` in method signatures for streaming results over any transport. [Guide](https://monkopedia.github.io/ksrpc/)
-- **JSON-RPC 2.0 notifications** -- Mark methods with `@KsNotification` for fire-and-forget semantics.
+- **Bidirectional communication** -- [`Connection`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html) supports hosting and calling services simultaneously over the same channel. [Guide](https://monkopedia.github.io/ksrpc/)
+- **Binary data** -- Stream binary payloads via [`RpcBinaryData`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-rpc-binary-data/index.html) with adapters for ktor, kotlinx-io, and okio.
+- **Typed errors** -- Map exceptions to wire-format error codes with [`@KsError`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-ks-error/index.html) and [`KsrpcException`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc/-ksrpc-exception/index.html). [Guide](https://monkopedia.github.io/ksrpc/)
+- **Context propagation** -- Propagate per-call context (auth tokens, trace IDs) across transports with [`@KsContext`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-ks-context/index.html). [Guide](https://monkopedia.github.io/ksrpc/)
+- **Introspection** -- Opt in with [`@KsIntrospectable`](https://monkopedia.github.io/ksrpc/ksrpc-introspection/com.monkopedia.ksrpc.annotation/-ks-introspectable/index.html) to expose endpoint metadata and schemas at runtime. [Guide](https://monkopedia.github.io/ksrpc/)
+- **Flow streaming** -- Use `Flow<T>` in method signatures for streaming results over any transport, backed by [`KsFlowService`](https://monkopedia.github.io/ksrpc/ksrpc-flow/com.monkopedia.ksrpc.flow/-ks-flow-service/index.html). [Guide](https://monkopedia.github.io/ksrpc/)
+- **JSON-RPC 2.0 notifications** -- Mark methods with [`@KsNotification`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-ks-notification/index.html) for fire-and-forget semantics.
 
 ## Why not gRPC?
 

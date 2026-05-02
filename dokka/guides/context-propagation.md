@@ -6,7 +6,7 @@ ksrpc can propagate coroutine context elements across the wire on a per-call bas
 
 ## Defining a context binding
 
-A context binding is a `CoroutineContext.Element` paired with a [KsContextBinding] that describes how to encode/decode it for the wire. The recommended pattern uses a named companion object:
+A context binding is a `CoroutineContext.Element` paired with a [`KsContextBinding`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc/-ks-context-binding/index.html) that describes how to encode/decode it for the wire. The recommended pattern uses a named companion object:
 
 ```kotlin
 import com.monkopedia.ksrpc.KsContextBinding
@@ -31,7 +31,7 @@ The binding must implement:
 
 ## Creating a context annotation
 
-Wrap your binding in an annotation meta-annotated with `@KsContext`:
+Wrap your binding in an annotation meta-annotated with [`@KsContext`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-ks-context/index.html):
 
 ```kotlin
 import com.monkopedia.ksrpc.annotation.KsContext
@@ -108,7 +108,7 @@ If the caller does not install a context element, the handler sees `null` from t
 
 The compiler plugin performs these checks:
 
-- A `@KsContext`-annotated annotation must reference a `binding` class that implements [KsContextBinding].
+- A `@KsContext`-annotated annotation must reference a `binding` class that implements `KsContextBinding`.
 - Two `@KsContext` annotations on the same method (or inherited from the service level) must not declare the same `wireKey`.
 
 ## Wire transport details

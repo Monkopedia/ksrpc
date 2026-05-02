@@ -14,7 +14,7 @@ implementation("com.monkopedia.ksrpc:ksrpc-introspection:$KSRPC_VERSION")
 
 ## Opting in
 
-Annotate your service with `@KsIntrospectable` and extend [IntrospectableRpcService] instead of `RpcService`:
+Annotate your service with [`@KsIntrospectable`](https://monkopedia.github.io/ksrpc/ksrpc-introspection/com.monkopedia.ksrpc.annotation/-ks-introspectable/index.html) and extend [`IntrospectableRpcService`](https://monkopedia.github.io/ksrpc/ksrpc-introspection/com.monkopedia.ksrpc/-introspectable-rpc-service/index.html) instead of [`RpcService`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html):
 
 ```kotlin
 import com.monkopedia.ksrpc.IntrospectableRpcService
@@ -55,21 +55,21 @@ val info = introspection.getEndpointInfo("greet")
 
 ## IntrospectionService
 
-The [IntrospectionService] returned by `getIntrospection()` is itself a `@KsService` with these methods:
+The [`IntrospectionService`](https://monkopedia.github.io/ksrpc/ksrpc-introspection/com.monkopedia.ksrpc/-introspection-service/index.html) returned by `getIntrospection()` is itself a `@KsService` with these methods:
 
 | Method | Description |
 |--------|-------------|
 | `getServiceName()` | Returns the fully qualified service name |
 | `getEndpoints()` | Returns the list of endpoint names |
-| `getEndpointInfo(endpoint)` | Returns [RpcEndpointInfo] with input/output type metadata |
+| `getEndpointInfo(endpoint)` | Returns [`RpcEndpointInfo`](https://monkopedia.github.io/ksrpc/ksrpc-introspection/com.monkopedia.ksrpc/-rpc-endpoint-info/index.html) with input/output type metadata |
 | `getIntrospectionFor(service)` | Returns introspection for a referenced sub-service |
 
 ## RpcEndpointInfo and RpcDataType
 
-Each endpoint's input and output are described by an [RpcDataType]:
+Each endpoint's input and output are described by an [`RpcDataType`](https://monkopedia.github.io/ksrpc/ksrpc-introspection/com.monkopedia.ksrpc/-rpc-data-type/index.html):
 
-- **`RpcDataType.DataStructure`** -- a serializable type. Contains an [RpcDescriptor] tree describing the structure: `dataType` (enum like `STRING`, `INT`, `CLASS`, `LIST`, etc.), `serialName`, `elements` (child fields), and an optional `id` for recursive types.
-- **`RpcDataType.BinaryData`** -- a binary payload ([RpcBinaryData]).
+- **`RpcDataType.DataStructure`** -- a serializable type. Contains an `RpcDescriptor` tree describing the structure: `dataType` (enum like `STRING`, `INT`, `CLASS`, `LIST`, etc.), `serialName`, `elements` (child fields), and an optional `id` for recursive types.
+- **`RpcDataType.BinaryData`** -- a binary payload ([`RpcBinaryData`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-rpc-binary-data/index.html)).
 - **`RpcDataType.Service`** -- a sub-service reference. The `qualifiedName` identifies the service, and you can call `getIntrospectionFor(qualifiedName)` to inspect it.
 
 ## Inspecting sub-services
@@ -85,11 +85,11 @@ if (outputType is RpcDataType.Service) {
 }
 ```
 
-This also works for `Flow<T>` endpoints, which are backed by `KsFlowService<T>` sub-services under the hood.
+This also works for `Flow<T>` endpoints, which are backed by [`KsFlowService`](https://monkopedia.github.io/ksrpc/ksrpc-flow/com.monkopedia.ksrpc.flow/-ks-flow-service/index.html)`<T>` sub-services under the hood.
 
 ## RpcDescriptor structure
 
-For `DataStructure` types, the [RpcDescriptor] tree mirrors the `kotlinx.serialization` descriptor:
+For `DataStructure` types, the `RpcDescriptor` tree mirrors the `kotlinx.serialization` descriptor:
 
 ```kotlin
 val info = introspection.getEndpointInfo("compute")

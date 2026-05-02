@@ -6,8 +6,8 @@
 
 ksrpc provides two levels of bidirectional channels:
 
-- **[SingleChannelConnection]** -- supports one hosted service and one client service (no sub-services). Used by JSON-RPC transport.
-- **[Connection]** -- extends `SingleChannelConnection` with full sub-service support in both directions. Used by WebSocket and socket transports.
+- **[`SingleChannelConnection`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-single-channel-connection/index.html)** -- supports one hosted service and one client service (no sub-services). Used by JSON-RPC transport.
+- **[`Connection`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html)** -- extends `SingleChannelConnection` with full sub-service support in both directions. Used by WebSocket and socket transports.
 
 Both provide `registerDefault` (host a service for incoming calls) and `defaultChannel` (get a channel for outgoing calls), and both can use them simultaneously.
 
@@ -46,7 +46,7 @@ connection.registerDefault(MyHostServiceImpl(client))
 
 ## Sub-service callbacks
 
-On transports that support `Connection` (sockets, WebSockets, JNI), you can pass `@KsService` interfaces as method parameters and return values. This enables contextual callback patterns:
+On transports that support `Connection` (sockets, WebSockets, JNI), you can pass [`@KsService`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-ks-service/index.html) interfaces as method parameters and return values. This enables contextual callback patterns:
 
 ```kotlin
 @KsService
@@ -95,7 +95,7 @@ class TaskRunnerImpl : TaskRunner {
 }
 ```
 
-Sub-service inputs require a `ChannelClient` (i.e. a `Connection`). Sub-service outputs require a `ChannelHost` (HTTP server or `Connection`). HTTP supports sub-service outputs but not inputs because it is not bidirectional.
+Sub-service inputs require a [`ChannelClient`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-channel-client/index.html) (i.e. a `Connection`). Sub-service outputs require a [`ChannelHost`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-channel-host/index.html) (HTTP server or `Connection`). HTTP supports sub-service outputs but not inputs because it is not bidirectional.
 
 ## Nested sub-services
 

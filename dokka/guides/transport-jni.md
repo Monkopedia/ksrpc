@@ -69,7 +69,7 @@ fun initializeService(connection: NativeConnection) {
 
 - Uses `JniSerialized` as the wire format -- a binary serialization format, not JSON
 - Bidirectional: both JVM and Native sides can host and call services
-- Full `Connection` with sub-service support in both directions
+- Full [`Connection`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html) with sub-service support in both directions
 - Zero network overhead -- data passes through JNI method calls in the same process
 - Packet-based protocol using the same `PacketChannelBase` as other bidirectional transports
 - Coroutine continuations are bridged across the JNI boundary, preserving suspend semantics

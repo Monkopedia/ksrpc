@@ -4,7 +4,7 @@
 
 The service worker transport hosts a ksrpc service inside a browser service worker, allowing web applications to offload RPC processing to a background thread. Communication uses the `MessagePort` API.
 
-This transport is experimental and requires explicit opt-in:
+This transport is experimental and requires explicit opt-in with [`@ExperimentalKsrpc`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-experimental-ksrpc/index.html):
 
 ```kotlin
 @OptIn(ExperimentalKsrpc::class)
@@ -66,7 +66,7 @@ fun main() {
 
 ## Transport semantics
 
-- Returns a full `Connection<String>` supporting bidirectional communication
+- Returns a full [`Connection`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html)`<String>` supporting bidirectional communication
 - Supports sub-services in both directions
 - Binary data is supported
 - Communication uses the browser `MessagePort` / `MessageChannel` API

@@ -4,11 +4,11 @@
 
 ## KsrpcException
 
-All ksrpc runtime errors extend [KsrpcException], which carries:
+All ksrpc runtime errors extend [`KsrpcException`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc/-ksrpc-exception/index.html), which carries:
 
 - `code` -- an integer error code (used on the wire)
 - `message` -- a human-readable description
-- `data` -- an optional typed payload (populated when `@KsError` bindings are active)
+- `data` -- an optional typed payload (populated when [`@KsError`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-ks-error/index.html) bindings are active)
 - `cause` -- optional root cause (server-side only; not propagated across the wire)
 
 Built-in subclasses:
@@ -119,7 +119,7 @@ try {
 
 ## Unexpected error codes
 
-When the server throws a typed error whose code the client does not have a `@KsError` mapping for (e.g., the server was updated with new error types but the client was not), the client does not crash. Instead, the runtime surfaces a generic [KsrpcException] carrying the raw wire-level code, the error message, and the raw wire-format payload in `KsrpcException.data`. This lets callers inspect or log the payload even without the `@KsError` binding:
+When the server throws a typed error whose code the client does not have a `@KsError` mapping for (e.g., the server was updated with new error types but the client was not), the client does not crash. Instead, the runtime surfaces a generic `KsrpcException` carrying the raw wire-level code, the error message, and the raw wire-format payload in `KsrpcException.data`. This lets callers inspect or log the payload even without the `@KsError` binding:
 
 ```kotlin
 try {
@@ -147,7 +147,7 @@ How typed errors appear on the wire depends on the transport:
 
 ## ErrorListener
 
-Configure a global error listener in [KsrpcEnvironment] to observe all errors:
+Configure a global error listener in [`KsrpcEnvironment`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc/-ksrpc-environment/index.html) to observe all errors:
 
 ```kotlin
 val env = ksrpcEnvironment {

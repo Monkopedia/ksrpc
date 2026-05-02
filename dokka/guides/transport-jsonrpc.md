@@ -4,7 +4,7 @@
 
 The JSON-RPC transport communicates using the [JSON-RPC 2.0](https://www.jsonrpc.org/specification) protocol over byte streams, enabling interop with other JSON-RPC clients and servers.
 
-The JSON-RPC transport returns a `SingleChannelConnection` rather than a full `Connection` -- it does not support sub-services. Each `@KsMethod` name maps directly to the JSON-RPC `method` field.
+The JSON-RPC transport returns a [`SingleChannelConnection`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-single-channel-connection/index.html) rather than a full [`Connection`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html) -- it does not support sub-services. Each [`@KsMethod`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-ks-method/index.html) name maps directly to the JSON-RPC `method` field.
 
 ## Module and dependencies
 
@@ -57,7 +57,7 @@ val connection = (input to output).asJsonRpcConnection(
 
 ## Notifications
 
-Methods annotated with `@KsNotification` are sent as JSON-RPC notifications (no `id` field, no response expected). This is useful for fire-and-forget messages like LSP's `textDocument/didOpen`.
+Methods annotated with [`@KsNotification`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-ks-notification/index.html) are sent as JSON-RPC notifications (no `id` field, no response expected). This is useful for fire-and-forget messages like LSP's `textDocument/didOpen`.
 
 ```kotlin
 @KsService
@@ -81,11 +81,11 @@ interface MyLspService : RpcService {
 
 ## Error mapping
 
-JSON-RPC errors use the standard `error` object with `code`, `message`, and optional `data` fields. ksrpc maps `@KsError` codes to JSON-RPC error codes. See the [error handling guide](error-handling.md) for details on defining custom error types.
+JSON-RPC errors use the standard `error` object with `code`, `message`, and optional `data` fields. ksrpc maps [`@KsError`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-ks-error/index.html) codes to JSON-RPC error codes. See the [error handling guide](error-handling.md) for details on defining custom error types.
 
 ## Context propagation
 
-`@KsContext` bindings in JSON-RPC default to the `RootSiblings` convention, where context values are added as sibling keys at the root of the params object. Other conventions are available. See the [context propagation guide](context-propagation.md) for details.
+[`@KsContext`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-ks-context/index.html) bindings in JSON-RPC default to the `RootSiblings` convention, where context values are added as sibling keys at the root of the params object. Other conventions are available. See the [context propagation guide](context-propagation.md) for details.
 
 ## See also
 

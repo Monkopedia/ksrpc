@@ -40,7 +40,7 @@ embeddedServer(Netty, port = 8080) {
 }.start(wait = true)
 ```
 
-`serveWebsocket` also accepts a pre-serialized `SerializedService<String>`.
+`serveWebsocket` also accepts a pre-serialized [`SerializedService`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-serialized-service/index.html)`<String>`.
 
 ## Client setup
 
@@ -58,8 +58,8 @@ val service = connection.defaultChannel().toStub<MyService>()
 ## Transport semantics
 
 - Uses a packet-based protocol over WebSocket frames
-- Returns a full `Connection<String>` supporting bidirectional communication
-- Supports sub-services in both directions (input and output `@KsService` parameters)
+- Returns a full [`Connection`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html)`<String>` supporting bidirectional communication
+- Supports sub-services in both directions (input and output [`@KsService`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-ks-service/index.html) parameters)
 - Binary data is streamed via WebSocket binary frames
 - The connection stays open until explicitly closed
 
