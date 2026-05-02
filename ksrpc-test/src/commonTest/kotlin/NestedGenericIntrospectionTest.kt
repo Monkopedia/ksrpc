@@ -24,6 +24,7 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.serializer
 
 /**
  * Tests for nested generic introspection chains:
@@ -32,9 +33,8 @@ import kotlinx.serialization.Serializable
  * Verifies that type arguments propagate correctly through sub-service
  * boundaries and that introspection reports the right typeArgs at each level.
  *
- * Uses concrete (non-generic) service interfaces that specialize generic
- * parents, since generic @KsService companions are RpcObjectFactory (not
- * RpcObject) and require concrete instantiation.
+ * Includes both concrete (non-generic) services and generic @KsService
+ * interfaces that call getIntrospection() directly (issue #131).
  */
 class NestedGenericIntrospectionTest {
 
@@ -53,6 +53,28 @@ class NestedGenericIntrospectionTest {
     interface NestedService : IntrospectableRpcService {
         @KsMethod("/child")
         suspend fun child(input: String): StreamService
+    }
+
+    /**
+     * Generic @KsService @KsIntrospectable interface — prior to issue #131 this
+     * would ClassCastException when calling getIntrospection() because the
+     * companion is an RpcObjectFactory, not an RpcObject.
+     */
+    @KsService
+    @KsIntrospectable
+    interface GenericInnerService<T> : IntrospectableRpcService {
+        @KsMethod("/echo")
+        suspend fun echo(input: T): T
+    }
+
+    /**
+     * Generic @KsService @KsIntrospectable with a Flow return type.
+     */
+    @KsService
+    @KsIntrospectable
+    interface GenericStreamService<T> : IntrospectableRpcService {
+        @KsMethod("/stream")
+        suspend fun stream(input: String): Flow<T>
     }
 
     private val streamImpl = object : StreamService {
@@ -140,6 +162,59 @@ class NestedGenericIntrospectionTest {
         assertTrue(
             streamOutput.typeArgs[0] is RpcDataType.DataStructure,
             "expected DataStructure for Update type arg"
+        )
+    }
+
+    // ---- Issue #131: generic @KsService @KsIntrospectable getIntrospection() ----
+
+    @Test
+    fun genericServiceIntrospectionReturnsEndpoints() = runBlockingUnit {
+        val impl = object : GenericInnerService<String> {
+            override suspend fun echo(input: String): String = input
+        }
+        val rpcObject = GenericInnerService(String.serializer())
+        val channel = impl.serialized(rpcObject, ksrpcEnvironment { })
+        val stub = rpcObject.createStub(channel)
+        val introspection = stub.getIntrospection()
+        val endpoints = introspection.getEndpoints()
+        assertTrue(
+            "echo" in endpoints,
+            "expected 'echo' in endpoints, got $endpoints"
+        )
+    }
+
+    @Test
+    fun genericServiceIntrospectionServiceName() = runBlockingUnit {
+        val impl = object : GenericInnerService<String> {
+            override suspend fun echo(input: String): String = input
+        }
+        val rpcObject = GenericInnerService(String.serializer())
+        val channel = impl.serialized(rpcObject, ksrpcEnvironment { })
+        val stub = rpcObject.createStub(channel)
+        val introspection = stub.getIntrospection()
+        val name = introspection.getServiceName()
+        assertEquals(
+            "com.monkopedia.ksrpc.NestedGenericIntrospectionTest.GenericInnerService",
+            name
+        )
+    }
+
+    @Test
+    fun genericStreamServiceIntrospection() = runBlockingUnit {
+        val impl = object : GenericStreamService<Update> {
+            override suspend fun stream(input: String): Flow<Update> = emptyFlow()
+        }
+        val rpcObject = GenericStreamService(Update.serializer())
+        val channel = impl.serialized(rpcObject, ksrpcEnvironment { })
+        val stub = rpcObject.createStub(channel)
+        val introspection = stub.getIntrospection()
+        val endpoints = introspection.getEndpoints()
+        assertTrue("stream" in endpoints, "expected 'stream' in endpoints, got $endpoints")
+        val info = introspection.getEndpointInfo("stream")
+        val output = info.output
+        assertTrue(
+            output is RpcDataType.Service,
+            "expected /stream output to be RpcDataType.Service (KsFlowService), got $output"
         )
     }
 }
