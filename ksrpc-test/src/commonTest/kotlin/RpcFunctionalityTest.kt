@@ -18,6 +18,7 @@
 package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.annotation.KsrpcInternal
+import com.monkopedia.ksrpc.channels.Connection
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
 import com.monkopedia.ksrpc.internal.asClient
@@ -37,15 +38,20 @@ import kotlinx.coroutines.launch
 abstract class RpcFunctionalityTest(
     supportedTypes: List<TestType> = TestType.values().toList(),
     private val serializedChannel: suspend CoroutineScope.() -> SerializedService<String>,
-    private val verifyOnChannel: suspend CoroutineScope.(SerializedService<String>) -> Unit
+    private val verifyOnChannel: suspend CoroutineScope.(SerializedService<String>) -> Unit,
+    private val workerServiceName: String? = null
 ) {
-    private val supportedTypes = supportedTypes.toSet() intersect platformSupportedTestTypes()
+    private val supportedTypes = run {
+        val effective = supportedTypes.toSet() intersect platformSupportedTestTypes()
+        if (workerServiceName == null) effective - TestType.SERVICE_WORKER else effective
+    }
 
     enum class TestType {
         SERIALIZE,
         PIPE,
         HTTP,
-        WEBSOCKET
+        WEBSOCKET,
+        SERVICE_WORKER
     }
 
     @Test
@@ -165,6 +171,14 @@ abstract class RpcFunctionalityTest(
         )
     }
 
+    @Test
+    fun testServiceWorkerPassthrough() = runBlockingUnit {
+        if (TestType.SERVICE_WORKER !in supportedTypes) return@runBlockingUnit
+        serviceWorkerTest(workerServiceName) { connection ->
+            verifyOnChannel(connection.defaultChannel())
+        }
+    }
+
     protected open fun createEnv() = ksrpcEnvironment { }
 }
 
@@ -174,6 +188,11 @@ internal expect fun runBlockingUnit(function: suspend CoroutineScope.() -> Unit)
 expect interface Routing
 
 internal expect fun platformSupportedTestTypes(): Set<RpcFunctionalityTest.TestType>
+
+internal expect suspend fun serviceWorkerTest(
+    serviceName: String?,
+    test: suspend (Connection<String>) -> Unit
+)
 
 expect suspend inline fun httpTest(
     crossinline serve: suspend Routing.() -> Unit,

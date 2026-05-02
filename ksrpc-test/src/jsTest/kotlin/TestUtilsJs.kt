@@ -13,9 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(ExperimentalKsrpc::class)
+
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.annotation.ExperimentalKsrpc
+import com.monkopedia.ksrpc.channels.Connection
 import com.monkopedia.ksrpc.channels.SerializedService
+import com.monkopedia.ksrpc.webworker.createServiceWorkerWithConnection
 import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
@@ -25,10 +30,30 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.promise
 
-internal actual fun platformSupportedTestTypes(): Set<RpcFunctionalityTest.TestType> = setOf(
-    RpcFunctionalityTest.TestType.SERIALIZE,
-    RpcFunctionalityTest.TestType.PIPE
-)
+internal actual fun platformSupportedTestTypes(): Set<RpcFunctionalityTest.TestType> = buildSet {
+    add(RpcFunctionalityTest.TestType.SERIALIZE)
+    add(RpcFunctionalityTest.TestType.PIPE)
+    if (hasWindow()) {
+        add(RpcFunctionalityTest.TestType.SERVICE_WORKER)
+    }
+}
+
+private fun hasWindow(): Boolean = js("typeof window !== 'undefined'") as Boolean
+
+private fun jsWorkerUrl(serviceName: String?): String {
+    val base = "base/kotlin/ksrpc-service-worker-test.js"
+    return if (serviceName != null) "$base?service=$serviceName" else base
+}
+
+internal actual suspend fun serviceWorkerTest(
+    serviceName: String?,
+    test: suspend (Connection<String>) -> Unit
+) {
+    val env = ksrpcEnvironment { }
+    createServiceWorkerWithConnection(jsWorkerUrl(serviceName), env).use { connection ->
+        test(connection)
+    }
+}
 
 actual suspend inline fun httpTest(
     crossinline serve: suspend Routing.() -> Unit,
