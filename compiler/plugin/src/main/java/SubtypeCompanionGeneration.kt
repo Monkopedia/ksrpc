@@ -21,7 +21,6 @@ import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.ir.backend.js.utils.isDispatchReceiver
 import org.jetbrains.kotlin.ir.builders.IrBlockBodyBuilder
-import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irCallConstructor
 import org.jetbrains.kotlin.ir.builders.irDelegatingConstructorCall
@@ -103,61 +102,18 @@ class SubtypeCompanionGeneration(
 
         declaration.isCompanion = true
 
-        if (!k.isGeneric) {
-            // Scenario 1: non-generic subtype — eagerly emit property bodies.
-            emitScenario1PropertyBodies(declaration, subtypeClass, k)
-        } else {
-            // Scenario 2: generic subtype — set arity property body
-            declaration.declarations
-                .filterIsInstance<IrProperty>()
-                .firstOrNull { it.name == FqConstants.ARITY }
-                ?.let { property ->
-                    val arity = subtypeClass.typeParameters.size
-                    property.getter?.body = context.irBuilder(property.getter!!).irSynthBody {
-                        +irReturn(irInt(arity))
-                    }
+        // Both generic and non-generic subtypes use RpcObjectFactory with arity property.
+        val arity = subtypeClass.typeParameters.size
+        declaration.declarations
+            .filterIsInstance<IrProperty>()
+            .firstOrNull { it.name == FqConstants.ARITY }
+            ?.let { property ->
+                property.getter?.body = context.irBuilder(property.getter!!).irSynthBody {
+                    +irReturn(irInt(arity))
                 }
-        }
+            }
 
         return emptyList()
-    }
-
-    private fun emitScenario1PropertyBodies(
-        declaration: IrClass,
-        subtypeClass: IrClass,
-        key: FirSubtypeCompanionGenerator.Key
-    ) {
-        val parentServiceClass = findIrClass(key.parentServiceClassId) ?: return
-
-        declaration.declarations
-            .filterIsInstance<IrProperty>()
-            .firstOrNull { it.name == FqConstants.SERVICE_NAME }
-            ?.let { property ->
-                property.getter?.body = context.irBuilder(property.getter!!).irSynthBody {
-                    val rpcObj = buildParentRpcObjectExpr(
-                        this, subtypeClass, parentServiceClass
-                    )
-                    val getter = findRpcObjectPropertyGetter(FqConstants.SERVICE_NAME)
-                    +irReturn(
-                        irCall(getter).apply { dispatchReceiver = rpcObj }
-                    )
-                }
-            }
-
-        declaration.declarations
-            .filterIsInstance<IrProperty>()
-            .firstOrNull { it.name == FqConstants.ENDPOINTS }
-            ?.let { property ->
-                property.getter?.body = context.irBuilder(property.getter!!).irSynthBody {
-                    val rpcObj = buildParentRpcObjectExpr(
-                        this, subtypeClass, parentServiceClass
-                    )
-                    val getter = findRpcObjectPropertyGetter(FqConstants.ENDPOINTS)
-                    +irReturn(
-                        irCall(getter).apply { dispatchReceiver = rpcObj }
-                    )
-                }
-            }
     }
 
     private fun createRpcObjectAnnotation(
@@ -184,16 +140,6 @@ class SubtypeCompanionGeneration(
 
         // Handle property getters
         function.correspondingPropertySymbol?.owner?.name?.let { propertyName ->
-            if (propertyName == FqConstants.SERVICE_NAME) {
-                return generateDelegatingPropertyBody(
-                    function, k, subtypeClass, FqConstants.SERVICE_NAME
-                )
-            }
-            if (propertyName == FqConstants.ENDPOINTS) {
-                return generateDelegatingPropertyBody(
-                    function, k, subtypeClass, FqConstants.ENDPOINTS
-                )
-            }
             if (propertyName == FqConstants.ARITY) {
                 return context.irBuilder(function).irSynthBody {
                     +irReturn(irInt(subtypeClass.typeParameters.size))
@@ -202,84 +148,23 @@ class SubtypeCompanionGeneration(
         }
 
         return when (function.name) {
-            FqConstants.CREATE_STUB -> generateCreateStubBody(function, k, subtypeClass)
-            FqConstants.FIND_ENDPOINT -> generateFindEndpointBody(function, k, subtypeClass)
             FqConstants.CREATE -> generateCreateBody(function, k, subtypeClass)
             else -> null
         }
     }
 
-    private fun generateDelegatingPropertyBody(
-        function: IrSimpleFunction,
-        key: FirSubtypeCompanionGenerator.Key,
-        subtypeClass: IrClass,
-        propertyName: Name
-    ): IrBody {
-        val parentServiceClass = findIrClass(key.parentServiceClassId)
-            ?: reportInternal(
-                "Can't find parent service ${key.parentServiceClassId} for subtype " +
-                    "${subtypeClass.kotlinFqName.asString()}"
-            )
-        return context.irBuilder(function).irSynthBody {
-            val rpcObj = buildParentRpcObjectExpr(this, subtypeClass, parentServiceClass)
-            val getter = findRpcObjectPropertyGetter(propertyName)
-            +irReturn(
-                irCall(getter).apply { dispatchReceiver = rpcObj }
-            )
-        }
-    }
-
-    private fun generateCreateStubBody(
-        function: IrSimpleFunction,
-        key: FirSubtypeCompanionGenerator.Key,
-        subtypeClass: IrClass
-    ): IrBody {
-        val parentServiceClass = findIrClass(key.parentServiceClassId)
-            ?: reportInternal(
-                "Can't find parent service ${key.parentServiceClassId} for subtype " +
-                    "${subtypeClass.kotlinFqName.asString()}"
-            )
-        return context.irBuilder(function).irSynthBody {
-            val rpcObj = buildParentRpcObjectExpr(this, subtypeClass, parentServiceClass)
-            val createStubMethod = findRpcObjectMethod(FqConstants.CREATE_STUB)
-            val channelParam = function.parameters.first { !it.isDispatchReceiver }
-            +irReturn(
-                irCall(createStubMethod).apply {
-                    dispatchReceiver = rpcObj
-                    typeArguments[0] = channelParam.type
-                    arguments[1] = irGet(channelParam)
-                }
-            )
-        }
-    }
-
-    private fun generateFindEndpointBody(
-        function: IrSimpleFunction,
-        key: FirSubtypeCompanionGenerator.Key,
-        subtypeClass: IrClass
-    ): IrBody {
-        val parentServiceClass = findIrClass(key.parentServiceClassId)
-            ?: reportInternal(
-                "Can't find parent service ${key.parentServiceClassId} for subtype " +
-                    "${subtypeClass.kotlinFqName.asString()}"
-            )
-        return context.irBuilder(function).irSynthBody {
-            val rpcObj = buildParentRpcObjectExpr(this, subtypeClass, parentServiceClass)
-            val findEndpointMethod = findRpcObjectMethod(FqConstants.FIND_ENDPOINT)
-            val endpointParam = function.parameters.first { !it.isDispatchReceiver }
-            +irReturn(
-                irCall(findEndpointMethod).apply {
-                    dispatchReceiver = rpcObj
-                    arguments[1] = irGet(endpointParam)
-                }
-            )
-        }
-    }
-
     /**
-     * Scenario 2: generate body for `create(typeArgs: List<KType>): RpcObject<Subtype<*,...>>`
-     * Delegates to the parent service's factory with the type args mapped through the
-     * subtype->parent substitution.
+     * Generate body for `create(typeArgs: List<KType>): RpcObject<...>`.
+     *
+     * - **Non-generic subtype** (e.g. `interface TypedFoo : GenericEcho<String>`):
+     *   Ignores `typeArgs` (arity is 0), constructs the parent's `Obj<String>(serializer<String>())`
+     *   directly, returning it as the `RpcObject`. This avoids the JVM bridge-method
+     *   ClassCastException that would occur if the companion's `createStub` tried to return the
+     *   parent's Stub as the subtype (see issue #136).
+     *
+     * - **Generic subtype** (e.g. `interface TypedFooT<T> : GenericEcho<T>`):
+     *   Maps `typeArgs` through the subtype-to-parent type-arg substitution and delegates
+     *   to the parent's `create(mappedTypeArgs)`.
      */
     private fun generateCreateBody(
         function: IrSimpleFunction,
@@ -291,6 +176,17 @@ class SubtypeCompanionGeneration(
                 "Can't find parent service ${key.parentServiceClassId} for subtype " +
                     "${subtypeClass.kotlinFqName.asString()}"
             )
+
+        if (!key.isGeneric) {
+            // Non-generic subtype: construct the parent's RpcObject directly with baked-in
+            // type args from the subtype's supertype reference.
+            return context.irBuilder(function).irSynthBody {
+                val rpcObj = buildParentRpcObjectExpr(this, subtypeClass, parentServiceClass)
+                +irReturn(rpcObj)
+            }
+        }
+
+        // Generic subtype: delegate to parent's factory with mapped type args.
         val parentCompanion = parentServiceClass.companionObject()
             ?: reportInternal(
                 "Parent service ${parentServiceClass.kotlinFqName.asString()} has no companion"
@@ -454,32 +350,6 @@ class SubtypeCompanionGeneration(
 
     private fun findIrClass(classId: ClassId): IrClass? =
         context.referenceClass(classId)?.owner
-
-    private fun findRpcObjectPropertyGetter(propertyName: Name): IrSimpleFunction {
-        val rpcObjectClass = context.referenceClass(FqConstants.RPC_OBJECT)?.owner
-            ?: reportInternal("Can't resolve RpcObject class")
-        val property = rpcObjectClass.declarations
-            .filterIsInstance<IrProperty>()
-            .firstOrNull { it.name == propertyName }
-            ?: reportInternal(
-                "Can't find property ${propertyName.asString()} on RpcObject"
-            )
-        return property.getter
-            ?: reportInternal(
-                "Property ${propertyName.asString()} on RpcObject has no getter"
-            )
-    }
-
-    private fun findRpcObjectMethod(name: Name): IrSimpleFunction {
-        val rpcObjectClass = context.referenceClass(FqConstants.RPC_OBJECT)?.owner
-            ?: reportInternal("Can't resolve RpcObject class")
-        return rpcObjectClass.declarations
-            .filterIsInstance<IrSimpleFunction>()
-            .firstOrNull { it.name == name }
-            ?: reportInternal(
-                "Can't find method ${name.asString()} on RpcObject"
-            )
-    }
 
     override fun generateBodyForConstructor(
         constructor: IrConstructor,
