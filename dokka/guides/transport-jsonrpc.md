@@ -79,6 +79,8 @@ interface MyLspService : RpcService {
 - Request/response correlation uses the JSON-RPC `id` field
 - Binary data is not supported (JSON-only wire format)
 
+> **Path convention**: JSON-RPC method names map verbatim to the wire. The conventional style for JSON-RPC is `namespace/method` without a leading `/` (e.g., `textDocument/completion`), while other ksrpc transports typically use `/path` style (e.g., `/greet`). Choose your `@KsMethod` names to match the protocol conventions of the transport you are targeting.
+
 ## Error mapping
 
 JSON-RPC errors use the standard `error` object with `code`, `message`, and optional `data` fields. ksrpc maps [`@KsError`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-ks-error/index.html) codes to JSON-RPC error codes. See the [error handling guide](error-handling.md) for details on defining custom error types.

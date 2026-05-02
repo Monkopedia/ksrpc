@@ -20,6 +20,8 @@ interface MyService : RpcService {
 
 The compiler plugin generates a companion [`RpcObject`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc/-rpc-object/index.html) that provides stub creation and serialization adapters. Any method on the interface that is not annotated with `@KsMethod` will produce a compiler warning.
 
+> **One-parameter limit**: `@KsMethod` functions may accept at most one parameter (plus the implicit receiver). To pass multiple values, wrap them in a `@Serializable` data class.
+
 The `@KsMethod` name is the wire-level identifier. It must be unique within a single service but does not need to be globally unique. Choose stable names -- renaming breaks wire compatibility.
 
 ## Primitive types
@@ -131,7 +133,7 @@ interface EntityService : RpcService {
     suspend fun getName(): String
 
     @KsMethod("/content")
-    suspend fun getContent(): RpcBinaryData
+    suspend fun getContent(): ByteReadChannel
 }
 
 @KsService

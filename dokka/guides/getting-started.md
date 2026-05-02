@@ -4,7 +4,7 @@
 
 ## Gradle setup
 
-Add the ksrpc compiler plugin and runtime dependency to your `build.gradle.kts`:
+Add the ksrpc compiler plugin and runtime dependency to your `build.gradle.kts`. Replace `$KSRPC_VERSION` with the latest release version from [Maven Central](https://search.maven.org/artifact/com.monkopedia.ksrpc/ksrpc-core) or [GitHub Releases](https://github.com/Monkopedia/ksrpc/releases):
 
 ```kotlin
 plugins {
@@ -113,15 +113,14 @@ suspend fun main() {
 All channels share a [`KsrpcEnvironment`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc/-ksrpc-environment/index.html) that holds the serialization format, default coroutine scope, and error handling:
 
 ```kotlin
-val env = ksrpcEnvironment {
-    serialization = Json {
-        encodeDefaults = true
-    }
+val env = ksrpcEnvironment(Json { encodeDefaults = true }) {
     errorListener = ErrorListener { t ->
         t.printStackTrace()
     }
 }
 ```
+
+The first argument to `ksrpcEnvironment` is a `StringFormat` (defaulting to `Json`). Custom serialization settings are passed there, not inside the builder block. The builder block configures other environment properties like `errorListener` and `logger`.
 
 See [`KsrpcEnvironment`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc/-ksrpc-environment/index.html) in the API docs for the full set of configurable fields.
 

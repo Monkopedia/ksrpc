@@ -15,14 +15,14 @@ Both provide `registerDefault` (host a service for incoming calls) and `defaultC
 
 ```kotlin
 val env = ksrpcEnvironment { }
-val connection = stdInConnection(env)
+withStdInOut(env) { connection ->
+    // Host a service for the remote side to call
+    connection.registerDefault(MyHostServiceImpl())
 
-// Host a service for the remote side to call
-connection.registerDefault(MyHostServiceImpl())
-
-// Get a stub for calling the remote side's service
-val remoteService = connection.defaultChannel().toStub<RemoteService>()
-val result = remoteService.someMethod("hello")
+    // Get a stub for calling the remote side's service
+    val remoteService = connection.defaultChannel().toStub<RemoteService>()
+    val result = remoteService.someMethod("hello")
+}
 ```
 
 ## The connect helper
@@ -30,18 +30,23 @@ val result = remoteService.someMethod("hello")
 The `connect<Host, Client>` extension combines `registerDefault` and `defaultChannel` into a single call. The lambda receives the client stub and returns the host service implementation:
 
 ```kotlin
-val connection = stdInConnection(env)
-connection.connect<MyHostService, MyClientService> { client ->
-    // client is a MyClientService stub for calling the remote side
-    MyHostServiceImpl(client) // returned value is registered as the hosted service
+withStdInOut(env) { connection ->
+    connection.connect<MyHostService, MyClientService> { client ->
+        // client is a MyClientService stub for calling the remote side
+        MyHostServiceImpl(client) // returned value is registered as the hosted service
+    }
 }
 ```
+
+The first type parameter is the service you host (returned by the lambda); the second is the remote service you call (passed into the lambda).
 
 This is equivalent to:
 
 ```kotlin
-val client = connection.defaultChannel().toStub<MyClientService>()
-connection.registerDefault(MyHostServiceImpl(client))
+withStdInOut(env) { connection ->
+    val client = connection.defaultChannel().toStub<MyClientService>()
+    connection.registerDefault(MyHostServiceImpl(client))
+}
 ```
 
 ## Sub-service callbacks
