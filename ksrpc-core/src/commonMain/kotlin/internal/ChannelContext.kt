@@ -27,6 +27,7 @@ class HostChannelContext<T>(val channel: ChannelHost<T>) : CoroutineContext.Elem
     override val key: CoroutineContext.Key<*>
         get() = Key
 
+    @KsrpcInternal
     object Key : CoroutineContext.Key<HostChannelContext<*>>
 }
 
@@ -35,6 +36,7 @@ class ClientChannelContext<T>(val channel: ChannelClient<T>) : CoroutineContext.
     override val key: CoroutineContext.Key<*>
         get() = Key
 
+    @KsrpcInternal
     object Key : CoroutineContext.Key<ClientChannelContext<*>>
 }
 
