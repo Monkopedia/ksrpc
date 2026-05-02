@@ -44,6 +44,7 @@ import org.jetbrains.kotlin.ir.builders.irImplicitCast
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irSetField
 import org.jetbrains.kotlin.ir.builders.irString
+import org.jetbrains.kotlin.ir.builders.irVararg
 import org.jetbrains.kotlin.ir.builders.irWhen
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrConstructor
@@ -63,6 +64,7 @@ import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.defaultType
 import org.jetbrains.kotlin.ir.types.isMarkedNullable
+import org.jetbrains.kotlin.ir.types.starProjectedType
 import org.jetbrains.kotlin.ir.types.makeNotNull
 import org.jetbrains.kotlin.ir.types.typeOrFail
 import org.jetbrains.kotlin.ir.types.typeOrNull
@@ -386,10 +388,18 @@ internal class GenericMethodIrBuilder(
                 serializerFields,
                 method
             )
+            val typeArgSerializersList = buildTypeArgSerializersList(
+                builder,
+                type,
+                serializerReceiver,
+                serializerFields,
+                method
+            )
             return builder.irConstructOf(
                 env.subserviceTransformer,
                 listOf(type),
-                rpcObjectExpr
+                rpcObjectExpr,
+                typeArgSerializersList
             )
         }
         return builder.irConstructOf(
@@ -715,6 +725,46 @@ internal class GenericMethodIrBuilder(
         }
     }
 
+    /**
+     * Emit a `listOf<KSerializer<*>>(ser0, ser1, ...)` IR expression for the type arguments
+     * of a sub-service type. For non-generic sub-services returns `emptyList()`.
+     * Serializers are composed recursively via [buildSerializer] so they can reference
+     * the outer service's type parameters.
+     */
+    private fun buildTypeArgSerializersList(
+        builder: IrBuilderWithScope,
+        type: IrType,
+        serializerReceiver: IrValueParameter,
+        serializerFields: List<IrField>,
+        method: IrSimpleFunction
+    ): IrExpression {
+        val simple = type as? IrSimpleType
+        val typeArgs = simple?.arguments?.mapNotNull { it.typeOrNull } ?: emptyList()
+        if (typeArgs.isEmpty()) {
+            return builder.irCall(env.emptyListFunction).apply {
+                typeArguments[0] = env.kSerializer.starProjectedType
+                this.type = context.irBuiltIns.listClass.typeWith(
+                    env.kSerializer.starProjectedType
+                )
+            }
+        }
+        val serializerExprs = typeArgs.map { argType ->
+            buildSerializer(builder, argType, serializerReceiver, serializerFields, method)
+        }
+        return builder.irCall(env.listOfFunction).apply {
+            typeArguments[0] = env.kSerializer.starProjectedType
+            val varargParameter = env.listOfFunction.owner.parameters
+                .single { it.kind == org.jetbrains.kotlin.ir.declarations.IrParameterKind.Regular }
+            arguments[varargParameter] = builder.irVararg(
+                env.kSerializer.starProjectedType,
+                serializerExprs
+            )
+            this.type = context.irBuiltIns.listClass.typeWith(
+                env.kSerializer.starProjectedType
+            )
+        }
+    }
+
     fun buildExecutor(referencedFunction: IrSimpleFunction, container: IrClass): IrClass =
         context.buildAnonymousServiceExecutor(env, referencedFunction, container)
 
@@ -768,10 +818,13 @@ internal class GenericMethodIrBuilder(
                 buildSerializer(builder, elementType, serializerReceiver, serializerFields, method)
             )
         }
+        val elementSerializerExpr =
+            buildSerializer(builder, elementType, serializerReceiver, serializerFields, method)
         return builder.irConstructOf(
             flowTransformerSymbol,
             listOf(elementType),
-            rpcObjectExpr
+            rpcObjectExpr,
+            elementSerializerExpr
         )
     }
 }

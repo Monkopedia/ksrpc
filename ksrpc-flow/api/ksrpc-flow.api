@@ -8,9 +8,11 @@ public final class com/monkopedia/ksrpc/flow/AutoClosingFlow : kotlinx/coroutine
 }
 
 public final class com/monkopedia/ksrpc/flow/FlowSubserviceTransformer : com/monkopedia/ksrpc/BaseSubserviceTransformer {
-	public fun <init> (Lcom/monkopedia/ksrpc/RpcObject;)V
+	public fun <init> (Lcom/monkopedia/ksrpc/RpcObject;Lkotlinx/serialization/KSerializer;)V
+	public synthetic fun <init> (Lcom/monkopedia/ksrpc/RpcObject;Lkotlinx/serialization/KSerializer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun fromService (Lcom/monkopedia/ksrpc/RpcService;)Ljava/lang/Object;
 	public fun getServiceObject ()Lcom/monkopedia/ksrpc/RpcObject;
+	public fun getTypeArgSerializers ()Ljava/util/List;
 	public synthetic fun toService (Ljava/lang/Object;)Lcom/monkopedia/ksrpc/RpcService;
 }
 

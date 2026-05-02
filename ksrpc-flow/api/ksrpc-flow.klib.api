@@ -113,10 +113,12 @@ final class <#A: kotlin/Any?> com.monkopedia.ksrpc.flow/AutoClosingFlow : kotlin
 }
 
 final class <#A: kotlin/Any?> com.monkopedia.ksrpc.flow/FlowSubserviceTransformer : com.monkopedia.ksrpc/BaseSubserviceTransformer<com.monkopedia.ksrpc.flow/KsFlowService<#A>, kotlinx.coroutines.flow/Flow<#A>> { // com.monkopedia.ksrpc.flow/FlowSubserviceTransformer|null[0]
-    constructor <init>(com.monkopedia.ksrpc/RpcObject<com.monkopedia.ksrpc.flow/KsFlowService<#A>>) // com.monkopedia.ksrpc.flow/FlowSubserviceTransformer.<init>|<init>(com.monkopedia.ksrpc.RpcObject<com.monkopedia.ksrpc.flow.KsFlowService<1:0>>){}[0]
+    constructor <init>(com.monkopedia.ksrpc/RpcObject<com.monkopedia.ksrpc.flow/KsFlowService<#A>>, kotlinx.serialization/KSerializer<#A>? = ...) // com.monkopedia.ksrpc.flow/FlowSubserviceTransformer.<init>|<init>(com.monkopedia.ksrpc.RpcObject<com.monkopedia.ksrpc.flow.KsFlowService<1:0>>;kotlinx.serialization.KSerializer<1:0>?){}[0]
 
     final val serviceObject // com.monkopedia.ksrpc.flow/FlowSubserviceTransformer.serviceObject|{}serviceObject[0]
         final fun <get-serviceObject>(): com.monkopedia.ksrpc/RpcObject<com.monkopedia.ksrpc.flow/KsFlowService<#A>> // com.monkopedia.ksrpc.flow/FlowSubserviceTransformer.serviceObject.<get-serviceObject>|<get-serviceObject>(){}[0]
+    final val typeArgSerializers // com.monkopedia.ksrpc.flow/FlowSubserviceTransformer.typeArgSerializers|{}typeArgSerializers[0]
+        final fun <get-typeArgSerializers>(): kotlin.collections/List<kotlinx.serialization/KSerializer<*>> // com.monkopedia.ksrpc.flow/FlowSubserviceTransformer.typeArgSerializers.<get-typeArgSerializers>|<get-typeArgSerializers>(){}[0]
 }
 
 final fun <#A: kotlin/Any?> (kotlinx.coroutines.flow/Flow<#A>).com.monkopedia.ksrpc.flow/asKsFlow(): com.monkopedia.ksrpc.flow/KsFlowService<#A> // com.monkopedia.ksrpc.flow/asKsFlow|asKsFlow@kotlinx.coroutines.flow.Flow<0:0>(){0§<kotlin.Any?>}[0]

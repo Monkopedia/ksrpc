@@ -148,6 +148,8 @@ abstract class <#A: com.monkopedia.ksrpc/RpcService, #B: kotlin/Any?> com.monkop
 
     abstract val serviceObject // com.monkopedia.ksrpc/BaseSubserviceTransformer.serviceObject|{}serviceObject[0]
         abstract fun <get-serviceObject>(): com.monkopedia.ksrpc/RpcObject<#A> // com.monkopedia.ksrpc/BaseSubserviceTransformer.serviceObject.<get-serviceObject>|<get-serviceObject>(){}[0]
+    open val typeArgSerializers // com.monkopedia.ksrpc/BaseSubserviceTransformer.typeArgSerializers|{}typeArgSerializers[0]
+        open fun <get-typeArgSerializers>(): kotlin.collections/List<kotlinx.serialization/KSerializer<*>> // com.monkopedia.ksrpc/BaseSubserviceTransformer.typeArgSerializers.<get-typeArgSerializers>|<get-typeArgSerializers>(){}[0]
 
     abstract fun fromService(#A): #B // com.monkopedia.ksrpc/BaseSubserviceTransformer.fromService|fromService(1:0){}[0]
     abstract fun toService(#B): #A // com.monkopedia.ksrpc/BaseSubserviceTransformer.toService|toService(1:1){}[0]
@@ -182,10 +184,12 @@ final class <#A: com.monkopedia.ksrpc/RpcService, #B: kotlin/Any?, #C: kotlin/An
 }
 
 final class <#A: com.monkopedia.ksrpc/RpcService> com.monkopedia.ksrpc/SubserviceTransformer : com.monkopedia.ksrpc/BaseSubserviceTransformer<#A, #A> { // com.monkopedia.ksrpc/SubserviceTransformer|null[0]
-    constructor <init>(com.monkopedia.ksrpc/RpcObject<#A>) // com.monkopedia.ksrpc/SubserviceTransformer.<init>|<init>(com.monkopedia.ksrpc.RpcObject<1:0>){}[0]
+    constructor <init>(com.monkopedia.ksrpc/RpcObject<#A>, kotlin.collections/List<kotlinx.serialization/KSerializer<*>> = ...) // com.monkopedia.ksrpc/SubserviceTransformer.<init>|<init>(com.monkopedia.ksrpc.RpcObject<1:0>;kotlin.collections.List<kotlinx.serialization.KSerializer<*>>){}[0]
 
     final val serviceObject // com.monkopedia.ksrpc/SubserviceTransformer.serviceObject|{}serviceObject[0]
         final fun <get-serviceObject>(): com.monkopedia.ksrpc/RpcObject<#A> // com.monkopedia.ksrpc/SubserviceTransformer.serviceObject.<get-serviceObject>|<get-serviceObject>(){}[0]
+    final val typeArgSerializers // com.monkopedia.ksrpc/SubserviceTransformer.typeArgSerializers|{}typeArgSerializers[0]
+        final fun <get-typeArgSerializers>(): kotlin.collections/List<kotlinx.serialization/KSerializer<*>> // com.monkopedia.ksrpc/SubserviceTransformer.typeArgSerializers.<get-typeArgSerializers>|<get-typeArgSerializers>(){}[0]
 }
 
 final class <#A: kotlin/Any?> com.monkopedia.ksrpc.internal/ClientChannelContext : kotlin.coroutines/CoroutineContext.Element { // com.monkopedia.ksrpc.internal/ClientChannelContext|null[0]

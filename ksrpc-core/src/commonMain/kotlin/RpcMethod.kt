@@ -134,6 +134,15 @@ object BinaryTransformer :
 abstract class BaseSubserviceTransformer<T : RpcService, O> : Transformer<O> {
     abstract val serviceObject: RpcObject<T>
 
+    /**
+     * Serializers for the type arguments of the sub-service, in declaration order.
+     * For example, `FlowSubserviceTransformer<Update>` returns the `KSerializer<Update>`.
+     * Non-generic sub-services return an empty list (the default).
+     *
+     * Used by introspection to populate [RpcDataType.Service.typeArgs].
+     */
+    open val typeArgSerializers: List<KSerializer<*>> get() = emptyList()
+
     protected abstract fun toService(value: O): T
     protected abstract fun fromService(service: T): O
 
@@ -156,7 +165,8 @@ abstract class BaseSubserviceTransformer<T : RpcService, O> : Transformer<O> {
 
 @OptIn(KsrpcInternal::class)
 class SubserviceTransformer<T : RpcService>(
-    override val serviceObject: RpcObject<T>
+    override val serviceObject: RpcObject<T>,
+    override val typeArgSerializers: List<KSerializer<*>> = emptyList()
 ) : BaseSubserviceTransformer<T, T>() {
     override fun toService(value: T): T = value
     override fun fromService(service: T): T = service

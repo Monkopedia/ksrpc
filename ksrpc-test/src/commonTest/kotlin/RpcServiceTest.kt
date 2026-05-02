@@ -240,6 +240,32 @@ class RpcServiceTest :
     }
 
     @Test
+    fun nonGenericSubserviceHasEmptyTypeArgs() = runBlockingUnit {
+        val channel =
+            testIntrospectionParentImpl.serialized<TestIntrospectionParent, String>(
+                ksrpcEnvironment {
+                }
+            )
+        val stub = channel.toStub<TestIntrospectionParent, String>()
+        val introspection = stub.getIntrospection()
+        val info = introspection.getEndpointInfo("child_service")
+        val output = info.output
+        assertTrue(
+            output is RpcDataType.Service,
+            "expected sub-service to surface as RpcDataType.Service, got $output"
+        )
+        assertEquals(
+            "com.monkopedia.ksrpc.TestIntrospectionChild",
+            output.qualifiedName
+        )
+        assertEquals(
+            emptyList(),
+            output.typeArgs,
+            "non-generic sub-service should have empty typeArgs"
+        )
+    }
+
+    @Test
     fun testIntrospectionForServiceMissing() = runBlockingUnit {
         val channel =
             testIntrospectionParentImpl.serialized<TestIntrospectionParent, String>(
