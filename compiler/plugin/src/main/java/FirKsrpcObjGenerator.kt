@@ -25,6 +25,7 @@ import com.monkopedia.ksrpc.plugin.FqConstants.RPC_METHOD
 import com.monkopedia.ksrpc.plugin.FqConstants.RPC_OBJECT
 import com.monkopedia.ksrpc.plugin.FqConstants.SERIALIZED_SERVICE
 import com.monkopedia.ksrpc.plugin.FqConstants.SERVICE_NAME
+import com.monkopedia.ksrpc.plugin.FqConstants.SERVICE_TIER
 import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.Modality
@@ -136,6 +137,7 @@ class FirKsrpcObjGenerator(session: FirSession) : FirDeclarationGenerationExtens
         return when (callableId.callableName) {
             SERVICE_NAME -> createServiceName(callableId, owner, ownerKey)
             ENDPOINTS -> createEndpoints(callableId, owner, ownerKey)
+            SERVICE_TIER -> createServiceTier(callableId, owner, ownerKey)
             else -> emptyList()
         }
     }
@@ -234,6 +236,28 @@ class FirKsrpcObjGenerator(session: FirSession) : FirDeclarationGenerationExtens
         return listOf(property.symbol)
     }
 
+    private fun createServiceTier(
+        callableId: CallableId,
+        owner: FirRegularClassSymbol,
+        ownerKey: Key
+    ): List<FirPropertySymbol> {
+        val tierType = FqConstants.SERVICE_TIER_CLASS.createConeType(session)
+        val property = createMemberProperty(
+            owner,
+            ownerKey,
+            callableId.callableName,
+            tierType,
+            isVal = true,
+            hasBackingField = false
+        ) {
+            modality = Modality.FINAL
+            status {
+                isOverride = true
+            }
+        }
+        return listOf(property.symbol)
+    }
+
     override fun getCallableNamesForClass(
         classSymbol: FirClassSymbol<*>,
         context: MemberGenerationContext
@@ -248,6 +272,7 @@ class FirKsrpcObjGenerator(session: FirSession) : FirDeclarationGenerationExtens
                 FIND_ENDPOINT,
                 SERVICE_NAME,
                 ENDPOINTS,
+                SERVICE_TIER,
                 SpecialNames.INIT
             )
         } else {

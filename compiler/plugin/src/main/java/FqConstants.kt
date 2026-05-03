@@ -109,6 +109,7 @@ object FqConstants {
     val SERVICE_TIER = Name.identifier("serviceTier")
     val OBJ = Name.identifier("Obj")
 
+    val SERVICE_TIER_CLASS = ClassId(FQPKG, Name.identifier("ServiceTier"))
     val RPC_OBJECT = ClassId(FQPKG, Name.identifier("RpcObject"))
     val RPC_OBJECT_FACTORY = ClassId(FQPKG, Name.identifier("RpcObjectFactory"))
     val RESOLVE_SERIALIZER_OR_THROW: CallableId =

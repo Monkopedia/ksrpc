@@ -44,8 +44,8 @@ class JsonRpcTierCheckTest {
             connection.registerDefault(hostService)
         }
         assertTrue(
-            exception.message!!.contains("sub-service"),
-            "Error message should mention sub-service, got: ${exception.message}"
+            exception.message!!.contains("HOST"),
+            "Error message should mention HOST tier, got: ${exception.message}"
         )
         assertTrue(
             exception.message!!.contains("JSON-RPC"),

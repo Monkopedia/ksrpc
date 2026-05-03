@@ -132,6 +132,15 @@ class ObjGeneration(
                     +irReturn(irListOfStrings(env, endpointsList))
                 }
             }
+        // Emit serviceTier property body.
+        val tier = computeServiceTier(cls.irClass)
+        declaration.declarations.filterIsInstance<IrProperty>()
+            .firstOrNull { it.name == FqConstants.SERVICE_TIER }
+            ?.let { property ->
+                property.getter?.body = context.irBuilder(property.getter!!).irSynthBody {
+                    +irReturn(irGetEnumValue(env, tier))
+                }
+            }
         return emptyList()
     }
 
@@ -173,6 +182,12 @@ class ObjGeneration(
                 }
                 return context.irBuilder(function).irSynthBody {
                     +irReturn(irListOfStrings(env, endpoints))
+                }
+            }
+            if (propertyName == FqConstants.SERVICE_TIER) {
+                val tier = computeServiceTier(cls.irClass)
+                return context.irBuilder(function).irSynthBody {
+                    +irReturn(irGetEnumValue(env, tier))
                 }
             }
         }

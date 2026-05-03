@@ -92,6 +92,7 @@ class KsrpcGenerationEnvironment(
     val introspectionConstructor: IrConstructorSymbol by lazy {
         introspectionImpl.constructors.first()
     }
+    val serviceTierClass = referenceClass(FqConstants.SERVICE_TIER_CLASS)
     val subserviceTransformer = referenceClass(FqConstants.SUBSERVICE_TRANSFORMER)
     val rpcObjectKey = maybeReferenceClass(FqConstants.RPC_OBJECT_KEY)
     val suspendCloseable = referenceClass(FqConstants.SUSPEND_CLOSEABLE)

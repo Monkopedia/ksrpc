@@ -64,8 +64,10 @@ import org.jetbrains.kotlin.ir.util.constructors
 import org.jetbrains.kotlin.ir.util.createThisReceiverParameter
 import org.jetbrains.kotlin.ir.util.defaultType as irClassDefaultType
 import org.jetbrains.kotlin.ir.util.erasedUpperBound
+import org.jetbrains.kotlin.ir.util.fqNameForIrSerialization
 import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
 import org.jetbrains.kotlin.ir.util.functions
+import org.jetbrains.kotlin.ir.util.getAllSuperclasses
 import org.jetbrains.kotlin.ir.util.parentClassOrNull
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
@@ -75,6 +77,25 @@ fun IrBuilderWithScope.buildStringFormat(vararg args: IrExpression): IrStringCon
     irConcat().apply {
         arguments += args
     }
+
+/**
+ * Emit an `IrGetEnumValue` expression for the given [entryName] on the `ServiceTier` enum.
+ */
+internal fun IrBuilderWithScope.irGetEnumValue(
+    env: KsrpcGenerationEnvironment,
+    entryName: String
+): IrExpression {
+    val enumClass = env.serviceTierClass.owner
+    val entry = enumClass.declarations
+        .filterIsInstance<org.jetbrains.kotlin.ir.declarations.IrEnumEntry>()
+        .first { it.name.asString() == entryName }
+    return org.jetbrains.kotlin.ir.expressions.impl.IrGetEnumValueImpl(
+        SYNTHETIC_OFFSET,
+        SYNTHETIC_OFFSET,
+        env.serviceTierClass.defaultType,
+        entry.symbol
+    )
+}
 
 inline fun DeclarationIrBuilder.irSynthBody(builder: IrBlockBodyBuilder.() -> Unit) = irBlockBody {
     startOffset = SYNTHETIC_OFFSET
@@ -122,6 +143,20 @@ fun IrClass.isSubclassOfFqName(fqName: String): Boolean =
         superTypes.any {
             it.erasedUpperBound.isSubclassOfFqName(fqName)
         }
+
+/**
+ * Determine the service tier from an `@KsService` interface's supertypes.
+ * Returns "SIMPLE", "HOST", or "BIDI".
+ */
+internal fun computeServiceTier(irClass: IrClass): String = when {
+    irClass.getAllSuperclasses().any {
+        it.fqNameForIrSerialization == FqConstants.FQRPC_BIDI_SERVICE
+    } -> "BIDI"
+    irClass.getAllSuperclasses().any {
+        it.fqNameForIrSerialization == FqConstants.FQRPC_HOST_SERVICE
+    } -> "HOST"
+    else -> "SIMPLE"
+}
 
 fun IrSimpleFunction.overridesFunctionIn(fqName: FqName): Boolean =
     parentClassOrNull?.fqNameWhenAvailable == fqName ||

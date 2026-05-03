@@ -30,6 +30,7 @@ import com.monkopedia.ksrpc.plugin.FqConstants.RPC_OBJECT
 import com.monkopedia.ksrpc.plugin.FqConstants.RPC_OBJECT_FACTORY
 import com.monkopedia.ksrpc.plugin.FqConstants.SERIALIZED_SERVICE
 import com.monkopedia.ksrpc.plugin.FqConstants.SERVICE_NAME
+import com.monkopedia.ksrpc.plugin.FqConstants.SERVICE_TIER
 import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.Modality.FINAL
@@ -177,6 +178,7 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
         return when (callableId.callableName) {
             SERVICE_NAME -> createServiceName(callableId, context.owner, ownerKey)
             ENDPOINTS -> createEndpoints(callableId, context.owner, ownerKey)
+            SERVICE_TIER -> createServiceTier(callableId, context.owner, ownerKey)
             else -> emptyList()
         }
     }
@@ -337,6 +339,28 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
         return listOf(property.symbol)
     }
 
+    private fun createServiceTier(
+        callableId: CallableId,
+        owner: FirClassSymbol<*>,
+        ownerKey: Key
+    ): List<FirPropertySymbol> {
+        val tierType = FqConstants.SERVICE_TIER_CLASS.createConeType(session)
+        val property = createMemberProperty(
+            owner,
+            ownerKey,
+            callableId.callableName,
+            tierType,
+            isVal = true,
+            hasBackingField = false
+        ) {
+            modality = FINAL
+            status {
+                isOverride = true
+            }
+        }
+        return listOf(property.symbol)
+    }
+
     override fun getCallableNamesForClass(
         classSymbol: FirClassSymbol<*>,
         context: MemberGenerationContext
@@ -352,7 +376,7 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
         val origin = classSymbol.origin as? FirDeclarationOrigin.Plugin
         val key = origin?.key as? Key
         return when {
-            key == null -> setOf(FIND_ENDPOINT, CREATE_STUB, SERVICE_NAME, ENDPOINTS)
+            key == null -> setOf(FIND_ENDPOINT, CREATE_STUB, SERVICE_NAME, ENDPOINTS, SERVICE_TIER)
 
             key.isGeneric -> if (factorySupported) {
                 setOf(INVOKE, CREATE, ARITY, SpecialNames.INIT)
@@ -360,7 +384,10 @@ class FirCompanionDeclarationGenerator(session: FirSession) :
                 setOf(INVOKE, SpecialNames.INIT)
             }
 
-            else -> setOf(FIND_ENDPOINT, CREATE_STUB, SERVICE_NAME, ENDPOINTS, SpecialNames.INIT)
+            else -> setOf(
+                FIND_ENDPOINT, CREATE_STUB, SERVICE_NAME, ENDPOINTS, SERVICE_TIER,
+                SpecialNames.INIT
+            )
         }
     }
 
