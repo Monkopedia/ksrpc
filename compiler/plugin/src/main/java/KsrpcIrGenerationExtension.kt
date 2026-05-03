@@ -209,30 +209,33 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
         val hasRpcServiceSuper = allSuperFqNames.contains(FQRPC_SERVICE)
         val hasIntrospectableSuper =
             allSuperFqNames.contains(INTROSPECTABLE_RPC_SERVICE.asSingleFqName())
-        // Reject `@KsService` applied to a subtype of another `@KsService` interface.
-        // The parent's @KsService annotation already drives codegen, and `rpcObject<Sub>()`
-        // walks supertypes to find the parent's `RpcObject`/`RpcObjectFactory` companion
-        // automatically. Allowing @KsService on the subtype would produce a duplicate
-        // companion that has no working stub/obj of its own and previously crashed
-        // CompanionGeneration with "Invalid synthetic declaration for ..." (issue #45).
-        val ksServiceSuper = irClass.superTypes
+        // Check for diamond @KsService inheritance (two UNRELATED @KsService ancestors).
+        // Linear chains (A extends B, both @KsService) are now allowed.
+        val ksServiceSupers = irClass.superTypes
             .mapNotNull { it.classOrNull?.owner }
-            .firstOrNull { superClass ->
+            .filter { superClass ->
                 superClass.annotations.any { it.type.classFqName == KS_SERVICE }
             }
-        if (ksServiceSuper != null) {
-            report.reportUserError(
-                "@KsService cannot be applied to ${irClass.kotlinFqName.asString()} because " +
-                    "its supertype ${ksServiceSuper.kotlinFqName.asString()} is already " +
-                    "@KsService. Remove @KsService from " +
-                    "${irClass.kotlinFqName.asString()}; rpcObject<" +
-                    "${irClass.name.asString()}>() will find the parent's companion " +
-                    "automatically.",
-                element = irClass
-            )
-            isValid = false
+        if (ksServiceSupers.size > 1) {
+            // Leaf-filter: keep only those not transitively extended by another in the list
+            val leafSupers = ksServiceSupers.filter { candidate ->
+                ksServiceSupers.none { other ->
+                    other != candidate &&
+                        other.getAllSuperclasses().any {
+                            it.fqNameForIrSerialization == candidate.fqNameForIrSerialization
+                        }
+                }
+            }
+            if (leafSupers.size > 1) {
+                report.reportUserError(
+                    "${irClass.kotlinFqName.asString()} has " +
+                        "multiple @KsService super types, which is not supported.",
+                    element = irClass
+                )
+                isValid = false
+            }
         }
-        if (!hasRpcServiceSuper && !hasIntrospectableSuper && ksServiceSuper == null) {
+        if (!hasRpcServiceSuper && !hasIntrospectableSuper && ksServiceSupers.isEmpty()) {
             report.reportUserError(
                 "${irClass.kotlinFqName.asString()} does not extend ${FQRPC_SERVICE.asString()}",
                 element = irClass

@@ -39,6 +39,7 @@ import org.jetbrains.kotlin.ir.builders.irWhen
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrConstructor
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
+import org.jetbrains.kotlin.ir.declarations.IrEnumEntry
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.expressions.IrBlockBody
@@ -46,6 +47,7 @@ import org.jetbrains.kotlin.ir.expressions.IrBody
 import org.jetbrains.kotlin.ir.expressions.IrClassReference
 import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
+import org.jetbrains.kotlin.ir.expressions.impl.IrGetEnumValueImpl
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.classFqName
@@ -115,6 +117,16 @@ class CompanionGeneration(
                     +irReturn(irListOfStrings(env, endpoints))
                 }
             }
+        // Emit serviceTier property body.
+        val tier = computeServiceTier(cls.irClass)
+        declaration.declarations
+            .filterIsInstance<IrProperty>()
+            .firstOrNull { it.name == FqConstants.SERVICE_TIER }
+            ?.let { property ->
+                property.getter?.body = context.irBuilder(property.getter!!).irSynthBody {
+                    +irReturn(irGetEnumValue(env, tier))
+                }
+            }
         // For generic service companions, eagerly emit the `arity` getter body — the
         // property overrides RpcObjectFactory.arity and must return a fixed integer.
         if (k.isGeneric) {
@@ -169,6 +181,12 @@ class CompanionGeneration(
                 val arity = cls.irClass.typeParameters.size
                 return context.irBuilder(function).irSynthBody {
                     +irReturn(irInt(arity))
+                }
+            }
+            if (propertyName == FqConstants.SERVICE_TIER) {
+                val tier = computeServiceTier(cls.irClass)
+                return context.irBuilder(function).irSynthBody {
+                    +irReturn(irGetEnumValue(env, tier))
                 }
             }
         }
