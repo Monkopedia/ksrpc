@@ -22,7 +22,7 @@ implementation("com.monkopedia.ksrpc:ksrpc-flow:$KSRPC_VERSION")
 import kotlinx.coroutines.flow.Flow
 
 @KsService
-interface EventService : RpcService {
+interface EventService : RpcBidiService {
     @KsMethod("/events")
     suspend fun streamEvents(filter: String): Flow<Event>
 }
@@ -93,7 +93,7 @@ If you need multi-collection or explicit lifecycle control, declare `KsFlowServi
 
 ```kotlin
 @KsService
-interface AdvancedEventService : RpcService {
+interface AdvancedEventService : RpcBidiService {
     @KsMethod("/events")
     suspend fun streamEvents(filter: String): KsFlowService<Event>
 }

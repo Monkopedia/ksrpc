@@ -17,6 +17,7 @@
 
 package com.monkopedia.ksrpc.samples
 
+import com.monkopedia.ksrpc.RpcBidiService
 import com.monkopedia.ksrpc.RpcService
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
@@ -31,7 +32,7 @@ import kotlinx.coroutines.flow.toList
 // ---- Service with Flow methods ----
 
 @KsService
-interface LogService : RpcService {
+interface LogService : RpcBidiService {
     @KsMethod("/stream_logs")
     suspend fun streamLogs(filter: String): Flow<String>
 }

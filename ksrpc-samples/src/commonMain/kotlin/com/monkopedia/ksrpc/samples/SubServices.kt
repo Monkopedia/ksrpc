@@ -17,6 +17,8 @@
 
 package com.monkopedia.ksrpc.samples
 
+import com.monkopedia.ksrpc.RpcBidiService
+import com.monkopedia.ksrpc.RpcHostService
 import com.monkopedia.ksrpc.RpcService
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
@@ -34,7 +36,7 @@ interface ScopedWorker : RpcService {
 }
 
 @KsService
-interface WorkerFactory : RpcService {
+interface WorkerFactory : RpcHostService {
     @KsMethod("/create_worker")
     suspend fun createWorker(name: String): ScopedWorker
 }
@@ -46,7 +48,7 @@ interface EventConsumer : RpcService {
 }
 
 @KsService
-interface EventProducer : RpcService {
+interface EventProducer : RpcBidiService {
     @KsMethod("/subscribe")
     suspend fun subscribe(consumer: EventConsumer): String
 }

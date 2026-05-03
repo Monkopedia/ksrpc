@@ -88,6 +88,12 @@ object KsrpcDiagnostics : KtDiagnosticsContainer() {
     val KSCONTEXT_DUPLICATE_WIRE_KEY: KtDiagnosticFactory1<String>
         by error1<KtElement, String>()
 
+    // 13: Service extends wrong tier for its method signatures (e.g. extends
+    // RpcService but has a method returning a sub-service, which requires
+    // RpcHostService or RpcBidiService).
+    val SERVICE_TIER_MISMATCH: KtDiagnosticFactory1<String>
+        by error1<KtElement, String>()
+
     override fun getRendererFactory(): BaseDiagnosticRendererFactory = KsrpcDiagnosticRenderers
 }
 
@@ -112,6 +118,7 @@ private object KsrpcDiagnosticRenderers : BaseDiagnosticRendererFactory() {
             map.put(MULTIPLE_KSSERVICE_SUPERTYPES, "{0}", CommonRenderers.STRING)
             map.put(KSCONTEXT_BINDING_NOT_KSCONTEXTBINDING, "{0}", CommonRenderers.STRING)
             map.put(KSCONTEXT_DUPLICATE_WIRE_KEY, "{0}", CommonRenderers.STRING)
+            map.put(SERVICE_TIER_MISMATCH, "{0}", CommonRenderers.STRING)
         }
     }
 }

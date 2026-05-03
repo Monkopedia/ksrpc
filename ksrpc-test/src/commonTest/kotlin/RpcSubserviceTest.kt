@@ -29,7 +29,7 @@ interface TestSubInterface : RpcService {
 }
 
 @KsService
-interface TestRootInterface : RpcService {
+interface TestRootInterface : RpcHostService {
     @KsMethod("/rpc")
     suspend fun rpc(u: Pair<String, String>): String
 

@@ -45,7 +45,7 @@ abstract interface <#A: kotlin/Any?> com.monkopedia.ksrpc.flow/KsFlowCollector :
     }
 }
 
-abstract interface <#A: kotlin/Any?> com.monkopedia.ksrpc.flow/KsFlowService : com.monkopedia.ksrpc/RpcService, kotlinx.coroutines.flow/Flow<#A> { // com.monkopedia.ksrpc.flow/KsFlowService|null[0]
+abstract interface <#A: kotlin/Any?> com.monkopedia.ksrpc.flow/KsFlowService : com.monkopedia.ksrpc/RpcBidiService, kotlinx.coroutines.flow/Flow<#A> { // com.monkopedia.ksrpc.flow/KsFlowService|null[0]
     abstract suspend fun startCollection(com.monkopedia.ksrpc.flow/KsFlowCollector<#A>): com.monkopedia.ksrpc.flow/KsCollectionToken // com.monkopedia.ksrpc.flow/KsFlowService.startCollection|startCollection(com.monkopedia.ksrpc.flow.KsFlowCollector<1:0>){}[0]
     open suspend fun collect(kotlinx.coroutines.flow/FlowCollector<#A>) // com.monkopedia.ksrpc.flow/KsFlowService.collect|collect(kotlinx.coroutines.flow.FlowCollector<1:0>){}[0]
 

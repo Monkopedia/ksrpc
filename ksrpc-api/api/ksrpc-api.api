@@ -4,6 +4,13 @@ public abstract interface class com/monkopedia/ksrpc/KsContextBinding : kotlin/c
 	public abstract fun toWire (Lkotlin/coroutines/CoroutineContext$Element;)Ljava/lang/String;
 }
 
+public abstract interface class com/monkopedia/ksrpc/RpcBidiService : com/monkopedia/ksrpc/RpcHostService {
+}
+
+public final class com/monkopedia/ksrpc/RpcBidiService$DefaultImpls {
+	public static fun close (Lcom/monkopedia/ksrpc/RpcBidiService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
 public final class com/monkopedia/ksrpc/RpcFailure {
 	public static final field Companion Lcom/monkopedia/ksrpc/RpcFailure$Companion;
 	public fun <init> (Ljava/lang/String;)V
@@ -29,6 +36,13 @@ public final synthetic class com/monkopedia/ksrpc/RpcFailure$$serializer : kotli
 
 public final class com/monkopedia/ksrpc/RpcFailure$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public abstract interface class com/monkopedia/ksrpc/RpcHostService : com/monkopedia/ksrpc/RpcService {
+}
+
+public final class com/monkopedia/ksrpc/RpcHostService$DefaultImpls {
+	public static fun close (Lcom/monkopedia/ksrpc/RpcHostService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public abstract interface class com/monkopedia/ksrpc/RpcService : com/monkopedia/ksrpc/SuspendCloseable {

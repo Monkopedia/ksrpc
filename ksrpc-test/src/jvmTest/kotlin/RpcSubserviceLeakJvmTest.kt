@@ -34,7 +34,7 @@ interface JvmLeakSubInterface : RpcService {
 }
 
 @KsService
-interface JvmLeakRootInterface : RpcService {
+interface JvmLeakRootInterface : RpcHostService {
     @KsMethod("/subservice")
     suspend fun subservice(prefix: String): JvmLeakSubInterface
 }

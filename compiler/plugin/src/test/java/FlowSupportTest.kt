@@ -42,7 +42,7 @@ class FlowSupportTest {
             """
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
-import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.RpcBidiService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.Serializable
 
@@ -50,7 +50,7 @@ import kotlinx.serialization.Serializable
 data class Update(val id: String)
 
 @KsService
-interface MyService : RpcService {
+interface MyService : RpcBidiService {
     @KsMethod("/updates")
     suspend fun updates(filter: String): Flow<Update>
 }
@@ -71,7 +71,7 @@ interface MyService : RpcService {
             """
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
-import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.RpcBidiService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.Serializable
 
@@ -82,7 +82,7 @@ data class Chunk(val bytes: String)
 data class Receipt(val ok: Boolean)
 
 @KsService
-interface UploadService : RpcService {
+interface UploadService : RpcBidiService {
     @KsMethod("/upload")
     suspend fun upload(items: Flow<Chunk>): Receipt
 }
@@ -103,7 +103,7 @@ interface UploadService : RpcService {
             """
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
-import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.RpcBidiService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.Serializable
 
@@ -111,7 +111,7 @@ import kotlinx.serialization.Serializable
 data class Item(val v: Int)
 
 @KsService
-interface Pipe : RpcService {
+interface Pipe : RpcBidiService {
     @KsMethod("/pipe")
     suspend fun pipe(items: Flow<Item>): Flow<Item>
 }
@@ -135,7 +135,7 @@ interface Pipe : RpcService {
             """
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
-import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.RpcBidiService
 import com.monkopedia.ksrpc.flow.KsFlowService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.Serializable
@@ -147,7 +147,7 @@ data class Event(val kind: String)
 data class Ack(val seq: Int)
 
 @KsService
-interface Mixed : RpcService {
+interface Mixed : RpcBidiService {
     @KsMethod("/events")
     suspend fun events(filter: String): Flow<Event>
 
@@ -178,11 +178,11 @@ interface Mixed : RpcService {
             """
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
-import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.RpcBidiService
 import kotlinx.coroutines.flow.Flow
 
 @KsService
-interface Stream<T> : RpcService {
+interface Stream<T> : RpcBidiService {
     @KsMethod("/items")
     suspend fun items(u: Unit): Flow<T>
 }
@@ -203,11 +203,11 @@ interface Stream<T> : RpcService {
             """
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
-import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.RpcBidiService
 import kotlinx.coroutines.flow.Flow
 
 @KsService
-interface Sink<T> : RpcService {
+interface Sink<T> : RpcBidiService {
     @KsMethod("/push")
     suspend fun push(items: Flow<T>)
 }

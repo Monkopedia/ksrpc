@@ -20,6 +20,7 @@ package com.monkopedia.ksrpc.ktor
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.KsrpcException
 import com.monkopedia.ksrpc.RpcEndpointException
+import com.monkopedia.ksrpc.RpcHostService
 import com.monkopedia.ksrpc.RpcService
 import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.binary.ktor.asRpcBinaryData
@@ -80,7 +81,7 @@ val DEFAULT_KSRPC_ERROR_CODE_TO_HTTP_STATUS: Map<Int, Int> = mapOf(
     KsrpcException.INTERNAL_ERROR_CODE to 500
 )
 
-inline fun <reified T : RpcService> Routing.serveHttp(
+inline fun <reified T : RpcHostService> Routing.serveHttp(
     basePath: String,
     service: T,
     env: KsrpcEnvironment<String>,

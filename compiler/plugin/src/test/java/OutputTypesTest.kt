@@ -30,6 +30,7 @@ class OutputTypesTest {
             """
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.RpcHostService
 import com.monkopedia.ksrpc.RpcService
 import io.ktor.utils.io.ByteReadChannel
 import kotlinx.serialization.Serializable
@@ -41,7 +42,7 @@ data class CustomType(
 )
 
 @KsService
-interface MyInterface: RpcService {
+interface MyInterface: RpcHostService {
 
     @KsMethod("/native_output")
     suspend fun do1(input: String): Int

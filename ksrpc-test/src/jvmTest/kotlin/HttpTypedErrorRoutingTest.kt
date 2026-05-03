@@ -24,6 +24,7 @@ import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.ktor.KSRPC_ERROR_CODE_HEADER
 import com.monkopedia.ksrpc.ktor.asHttpChannelClient
 import com.monkopedia.ksrpc.ktor.serveHttp
+import com.monkopedia.ksrpc.serialized
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -72,7 +73,7 @@ class HttpTypedErrorRoutingTest {
         val env = ksrpcEnvironment { }
         httpTest(
             serve = {
-                serveHttp("/", service, env)
+                serveHttp("/", service.serialized(env), env)
             },
             test = { port ->
                 val httpClient = HttpClient()
@@ -111,7 +112,7 @@ class HttpTypedErrorRoutingTest {
         val env = ksrpcEnvironment { }
         httpTest(
             serve = {
-                serveHttp("/", service, env)
+                serveHttp("/", service.serialized(env), env)
             },
             test = { port ->
                 val httpClient = HttpClient()
@@ -155,7 +156,7 @@ class HttpTypedErrorRoutingTest {
         val env = ksrpcEnvironment { }
         httpTest(
             serve = {
-                serveHttp("/", service, env)
+                serveHttp("/", service.serialized(env), env)
             },
             test = { port ->
                 val httpClient = HttpClient()
@@ -204,7 +205,7 @@ class HttpTypedErrorRoutingTest {
         )
         httpTest(
             serve = {
-                serveHttp("/", service, env, customMap)
+                serveHttp("/", service.serialized(env), env, customMap)
             },
             test = { port ->
                 val httpClient = HttpClient()
