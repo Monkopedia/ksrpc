@@ -63,7 +63,7 @@ interface HierarchyFullService : HierarchyMiddleService, RpcBidiService {
 }
 
 @KsService
-interface HierarchyParentService : RpcHostService {
+interface HierarchyParentService : RpcBidiService {
     @KsMethod("/getExtended")
     suspend fun getExtended(): HierarchyExtendedService
 }
