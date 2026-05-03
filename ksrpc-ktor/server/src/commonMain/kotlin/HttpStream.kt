@@ -22,7 +22,10 @@ import com.monkopedia.ksrpc.KsrpcException
 import com.monkopedia.ksrpc.RpcEndpointException
 import com.monkopedia.ksrpc.RpcHostService
 import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.ServiceTier
 import com.monkopedia.ksrpc.annotation.KsrpcInternal
+import com.monkopedia.ksrpc.requireTier
+import com.monkopedia.ksrpc.rpcObject
 import com.monkopedia.ksrpc.binary.ktor.asRpcBinaryData
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.ChannelClient
@@ -87,6 +90,8 @@ inline fun <reified T : RpcHostService> Routing.serveHttp(
     env: KsrpcEnvironment<String>,
     errorCodeToHttpStatus: Map<Int, Int> = DEFAULT_KSRPC_ERROR_CODE_TO_HTTP_STATUS
 ) {
+    @OptIn(KsrpcInternal::class)
+    requireTier(rpcObject<T>(), ServiceTier.HOST, "HTTP")
     val serializedService = service.serialized(env)
     serveHttp(basePath, serializedService, env, errorCodeToHttpStatus)
 }
