@@ -40,6 +40,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
@@ -144,7 +145,7 @@ class JsonRpcWriterBase(
                 comm.send(
                     json.encodeToJsonElement(
                         JsonRpcResponse(
-                            result = response,
+                            result = response ?: JsonNull,
                             id = id
                         )
                     )
@@ -207,7 +208,7 @@ class JsonRpcWriterBase(
         val request = JsonRpcRequest(
             method = method,
             params = message,
-            id = JsonPrimitive(wireId)
+            id = wireId?.let { JsonPrimitive(it) }
         )
         val wireCtx = coroutineContext[WireContextMap]
         val requestJson = injectContext(json.encodeToJsonElement(request), wireCtx, message)
