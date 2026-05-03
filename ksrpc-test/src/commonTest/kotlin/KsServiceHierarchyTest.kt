@@ -39,7 +39,9 @@ interface HierarchyCoreService : RpcService {
 }
 
 @KsService
-interface HierarchyExtendedService : HierarchyCoreService, RpcBidiService {
+interface HierarchyExtendedService :
+    HierarchyCoreService,
+    RpcBidiService {
     @KsMethod("/updates")
     suspend fun updates(filter: String): Flow<String>
 }
@@ -51,13 +53,17 @@ interface HierarchyBaseService : RpcService {
 }
 
 @KsService
-interface HierarchyMiddleService : HierarchyBaseService, RpcHostService {
+interface HierarchyMiddleService :
+    HierarchyBaseService,
+    RpcHostService {
     @KsMethod("/middle")
     suspend fun middle(): HierarchyCoreService
 }
 
 @KsService
-interface HierarchyFullService : HierarchyMiddleService, RpcBidiService {
+interface HierarchyFullService :
+    HierarchyMiddleService,
+    RpcBidiService {
     @KsMethod("/stream")
     suspend fun stream(): Flow<String>
 }
