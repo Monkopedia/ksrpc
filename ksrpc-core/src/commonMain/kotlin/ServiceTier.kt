@@ -72,11 +72,17 @@ fun <T : RpcService> requireTier(
             )
         }
         if (required == ServiceTier.BIDI && method.outputTransform is BaseSubserviceTransformer<*, *>) {
-            // Check if the output sub-service itself requires bidi
             throw IllegalArgumentException(
                 "${rpcObject.serviceName} requires bidirectional transport " +
                     "(method '$endpoint' returns a bidirectional sub-service), " +
                     "but $transportName does not support this."
+            )
+        }
+        if (required == ServiceTier.HOST && method.outputTransform is BaseSubserviceTransformer<*, *>) {
+            throw IllegalArgumentException(
+                "${rpcObject.serviceName} requires HOST transport " +
+                    "(method '$endpoint' returns a sub-service), " +
+                    "but $transportName only supports SIMPLE services."
             )
         }
     }

@@ -21,11 +21,13 @@ import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.RpcMethod
 import com.monkopedia.ksrpc.RpcObject
 import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.ServiceTier
 import com.monkopedia.ksrpc.SuspendCloseableObservable
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.channels.ChannelClient.Companion.DEFAULT
 import com.monkopedia.ksrpc.internal.HostSerializedServiceImpl
+import com.monkopedia.ksrpc.requireTier
 import com.monkopedia.ksrpc.rpcObject
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -41,8 +43,11 @@ suspend inline fun <reified T : RpcService, S> ChannelHost<S>.registerHost(servi
 /**
  * Register a service to be hosted on the default channel.
  */
-suspend inline fun <reified T : RpcService, S> SingleChannelHost<S>.registerDefault(service: T) =
-    registerDefault(service, rpcObject())
+suspend inline fun <reified T : RpcService, S> SingleChannelHost<S>.registerDefault(service: T) {
+    val obj = rpcObject<T>()
+    requireTier(obj, supportedTier, transportName)
+    registerDefault(service, obj)
+}
 
 /**
  * Register a service to be hosted, the [ChannelId] ollocated to this service
@@ -69,6 +74,21 @@ suspend fun <T : RpcService, S> SingleChannelHost<S>.registerDefault(
  * SerializedService.
  */
 interface SingleChannelHost<T> : KsrpcEnvironment.Element<T> {
+    /**
+     * The maximum [ServiceTier] this host supports. Defaults to [ServiceTier.BIDI]
+     * (full capability). Implementations with limited transport capabilities should
+     * override this to a lower tier.
+     */
+    val supportedTier: ServiceTier
+        get() = ServiceTier.BIDI
+
+    /**
+     * A human-readable name for this transport, used in error messages when a
+     * service exceeds the [supportedTier].
+     */
+    val transportName: String
+        get() = this::class.simpleName ?: "unknown transport"
+
     /**
      * Register the primary service to be hosted on this communication channel.
      *
