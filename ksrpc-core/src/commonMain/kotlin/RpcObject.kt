@@ -23,6 +23,15 @@ import com.monkopedia.ksrpc.channels.SerializedService
 interface RpcObject<T : RpcService> {
     val serviceName: String
     val endpoints: List<String>
+
+    /**
+     * The minimum transport capability tier this service requires, as determined
+     * by the compiler plugin from the service's method signatures. Used by
+     * transport registration checks to reject services that can't work on a
+     * given channel.
+     */
+    val serviceTier: ServiceTier get() = ServiceTier.SIMPLE
+
     fun <S> createStub(channel: SerializedService<S>): T
     fun findEndpoint(endpoint: String): RpcMethod<*, *, *>
 }
