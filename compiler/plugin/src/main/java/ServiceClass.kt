@@ -26,9 +26,11 @@ import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
+import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin.GeneratedByPlugin
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.classOrNull
+import org.jetbrains.kotlin.ir.util.companionObject
 import org.jetbrains.kotlin.ir.util.fqNameForIrSerialization
 import org.jetbrains.kotlin.ir.util.getAllSuperclasses
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
@@ -140,6 +142,16 @@ private class SubclassVisitor(
         val declFqName = declaration.fqNameForIrSerialization.asString()
         // Skip if this class is itself a @KsService (it has its own entry)
         if (declFqName in classes) {
+            return super.visitClass(declaration)
+        }
+        // Skip if the class already has a synthesized companion from
+        // FirSubtypeCompanionGenerator — that companion handles @RpcObjectKey
+        // itself and adding the class to irClassAndImpls would cause a duplicate
+        // annotation (see issue #160).
+        val companionOrigin = declaration.companionObject()?.origin
+        if (companionOrigin is GeneratedByPlugin &&
+            companionOrigin.pluginKey is FirSubtypeCompanionGenerator.Key
+        ) {
             return super.visitClass(declaration)
         }
         val ksServiceSupers = declaration.getAllSuperclasses().mapNotNull {
