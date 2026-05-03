@@ -68,6 +68,20 @@ interface HierarchyParentService : RpcHostService {
     suspend fun getExtended(): HierarchyExtendedService
 }
 
+// --- Same-tier inheritance (both RpcService, no tier escalation) ---
+
+@KsService
+interface SameTierBase : RpcService {
+    @KsMethod("/greet")
+    suspend fun greet(name: String): String
+}
+
+@KsService
+interface SameTierChild : SameTierBase {
+    @KsMethod("/farewell")
+    suspend fun farewell(name: String): String
+}
+
 // --- Implementations ---
 
 private class HierarchyExtendedServiceImpl : HierarchyExtendedService {
@@ -131,6 +145,43 @@ class KsServiceHierarchyTest {
             assertEquals(listOf("update-1"), result)
         }
     )
+
+    // --- Test: Same capability tier inheritance ---
+
+    @Test
+    fun sameTierChildHasBothEndpoints() = runBlockingUnit {
+        val obj = rpcObject<SameTierChild>()
+        assertTrue(
+            "greet" in obj.endpoints,
+            "Expected 'greet' (inherited) in endpoints: ${obj.endpoints}"
+        )
+        assertTrue(
+            "farewell" in obj.endpoints,
+            "Expected 'farewell' (own) in endpoints: ${obj.endpoints}"
+        )
+    }
+
+    @Test
+    fun sameTierChildRoundTrip() = runBlockingUnit {
+        val impl = object : SameTierChild {
+            override suspend fun greet(name: String) = "hello $name"
+            override suspend fun farewell(name: String) = "bye $name"
+        }
+        val channel = impl.serialized<SameTierChild, String>(ksrpcEnvironment { })
+        val stub = channel.toStub<SameTierChild, String>()
+        assertEquals("hello world", stub.greet("world"))
+        assertEquals("bye world", stub.farewell("world"))
+    }
+
+    @Test
+    fun sameTierBaseStillWorksAlone() = runBlockingUnit {
+        val impl = object : SameTierBase {
+            override suspend fun greet(name: String) = "hi $name"
+        }
+        val channel = impl.serialized<SameTierBase, String>(ksrpcEnvironment { })
+        val stub = channel.toStub<SameTierBase, String>()
+        assertEquals("hi there", stub.greet("there"))
+    }
 
     // --- Test 2: Parent works independently ---
 
