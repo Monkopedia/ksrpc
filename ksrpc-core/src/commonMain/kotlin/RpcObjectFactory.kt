@@ -17,6 +17,7 @@ package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import kotlin.reflect.KType
+import kotlinx.atomicfu.atomic
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.serializer
@@ -46,6 +47,32 @@ interface RpcObjectFactory<T : RpcService> {
      *   any type argument is not `@Serializable` / not resolvable by kotlinx.serialization.
      */
     fun create(typeArgs: List<KType>): RpcObject<T>
+}
+
+/**
+ * Global cache for [RpcObject] instances produced by [RpcObjectFactory.create].
+ *
+ * Keyed by `(factory identity, typeArgs)` so that repeated calls with the same type
+ * arguments return the same [RpcObject] instance instead of allocating a new one each
+ * time. The cache uses copy-on-write via [atomicfu] to stay lock-free and KMP-safe.
+ */
+private val factoryCache =
+    atomic(emptyMap<Pair<RpcObjectFactory<*>, List<KType>>, RpcObject<*>>())
+
+/**
+ * Return a cached [RpcObject] for the given [typeArgs], creating one via [create] only on
+ * the first call for each unique `(this, typeArgs)` pair. Thread-safe via atomic
+ * copy-on-write; in the rare event of a race, [create] may be called more than once but
+ * only one result is kept.
+ */
+@Suppress("UNCHECKED_CAST")
+@KsrpcInternal
+fun <T : RpcService> RpcObjectFactory<T>.cachedCreate(typeArgs: List<KType>): RpcObject<T> {
+    val key: Pair<RpcObjectFactory<*>, List<KType>> = this to typeArgs
+    factoryCache.value[key]?.let { return it as RpcObject<T> }
+    val result = create(typeArgs)
+    factoryCache.lazySet(factoryCache.value + (key to result))
+    return result
 }
 
 /**

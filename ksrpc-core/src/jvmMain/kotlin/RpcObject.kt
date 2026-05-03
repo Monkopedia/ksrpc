@@ -15,6 +15,7 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import java.io.PrintWriter
 import java.io.StringWriter
 import kotlin.reflect.KClass
@@ -35,6 +36,7 @@ import kotlin.reflect.full.companionObjectInstance
  *    parent's factory even though `TypedStream` itself has no type parameters).
  */
 @Suppress("UNCHECKED_CAST")
+@OptIn(KsrpcInternal::class)
 actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> {
     val klass = T::class
     when (val companion = klass.companionObjectInstance) {
@@ -47,7 +49,7 @@ actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> {
                     "Star projection not supported in rpcObject<${klass.simpleName}<...>>()"
                 )
             }
-            return (companion as RpcObjectFactory<T>).create(typeArgs)
+            return (companion as RpcObjectFactory<T>).cachedCreate(typeArgs)
         }
     }
     // Walk supertypes via KClass.allSupertypes, which returns KTypes with type arguments
@@ -65,7 +67,7 @@ actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> {
                         "Star projection not supported in supertype $supertype of $klass"
                     )
                 }
-                return (superCompanion as RpcObjectFactory<T>).create(typeArgs)
+                return (superCompanion as RpcObjectFactory<T>).cachedCreate(typeArgs)
             }
         }
     }
