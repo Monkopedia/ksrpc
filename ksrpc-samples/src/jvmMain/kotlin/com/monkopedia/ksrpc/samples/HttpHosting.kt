@@ -20,7 +20,6 @@ package com.monkopedia.ksrpc.samples
 import com.monkopedia.ksrpc.ksrpcEnvironment
 import com.monkopedia.ksrpc.ktor.asHttpChannelClient
 import com.monkopedia.ksrpc.ktor.serveHttp
-import com.monkopedia.ksrpc.serialized
 import com.monkopedia.ksrpc.toStub
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
@@ -40,7 +39,7 @@ fun httpServerSetup() {
     // Embed ksrpc into a Ktor HTTP server.
     val server = embeddedServer(Netty, port = 8080) {
         routing {
-            serveHttp("/api", service.serialized(env), env)
+            serveHttp("/api", service, env)
         }
     }
     // server.start(wait = true)

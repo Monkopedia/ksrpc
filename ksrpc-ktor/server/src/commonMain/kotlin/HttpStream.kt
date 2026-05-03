@@ -84,7 +84,7 @@ val DEFAULT_KSRPC_ERROR_CODE_TO_HTTP_STATUS: Map<Int, Int> = mapOf(
     KsrpcException.INTERNAL_ERROR_CODE to 500
 )
 
-inline fun <reified T : RpcHostService> Routing.serveHttp(
+inline fun <reified T : RpcService> Routing.serveHttp(
     basePath: String,
     service: T,
     env: KsrpcEnvironment<String>,
