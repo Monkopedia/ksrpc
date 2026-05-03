@@ -51,38 +51,9 @@ import kotlinx.coroutines.withContext
 private const val KSRPC_BINARY = "binary"
 private const val KSRPC_CHANNEL = "channel"
 
-/**
- * Header carrying the original ksrpc error code when the wire status maps to the default
- * 500 fallback (i.e. the code is not present in the configured `errorCodeToHttpStatus` map).
- * The client side uses this to recover the exact code for `@KsError`-bound payload routing
- * on the receive path. Match this constant on both ends — see also the duplicate definition
- * in `ksrpc-ktor-client`'s `HttpSerializedChannel.kt`.
- */
-const val KSRPC_ERROR_CODE_HEADER: String = "X-Ksrpc-Error-Code"
-
-/**
- * Header carrying the human-readable error message that pairs with the ksrpc error code on
- * the wire. The body slot carries the typed `errorData` payload; the message moves to a
- * header so it survives transports that strip/escape the body, and so the client can
- * recover it cleanly even when the body decode fails.
- */
-const val KSRPC_ERROR_MESSAGE_HEADER: String = "X-Ksrpc-Error-Message"
-
-/**
- * Default mapping from ksrpc error codes to HTTP status codes used by the HTTP transport.
- *   - [KsrpcException.ENDPOINT_NOT_FOUND_CODE] (`-32601`) -> 404
- *   - [KsrpcException.INTERNAL_ERROR_CODE] (`-32603`) -> 500
- *
- * Codes not present in the configured map default to status 500, with the original code
- * carried in [KSRPC_ERROR_CODE_HEADER]. The error response body always carries the
- * wire-format-encoded error payload (or empty when no payload is attached).
- *
- * Pass the same map on both ends so the round-trip preserves user-defined codes.
- */
-val DEFAULT_KSRPC_ERROR_CODE_TO_HTTP_STATUS: Map<Int, Int> = mapOf(
-    KsrpcException.ENDPOINT_NOT_FOUND_CODE to 404,
-    KsrpcException.INTERNAL_ERROR_CODE to 500
-)
+// KSRPC_ERROR_CODE_HEADER, KSRPC_ERROR_MESSAGE_HEADER, and
+// DEFAULT_KSRPC_ERROR_CODE_TO_HTTP_STATUS are defined in ksrpc-ktor-client's
+// HttpErrorMapping.kt and re-exported here via the api dependency.
 
 inline fun <reified T : RpcService> Routing.serveHttp(
     basePath: String,

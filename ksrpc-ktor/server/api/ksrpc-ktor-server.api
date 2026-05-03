@@ -1,7 +1,4 @@
 public final class com/monkopedia/ksrpc/ktor/HttpStreamKt {
-	public static final field KSRPC_ERROR_CODE_HEADER Ljava/lang/String;
-	public static final field KSRPC_ERROR_MESSAGE_HEADER Ljava/lang/String;
-	public static final fun getDEFAULT_KSRPC_ERROR_CODE_TO_HTTP_STATUS ()Ljava/util/Map;
 	public static final fun serveHttp (Lio/ktor/server/routing/Routing;Ljava/lang/String;Lcom/monkopedia/ksrpc/channels/SerializedChannel;Lcom/monkopedia/ksrpc/KsrpcEnvironment;Ljava/util/Map;)V
 	public static final fun serveHttp (Lio/ktor/server/routing/Routing;Ljava/lang/String;Lcom/monkopedia/ksrpc/channels/SerializedService;Lcom/monkopedia/ksrpc/KsrpcEnvironment;Ljava/util/Map;)V
 	public static synthetic fun serveHttp$default (Lio/ktor/server/routing/Routing;Ljava/lang/String;Lcom/monkopedia/ksrpc/channels/SerializedChannel;Lcom/monkopedia/ksrpc/KsrpcEnvironment;Ljava/util/Map;ILjava/lang/Object;)V

@@ -21,7 +21,8 @@ plugins {
 
 ksrpcModule(
     supportJs = false,
-    supportMingw = false
+    supportMingw = false,
+    supportLinuxArm64 = false
 )
 
 kotlin {
@@ -32,6 +33,10 @@ kotlin {
         // Exposed as `api` so consumers of the HTTP transport don't need to
         // declare it.
         api(project(":ksrpc-binary-ktor"))
+        // Shared HTTP constants (error headers, default status mapping) live in
+        // the client module to avoid duplicate symbols in K/N linking when both
+        // client and server appear on the same classpath.
+        api(project(":ksrpc-ktor-client"))
         api(libs.ktor.server)
     }
 }
