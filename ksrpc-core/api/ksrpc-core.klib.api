@@ -13,6 +13,18 @@ open annotation class com.monkopedia.ksrpc/RpcObjectKey : kotlin/Annotation { //
         final fun <get-rpcObject>(): kotlin.reflect/KClass<*> // com.monkopedia.ksrpc/RpcObjectKey.rpcObject.<get-rpcObject>|<get-rpcObject>(){}[0]
 }
 
+final enum class com.monkopedia.ksrpc/ServiceTier : kotlin/Enum<com.monkopedia.ksrpc/ServiceTier> { // com.monkopedia.ksrpc/ServiceTier|null[0]
+    enum entry BIDI // com.monkopedia.ksrpc/ServiceTier.BIDI|null[0]
+    enum entry HOST // com.monkopedia.ksrpc/ServiceTier.HOST|null[0]
+    enum entry SIMPLE // com.monkopedia.ksrpc/ServiceTier.SIMPLE|null[0]
+
+    final val entries // com.monkopedia.ksrpc/ServiceTier.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<com.monkopedia.ksrpc/ServiceTier> // com.monkopedia.ksrpc/ServiceTier.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): com.monkopedia.ksrpc/ServiceTier // com.monkopedia.ksrpc/ServiceTier.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<com.monkopedia.ksrpc/ServiceTier> // com.monkopedia.ksrpc/ServiceTier.values|values#static(){}[0]
+}
+
 abstract fun interface com.monkopedia.ksrpc/ErrorListener { // com.monkopedia.ksrpc/ErrorListener|null[0]
     abstract fun onError(kotlin/Throwable) // com.monkopedia.ksrpc/ErrorListener.onError|onError(kotlin.Throwable){}[0]
 }
@@ -67,6 +79,11 @@ abstract interface <#A: kotlin/Any?> com.monkopedia.ksrpc.channels/SingleChannel
 abstract interface <#A: kotlin/Any?> com.monkopedia.ksrpc.channels/SingleChannelConnection : com.monkopedia.ksrpc.channels/SingleChannelClient<#A>, com.monkopedia.ksrpc.channels/SingleChannelHost<#A> // com.monkopedia.ksrpc.channels/SingleChannelConnection|null[0]
 
 abstract interface <#A: kotlin/Any?> com.monkopedia.ksrpc.channels/SingleChannelHost : com.monkopedia.ksrpc/KsrpcEnvironment.Element<#A> { // com.monkopedia.ksrpc.channels/SingleChannelHost|null[0]
+    open val supportedTier // com.monkopedia.ksrpc.channels/SingleChannelHost.supportedTier|{}supportedTier[0]
+        open fun <get-supportedTier>(): com.monkopedia.ksrpc/ServiceTier // com.monkopedia.ksrpc.channels/SingleChannelHost.supportedTier.<get-supportedTier>|<get-supportedTier>(){}[0]
+    open val transportName // com.monkopedia.ksrpc.channels/SingleChannelHost.transportName|{}transportName[0]
+        open fun <get-transportName>(): kotlin/String // com.monkopedia.ksrpc.channels/SingleChannelHost.transportName.<get-transportName>|<get-transportName>(){}[0]
+
     abstract suspend fun registerDefault(com.monkopedia.ksrpc.channels/SerializedService<#A>) // com.monkopedia.ksrpc.channels/SingleChannelHost.registerDefault|registerDefault(com.monkopedia.ksrpc.channels.SerializedService<1:0>){}[0]
 }
 
