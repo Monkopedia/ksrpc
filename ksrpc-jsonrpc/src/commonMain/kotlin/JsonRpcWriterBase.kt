@@ -18,6 +18,7 @@
 package com.monkopedia.ksrpc.jsonrpc.internal
 
 import com.monkopedia.ksrpc.KsrpcEnvironment
+import com.monkopedia.ksrpc.ServiceTier
 import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.channels.CancellationSupport
 import com.monkopedia.ksrpc.channels.RpcCallId
@@ -61,6 +62,9 @@ class JsonRpcWriterBase(
 ) : JsonRpcChannel,
     SingleChannelConnection<String>,
     CancellationSupport {
+    override val supportedTier: ServiceTier = ServiceTier.SIMPLE
+    override val transportName: String = "JSON-RPC (SingleChannelConnection)"
+
     private val json = (env.serialization as? Json) ?: Json
 
     companion object {
