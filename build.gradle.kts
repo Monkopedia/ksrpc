@@ -120,15 +120,26 @@ subprojects {
 val dokkaAssets = rootProject.file("dokka/assets").listFiles()?.toList().orEmpty()
 val dokkaStyleSheets = rootProject.file("dokka/styles").listFiles()?.toList().orEmpty()
 
+val processedGuidesDir = layout.buildDirectory.dir("dokka-guides")
+val processDokkaGuides = tasks.register<Copy>("processDokkaGuides") {
+    from("dokka/guides")
+    into(processedGuidesDir)
+    filter { it.replace("\$KSRPC_VERSION", project.version.toString()) }
+}
+
 dokka {
     dokkaPublications.named("html") {
         outputDirectory.set(projectDir.resolve("build/dokka"))
-        includes.from(fileTree("dokka/guides") { include("*.md") })
+        includes.from(processedGuidesDir.map { fileTree(it) { include("*.md") } })
     }
     pluginsConfiguration.html {
         customAssets.from(dokkaAssets)
         customStyleSheets.from(dokkaStyleSheets)
     }
+}
+
+tasks.matching { it.name.startsWith("dokkaGenerate") }.configureEach {
+    dependsOn(processDokkaGuides)
 }
 
 dependencies {
