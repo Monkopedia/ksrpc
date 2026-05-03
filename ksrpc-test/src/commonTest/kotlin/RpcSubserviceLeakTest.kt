@@ -42,7 +42,7 @@ interface LeakTestSubInterface : RpcService {
 }
 
 @KsService
-interface LeakTestRootInterface : RpcService {
+interface LeakTestRootInterface : RpcHostService {
     @KsMethod("/subservice")
     suspend fun subservice(prefix: String): LeakTestSubInterface
 }

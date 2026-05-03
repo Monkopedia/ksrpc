@@ -62,7 +62,7 @@ class FlowAutoDetectTest {
      * raw `KsFlowService<T>` signatures through the pre-#39 codegen path.
      */
     @KsService
-    interface StreamService : RpcService {
+    interface StreamService : RpcBidiService {
         @KsMethod("/updates")
         suspend fun updates(filter: String): Flow<Update>
 

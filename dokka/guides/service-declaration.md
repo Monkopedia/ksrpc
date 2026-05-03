@@ -137,7 +137,7 @@ interface EntityService : RpcService {
 }
 
 @KsService
-interface CatalogService : RpcService {
+interface CatalogService : RpcBidiService {
     @KsMethod("/get")
     suspend fun getEntity(id: Int): EntityService
 

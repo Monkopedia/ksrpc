@@ -90,7 +90,7 @@ public final synthetic class com/monkopedia/ksrpc/flow/KsFlowCollector$Stub$Comp
 	public fun <init> ()V
 }
 
-public abstract interface class com/monkopedia/ksrpc/flow/KsFlowService : com/monkopedia/ksrpc/RpcService, kotlinx/coroutines/flow/Flow {
+public abstract interface class com/monkopedia/ksrpc/flow/KsFlowService : com/monkopedia/ksrpc/RpcBidiService, kotlinx/coroutines/flow/Flow {
 	public static final field Companion Lcom/monkopedia/ksrpc/flow/KsFlowService$Companion;
 	public fun collect (Lkotlinx/coroutines/flow/FlowCollector;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun startCollection (Lcom/monkopedia/ksrpc/flow/KsFlowCollector;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;

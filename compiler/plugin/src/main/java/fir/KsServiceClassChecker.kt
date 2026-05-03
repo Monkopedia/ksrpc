@@ -13,22 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(org.jetbrains.kotlin.fir.declarations.DirectDeclarationsAccess::class)
+
 package com.monkopedia.ksrpc.plugin.fir
 
 import com.monkopedia.ksrpc.plugin.FqConstants
 import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.diagnostics.DiagnosticReporter
 import org.jetbrains.kotlin.diagnostics.reportOn
+import org.jetbrains.kotlin.KtSourceElement
+import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.analysis.checkers.MppCheckerKind
 import org.jetbrains.kotlin.fir.analysis.checkers.context.CheckerContext
 import org.jetbrains.kotlin.fir.analysis.checkers.declaration.FirDeclarationChecker
 import org.jetbrains.kotlin.fir.declarations.FirClass
+import org.jetbrains.kotlin.fir.declarations.FirNamedFunction
+import org.jetbrains.kotlin.fir.resolve.providers.symbolProvider
 import org.jetbrains.kotlin.fir.declarations.FirRegularClass
 import org.jetbrains.kotlin.fir.declarations.FirTypeParameter
 import org.jetbrains.kotlin.fir.declarations.hasAnnotation
 import org.jetbrains.kotlin.fir.declarations.utils.classId
 import org.jetbrains.kotlin.fir.symbols.SymbolInternals
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassSymbol
+import org.jetbrains.kotlin.fir.types.ConeKotlinType
+import org.jetbrains.kotlin.fir.types.classId
+import org.jetbrains.kotlin.fir.types.coneType
 import org.jetbrains.kotlin.fir.types.toRegularClassSymbol
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
@@ -54,10 +63,20 @@ import org.jetbrains.kotlin.types.Variance
 internal object KsServiceClassChecker :
     FirDeclarationChecker<FirClass>(MppCheckerKind.Common) {
 
+    /** Service capability tiers, ordered by increasing requirement. */
+    private enum class Tier(val interfaceName: String) {
+        SIMPLE("RpcService"),
+        HOST("RpcHostService"),
+        BIDI("RpcBidiService")
+    }
+
     private val KS_SERVICE_ID =
         ClassId(FqName("com.monkopedia.ksrpc.annotation"), Name.identifier("KsService"))
     private val FQRPC_SERVICE = FqConstants.FQRPC_SERVICE
+    private val FQRPC_HOST_SERVICE = FqConstants.FQRPC_HOST_SERVICE
+    private val FQRPC_BIDI_SERVICE = FqConstants.FQRPC_BIDI_SERVICE
     private val FQ_INTROSPECTABLE_RPC_SERVICE = FqConstants.FQ_INTROSPECTABLE_RPC_SERVICE
+    private val FLOW_FQ = FqConstants.FLOW
 
     context(context: CheckerContext, reporter: DiagnosticReporter)
     override fun check(declaration: FirClass) {
@@ -173,6 +192,157 @@ internal object KsServiceClassChecker :
                 }
             }
         }
+
+        // #4: service tier validation — check that the declared tier is sufficient
+        // for the methods declared on this service.
+        checkServiceTier(declaration, allSuperFqNames, session, source, context, reporter)
+    }
+
+    /**
+     * Determine the tier that [declaration] explicitly extends.
+     */
+    private fun declaredTier(allSuperFqNames: Set<FqName>): Tier = when {
+        allSuperFqNames.contains(FQRPC_BIDI_SERVICE) -> Tier.BIDI
+        allSuperFqNames.contains(FQRPC_HOST_SERVICE) -> Tier.HOST
+        else -> Tier.SIMPLE
+    }
+
+    /**
+     * Determine the tier of a type that is itself a `@KsService`.
+     */
+    @OptIn(SymbolInternals::class)
+    private fun tierOfService(
+        serviceSymbol: FirClassSymbol<*>,
+        session: FirSession
+    ): Tier {
+        val superFqNames = collectAllSuperFqNames(serviceSymbol.fir, session)
+        return declaredTier(superFqNames)
+    }
+
+    /**
+     * Check whether a [ConeKotlinType] resolves to a `Flow<T>`.
+     */
+    private fun isFlowType(type: ConeKotlinType): Boolean {
+        val classId = type.classId ?: return false
+        return classId.asSingleFqName() == FLOW_FQ
+    }
+
+    /**
+     * Check whether a [ConeKotlinType] resolves to a `@KsService` type, and
+     * if so return its symbol.
+     */
+    private fun asKsServiceSymbol(
+        type: ConeKotlinType,
+        session: FirSession
+    ): FirClassSymbol<*>? {
+        val classId = type.classId ?: return null
+        val symbol = session.symbolProvider.getClassLikeSymbolByClassId(classId)
+            as? FirClassSymbol<*> ?: return null
+        return if (symbol.hasAnnotation(KS_SERVICE_ID, session)) symbol else null
+    }
+
+    /**
+     * Compute the required tier and compare against the declared tier. Report
+     * a diagnostic if the required tier exceeds the declared tier.
+     */
+    @OptIn(SymbolInternals::class)
+    private fun checkServiceTier(
+        declaration: FirClass,
+        allSuperFqNames: Set<FqName>,
+        session: FirSession,
+        source: KtSourceElement,
+        context: CheckerContext,
+        reporter: DiagnosticReporter
+    ) {
+        val declared = declaredTier(allSuperFqNames)
+        val selfName = declaration.symbol.classId.shortClassName.asString()
+        val ksMethodId =
+            ClassId(FqName("com.monkopedia.ksrpc.annotation"), Name.identifier("KsMethod"))
+
+        for (member in declaration.declarations) {
+            val function = member as? FirNamedFunction ?: continue
+            if (!function.symbol.hasAnnotation(ksMethodId, session)) continue
+
+            val methodName = function.name.asString()
+
+            // Check return type
+            val returnType = function.returnTypeRef.coneType
+            var requiredForMethod = Tier.SIMPLE
+
+            if (isFlowType(returnType)) {
+                // Flow<T> is backed by KsFlowService<T> which is RpcBidiService
+                requiredForMethod = Tier.BIDI
+            } else {
+                val returnServiceSymbol = asKsServiceSymbol(returnType, session)
+                if (returnServiceSymbol != null) {
+                    // Returning a sub-service requires at least HOST
+                    val subTier = tierOfService(returnServiceSymbol, session)
+                    requiredForMethod = maxOf(requiredForMethod, Tier.HOST)
+                    // If the sub-service itself requires BIDI, propagate
+                    requiredForMethod = maxOf(requiredForMethod, subTier)
+                }
+            }
+
+            // Check input parameters (skip dispatch receiver)
+            for (param in function.valueParameters) {
+                val paramType = param.returnTypeRef.coneType
+                if (isFlowType(paramType)) {
+                    requiredForMethod = Tier.BIDI
+                } else {
+                    val paramServiceSymbol = asKsServiceSymbol(paramType, session)
+                    if (paramServiceSymbol != null) {
+                        // Accepting a sub-service as input requires BIDI
+                        requiredForMethod = Tier.BIDI
+                    }
+                }
+            }
+
+            if (requiredForMethod > declared) {
+                val returnDesc = describeMethodRequirement(
+                    returnType, function.valueParameters.map { it.returnTypeRef.coneType },
+                    session
+                )
+                reporter.reportOn(
+                    source,
+                    KsrpcDiagnostics.SERVICE_TIER_MISMATCH,
+                    "$selfName extends ${declared.interfaceName} but method " +
+                        "'$methodName' $returnDesc. Change " +
+                        "'${declared.interfaceName}' to " +
+                        "'${requiredForMethod.interfaceName}'.",
+                    context
+                )
+            }
+        }
+    }
+
+    /**
+     * Build a human-readable description of why a method requires a higher tier.
+     */
+    private fun describeMethodRequirement(
+        returnType: ConeKotlinType,
+        paramTypes: List<ConeKotlinType>,
+        session: FirSession
+    ): String {
+        if (isFlowType(returnType)) {
+            return "returns Flow<T> (a RpcBidiService)"
+        }
+        for (pt in paramTypes) {
+            if (isFlowType(pt)) {
+                return "accepts Flow<T> (a RpcBidiService)"
+            }
+            val sym = asKsServiceSymbol(pt, session)
+            if (sym != null) {
+                val name = sym.classId.shortClassName.asString()
+                return "accepts $name (a @KsService input, requires RpcBidiService)"
+            }
+        }
+        val retSym = asKsServiceSymbol(returnType, session)
+        if (retSym != null) {
+            val name = retSym.classId.shortClassName.asString()
+            val tier = tierOfService(retSym, session)
+            return "returns $name (a ${tier.interfaceName})"
+        }
+        return "requires a higher service tier"
     }
 
     /**
@@ -181,7 +351,7 @@ internal object KsServiceClassChecker :
     @OptIn(SymbolInternals::class)
     private fun collectAllSuperFqNames(
         declaration: FirClass,
-        session: org.jetbrains.kotlin.fir.FirSession
+        session: FirSession
     ): Set<FqName> {
         val result = mutableSetOf<FqName>()
         val queue = ArrayDeque<FirClass>()

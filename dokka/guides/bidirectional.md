@@ -64,7 +64,7 @@ interface ProgressCallback : RpcService {
 }
 
 @KsService
-interface TaskRunner : RpcService {
+interface TaskRunner : RpcBidiService {
     @KsMethod("/run")
     suspend fun runTask(callback: ProgressCallback): String
 }
@@ -117,7 +117,7 @@ interface TaskHandle : RpcService {
 }
 
 @KsService
-interface Scheduler : RpcService {
+interface Scheduler : RpcBidiService {
     @KsMethod("/schedule")
     suspend fun schedule(callback: ProgressCallback): TaskHandle
 }

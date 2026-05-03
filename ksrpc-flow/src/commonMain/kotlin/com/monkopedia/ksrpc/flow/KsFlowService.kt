@@ -15,6 +15,7 @@
  */
 package com.monkopedia.ksrpc.flow
 
+import com.monkopedia.ksrpc.RpcBidiService
 import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.RpcService
 import com.monkopedia.ksrpc.annotation.KsMethod
@@ -45,7 +46,7 @@ import kotlinx.coroutines.flow.FlowCollector
 @KsService
 interface KsFlowService<T> :
     Flow<T>,
-    RpcService {
+    RpcBidiService {
     /**
      * Start collecting from this flow service.
      *

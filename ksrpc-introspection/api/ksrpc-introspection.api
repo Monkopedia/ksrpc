@@ -1,4 +1,4 @@
-public abstract interface class com/monkopedia/ksrpc/IntrospectableRpcService : com/monkopedia/ksrpc/RpcService {
+public abstract interface class com/monkopedia/ksrpc/IntrospectableRpcService : com/monkopedia/ksrpc/RpcHostService {
 	public fun getIntrospection (Lkotlin/Unit;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun getIntrospection$default (Lcom/monkopedia/ksrpc/IntrospectableRpcService;Lkotlin/Unit;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }

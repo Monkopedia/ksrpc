@@ -46,7 +46,7 @@ class FlowClasspathDiagnosticTest {
             """
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
-import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.RpcBidiService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.Serializable
 
@@ -54,7 +54,7 @@ import kotlinx.serialization.Serializable
 data class Update(val id: String)
 
 @KsService
-interface MyService : RpcService {
+interface MyService : RpcBidiService {
     @KsMethod("/updates")
     suspend fun updates(filter: String): Flow<Update>
 }
@@ -81,7 +81,7 @@ interface MyService : RpcService {
             """
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
-import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.RpcBidiService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.Serializable
 
@@ -92,7 +92,7 @@ data class Chunk(val bytes: String)
 data class Receipt(val ok: Boolean)
 
 @KsService
-interface UploadService : RpcService {
+interface UploadService : RpcBidiService {
     @KsMethod("/upload")
     suspend fun upload(items: Flow<Chunk>): Receipt
 }

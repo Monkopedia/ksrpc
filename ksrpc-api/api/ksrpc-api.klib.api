@@ -68,6 +68,10 @@ abstract interface <#A: kotlin.coroutines/CoroutineContext.Element> com.monkoped
     abstract fun toWire(#A): kotlin/String // com.monkopedia.ksrpc/KsContextBinding.toWire|toWire(1:0){}[0]
 }
 
+abstract interface com.monkopedia.ksrpc/RpcBidiService : com.monkopedia.ksrpc/RpcHostService // com.monkopedia.ksrpc/RpcBidiService|null[0]
+
+abstract interface com.monkopedia.ksrpc/RpcHostService : com.monkopedia.ksrpc/RpcService // com.monkopedia.ksrpc/RpcHostService|null[0]
+
 abstract interface com.monkopedia.ksrpc/RpcService : com.monkopedia.ksrpc/SuspendCloseable { // com.monkopedia.ksrpc/RpcService|null[0]
     open suspend fun close() // com.monkopedia.ksrpc/RpcService.close|close(){}[0]
 }

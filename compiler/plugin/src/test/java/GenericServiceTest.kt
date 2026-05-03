@@ -408,6 +408,7 @@ fun <S> useStub(
             """
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.RpcBidiService
 import com.monkopedia.ksrpc.RpcService
 
 @KsService
@@ -417,7 +418,7 @@ interface Sub<T> : RpcService {
 }
 
 @KsService
-interface Outer<T> : RpcService {
+interface Outer<T> : RpcBidiService {
     @KsMethod("/take")
     suspend fun take(sub: Sub<T>)
 
@@ -443,6 +444,7 @@ interface Outer<T> : RpcService {
             """
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.RpcHostService
 import com.monkopedia.ksrpc.RpcService
 
 @KsService
@@ -452,7 +454,7 @@ interface Token : RpcService {
 }
 
 @KsService
-interface GenericHolder<T> : RpcService {
+interface GenericHolder<T> : RpcHostService {
     @KsMethod("/token")
     suspend fun token(u: Unit): Token
 }

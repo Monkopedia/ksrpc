@@ -35,7 +35,7 @@ interface ChildInterface : RpcService {
 }
 
 @KsService
-interface PrimaryInterface : RpcService {
+interface PrimaryInterface : RpcBidiService {
     @KsMethod("/rpc")
     suspend fun basicCall(input: String): String
 

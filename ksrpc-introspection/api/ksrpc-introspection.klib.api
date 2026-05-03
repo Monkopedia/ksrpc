@@ -37,7 +37,7 @@ final enum class com.monkopedia.ksrpc/RpcDescriptorType : kotlin/Enum<com.monkop
     final fun values(): kotlin/Array<com.monkopedia.ksrpc/RpcDescriptorType> // com.monkopedia.ksrpc/RpcDescriptorType.values|values#static(){}[0]
 }
 
-abstract interface com.monkopedia.ksrpc/IntrospectableRpcService : com.monkopedia.ksrpc/RpcService { // com.monkopedia.ksrpc/IntrospectableRpcService|null[0]
+abstract interface com.monkopedia.ksrpc/IntrospectableRpcService : com.monkopedia.ksrpc/RpcHostService { // com.monkopedia.ksrpc/IntrospectableRpcService|null[0]
     open suspend fun getIntrospection(kotlin/Unit = ...): com.monkopedia.ksrpc/IntrospectionService // com.monkopedia.ksrpc/IntrospectableRpcService.getIntrospection|getIntrospection(kotlin.Unit){}[0]
 }
 

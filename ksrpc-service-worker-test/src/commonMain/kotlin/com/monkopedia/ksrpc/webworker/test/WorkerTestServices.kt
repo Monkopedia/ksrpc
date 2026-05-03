@@ -15,6 +15,7 @@
  */
 package com.monkopedia.ksrpc.webworker.test
 
+import com.monkopedia.ksrpc.RpcHostService
 import com.monkopedia.ksrpc.RpcService
 import com.monkopedia.ksrpc.annotation.KsMethod
 import com.monkopedia.ksrpc.annotation.KsService
@@ -43,7 +44,7 @@ interface WorkerTestSubInterface : RpcService {
  * Mirror of `TestRootInterface` from ksrpc-test.
  */
 @KsService
-interface WorkerTestRootInterface : RpcService {
+interface WorkerTestRootInterface : RpcHostService {
     @KsMethod("/rpc")
     suspend fun rpc(u: Pair<String, String>): String
 
