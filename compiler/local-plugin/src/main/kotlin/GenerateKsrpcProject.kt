@@ -276,7 +276,7 @@ fun Project.ksrpcModule(
                 it.url.set("http://github.com/Monkopedia/ksrpc/")
             }
         }
-        publishToMavenCentral()
+        publishToMavenCentral(automaticRelease = true)
         signAllPublications()
     }
 

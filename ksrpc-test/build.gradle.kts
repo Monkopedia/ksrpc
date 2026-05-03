@@ -163,9 +163,11 @@ val copyLib = tasks.register("copyLib", Copy::class) {
             destinationDir = projectDir.resolve("build/generated/lib/resources/libs/")
         }
 
-        else -> throw GradleException(
-            "Host OS '$hostOs' is not supported in Kotlin/Native $project."
-        )
+        else -> {
+            // Unsupported host (e.g. Windows) — skip native lib copy.
+            // The task will be a no-op; JNI tests won't run on this platform.
+            enabled = false
+        }
     }
     doFirst {
     }
