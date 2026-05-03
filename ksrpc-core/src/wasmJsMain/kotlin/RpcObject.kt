@@ -15,6 +15,7 @@
  */
 package com.monkopedia.ksrpc
 
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import kotlin.reflect.AssociatedObjectKey
 import kotlin.reflect.ExperimentalAssociatedObjects
 import kotlin.reflect.KClass
@@ -32,7 +33,7 @@ actual annotation class RpcObjectKey actual constructor(
 )
 
 @Suppress("UNCHECKED_CAST")
-@OptIn(ExperimentalAssociatedObjects::class)
+@OptIn(ExperimentalAssociatedObjects::class, KsrpcInternal::class)
 actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> {
     val obj = T::class.findAssociatedObject<RpcObjectKey>()
     when (obj) {
@@ -57,7 +58,7 @@ actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> {
                         "explicit type arguments (see issue #64)."
                 )
             }
-            return factory.create(typeArgs)
+            return factory.getOrCreate(typeArgs)
         }
     }
     return error("Can't find rpc companion for ${T::class}")
