@@ -80,10 +80,19 @@ class CompanionGeneration(
         // companion is the `RpcObject`; for generic services it's the `RpcObjectFactory`.
         // `rpcObject<T>()` inspects the returned instance and, when it's a factory,
         // resolves typeArgs from `typeOf<T>()` and calls `create(...)`.
-        env.rpcObjectKey?.let {
+        env.rpcObjectKey?.let { rpcObjectKeySymbol ->
+            val rpcObjectKeyFqName = rpcObjectKeySymbol.owner.kotlinFqName
             val objectReference = createClassReference(context, declaration)
             cls.irClassAndImpls.forEach { irClass ->
-                irClass.annotations += createRpcObjectAnnotation(irClass, it, objectReference)
+                // Skip classes that already have @RpcObjectKey (e.g. plain-Kotlin subtypes
+                // whose synthesized companion already added the annotation via
+                // SubtypeCompanionGeneration — see issue #160).
+                val alreadyAnnotated = irClass.annotations.any {
+                    it.type.classFqName == rpcObjectKeyFqName
+                }
+                if (!alreadyAnnotated) {
+                    irClass.annotations += createRpcObjectAnnotation(irClass, rpcObjectKeySymbol, objectReference)
+                }
             }
         }
         declaration.declarations
