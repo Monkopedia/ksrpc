@@ -222,8 +222,10 @@ fun Project.ksrpcModule(
     extensions.configure<DokkaExtension> {
         dokkaSourceSets.configureEach { sourceSet ->
             sourceSet.includes.from(rootProject.file("dokka/moduledoc.md"))
-            sourceSet.samples.from(rootProject.file("ksrpc-samples/src/commonMain/kotlin"))
-            if (sourceSet.name.contains("jvm", ignoreCase = true)) {
+            if (sourceSet.name == "commonMain") {
+                sourceSet.samples.from(rootProject.file("ksrpc-samples/src/commonMain/kotlin"))
+            }
+            if (sourceSet.name == "jvmMain") {
                 sourceSet.samples.from(rootProject.file("ksrpc-samples/src/jvmMain/kotlin"))
             }
             sourceSet.skipEmptyPackages.set(true)
