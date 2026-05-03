@@ -26,6 +26,7 @@ public final class com/monkopedia/ksrpc/IntrospectionService$Companion : com/mon
 	public final fun findEndpoint (Ljava/lang/String;)Lcom/monkopedia/ksrpc/RpcMethod;
 	public final fun getEndpoints ()Ljava/util/List;
 	public final fun getServiceName ()Ljava/lang/String;
+	public final fun getServiceTier ()Lcom/monkopedia/ksrpc/ServiceTier;
 }
 
 public final class com/monkopedia/ksrpc/IntrospectionService$DefaultImpls {

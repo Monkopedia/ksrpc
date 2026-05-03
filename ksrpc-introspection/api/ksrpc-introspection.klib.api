@@ -67,6 +67,8 @@ abstract interface com.monkopedia.ksrpc/IntrospectionService : com.monkopedia.ks
             final fun <get-endpoints>(): kotlin.collections/List<kotlin/String> // com.monkopedia.ksrpc/IntrospectionService.Companion.endpoints.<get-endpoints>|<get-endpoints>(){}[0]
         final val serviceName // com.monkopedia.ksrpc/IntrospectionService.Companion.serviceName|{}serviceName[0]
             final fun <get-serviceName>(): kotlin/String // com.monkopedia.ksrpc/IntrospectionService.Companion.serviceName.<get-serviceName>|<get-serviceName>(){}[0]
+        final val serviceTier // com.monkopedia.ksrpc/IntrospectionService.Companion.serviceTier|{}serviceTier[0]
+            final fun <get-serviceTier>(): com.monkopedia.ksrpc/ServiceTier // com.monkopedia.ksrpc/IntrospectionService.Companion.serviceTier.<get-serviceTier>|<get-serviceTier>(){}[0]
 
         final fun <#A2: kotlin/Any?> createStub(com.monkopedia.ksrpc.channels/SerializedService<#A2>): com.monkopedia.ksrpc/IntrospectionService // com.monkopedia.ksrpc/IntrospectionService.Companion.createStub|createStub(com.monkopedia.ksrpc.channels.SerializedService<0:0>){0§<kotlin.Any?>}[0]
         final fun findEndpoint(kotlin/String): com.monkopedia.ksrpc/RpcMethod<*, *, *> // com.monkopedia.ksrpc/IntrospectionService.Companion.findEndpoint|findEndpoint(kotlin.String){}[0]

@@ -254,6 +254,11 @@ public abstract interface class com/monkopedia/ksrpc/RpcObject {
 	public abstract fun findEndpoint (Ljava/lang/String;)Lcom/monkopedia/ksrpc/RpcMethod;
 	public abstract fun getEndpoints ()Ljava/util/List;
 	public abstract fun getServiceName ()Ljava/lang/String;
+	public fun getServiceTier ()Lcom/monkopedia/ksrpc/ServiceTier;
+}
+
+public final class com/monkopedia/ksrpc/RpcObject$DefaultImpls {
+	public static fun getServiceTier (Lcom/monkopedia/ksrpc/RpcObject;)Lcom/monkopedia/ksrpc/ServiceTier;
 }
 
 public abstract interface class com/monkopedia/ksrpc/RpcObjectFactory {

@@ -18,6 +18,8 @@ abstract interface <#A: kotlin/Any?> com.monkopedia.ksrpc.flow/KsFlowCollector :
             final fun <get-endpoints>(): kotlin.collections/List<kotlin/String> // com.monkopedia.ksrpc.flow/KsFlowCollector.Obj.endpoints.<get-endpoints>|<get-endpoints>(){}[0]
         final val serviceName // com.monkopedia.ksrpc.flow/KsFlowCollector.Obj.serviceName|{}serviceName[0]
             final fun <get-serviceName>(): kotlin/String // com.monkopedia.ksrpc.flow/KsFlowCollector.Obj.serviceName.<get-serviceName>|<get-serviceName>(){}[0]
+        final val serviceTier // com.monkopedia.ksrpc.flow/KsFlowCollector.Obj.serviceTier|{}serviceTier[0]
+            final fun <get-serviceTier>(): com.monkopedia.ksrpc/ServiceTier // com.monkopedia.ksrpc.flow/KsFlowCollector.Obj.serviceTier.<get-serviceTier>|<get-serviceTier>(){}[0]
 
         final fun <#A2: kotlin/Any?> createStub(com.monkopedia.ksrpc.channels/SerializedService<#A2>): com.monkopedia.ksrpc.flow/KsFlowCollector<#A1> // com.monkopedia.ksrpc.flow/KsFlowCollector.Obj.createStub|createStub(com.monkopedia.ksrpc.channels.SerializedService<0:0>){0§<kotlin.Any?>}[0]
         final fun findEndpoint(kotlin/String): com.monkopedia.ksrpc/RpcMethod<*, *, *> // com.monkopedia.ksrpc.flow/KsFlowCollector.Obj.findEndpoint|findEndpoint(kotlin.String){}[0]
@@ -56,6 +58,8 @@ abstract interface <#A: kotlin/Any?> com.monkopedia.ksrpc.flow/KsFlowService : c
             final fun <get-endpoints>(): kotlin.collections/List<kotlin/String> // com.monkopedia.ksrpc.flow/KsFlowService.Obj.endpoints.<get-endpoints>|<get-endpoints>(){}[0]
         final val serviceName // com.monkopedia.ksrpc.flow/KsFlowService.Obj.serviceName|{}serviceName[0]
             final fun <get-serviceName>(): kotlin/String // com.monkopedia.ksrpc.flow/KsFlowService.Obj.serviceName.<get-serviceName>|<get-serviceName>(){}[0]
+        final val serviceTier // com.monkopedia.ksrpc.flow/KsFlowService.Obj.serviceTier|{}serviceTier[0]
+            final fun <get-serviceTier>(): com.monkopedia.ksrpc/ServiceTier // com.monkopedia.ksrpc.flow/KsFlowService.Obj.serviceTier.<get-serviceTier>|<get-serviceTier>(){}[0]
 
         final fun <#A2: kotlin/Any?> createStub(com.monkopedia.ksrpc.channels/SerializedService<#A2>): com.monkopedia.ksrpc.flow/KsFlowService<#A1> // com.monkopedia.ksrpc.flow/KsFlowService.Obj.createStub|createStub(com.monkopedia.ksrpc.channels.SerializedService<0:0>){0§<kotlin.Any?>}[0]
         final fun findEndpoint(kotlin/String): com.monkopedia.ksrpc/RpcMethod<*, *, *> // com.monkopedia.ksrpc.flow/KsFlowService.Obj.findEndpoint|findEndpoint(kotlin.String){}[0]
@@ -100,6 +104,8 @@ abstract interface com.monkopedia.ksrpc.flow/KsCollectionToken : com.monkopedia.
             final fun <get-endpoints>(): kotlin.collections/List<kotlin/String> // com.monkopedia.ksrpc.flow/KsCollectionToken.Companion.endpoints.<get-endpoints>|<get-endpoints>(){}[0]
         final val serviceName // com.monkopedia.ksrpc.flow/KsCollectionToken.Companion.serviceName|{}serviceName[0]
             final fun <get-serviceName>(): kotlin/String // com.monkopedia.ksrpc.flow/KsCollectionToken.Companion.serviceName.<get-serviceName>|<get-serviceName>(){}[0]
+        final val serviceTier // com.monkopedia.ksrpc.flow/KsCollectionToken.Companion.serviceTier|{}serviceTier[0]
+            final fun <get-serviceTier>(): com.monkopedia.ksrpc/ServiceTier // com.monkopedia.ksrpc.flow/KsCollectionToken.Companion.serviceTier.<get-serviceTier>|<get-serviceTier>(){}[0]
 
         final fun <#A2: kotlin/Any?> createStub(com.monkopedia.ksrpc.channels/SerializedService<#A2>): com.monkopedia.ksrpc.flow/KsCollectionToken // com.monkopedia.ksrpc.flow/KsCollectionToken.Companion.createStub|createStub(com.monkopedia.ksrpc.channels.SerializedService<0:0>){0§<kotlin.Any?>}[0]
         final fun findEndpoint(kotlin/String): com.monkopedia.ksrpc/RpcMethod<*, *, *> // com.monkopedia.ksrpc.flow/KsCollectionToken.Companion.findEndpoint|findEndpoint(kotlin.String){}[0]
