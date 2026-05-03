@@ -1,19 +1,11 @@
 // Klib ABI Dump
-// Targets: [iosArm64, iosSimulatorArm64, iosX64, linuxArm64, linuxX64, macosArm64, macosX64]
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, linuxX64, macosArm64, macosX64]
 // Rendering settings:
 // - Signature version: 2
 // - Show manifest properties: true
 // - Show declarations: true
 
 // Library unique name: <com.monkopedia.ksrpc:ksrpc-ktor-server>
-final const val com.monkopedia.ksrpc.ktor/KSRPC_ERROR_CODE_HEADER // com.monkopedia.ksrpc.ktor/KSRPC_ERROR_CODE_HEADER|{}KSRPC_ERROR_CODE_HEADER[0]
-    final fun <get-KSRPC_ERROR_CODE_HEADER>(): kotlin/String // com.monkopedia.ksrpc.ktor/KSRPC_ERROR_CODE_HEADER.<get-KSRPC_ERROR_CODE_HEADER>|<get-KSRPC_ERROR_CODE_HEADER>(){}[0]
-final const val com.monkopedia.ksrpc.ktor/KSRPC_ERROR_MESSAGE_HEADER // com.monkopedia.ksrpc.ktor/KSRPC_ERROR_MESSAGE_HEADER|{}KSRPC_ERROR_MESSAGE_HEADER[0]
-    final fun <get-KSRPC_ERROR_MESSAGE_HEADER>(): kotlin/String // com.monkopedia.ksrpc.ktor/KSRPC_ERROR_MESSAGE_HEADER.<get-KSRPC_ERROR_MESSAGE_HEADER>|<get-KSRPC_ERROR_MESSAGE_HEADER>(){}[0]
-
-final val com.monkopedia.ksrpc.ktor/DEFAULT_KSRPC_ERROR_CODE_TO_HTTP_STATUS // com.monkopedia.ksrpc.ktor/DEFAULT_KSRPC_ERROR_CODE_TO_HTTP_STATUS|{}DEFAULT_KSRPC_ERROR_CODE_TO_HTTP_STATUS[0]
-    final fun <get-DEFAULT_KSRPC_ERROR_CODE_TO_HTTP_STATUS>(): kotlin.collections/Map<kotlin/Int, kotlin/Int> // com.monkopedia.ksrpc.ktor/DEFAULT_KSRPC_ERROR_CODE_TO_HTTP_STATUS.<get-DEFAULT_KSRPC_ERROR_CODE_TO_HTTP_STATUS>|<get-DEFAULT_KSRPC_ERROR_CODE_TO_HTTP_STATUS>(){}[0]
-
 final fun (io.ktor.server.routing/Routing).com.monkopedia.ksrpc.ktor/serveHttp(kotlin/String, com.monkopedia.ksrpc.channels/SerializedChannel<kotlin/String>, com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String>, kotlin.collections/Map<kotlin/Int, kotlin/Int> = ...) // com.monkopedia.ksrpc.ktor/serveHttp|serveHttp@io.ktor.server.routing.Routing(kotlin.String;com.monkopedia.ksrpc.channels.SerializedChannel<kotlin.String>;com.monkopedia.ksrpc.KsrpcEnvironment<kotlin.String>;kotlin.collections.Map<kotlin.Int,kotlin.Int>){}[0]
 final fun (io.ktor.server.routing/Routing).com.monkopedia.ksrpc.ktor/serveHttp(kotlin/String, com.monkopedia.ksrpc.channels/SerializedService<kotlin/String>, com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String>, kotlin.collections/Map<kotlin/Int, kotlin/Int> = ...) // com.monkopedia.ksrpc.ktor/serveHttp|serveHttp@io.ktor.server.routing.Routing(kotlin.String;com.monkopedia.ksrpc.channels.SerializedService<kotlin.String>;com.monkopedia.ksrpc.KsrpcEnvironment<kotlin.String>;kotlin.collections.Map<kotlin.Int,kotlin.Int>){}[0]
 final inline fun <#A: reified com.monkopedia.ksrpc/RpcService> (io.ktor.server.routing/Routing).com.monkopedia.ksrpc.ktor/serveHttp(kotlin/String, #A, com.monkopedia.ksrpc/KsrpcEnvironment<kotlin/String>, kotlin.collections/Map<kotlin/Int, kotlin/Int> = ...) // com.monkopedia.ksrpc.ktor/serveHttp|serveHttp@io.ktor.server.routing.Routing(kotlin.String;0:0;com.monkopedia.ksrpc.KsrpcEnvironment<kotlin.String>;kotlin.collections.Map<kotlin.Int,kotlin.Int>){0§<com.monkopedia.ksrpc.RpcService>}[0]
