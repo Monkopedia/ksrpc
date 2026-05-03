@@ -236,11 +236,10 @@ class FlowAutoDetectTest {
                 override suspend fun upload(items: Flow<Chunk>): Receipt =
                     error("not exercised here")
 
-                override suspend fun raw(u: Unit): KsFlowService<Update> =
-                    flow {
-                        emit(Update("r-1"))
-                        emit(Update("r-2"))
-                    }.asKsFlow()
+                override suspend fun raw(u: Unit): KsFlowService<Update> = flow {
+                    emit(Update("r-1"))
+                    emit(Update("r-2"))
+                }.asKsFlow()
 
                 override suspend fun close() = Unit
             }
@@ -281,10 +280,18 @@ class FlowAutoDetectTest {
         try {
             clientJob(clientChannel)
         } finally {
-            try { clientChannel.close() } catch (_: Throwable) {}
-            try { serviceChannel.close() } catch (_: Throwable) {}
-            try { input.cancel(null) } catch (_: Throwable) {}
-            try { si.cancel(null) } catch (_: Throwable) {}
+            try {
+                clientChannel.close()
+            } catch (_: Throwable) {}
+            try {
+                serviceChannel.close()
+            } catch (_: Throwable) {}
+            try {
+                input.cancel(null)
+            } catch (_: Throwable) {}
+            try {
+                si.cancel(null)
+            } catch (_: Throwable) {}
             output.close(null)
             so.close(null)
             bgJob.join()

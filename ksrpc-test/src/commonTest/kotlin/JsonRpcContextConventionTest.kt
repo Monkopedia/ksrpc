@@ -58,8 +58,12 @@ class JsonRpcContextConventionTest {
             val stub = channel.defaultChannel().toStub<ContextService, String>()
             verify(stub)
         } finally {
-            try { input.cancel(null) } catch (_: Throwable) {}
-            try { si.cancel(null) } catch (_: Throwable) {}
+            try {
+                input.cancel(null)
+            } catch (_: Throwable) {}
+            try {
+                si.cancel(null)
+            } catch (_: Throwable) {}
             output.close(null)
             so.close(null)
         }

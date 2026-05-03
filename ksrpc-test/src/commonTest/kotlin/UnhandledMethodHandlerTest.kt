@@ -139,9 +139,7 @@ class RpcUnhandledMethodHandlerThrowsTest :
                 override suspend fun <T> onUnhandled(
                     method: String,
                     input: CallData<T>
-                ): CallData<T> {
-                    throw IllegalStateException("boom:$method")
-                }
+                ): CallData<T> = throw IllegalStateException("boom:$method")
             }
             impl.serialized(ksrpcEnvironment { })
         },

@@ -43,14 +43,18 @@ class NestedGenericIntrospectionTest {
 
     @KsService
     @KsIntrospectable
-    interface StreamService : IntrospectableRpcService, RpcBidiService {
+    interface StreamService :
+        IntrospectableRpcService,
+        RpcBidiService {
         @KsMethod("/stream")
         suspend fun stream(input: String): Flow<Update>
     }
 
     @KsService
     @KsIntrospectable
-    interface NestedService : IntrospectableRpcService, RpcBidiService {
+    interface NestedService :
+        IntrospectableRpcService,
+        RpcBidiService {
         @KsMethod("/child")
         suspend fun child(input: String): StreamService
     }
@@ -72,7 +76,9 @@ class NestedGenericIntrospectionTest {
      */
     @KsService
     @KsIntrospectable
-    interface GenericStreamService<T> : IntrospectableRpcService, RpcBidiService {
+    interface GenericStreamService<T> :
+        IntrospectableRpcService,
+        RpcBidiService {
         @KsMethod("/stream")
         suspend fun stream(input: String): Flow<T>
     }

@@ -104,9 +104,8 @@ class KsErrorRoutingTest {
     @Test
     fun mappedThrowDeliversTypedDataToClient() = runBlockingUnit {
         val service = object : TypedErrorService {
-            override suspend fun init(input: String): String {
+            override suspend fun init(input: String): String =
                 throw InitError(retry = true, reason = "bad input: $input")
-            }
 
             override suspend fun plain(input: String): String = error("unused")
             override suspend fun category(input: String): String = error("unused")
@@ -132,9 +131,8 @@ class KsErrorRoutingTest {
     @Test
     fun secondMappingResolvesIndependently() = runBlockingUnit {
         val service = object : TypedErrorService {
-            override suspend fun init(input: String): String {
+            override suspend fun init(input: String): String =
                 throw VersionError(expected = 7, actual = 3)
-            }
 
             override suspend fun plain(input: String): String = error("unused")
             override suspend fun category(input: String): String = error("unused")
@@ -158,9 +156,8 @@ class KsErrorRoutingTest {
     @Test
     fun unmappedThrowFallsBackToRpcException() = runBlockingUnit {
         val service = object : TypedErrorService {
-            override suspend fun init(input: String): String {
+            override suspend fun init(input: String): String =
                 throw IllegalStateException("not mapped")
-            }
 
             override suspend fun plain(input: String): String = error("unused")
             override suspend fun category(input: String): String = error("unused")
@@ -187,9 +184,8 @@ class KsErrorRoutingTest {
     @Test
     fun ksrpcExceptionWithUnboundDataFallsBack() = runBlockingUnit {
         val service = object : TypedErrorService {
-            override suspend fun init(input: String): String {
+            override suspend fun init(input: String): String =
                 throw KsrpcException(code = 999, message = "untyped")
-            }
 
             override suspend fun plain(input: String): String = error("unused")
             override suspend fun category(input: String): String = error("unused")
@@ -219,9 +215,8 @@ class KsErrorRoutingTest {
         val service = object : TypedErrorService {
             override suspend fun init(input: String): String = error("unused")
             override suspend fun plain(input: String): String = error("unused")
-            override suspend fun category(input: String): String {
+            override suspend fun category(input: String): String =
                 throw RetryableError(tag = "io", backoffMs = 250L)
-            }
         }
         withInProcessChannel(service) { stub ->
             try {
@@ -372,9 +367,8 @@ class KsErrorRoutingPipeTest :
         ),
         serializedChannel = {
             val service = object : TypedErrorService {
-                override suspend fun init(input: String): String {
+                override suspend fun init(input: String): String =
                     throw InitError(retry = false, reason = "from-pipe")
-                }
 
                 override suspend fun plain(input: String): String = "ok"
                 override suspend fun category(input: String): String = "ok"
@@ -408,9 +402,8 @@ class KsErrorRoutingPipeFallbackTest :
         ),
         serializedChannel = {
             val service = object : TypedErrorService {
-                override suspend fun init(input: String): String {
+                override suspend fun init(input: String): String =
                     throw IllegalArgumentException("not bound")
-                }
 
                 override suspend fun plain(input: String): String = "ok"
                 override suspend fun category(input: String): String = "ok"

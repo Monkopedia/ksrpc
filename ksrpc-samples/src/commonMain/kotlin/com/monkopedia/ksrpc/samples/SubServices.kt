@@ -63,11 +63,9 @@ suspend fun subServiceOutput() {
     // is hosted as a sub-service on the same connection, with its own
     // channel id managed by the framework.
     val factory = object : WorkerFactory {
-        override suspend fun createWorker(name: String): ScopedWorker =
-            object : ScopedWorker {
-                override suspend fun execute(command: String): String =
-                    "[$name] executed: $command"
-            }
+        override suspend fun createWorker(name: String): ScopedWorker = object : ScopedWorker {
+            override suspend fun execute(command: String): String = "[$name] executed: $command"
+        }
     }
 
     // Serialize and use through a stub -- sub-services work transparently.

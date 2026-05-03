@@ -28,9 +28,7 @@ import kotlin.reflect.findAssociatedObject
 @AssociatedObjectKey
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.BINARY)
-actual annotation class RpcObjectKey actual constructor(
-    actual val rpcObject: KClass<*>
-)
+actual annotation class RpcObjectKey actual constructor(actual val rpcObject: KClass<*>)
 
 @Suppress("UNCHECKED_CAST")
 @OptIn(ExperimentalAssociatedObjects::class, KsrpcInternal::class)

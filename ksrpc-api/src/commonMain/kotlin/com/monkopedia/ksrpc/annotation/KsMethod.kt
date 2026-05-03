@@ -74,8 +74,4 @@ annotation class KsMethodMetadata
 @KsMethodMetadata
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.BINARY)
-annotation class KsTimeout(
-    val millis: Long = 0,
-    val seconds: Long = 0,
-    val minutes: Long = 0
-)
+annotation class KsTimeout(val millis: Long = 0, val seconds: Long = 0, val minutes: Long = 0)
