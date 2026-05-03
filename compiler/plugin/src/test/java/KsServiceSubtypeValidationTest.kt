@@ -25,16 +25,17 @@ import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.junit.Test
 
 /**
- * Regression tests for issue #45: applying `@KsService` to a subtype of another
- * `@KsService` interface used to crash CompanionGeneration with
- * "Invalid synthetic declaration for ...". The plugin now rejects this with a clear
- * compile-time diagnostic, while the supported workaround (a plain Kotlin subtype with
- * no `@KsService`) continues to work — see `GenericServiceSubtypeJvmTest`.
+ * Tests for @KsService interface inheritance support.
+ *
+ * @KsService on a subtype of another @KsService is now allowed (interface hierarchy).
+ * Only true diamond inheritance (two UNRELATED @KsService ancestors) is rejected.
+ * The supported workaround (a plain Kotlin subtype with no `@KsService`) also
+ * continues to work — see `GenericServiceSubtypeJvmTest`.
  */
 class KsServiceSubtypeValidationTest {
 
     @Test
-    fun `KsService on subtype of generic KsService is rejected with a clear diagnostic`() {
+    fun `KsService on subtype of generic KsService compiles successfully`() {
         val source = SourceFile.kotlin(
             "main.kt",
             """
@@ -53,27 +54,16 @@ interface TypedGenericEcho : GenericEcho<String>
 """
         )
         val result = compile(listOf(source))
-        assertTrue(
-            result.exitCode != KotlinCompilation.ExitCode.OK,
-            "Expected compilation to fail but got: ${result.exitCode}\n${result.messages}"
-        )
-        assertTrue(
-            result.messages.contains("@KsService cannot be applied to") &&
-                result.messages.contains("TypedGenericEcho") &&
-                result.messages.contains("GenericEcho"),
-            "Expected diagnostic mentioning @KsService, TypedGenericEcho and GenericEcho, " +
-                "got: ${result.messages}"
-        )
-        // Make sure we're not seeing the old crash anymore.
-        assertTrue(
-            !result.messages.contains("Invalid synthetic declaration"),
-            "Plugin should not crash with 'Invalid synthetic declaration' anymore, " +
-                "got: ${result.messages}"
+        assertEquals(
+            KotlinCompilation.ExitCode.OK,
+            result.exitCode,
+            "Expected @KsService on subtype of generic @KsService to compile. " +
+                "messages: ${result.messages}"
         )
     }
 
     @Test
-    fun `KsService on subtype of non-generic KsService is rejected`() {
+    fun `KsService on subtype of non-generic KsService compiles successfully`() {
         val source = SourceFile.kotlin(
             "main.kt",
             """
@@ -92,16 +82,11 @@ interface ChildService : ParentService
 """
         )
         val result = compile(listOf(source))
-        assertTrue(
-            result.exitCode != KotlinCompilation.ExitCode.OK,
-            "Expected compilation to fail but got: ${result.exitCode}\n${result.messages}"
-        )
-        assertTrue(
-            result.messages.contains("@KsService cannot be applied to") &&
-                result.messages.contains("ChildService") &&
-                result.messages.contains("ParentService"),
-            "Expected diagnostic mentioning @KsService, ChildService and ParentService, " +
-                "got: ${result.messages}"
+        assertEquals(
+            KotlinCompilation.ExitCode.OK,
+            result.exitCode,
+            "Expected @KsService on subtype of non-generic @KsService to compile. " +
+                "messages: ${result.messages}"
         )
     }
 

@@ -197,6 +197,7 @@ import com.monkopedia.ksrpc.annotation.KsService
 import com.monkopedia.ksrpc.RpcService
 import com.monkopedia.ksrpc.RpcBidiService
 import com.monkopedia.ksrpc.ksrpcEnvironment
+import com.monkopedia.ksrpc.serialized
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 

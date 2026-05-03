@@ -99,16 +99,23 @@ internal object KsServiceClassChecker :
             checkKsServiceClass(declaration, symbol, ksServiceSuperSymbols, context, reporter)
         } else {
             // Non-@KsService classes are only interesting if they implement multiple
-            // @KsService interfaces (legacy SubclassVisitor behaviour).
+            // UNRELATED @KsService interfaces (legacy SubclassVisitor behaviour).
             if (ksServiceSuperSymbols.size > 1) {
-                val source = declaration.source ?: return
-                reporter.reportOn(
-                    source,
-                    KsrpcDiagnostics.MULTIPLE_KSSERVICE_SUPERTYPES,
-                    "${symbol.classId.asFqNameString()} has " +
-                        "multiple @KsService super types, which is not supported.",
-                    context
-                )
+                val leafKsServiceSupers = ksServiceSuperSymbols.filter { candidate ->
+                    ksServiceSuperSymbols.none { other ->
+                        other != candidate && transitivelyExtends(other, candidate, context.session)
+                    }
+                }
+                if (leafKsServiceSupers.size > 1) {
+                    val source = declaration.source ?: return
+                    reporter.reportOn(
+                        source,
+                        KsrpcDiagnostics.MULTIPLE_KSSERVICE_SUPERTYPES,
+                        "${symbol.classId.asFqNameString()} has " +
+                            "multiple @KsService super types, which is not supported.",
+                        context
+                    )
+                }
             }
         }
     }
@@ -145,27 +152,27 @@ internal object KsServiceClassChecker :
         val hasRpcServiceSuper = allSuperFqNames.contains(FQRPC_SERVICE)
         val hasIntrospectableSuper = allSuperFqNames.contains(FQ_INTROSPECTABLE_RPC_SERVICE)
 
-        val ksServiceSuper = ksServiceSuperSymbols.firstOrNull()
-        if (ksServiceSuper != null) {
-            // #1: @KsService on a subtype of another @KsService — reject with the
-            // existing wording so the existing test suite keeps asserting on the
-            // same message.
-            val selfFqName = symbol.classId.asFqNameString()
-            val superFqName = ksServiceSuper.classId.asFqNameString()
-            val selfShortName = symbol.classId.shortClassName.asString()
-            reporter.reportOn(
-                source,
-                KsrpcDiagnostics.KSSERVICE_SUBTYPE_OF_KSSERVICE,
-                "@KsService cannot be applied to $selfFqName because " +
-                    "its supertype $superFqName is already " +
-                    "@KsService. Remove @KsService from " +
-                    "$selfFqName; rpcObject<" +
-                    "$selfShortName>() will find the parent's companion " +
-                    "automatically.",
-                context
-            )
+        // #1: Check for diamond inheritance (two UNRELATED @KsService ancestors).
+        // A linear chain (A extends B extends C, all @KsService) is allowed.
+        // Filter to "leaf" services: those not transitively extended by another
+        // @KsService in the list.
+        if (ksServiceSuperSymbols.size > 1) {
+            val leafKsServiceSupers = ksServiceSuperSymbols.filter { candidate ->
+                ksServiceSuperSymbols.none { other ->
+                    other != candidate && transitivelyExtends(other, candidate, session)
+                }
+            }
+            if (leafKsServiceSupers.size > 1) {
+                reporter.reportOn(
+                    source,
+                    KsrpcDiagnostics.MULTIPLE_KSSERVICE_SUPERTYPES,
+                    "${symbol.classId.asFqNameString()} has " +
+                        "multiple @KsService super types, which is not supported.",
+                    context
+                )
+            }
         }
-        if (!hasRpcServiceSuper && !hasIntrospectableSuper && ksServiceSuper == null) {
+        if (!hasRpcServiceSuper && !hasIntrospectableSuper && ksServiceSuperSymbols.isEmpty()) {
             // #2
             reporter.reportOn(
                 source,
@@ -275,11 +282,10 @@ internal object KsServiceClassChecker :
             } else {
                 val returnServiceSymbol = asKsServiceSymbol(returnType, session)
                 if (returnServiceSymbol != null) {
-                    // Returning a sub-service requires at least HOST
-                    val subTier = tierOfService(returnServiceSymbol, session)
+                    // Returning a sub-service requires at least HOST.
+                    // The sub-service's own tier is NOT propagated — the parent
+                    // only needs to host the sub-service, not replicate its tier.
                     requiredForMethod = maxOf(requiredForMethod, Tier.HOST)
-                    // If the sub-service itself requires BIDI, propagate
-                    requiredForMethod = maxOf(requiredForMethod, subTier)
                 }
             }
 
@@ -343,6 +349,34 @@ internal object KsServiceClassChecker :
             return "returns $name (a ${tier.interfaceName})"
         }
         return "requires a higher service tier"
+    }
+
+    /**
+     * Check whether [child] transitively extends [ancestor] through supertypes.
+     */
+    @OptIn(SymbolInternals::class)
+    private fun transitivelyExtends(
+        child: FirClassSymbol<*>,
+        ancestor: FirClassSymbol<*>,
+        session: FirSession
+    ): Boolean {
+        val targetClassId = ancestor.classId
+        val visited = mutableSetOf<ClassId>()
+        val queue = ArrayDeque<FirClassSymbol<*>>()
+        // Start from child's supertypes
+        for (superRef in child.fir.superTypeRefs) {
+            val sym = superRef.toRegularClassSymbol(session) ?: continue
+            if (visited.add(sym.classId)) queue.add(sym)
+        }
+        while (queue.isNotEmpty()) {
+            val current = queue.removeFirst()
+            if (current.classId == targetClassId) return true
+            for (superRef in current.fir.superTypeRefs) {
+                val sym = superRef.toRegularClassSymbol(session) ?: continue
+                if (visited.add(sym.classId)) queue.add(sym)
+            }
+        }
+        return false
     }
 
     /**

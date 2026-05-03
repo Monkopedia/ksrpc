@@ -262,7 +262,9 @@ interface FullService : RpcBidiService {
     }
 
     @Test
-    fun `recursive - service returning a RpcBidiService sub-service needs RpcBidiService`() {
+    fun `recursive - service returning a RpcBidiService sub-service only needs RpcHostService`() {
+        // Returning a sub-service only requires HOST tier regardless of the sub-service's
+        // own tier. The sub-service manages its own bidirectional connections.
         val source = SourceFile.kotlin(
             "main.kt",
             """
@@ -292,16 +294,10 @@ interface Outer : RpcHostService {
         )
         val result = compile(sourceFile = source)
         assertEquals(
-            KotlinCompilation.ExitCode.COMPILATION_ERROR,
+            KotlinCompilation.ExitCode.OK,
             result.exitCode,
-            "messages: ${result.messages}"
-        )
-        assertTrue(
-            result.messages.contains("Outer") &&
-                result.messages.contains("bidi") &&
-                result.messages.contains("RpcBidiService"),
-            "Expected diagnostic mentioning Outer, method 'bidi', and RpcBidiService; " +
-                "got: ${result.messages}"
+            "Expected RpcHostService returning BidiSub to compile (sub-service manages " +
+                "its own tier). messages: ${result.messages}"
         )
     }
 }

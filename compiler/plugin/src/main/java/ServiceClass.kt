@@ -137,17 +137,32 @@ private class SubclassVisitor(
     private val classes: Map<String, ServiceClass>
 ) : IrElementTransformerVoid() {
     override fun visitClass(declaration: IrClass): IrStatement {
-        declaration.getAllSuperclasses().mapNotNull {
+        val declFqName = declaration.fqNameForIrSerialization.asString()
+        // Skip if this class is itself a @KsService (it has its own entry)
+        if (declFqName in classes) {
+            return super.visitClass(declaration)
+        }
+        val ksServiceSupers = declaration.getAllSuperclasses().mapNotNull {
             classes[it.fqNameForIrSerialization.asString()]
-        }.also {
-            if (it.size > 1) {
-                messageCollector.reportUserError(
-                    "${declaration.fqNameForIrSerialization.asString()} has " +
-                        "multiple @KsService super types, which is not supported.",
-                    element = declaration
-                )
+        }
+        // Leaf-filter: keep only those not transitively extended by another in the list
+        val leafSupers = ksServiceSupers.filter { candidate ->
+            ksServiceSupers.none { other ->
+                other != candidate &&
+                    other.irClass.getAllSuperclasses().any {
+                        it.fqNameForIrSerialization.asString() ==
+                            candidate.irClass.fqNameForIrSerialization.asString()
+                    }
             }
-        }.singleOrNull()?.irClassAndImpls?.add(declaration)
+        }
+        if (leafSupers.size > 1) {
+            messageCollector.reportUserError(
+                "${declaration.fqNameForIrSerialization.asString()} has " +
+                    "multiple @KsService super types, which is not supported.",
+                element = declaration
+            )
+        }
+        leafSupers.singleOrNull()?.irClassAndImpls?.add(declaration)
         return super.visitClass(declaration)
     }
 }
@@ -234,14 +249,70 @@ data class ServiceClass(
     }
 
     companion object {
+        private val serviceAnnotationFqName =
+            FqName("com.monkopedia.ksrpc.annotation.KsService")
+
         fun findServices(
             messageCollector: MessageCollector,
             moduleFragment: IrModuleFragment
         ): MutableMap<String, ServiceClass> {
             val visitor = Visitor(messageCollector)
             visitor.visitElement(moduleFragment)
+            // Import inherited methods from parent @KsService classes
+            importInheritedMethods(visitor.classes)
             SubclassVisitor(messageCollector, visitor.classes).visitElement(moduleFragment)
             return visitor.classes
+        }
+
+        /**
+         * For each ServiceClass, walk its @KsService supertypes (found in [classes])
+         * and import their ServiceMethod entries. Skip methods already present in the
+         * child (by endpoint name extracted from the @KsMethod annotation value).
+         */
+        private fun importInheritedMethods(classes: MutableMap<String, ServiceClass>) {
+            for ((_, serviceClass) in classes) {
+                val existingEndpoints = serviceClass.methods.map { method ->
+                    extractEndpointName(method)
+                }.toMutableSet()
+                // Walk supertypes to find parent @KsService classes
+                val visited = mutableSetOf<String>()
+                val queue = ArrayDeque<IrClass>()
+                for (superType in serviceClass.irClass.superTypes) {
+                    val superClass = superType.classOrNull?.owner ?: continue
+                    val fqName = superClass.fqNameForIrSerialization.asString()
+                    if (visited.add(fqName)) queue.add(superClass)
+                }
+                while (queue.isNotEmpty()) {
+                    val current = queue.removeFirst()
+                    val currentFqName = current.fqNameForIrSerialization.asString()
+                    val parentService = classes[currentFqName]
+                    if (parentService != null) {
+                        for (method in parentService.methods) {
+                            val endpoint = extractEndpointName(method)
+                            if (endpoint !in existingEndpoints) {
+                                existingEndpoints.add(endpoint)
+                                serviceClass.methods.add(method)
+                            }
+                        }
+                    }
+                    // Continue walking up
+                    for (superType in current.superTypes) {
+                        val superClass = superType.classOrNull?.owner ?: continue
+                        val fqName = superClass.fqNameForIrSerialization.asString()
+                        if (visited.add(fqName)) queue.add(superClass)
+                    }
+                }
+            }
+        }
+
+        /**
+         * Extract the endpoint name from a ServiceMethod's @KsMethod annotation.
+         * The first argument of @KsMethod is the endpoint string.
+         */
+        private fun extractEndpointName(method: ServiceMethod): String {
+            val annotation = method.ksMethodAnnotation
+            return annotation.arguments[0].constString()
+                ?: method.function.name.asString()
         }
     }
 }
