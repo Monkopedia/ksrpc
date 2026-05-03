@@ -238,8 +238,11 @@ abstract class PacketChannelBase<T>(
                         val take = if (remaining > packetMax) packetMax else remaining
                         // Avoid a copy when the chunk is already exactly the right
                         // slice — common for small payloads that fit in one packet.
-                        val packet = if (cursor == 0 && take == bytes.size) bytes
-                            else bytes.copyOfRange(cursor, cursor + take)
+                        val packet = if (cursor == 0 && take == bytes.size) {
+                            bytes
+                        } else {
+                            bytes.copyOfRange(cursor, cursor + take)
+                        }
                         send(
                             Packet(
                                 input = input,

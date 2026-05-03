@@ -64,9 +64,8 @@ class HttpTypedErrorRoutingTest {
     @Test
     fun typedErrorRoundTripsOverHttp() = runBlockingUnit {
         val service = object : HttpTypedErrorService {
-            override suspend fun init(input: String): String {
+            override suspend fun init(input: String): String =
                 throw HttpInitError(retry = true, reason = "input was: $input")
-            }
 
             override suspend fun missingOnly(input: String): String = "ok"
         }
@@ -147,9 +146,8 @@ class HttpTypedErrorRoutingTest {
     @Test
     fun customCodeFallsBackToHeader() = runBlockingUnit {
         val service = object : HttpTypedErrorService {
-            override suspend fun init(input: String): String {
+            override suspend fun init(input: String): String =
                 throw KsrpcException(code = 100, message = "user failure")
-            }
 
             override suspend fun missingOnly(input: String): String = "ok"
         }
@@ -191,9 +189,8 @@ class HttpTypedErrorRoutingTest {
     @Test
     fun customErrorMappingIsRespectedRoundTrip() = runBlockingUnit {
         val service = object : HttpTypedErrorService {
-            override suspend fun init(input: String): String {
+            override suspend fun init(input: String): String =
                 throw HttpInitError(retry = true, reason = "session expired")
-            }
 
             override suspend fun missingOnly(input: String): String = "ok"
         }

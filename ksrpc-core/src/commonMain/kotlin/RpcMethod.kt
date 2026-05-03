@@ -441,7 +441,9 @@ class RpcMethod<T : RpcService, I, O>(
         if (typed != null) return typed
         return when (error.errorCode) {
             KsrpcException.ENDPOINT_NOT_FOUND_CODE -> RpcEndpointException(error.errorMessage)
+
             KsrpcException.INTERNAL_ERROR_CODE -> RpcException(error.errorMessage)
+
             // Forward-compat: unknown wire code (e.g. newer server's typed error not
             // bound here) — surface a generic KsrpcException carrying the raw
             // wire-format payload so callers can still inspect the data even without
@@ -455,11 +457,10 @@ class RpcMethod<T : RpcService, I, O>(
     }
 
     @KsrpcInternal
-    fun findSubserviceTransformers(): List<BaseSubserviceTransformer<*, *>> =
-        listOfNotNull(
-            inputTransform as? BaseSubserviceTransformer<*, *>,
-            outputTransform as? BaseSubserviceTransformer<*, *>
-        )
+    fun findSubserviceTransformers(): List<BaseSubserviceTransformer<*, *>> = listOfNotNull(
+        inputTransform as? BaseSubserviceTransformer<*, *>,
+        outputTransform as? BaseSubserviceTransformer<*, *>
+    )
 
     /**
      * Client-side: extract context values from the current [CoroutineContext]

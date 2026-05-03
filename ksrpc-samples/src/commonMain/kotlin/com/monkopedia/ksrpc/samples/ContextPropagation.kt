@@ -54,8 +54,7 @@ class AuthorizationToken(val bearer: String) : CoroutineContext.Element {
     companion object Key : KsContextBinding<AuthorizationToken> {
         override val wireKey: String = "authorization"
         override fun toWire(value: AuthorizationToken): String = value.bearer
-        override fun fromWire(encoded: String): AuthorizationToken =
-            AuthorizationToken(encoded)
+        override fun fromWire(encoded: String): AuthorizationToken = AuthorizationToken(encoded)
     }
 }
 

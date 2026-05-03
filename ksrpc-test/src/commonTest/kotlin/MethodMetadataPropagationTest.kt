@@ -34,11 +34,7 @@ import kotlin.test.assertTrue
 @KsMethodMetadata
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.BINARY)
-annotation class KsTestMarker(
-    val tag: String,
-    val priority: Int = 0,
-    val flags: Array<String> = []
-)
+annotation class KsTestMarker(val tag: String, val priority: Int = 0, val flags: Array<String> = [])
 
 /**
  * Second demo sibling annotation — verifies that multiple metadata annotations
@@ -69,10 +65,7 @@ class KsTestPayload
 @KsMethodMetadata
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.BINARY)
-annotation class KsTestRef(
-    val payload: kotlin.reflect.KClass<*>,
-    val color: KsTestColor
-)
+annotation class KsTestRef(val payload: kotlin.reflect.KClass<*>, val color: KsTestColor)
 
 /**
  * A plain, non-metadata sibling annotation. The compiler plugin should ignore

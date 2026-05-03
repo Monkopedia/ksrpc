@@ -60,10 +60,8 @@ sealed class RpcDataType {
     object BinaryData : RpcDataType()
 
     @Serializable
-    data class Service(
-        val qualifiedName: String,
-        val typeArgs: List<RpcDataType> = emptyList()
-    ) : RpcDataType()
+    data class Service(val qualifiedName: String, val typeArgs: List<RpcDataType> = emptyList()) :
+        RpcDataType()
 }
 
 /**

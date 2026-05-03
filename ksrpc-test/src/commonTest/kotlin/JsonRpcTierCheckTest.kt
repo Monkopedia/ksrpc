@@ -37,8 +37,7 @@ class JsonRpcTierCheckTest {
 
         val hostService = object : TestRootInterface {
             override suspend fun rpc(u: Pair<String, String>): String = "${u.first} ${u.second}"
-            override suspend fun subservice(prefix: String): TestSubInterface =
-                error("unreachable")
+            override suspend fun subservice(prefix: String): TestSubInterface = error("unreachable")
         }
 
         val exception = assertFailsWith<IllegalArgumentException> {

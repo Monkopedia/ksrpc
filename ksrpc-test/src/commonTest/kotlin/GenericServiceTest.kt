@@ -81,8 +81,7 @@ private class WrappedEchoStringImpl : WrappedEcho<String> {
         items.map { it?.let { "ln:$it" } }
     override suspend fun nested(items: List<List<String>>): List<List<String>> =
         items.map { row -> row.map { "nd:$it" } }
-    override suspend fun nullableList(items: List<String>?): List<String>? =
-        items?.map { "nl:$it" }
+    override suspend fun nullableList(items: List<String>?): List<String>? = items?.map { "nl:$it" }
     override suspend fun close() = Unit
 }
 
@@ -274,4 +273,3 @@ class GenericServiceFactoryTest {
         )
     }
 }
-

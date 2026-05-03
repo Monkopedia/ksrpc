@@ -23,8 +23,10 @@ import com.monkopedia.ksrpc.annotation.KsrpcInternal
 enum class ServiceTier {
     /** Simple input/output — works on all transports. */
     SIMPLE,
+
     /** Returns sub-services — needs [com.monkopedia.ksrpc.channels.ChannelHost]. */
     HOST,
+
     /** Accepts sub-service inputs or uses Flow — needs bidirectional [com.monkopedia.ksrpc.channels.Connection]. */
     BIDI
 }
@@ -64,21 +66,27 @@ fun <T : RpcService> requireTier(
     // Find the first offending method for a helpful error message.
     for (endpoint in rpcObject.endpoints) {
         val method = rpcObject.findEndpoint(endpoint)
-        if (required == ServiceTier.BIDI && method.inputTransform is BaseSubserviceTransformer<*, *>) {
+        if (required == ServiceTier.BIDI &&
+            method.inputTransform is BaseSubserviceTransformer<*, *>
+        ) {
             throw IllegalArgumentException(
                 "${rpcObject.serviceName} requires bidirectional transport " +
                     "(method '$endpoint' accepts a sub-service input), " +
                     "but $transportName does not support this."
             )
         }
-        if (required == ServiceTier.BIDI && method.outputTransform is BaseSubserviceTransformer<*, *>) {
+        if (required == ServiceTier.BIDI &&
+            method.outputTransform is BaseSubserviceTransformer<*, *>
+        ) {
             throw IllegalArgumentException(
                 "${rpcObject.serviceName} requires bidirectional transport " +
                     "(method '$endpoint' returns a bidirectional sub-service), " +
                     "but $transportName does not support this."
             )
         }
-        if (required == ServiceTier.HOST && method.outputTransform is BaseSubserviceTransformer<*, *>) {
+        if (required == ServiceTier.HOST &&
+            method.outputTransform is BaseSubserviceTransformer<*, *>
+        ) {
             throw IllegalArgumentException(
                 "${rpcObject.serviceName} requires HOST transport " +
                     "(method '$endpoint' returns a sub-service), " +

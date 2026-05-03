@@ -43,7 +43,9 @@ class FlowIntrospectionTest {
 
     @KsService
     @KsIntrospectable
-    interface FlowIntrospectionService : IntrospectableRpcService, RpcBidiService {
+    interface FlowIntrospectionService :
+        IntrospectableRpcService,
+        RpcBidiService {
         @KsMethod("/updates")
         suspend fun updates(filter: String): Flow<Update>
     }

@@ -47,7 +47,4 @@ class WireContextMap(val values: Map<String, String>) : CoroutineContext.Element
  * intermediate `withContext` switches in the in-process channel path.
  */
 @KsrpcInternal
-class WireContextCallId(
-    val delegate: RpcCallId?,
-    val wireContextMap: WireContextMap?
-) : RpcCallId
+class WireContextCallId(val delegate: RpcCallId?, val wireContextMap: WireContextMap?) : RpcCallId

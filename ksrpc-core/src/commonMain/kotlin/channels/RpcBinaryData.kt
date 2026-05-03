@@ -88,9 +88,11 @@ class ByteArrayBinaryData(
         if (length > 0) sink(data, offset, length)
     }
 
-    override suspend fun toByteArray(): ByteArray =
-        if (offset == 0 && length == data.size) data
-        else data.copyOfRange(offset, offset + length)
+    override suspend fun toByteArray(): ByteArray = if (offset == 0 && length == data.size) {
+        data
+    } else {
+        data.copyOfRange(offset, offset + length)
+    }
 
     override suspend fun close() {} // nothing to release
 }

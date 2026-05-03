@@ -24,8 +24,6 @@ import com.monkopedia.ksrpc.RpcHostService
 import com.monkopedia.ksrpc.RpcService
 import com.monkopedia.ksrpc.ServiceTier
 import com.monkopedia.ksrpc.annotation.KsrpcInternal
-import com.monkopedia.ksrpc.requireTier
-import com.monkopedia.ksrpc.rpcObject
 import com.monkopedia.ksrpc.binary.ktor.asRpcBinaryData
 import com.monkopedia.ksrpc.channels.CallData
 import com.monkopedia.ksrpc.channels.ChannelClient
@@ -34,6 +32,8 @@ import com.monkopedia.ksrpc.channels.SerializedChannel
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.channels.WireContextMap
 import com.monkopedia.ksrpc.internal.HostSerializedChannelImpl
+import com.monkopedia.ksrpc.requireTier
+import com.monkopedia.ksrpc.rpcObject
 import com.monkopedia.ksrpc.serialized
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.decodeURLPart

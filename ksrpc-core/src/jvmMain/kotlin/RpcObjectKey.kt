@@ -19,6 +19,4 @@ import kotlin.reflect.KClass
 
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.BINARY)
-actual annotation class RpcObjectKey actual constructor(
-    actual val rpcObject: KClass<*>
-)
+actual annotation class RpcObjectKey actual constructor(actual val rpcObject: KClass<*>)

@@ -53,12 +53,11 @@ fun flowMethodDeclaration() {
  */
 suspend fun collectingFlowFromService() {
     val service = object : LogService {
-        override suspend fun streamLogs(filter: String): Flow<String> =
-            flow {
-                emit("[$filter] Starting...")
-                emit("[$filter] Processing...")
-                emit("[$filter] Done.")
-            }
+        override suspend fun streamLogs(filter: String): Flow<String> = flow {
+            emit("[$filter] Starting...")
+            emit("[$filter] Processing...")
+            emit("[$filter] Done.")
+        }
     }
 
     val env = ksrpcEnvironment { }

@@ -116,8 +116,7 @@ class JniTypedErrorRoutingTest {
         assertIs<RpcEndpointException>(decoded)
     }
 
-    private fun jniEnv(): KsrpcEnvironment<JniSerialized> =
-        ksrpcEnvironment(JniSerialization()) { }
+    private fun jniEnv(): KsrpcEnvironment<JniSerialized> = ksrpcEnvironment(JniSerialization()) { }
 
     private fun loadNativeLib() {
         NativeUtils.loadLibraryFromJar("/libs/libksrpc_test.${extension()}")
