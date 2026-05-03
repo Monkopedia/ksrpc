@@ -39,7 +39,7 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">0.11.1
+        <div class="library-version" id="library-version">1.0.0-RC1
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
@@ -94,7 +94,7 @@
   <div class="breadcrumbs"><a href="../../index.html">ksrpc-core</a><span class="delimiter">/</span><a href="../index.html">com.monkopedia.ksrpc.channels</a><span class="delimiter">/</span><span class="current">RpcBinaryData</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Rpc</span><wbr><span>Binary</span><wbr><span><span>Data</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">RpcBinaryData</a> : <a href="../../../ksrpc-api/com.monkopedia.ksrpc/-suspend-closeable/index.html">SuspendCloseable</a></div><p class="paragraph">Transport-agnostic binary data source. Implementations adapt user-facing types (<code class="lang-kotlin">ByteReadChannel</code>, <code class="lang-kotlin">kotlinx.io.Source</code>, <code class="lang-kotlin">okio.BufferedSource</code>, ...) to a shape the ksrpc wire protocol can consume.</p><p class="paragraph">Source-oriented only: in ksrpc the binary payload is always "something the receiver reads from," regardless of which side is sending.</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">RpcBinaryData</a> : <a href="../../../ksrpc-api/com.monkopedia.ksrpc/-suspend-closeable/index.html">SuspendCloseable</a></div><p class="paragraph">Transport-agnostic binary data source. Implementations adapt user-facing types (<code class="lang-kotlin">ByteReadChannel</code>, <code class="lang-kotlin">kotlinx.io.Source</code>, <code class="lang-kotlin">okio.BufferedSource</code>, ...) to a shape the ksrpc wire protocol can consume.</p><p class="paragraph">Source-oriented only: in ksrpc the binary payload is always "something the receiver reads from," regardless of which side is sending.</p><h4 class="tableheader">Inheritors</h4><div class="table"><div class="table-row table-row_content" data-filterable-current=":ksrpc-core/commonMain" data-filterable-set=":ksrpc-core/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../-byte-array-binary-data/index.html">ByteArrayBinaryData</a></div></span></div><div></div></div></div></div></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
@@ -131,6 +131,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="../-serialized-service/index.html#-1927979038%2FFunctions%2F1567993722"><span class="token function">close</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-942843382%2FFunctions%2F1567993722" anchor-label="toByteArray" id="-942843382%2FFunctions%2F1567993722" data-filterable-set=":ksrpc-core/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":ksrpc-core/commonMain" data-filterable-set=":ksrpc-core/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="to-byte-array.html"><span>to</span><wbr><span>Byte</span><wbr><span><span>Array</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-942843382%2FFunctions%2F1567993722"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="to-byte-array.html"><span class="token function">toByteArray</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a></div><div class="brief "><p class="paragraph">Drain this source into a single <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a>. Default implementation accumulates <a href="transfer-to.html">transferTo</a> chunks; subclasses that already hold the data in memory should override this to return it directly.</p></div></div></div>
                 </div>
               </div>
             </div>

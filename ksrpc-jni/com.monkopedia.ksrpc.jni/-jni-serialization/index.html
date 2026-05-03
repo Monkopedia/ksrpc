@@ -39,7 +39,7 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">0.11.1
+        <div class="library-version" id="library-version">1.0.0-RC1
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
@@ -94,7 +94,7 @@
   <div class="breadcrumbs"><a href="../../index.html">ksrpc-jni</a><span class="delimiter">/</span><a href="../index.html">com.monkopedia.ksrpc.jni</a><span class="delimiter">/</span><span class="current">JniSerialization</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Jni</span><wbr><span><span>Serialization</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-jni/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">JniSerialization</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">jniSer<span class="token operator">: </span><a href="../-jni-ser/index.html">JniSer</a><span class="token operator"> = </span>JniSer</span></span><span class="token punctuation">)</span> : <a href="../../../ksrpc-core/com.monkopedia.ksrpc/-call-data-serializer/index.html">CallDataSerializer</a><span class="token operator">&lt;</span><a href="../-jni-serialized/index.html">JniSerialized</a><span class="token operator">&gt; </span></div></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-jni/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">JniSerialization</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">jniSer<span class="token operator">: </span><a href="../-jni-ser/index.html">JniSer</a><span class="token operator"> = </span>JniSer</span></span><span class="token punctuation">)</span> : <a href="../../../ksrpc-core/com.monkopedia.ksrpc/-call-data-serializer/index.html">CallDataSerializer</a><span class="token operator">&lt;</span><a href="../-jni-serialized/index.html">JniSerialized</a><span class="token operator">&gt; </span></div><p class="paragraph">Wire-format adapter for the JNI transport. Round-trips successful payloads through <a href="../-jni-ser/index.html">JniSer</a>; error frames are carried as <a href="../../../ksrpc-core/com.monkopedia.ksrpc.channels/-call-data/-error/index.html">CallData.Error</a> by the routing layer (RpcMethod) and encoded natively by JniConnection, so this serializer only handles the success path.</p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
@@ -135,36 +135,6 @@
               </div>
             </div>
           </div>
-<a data-name="1681419849%2FFunctions%2F-1918563826" anchor-label="createEndpointNotFoundCallData" id="1681419849%2FFunctions%2F-1918563826" data-filterable-set=":ksrpc-jni/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":ksrpc-jni/commonMain" data-filterable-set=":ksrpc-jni/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="create-endpoint-not-found-call-data.html"><span>create</span><wbr><span>Endpoint</span><wbr><span>Not</span><wbr><span>Found</span><wbr><span>Call</span><wbr><span><span>Data</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1681419849%2FFunctions%2F-1918563826"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-jni/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="create-endpoint-not-found-call-data.html">I</a><span class="token operator">&gt; </span><a href="create-endpoint-not-found-call-data.html"><span class="token function">createEndpointNotFoundCallData</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">serializer<span class="token operator">: </span><span data-unresolved-link="kotlinx.serialization/KSerializer///PointingToDeclaration/">KSerializer</span><span class="token operator">&lt;</span><a href="create-endpoint-not-found-call-data.html">I</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">input<span class="token operator">: </span><a href="create-endpoint-not-found-call-data.html">I</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../ksrpc-core/com.monkopedia.ksrpc.channels/-call-data/index.html">CallData</a><span class="token operator">&lt;</span><a href="../-jni-serialized/index.html">JniSerialized</a><span class="token operator">&gt;</span></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="1062264763%2FFunctions%2F-1918563826" anchor-label="createErrorCallData" id="1062264763%2FFunctions%2F-1918563826" data-filterable-set=":ksrpc-jni/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":ksrpc-jni/commonMain" data-filterable-set=":ksrpc-jni/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="create-error-call-data.html"><span>create</span><wbr><span>Error</span><wbr><span>Call</span><wbr><span><span>Data</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1062264763%2FFunctions%2F-1918563826"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-jni/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="create-error-call-data.html">I</a><span class="token operator">&gt; </span><a href="create-error-call-data.html"><span class="token function">createErrorCallData</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">serializer<span class="token operator">: </span><span data-unresolved-link="kotlinx.serialization/KSerializer///PointingToDeclaration/">KSerializer</span><span class="token operator">&lt;</span><a href="create-error-call-data.html">I</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">input<span class="token operator">: </span><a href="create-error-call-data.html">I</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../ksrpc-core/com.monkopedia.ksrpc.channels/-call-data/index.html">CallData</a><span class="token operator">&lt;</span><a href="../-jni-serialized/index.html">JniSerialized</a><span class="token operator">&gt;</span></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
 <a data-name="1993796283%2FFunctions%2F-1918563826" anchor-label="decodeCallData" id="1993796283%2FFunctions%2F-1918563826" data-filterable-set=":ksrpc-jni/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":ksrpc-jni/commonMain" data-filterable-set=":ksrpc-jni/commonMain">
             <div class="main-subrow keyValue ">
@@ -176,36 +146,6 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-jni/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="decode-call-data.html">I</a><span class="token operator">&gt; </span><a href="decode-call-data.html"><span class="token function">decodeCallData</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">serializer<span class="token operator">: </span><span data-unresolved-link="kotlinx.serialization/KSerializer///PointingToDeclaration/">KSerializer</span><span class="token operator">&lt;</span><a href="decode-call-data.html">I</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">data<span class="token operator">: </span><a href="../../../ksrpc-core/com.monkopedia.ksrpc.channels/-call-data/index.html">CallData</a><span class="token operator">&lt;</span><a href="../-jni-serialized/index.html">JniSerialized</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="decode-call-data.html">I</a></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="-1881234350%2FFunctions%2F-1918563826" anchor-label="decodeErrorCallData" id="-1881234350%2FFunctions%2F-1918563826" data-filterable-set=":ksrpc-jni/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":ksrpc-jni/commonMain" data-filterable-set=":ksrpc-jni/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="decode-error-call-data.html"><span>decode</span><wbr><span>Error</span><wbr><span>Call</span><wbr><span><span>Data</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1881234350%2FFunctions%2F-1918563826"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-jni/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="decode-error-call-data.html"><span class="token function">decodeErrorCallData</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">callData<span class="token operator">: </span><a href="../../../ksrpc-core/com.monkopedia.ksrpc.channels/-call-data/index.html">CallData</a><span class="token operator">&lt;</span><a href="../-jni-serialized/index.html">JniSerialized</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="-551561642%2FFunctions%2F-1918563826" anchor-label="isError" id="-551561642%2FFunctions%2F-1918563826" data-filterable-set=":ksrpc-jni/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":ksrpc-jni/commonMain" data-filterable-set=":ksrpc-jni/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="is-error.html"><span>is</span><wbr><span><span>Error</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-551561642%2FFunctions%2F-1918563826"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-jni/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="is-error.html"><span class="token function">isError</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">data<span class="token operator">: </span><a href="../../../ksrpc-core/com.monkopedia.ksrpc.channels/-call-data/index.html">CallData</a><span class="token operator">&lt;</span><a href="../-jni-serialized/index.html">JniSerialized</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
                 </div>
               </div>
             </div>

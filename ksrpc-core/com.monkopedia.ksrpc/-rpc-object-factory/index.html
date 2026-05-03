@@ -39,7 +39,7 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">0.11.1
+        <div class="library-version" id="library-version">1.0.0-RC1
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
@@ -97,7 +97,7 @@
     <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">RpcObjectFactory</a><span class="token operator">&lt;</span><a href="index.html">T</a><span class="token operator"> : </span><a href="../../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token operator">&gt;</span></div><p class="paragraph">Supertype of the generated companion for generic <code class="lang-kotlin">@KsService</code> interfaces. Lets callers materialize an <a href="../-rpc-object/index.html">RpcObject</a> for a concrete instantiation of the service when they only have <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.reflect/-k-type/index.html">KType</a>s (for example, reflective/introspection code or sub-service transformers).</p><p class="paragraph">Non-generic service companions directly implement <a href="../-rpc-object/index.html">RpcObject</a> and do not need this factory indirection — they are already an <code class="lang-kotlin">RpcObject&lt;Service&gt;</code>.</p><p class="paragraph">The preferred, type-safe entry point remains the companion's <code class="lang-kotlin">operator fun &lt;T, ...&gt; invoke(serializer, ...): RpcObject&lt;Service&lt;T, ...&gt;&gt;</code>; this factory exists for contexts where a <code class="lang-kotlin">KSerializer</code> isn't statically available.</p></div></div>
   </div>
   <div class="tabbedcontent">
-    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button><button class="section-tab" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION,EXTENSION_PROPERTY,EXTENSION_FUNCTION">Members &amp; Extensions</button></div>
     <div class="tabs-section-body">
       <div data-togglable="PROPERTY">
         <h2 class="tableheader">Properties</h2>
@@ -131,6 +131,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="create.html"><span class="token function">create</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">typeArgs<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.reflect/-k-type/index.html">KType</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-rpc-object/index.html">RpcObject</a><span class="token operator">&lt;</span><a href="index.html">T</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Create an <a href="../-rpc-object/index.html">RpcObject</a> for a concrete instantiation of the service, resolving the needed serializers from <a href="create.html">typeArgs</a> via <span data-unresolved-link="kotlinx.serialization//serializer/#/PointingToDeclaration/">kotlinx.serialization.serializer</span>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1792925600%2FFunctions%2F1567993722" anchor-label="getOrCreate" id="-1792925600%2FFunctions%2F1567993722" data-filterable-set=":ksrpc-core/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":ksrpc-core/commonMain" data-filterable-set=":ksrpc-core/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../get-or-create.html"><span>get</span><wbr><span>Or</span><wbr><span><span>Create</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1792925600%2FFunctions%2F1567993722"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="../get-or-create.html">T</a><span class="token operator"> : </span><a href="../../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token operator">&gt; </span><a href="index.html">RpcObjectFactory</a><span class="token operator">&lt;</span><a href="../get-or-create.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="../get-or-create.html"><span class="token function">getOrCreate</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">typeArgs<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.reflect/-k-type/index.html">KType</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-rpc-object/index.html">RpcObject</a><span class="token operator">&lt;</span><a href="../get-or-create.html">T</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Return a cached <a href="../-rpc-object/index.html">RpcObject</a> for the given <a href="../get-or-create.html">typeArgs</a>, creating one via create only on the first call for each unique <code class="lang-kotlin">(this, typeArgs)</code> pair. Thread-safe via atomic copy-on-write; in the rare event of a race, create may be called more than once but only one result is kept.</p></div></div></div>
                 </div>
               </div>
             </div>
