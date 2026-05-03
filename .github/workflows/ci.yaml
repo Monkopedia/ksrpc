@@ -1,0 +1,30 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Install libcurl
+        run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev
+
+      - name: Check API compatibility
+        run: ./gradlew apiCheck
+
+      - name: Run JVM tests
+        run: ./gradlew jvmTest --continue
+
+      - name: Run compiler plugin tests
+        run: cd compiler && ./gradlew test

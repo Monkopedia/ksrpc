@@ -286,6 +286,15 @@ public final class com/monkopedia/ksrpc/ServiceNameKt {
 	public static final fun serviceNameFor (Lkotlin/reflect/KClass;)Ljava/lang/String;
 }
 
+public final class com/monkopedia/ksrpc/ServiceTier : java/lang/Enum {
+	public static final field BIDI Lcom/monkopedia/ksrpc/ServiceTier;
+	public static final field HOST Lcom/monkopedia/ksrpc/ServiceTier;
+	public static final field SIMPLE Lcom/monkopedia/ksrpc/ServiceTier;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/monkopedia/ksrpc/ServiceTier;
+	public static fun values ()[Lcom/monkopedia/ksrpc/ServiceTier;
+}
+
 public abstract interface class com/monkopedia/ksrpc/SuspendCloseableObservable : com/monkopedia/ksrpc/SuspendCloseable {
 	public abstract fun onClose (Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
@@ -415,6 +424,8 @@ public abstract interface class com/monkopedia/ksrpc/channels/ChannelHost : com/
 
 public final class com/monkopedia/ksrpc/channels/ChannelHost$DefaultImpls {
 	public static fun getContext (Lcom/monkopedia/ksrpc/channels/ChannelHost;)Lkotlin/coroutines/CoroutineContext;
+	public static fun getSupportedTier (Lcom/monkopedia/ksrpc/channels/ChannelHost;)Lcom/monkopedia/ksrpc/ServiceTier;
+	public static fun getTransportName (Lcom/monkopedia/ksrpc/channels/ChannelHost;)Ljava/lang/String;
 }
 
 public final class com/monkopedia/ksrpc/channels/ChannelId {
@@ -434,6 +445,8 @@ public abstract interface class com/monkopedia/ksrpc/channels/Connection : com/m
 public final class com/monkopedia/ksrpc/channels/Connection$DefaultImpls {
 	public static fun defaultChannel (Lcom/monkopedia/ksrpc/channels/Connection;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static fun getContext (Lcom/monkopedia/ksrpc/channels/Connection;)Lkotlin/coroutines/CoroutineContext;
+	public static fun getSupportedTier (Lcom/monkopedia/ksrpc/channels/Connection;)Lcom/monkopedia/ksrpc/ServiceTier;
+	public static fun getTransportName (Lcom/monkopedia/ksrpc/channels/Connection;)Ljava/lang/String;
 }
 
 public final class com/monkopedia/ksrpc/channels/ConnectionKt {
@@ -508,8 +521,20 @@ public abstract interface class com/monkopedia/ksrpc/channels/SingleChannelClien
 public abstract interface class com/monkopedia/ksrpc/channels/SingleChannelConnection : com/monkopedia/ksrpc/channels/SingleChannelClient, com/monkopedia/ksrpc/channels/SingleChannelHost {
 }
 
+public final class com/monkopedia/ksrpc/channels/SingleChannelConnection$DefaultImpls {
+	public static fun getSupportedTier (Lcom/monkopedia/ksrpc/channels/SingleChannelConnection;)Lcom/monkopedia/ksrpc/ServiceTier;
+	public static fun getTransportName (Lcom/monkopedia/ksrpc/channels/SingleChannelConnection;)Ljava/lang/String;
+}
+
 public abstract interface class com/monkopedia/ksrpc/channels/SingleChannelHost : com/monkopedia/ksrpc/KsrpcEnvironment$Element {
+	public fun getSupportedTier ()Lcom/monkopedia/ksrpc/ServiceTier;
+	public fun getTransportName ()Ljava/lang/String;
 	public abstract fun registerDefault (Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/monkopedia/ksrpc/channels/SingleChannelHost$DefaultImpls {
+	public static fun getSupportedTier (Lcom/monkopedia/ksrpc/channels/SingleChannelHost;)Lcom/monkopedia/ksrpc/ServiceTier;
+	public static fun getTransportName (Lcom/monkopedia/ksrpc/channels/SingleChannelHost;)Ljava/lang/String;
 }
 
 public final class com/monkopedia/ksrpc/channels/WireContextMap$Key : kotlin/coroutines/CoroutineContext$Key {
