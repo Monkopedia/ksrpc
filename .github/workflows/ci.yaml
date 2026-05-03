@@ -20,6 +20,12 @@ jobs:
       - name: Install libcurl
         run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev
 
+      - name: Check code style
+        run: ./gradlew ktlintCheck -x ktlintKotlinScriptCheck --continue
+
+      - name: Check license headers
+        run: ./gradlew licenseCheckForKotlin --continue
+
       - name: Check API compatibility
         run: ./gradlew apiCheck
 
