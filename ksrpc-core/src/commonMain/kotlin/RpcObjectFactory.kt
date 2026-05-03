@@ -67,7 +67,7 @@ private val factoryCache =
  */
 @Suppress("UNCHECKED_CAST")
 @KsrpcInternal
-fun <T : RpcService> RpcObjectFactory<T>.cachedCreate(typeArgs: List<KType>): RpcObject<T> {
+fun <T : RpcService> RpcObjectFactory<T>.getOrCreate(typeArgs: List<KType>): RpcObject<T> {
     val key: Pair<RpcObjectFactory<*>, List<KType>> = this to typeArgs
     factoryCache.value[key]?.let { return it as RpcObject<T> }
     val result = create(typeArgs)

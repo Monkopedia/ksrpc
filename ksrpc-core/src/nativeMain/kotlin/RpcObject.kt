@@ -64,7 +64,7 @@ actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> {
                         "explicit type arguments (see issue #64)."
                 )
             }
-            return factory.cachedCreate(typeArgs)
+            return factory.getOrCreate(typeArgs)
         }
     }
     return error("Can't find rpc companion for ${T::class}")

@@ -49,7 +49,7 @@ actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> {
                     "Star projection not supported in rpcObject<${klass.simpleName}<...>>()"
                 )
             }
-            return (companion as RpcObjectFactory<T>).cachedCreate(typeArgs)
+            return (companion as RpcObjectFactory<T>).getOrCreate(typeArgs)
         }
     }
     // Walk supertypes via KClass.allSupertypes, which returns KTypes with type arguments
@@ -67,7 +67,7 @@ actual inline fun <reified T : RpcService> rpcObject(): RpcObject<T> {
                         "Star projection not supported in supertype $supertype of $klass"
                     )
                 }
-                return (superCompanion as RpcObjectFactory<T>).cachedCreate(typeArgs)
+                return (superCompanion as RpcObjectFactory<T>).getOrCreate(typeArgs)
             }
         }
     }
