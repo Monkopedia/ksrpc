@@ -3,135 +3,30 @@ public final class com/monkopedia/ksrpc/flow/AsKsFlowKt {
 }
 
 public abstract interface class com/monkopedia/ksrpc/flow/KsCollectionToken : com/monkopedia/ksrpc/RpcService {
-	public static final field Companion Lcom/monkopedia/ksrpc/flow/KsCollectionToken$Companion;
 	public abstract fun cancelCollection (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public final class com/monkopedia/ksrpc/flow/KsCollectionToken$Companion : com/monkopedia/ksrpc/RpcObject {
-	public synthetic fun createStub (Lcom/monkopedia/ksrpc/channels/SerializedService;)Lcom/monkopedia/ksrpc/RpcService;
-	public final fun createStub (Lcom/monkopedia/ksrpc/channels/SerializedService;)Lcom/monkopedia/ksrpc/flow/KsCollectionToken;
-	public final fun findEndpoint (Ljava/lang/String;)Lcom/monkopedia/ksrpc/RpcMethod;
-	public final fun getEndpoints ()Ljava/util/List;
-	public final fun getServiceName ()Ljava/lang/String;
-	public final fun getServiceTier ()Lcom/monkopedia/ksrpc/ServiceTier;
 }
 
 public final class com/monkopedia/ksrpc/flow/KsCollectionToken$DefaultImpls {
 	public static fun close (Lcom/monkopedia/ksrpc/flow/KsCollectionToken;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
-public final class com/monkopedia/ksrpc/flow/KsCollectionToken$Stub : com/monkopedia/ksrpc/RpcService, com/monkopedia/ksrpc/flow/KsCollectionToken {
-	public static final field Companion Lcom/monkopedia/ksrpc/flow/KsCollectionToken$Stub$Companion;
-	public fun <init> (Lcom/monkopedia/ksrpc/channels/SerializedService;)V
-	public final synthetic fun cancelCollection (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final synthetic fun close (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public final class com/monkopedia/ksrpc/flow/KsCollectionToken$Stub$AnonymousCancelCollection : com/monkopedia/ksrpc/internal/ServiceExecutor {
-	public fun <init> ()V
-	public final synthetic fun invoke (Lcom/monkopedia/ksrpc/RpcService;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public final synthetic class com/monkopedia/ksrpc/flow/KsCollectionToken$Stub$Companion {
-	public fun <init> ()V
-	public final synthetic fun CancelCollection$ksrpc_flow ()Lcom/monkopedia/ksrpc/RpcMethod;
-}
-
 public abstract interface class com/monkopedia/ksrpc/flow/KsFlowCollector : com/monkopedia/ksrpc/RpcService {
-	public static final field Companion Lcom/monkopedia/ksrpc/flow/KsFlowCollector$Companion;
 	public abstract fun onComplete (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun onError (Lcom/monkopedia/ksrpc/RpcFailure;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun onItem (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public final class com/monkopedia/ksrpc/flow/KsFlowCollector$Companion : com/monkopedia/ksrpc/RpcObjectFactory {
-	public final fun create (Ljava/util/List;)Lcom/monkopedia/ksrpc/RpcObject;
-	public final fun getArity ()I
-	public final fun invoke (Lkotlinx/serialization/KSerializer;)Lcom/monkopedia/ksrpc/RpcObject;
 }
 
 public final class com/monkopedia/ksrpc/flow/KsFlowCollector$DefaultImpls {
 	public static fun close (Lcom/monkopedia/ksrpc/flow/KsFlowCollector;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
-public final class com/monkopedia/ksrpc/flow/KsFlowCollector$Obj : com/monkopedia/ksrpc/RpcObject {
-	public fun <init> (Lkotlinx/serialization/KSerializer;)V
-	public synthetic fun createStub (Lcom/monkopedia/ksrpc/channels/SerializedService;)Lcom/monkopedia/ksrpc/RpcService;
-	public final fun createStub (Lcom/monkopedia/ksrpc/channels/SerializedService;)Lcom/monkopedia/ksrpc/flow/KsFlowCollector;
-	public final fun findEndpoint (Ljava/lang/String;)Lcom/monkopedia/ksrpc/RpcMethod;
-	public final fun getEndpoints ()Ljava/util/List;
-	public final fun getServiceName ()Ljava/lang/String;
-	public final fun getServiceTier ()Lcom/monkopedia/ksrpc/ServiceTier;
-}
-
-public final class com/monkopedia/ksrpc/flow/KsFlowCollector$Stub : com/monkopedia/ksrpc/RpcService, com/monkopedia/ksrpc/flow/KsFlowCollector {
-	public static final field Companion Lcom/monkopedia/ksrpc/flow/KsFlowCollector$Stub$Companion;
-	public fun <init> (Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlinx/serialization/KSerializer;)V
-	public final synthetic fun close (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final synthetic fun onComplete (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final synthetic fun onError (Lcom/monkopedia/ksrpc/RpcFailure;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final synthetic fun onItem (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public final class com/monkopedia/ksrpc/flow/KsFlowCollector$Stub$AnonymousOnComplete : com/monkopedia/ksrpc/internal/ServiceExecutor {
-	public fun <init> ()V
-	public final synthetic fun invoke (Lcom/monkopedia/ksrpc/RpcService;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public final class com/monkopedia/ksrpc/flow/KsFlowCollector$Stub$AnonymousOnError : com/monkopedia/ksrpc/internal/ServiceExecutor {
-	public fun <init> ()V
-	public final synthetic fun invoke (Lcom/monkopedia/ksrpc/RpcService;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public final class com/monkopedia/ksrpc/flow/KsFlowCollector$Stub$AnonymousOnItem : com/monkopedia/ksrpc/internal/ServiceExecutor {
-	public fun <init> ()V
-	public final synthetic fun invoke (Lcom/monkopedia/ksrpc/RpcService;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public final synthetic class com/monkopedia/ksrpc/flow/KsFlowCollector$Stub$Companion {
-	public fun <init> ()V
-}
-
 public abstract interface class com/monkopedia/ksrpc/flow/KsFlowService : com/monkopedia/ksrpc/RpcBidiService, kotlinx/coroutines/flow/Flow {
-	public static final field Companion Lcom/monkopedia/ksrpc/flow/KsFlowService$Companion;
 	public fun collect (Lkotlinx/coroutines/flow/FlowCollector;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun startCollection (Lcom/monkopedia/ksrpc/flow/KsFlowCollector;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public final class com/monkopedia/ksrpc/flow/KsFlowService$Companion : com/monkopedia/ksrpc/RpcObjectFactory {
-	public final fun create (Ljava/util/List;)Lcom/monkopedia/ksrpc/RpcObject;
-	public final fun getArity ()I
-	public final fun invoke (Lkotlinx/serialization/KSerializer;)Lcom/monkopedia/ksrpc/RpcObject;
 }
 
 public final class com/monkopedia/ksrpc/flow/KsFlowService$DefaultImpls {
 	public static fun close (Lcom/monkopedia/ksrpc/flow/KsFlowService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static fun collect (Lcom/monkopedia/ksrpc/flow/KsFlowService;Lkotlinx/coroutines/flow/FlowCollector;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public final class com/monkopedia/ksrpc/flow/KsFlowService$Obj : com/monkopedia/ksrpc/RpcObject {
-	public fun <init> (Lkotlinx/serialization/KSerializer;)V
-	public synthetic fun createStub (Lcom/monkopedia/ksrpc/channels/SerializedService;)Lcom/monkopedia/ksrpc/RpcService;
-	public final fun createStub (Lcom/monkopedia/ksrpc/channels/SerializedService;)Lcom/monkopedia/ksrpc/flow/KsFlowService;
-	public final fun findEndpoint (Ljava/lang/String;)Lcom/monkopedia/ksrpc/RpcMethod;
-	public final fun getEndpoints ()Ljava/util/List;
-	public final fun getServiceName ()Ljava/lang/String;
-	public final fun getServiceTier ()Lcom/monkopedia/ksrpc/ServiceTier;
-}
-
-public final class com/monkopedia/ksrpc/flow/KsFlowService$Stub : com/monkopedia/ksrpc/RpcService, com/monkopedia/ksrpc/flow/KsFlowService {
-	public static final field Companion Lcom/monkopedia/ksrpc/flow/KsFlowService$Stub$Companion;
-	public fun <init> (Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlinx/serialization/KSerializer;)V
-	public final synthetic fun close (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final synthetic fun startCollection (Lcom/monkopedia/ksrpc/flow/KsFlowCollector;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public final class com/monkopedia/ksrpc/flow/KsFlowService$Stub$AnonymousStartCollection : com/monkopedia/ksrpc/internal/ServiceExecutor {
-	public fun <init> ()V
-	public final synthetic fun invoke (Lcom/monkopedia/ksrpc/RpcService;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public final synthetic class com/monkopedia/ksrpc/flow/KsFlowService$Stub$Companion {
-	public fun <init> ()V
 }
 

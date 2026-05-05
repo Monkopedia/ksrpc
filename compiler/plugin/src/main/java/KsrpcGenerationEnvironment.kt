@@ -95,6 +95,16 @@ class KsrpcGenerationEnvironment(
     val serviceTierClass = referenceClass(FqConstants.SERVICE_TIER_CLASS)
     val subserviceTransformer = referenceClass(FqConstants.SUBSERVICE_TRANSFORMER)
     val rpcObjectKey = maybeReferenceClass(FqConstants.RPC_OBJECT_KEY)
+
+    /**
+     * `@KsrpcGenerated` — applied by the plugin to every generated synthetic
+     * declaration (Stub, Obj, Companion, subtype companion) so consumers using
+     * binary-compatibility-validator can filter these out of their API dumps via
+     * `apiValidation { nonPublicMarkers += "com.monkopedia.ksrpc.annotation.KsrpcGenerated" }`.
+     * Resolved optimistically: callers no-op when the annotation isn't on the
+     * compile classpath (older ksrpc-api versions).
+     */
+    val ksrpcGenerated = maybeReferenceClass(FqConstants.KSRPC_GENERATED)
     val suspendCloseable = referenceClass(FqConstants.SUSPEND_CLOSEABLE)
 
     val kSerializer = referenceClass(FqConstants.KSERIALIZER)

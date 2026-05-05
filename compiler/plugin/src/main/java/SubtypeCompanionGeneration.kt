@@ -90,6 +90,10 @@ class SubtypeCompanionGeneration(
         val k = key as FirSubtypeCompanionGenerator.Key
         val subtypeClass = declaration.parentAsClass
 
+        // Mark the synthesized subtype companion `@KsrpcGenerated` so BCV consumers
+        // can filter generated synthetic declarations out of API dumps (issue #168).
+        declaration.addKsrpcGeneratedAnnotation(context, env)
+
         // Emit @RpcObjectKey pointing at this companion on the subtype class.
         env.rpcObjectKey?.let { rpcObjectKeySymbol ->
             val objectReference = createClassReference(context, declaration)

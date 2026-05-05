@@ -102,6 +102,9 @@ class ObjGeneration(
         // Class may have been removed by validation (issue #45 — @KsService subtype of
         // another @KsService). Errors are already reported; skip to avoid crashing.
         val cls = classes[k.target] ?: return emptyList()
+        // Mark the generated Obj class `@KsrpcGenerated` so BCV consumers can filter
+        // synthetic declarations out of API dumps (issue #168).
+        declaration.addKsrpcGeneratedAnnotation(context, env)
         val serializerFields =
             context.buildSerializerFieldsForTypeParams(declaration, env, attach = true)
         cls.setObjClass(declaration)
