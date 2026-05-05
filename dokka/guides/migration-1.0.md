@@ -2,6 +2,14 @@
 
 # Migration Guide: 0.11.x to 1.0
 
+## Requirements
+
+ksrpc 1.0 requires a recent Kotlin version. The compiler plugin uses FIR APIs that change between Kotlin versions, so consumers must run at least the same Kotlin version that ksrpc was compiled against. The Gradle plugin checks this on apply and fails fast with a clear message naming the required version.
+
+## Call-site code: no changes needed
+
+The transport entry points are unchanged. Existing calls to `ksrpcEnvironment { }`, `asConnection(env)`, `serveHttp(...)`, `toStub<T>()`, `registerDefault(...)`, etc. work exactly as before — the breaking changes are in the service interface declarations only.
+
 ## Service tier hierarchy (breaking)
 
 Services must now declare their capability tier explicitly:

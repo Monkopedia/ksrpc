@@ -17,6 +17,7 @@ package com.monkopedia.ksrpc.gradle
 
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
+import org.jetbrains.kotlin.gradle.plugin.KotlinBasePlugin
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilerPluginSupportPlugin
 import org.jetbrains.kotlin.gradle.plugin.SubpluginArtifact
@@ -25,6 +26,36 @@ import org.jetbrains.kotlin.gradle.plugin.SubpluginOption
 class KsrpcGradlePlugin : KotlinCompilerPluginSupportPlugin {
     override fun apply(target: Project): Unit = with(target) {
         extensions.create("ksrpc", KsrpcGradleExtension::class.java)
+        checkKotlinVersion(target)
+    }
+
+    private fun checkKotlinVersion(project: Project) {
+        // Pull the Kotlin plugin version off the buildscript classpath. The compiler
+        // plugin uses FIR APIs that change between Kotlin versions; running against an
+        // older Kotlin than the one we compile against throws NoClassDefFoundError
+        // mid-compilation with no useful context. Fail fast with a clear message instead.
+        // The minimum supported version is injected from gradle/libs.versions.toml at
+        // build time, so it stays in sync as we upgrade Kotlin.
+        val kotlinVersion = project.plugins.findPlugin(KotlinBasePlugin::class.java)?.pluginVersion
+            ?: return
+        if (compareVersions(kotlinVersion, BuildConfig.MIN_KOTLIN_VERSION) < 0) {
+            error(
+                "ksrpc compiler plugin requires Kotlin ${BuildConfig.MIN_KOTLIN_VERSION} " +
+                    "or later (found $kotlinVersion). Upgrade your kotlin plugin version."
+            )
+        }
+    }
+
+    /** Lexicographic comparison of dot-separated numeric versions (ignoring suffixes). */
+    private fun compareVersions(a: String, b: String): Int {
+        val aParts = a.split(".", "-").mapNotNull { it.toIntOrNull() }
+        val bParts = b.split(".", "-").mapNotNull { it.toIntOrNull() }
+        for (i in 0 until maxOf(aParts.size, bParts.size)) {
+            val x = aParts.getOrNull(i) ?: 0
+            val y = bParts.getOrNull(i) ?: 0
+            if (x != y) return x.compareTo(y)
+        }
+        return 0
     }
 
     override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean = true

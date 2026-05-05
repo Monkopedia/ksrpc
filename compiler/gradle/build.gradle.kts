@@ -59,6 +59,14 @@ buildConfig {
     buildConfigField("String", "KOTLIN_PLUGIN_GROUP", "\"${project.group}\"")
     buildConfigField("String", "KOTLIN_PLUGIN_NAME", "\"${project.name}\"")
     buildConfigField("String", "KOTLIN_PLUGIN_VERSION", "\"${project.version}\"")
+    // Minimum supported Kotlin version. Derived from the Kotlin plugin version we
+    // ourselves compile against — the compiler plugin uses FIR APIs that change
+    // between Kotlin versions, so consumers must run at least this version.
+    buildConfigField(
+        "String",
+        "MIN_KOTLIN_VERSION",
+        "\"${libs.versions.kotlin.asProvider().get()}\""
+    )
 }
 
 tasks.withType<KotlinCompile> {
