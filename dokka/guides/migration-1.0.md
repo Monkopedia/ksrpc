@@ -102,3 +102,15 @@ Typed error mappings via `@KsError`. See the [error handling guide](error-handli
 - `Packet` class is `@KsrpcInternal`
 - `ServiceTier` enum added to public API
 - `RpcObject.serviceTier` property added (compiler-generated)
+
+## BCV consumers: re-dump after upgrade
+
+If you use [binary-compatibility-validator](https://github.com/Kotlin/binary-compatibility-validator), `apiCheck` will fail after upgrading because generated `Stub$*` classes reference internal types that moved packages. Run:
+
+```
+./gradlew apiDump
+```
+
+after the upgrade to refresh your API dumps.
+
+A future release will annotate generated synthetic classes with `@KsrpcInternal` so BCV's `nonPublicMarkers` filter excludes them automatically.

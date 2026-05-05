@@ -1,0 +1,66 @@
+# Changelog
+
+## 1.0.0-RC2 (2026-05-03)
+
+First working release candidate for ksrpc 1.0.0.
+
+### New features
+
+- **Service capability tier hierarchy**: `RpcService` → `RpcHostService` → `RpcBidiService` with compile-time validation in the FIR checker and runtime validation at registration time
+- **`@KsService` interface inheritance**: child services inherit parent methods; both can have their own `@KsService` and companion
+- **`@KsContext` propagation**: per-call context across all transports
+  - HTTP: via request headers (`wireKey` → header name)
+  - JSON-RPC: configurable conventions (`RootSiblings` default, also `RootField`, `InParams`, `TransportNative`, `None`)
+  - Packet transport: via `cx` field
+- **`@KsError` typed error mappings**: bidirectional code → exception type mapping with transport-native wire formats (HTTP status codes, JSON-RPC error envelope, packet error frames)
+- **Binary data adapters**: separate modules for ktor `ByteReadChannel`, kotlinx-io `Source`, and okio `BufferedSource`
+- **Flow streaming** (`ksrpc-flow`): `Flow<T>` in method signatures, auto-wrapped in `KsFlowService<T>`
+- **Introspection** (`ksrpc-introspection`): `@KsIntrospectable` services expose endpoint metadata and schemas at runtime, including type arguments for generic sub-services
+- **Generic service support**: `RpcObjectFactory` for parameterized services, plain-Kotlin subtype companion synthesis (`#95`), nested generic chains (`OuterService<T> → InnerService<T> → Flow<T>`)
+- **0-argument `@KsMethod` functions**: no longer require `u: Unit` placeholder
+- **Higher-level IR builder DSL**: `irConstructOf`, `irBuildListOf` helpers in the compiler plugin
+- **Service worker test transport**: `SERVICE_WORKER` test type in `RpcFunctionalityTest`
+- **Comprehensive documentation**: per-transport guide pages, samples, deep links to API reference
+
+### API changes (breaking from 0.11.x)
+
+- Services returning sub-services must extend `RpcHostService` (was `RpcService`)
+- Services using `Flow` or accepting sub-service inputs must extend `RpcBidiService`
+- `IntrospectableRpcService` now extends `RpcHostService` (was `RpcService`)
+- Binary data requires adapter module on classpath (`ksrpc-binary-ktor`, `ksrpc-binary-kotlinx-io`, or `ksrpc-binary-okio`)
+- Several `@KsrpcInternal` types removed from the public API surface (now properly gated)
+- `serveHttp` reified type bound is `RpcService` (accepts all tiers; runtime check rejects bidi)
+- Compiler plugin: `@KsService` on a non-interface declaration is now reported as a FIR diagnostic (was IR-time)
+- `Packet` data class is `@KsrpcInternal`
+
+See [migration-1.0.md](dokka/guides/migration-1.0.md) for detailed migration steps.
+
+### Bug fixes
+
+- Fixed websocket binary transport regression (-94% throughput → restored)
+- Fixed packet codec regression (`encodeDefaults = false` on `PACKET_JSON`)
+- Fixed JNI subtype `ClassCastException` (companion now `RpcObjectFactory` for non-generic subtypes)
+- Fixed native linker errors (`DEFAULT_KSRPC_ERROR_CODE_TO_HTTP_STATUS` deduplication, duplicate `@RpcObjectKey` on synthesized companions)
+- Fixed JSON-RPC spec compliance: notifications no longer send `"id": null`, success responses always include `result`
+- Fixed transitive supertype validation in `@KsService` deep chains
+- Fixed companion synthesis on plain-Kotlin subtypes of generic `@KsService`
+
+### Infrastructure
+
+- New `ksrpc-samples` module for compilable Dokka `@sample` references
+- CI workflow with ktlint, license check, apiCheck, JVM tests, and compiler plugin tests
+- `processDokkaGuides` task substitutes `$KSRPC_VERSION` in guide markdown
+- Migrated FIR diagnostics to support IDE quick-fix infrastructure
+- Auto-release enabled on Maven Central publish
+
+### Known issues
+
+- Consumers using BCV (binary compatibility validator) will see apiCheck failures because generated `Stub$*` classes reference internal types. Run `./gradlew apiDump` after upgrading. A future release will annotate generated synthetic classes with `@KsrpcInternal` so BCV's `nonPublicMarkers` filter excludes them automatically.
+
+## 1.0.0-RC1 (2026-05-03)
+
+Failed release candidate. Withdrawn due to publish workflow misconfiguration (Dokka samples and Gradle plugin portal duplicate detection). All planned changes shipped in 1.0.0-RC2.
+
+## Earlier releases
+
+See [GitHub Releases](https://github.com/Monkopedia/ksrpc/releases) for 0.11.x and earlier.
