@@ -61,9 +61,7 @@ interface ShutdownService : RpcService {
     suspend fun greet(name: String): String
 }
 
-private class ShutdownServiceImpl(
-    val onExit: () -> Unit = {}
-) : ShutdownService {
+private class ShutdownServiceImpl(val onExit: () -> Unit = {}) : ShutdownService {
     override suspend fun shutdown(): String = "ok"
     override suspend fun exit() {
         onExit()
