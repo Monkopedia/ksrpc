@@ -26,6 +26,7 @@ import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.jvm.javaio.toByteReadChannel
 import io.ktor.utils.io.pool.ByteArrayPool
 import io.ktor.utils.io.readAvailable
+import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import kotlin.coroutines.coroutineContext
@@ -80,9 +81,16 @@ private suspend fun ByteReadChannel.copyToAndFlush(
                 val rc = readAvailable(buffer, 0, minOf(limit - copied, bufferSize).toInt())
                 if (rc == -1 && isClosedForRead) break
                 if (rc > 0) {
-                    out.write(buffer, 0, rc)
-                    out.flush()
-                    copied += rc
+                    try {
+                        out.write(buffer, 0, rc)
+                        out.flush()
+                        copied += rc
+                    } catch (t: IOException) {
+                        // Destination stream is gone (e.g. subprocess exited and closed
+                        // its stdin). Stop trying to write; the connection scope will
+                        // observe the close via other means.
+                        break
+                    }
                 }
             } catch (t: Throwable) {
                 if (!isClosedForRead) {
