@@ -73,6 +73,12 @@ class JsonRpcWriterBase(
          * original can be recovered on the receiving side.
          */
         private const val IN_PARAMS_WRAPPED_VALUE_KEY = "__ksrpc_value"
+
+        /**
+         * Substituted in place of an omitted wire-level `params` field so the
+         * downstream Unit input deserializer accepts the request — see #170.
+         */
+        private val EMPTY_PARAMS: JsonObject = buildJsonObject { }
     }
 
     private var baseChannel = CompletableDeferred<JsonRpcChannel>()
@@ -88,7 +94,30 @@ class JsonRpcWriterBase(
                         if ((p as? JsonObject)?.containsKey("method") == true) {
                             val wireCtx = extractContext(p)
                             val cleaned = stripContext(p)
-                            val request = json.decodeFromJsonElement<JsonRpcRequest>(cleaned)
+                            val rawObj = cleaned as? JsonObject
+                            val decoded = json.decodeFromJsonElement<JsonRpcRequest>(cleaned)
+                            // JSON-RPC 2.0 §4 explicitly allows the `params` member to be
+                            // omitted entirely. Real LSP clients (lsp4j, vscode) routinely
+                            // send 0-arg calls like `shutdown` and notifications like
+                            // `exit` with no `params`. Distinguish "missing on the wire"
+                            // (no `params` key on the raw inbound object) from "explicit
+                            // wire null" (key present with value `null`) — only the
+                            // missing case is normalized to an empty object so the
+                            // downstream input-type deserializer (notably Unit, the
+                            // synthesized input for 0-arg @KsMethod functions per #40)
+                            // accepts it. Wire-level `null` is preserved as a Kotlin
+                            // `null` here because that's what nullable-input stubs send,
+                            // and the typed nullable deserializer accepts the literal
+                            // `"null"` string downstream. See #170.
+                            val request = if (
+                                rawObj != null &&
+                                !rawObj.containsKey("params") &&
+                                decoded.params == null
+                            ) {
+                                decoded.copy(params = EMPTY_PARAMS)
+                            } else {
+                                decoded
+                            }
                             if (isCancellationNotification(request)) {
                                 handleCancellationNotification(request)
                             } else {

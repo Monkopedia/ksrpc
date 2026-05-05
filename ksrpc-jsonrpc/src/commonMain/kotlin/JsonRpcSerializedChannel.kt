@@ -26,6 +26,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
 
 private val RpcMethod<*, *, *>.isNotification: Boolean
     get() = metadata("com.monkopedia.ksrpc.annotation.KsNotification") != null
@@ -59,7 +60,15 @@ class JsonRpcSerializedChannel(
         require(!input.isBinary) {
             "JsonRpc does not support binary data"
         }
-        val message = json.decodeFromString<JsonElement?>(input.readSerialized())
+        // We always have a real input payload here (the stub serialized something —
+        // even a `null` value is the literal string "null"). Decoding `"null"` via
+        // `<JsonElement?>` collapses to a Kotlin `null`, but downstream we use the
+        // `null`-vs-non-null distinction to mean "wire `params` field omitted vs.
+        // present" (see #170). Coerce to `JsonNull` so the request encodes as
+        // `params: null` on the wire — distinguishable from a missing `params`
+        // field — and the typed nullable input deserializer on the receiving side
+        // still accepts the literal "null" value.
+        val message = json.decodeFromString<JsonElement?>(input.readSerialized()) ?: JsonNull
         // Outbound stub path: no server-side id to forward. The wire id (if any) is allocated
         // by the underlying JsonRpcChannel.
         val response = try {
