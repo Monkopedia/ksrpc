@@ -129,6 +129,14 @@ object FqConstants {
     val KS_NOTIFICATION = FqName("com.monkopedia.ksrpc.annotation.KsNotification")
     val KS_ERROR = FqName("com.monkopedia.ksrpc.annotation.KsError")
 
+    // @KsrpcGenerated — applied by the plugin to every generated synthetic class
+    // (Stub, Obj, Companion, subtype companion). Allows BCV consumers to filter
+    // these out of API dumps via
+    // `apiValidation { nonPublicMarkers += "com.monkopedia.ksrpc.annotation.KsrpcGenerated" }`.
+    // See issue #168.
+    val KSRPC_GENERATED =
+        ClassId(FqName("com.monkopedia.ksrpc.annotation"), Name.identifier("KsrpcGenerated"))
+
     // kotlinx.serialization.Serializable annotation FQN — used by @KsError validation
     // to check that the bound error payload type is @Serializable.
     val KOTLINX_SERIALIZABLE = FqName("kotlinx.serialization.Serializable")

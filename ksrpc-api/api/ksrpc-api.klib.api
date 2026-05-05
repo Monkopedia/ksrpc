@@ -56,6 +56,10 @@ open annotation class com.monkopedia.ksrpc.annotation/KsTimeout : kotlin/Annotat
         final fun <get-seconds>(): kotlin/Long // com.monkopedia.ksrpc.annotation/KsTimeout.seconds.<get-seconds>|<get-seconds>(){}[0]
 }
 
+open annotation class com.monkopedia.ksrpc.annotation/KsrpcGenerated : kotlin/Annotation { // com.monkopedia.ksrpc.annotation/KsrpcGenerated|null[0]
+    constructor <init>() // com.monkopedia.ksrpc.annotation/KsrpcGenerated.<init>|<init>(){}[0]
+}
+
 open annotation class com.monkopedia.ksrpc.annotation/KsrpcInternal : kotlin/Annotation { // com.monkopedia.ksrpc.annotation/KsrpcInternal|null[0]
     constructor <init>() // com.monkopedia.ksrpc.annotation/KsrpcInternal.<init>|<init>(){}[0]
 }

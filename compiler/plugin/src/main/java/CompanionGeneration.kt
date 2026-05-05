@@ -76,6 +76,11 @@ class CompanionGeneration(
         // subtype of another @KsService — see issue #45). In that case validation has
         // already reported an error; just skip body generation so we don't crash.
         val cls = classes[k.type] ?: return emptyList()
+        // Mark the generated companion `@KsrpcGenerated` so BCV consumers can filter
+        // synthetic declarations out of API dumps (issue #168). Applies to both
+        // non-generic service companions (RpcObject) and generic service companions
+        // (RpcObjectFactory) — both are entirely plugin-generated.
+        declaration.addKsrpcGeneratedAnnotation(context, env)
         // Emit @RpcObjectKey pointing at the companion. For non-generic services the
         // companion is the `RpcObject`; for generic services it's the `RpcObjectFactory`.
         // `rpcObject<T>()` inspects the returned instance and, when it's a factory,

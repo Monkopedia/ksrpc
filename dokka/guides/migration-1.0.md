@@ -103,14 +103,26 @@ Typed error mappings via `@KsError`. See the [error handling guide](error-handli
 - `ServiceTier` enum added to public API
 - `RpcObject.serviceTier` property added (compiler-generated)
 
-## BCV consumers: re-dump after upgrade
+## BCV consumers: filter generated synthetic classes
 
-If you use [binary-compatibility-validator](https://github.com/Kotlin/binary-compatibility-validator), `apiCheck` will fail after upgrading because generated `Stub$*` classes reference internal types that moved packages. Run:
+Every `@KsService` interface receives a set of plugin-generated synthetic
+companions (`Stub`, `Stub.Companion`, `Stub.Anonymous<MethodName>`
+`ServiceExecutor`s, `Obj`, the service's `RpcObject` / `RpcObjectFactory`
+companion, and the synthesized companion on plain-Kotlin subtypes of
+`@KsService`). The plugin now annotates all of them with the new
+`@KsrpcGenerated` marker so consumers using
+[binary-compatibility-validator](https://github.com/Kotlin/binary-compatibility-validator)
+can keep them out of their API dumps:
 
+```kotlin
+apiValidation {
+    nonPublicMarkers += "com.monkopedia.ksrpc.annotation.KsrpcGenerated"
+}
 ```
-./gradlew apiDump
-```
 
-after the upgrade to refresh your API dumps.
-
-A future release will annotate generated synthetic classes with `@KsrpcInternal` so BCV's `nonPublicMarkers` filter excludes them automatically.
+You do not need to reference `@KsrpcInternal` in your BCV configuration —
+that marker is for ksrpc's own internal symbols, which consumers do not
+declare directly. With `KsrpcGenerated` filtered, generated declarations
+no longer appear in your API dumps and plugin-internal changes (for
+example the `ServiceExecutor` package change in 1.0.0-RC2) no longer
+trigger spurious `apiCheck` failures on upgrade.

@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.0-RC3 (unreleased)
+
+### New features
+
+- **`@KsrpcGenerated` marker annotation**: compiler plugin now annotates all synthetic classes (`Stub`, `Companion`, `Obj`, `ServiceExecutor`, synthesized subtype companions). Consumers using BCV can add `nonPublicMarkers += "com.monkopedia.ksrpc.annotation.KsrpcGenerated"` to filter generated classes from their API dumps automatically (#168)
+
+### Bug fixes
+
+- **JSON-RPC missing params** (#170): 0-arg `@KsMethod` calls now accept omitted `params` field (spec-allowed, used by lsp4j)
+- **Subprocess IOException** (#169): `copyToAndFlush` no longer escapes benign IOException to stderr when subprocess closes its stdin
+
 ## 1.0.0-RC2 (2026-05-03)
 
 First working release candidate for ksrpc 1.0.0.

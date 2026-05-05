@@ -101,6 +101,9 @@ class StubGeneration(
     ): Collection<IrDeclaration> {
         val target = (key as? FirKsrpcStubGenerator.Key)?.target
         val service = classes[target] ?: return emptyList()
+        // Mark the Stub class itself `@KsrpcGenerated` so BCV consumers can filter
+        // generated synthetic types out of API dumps (issue #168).
+        declaration.addKsrpcGeneratedAnnotation(context, env)
         // For generic services, also add per-instance serializer fields on the Stub so
         // method bodies can reach the injected KSerializer<T>. We build these free-standing
         // (attach = false) so `generateChildrenForClass` can add them via its returned list.
@@ -293,6 +296,9 @@ class StubGeneration(
     }.apply {
         origin = IrDeclarationOrigin.DELEGATE
         annotations = listOf(createThreadLocalAnnotation())
+        // Mark the synthetic Stub.Companion `@KsrpcGenerated` so BCV consumers can
+        // filter it out of API dumps (issue #168).
+        addKsrpcGeneratedAnnotation(context, env)
         createThisReceiverParameter()
         addConstructor {
             startOffset = SYNTHETIC_OFFSET

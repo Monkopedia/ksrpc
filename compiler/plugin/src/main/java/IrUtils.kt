@@ -54,6 +54,7 @@ import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.IrType
+import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.defaultType
 import org.jetbrains.kotlin.ir.types.starProjectedType
 import org.jetbrains.kotlin.ir.types.typeWith
@@ -118,6 +119,27 @@ fun createClassReference(
         classSymbol,
         classType
     )
+}
+
+/**
+ * Add `@KsrpcGenerated` to [irClass] when the annotation is on the compile
+ * classpath. No-op when the marker is missing (older ksrpc-api) or when the
+ * class already carries the annotation. See issue #168 — every synthetic
+ * declaration the plugin emits (Stub, Obj, Companion, subtype companion)
+ * should be tagged so BCV's `nonPublicMarkers` filter can hide them.
+ */
+internal fun IrClass.addKsrpcGeneratedAnnotation(
+    context: IrPluginContext,
+    env: KsrpcGenerationEnvironment
+) {
+    val markerSymbol = env.ksrpcGenerated ?: return
+    val markerFqName = markerSymbol.owner.fqNameWhenAvailable
+    if (annotations.any { it.type.classFqName == markerFqName }) return
+    val constructor = markerSymbol.constructors.firstOrNull()
+        ?: reportInternal(
+            "@KsrpcGenerated has no constructor — ksrpc-api on the classpath is broken"
+        )
+    annotations += context.irBuilder(symbol).irCallConstructor(constructor, emptyList())
 }
 
 fun IrClassSymbol.findMethod(name: Name) = functions.find {
@@ -243,6 +265,11 @@ internal fun IrPluginContext.buildAnonymousServiceExecutor(
     }.apply {
         parent = container
         superTypes = listOf(env.serviceExecutor.typeWith())
+        // Mark the synthetic anonymous ServiceExecutor `@KsrpcGenerated` so BCV
+        // consumers can filter generated synthetic declarations out of API dumps
+        // (issue #168). Despite being declared INTERNAL these still appear in
+        // jvm BCV output.
+        addKsrpcGeneratedAnnotation(this@buildAnonymousServiceExecutor, env)
         createThisReceiverParameter()
         addConstructor {
             startOffset = SYNTHETIC_OFFSET
