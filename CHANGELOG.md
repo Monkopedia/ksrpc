@@ -4,12 +4,18 @@
 
 ### New features
 
-- **`@KsrpcGenerated` marker annotation**: compiler plugin now annotates all synthetic classes (`Stub`, `Companion`, `Obj`, `ServiceExecutor`, synthesized subtype companions). Consumers using BCV can add `nonPublicMarkers += "com.monkopedia.ksrpc.annotation.KsrpcGenerated"` to filter generated classes from their API dumps automatically (#168)
+- **`@KsrpcGenerated` marker annotation** (#168): compiler plugin annotates all synthetic classes (`Stub`, `Companion`, `Obj`, `ServiceExecutor`, synthesized subtype companions). Consumers using BCV can add `nonPublicMarkers += "com.monkopedia.ksrpc.annotation.KsrpcGenerated"` to filter generated classes from API dumps automatically.
+- **Kotlin version check**: Gradle plugin fails fast with a clear message when applied with a Kotlin version older than the one ksrpc was compiled against. The minimum is derived from `gradle/libs.versions.toml` so it stays in sync as we upgrade.
 
 ### Bug fixes
 
-- **JSON-RPC missing params** (#170): 0-arg `@KsMethod` calls now accept omitted `params` field (spec-allowed, used by lsp4j)
+- **JSON-RPC missing params** (#170): 0-arg `@KsMethod` calls now accept omitted `params` field (spec-allowed, used by lsp4j and other JSON-RPC clients)
 - **Subprocess IOException** (#169): `copyToAndFlush` no longer escapes benign IOException to stderr when subprocess closes its stdin
+
+### Documentation
+
+- Migration guide explicitly states the Kotlin version requirement
+- Migration guide notes that call-site code (`ksrpcEnvironment`, `asConnection`, `toStub`, etc.) needs no changes
 
 ## 1.0.0-RC2 (2026-05-03)
 

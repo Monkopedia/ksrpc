@@ -21,10 +21,33 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilerPluginSupportPlugin
 import org.jetbrains.kotlin.gradle.plugin.SubpluginArtifact
 import org.jetbrains.kotlin.gradle.plugin.SubpluginOption
+import org.jetbrains.kotlin.gradle.plugin.getKotlinPluginVersion
 
 class KsrpcGradlePlugin : KotlinCompilerPluginSupportPlugin {
     override fun apply(target: Project): Unit = with(target) {
         extensions.create("ksrpc", KsrpcGradleExtension::class.java)
+        checkKotlinVersion(target)
+    }
+
+    private fun checkKotlinVersion(project: Project) {
+        // Pull the Kotlin plugin version off the buildscript classpath. The compiler
+        // plugin uses FIR APIs (FirNamedFunction) that only exist in 2.3.20+; running
+        // against an older Kotlin throws NoClassDefFoundError mid-compilation with no
+        // useful context. Fail fast with a clear message instead.
+        val kotlinVersion = project.getKotlinPluginVersion() ?: return
+        val (major, minor, patch) = kotlinVersion.split(".", "-").take(3)
+            .mapNotNull { it.toIntOrNull() }
+            .let {
+                if (it.size < 3) listOf(0, 0, 0) else it
+            }
+        val ok = major > 2 || (major == 2 && minor > 3) ||
+            (major == 2 && minor == 3 && patch >= 20)
+        if (!ok) {
+            error(
+                "ksrpc compiler plugin requires Kotlin 2.3.20 or later " +
+                    "(found $kotlinVersion). Upgrade your kotlin plugin version."
+            )
+        }
     }
 
     override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean = true
