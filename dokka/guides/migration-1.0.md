@@ -4,7 +4,7 @@
 
 ## Requirements
 
-ksrpc 1.0 requires **Kotlin 2.3.20 or later**. The compiler plugin uses FIR APIs introduced in 2.3.20; older Kotlin versions will fail at compile time. The Gradle plugin checks this and fails fast with a clear message.
+ksrpc 1.0 requires a recent Kotlin version. The compiler plugin uses FIR APIs that change between Kotlin versions, so consumers must run at least the same Kotlin version that ksrpc was compiled against. The Gradle plugin checks this on apply and fails fast with a clear message naming the required version.
 
 ## Call-site code: no changes needed
 
