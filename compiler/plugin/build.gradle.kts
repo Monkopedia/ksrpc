@@ -152,7 +152,7 @@ mavenPublishing {
             url.set("http://github.com/Monkopedia/ksrpc/")
         }
     }
-    publishToMavenCentral(automaticRelease = true)
+    publishToMavenCentral()
     signAllPublications()
 }
 
