@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0-RC3 (unreleased)
+## 1.0.0-RC3 (2026-05-05)
 
 ### New features
 
