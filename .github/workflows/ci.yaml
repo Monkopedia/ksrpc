@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
 jobs:
-  check:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -13,24 +13,41 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
-
-      - name: Install libcurl
-        run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev
-
       - name: Check code style
         run: ./gradlew ktlintCheck -x ktlintKotlinScriptCheck --continue
-
       - name: Check license headers
         run: ./gradlew licenseCheckForKotlin --continue
-
       - name: Check API compatibility
         run: ./gradlew apiCheck
 
+  jvm-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Install libcurl
+        run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev
       - name: Run JVM tests
         run: ./gradlew jvmTest --continue
 
+  compiler-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
       - name: Run compiler plugin tests
         run: cd compiler && ./gradlew test
