@@ -30,19 +30,25 @@ class KsrpcGradlePlugin : KotlinCompilerPluginSupportPlugin {
     }
 
     private fun checkKotlinVersion(project: Project) {
-        // Pull the Kotlin plugin version off the buildscript classpath. The compiler
-        // plugin uses FIR APIs that change between Kotlin versions; running against an
-        // older Kotlin than the one we compile against throws NoClassDefFoundError
+        // The compiler plugin uses FIR APIs that change between Kotlin versions; running
+        // against an older Kotlin than the one we compile against throws NoClassDefFoundError
         // mid-compilation with no useful context. Fail fast with a clear message instead.
         // The minimum supported version is injected from gradle/libs.versions.toml at
         // build time, so it stays in sync as we upgrade Kotlin.
-        val kotlinVersion = project.plugins.findPlugin(KotlinBasePlugin::class.java)?.pluginVersion
-            ?: return
-        if (compareVersions(kotlinVersion, BuildConfig.MIN_KOTLIN_VERSION) < 0) {
-            error(
-                "ksrpc compiler plugin requires Kotlin ${BuildConfig.MIN_KOTLIN_VERSION} " +
-                    "or later (found $kotlinVersion). Upgrade your kotlin plugin version."
-            )
+        //
+        // withType(...) fires for both already-registered plugins and any that show up
+        // later in the plugins block, so the check works regardless of whether the user
+        // applies ksrpc before or after Kotlin (and regardless of whether they use the
+        // `id(...)` apply path or the version-catalog `alias(libs.plugins.ksrpc)` path —
+        // see ksrpc#185).
+        project.plugins.withType(KotlinBasePlugin::class.java) { kotlinPlugin ->
+            val kotlinVersion = kotlinPlugin.pluginVersion
+            if (compareVersions(kotlinVersion, BuildConfig.MIN_KOTLIN_VERSION) < 0) {
+                error(
+                    "ksrpc compiler plugin requires Kotlin ${BuildConfig.MIN_KOTLIN_VERSION} " +
+                        "or later (found $kotlinVersion). Upgrade your kotlin plugin version."
+                )
+            }
         }
     }
 
