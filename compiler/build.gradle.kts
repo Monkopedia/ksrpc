@@ -48,16 +48,20 @@ subprojects {
         "licenseCheckForKotlin",
         com.hierynomus.gradle.license.tasks.LicenseCheck::class
     ) {
-        dependsOn("processResources")
-        source = fileTree(project.projectDir) { include("**/*.kt") }
+        source = fileTree(project.projectDir) {
+            include("**/*.kt")
+            exclude("build/**")
+        }
     }
     tasks["license"].dependsOn("licenseCheckForKotlin")
     tasks.register(
         "licenseFormatForKotlin",
         com.hierynomus.gradle.license.tasks.LicenseFormat::class
     ) {
-        dependsOn("processResources")
-        source = fileTree(project.projectDir) { include("**/*.kt") }
+        source = fileTree(project.projectDir) {
+            include("**/*.kt")
+            exclude("build/**")
+        }
     }
     tasks["licenseFormat"].dependsOn("licenseFormatForKotlin")
 
@@ -76,24 +80,5 @@ subprojects {
     configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
         version.set("1.8.0")
         android.set(true)
-    }
-    afterEvaluate {
-        listOfNotNull(
-            tasks.findByName("licenseCheckForKotlin"),
-            tasks.findByName("licenseFormatForKotlin")
-        ).forEach {
-            tasks.all {
-                if ((this.name.startsWith("ktlint") && this.name.endsWith("Check")) ||
-                    (this.name.startsWith("transform") && this.name.endsWith("Metadata")) ||
-                    (this.name.startsWith("compile") && this.name.contains("Kotlin")) ||
-                    this.name.startsWith("link") ||
-                    this.name == "copyLib" ||
-                    this.name.endsWith("Test") ||
-                    this.name.endsWith("Tests")
-                ) {
-                    it.dependsOn(this)
-                }
-            }
-        }
     }
 }
