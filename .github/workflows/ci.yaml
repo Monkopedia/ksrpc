@@ -49,5 +49,15 @@ jobs:
           java-version: 21
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
+      - name: Build jvmJars referenced by compiler tests
+        run: >
+          ./gradlew
+          :ksrpc-api:jvmJar
+          :ksrpc-core:jvmJar
+          :ksrpc-flow:jvmJar
+          :ksrpc-packets:jvmJar
+          :ksrpc-binary-ktor:jvmJar
+          :ksrpc-binary-kotlinx-io:jvmJar
+          :ksrpc-binary-okio:jvmJar
       - name: Run compiler plugin tests
         run: cd compiler && ./gradlew test

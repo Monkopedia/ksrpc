@@ -31,79 +31,50 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
+// Resolves the main build's current version from its gradle.properties so the
+// test classpath references below pick up whichever jvmJar the main build just
+// produced (rather than coupling to a hard-coded version that goes stale on
+// every release bump).
+val ksrpcVersion: String = rootDir.resolve("../gradle.properties").readLines()
+    .first { it.startsWith("version=") }
+    .substringAfter("=")
+    .trim()
+
 dependencies {
     compileOnly("org.jetbrains.kotlin:kotlin-compiler-embeddable")
 
     ksp(libs.autoservice)
     compileOnly(libs.autoservice.annotations)
 
-    // Locally-built `ksrpc-api` jvmJar, listed BEFORE the published `ksrpctest`
-    // coordinate so the newly-added `@KsError` annotation (#77, Part 2 of #13)
-    // is visible to the test sources. The published 0.11.1 ksrpc-api coordinate
-    // predates the annotation.
+    // The locally-built jvmJars below contain the current main-build source —
+    // the compiler tests need newer APIs (e.g. @KsError #77, the FlowSubservice
+    // Transformer chain #39, binary adapter transformers #72/#73/#74) that the
+    // last published ksrpctest version predates. Run `./gradlew jvmJar` in the
+    // main build before `:compiler:ksrpc-compiler-plugin:test`; CI does this
+    // explicitly in the compiler-tests job.
     testImplementation(
         files(
-            project.rootDir.resolve("../ksrpc-api/build/libs/ksrpc-api-jvm-0.11.1.jar")
-        )
-    )
-    // Locally-built `ksrpc-core` jvmJar, listed BEFORE the published `ksrpctest`
-    // coordinate so the local (non-sealed) `Transformer` interface takes
-    // precedence over the published (sealed) one. The FlowSupportTest (#39) needs
-    // this because `FlowSubserviceTransformer` in the locally-built `ksrpc-flow` extends
-    // `Transformer`; the published 0.11.1 sealed version would reject the
-    // extension at user-code compile time.
-    testImplementation(
-        files(
-            project.rootDir.resolve("../ksrpc-core/build/libs/ksrpc-core-jvm-0.11.1.jar")
-        )
-    )
-    testImplementation(libs.ksrpctest)
-    // Locally-built `ksrpc-flow` jvmJar — see FlowSupportTest (#39). The compiler
-    // plugin sits in an included build, so `project(":ksrpc-flow")` cannot reach
-    // the main build's module; we stitch the jvmJar file onto the test classpath
-    // by path. Consumers must run `:ksrpc-flow:jvmJar` (and `:ksrpc-core:jvmJar`)
-    // in the main build before `:compiler:ksrpc-compiler-plugin:test`; CI already
-    // does this implicitly because the plugin tests run after the main build.
-    testImplementation(
-        files(
-            project.rootDir.resolve("../ksrpc-flow/build/libs/ksrpc-flow-jvm-0.11.1.jar")
-        )
-    )
-    // Locally-built `ksrpc-packets` — required transitively by `ksrpc-binary-ktor`
-    // for plugin tests that compile `ByteReadChannel` signatures.
-    testImplementation(
-        files(
-            project.rootDir.resolve("../ksrpc-packets/build/libs/ksrpc-packets-jvm-0.11.1.jar")
-        )
-    )
-    // Locally-built `ksrpc-binary-ktor` — hosts the `ByteReadChannelTransformer`
-    // the plugin emits for `ByteReadChannel` service signatures (issue #72).
-    testImplementation(
-        files(
-            project.rootDir.resolve(
-                "../ksrpc-binary-ktor/build/libs/ksrpc-binary-ktor-jvm-0.11.1.jar"
-            )
-        )
-    )
-    // Locally-built `ksrpc-binary-kotlinx-io` — hosts the `SourceTransformer`
-    // the plugin emits for `kotlinx.io.Source` service signatures (issue #73).
-    testImplementation(
-        files(
-            project.rootDir.resolve(
+            rootDir.resolve("../ksrpc-api/build/libs/ksrpc-api-jvm-$ksrpcVersion.jar"),
+            rootDir.resolve("../ksrpc-core/build/libs/ksrpc-core-jvm-$ksrpcVersion.jar"),
+            rootDir.resolve("../ksrpc-flow/build/libs/ksrpc-flow-jvm-$ksrpcVersion.jar"),
+            rootDir.resolve("../ksrpc-packets/build/libs/ksrpc-packets-jvm-$ksrpcVersion.jar"),
+            rootDir.resolve(
+                "../ksrpc-binary-ktor/build/libs/ksrpc-binary-ktor-jvm-$ksrpcVersion.jar"
+            ),
+            rootDir.resolve(
                 "../ksrpc-binary-kotlinx-io/build/libs/" +
-                    "ksrpc-binary-kotlinx-io-jvm-0.11.1.jar"
+                    "ksrpc-binary-kotlinx-io-jvm-$ksrpcVersion.jar"
+            ),
+            rootDir.resolve(
+                "../ksrpc-binary-okio/build/libs/ksrpc-binary-okio-jvm-$ksrpcVersion.jar"
             )
         )
     )
-    // Locally-built `ksrpc-binary-okio` — hosts the `BufferedSourceTransformer`
-    // the plugin emits for `okio.BufferedSource` service signatures (issue #74).
-    testImplementation(
-        files(
-            project.rootDir.resolve(
-                "../ksrpc-binary-okio/build/libs/ksrpc-binary-okio-jvm-0.11.1.jar"
-            )
-        )
-    )
+    // Published coordinate — pulls in the transitive runtime deps (kotlinx
+    // serialization, coroutines, etc.) that the bare local jvmJar files above
+    // don't carry. Pinned to a published version; the local jars take classpath
+    // precedence for ksrpc's own types.
+    testImplementation(libs.ksrpctest)
     // User-facing binary types must be resolvable at test-compile time. The
     // adapter jars above depend on these transitively, but BinaryAdapterDiagnosticTest
     // intentionally strips an adapter jar from the compile classpath and still
