@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.0-RC4 (2026-05-17)
+
+Re-release of RC3 with no library code changes. RC3's main packages
+(`ksrpc-core`, `ksrpc-api`, `ksrpc-flow`, etc.) failed to reach Maven Central
+because the vanniktech-maven-publish plugin's auto-release polling timed out
+on the compiler-plugin step, causing GitHub Actions to skip the subsequent
+publish steps. Only `ksrpc-compiler-plugin` and `ksrpc-gradle-plugin` made
+it through.
+
+RC4 publishes everything from a single consistent build with the upstream fix
+in place (vanniktech 0.36.0's new `VALIDATED` default replaces the old
+`PUBLISHED` polling wait). Functionally equivalent to RC3 at the API level.
+
 ## 1.0.0-RC3 (2026-05-05)
 
 ### New features
