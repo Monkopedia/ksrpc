@@ -1,5 +1,35 @@
 # Changelog
 
+## 1.0.0-RC5 (2026-05-19)
+
+Pre-1.0 polish from real-world consumer feedback (konstructor, kplusplus,
+lsp-kotlin, hauler) gathered during RC4 integration testing. No API changes;
+also serves as a publish smoke-test for the release-signing rework in #192
+before tagging 1.0.0 final.
+
+### Fixes
+
+- **#185 / PR #186**: Kotlin version-check gradle plugin now fires on the
+  version-catalog `alias(libs.plugins.ksrpc)` apply path too, not just
+  `id("...")`. Was silently skipped when ksrpc applied before Kotlin in
+  the plugins block. Reported by kplusplus.
+- **#187 / PR #188**: Receive-loop exceptions after `close()` log at debug
+  instead of warn. Read-side counterpart to the close-during-write fix in
+  PR #172 (#169). Reported by konstructor (production teardown noise).
+
+### Developer experience
+
+- **#189 / PR #190**: New `publishAllToMavenLocal` aggregator task that
+  reaches into the compiler included build, so contributors testing against
+  a development build of ksrpc no longer need to run publishToMavenLocal
+  twice. Reported by kplusplus.
+- **#191 / PR #192**: Release signing is now gated on the
+  `RELEASE_SIGNING_ENABLED` gradle property (vanniktech's convention).
+  Contributors can run `publishToMavenLocal` without the maintainer's GPG
+  key. The maintainer's `signing.gnupg.keyName` moved out of the repo's
+  `gradle.properties`; it now lives in `~/.gradle/gradle.properties` and
+  is passed into the publish CI as a `-P` flag. Reported by kplusplus.
+
 ## 1.0.0-RC4 (2026-05-17)
 
 Re-release of RC3 with no library code changes. RC3's main packages
