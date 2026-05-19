@@ -26,6 +26,10 @@ plugins {
 
 group = "com.monkopedia.ksrpc"
 
+// Release signing is gated so contributors can run publishToMavenLocal without the
+// maintainer's GPG key. Enable in release CI via -PRELEASE_SIGNING_ENABLED=true.
+val signingEnabled = (findProperty("RELEASE_SIGNING_ENABLED") as String?)?.toBoolean() == true
+
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
@@ -82,7 +86,9 @@ mavenPublishing {
         }
     }
     publishToMavenCentral(automaticRelease = true)
-    signAllPublications()
+    // signAllPublications() is auto-called by vanniktech when the Gradle property
+    // RELEASE_SIGNING_ENABLED=true is set; we don't call it explicitly to avoid a
+    // double-set on the (now finalized) underlying Property in 0.36.0.
 }
 
 tasks.withType<KotlinCompile> {
@@ -93,7 +99,9 @@ tasks.withType<KotlinCompile> {
     }
 }
 
-signing {
-    useGpgCmd()
-    sign(publishing.publications)
+if (signingEnabled) {
+    signing {
+        useGpgCmd()
+        sign(publishing.publications)
+    }
 }

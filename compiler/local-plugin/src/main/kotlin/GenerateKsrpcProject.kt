@@ -252,6 +252,10 @@ fun Project.ksrpcModule(
     }
     val publishing = extensions.getByType<MavenPublishBaseExtension>()
     val pub = extensions.getByType<PublishingExtension>()
+    // Release signing is gated so contributors can run publishToMavenLocal without the
+    // maintainer's GPG key. Enable in release CI via -PRELEASE_SIGNING_ENABLED=true.
+    val signingEnabled =
+        (findProperty("RELEASE_SIGNING_ENABLED") as String?)?.toBoolean() == true
     publishing.apply {
         pom {
             it.name.set(this@ksrpcModule.name)
@@ -277,19 +281,23 @@ fun Project.ksrpcModule(
             }
         }
         publishToMavenCentral(automaticRelease = true)
-        signAllPublications()
+        // signAllPublications() is auto-called by vanniktech when the Gradle property
+        // RELEASE_SIGNING_ENABLED=true is set; we don't call it explicitly to avoid a
+        // double-set on the (now finalized) underlying Property in 0.36.0.
     }
 
-    extensions.getByType<SigningExtension>().apply {
-        useGpgCmd()
-        sign(pub.publications)
-    }
-    project.afterEvaluate {
-        tasks.withType(org.gradle.plugins.signing.Sign::class) { signingTask ->
-            tasks.withType(
-                org.gradle.api.publish.maven.tasks.AbstractPublishToMaven::class
-            ) { publishTask ->
-                publishTask.dependsOn(signingTask)
+    if (signingEnabled) {
+        extensions.getByType<SigningExtension>().apply {
+            useGpgCmd()
+            sign(pub.publications)
+        }
+        project.afterEvaluate {
+            tasks.withType(org.gradle.plugins.signing.Sign::class) { signingTask ->
+                tasks.withType(
+                    org.gradle.api.publish.maven.tasks.AbstractPublishToMaven::class
+                ) { publishTask ->
+                    publishTask.dependsOn(signingTask)
+                }
             }
         }
     }
