@@ -31,6 +31,7 @@ import kotlin.test.assertNull
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.builtins.serializer
 
 /**
@@ -103,11 +104,20 @@ class CopyToAndFlushOutputCloseJvmTest {
                     "hello"
                 )
                 output.fail()
-                runCatching {
-                    connection!!.defaultChannel().call("echo", request, callId = null)
+                // The call will never return: after #169/PR #172 the writer silently
+                // swallows the IOException, so the request bytes never reach the peer
+                // and no response packet comes back. Bound the wait — what we care
+                // about is whether copyToAndFlush leaked the exception to the parent
+                // scope, not whether the call completes. 1s is plenty for the writer
+                // to observe the failed write.
+                withTimeoutOrNull(1000) {
+                    runCatching {
+                        connection!!.defaultChannel().call("echo", request, callId = null)
+                    }
                 }
-                // Give the copy coroutine time to observe the failed write
-                // and either swallow it (fixed) or rethrow (buggy).
+                // Belt-and-suspenders pause so the copy coroutine has a chance to
+                // observe the failed write and either swallow it (fixed) or rethrow
+                // (buggy) before we read capturedException.
                 delay(300)
             }
         } finally {
