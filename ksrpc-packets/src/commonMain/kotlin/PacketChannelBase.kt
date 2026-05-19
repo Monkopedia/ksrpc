@@ -179,7 +179,17 @@ abstract class PacketChannelBase<T>(
                 }
             }
         } catch (t: Throwable) {
-            env.logger.warn("MultiChannel", "Exception in multichannel", t)
+            // Once close() has flipped isClosed, the peer is gone by definition — the read
+            // path will see a closed channel and surface IOException ("closed for reading"
+            // from PacketUtils.readFields, or framework-equivalent). That's normal teardown,
+            // not a failure: downgrade to debug so it doesn't read as a scary WARN in
+            // consumer logs. Mirrors the close-during-write handling in
+            // ksrpc-sockets/InputOutputStreams.copyToAndFlush (#169 / PR #172).
+            if (isClosed) {
+                env.logger.debug("MultiChannel", "Receive loop ended after close", t)
+            } else {
+                env.logger.warn("MultiChannel", "Exception in multichannel", t)
+            }
             binaryChannels.values.forEach { it.closeWithError(t) }
             multiChannel.close(CancellationException("Multi-channel failure", t))
         }
