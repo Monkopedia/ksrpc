@@ -144,3 +144,15 @@ dependencies {
     dokka(project(":ksrpc-sockets"))
     dokka(project(":ksrpc-service-worker"))
 }
+
+// Convenience aggregator so `./gradlew publishAllToMavenLocal` reaches into the compiler
+// included build (settings.gradle.kts:55) — root `publishToMavenLocal` doesn't recurse, so
+// the compiler-plugin / gradle-plugin / plugin-marker artifacts otherwise need a separate
+// `cd compiler/ && ./gradlew publishToMavenLocal` step. Surfaced by kplusplus during the
+// 1.0.0-RC4 #185 retest.
+tasks.register("publishAllToMavenLocal") {
+    group = "publishing"
+    description = "Publishes all ksrpc artifacts (root + compiler included build) to mavenLocal."
+    dependsOn("publishToMavenLocal")
+    dependsOn(gradle.includedBuild("compiler").task(":publishToMavenLocal"))
+}
