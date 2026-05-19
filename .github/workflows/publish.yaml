@@ -23,16 +23,16 @@ jobs:
           gpg --list-secret-keys --keyid-format LONG
 
       - name: Publish compiler plugins
-        run: cd compiler && ./gradlew publish -PmavenCentralUsername=${{ secrets.OSSRH_USERNAME }} -PmavenCentralPassword=${{ secrets.OSSRH_TOKEN }} -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
+        run: cd compiler && ./gradlew publish -PmavenCentralUsername=${{ secrets.OSSRH_USERNAME }} -PmavenCentralPassword=${{ secrets.OSSRH_TOKEN }} -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}' -Psigning.gnupg.keyName=5B83421E2338B907 -PRELEASE_SIGNING_ENABLED=true
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
 
       - name: Publish to Gradle Plugin Portal
-        run: cd compiler && ./gradlew :ksrpc-gradle-plugin:publishPlugins -Pgradle.publish.key=${{ secrets.GRADLE_PUBLISH_KEY }} -Pgradle.publish.secret=${{ secrets.GRADLE_PUBLISH_SECRET }} -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
+        run: cd compiler && ./gradlew :ksrpc-gradle-plugin:publishPlugins -Pgradle.publish.key=${{ secrets.GRADLE_PUBLISH_KEY }} -Pgradle.publish.secret=${{ secrets.GRADLE_PUBLISH_SECRET }} -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}' -Psigning.gnupg.keyName=5B83421E2338B907 -PRELEASE_SIGNING_ENABLED=true
 
       - name: Publish all packages
-        run: ./gradlew publish -PmavenCentralUsername=${{ secrets.OSSRH_USERNAME }} -PmavenCentralPassword=${{ secrets.OSSRH_TOKEN }} -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}'
+        run: ./gradlew publish -PmavenCentralUsername=${{ secrets.OSSRH_USERNAME }} -PmavenCentralPassword=${{ secrets.OSSRH_TOKEN }} -Psigning.gnupg.passphrase='${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}' -Psigning.gnupg.keyName=5B83421E2338B907 -PRELEASE_SIGNING_ENABLED=true
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
