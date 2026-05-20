@@ -23,6 +23,12 @@ jobs:
         run: ./gradlew apiCheck
 
   jvm-tests:
+    # Pure-JVM modules. The JNI/native-backed jvmTest tasks
+    # (`:ksrpc-jni`, `:ksrpc-test`, `:ksrpc-bench`) run separately in the
+    # `jni-tests` job because they trigger Kotlin/Native compilation
+    # (cinterop + linkDebugSharedLinuxX64 for libksrpc_test.so) that
+    # dominated this job's wall-clock without exercising the JVM test
+    # runner. See #183.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -33,10 +39,43 @@ jobs:
           java-version: 21
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
+      - name: Run JVM tests
+        run: >
+          ./gradlew jvmTest
+          -x :ksrpc-jni:jvmTest
+          -x :ksrpc-test:jvmTest
+          -x :ksrpc-bench:jvmTest
+          --parallel --continue
+
+  jni-tests:
+    # Builds the Kotlin/Native libksrpc_test.so + ksrpc-jni cinterop klibs
+    # required by the JNI-backed jvmTest classes in ksrpc-test. Kept on its
+    # own runner so its native-compile cost (the long pole on jvm-tests
+    # pre-#183) runs in parallel with the rest of the JVM suite. Caches
+    # `~/.konan` because the Kotlin/Native prebuilt + its dependencies
+    # (~1GB compiler + ~4GB sysroot/libs on first download) dominate the
+    # native-compile cold-cache cost.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Cache Kotlin/Native toolchain
+        uses: actions/cache@v4
+        with:
+          path: ~/.konan
+          key: konan-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml', 'gradle.properties') }}
+          restore-keys: |
+            konan-${{ runner.os }}-
       - name: Install libcurl
         run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev
-      - name: Run JVM tests
-        run: ./gradlew jvmTest --continue
+      - name: Run JNI-backed JVM tests
+        run: ./gradlew :ksrpc-jni:jvmTest :ksrpc-test:jvmTest --continue
 
   compiler-tests:
     runs-on: ubuntu-latest
