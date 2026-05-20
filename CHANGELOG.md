@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.0.0-RC6 (2026-05-20)
+
+One consumer-facing fix plus test/CI hardening. No API changes.
+
+### Fixes
+
+- **#195 / PR #196**: the packet receive loop now closes the multiChannel and
+  binary channels cleanly when the channel was already closed by the consumer,
+  instead of propagating a `CancellationException("Multi-channel failure")`
+  wrapping the underlying close IOException. PR #188 (RC5) only quieted ksrpc's
+  own log; the exception was still surfacing to consumers who catch and log it
+  (konstructor's `ScriptManager` logged ~169 WARN events per teardown). This
+  closes that propagation at the source. Reported by konstructor.
+
+### Internal (no artifact impact)
+
+- **#197 / PR #198**: bounded a hanging regression test
+  (`CopyToAndFlushOutputCloseJvmTest`) that had been silently wedging CI since
+  it was added.
+- **#183 / PR #194**: split the JNI/Kotlin-Native-backed jvmTest modules into
+  their own CI job with a `~/.konan` cache, cutting CI wall-clock from ~25min
+  to ~5-8min.
+
 ## 1.0.0-RC5 (2026-05-19)
 
 Pre-1.0 polish from real-world consumer feedback (konstructor, kplusplus,
