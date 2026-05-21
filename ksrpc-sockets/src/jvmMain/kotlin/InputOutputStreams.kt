@@ -30,6 +30,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import kotlin.coroutines.coroutineContext
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -45,30 +46,45 @@ suspend fun Pair<InputStream, OutputStream>.asConnection(
     val (input, output) = this
     val channel = ByteChannel(autoFlush = true)
     val connectionScope = CoroutineScope(coroutineContext + SupervisorJob())
+    // The connection isn't built until after this coroutine launches, so hand it to the
+    // copy coroutine via a deferred — it needs it to force-close on write-side failure (#200).
+    val connectionReady = CompletableDeferred<Connection<String>>()
     connectionScope.launch(Dispatchers.IO) {
-        channel.copyToAndFlush(output)
-    }
-    return (input.toByteReadChannel(Dispatchers.IO) to channel)
-        .asConnection(connectionScope, env)
-        .also {
-            it.onClose {
-                swallow { connectionScope.cancel() }
-                swallow { input.close() }
-                swallow { output.close() }
-            }
+        val cleanEof = channel.copyToAndFlush(output)
+        if (!cleanEof) {
+            // The write side died (e.g. subprocess closed its stdin) while the read side may
+            // still be open. Without this, the receive loop keeps waiting on the live read
+            // side, MultiChannel.close() never fires, and any pending call() awaits a response
+            // that can never come — hanging forever (#200). Closing the connection runs the
+            // normal teardown, which completes pending receivers exceptionally so callers fail
+            // fast instead of hanging.
+            swallow { connectionReady.await().close() }
         }
+    }
+    val connection = (input.toByteReadChannel(Dispatchers.IO) to channel)
+        .asConnection(connectionScope, env)
+    connection.onClose {
+        swallow { connectionScope.cancel() }
+        swallow { input.close() }
+        swallow { output.close() }
+    }
+    connectionReady.complete(connection)
+    return connection
 }
 
 /**
- * Copies up to [limit] bytes from [this] byte channel to [out] stream suspending on read channel
- * and blocking on output
+ * Copies bytes from [this] byte channel to [out] stream, suspending on read and blocking on
+ * the output write.
  *
- * @return number of bytes copied
+ * @return `true` if the copy ended because the read side reached a clean EOF; `false` if it
+ *   ended because the destination stream failed (e.g. the subprocess closed its stdin). The
+ *   caller uses a `false` return to force-close the connection so pending calls don't hang on
+ *   a write side that silently went away (#200).
  */
 private suspend fun ByteReadChannel.copyToAndFlush(
     out: OutputStream,
     limit: Long = Long.MAX_VALUE
-): Long {
+): Boolean {
     require(limit >= 0) { "Limit shouldn't be negative: $limit" }
 
     val buffer = ByteArrayPool.borrow()
@@ -87,9 +103,10 @@ private suspend fun ByteReadChannel.copyToAndFlush(
                         copied += rc
                     } catch (t: IOException) {
                         // Destination stream is gone (e.g. subprocess exited and closed
-                        // its stdin). Stop trying to write; the connection scope will
-                        // observe the close via other means.
-                        break
+                        // its stdin). Signal the failure to the caller so it can tear the
+                        // connection down — see #200.
+                        swallow { out.close() }
+                        return false
                     }
                 }
             } catch (t: Throwable) {
@@ -100,7 +117,7 @@ private suspend fun ByteReadChannel.copyToAndFlush(
         }
         swallow { out.close() }
 
-        return copied
+        return true
     } finally {
         ByteArrayPool.recycle(buffer)
     }
