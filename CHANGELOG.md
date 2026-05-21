@@ -1,5 +1,34 @@
 # Changelog
 
+## 1.0.0 (2026-05-21)
+
+First stable release. API is now considered stable under semantic versioning —
+breaking changes will require a 2.0.0.
+
+Identical in library code to 1.0.0-RC6 plus the #200 fix (PR #202). The full
+1.0.0 surface was built up across the RC series (see entries below):
+
+- Service capability tier hierarchy (`RpcService` → `RpcHostService` →
+  `RpcBidiService`) with compile-time FIR validation
+- `@KsService` interface inheritance, `@KsContext` propagation, `@KsError`
+  typed error mappings, `@KsIntrospectable` runtime metadata
+- `Flow<T>` streaming (`ksrpc-flow`), binary data adapters (ktor / kotlinx-io /
+  okio), generic service support
+- Transports: HTTP, websocket, JSON-RPC 2.0, POSIX sockets, stdin/out,
+  service-worker
+
+Validated against four downstream consumers (konstructor, kplusplus,
+lsp-kotlin, hauler) across RC2/RC4/RC5/RC6.
+
+### Fixes since RC6
+
+- **#200 / PR #202**: `call()` no longer hangs indefinitely when the JVM pipe
+  transport's write side fails silently (e.g. a subprocess closes its stdin)
+  while the read side stays open. The connection is now force-closed on
+  write-side failure so pending calls fail fast instead of awaiting a response
+  that can never arrive. (The Kotlin/Native posix analog is tracked as #201 for
+  a 1.0.x follow-up.)
+
 ## 1.0.0-RC6 (2026-05-20)
 
 One consumer-facing fix plus test/CI hardening. No API changes.
