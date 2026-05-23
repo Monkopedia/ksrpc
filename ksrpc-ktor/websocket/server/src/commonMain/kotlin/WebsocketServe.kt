@@ -28,6 +28,12 @@ import io.ktor.server.routing.Routing
 import io.ktor.server.websocket.webSocket
 import kotlinx.coroutines.coroutineScope
 
+/**
+ * Hosts the given [service] over a WebSocket on the supplied [basePath] within a Ktor [Routing]
+ * block. The server application must have the WebSockets plugin installed.
+ *
+ * @sample com.monkopedia.ksrpc.samples.websocketServerSetup
+ */
 inline fun <reified T : RpcService> Routing.serveWebsocket(
     basePath: String,
     service: T,

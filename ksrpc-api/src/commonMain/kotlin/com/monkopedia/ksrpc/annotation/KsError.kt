@@ -65,6 +65,9 @@ import kotlin.reflect.KClass
  * by the compiler plugin directly because the binding requires a real
  * serializer reference and a dedicated lookup table, not an opaque
  * metadata bag.
+ *
+ * @sample com.monkopedia.ksrpc.samples.errorAnnotationUsage
+ * @sample com.monkopedia.ksrpc.samples.throwingTypedErrors
  */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.BINARY)

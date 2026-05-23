@@ -28,6 +28,8 @@ import io.ktor.client.HttpClient
  * use the WebSocket or JSON-RPC transports instead.
  *
  * This is functionally equivalent to baseUrl.toKsrpcUri().connect(env).
+ *
+ * @sample com.monkopedia.ksrpc.samples.httpClientConnect
  */
 fun HttpClient.asHttpChannelClient(
     baseUrl: String,

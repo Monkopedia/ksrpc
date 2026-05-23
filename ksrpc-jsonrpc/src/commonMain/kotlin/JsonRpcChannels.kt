@@ -28,6 +28,16 @@ import io.ktor.utils.io.ByteWriteChannel
 import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CoroutineScope
 
+/**
+ * Create a [SingleChannelConnection] that communicates over this pair of byte channels using
+ * JSON-RPC 2.0 framing.
+ *
+ * For hosting JSON-RPC over a process' stdin/stdout (e.g. LSP-style protocols on the JVM), see
+ * `stdInJsonRpcConnection` (JVM only), demonstrated in the second sample below.
+ *
+ * @sample com.monkopedia.ksrpc.samples.jsonRpcConnection
+ * @sample com.monkopedia.ksrpc.samples.jsonRpcStdIn
+ */
 suspend fun Pair<ByteReadChannel, ByteWriteChannel>.asJsonRpcConnection(
     env: KsrpcEnvironment<String>,
     includeContentHeaders: Boolean = true,

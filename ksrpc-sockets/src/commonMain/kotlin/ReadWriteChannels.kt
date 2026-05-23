@@ -29,6 +29,8 @@ internal const val MESSAGE = "Message"
 
 /**
  * Create a [Connection] for the given input/output channel.
+ *
+ * @sample com.monkopedia.ksrpc.samples.socketServerSetup
  */
 suspend fun Pair<ByteReadChannel, ByteWriteChannel>.asConnection(
     env: KsrpcEnvironment<String>

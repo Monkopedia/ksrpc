@@ -19,6 +19,8 @@ import com.monkopedia.ksrpc.channels.SerializedService
 
 /**
  * Interface for generated companions of [RpcService].
+ *
+ * @sample com.monkopedia.ksrpc.samples.basicServiceDeclaration
  */
 interface RpcObject<T : RpcService> {
     val serviceName: String

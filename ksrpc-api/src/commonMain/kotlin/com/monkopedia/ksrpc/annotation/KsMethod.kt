@@ -20,6 +20,9 @@ package com.monkopedia.ksrpc.annotation
  *
  * interfaces tagged with this are expected to extend [com.monkopedia.ksrpc.RpcService], and will
  * have a companion generated for them that implements [com.monkopedia.ksrpc.RpcObject] for itself.
+ *
+ * @sample com.monkopedia.ksrpc.samples.basicServiceDeclaration
+ * @sample com.monkopedia.ksrpc.samples.implementAndSerialize
  */
 annotation class KsService
 
@@ -28,6 +31,10 @@ annotation class KsService
  *
  * The [name] must be unique within a [KsService] but need not be unique
  * globally.
+ *
+ * @sample com.monkopedia.ksrpc.samples.basicServiceDeclaration
+ * @sample com.monkopedia.ksrpc.samples.serializableTypes
+ * @sample com.monkopedia.ksrpc.samples.unitInputOutput
  */
 annotation class KsMethod(val name: String)
 

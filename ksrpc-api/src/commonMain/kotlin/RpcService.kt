@@ -35,6 +35,8 @@ interface RpcService : SuspendCloseable {
  *
  * HTTP transports can host [RpcHostService] instances (sub-service outputs are
  * multiplexed over the same connection), but cannot host [RpcBidiService].
+ *
+ * @sample com.monkopedia.ksrpc.samples.subServiceOutput
  */
 interface RpcHostService : RpcService
 
@@ -48,5 +50,7 @@ interface RpcHostService : RpcService
  *
  * Only bidirectional transports (WebSocket, raw sockets, JNI) can host
  * [RpcBidiService] instances.
+ *
+ * @sample com.monkopedia.ksrpc.samples.subServiceInput
  */
 interface RpcBidiService : RpcHostService

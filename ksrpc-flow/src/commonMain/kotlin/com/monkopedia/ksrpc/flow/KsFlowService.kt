@@ -42,6 +42,9 @@ import kotlinx.coroutines.flow.FlowCollector
  *
  * [KsFlowService] does NOT auto-close on collection completion — it stays
  * alive until [close] is called explicitly or its parent connection closes.
+ *
+ * @sample com.monkopedia.ksrpc.samples.flowMethodDeclaration
+ * @sample com.monkopedia.ksrpc.samples.collectingFlowFromService
  */
 @KsService
 interface KsFlowService<T> :

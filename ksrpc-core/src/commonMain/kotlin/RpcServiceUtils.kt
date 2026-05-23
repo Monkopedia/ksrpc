@@ -20,6 +20,9 @@ import com.monkopedia.ksrpc.internal.HostSerializedServiceImpl
 
 /**
  * Helper to get [RpcObject] for a given [RpcService]
+ *
+ * @sample com.monkopedia.ksrpc.samples.basicServiceDeclaration
+ * @sample com.monkopedia.ksrpc.samples.serializableTypes
  */
 expect inline fun <reified T : RpcService> rpcObject(): RpcObject<T>
 
@@ -43,6 +46,9 @@ fun <T : RpcService, S> T.serialized(
 
 /**
  * Convert a [SerializedService] to a [T] for use as a client.
+ *
+ * @sample com.monkopedia.ksrpc.samples.implementAndSerialize
+ * @sample com.monkopedia.ksrpc.samples.subServiceOutput
  */
 inline fun <reified T : RpcService, S> SerializedService<S>.toStub(): T =
     rpcObject<T>().createStub(this)

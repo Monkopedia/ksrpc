@@ -31,6 +31,8 @@ import kotlinx.coroutines.CoroutineScope
  * Turn an [HttpClient] into a websocket based [Connection] for a specified baseUrl.
  *
  * This is functionally equivalent to baseUrl.toKsrpcUri().connect(env).
+ *
+ * @sample com.monkopedia.ksrpc.samples.websocketClientConnect
  */
 suspend fun HttpClient.asWebsocketConnection(
     baseUrl: String,
