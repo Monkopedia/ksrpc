@@ -16,7 +16,6 @@
 package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.jni.JavaJniContinuation
-import com.monkopedia.ksrpc.jni.JniConnection
 import com.monkopedia.ksrpc.jni.JniSerialized
 import com.monkopedia.ksrpc.jni.NativeJniContinuation
 
@@ -30,10 +29,6 @@ class NativeHost {
     external fun createContinuationRelay(
         output: JavaJniContinuation<Int>
     ): NativeJniContinuation<Int>
-
-    external fun createEnv(): Long
-
-    external fun registerService(connection: JniConnection, output: JavaJniContinuation<Int>)
 }
 
 interface Receiver {

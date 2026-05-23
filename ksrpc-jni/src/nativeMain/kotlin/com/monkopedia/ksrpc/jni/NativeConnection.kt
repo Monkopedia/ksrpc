@@ -20,12 +20,6 @@ package com.monkopedia.ksrpc.jni
 import com.monkopedia.jni.JNIEnvVar
 import com.monkopedia.jni.jlong
 import com.monkopedia.jni.jobject
-import com.monkopedia.jnitest.JNI
-import com.monkopedia.jnitest.com.monkopedia.ksrpc.jni.JavaJniContinuation
-import com.monkopedia.jnitest.com.monkopedia.ksrpc.jni.JavaJniContinuationConverter
-import com.monkopedia.jnitest.initThread
-import com.monkopedia.jnitest.threadEnv
-import com.monkopedia.jnitest.threadJni
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.channels.CallData

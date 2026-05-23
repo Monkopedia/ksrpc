@@ -20,8 +20,6 @@ package com.monkopedia.ksrpc.jni
 import com.monkopedia.jni.JNIEnvVar
 import com.monkopedia.jni.jlong
 import com.monkopedia.jni.jobject
-import com.monkopedia.jnitest.JNI
-import com.monkopedia.jnitest.initThread
 import com.monkopedia.ksrpc.RpcFailure
 import com.monkopedia.ksrpc.toException
 import kotlin.coroutines.Continuation

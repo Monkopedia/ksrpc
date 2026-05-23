@@ -16,8 +16,6 @@
 package com.monkopedia.ksrpc.jni
 
 import com.monkopedia.jni.jobject
-import com.monkopedia.jnitest.JNI
-import com.monkopedia.jnitest.threadEnv
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.serialization.KSerializer
 

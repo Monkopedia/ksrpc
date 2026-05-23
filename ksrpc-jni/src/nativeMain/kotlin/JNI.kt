@@ -15,7 +15,7 @@
  */
 @file:OptIn(ExperimentalForeignApi::class)
 
-package com.monkopedia.jnitest
+package com.monkopedia.ksrpc.jni
 
 import com.monkopedia.jni.JNIEnvVar
 import com.monkopedia.jni.JNINativeInterface_

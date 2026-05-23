@@ -18,10 +18,9 @@ package com.monkopedia.ksrpc
 import ComplexClass
 import OtherClass
 import com.monkopedia.ksrpc.jni.JavaJniContinuation
-import com.monkopedia.ksrpc.jni.JniConnection
 import com.monkopedia.ksrpc.jni.JniSer
-import com.monkopedia.ksrpc.jni.JniSerialization
 import com.monkopedia.ksrpc.jni.JniSerialized
+import com.monkopedia.ksrpc.jni.KsrpcNativeHost
 import com.monkopedia.ksrpc.jni.NativeUtils
 import com.monkopedia.ksrpc.jni.asContinuation
 import com.monkopedia.ksrpc.jni.decodeFromJni
@@ -242,23 +241,13 @@ class JniTest {
 
     private suspend fun CoroutineScope.createService(): JniTestInterface {
         NativeUtils.loadLibraryFromJar("/libs/libksrpc_test.${extension()}")
-        val env = ksrpcEnvironment(JniSerialization()) {}
-        val nativeEnvironment = NativeHost().createEnv()
-        val connection = JniConnection(this, env, nativeEnvironment)
-        suspendCoroutine<Int> {
-            NativeHost().registerService(connection, it.withConverter(newTypeConverter<Any?>().int))
-        }
+        val connection = KsrpcNativeHost.connect(this)
         return connection.defaultChannel().toStub<JniTestInterface, JniSerialized>()
     }
 
     private suspend fun CoroutineScope.createMissingEpService(): MissingEndpointTestInterface {
         NativeUtils.loadLibraryFromJar("/libs/libksrpc_test.${extension()}")
-        val env = ksrpcEnvironment(JniSerialization()) {}
-        val nativeEnvironment = NativeHost().createEnv()
-        val connection = JniConnection(this, env, nativeEnvironment)
-        suspendCoroutine<Int> {
-            NativeHost().registerService(connection, it.withConverter(newTypeConverter<Any?>().int))
-        }
+        val connection = KsrpcNativeHost.connect(this)
         return connection.defaultChannel().toStub<MissingEndpointTestInterface, JniSerialized>()
     }
 }

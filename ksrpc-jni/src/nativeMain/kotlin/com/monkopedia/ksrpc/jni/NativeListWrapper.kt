@@ -19,7 +19,6 @@ package com.monkopedia.ksrpc.jni
 
 import com.monkopedia.jni.JNIEnvVar
 import com.monkopedia.jni.jobject
-import com.monkopedia.jnitest.JNI
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 

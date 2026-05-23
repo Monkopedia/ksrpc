@@ -17,43 +17,41 @@
 
 import com.monkopedia.jni.JNIEnvVar
 import com.monkopedia.jni.JNINativeInterface_
+import com.monkopedia.jni.JavaVMVar
+import com.monkopedia.jni.jint
 import com.monkopedia.jni.jmethodID
 import com.monkopedia.jni.jobject
 import com.monkopedia.jni.jvalue
-import com.monkopedia.jnitest.com.monkopedia.ksrpc.jni.JNIDispatcher
-import com.monkopedia.jnitest.com.monkopedia.ksrpc.jni.JavaJniContinuationConverter
-import com.monkopedia.jnitest.initThread
-import com.monkopedia.jnitest.threadEnv
-import com.monkopedia.jnitest.threadJni
 import com.monkopedia.ksrpc.JniTestInterface
 import com.monkopedia.ksrpc.TestJniImpl
 import com.monkopedia.ksrpc.channels.registerDefault
+import com.monkopedia.ksrpc.jni.JNIDispatcher
+import com.monkopedia.ksrpc.jni.JavaJniContinuationConverter
 import com.monkopedia.ksrpc.jni.JniSer
-import com.monkopedia.ksrpc.jni.JniSerialization
 import com.monkopedia.ksrpc.jni.JniSerialized
-import com.monkopedia.ksrpc.jni.NativeConnection
 import com.monkopedia.ksrpc.jni.NativeJniContinuation
 import com.monkopedia.ksrpc.jni.NativeJniContinuationConverter
 import com.monkopedia.ksrpc.jni.decodeFromJni
 import com.monkopedia.ksrpc.jni.encodeToJni
 import com.monkopedia.ksrpc.jni.fromJvm
+import com.monkopedia.ksrpc.jni.initThread
+import com.monkopedia.ksrpc.jni.ksrpcNativeHost
 import com.monkopedia.ksrpc.jni.newTypeConverter
+import com.monkopedia.ksrpc.jni.threadEnv
+import com.monkopedia.ksrpc.jni.threadJni
 import com.monkopedia.ksrpc.jni.toJvm
 import com.monkopedia.ksrpc.jni.withConverter
-import com.monkopedia.ksrpc.ksrpcEnvironment
-import com.monkopedia.ksrpc.serialized
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.suspendCoroutine
 import kotlin.experimental.ExperimentalNativeApi
+import kotlinx.cinterop.COpaquePointer
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.MemScope
-import kotlinx.cinterop.StableRef
 import kotlinx.cinterop.cValue
 import kotlinx.cinterop.cstr
 import kotlinx.cinterop.invoke
 import kotlinx.cinterop.memScoped
-import kotlinx.cinterop.toLong
 import kotlinx.cinterop.wcstr
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -196,37 +194,9 @@ fun createContinuationRelay(env: CPointer<JNIEnvVar>, clazz: jobject, output: jo
 }
 
 @OptIn(ExperimentalForeignApi::class)
-@CName("Java_com_monkopedia_ksrpc_NativeHost_registerService")
-fun registerService(env: CPointer<JNIEnvVar>, clazz: jobject, input: jobject, output: jobject) {
-    initThread(env)
-    try {
-        val jniSerialized = NativeConnection.convertTo(input)
-        val javaContinuation = JavaJniContinuationConverter<Int>(env).convertTo(output)
-        GlobalScope.launch(JNIDispatcher) {
-            runCatching {
-                val service: JniTestInterface = TestJniImpl()
-                jniSerialized.registerDefault(service.serialized(jniSerialized.env))
-                0
-            }.let {
-                javaContinuation.resumeWith(newTypeConverter<jobject>().int, it)
-            }
-        }
-    } catch (t: Throwable) {
-        t.printStackTrace()
-        usleep(1000000u)
+@CName("JNI_OnLoad")
+fun jniOnLoad(vm: CPointer<JavaVMVar>, reserved: COpaquePointer?): jint =
+    ksrpcNativeHost { _, connection ->
+        val service: JniTestInterface = TestJniImpl()
+        connection.registerDefault(service)
     }
-}
-
-@OptIn(ExperimentalForeignApi::class)
-@CName("Java_com_monkopedia_ksrpc_NativeHost_createEnv")
-fun createEnv(env: CPointer<JNIEnvVar>, clazz: jobject): Long {
-    initThread(env)
-    try {
-        val env = ksrpcEnvironment(JniSerialization()) {}
-        return StableRef.create(env).asCPointer().toLong()
-    } catch (t: Throwable) {
-        t.printStackTrace()
-        usleep(1000000u)
-        return -1
-    }
-}

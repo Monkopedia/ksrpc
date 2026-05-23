@@ -19,12 +19,11 @@
     ExperimentalNativeApi::class
 )
 
-package com.monkopedia.jnitest.com.monkopedia.ksrpc.jni
+package com.monkopedia.ksrpc.jni
 
 import com.monkopedia.jni.JNIEnvVar
 import com.monkopedia.jni.jint
 import com.monkopedia.jni.jobject
-import com.monkopedia.jnitest.JNI
 import kotlin.coroutines.CoroutineContext
 import kotlin.experimental.ExperimentalNativeApi
 import kotlin.native.concurrent.ThreadLocal
