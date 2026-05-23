@@ -27,6 +27,8 @@ import kotlin.jvm.JvmName
  * A bidirectional channel that can both host and call services/sub-services.
  *
  * (Meaning @KsServices can be used for both input and output of any @KsMethod)
+ *
+ * @sample com.monkopedia.ksrpc.samples.bidirectionalSetup
  */
 interface Connection<T> :
     ChannelHost<T>,
@@ -52,6 +54,8 @@ data class ChannelId(val id: String)
  *
  * This is equivalent to calling [registerDefault] for [T] instance and using
  * [defaultChannel] and [toStub] to create [R].
+ *
+ * @sample com.monkopedia.ksrpc.samples.connectHelper
  */
 @OptIn(ExperimentalContracts::class)
 suspend inline fun <

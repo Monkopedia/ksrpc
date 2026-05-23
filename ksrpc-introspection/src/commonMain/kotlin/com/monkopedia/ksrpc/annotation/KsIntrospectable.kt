@@ -19,6 +19,9 @@ package com.monkopedia.ksrpc.annotation
  * Annotation tagging an interface for processing by the compiler plugin.
  *
  * This should be placed on interfaces which extend [IntrospectableRpcService].
+ *
+ * @sample com.monkopedia.ksrpc.samples.introspectableService
+ * @sample com.monkopedia.ksrpc.samples.queryingEndpointInfo
  */
 @Retention(AnnotationRetention.BINARY)
 annotation class KsIntrospectable

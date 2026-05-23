@@ -55,6 +55,11 @@ private const val KSRPC_CHANNEL = "channel"
 // DEFAULT_KSRPC_ERROR_CODE_TO_HTTP_STATUS are defined in ksrpc-ktor-client's
 // HttpErrorMapping.kt and re-exported here via the api dependency.
 
+/**
+ * Hosts the given [service] over HTTP on the supplied [basePath] within a Ktor [Routing] block.
+ *
+ * @sample com.monkopedia.ksrpc.samples.httpServerSetup
+ */
 inline fun <reified T : RpcService> Routing.serveHttp(
     basePath: String,
     service: T,

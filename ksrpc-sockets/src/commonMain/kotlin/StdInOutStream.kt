@@ -20,6 +20,8 @@ import com.monkopedia.ksrpc.channels.Connection
 
 /**
  * Create a [Connection] that communicates over the std in/out streams of this process.
+ *
+ * @sample com.monkopedia.ksrpc.samples.stdInOutHosting
  */
 expect suspend inline fun withStdInOut(
     ksrpcEnvironment: KsrpcEnvironment<String>,

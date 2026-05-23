@@ -49,6 +49,10 @@ import kotlin.reflect.KClass
  * Code emission for stub-side put-into-context and handler-side
  * read-from-coroutine-context, plus per-transport wire formats, is handled by
  * follow-up work and is intentionally not part of this annotation's contract.
+ *
+ * @sample com.monkopedia.ksrpc.samples.contextBindingDefinition
+ * @sample com.monkopedia.ksrpc.samples.contextAnnotationUsage
+ * @sample com.monkopedia.ksrpc.samples.contextPropagationUsage
  */
 @Target(AnnotationTarget.ANNOTATION_CLASS)
 @Retention(AnnotationRetention.BINARY)

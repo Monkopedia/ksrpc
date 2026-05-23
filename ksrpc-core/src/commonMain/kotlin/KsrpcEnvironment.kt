@@ -85,6 +85,16 @@ fun <T> ksrpcEnvironment(
     builder: KsrpcEnvironmentBuilder<T>.() -> Unit
 ): KsrpcEnvironment<T> = KsrpcEnvironmentBuilder<T>(serializer).also(builder)
 
+/**
+ * Creates a string-based [KsrpcEnvironment] using the given [stringFormat] (JSON by default).
+ *
+ * The [builder] lambda configures optional settings such as the
+ * [KsrpcEnvironmentBuilder.errorListener]. Pass a custom [kotlinx.serialization.StringFormat]
+ * to control how payloads are encoded on the wire.
+ *
+ * @sample com.monkopedia.ksrpc.samples.environmentBasicSetup
+ * @sample com.monkopedia.ksrpc.samples.environmentWithErrorListener
+ */
 fun ksrpcEnvironment(
     stringFormat: StringFormat = Json,
     builder: KsrpcEnvironmentBuilder<String>.() -> Unit

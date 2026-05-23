@@ -223,9 +223,13 @@ fun Project.ksrpcModule(
         dokkaSourceSets.configureEach { sourceSet ->
             sourceSet.includes.from(rootProject.file("dokka/moduledoc.md"))
             if (sourceSet.name == "commonMain") {
+                // Attach both sample roots to commonMain so that common declarations
+                // (e.g. transport entry points such as serveHttp / asConnection) can
+                // reference platform-specific (JVM-only) samples that demonstrate them.
+                // JVM-only samples must compile against JVM APIs, so they live in the
+                // jvmMain sample root; attaching that root only to commonMain avoids the
+                // "same sample root shared by related source sets" validity error.
                 sourceSet.samples.from(rootProject.file("ksrpc-samples/src/commonMain/kotlin"))
-            }
-            if (sourceSet.name == "jvmMain") {
                 sourceSet.samples.from(rootProject.file("ksrpc-samples/src/jvmMain/kotlin"))
             }
             sourceSet.skipEmptyPackages.set(true)
