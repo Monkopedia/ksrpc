@@ -24,6 +24,7 @@ import com.monkopedia.jni.jmethodID
 import com.monkopedia.jni.jobject
 import com.monkopedia.jni.jstring
 import com.monkopedia.jni.jvalue
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import kotlin.native.concurrent.ThreadLocal
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.CPointerVarOf
@@ -55,13 +56,17 @@ internal lateinit var jni: JNINativeInterface_
 @ThreadLocal
 internal lateinit var env: CPointer<CPointerVarOf<CPointer<JNINativeInterface_>>>
 
+@KsrpcInternal
 val threadJni: JNINativeInterface_
     get() {
         return jni
     }
+
+@KsrpcInternal
 val threadEnv: CPointer<CPointerVarOf<CPointer<JNINativeInterface_>>>
     get() = env
 
+@KsrpcInternal
 fun initThread(e: CPointer<JNIEnvVar>) {
     JNI.init(e)
 }

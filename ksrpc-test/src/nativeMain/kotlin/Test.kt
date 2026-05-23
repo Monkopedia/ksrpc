@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@file:OptIn(ExperimentalForeignApi::class, ExperimentalNativeApi::class)
+@file:OptIn(ExperimentalForeignApi::class, ExperimentalNativeApi::class, KsrpcInternal::class)
 
 import com.monkopedia.jni.JNIEnvVar
 import com.monkopedia.jni.JNINativeInterface_
@@ -24,6 +24,7 @@ import com.monkopedia.jni.jobject
 import com.monkopedia.jni.jvalue
 import com.monkopedia.ksrpc.JniTestInterface
 import com.monkopedia.ksrpc.TestJniImpl
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.channels.registerDefault
 import com.monkopedia.ksrpc.jni.JNIDispatcher
 import com.monkopedia.ksrpc.jni.JavaJniContinuationConverter

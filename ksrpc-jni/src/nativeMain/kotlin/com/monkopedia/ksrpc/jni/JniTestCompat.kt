@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@file:OptIn(ExperimentalForeignApi::class)
+@file:OptIn(ExperimentalForeignApi::class, KsrpcInternal::class)
 @file:Suppress("ktlint:standard:filename")
 
 package com.monkopedia.jnitest
 
 import com.monkopedia.jni.JNIEnvVar
 import com.monkopedia.jni.JNINativeInterface_
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.jni.initThread as movedInitThread
 import com.monkopedia.ksrpc.jni.threadEnv as movedThreadEnv
 import com.monkopedia.ksrpc.jni.threadJni as movedThreadJni
@@ -34,6 +35,7 @@ import kotlinx.cinterop.ExperimentalForeignApi
     "Moved to com.monkopedia.ksrpc.jni",
     ReplaceWith("threadJni", "com.monkopedia.ksrpc.jni.threadJni")
 )
+@KsrpcInternal
 val threadJni: JNINativeInterface_
     get() = movedThreadJni
 
@@ -44,6 +46,7 @@ val threadJni: JNINativeInterface_
     "Moved to com.monkopedia.ksrpc.jni",
     ReplaceWith("threadEnv", "com.monkopedia.ksrpc.jni.threadEnv")
 )
+@KsrpcInternal
 val threadEnv: CPointer<CPointerVarOf<CPointer<JNINativeInterface_>>>
     get() = movedThreadEnv
 
@@ -54,4 +57,5 @@ val threadEnv: CPointer<CPointerVarOf<CPointer<JNINativeInterface_>>>
     "Moved to com.monkopedia.ksrpc.jni",
     ReplaceWith("initThread(e)", "com.monkopedia.ksrpc.jni.initThread")
 )
+@KsrpcInternal
 fun initThread(e: CPointer<JNIEnvVar>) = movedInitThread(e)

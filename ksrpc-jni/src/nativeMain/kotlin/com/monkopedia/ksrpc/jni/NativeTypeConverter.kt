@@ -13,9 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(KsrpcInternal::class)
+
 package com.monkopedia.ksrpc.jni
 
 import com.monkopedia.jni.jobject
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.serialization.KSerializer
 
