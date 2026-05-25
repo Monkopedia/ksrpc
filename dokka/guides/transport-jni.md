@@ -53,9 +53,9 @@ ksrpc owns all of the JNI export plumbing, so hosting a service inside a Kotlin/
        }
    ```
 
-   The `register` lambda receives the shared [`KsrpcEnvironment`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc/-ksrpc-environment/index.html) and the freshly-opened [`Connection`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html) each time the JVM connects, running on the calling JVM thread.
+   `ksrpcNativeHost` only **stores** this configuration at load time -- nothing is registered yet. The `register` lambda runs **once per JVM connection**: each time the JVM opens a connection, ksrpc builds a fresh [`KsrpcEnvironment`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc/-ksrpc-environment/index.html) (from your `configure` block) and a new [`Connection`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html), then runs `register` against them on the calling JVM thread. So **each connection is independent** -- it gets its own environment and its own service instance(s); `MyServiceImpl(env)` above is constructed per connection, not shared across clients.
 
-`ksrpcNativeHost` also takes an optional `configure` block to tweak the shared environment. The whole host API is typed on `JniSerialized`, so `JniSerialization` is pre-set and a mismatched serializer is a compile error:
+`ksrpcNativeHost` also takes an optional `configure` block, applied to each connection's environment. The whole host API is typed on `JniSerialized`, so `JniSerialization` is pre-set and a mismatched serializer is a compile error:
 
 ```kotlin
 ksrpcNativeHost(
@@ -69,7 +69,7 @@ ksrpcNativeHost(
 
 ## JVM side: loading and connecting
 
-Load the shared library (e.g. via `NativeUtils.loadLibraryFromJar`), then `KsrpcNativeHost.connect` pairs the environment, connection, and native registration into one call:
+Load the shared library once (e.g. via `NativeUtils.loadLibraryFromJar`), then open a connection. `KsrpcNativeHost.connect` performs the three steps of bringing up a connection in one call -- it **creates** the connection (with a fresh per-connection native environment), **drives the native registration** so the host's `register` lambda runs against *this* connection, and hands it back ready to **use**:
 
 ```kotlin
 import com.monkopedia.ksrpc.jni.JniSerialized
@@ -77,18 +77,20 @@ import com.monkopedia.ksrpc.jni.KsrpcNativeHost
 import com.monkopedia.ksrpc.jni.NativeUtils
 import com.monkopedia.ksrpc.toStub
 
-// Load the Kotlin/Native shared library bundled on the classpath
+// Load the Kotlin/Native shared library bundled on the classpath (once per process)
 NativeUtils.loadLibraryFromJar("/libs/libmy_service.so")
 
-// Build the environment + connection and run the native `register` lambda
+// create a connection (fresh native environment) AND register the native service on it
 val connection = KsrpcNativeHost.connect(scope)
 
-// Call a service hosted on the native side
+// use this connection
 val service = connection.defaultChannel().toStub<MyService, JniSerialized>()
 val result = service.someMethod("hello")
 ```
 
-`KsrpcNativeHost.connect` defaults to a `JniSerialization` environment; pass your own `KsrpcEnvironment<JniSerialized>` to customize the JVM-side logger or error listener. The lower-level primitives (`JniConnection`, `JniSerialization`, `NativeUtils`) remain public if you need finer control.
+The native `register` lambda runs as part of `connect`, on this thread, so the service is hosted on the returned connection before `connect` returns. **Each `connect` call is independent**: it gets its own native environment and its own service instance(s) -- if you call `connect` again you get a separate connection with a separate host-side service, not a shared one.
+
+`KsrpcNativeHost.connect` defaults to a `JniSerialization` environment; pass your own `KsrpcEnvironment<JniSerialized>` to customize the JVM-side logger or error listener. The lower-level primitives (`JniConnection`, `JniSerialization`, `NativeUtils`) remain public if you need finer control over the create/register/use steps yourself.
 
 The working end-to-end reference is the test harness: [`ksrpc-test/src/nativeMain/kotlin/Test.kt`](https://github.com/Monkopedia/ksrpc/blob/main/ksrpc-test/src/nativeMain/kotlin/Test.kt) (the `JNI_OnLoad`) and [`ksrpc-test/src/jvmTest/kotlin/JniTest.kt`](https://github.com/Monkopedia/ksrpc/blob/main/ksrpc-test/src/jvmTest/kotlin/JniTest.kt) (the `KsrpcNativeHost.connect` calls).
 

@@ -68,15 +68,18 @@ private var hostConfig: NativeHostConfig? = null
  *     }
  * ```
  *
- * The [configure] block tweaks the shared [KsrpcEnvironment] (logger, error
- * listener, coroutine exception handler, ...). The serializer is pre-set to
- * [JniSerialization]; because everything is typed on [JniSerialized] it can only
- * be replaced by another `CallDataSerializer<JniSerialized>`.
+ * Only the configuration is stored at load time; nothing is registered yet.
+ * The [configure] block is applied to a fresh [KsrpcEnvironment] built for each
+ * connection (logger, error listener, coroutine exception handler, ...). The
+ * serializer is pre-set to [JniSerialization]; because everything is typed on
+ * [JniSerialized] it can only be replaced by another `CallDataSerializer<JniSerialized>`.
  *
- * The [register] lambda runs every time the JVM opens a connection, on the
- * calling JVM thread (with a live `JNIEnv`), receiving the shared
+ * The [register] lambda runs **once per JVM connection**, on the calling JVM
+ * thread (with a live `JNIEnv`), receiving that connection's own
  * [KsrpcEnvironment] and the freshly-opened [Connection] so it can register the
- * service(s) it hosts.
+ * service(s) it hosts. Each connection is independent: it gets its own
+ * environment and its own service instance(s) -- nothing is shared across
+ * connections.
  *
  * Note: `JNI_OnLoad`'s `JavaVM*` / reserved arguments are not needed by ksrpc —
  * the dispatcher is JVM-thread-driven, so there is no native-initiated thread to

@@ -46,12 +46,16 @@ object KsrpcNativeHost {
     )
 
     /**
-     * Opens a [Connection] to the native host on the given [scope], invoking the
-     * native `register` lambda so its service(s) are hosted before returning.
+     * Opens a [Connection] to the native host on the given [scope]: it creates the
+     * connection (with a fresh native environment), drives the native registration
+     * so the host's `register` lambda runs against *this* connection, and returns
+     * it ready to use. Each call is independent -- a new connection gets its own
+     * native environment and service instance(s); nothing is shared across calls.
      *
      * The connection uses [JniSerialization]; the optional [environment]
      * configures the JVM-side [KsrpcEnvironment] (logger, error listener, ...).
-     * The native side keeps its own environment configured via [ksrpcNativeHost].
+     * The native side builds its own per-connection environment, configured via
+     * the `configure` block passed to [ksrpcNativeHost].
      */
     suspend fun connect(
         scope: CoroutineScope,
