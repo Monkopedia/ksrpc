@@ -276,6 +276,20 @@ internal object JNI {
                 invoker(jni, env, cls, method, alloc<jvalue> { this.typeMapping(input) }.ptr, true)
             }
         }
+
+        inner class ObjectField(name: String, sig: String) : (jobject) -> jobject? {
+            val field by lazy { cls.findField(name, sig) }
+
+            override fun invoke(obj: jobject): jobject? =
+                jni.GetObjectField!!.invoke(env, obj, field)
+        }
+
+        inner class LongField(name: String, sig: String) : (jobject) -> kotlin.Long {
+            val field by lazy { cls.findField(name, sig) }
+
+            override fun invoke(obj: jobject): kotlin.Long =
+                jni.GetLongField!!.invoke(env, obj, field)
+        }
     }
 
     data object Bool : JvmClass("java/lang/Boolean") {
@@ -327,6 +341,12 @@ internal object JNI {
     data object JavaJniContinuation : JvmClass("com/monkopedia/ksrpc/jni/JavaJniContinuation") {
         val resumeSuccess = Method1("resumeSuccess", "(Ljava/lang/Object;)V", objArg, voidMethod)
         val resumeFailure = Method1("resumeFailure", "(Ljava/lang/Object;)V", objArg, voidMethod)
+    }
+
+    data object JniHostInit : JvmClass("com/monkopedia/ksrpc/jni/JniHostInit") {
+        val connection = ObjectField("connection", "Lcom/monkopedia/ksrpc/jni/JniConnection;")
+        val scope = LongField("scope", "J")
+        val output = ObjectField("output", "Lcom/monkopedia/ksrpc/jni/JavaJniContinuation;")
     }
 
     data object ArrayList : JvmClass("java/util/ArrayList") {
@@ -398,6 +418,11 @@ internal object JNI {
     private fun jclass.findMethod(name: String, signature: String) = memScoped {
         jni.GetMethodID!!.invoke(env, this@findMethod, name.cstr.ptr, signature.cstr.ptr)
             ?: error("Missing method $name $signature")
+    }
+
+    private fun jclass.findField(name: String, signature: String) = memScoped {
+        jni.GetFieldID!!.invoke(env, this@findField, name.cstr.ptr, signature.cstr.ptr)
+            ?: error("Missing field $name $signature")
     }
 
     private fun jclass.findStaticMethod(name: String, signature: String) = memScoped {

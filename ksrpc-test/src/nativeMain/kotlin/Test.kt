@@ -18,7 +18,6 @@
 import com.monkopedia.jni.JNIEnvVar
 import com.monkopedia.jni.JNINativeInterface_
 import com.monkopedia.jni.jint
-import com.monkopedia.jni.jlong
 import com.monkopedia.jni.jmethodID
 import com.monkopedia.jni.jobject
 import com.monkopedia.jni.jvalue
@@ -195,12 +194,7 @@ fun createContinuationRelay(env: CPointer<JNIEnvVar>, clazz: jobject, output: jo
 
 @OptIn(ExperimentalForeignApi::class)
 @CName("Java_com_monkopedia_ksrpc_TestNativeHost_initialize")
-fun initialize(
-    env: CPointer<JNIEnvVar>,
-    clazz: jobject,
-    connection: jobject,
-    scope: jlong,
-    output: jobject
-) = ksrpcHostConnection(env, connection, scope, output) { conn ->
-    conn.registerDefault(TestJniImpl().serialized(conn.env))
-}
+fun initialize(env: CPointer<JNIEnvVar>, clazz: jobject, host: jobject) =
+    ksrpcHostConnection(env, host) { conn ->
+        conn.registerDefault(TestJniImpl().serialized(conn.env))
+    }

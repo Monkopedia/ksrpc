@@ -36,43 +36,32 @@ ksrpc owns all of the JNI export plumbing, so hosting a service inside a Kotlin/
    }
    ```
 
-2. **Declare the binding on one of your own JVM classes** -- an `external fun` ksrpc will drive. Because the `@CName` symbol is mangled from the declaring class, putting it on *your* class means the native symbol names *your* class, not a ksrpc type:
+2. **Declare the binding on one of your own JVM classes** -- an `external fun` ksrpc will drive. Because the `@CName` symbol is mangled from the declaring class, putting it on *your* class means the native symbol names *your* class, not a ksrpc type. The binding takes a single opaque [`JniHostInit`](https://monkopedia.github.io/ksrpc/ksrpc-jni/com.monkopedia.ksrpc.jni/-jni-host-init/index.html) -- you never inspect it, you only forward it:
 
    ```kotlin
    // your JVM source set:
-   import com.monkopedia.ksrpc.jni.JavaJniContinuation
-   import com.monkopedia.ksrpc.jni.JniConnection
+   import com.monkopedia.ksrpc.jni.JniHostInit
 
    object MyNativeService {
-       external fun initialize(
-           connection: JniConnection,
-           scope: Long,
-           output: JavaJniContinuation<Long>
-       )
+       external fun initialize(host: JniHostInit)
    }
    ```
 
-3. **Implement that binding natively** with a single `@CName` export that delegates to `ksrpcHostConnection`. The symbol matches your class from step 2; you write nothing else -- no other `@CName` functions:
+3. **Implement that binding natively** with a single `@CName` export that forwards the `host` to `ksrpcHostConnection`. The symbol matches your class from step 2; you write nothing else -- no other `@CName` functions:
 
    ```kotlin
    // your native source set:
    import com.monkopedia.jni.JNIEnvVar
-   import com.monkopedia.jni.jlong
    import com.monkopedia.jni.jobject
    import com.monkopedia.ksrpc.channels.registerDefault
    import com.monkopedia.ksrpc.jni.ksrpcHostConnection
    import kotlinx.cinterop.CPointer
 
    @CName("Java_com_example_MyNativeService_initialize")
-   fun initialize(
-       env: CPointer<JNIEnvVar>,
-       clazz: jobject,
-       connection: jobject,
-       scope: jlong,
-       output: jobject
-   ) = ksrpcHostConnection(env, connection, scope, output) { conn ->
-       conn.registerDefault(MyServiceImpl(conn.env))
-   }
+   fun initialize(env: CPointer<JNIEnvVar>, clazz: jobject, host: jobject) =
+       ksrpcHostConnection(env, host) { conn ->
+           conn.registerDefault(MyServiceImpl(conn.env))
+       }
    ```
 
    The `setup` lambda runs **once per connection**, on the JNI dispatcher, with the freshly-opened [`Connection`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html). For each connection, `ksrpcHostConnection` builds that connection's own [`KsrpcEnvironment`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc/-ksrpc-environment/index.html), wraps the JVM connection, runs your `setup`, and hands the JVM a single opaque handle that backs the connection's lifecycle. So **each connection is independent** -- it gets its own environment and its own service instance(s); `MyServiceImpl(conn.env)` above is constructed per connection, not shared across clients.
@@ -81,7 +70,7 @@ ksrpc owns all of the JNI export plumbing, so hosting a service inside a Kotlin/
 
 ```kotlin
 ksrpcHostConnection(
-    env, connection, scope, output,
+    env, host,
     configure = { errorListener = ErrorListener { it.printStackTrace() } }
 ) { conn ->
     conn.registerDefault(MyServiceImpl(conn.env))

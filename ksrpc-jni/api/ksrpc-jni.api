@@ -191,6 +191,9 @@ public final class com/monkopedia/ksrpc/jni/JniEncoder : kotlinx/serialization/e
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class com/monkopedia/ksrpc/jni/JniHostInit {
+}
+
 public class com/monkopedia/ksrpc/jni/JniSer {
 	public static final field Companion Lcom/monkopedia/ksrpc/jni/JniSer$Companion;
 	public fun <init> (Lcom/monkopedia/ksrpc/jni/JniEncoder;Lcom/monkopedia/ksrpc/jni/JniDecoder;)V
@@ -247,8 +250,8 @@ public abstract interface class com/monkopedia/ksrpc/jni/JniTypeConverter {
 
 public final class com/monkopedia/ksrpc/jni/KsrpcNativeHost {
 	public static final field INSTANCE Lcom/monkopedia/ksrpc/jni/KsrpcNativeHost;
-	public final fun connect (Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function3;Lcom/monkopedia/ksrpc/KsrpcEnvironment;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun connect$default (Lcom/monkopedia/ksrpc/jni/KsrpcNativeHost;Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function3;Lcom/monkopedia/ksrpc/KsrpcEnvironment;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun connect (Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function1;Lcom/monkopedia/ksrpc/KsrpcEnvironment;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun connect$default (Lcom/monkopedia/ksrpc/jni/KsrpcNativeHost;Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function1;Lcom/monkopedia/ksrpc/KsrpcEnvironment;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
 public abstract interface class com/monkopedia/ksrpc/jni/MutableBasicList : com/monkopedia/ksrpc/jni/BasicList {

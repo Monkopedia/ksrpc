@@ -18,7 +18,7 @@ package com.monkopedia.ksrpc
 import ComplexClass
 import OtherClass
 import com.monkopedia.ksrpc.jni.JavaJniContinuation
-import com.monkopedia.ksrpc.jni.JniConnection
+import com.monkopedia.ksrpc.jni.JniHostInit
 import com.monkopedia.ksrpc.jni.JniSer
 import com.monkopedia.ksrpc.jni.JniSerialized
 import com.monkopedia.ksrpc.jni.KsrpcNativeHost
@@ -259,9 +259,5 @@ class JniTest {
  * (`Java_com_monkopedia_ksrpc_TestNativeHost_initialize`), not a ksrpc type.
  */
 object TestNativeHost {
-    external fun initialize(
-        connection: JniConnection,
-        scope: Long,
-        output: JavaJniContinuation<Long>
-    )
+    external fun initialize(host: JniHostInit)
 }

@@ -27,12 +27,14 @@ import kotlinx.coroutines.CoroutineScope
  * The library must already be loaded (e.g. via
  * [NativeUtils.loadLibraryFromJar]). The consumer declares the native binding on
  * one of *their own* classes -- an `external fun` whose `@CName` therefore names
- * their class, not a ksrpc type -- and passes a reference to it into [connect]:
+ * their class, not a ksrpc type -- and passes a reference to it into [connect].
+ * The binding takes a single opaque [JniHostInit], which the consumer simply
+ * forwards to `ksrpcHostConnection`:
  *
  * ```
  * // The consumer's own JVM class declares the binding:
  * object MyNativeService {
- *     external fun initialize(connection: JniConnection, scope: Long, output: JavaJniContinuation<Long>)
+ *     external fun initialize(host: JniHostInit)
  * }
  *
  * // ... and connects with it:
@@ -42,7 +44,7 @@ import kotlinx.coroutines.CoroutineScope
  * ```
  *
  * The matching native side (`@CName("Java_..._MyNativeService_initialize")`)
- * typically just delegates to
+ * just forwards the [JniHostInit] to
  * [ksrpcHostConnection][com.monkopedia.ksrpc.jni.ksrpcHostConnection].
  */
 object KsrpcNativeHost {
@@ -57,10 +59,10 @@ object KsrpcNativeHost {
      *
      * [initialize] is the consumer's native entry point, usually a reference to an
      * `external fun` on one of their classes (e.g. `MyNativeService::initialize`)
-     * that delegates to
-     * [ksrpcHostConnection][com.monkopedia.ksrpc.jni.ksrpcHostConnection]. ksrpc
-     * passes it this connection, the native scope handle, and a continuation to
-     * resume with the connection's native handle.
+     * that forwards its [JniHostInit] to
+     * [ksrpcHostConnection][com.monkopedia.ksrpc.jni.ksrpcHostConnection]. The
+     * [JniHostInit] is an opaque bundle of the per-connection JNI context; the
+     * consumer never unpacks it.
      *
      * The connection uses [JniSerialization]; the optional [environment]
      * configures the JVM-side [KsrpcEnvironment] (logger, error listener, ...). The
@@ -69,15 +71,17 @@ object KsrpcNativeHost {
      */
     suspend fun connect(
         scope: CoroutineScope,
-        initialize: (JniConnection, Long, JavaJniContinuation<Long>) -> Unit,
+        initialize: (JniHostInit) -> Unit,
         environment: KsrpcEnvironment<JniSerialized> = ksrpcEnvironment(JniSerialization()) {}
     ): JniConnection {
         val connection = JniConnection(scope, environment)
         val handle = suspendCoroutine<Long> {
             initialize(
-                connection,
-                scope.asNativeScope,
-                it.withConverter(newTypeConverter<Any?>().long)
+                JniHostInit(
+                    connection,
+                    scope.asNativeScope,
+                    it.withConverter(newTypeConverter<Any?>().long)
+                )
             )
         }
         connection.attachNative(handle)

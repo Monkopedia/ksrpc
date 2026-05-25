@@ -18,7 +18,6 @@
 package com.monkopedia.ksrpc.jni
 
 import com.monkopedia.jni.JNIEnvVar
-import com.monkopedia.jni.jlong
 import com.monkopedia.jni.jobject
 import com.monkopedia.ksrpc.KsrpcEnvironmentBuilder
 import com.monkopedia.ksrpc.annotation.KsrpcInternal
@@ -50,17 +49,13 @@ import platform.posix.usleep
  * type) and simply delegates here:
  *
  * ```
- * // matches the consumer's own JVM class `com.example.MyNativeService`:
+ * // matches the consumer's own JVM class `com.example.MyNativeService`,
+ * // whose `external fun initialize(host: JniHostInit)` this backs:
  * @CName("Java_com_example_MyNativeService_initialize")
- * fun initialize(
- *     env: CPointer<JNIEnvVar>,
- *     clazz: jobject,
- *     connection: jobject,
- *     scope: jlong,
- *     output: jobject
- * ) = ksrpcHostConnection(env, connection, scope, output) { conn ->
- *     conn.registerDefault(MyServiceImpl().serialized(conn.env))
- * }
+ * fun initialize(env: CPointer<JNIEnvVar>, clazz: jobject, host: jobject) =
+ *     ksrpcHostConnection(env, host) { conn ->
+ *         conn.registerDefault(MyServiceImpl().serialized(conn.env))
+ *     }
  * ```
  *
  * ksrpc owns everything else: it builds this connection's own
@@ -80,15 +75,18 @@ import platform.posix.usleep
  */
 fun ksrpcHostConnection(
     env: CPointer<JNIEnvVar>,
-    connection: jobject,
-    scope: jlong,
-    output: jobject,
+    host: jobject,
     configure: KsrpcEnvironmentBuilder<JniSerialized>.() -> Unit = {},
     setup: suspend (Connection<JniSerialized>) -> Unit
 ) {
     initThread(env)
     try {
-        val nativeScope = scope.toCPointer<CPointed>()?.asStableRef<CoroutineScope>()?.get()
+        val connection = JNI.JniHostInit.connection(host)
+            ?: error("JniHostInit.connection was null")
+        val output = JNI.JniHostInit.output(host)
+            ?: error("JniHostInit.output was null")
+        val nativeScope = JNI.JniHostInit.scope(host).toCPointer<CPointed>()
+            ?.asStableRef<CoroutineScope>()?.get()
             ?: error("Invalid native scope handle")
         val ksrpcEnv = ksrpcEnvironment(JniSerialization(), configure)
         val objectRef = threadJni.NewWeakGlobalRef!!.invoke(env, connection)
