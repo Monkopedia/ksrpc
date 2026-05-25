@@ -43,13 +43,15 @@ import platform.posix.usleep
  * hands the JVM the opaque native handle that backs it.
  *
  * This is the one piece of glue a consumer needs to write to host a ksrpc
- * service in native code. It is driven from the JVM by
- * [com.monkopedia.ksrpc.jni.KsrpcNativeHost.connect], which resolves a single
- * `@CName("Java_com_monkopedia_ksrpc_jni_KsrpcNativeHost_initialize")` export
- * the consumer provides; that export simply delegates here:
+ * service in native code. The consumer declares the binding as an `external fun`
+ * on one of *their own* JVM classes and passes a reference to it into
+ * [com.monkopedia.ksrpc.jni.KsrpcNativeHost.connect]; the matching native
+ * `@CName` export is therefore named after the consumer's class (not a ksrpc
+ * type) and simply delegates here:
  *
  * ```
- * @CName("Java_com_monkopedia_ksrpc_jni_KsrpcNativeHost_initialize")
+ * // matches the consumer's own JVM class `com.example.MyNativeService`:
+ * @CName("Java_com_example_MyNativeService_initialize")
  * fun initialize(
  *     env: CPointer<JNIEnvVar>,
  *     clazz: jobject,
