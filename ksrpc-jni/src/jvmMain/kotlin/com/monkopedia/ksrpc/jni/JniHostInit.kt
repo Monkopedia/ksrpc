@@ -16,12 +16,11 @@
 package com.monkopedia.ksrpc.jni
 
 /**
- * Opaque handle passed to a native host binding (the consumer's `external fun`
- * referenced by [KsrpcNativeHost.connect]). It bundles the per-connection JNI
- * context that the native side needs; the consumer never inspects it -- they
- * only name the type in their binding signature and forward the value to
- * `ksrpcHostConnection`. The members are read natively (by field access), so
- * the type deliberately exposes no public API.
+ * Handle passed to a native host binding (the consumer's `external fun`
+ * referenced by [KsrpcNativeHost.connect]). It carries the per-connection JNI
+ * context that the native side reads; the consumer names the type in their
+ * binding signature and forwards the value to `ksrpcHostConnection` without
+ * inspecting it.
  */
 class JniHostInit internal constructor(
     internal val connection: JniConnection,

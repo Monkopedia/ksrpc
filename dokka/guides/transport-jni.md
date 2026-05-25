@@ -21,7 +21,7 @@ Both sides run in the same OS process, communicating through JNI calls rather th
 
 ## Native side: hosting a service
 
-ksrpc owns all of the JNI export plumbing, so hosting a service inside a Kotlin/Native `.so` is a single `initialize` export that delegates to `ksrpcHostConnection` with a setup lambda. There is no `JNI_OnLoad` and no global state.
+To host a service inside a Kotlin/Native `.so`, declare a binding on one of your own JVM classes, implement it natively by delegating to `ksrpcHostConnection`, and open it from the JVM with `KsrpcNativeHost.connect`.
 
 1. **Build your native module as a shared library** that exports `ksrpc-jni`, so its klib (and the JNI exports ksrpc owns) link into your `.so`:
 
@@ -36,7 +36,7 @@ ksrpc owns all of the JNI export plumbing, so hosting a service inside a Kotlin/
    }
    ```
 
-2. **Declare the binding on one of your own JVM classes** -- an `external fun` ksrpc will drive. Because the `@CName` symbol is mangled from the declaring class, putting it on *your* class means the native symbol names *your* class, not a ksrpc type. The binding takes a single opaque [`JniHostInit`](https://monkopedia.github.io/ksrpc/ksrpc-jni/com.monkopedia.ksrpc.jni/-jni-host-init/index.html) -- you never inspect it, you only forward it:
+2. **Declare the binding on one of your own JVM classes** -- an `external fun` that `KsrpcNativeHost.connect` calls. The native `@CName` symbol is derived from the declaring class, so declaring it on your own class places that symbol under your package. The binding takes a single [`JniHostInit`](https://monkopedia.github.io/ksrpc/ksrpc-jni/com.monkopedia.ksrpc.jni/-jni-host-init/index.html), which you forward unchanged to `ksrpcHostConnection`:
 
    ```kotlin
    // your JVM source set:
@@ -47,7 +47,7 @@ ksrpc owns all of the JNI export plumbing, so hosting a service inside a Kotlin/
    }
    ```
 
-3. **Implement that binding natively** with a single `@CName` export that forwards the `host` to `ksrpcHostConnection`. The symbol matches your class from step 2; you write nothing else -- no other `@CName` functions:
+3. **Implement that binding natively** with a `@CName` export that forwards `host` to `ksrpcHostConnection`. The symbol matches your class from step 2:
 
    ```kotlin
    // your native source set:

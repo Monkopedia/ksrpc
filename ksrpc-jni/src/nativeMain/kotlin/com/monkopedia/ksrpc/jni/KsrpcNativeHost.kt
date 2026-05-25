@@ -41,16 +41,14 @@ import platform.posix.usleep
  * Hosts a single ksrpc [Connection] inside a Kotlin/Native shared library and
  * hands the JVM the opaque native handle that backs it.
  *
- * This is the one piece of glue a consumer needs to write to host a ksrpc
- * service in native code. The consumer declares the binding as an `external fun`
- * on one of *their own* JVM classes and passes a reference to it into
+ * The consumer declares the binding as an `external fun` on one of their own JVM
+ * classes and passes a reference to it into
  * [com.monkopedia.ksrpc.jni.KsrpcNativeHost.connect]; the matching native
- * `@CName` export is therefore named after the consumer's class (not a ksrpc
- * type) and simply delegates here:
+ * `@CName` export is named after that class and delegates here:
  *
  * ```
- * // matches the consumer's own JVM class `com.example.MyNativeService`,
- * // whose `external fun initialize(host: JniHostInit)` this backs:
+ * // backs `external fun initialize(host: JniHostInit)` on
+ * // the consumer's class `com.example.MyNativeService`:
  * @CName("Java_com_example_MyNativeService_initialize")
  * fun initialize(env: CPointer<JNIEnvVar>, clazz: jobject, host: jobject) =
  *     ksrpcHostConnection(env, host) { conn ->
@@ -58,20 +56,16 @@ import platform.posix.usleep
  *     }
  * ```
  *
- * ksrpc owns everything else: it builds this connection's own
- * [KsrpcEnvironment][com.monkopedia.ksrpc.KsrpcEnvironment] (pre-set to
- * [JniSerialization]; the [configure] block can tune logger, error listener,
- * coroutine exception handler, ... but cannot swap the serializer because the
- * whole API is typed on [JniSerialized]), wraps the JVM connection object, and
- * manages the connection's lifecycle. The JVM holds a single opaque native
- * handle (a [StableRef] to the [NativeConnection]) which it later passes back to
- * dispose the connection.
+ * For each connection it builds a [KsrpcEnvironment][com.monkopedia.ksrpc.KsrpcEnvironment]
+ * (pre-set to [JniSerialization]; the [configure] block tunes the logger, error
+ * listener, coroutine exception handler, ... and the serializer is fixed because
+ * the API is typed on [JniSerialized]), wraps the JVM connection object, runs
+ * [setup], and returns a single native handle (a [StableRef] to the
+ * [NativeConnection]) that the JVM passes back to dispose the connection.
  *
- * The [setup] lambda runs **once per connection**, on the JNI dispatcher, with
- * the freshly-opened [Connection] so it can register the service(s) this
- * connection hosts. There is no global state and nothing is shared across
- * connections: every connection gets its own environment and its own service
- * instance(s).
+ * The [setup] lambda runs once per connection, on the JNI dispatcher, with the
+ * freshly-opened [Connection] so it can register the service(s) this connection
+ * hosts. Each connection gets its own environment and service instance(s).
  */
 fun ksrpcHostConnection(
     env: CPointer<JNIEnvVar>,

@@ -26,10 +26,9 @@ import kotlinx.coroutines.CoroutineScope
  *
  * The library must already be loaded (e.g. via
  * [NativeUtils.loadLibraryFromJar]). The consumer declares the native binding on
- * one of *their own* classes -- an `external fun` whose `@CName` therefore names
- * their class, not a ksrpc type -- and passes a reference to it into [connect].
- * The binding takes a single opaque [JniHostInit], which the consumer simply
- * forwards to `ksrpcHostConnection`:
+ * one of their own classes -- an `external fun` whose `@CName` is named after
+ * that class -- and passes a reference to it into [connect]. The binding takes a
+ * single [JniHostInit], which the consumer forwards to `ksrpcHostConnection`:
  *
  * ```
  * // The consumer's own JVM class declares the binding:
