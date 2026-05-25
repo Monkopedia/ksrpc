@@ -18,6 +18,7 @@ package com.monkopedia.ksrpc
 import ComplexClass
 import OtherClass
 import com.monkopedia.ksrpc.jni.JavaJniContinuation
+import com.monkopedia.ksrpc.jni.JniConnection
 import com.monkopedia.ksrpc.jni.JniSer
 import com.monkopedia.ksrpc.jni.JniSerialized
 import com.monkopedia.ksrpc.jni.KsrpcNativeHost
@@ -241,13 +242,26 @@ class JniTest {
 
     private suspend fun CoroutineScope.createService(): JniTestInterface {
         NativeUtils.loadLibraryFromJar("/libs/libksrpc_test.${extension()}")
-        val connection = KsrpcNativeHost.connect(this)
+        val connection = KsrpcNativeHost.connect(this, TestNativeHost::initialize)
         return connection.defaultChannel().toStub<JniTestInterface, JniSerialized>()
     }
 
     private suspend fun CoroutineScope.createMissingEpService(): MissingEndpointTestInterface {
         NativeUtils.loadLibraryFromJar("/libs/libksrpc_test.${extension()}")
-        val connection = KsrpcNativeHost.connect(this)
+        val connection = KsrpcNativeHost.connect(this, TestNativeHost::initialize)
         return connection.defaultChannel().toStub<MissingEndpointTestInterface, JniSerialized>()
     }
+}
+
+/**
+ * The test's own native binding. ksrpc-test plays the role of a consumer here:
+ * the `@CName` for the native impl is named after *this* class
+ * (`Java_com_monkopedia_ksrpc_TestNativeHost_initialize`), not a ksrpc type.
+ */
+object TestNativeHost {
+    external fun initialize(
+        connection: JniConnection,
+        scope: Long,
+        output: JavaJniContinuation<Long>
+    )
 }

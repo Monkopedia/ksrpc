@@ -36,9 +36,26 @@ ksrpc owns all of the JNI export plumbing, so hosting a service inside a Kotlin/
    }
    ```
 
-2. **Add one `@CName` export** that delegates to `ksrpcHostConnection`. This single symbol backs the JVM-side `KsrpcNativeHost.initialize` `external fun`, resolved by JNI name mangling against the symbol your klib contributes to the `.so`. You write nothing else -- no other `@CName` functions, no JVM-side `external fun`s:
+2. **Declare the binding on one of your own JVM classes** -- an `external fun` ksrpc will drive. Because the `@CName` symbol is mangled from the declaring class, putting it on *your* class means the native symbol names *your* class, not a ksrpc type:
 
    ```kotlin
+   // your JVM source set:
+   import com.monkopedia.ksrpc.jni.JavaJniContinuation
+   import com.monkopedia.ksrpc.jni.JniConnection
+
+   object MyNativeService {
+       external fun initialize(
+           connection: JniConnection,
+           scope: Long,
+           output: JavaJniContinuation<Long>
+       )
+   }
+   ```
+
+3. **Implement that binding natively** with a single `@CName` export that delegates to `ksrpcHostConnection`. The symbol matches your class from step 2; you write nothing else -- no other `@CName` functions:
+
+   ```kotlin
+   // your native source set:
    import com.monkopedia.jni.JNIEnvVar
    import com.monkopedia.jni.jlong
    import com.monkopedia.jni.jobject
@@ -46,7 +63,7 @@ ksrpc owns all of the JNI export plumbing, so hosting a service inside a Kotlin/
    import com.monkopedia.ksrpc.jni.ksrpcHostConnection
    import kotlinx.cinterop.CPointer
 
-   @CName("Java_com_monkopedia_ksrpc_jni_KsrpcNativeHost_initialize")
+   @CName("Java_com_example_MyNativeService_initialize")
    fun initialize(
        env: CPointer<JNIEnvVar>,
        clazz: jobject,
@@ -73,7 +90,7 @@ ksrpcHostConnection(
 
 ## JVM side: loading and connecting
 
-Load the shared library once (e.g. via `NativeUtils.loadLibraryFromJar`), then open a connection with `KsrpcNativeHost.connect`. That call is what drives the native `initialize` export above: loading the `.so` makes the symbol available, and `connect` invokes it to build *this* connection's native environment and run your `setup` lambda before handing back a connection ready to use:
+Load the shared library once (e.g. via `NativeUtils.loadLibraryFromJar`), then open a connection with `KsrpcNativeHost.connect`, passing a reference to your binding's `initialize`. That call is what drives the native export above: loading the `.so` makes the symbol available, and `connect` invokes it to build *this* connection's native environment and run your `setup` lambda before handing back a connection ready to use:
 
 ```kotlin
 import com.monkopedia.ksrpc.jni.JniSerialized
@@ -84,9 +101,9 @@ import com.monkopedia.ksrpc.toStub
 // Load the Kotlin/Native shared library bundled on the classpath (once per process)
 NativeUtils.loadLibraryFromJar("/libs/libmy_service.so")
 
-// Open a connection: connect() invokes the native `initialize`, which builds this
-// connection's own environment and runs the host's `setup` lambda against it.
-val connection = KsrpcNativeHost.connect(scope)
+// Open a connection: connect() invokes your binding's `initialize`, which builds
+// this connection's own environment and runs the host's `setup` lambda against it.
+val connection = KsrpcNativeHost.connect(scope, MyNativeService::initialize)
 
 // Use the connection.
 val service = connection.defaultChannel().toStub<MyService, JniSerialized>()

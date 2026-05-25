@@ -194,7 +194,7 @@ fun createContinuationRelay(env: CPointer<JNIEnvVar>, clazz: jobject, output: jo
 }
 
 @OptIn(ExperimentalForeignApi::class)
-@CName("Java_com_monkopedia_ksrpc_jni_KsrpcNativeHost_initialize")
+@CName("Java_com_monkopedia_ksrpc_TestNativeHost_initialize")
 fun initialize(
     env: CPointer<JNIEnvVar>,
     clazz: jobject,
