@@ -53,6 +53,24 @@ apiValidation {
     ignoredProjects.addAll(listOf("ksrpc-test", "ksrpc-bench", "ksrpc-samples", "ksrpc-service-worker-test"))
     nonPublicMarkers += "com.monkopedia.ksrpc.annotation.KsrpcInternal"
     nonPublicMarkers += "com.monkopedia.ksrpc.annotation.KsrpcGenerated"
+    // kotlinx-serialization generates `$$serializer` / `$Companion` members for @Serializable
+    // types. When the parent type is @KsrpcInternal (so BCV excludes it), the nonPublicMarker
+    // does NOT propagate to these generated synthetics, so they leak into the JVM dump even
+    // though the parent is correctly hidden. They aren't usable API (the parent is
+    // inaccessible) — list them explicitly so the dump shows only genuinely-public surface.
+    ignoredClasses.addAll(
+        listOf(
+            "com.monkopedia.ksrpc.packets.internal.Packet\$Companion",
+            "com.monkopedia.ksrpc.packets.internal.Packet\$\$serializer",
+            "com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcError\$Companion",
+            "com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcError\$\$serializer",
+            "com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcRequest\$Companion",
+            "com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcRequest\$\$serializer",
+            "com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcResponse\$Companion",
+            "com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcResponse\$\$serializer",
+            "com.monkopedia.ksrpc.jsonrpc.internal.JsonRpcWriterBase\$Companion"
+        )
+    )
     @OptIn(ExperimentalBCVApi::class)
     klib {
         enabled = true
