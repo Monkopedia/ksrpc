@@ -69,7 +69,7 @@ ksrpcNativeHost(
 
 ## JVM side: loading and connecting
 
-Load the shared library once (e.g. via `NativeUtils.loadLibraryFromJar`), then open a connection. `KsrpcNativeHost.connect` performs the three steps of bringing up a connection in one call -- it **creates** the connection (with a fresh per-connection native environment), **drives the native registration** so the host's `register` lambda runs against *this* connection, and hands it back ready to **use**:
+Load the shared library once (e.g. via `NativeUtils.loadLibraryFromJar`), then bring up a connection in three steps: **create** it (with a fresh per-connection native environment), **register** the host's service on it, then **use** it. `KsrpcNativeHost.connect` does the first two and hands back a connection ready to use:
 
 ```kotlin
 import com.monkopedia.ksrpc.jni.JniSerialized
@@ -80,17 +80,18 @@ import com.monkopedia.ksrpc.toStub
 // Load the Kotlin/Native shared library bundled on the classpath (once per process)
 NativeUtils.loadLibraryFromJar("/libs/libmy_service.so")
 
-// create a connection (fresh native environment) AND register the native service on it
-val connection = KsrpcNativeHost.connect(scope)
+// 1. create a connection  -- a fresh native environment for this connection
+// 2. register             -- run the native `register` lambda to host the service on this connection
+val connection = KsrpcNativeHost.connect(scope)   // connect() does steps 1 and 2
 
-// use this connection
+// 3. use the connection
 val service = connection.defaultChannel().toStub<MyService, JniSerialized>()
 val result = service.someMethod("hello")
 ```
 
-The native `register` lambda runs as part of `connect`, on this thread, so the service is hosted on the returned connection before `connect` returns. **Each `connect` call is independent**: it gets its own native environment and its own service instance(s) -- if you call `connect` again you get a separate connection with a separate host-side service, not a shared one.
+`KsrpcNativeHost.connect` performs steps 1 and 2 together: it creates the connection (with a fresh per-connection native environment) and drives the native registration, so the host's `register` lambda has run against *this* connection before `connect` returns (synchronously, on the calling thread). **Each `connect` call is independent** -- it gets its own native environment and its own service instance(s); call `connect` again and you get a separate connection with a separate host-side service, not a shared one.
 
-`KsrpcNativeHost.connect` defaults to a `JniSerialization` environment; pass your own `KsrpcEnvironment<JniSerialized>` to customize the JVM-side logger or error listener. The lower-level primitives (`JniConnection`, `JniSerialization`, `NativeUtils`) remain public if you need finer control over the create/register/use steps yourself.
+`KsrpcNativeHost.connect` defaults to a `JniSerialization` environment; pass your own `KsrpcEnvironment<JniSerialized>` to customize the JVM-side logger or error listener. The lower-level primitives (`JniConnection`, `JniSerialization`, `NativeUtils`) remain public if you want to build the JVM-side environment or load the library differently.
 
 The working end-to-end reference is the test harness: [`ksrpc-test/src/nativeMain/kotlin/Test.kt`](https://github.com/Monkopedia/ksrpc/blob/main/ksrpc-test/src/nativeMain/kotlin/Test.kt) (the `JNI_OnLoad`) and [`ksrpc-test/src/jvmTest/kotlin/JniTest.kt`](https://github.com/Monkopedia/ksrpc/blob/main/ksrpc-test/src/jvmTest/kotlin/JniTest.kt) (the `KsrpcNativeHost.connect` calls).
 

@@ -34,7 +34,9 @@ import kotlinx.coroutines.CoroutineScope
  *
  * ```
  * NativeUtils.loadLibraryFromJar("/libmyservice.so")
+ * // create the connection + register the native service on it (connect does both)
  * val connection = KsrpcNativeHost.connect(scope)
+ * // use the connection
  * val service = connection.defaultChannel().toStub<MyService, JniSerialized>()
  * ```
  */
