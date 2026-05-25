@@ -66,6 +66,8 @@ import platform.posix.usleep
  * The [setup] lambda runs once per connection, on the JNI dispatcher, with the
  * freshly-opened [Connection] so it can register the service(s) this connection
  * hosts. Each connection gets its own environment and service instance(s).
+ *
+ * @sample com.monkopedia.ksrpc.samples.initialize
  */
 fun ksrpcHostConnection(
     env: CPointer<JNIEnvVar>,

@@ -67,6 +67,8 @@ object KsrpcNativeHost {
      * configures the JVM-side [KsrpcEnvironment] (logger, error listener, ...). The
      * native side builds its own per-connection environment, configured via the
      * `configure` block passed to `ksrpcHostConnection`.
+     *
+     * @sample com.monkopedia.ksrpc.samples.jniHostConnect
      */
     suspend fun connect(
         scope: CoroutineScope,

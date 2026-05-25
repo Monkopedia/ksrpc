@@ -222,15 +222,47 @@ fun Project.ksrpcModule(
     extensions.configure<DokkaExtension> {
         dokkaSourceSets.configureEach { sourceSet ->
             sourceSet.includes.from(rootProject.file("dokka/moduledoc.md"))
+            // Dokka resolves a @sample link only within the dokka source set that the
+            // referencing declaration belongs to (it does not search parent source sets).
+            // A given sample root may also be attached to only ONE source set per module
+            // -- attaching the same root to two related source sets (e.g. common + jvm)
+            // fails Dokka's pre-generation validity check ("common sample roots").
+            //
+            // So the attachment is chosen per module by where the @sample-bearing
+            // declarations live:
+            //  * Most modules reference samples only from commonMain declarations, so the
+            //    common/jvm/js sample roots are attached to commonMain (JVM/JS-only
+            //    samples must still compile against their platform APIs, hence the
+            //    separate roots).
+            //  * ksrpc-jni references samples from jvmMain (KsrpcNativeHost.connect) and
+            //    nativeMain (ksrpcHostConnection) declarations, so its jvm/native roots
+            //    attach to those leaf source sets instead.
+            //  * ksrpc-service-worker references a JS sample from a jsMain declaration
+            //    (onServiceWorkerConnection) and from a commonMain `expect`
+            //    (createServiceWorkerWithConnection); attaching the JS root to jsMain
+            //    resolves both (the expect resolves through its JS actual).
+            val isJni = name == "ksrpc-jni"
+            val isServiceWorker = name == "ksrpc-service-worker"
             if (sourceSet.name == "commonMain") {
-                // Attach both sample roots to commonMain so that common declarations
-                // (e.g. transport entry points such as serveHttp / asConnection) can
-                // reference platform-specific (JVM-only) samples that demonstrate them.
-                // JVM-only samples must compile against JVM APIs, so they live in the
-                // jvmMain sample root; attaching that root only to commonMain avoids the
-                // "same sample root shared by related source sets" validity error.
                 sourceSet.samples.from(rootProject.file("ksrpc-samples/src/commonMain/kotlin"))
+                if (!isJni) {
+                    sourceSet.samples.from(rootProject.file("ksrpc-samples/src/jvmMain/kotlin"))
+                }
+                if (!isServiceWorker) {
+                    sourceSet.samples.from(rootProject.file("ksrpc-samples/src/jsMain/kotlin"))
+                }
+            }
+            // Native samples use cinterop types (@CName, CPointer, JNIEnvVar) that only
+            // resolve in a native source set, so the native sample root attaches to the
+            // shared native dokka source set rather than to commonMain.
+            if (sourceSet.name == "nativeMain" && isJni) {
+                sourceSet.samples.from(rootProject.file("ksrpc-samples/src/nativeMain/kotlin"))
+            }
+            if (sourceSet.name == "jvmMain" && isJni) {
                 sourceSet.samples.from(rootProject.file("ksrpc-samples/src/jvmMain/kotlin"))
+            }
+            if (sourceSet.name == "jsMain" && isServiceWorker) {
+                sourceSet.samples.from(rootProject.file("ksrpc-samples/src/jsMain/kotlin"))
             }
             sourceSet.skipEmptyPackages.set(true)
             listOf(
