@@ -30,9 +30,7 @@ import kotlin.experimental.ExperimentalNativeApi
 import kotlinx.cinterop.CPointed
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.StableRef
 import kotlinx.cinterop.asStableRef
-import kotlinx.cinterop.invoke
 import kotlinx.cinterop.toCPointer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
@@ -118,43 +116,12 @@ class NativeConnection(
 
 @OptIn(ExperimentalForeignApi::class)
 @CName("Java_com_monkopedia_ksrpc_jni_JniConnection_finalize")
-fun jniConnectionFinalize(
-    env: CPointer<JNIEnvVar>,
-    clazz: jobject,
-    nativeObject: jlong,
-    nativeEnvironment: jlong
-) {
+fun jniConnectionFinalize(env: CPointer<JNIEnvVar>, clazz: jobject, nativeObject: jlong) {
     initThread(env)
     try {
         nativeObject.toCPointer<CPointed>()?.asStableRef<NativeConnection>()?.dispose()
-        nativeEnvironment.toCPointer<CPointed>()?.asStableRef<KsrpcEnvironment<jobject>>()
-            ?.dispose()
     } catch (t: Throwable) {
         t.printStackTrace()
-    }
-}
-
-@OptIn(ExperimentalForeignApi::class)
-@CName("Java_com_monkopedia_ksrpc_jni_JniConnection_createConnection")
-fun jniCreateConnection(
-    env: CPointer<JNIEnvVar>,
-    clazz: jobject,
-    scope: jlong,
-    ksrpcEnv: jlong
-): jlong {
-    initThread(env)
-    try {
-        val nativeScope = scope.toCPointer<CPointed>()?.asStableRef<CoroutineScope>()?.get()
-            ?: return -1
-        val nativeEnv = ksrpcEnv.toCPointer<CPointed>()
-            ?.asStableRef<KsrpcEnvironment<JniSerialized>>()?.get()
-            ?: return -1
-        val objectRef = threadJni.NewWeakGlobalRef!!.invoke(env, clazz)
-        val connection = NativeConnection(nativeScope, objectRef!!, nativeEnv)
-        return StableRef.create(connection).asCPointer().rawValue.toLong()
-    } catch (t: Throwable) {
-        t.printStackTrace()
-        return -1
     }
 }
 

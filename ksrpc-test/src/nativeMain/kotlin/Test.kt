@@ -17,12 +17,11 @@
 
 import com.monkopedia.jni.JNIEnvVar
 import com.monkopedia.jni.JNINativeInterface_
-import com.monkopedia.jni.JavaVMVar
 import com.monkopedia.jni.jint
+import com.monkopedia.jni.jlong
 import com.monkopedia.jni.jmethodID
 import com.monkopedia.jni.jobject
 import com.monkopedia.jni.jvalue
-import com.monkopedia.ksrpc.JniTestInterface
 import com.monkopedia.ksrpc.TestJniImpl
 import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.channels.registerDefault
@@ -36,16 +35,16 @@ import com.monkopedia.ksrpc.jni.decodeFromJni
 import com.monkopedia.ksrpc.jni.encodeToJni
 import com.monkopedia.ksrpc.jni.fromJvm
 import com.monkopedia.ksrpc.jni.initThread
-import com.monkopedia.ksrpc.jni.ksrpcNativeHost
+import com.monkopedia.ksrpc.jni.ksrpcHostConnection
 import com.monkopedia.ksrpc.jni.newTypeConverter
 import com.monkopedia.ksrpc.jni.threadEnv
 import com.monkopedia.ksrpc.jni.threadJni
 import com.monkopedia.ksrpc.jni.toJvm
 import com.monkopedia.ksrpc.jni.withConverter
+import com.monkopedia.ksrpc.serialized
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.suspendCoroutine
 import kotlin.experimental.ExperimentalNativeApi
-import kotlinx.cinterop.COpaquePointer
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.MemScope
@@ -195,9 +194,13 @@ fun createContinuationRelay(env: CPointer<JNIEnvVar>, clazz: jobject, output: jo
 }
 
 @OptIn(ExperimentalForeignApi::class)
-@CName("JNI_OnLoad")
-fun jniOnLoad(vm: CPointer<JavaVMVar>, reserved: COpaquePointer?): jint =
-    ksrpcNativeHost { _, connection ->
-        val service: JniTestInterface = TestJniImpl()
-        connection.registerDefault(service)
-    }
+@CName("Java_com_monkopedia_ksrpc_jni_KsrpcNativeHost_initialize")
+fun initialize(
+    env: CPointer<JNIEnvVar>,
+    clazz: jobject,
+    connection: jobject,
+    scope: jlong,
+    output: jobject
+) = ksrpcHostConnection(env, connection, scope, output) { conn ->
+    conn.registerDefault(TestJniImpl().serialized(conn.env))
+}

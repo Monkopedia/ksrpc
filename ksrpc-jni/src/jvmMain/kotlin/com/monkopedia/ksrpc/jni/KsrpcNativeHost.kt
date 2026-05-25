@@ -22,51 +22,60 @@ import kotlinx.coroutines.CoroutineScope
 
 /**
  * JVM entry point for talking to a ksrpc service hosted inside a Kotlin/Native
- * shared library that registered itself with
- * [ksrpcNativeHost][com.monkopedia.ksrpc.jni.ksrpcNativeHost].
+ * shared library.
  *
- * ksrpc owns the JNI exports backing [createEnv] and [registerService]; they are
- * resolved by JNI name mangling against the symbols `ksrpc-jni`'s klib links into
- * the consumer's `.so`, so the consumer declares no `external fun`s of its own.
+ * The consumer's `.so` provides a single
+ * `@CName("Java_com_monkopedia_ksrpc_jni_KsrpcNativeHost_initialize")` symbol
+ * (typically by delegating to
+ * [ksrpcHostConnection][com.monkopedia.ksrpc.jni.ksrpcHostConnection]); it is
+ * resolved by JNI name mangling against the [initialize] `external fun` here, so
+ * the consumer declares no `external fun`s of its own.
  *
  * The library must already be loaded (e.g. via
  * [NativeUtils.loadLibraryFromJar]). Typical use:
  *
  * ```
  * NativeUtils.loadLibraryFromJar("/libmyservice.so")
- * // create the connection + register the native service on it (connect does both)
+ * // create + register the native service on a single connection (connect does both)
  * val connection = KsrpcNativeHost.connect(scope)
  * // use the connection
  * val service = connection.defaultChannel().toStub<MyService, JniSerialized>()
  * ```
  */
 object KsrpcNativeHost {
-    private external fun createEnv(): Long
-    private external fun registerService(
-        connection: JniConnection,
-        output: JavaJniContinuation<Int>
-    )
 
     /**
-     * Opens a [Connection] to the native host on the given [scope]: it creates the
-     * connection (with a fresh native environment), drives the native registration
-     * so the host's `register` lambda runs against *this* connection, and returns
-     * it ready to use. Each call is independent -- a new connection gets its own
-     * native environment and service instance(s); nothing is shared across calls.
+     * Opens a [Connection] to the native host on the given [scope]: it builds the
+     * connection, drives the native `initialize` so the host's `setup` lambda runs
+     * against *this* connection (building its own per-connection native
+     * environment and service instance(s)), and returns it ready to use. Each call
+     * is independent -- nothing is shared across connections.
      *
      * The connection uses [JniSerialization]; the optional [environment]
-     * configures the JVM-side [KsrpcEnvironment] (logger, error listener, ...).
-     * The native side builds its own per-connection environment, configured via
-     * the `configure` block passed to [ksrpcNativeHost].
+     * configures the JVM-side [KsrpcEnvironment] (logger, error listener, ...). The
+     * native side builds its own per-connection environment, configured via the
+     * `configure` block passed to
+     * [ksrpcHostConnection][com.monkopedia.ksrpc.jni.ksrpcHostConnection].
      */
     suspend fun connect(
         scope: CoroutineScope,
         environment: KsrpcEnvironment<JniSerialized> = ksrpcEnvironment(JniSerialization()) {}
     ): JniConnection {
-        val connection = JniConnection(scope, environment, createEnv())
-        suspendCoroutine<Int> {
-            registerService(connection, it.withConverter(newTypeConverter<Any?>().int))
+        val connection = JniConnection(scope, environment)
+        val handle = suspendCoroutine<Long> {
+            initialize(
+                connection,
+                scope.asNativeScope,
+                it.withConverter(newTypeConverter<Any?>().long)
+            )
         }
+        connection.attachNative(handle)
         return connection
     }
+
+    private external fun initialize(
+        connection: JniConnection,
+        scope: Long,
+        output: JavaJniContinuation<Long>
+    )
 }

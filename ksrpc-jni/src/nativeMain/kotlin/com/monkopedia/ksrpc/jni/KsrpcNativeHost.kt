@@ -18,127 +18,88 @@
 package com.monkopedia.ksrpc.jni
 
 import com.monkopedia.jni.JNIEnvVar
-import com.monkopedia.jni.JNI_VERSION_1_6
-import com.monkopedia.jni.jint
 import com.monkopedia.jni.jlong
 import com.monkopedia.jni.jobject
-import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.KsrpcEnvironmentBuilder
 import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.channels.Connection
 import com.monkopedia.ksrpc.ksrpcEnvironment
 import kotlin.experimental.ExperimentalNativeApi
+import kotlinx.cinterop.CPointed
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.StableRef
+import kotlinx.cinterop.asStableRef
+import kotlinx.cinterop.invoke
+import kotlinx.cinterop.toCPointer
 import kotlinx.cinterop.toLong
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import platform.posix.usleep
 
 /**
- * The configuration of a ksrpc service hosted inside a Kotlin/Native shared
- * library, registered once at load time via [ksrpcNativeHost].
+ * Hosts a single ksrpc [Connection] inside a Kotlin/Native shared library and
+ * hands the JVM the opaque native handle that backs it.
  *
- * The whole host API is typed on [JniSerialized] so that the serializer can
- * only ever be a [CallDataSerializer][com.monkopedia.ksrpc.CallDataSerializer]
- * of [JniSerialized] (i.e. [JniSerialization]) — a mismatched serializer is a
- * compile error rather than a runtime failure.
- */
-private class NativeHostConfig(
-    val configure: KsrpcEnvironmentBuilder<JniSerialized>.() -> Unit,
-    val register: suspend (KsrpcEnvironment<JniSerialized>, Connection<JniSerialized>) -> Unit
-)
-
-private var hostConfig: NativeHostConfig? = null
-
-/**
- * Registers this Kotlin/Native shared library as a ksrpc host so it can be
- * driven from the JVM via [com.monkopedia.ksrpc.jni.KsrpcNativeHost] in
- * `ksrpc-jni`.
- *
- * Call this from a single `JNI_OnLoad` export; ksrpc owns all of the underlying
- * JNI plumbing, so the consumer writes no other native glue:
+ * This is the one piece of glue a consumer needs to write to host a ksrpc
+ * service in native code. It is driven from the JVM by
+ * [com.monkopedia.ksrpc.jni.KsrpcNativeHost.connect], which resolves a single
+ * `@CName("Java_com_monkopedia_ksrpc_jni_KsrpcNativeHost_initialize")` export
+ * the consumer provides; that export simply delegates here:
  *
  * ```
- * @CName("JNI_OnLoad")
- * fun jniOnLoad(vm: CPointer<JavaVMVar>, reserved: COpaquePointer?): jint =
- *     ksrpcNativeHost { env, connection ->
- *         connection.registerDefault(MyServiceImpl(env))
- *     }
+ * @CName("Java_com_monkopedia_ksrpc_jni_KsrpcNativeHost_initialize")
+ * fun initialize(
+ *     env: CPointer<JNIEnvVar>,
+ *     clazz: jobject,
+ *     connection: jobject,
+ *     scope: jlong,
+ *     output: jobject
+ * ) = ksrpcHostConnection(env, connection, scope, output) { conn ->
+ *     conn.registerDefault(MyServiceImpl().serialized(conn.env))
+ * }
  * ```
  *
- * Only the configuration is stored at load time; nothing is registered yet.
- * The [configure] block is applied to a fresh [KsrpcEnvironment] built for each
- * connection (logger, error listener, coroutine exception handler, ...). The
- * serializer is pre-set to [JniSerialization]; because everything is typed on
- * [JniSerialized] it can only be replaced by another `CallDataSerializer<JniSerialized>`.
+ * ksrpc owns everything else: it builds this connection's own
+ * [KsrpcEnvironment][com.monkopedia.ksrpc.KsrpcEnvironment] (pre-set to
+ * [JniSerialization]; the [configure] block can tune logger, error listener,
+ * coroutine exception handler, ... but cannot swap the serializer because the
+ * whole API is typed on [JniSerialized]), wraps the JVM connection object, and
+ * manages the connection's lifecycle. The JVM holds a single opaque native
+ * handle (a [StableRef] to the [NativeConnection]) which it later passes back to
+ * dispose the connection.
  *
- * The [register] lambda runs **once per JVM connection**, on the calling JVM
- * thread (with a live `JNIEnv`), receiving that connection's own
- * [KsrpcEnvironment] and the freshly-opened [Connection] so it can register the
- * service(s) it hosts. Each connection is independent: it gets its own
- * environment and its own service instance(s) -- nothing is shared across
- * connections.
- *
- * Note: `JNI_OnLoad`'s `JavaVM*` / reserved arguments are not needed by ksrpc —
- * the dispatcher is JVM-thread-driven, so there is no native-initiated thread to
- * attach. They exist only because JNI mandates the
- * `jint JNI_OnLoad(JavaVM*, void*)` ABI. This function simply returns the JNI
- * version for the export to return.
- *
- * @return the JNI version (`JNI_VERSION_1_6`) for `JNI_OnLoad` to return.
+ * The [setup] lambda runs **once per connection**, on the JNI dispatcher, with
+ * the freshly-opened [Connection] so it can register the service(s) this
+ * connection hosts. There is no global state and nothing is shared across
+ * connections: every connection gets its own environment and its own service
+ * instance(s).
  */
-fun ksrpcNativeHost(
-    configure: KsrpcEnvironmentBuilder<JniSerialized>.() -> Unit = {},
-    register: suspend (KsrpcEnvironment<JniSerialized>, Connection<JniSerialized>) -> Unit
-): jint {
-    hostConfig = NativeHostConfig(configure, register)
-    return JNI_VERSION_1_6.toInt()
-}
-
-@OptIn(ExperimentalForeignApi::class)
-@CName("Java_com_monkopedia_ksrpc_jni_KsrpcNativeHost_createEnv")
-fun ksrpcNativeHostCreateEnv(env: CPointer<JNIEnvVar>, clazz: jobject): jlong {
-    initThread(env)
-    try {
-        val config = hostConfig
-            ?: error(
-                "ksrpcNativeHost(...) was not called from JNI_OnLoad; " +
-                    "no host has been registered."
-            )
-        val ksrpcEnv = ksrpcEnvironment(JniSerialization(), config.configure)
-        return StableRef.create(ksrpcEnv).asCPointer().toLong()
-    } catch (t: Throwable) {
-        t.printStackTrace()
-        usleep(1000000u)
-        return -1
-    }
-}
-
-@OptIn(ExperimentalForeignApi::class)
-@CName("Java_com_monkopedia_ksrpc_jni_KsrpcNativeHost_registerService")
-fun ksrpcNativeHostRegisterService(
+fun ksrpcHostConnection(
     env: CPointer<JNIEnvVar>,
-    clazz: jobject,
-    input: jobject,
-    output: jobject
+    connection: jobject,
+    scope: jlong,
+    output: jobject,
+    configure: KsrpcEnvironmentBuilder<JniSerialized>.() -> Unit = {},
+    setup: suspend (Connection<JniSerialized>) -> Unit
 ) {
     initThread(env)
     try {
-        val connection = NativeConnection.convertTo(input)
-        val javaContinuation = JavaJniContinuationConverter<Int>(env).convertTo(output)
-        val config = hostConfig
-            ?: error(
-                "ksrpcNativeHost(...) was not called from JNI_OnLoad; " +
-                    "no host has been registered."
-            )
+        val nativeScope = scope.toCPointer<CPointed>()?.asStableRef<CoroutineScope>()?.get()
+            ?: error("Invalid native scope handle")
+        val ksrpcEnv = ksrpcEnvironment(JniSerialization(), configure)
+        val objectRef = threadJni.NewWeakGlobalRef!!.invoke(env, connection)
+            ?: error("Could not create weak global ref to JVM connection")
+        val nativeConnection = NativeConnection(nativeScope, objectRef, ksrpcEnv)
+        val handle = StableRef.create(nativeConnection).asCPointer().rawValue.toLong()
+        val continuation = JavaJniContinuationConverter<Long>(env).convertTo(output)
         GlobalScope.launch(JNIDispatcher) {
             runCatching {
-                config.register(connection.env, connection)
-                0
+                setup(nativeConnection)
+                handle
             }.let {
-                javaContinuation.resumeWith(newTypeConverter<jobject>().int, it)
+                continuation.resumeWith(newTypeConverter<jobject>().long, it)
             }
         }
     } catch (t: Throwable) {
