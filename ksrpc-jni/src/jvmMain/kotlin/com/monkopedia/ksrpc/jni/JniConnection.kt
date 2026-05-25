@@ -28,28 +28,25 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 
-class JniConnection(
-    scope: CoroutineScope,
-    env: KsrpcEnvironment<JniSerialized>,
-    private val nativeEnvironment: Long
-) : PacketChannelBase<JniSerialized>(scope, env) {
+class JniConnection(scope: CoroutineScope, env: KsrpcEnvironment<JniSerialized>) :
+    PacketChannelBase<JniSerialized>(scope, env) {
     private val receiveChannel = Channel<Packet<JniSerialized>>()
-    private val nativeConnection = createConnection(scope.asNativeScope, nativeEnvironment)
+    private var nativeConnection: Long = 0L
 
-    init {
+    /**
+     * Attaches the opaque native connection handle produced by the native
+     * `initialize` export and starts the receive loop. Called once, after
+     * construction, because native initialization is asynchronous.
+     */
+    fun attachNative(handle: Long) {
+        nativeConnection = handle
         startReceiveLoop()
     }
-
-    constructor(
-        scope: CoroutineScope,
-        env: KsrpcEnvironment<JniSerialized>,
-        nativeEnvironmentFactory: NativeKsrpcEnvironmentFactory
-    ) : this(scope, env, nativeEnvironmentFactory.createNativeEnvironment())
 
     fun getNativeConnection(): Long = nativeConnection
 
     fun finalize() {
-        finalize(nativeConnection, nativeEnvironment)
+        finalize(nativeConnection)
     }
 
     override suspend fun sendLocked(packet: Packet<JniSerialized>) {
@@ -100,9 +97,7 @@ class JniConnection(
         }
     }
 
-    external fun finalize(nativeObject: Long, nativeEnvironment: Long)
-
-    external fun createConnection(scope: Long, env: Long): Long
+    external fun finalize(nativeObject: Long)
 
     external fun close(nativeObject: Long, continuation: JavaJniContinuation<Int>)
 

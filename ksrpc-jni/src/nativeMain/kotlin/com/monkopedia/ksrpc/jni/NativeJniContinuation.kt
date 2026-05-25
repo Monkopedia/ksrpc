@@ -13,16 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@file:OptIn(ExperimentalForeignApi::class, ExperimentalNativeApi::class)
+@file:OptIn(ExperimentalForeignApi::class, ExperimentalNativeApi::class, KsrpcInternal::class)
 
 package com.monkopedia.ksrpc.jni
 
 import com.monkopedia.jni.JNIEnvVar
 import com.monkopedia.jni.jlong
 import com.monkopedia.jni.jobject
-import com.monkopedia.jnitest.JNI
-import com.monkopedia.jnitest.initThread
 import com.monkopedia.ksrpc.RpcFailure
+import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.toException
 import kotlin.coroutines.Continuation
 import kotlin.experimental.ExperimentalNativeApi

@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.monkopedia.ksrpc
+package com.monkopedia.ksrpc.jni
 
-import com.monkopedia.ksrpc.jni.NativeKsrpcEnvironmentFactory
-import kotlin.test.Test
-import kotlin.test.assertEquals
-
-class NativeKsrpcEnvironmentFactoryTypeReferenceTest {
-    @Test
-    fun nativeKsrpcEnvironmentFactoryTypeIsReachable() {
-        val factory = NativeKsrpcEnvironmentFactory { 17L }
-        assertEquals(17L, factory.createNativeEnvironment())
-    }
-}
+/**
+ * Handle passed to a native host binding (the consumer's `external fun`
+ * referenced by [KsrpcNativeHost.connect]). It carries the per-connection JNI
+ * context that the native side reads; the consumer names the type in their
+ * binding signature and forwards the value to `ksrpcHostConnection` without
+ * inspecting it.
+ */
+class JniHostInit internal constructor(
+    internal val connection: JniConnection,
+    internal val scope: Long,
+    internal val output: JavaJniContinuation<Long>
+)

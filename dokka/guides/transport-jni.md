@@ -19,82 +19,96 @@ implementation("com.monkopedia.ksrpc:ksrpc-jni:$KSRPC_VERSION")
 
 Both sides run in the same OS process, communicating through JNI calls rather than sockets or HTTP.
 
-## JVM side: loading and connecting
-
-The JVM-consumer path is the clean, public part of this transport. Load the native shared library, build a `JniConnection` against a native ksrpc environment pointer, and obtain a stub:
-
-```kotlin
-import com.monkopedia.ksrpc.jni.JniConnection
-import com.monkopedia.ksrpc.jni.JniSerialization
-import com.monkopedia.ksrpc.jni.JniSerialized
-import com.monkopedia.ksrpc.jni.NativeUtils
-import com.monkopedia.ksrpc.ksrpcEnvironment
-import com.monkopedia.ksrpc.toStub
-
-// Load the Kotlin/Native shared library bundled on the classpath
-NativeUtils.loadLibraryFromJar("/libs/libmy_service.so")
-
-val env = ksrpcEnvironment(JniSerialization()) { }
-
-// `nativeEnvironment` is a pointer returned from a native export (see below)
-val nativeEnvironment: Long = MyNativeHost().createEnv()
-val connection = JniConnection(scope, env, nativeEnvironment)
-
-// Call a service hosted on the native side
-val service = connection.defaultChannel().toStub<MyService, JniSerialized>()
-val result = service.someMethod("hello")
-```
-
-`NativeUtils.loadLibraryFromJar`, `JniConnection`, and `JniSerialization` are public API. The native environment pointer (`createEnv` above) and any service registration are produced by the native module's own JNI exports, which you write yourself -- see the next section.
-
 ## Native side: hosting a service
 
-> **Heads up:** there is no turnkey public API for hosting a ksrpc service inside a Kotlin/Native `.so` in 1.0.0. Doing so today means hand-writing the JNI export boilerplate that bridges the JVM `JniConnection` to a `NativeConnection`. A clean, supported host API is planned -- see [issue #204](https://github.com/Monkopedia/ksrpc/issues/204).
+To host a service inside a Kotlin/Native `.so`, declare a binding on one of your own JVM classes, implement it natively by delegating to `ksrpcHostConnection`, and open it from the JVM with `KsrpcNativeHost.connect`.
 
-To host a native service today, mirror the working reference pattern in the test harness: [`ksrpc-test/src/nativeMain/kotlin/Test.kt`](https://github.com/Monkopedia/ksrpc/blob/main/ksrpc-test/src/nativeMain/kotlin/Test.kt) together with its JVM-side `external` declarations in [`ksrpc-test/src/jvmTest/kotlin/Test.kt`](https://github.com/Monkopedia/ksrpc/blob/main/ksrpc-test/src/jvmTest/kotlin/Test.kt).
-
-The shape of the manual path is:
-
-1. **Build your native module as a shared library**, so the JVM can load it:
+1. **Build your native module as a shared library** that exports `ksrpc-jni`, so its klib (and the JNI exports ksrpc owns) link into your `.so`:
 
    ```kotlin
    kotlin {
        // ... your native target ...
        binaries {
-           sharedLib { }
+           sharedLib {
+               export(project(":ksrpc-jni"))
+           }
        }
    }
    ```
 
-2. **Declare JVM-side `external` functions** that the native library will implement -- a `createEnv` that returns the native ksrpc environment pointer, and a `registerService` that wires up your service:
+2. **Declare the binding on one of your own JVM classes** -- an `external fun` that `KsrpcNativeHost.connect` calls. The native `@CName` symbol is derived from the declaring class, so declaring it on your own class places that symbol under your package. The binding takes a single [`JniHostInit`](https://monkopedia.github.io/ksrpc/ksrpc-jni/com.monkopedia.ksrpc.jni/-jni-host-init/index.html), which you forward unchanged to `ksrpcHostConnection`:
 
    ```kotlin
-   class MyNativeHost {
-       external fun createEnv(): Long
-       external fun registerService(
-           connection: JniConnection,
-           output: JavaJniContinuation<Int>
-       )
+   // your JVM source set:
+   import com.monkopedia.ksrpc.jni.JniHostInit
+
+   object MyNativeService {
+       external fun initialize(host: JniHostInit)
    }
    ```
 
-3. **Implement those exports in Kotlin/Native** with `@CName("Java_...")` functions. Each entry point initializes the JNI thread, then uses `NativeConnection` plus `registerDefault` to host the service:
+3. **Implement that binding natively** with a `@CName` export that forwards `host` to `ksrpcHostConnection`. The symbol matches your class from step 2:
 
    ```kotlin
-   @CName("Java_com_example_MyNativeHost_registerService")
-   fun registerService(env: CPointer<JNIEnvVar>, clazz: jobject, input: jobject, output: jobject) {
-       // initialize the JNI thread, convert `input` to a NativeConnection,
-       // then on the dispatcher:
-       //   nativeConnection.registerDefault(MyNativeServiceImpl().serialized(nativeConnection.env))
-   }
+   // your native source set:
+   import com.monkopedia.jni.JNIEnvVar
+   import com.monkopedia.jni.jobject
+   import com.monkopedia.ksrpc.channels.registerDefault
+   import com.monkopedia.ksrpc.jni.ksrpcHostConnection
+   import kotlinx.cinterop.CPointer
+
+   @CName("Java_com_example_MyNativeService_initialize")
+   fun initialize(env: CPointer<JNIEnvVar>, clazz: jobject, host: jobject) =
+       ksrpcHostConnection(env, host) { conn ->
+           conn.registerDefault(MyServiceImpl(conn.env))
+       }
    ```
 
-The dispatcher and thread-bootstrap helpers used by the reference harness currently live under the test-scoped `com.monkopedia.jnitest.*` package (`JNIDispatcher`, `initThread`, `threadEnv`). These are **not** a supported consumer API and may move; treat `ksrpc-test`'s native `Test.kt` as the authoritative example of what the manual path requires rather than copying those imports verbatim. Issue #204 tracks promoting this machinery to a stable, public host helper.
+   The `setup` lambda runs **once per connection**, on the JNI dispatcher, with the freshly-opened [`Connection`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html). For each connection, `ksrpcHostConnection` builds that connection's own [`KsrpcEnvironment`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc/-ksrpc-environment/index.html), wraps the JVM connection, runs your `setup`, and hands the JVM a single opaque handle that backs the connection's lifecycle. So **each connection is independent** -- it gets its own environment and its own service instance(s); `MyServiceImpl(conn.env)` above is constructed per connection, not shared across clients.
+
+`ksrpcHostConnection` also takes an optional `configure` block, applied to each connection's environment. The whole host API is typed on `JniSerialized`, so `JniSerialization` is pre-set and a mismatched serializer is a compile error:
+
+```kotlin
+ksrpcHostConnection(
+    env, host,
+    configure = { errorListener = ErrorListener { it.printStackTrace() } }
+) { conn ->
+    conn.registerDefault(MyServiceImpl(conn.env))
+}
+```
+
+## JVM side: loading and connecting
+
+Load the shared library once (e.g. via `NativeUtils.loadLibraryFromJar`), then open a connection with `KsrpcNativeHost.connect`, passing a reference to your binding's `initialize`. That call is what drives the native export above: loading the `.so` makes the symbol available, and `connect` invokes it to build *this* connection's native environment and run your `setup` lambda before handing back a connection ready to use:
+
+```kotlin
+import com.monkopedia.ksrpc.jni.JniSerialized
+import com.monkopedia.ksrpc.jni.KsrpcNativeHost
+import com.monkopedia.ksrpc.jni.NativeUtils
+import com.monkopedia.ksrpc.toStub
+
+// Load the Kotlin/Native shared library bundled on the classpath (once per process)
+NativeUtils.loadLibraryFromJar("/libs/libmy_service.so")
+
+// Open a connection: connect() invokes your binding's `initialize`, which builds
+// this connection's own environment and runs the host's `setup` lambda against it.
+val connection = KsrpcNativeHost.connect(scope, MyNativeService::initialize)
+
+// Use the connection.
+val service = connection.defaultChannel().toStub<MyService, JniSerialized>()
+val result = service.someMethod("hello")
+```
+
+**Each `connect` call is independent** -- it drives a fresh `initialize` on the native side, so the connection gets its own native environment and its own service instance(s); call `connect` again and you get a separate connection with a separate host-side service, not a shared one. The native `setup` lambda has run against the connection before `connect` returns.
+
+`KsrpcNativeHost.connect` defaults to a `JniSerialization` environment; pass your own `KsrpcEnvironment<JniSerialized>` to customize the JVM-side logger or error listener. The native side builds its own per-connection environment, tuned via the `configure` block passed to `ksrpcHostConnection`.
+
+The working end-to-end reference is the test harness: [`ksrpc-test/src/nativeMain/kotlin/Test.kt`](https://github.com/Monkopedia/ksrpc/blob/main/ksrpc-test/src/nativeMain/kotlin/Test.kt) (the `initialize` export) and [`ksrpc-test/src/jvmTest/kotlin/JniTest.kt`](https://github.com/Monkopedia/ksrpc/blob/main/ksrpc-test/src/jvmTest/kotlin/JniTest.kt) (the `KsrpcNativeHost.connect` calls).
 
 ## Transport semantics
 
 - Uses `JniSerialized` as the wire format -- a binary serialization format, not JSON
-- Bidirectional at the protocol level: both JVM and Native sides can host and call services, though hosting on the native side currently requires the manual JNI export boilerplate described above
+- Bidirectional at the protocol level: both JVM and Native sides can host and call services
 - Full [`Connection`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html) with sub-service support in both directions
 - Zero network overhead -- data passes through JNI method calls in the same process
 - Packet-based protocol using the same `PacketChannelBase` as other bidirectional transports
