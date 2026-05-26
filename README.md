@@ -59,6 +59,7 @@ dependencies {
 | Sockets | JVM, POSIX Native | `ksrpc-sockets` |
 | Stdin/out | JVM, POSIX Native | `ksrpc-sockets` |
 | JSON-RPC 2.0 | JVM, POSIX Native | `ksrpc-jsonrpc` |
+| JNI | JVM + Kotlin/Native | `ksrpc-jni` |
 | Service Workers | JS (experimental) | `ksrpc-service-worker` |
 
 ## Features
