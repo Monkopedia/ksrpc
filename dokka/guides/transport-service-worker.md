@@ -64,6 +64,33 @@ fun main() {
 }
 ```
 
+## Build setup
+
+The worker is a separate browser script that must be built and served on its own, so the code above is only half of what a working setup needs. The worker entry point compiles to a standalone JavaScript bundle, which is served at the path the client passes to `createServiceWorkerWithConnection`.
+
+Build the worker as its own JS executable that depends on `ksrpc-service-worker`, using webpack to produce the bundle:
+
+```kotlin
+kotlin {
+    js {
+        binaries.executable()
+    }
+    sourceSets["jsMain"].dependencies {
+        implementation("com.monkopedia.ksrpc:ksrpc-service-worker:$KSRPC_VERSION")
+        implementation(npm("webpack", "5.101.3"))
+        implementation(npm("webpack-cli", "6.0.1"))
+        implementation(npm("source-map-loader", "5.0.0"))
+    }
+}
+```
+
+`jsBrowserProductionWebpack` / `jsBrowserDistribution` produce the worker bundle under `build/dist/js/productionExecutable`. Serve that `.js` at the origin-relative path the client registers (e.g. `/worker.js`).
+
+The repository's own modules are the working end-to-end reference for this wiring:
+
+- [`ksrpc-service-worker-test`](https://github.com/Monkopedia/ksrpc/blob/main/ksrpc-service-worker-test/build.gradle.kts) -- the worker built as a standalone JS executable.
+- [`ksrpc-test`](https://github.com/Monkopedia/ksrpc/blob/main/ksrpc-test/build.gradle.kts) -- the `copyWebWorker*` tasks that stage the built worker bundle into resources and serve it for the client to register.
+
 ## Transport semantics
 
 - Returns a full [`Connection`](https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html)`<String>` supporting bidirectional communication

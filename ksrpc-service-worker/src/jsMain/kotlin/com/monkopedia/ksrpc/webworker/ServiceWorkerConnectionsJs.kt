@@ -36,6 +36,11 @@ import org.w3c.dom.MessageChannel
 import org.w3c.dom.MessageEvent
 import org.w3c.dom.MessagePort
 
+/**
+ * Creates a connection to a service worker registered at [workerScriptPath].
+ *
+ * @sample com.monkopedia.ksrpc.samples.serviceWorkerClient
+ */
 @ExperimentalKsrpc
 actual fun createServiceWorkerWithConnection(
     workerScriptPath: String,
@@ -63,6 +68,8 @@ actual fun createServiceWorkerWithConnection(
  *
  * This is an experimental API — the service-worker transport has limited test
  * coverage and its behavior may change without notice.
+ *
+ * @sample com.monkopedia.ksrpc.samples.serviceWorkerHosting
  */
 @ExperimentalKsrpc
 fun onServiceWorkerConnection(
