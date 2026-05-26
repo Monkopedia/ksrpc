@@ -154,6 +154,12 @@ internal val Transformer<*>.rpcDataType: RpcDataType
     get() = when (this) {
         is BinaryDataTransformer -> RpcDataType.BinaryData
 
+        // Result<O> methods (issue #133) are an ergonomic transform over the
+        // plain `O` protocol — the wire representation is exactly the inner
+        // `O`. Introspection therefore reports the inner transformer's data
+        // type so a `Result<O>` endpoint looks identical to an `O` endpoint.
+        is ResultTransformer<*> -> inner.rpcDataType
+
         is SerializerTransformer<*> -> RpcDataType.DataStructure(serializer)
 
         // Matches `SubserviceTransformer<T>` (trivial adapter) as well as any

@@ -181,4 +181,12 @@ object FqConstants {
     val KS_FLOW_SERVICE = ClassId(KSRPC_FLOW_PKG, Name.identifier("KsFlowService"))
     val FLOW_TRANSFORMER =
         ClassId(KSRPC_FLOW_PKG, Name.identifier("FlowSubserviceTransformer"))
+
+    // kotlin.Result<O> return types (issue #133). A `Result<O>` method is an
+    // ergonomic client/server transform over the plain `O`-method protocol —
+    // success serializes the inner `O`, failure rides the existing @KsError /
+    // error envelope. The plugin wraps the inner-`O` transformer in a
+    // `ResultTransformer<O>` (lives in ksrpc-core).
+    val RESULT = FqName("kotlin.Result")
+    val RESULT_TRANSFORMER = ClassId(FQPKG, Name.identifier("ResultTransformer"))
 }

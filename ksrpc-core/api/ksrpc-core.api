@@ -6,7 +6,10 @@ public final class com/monkopedia/ksrpc/BinaryTransformer : com/monkopedia/ksrpc
 	public fun getHasContent ()Z
 	public fun transform (Lcom/monkopedia/ksrpc/channels/RpcBinaryData;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public synthetic fun transform (Ljava/lang/Object;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun transformOutcome (Lcom/monkopedia/ksrpc/channels/RpcBinaryData;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public synthetic fun transformOutcome (Ljava/lang/Object;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun untransform (Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun untransformOutcome (Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public abstract interface class com/monkopedia/ksrpc/CallDataSerializer {
@@ -283,7 +286,9 @@ public final class com/monkopedia/ksrpc/SerializerTransformer : com/monkopedia/k
 	public fun getHasContent ()Z
 	public final fun getSerializer ()Lkotlinx/serialization/KSerializer;
 	public fun transform (Ljava/lang/Object;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun transformOutcome (Ljava/lang/Object;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun untransform (Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun untransformOutcome (Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class com/monkopedia/ksrpc/ServiceNameKt {
@@ -311,11 +316,15 @@ public final class com/monkopedia/ksrpc/SuspendCloseableObservableKt {
 public abstract interface class com/monkopedia/ksrpc/Transformer {
 	public fun getHasContent ()Z
 	public abstract fun transform (Ljava/lang/Object;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun transformOutcome (Ljava/lang/Object;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun untransform (Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun untransformOutcome (Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class com/monkopedia/ksrpc/Transformer$DefaultImpls {
 	public static fun getHasContent (Lcom/monkopedia/ksrpc/Transformer;)Z
+	public static fun transformOutcome (Lcom/monkopedia/ksrpc/Transformer;Ljava/lang/Object;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun untransformOutcome (Lcom/monkopedia/ksrpc/Transformer;Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public abstract interface class com/monkopedia/ksrpc/UnhandledMethodHandler {

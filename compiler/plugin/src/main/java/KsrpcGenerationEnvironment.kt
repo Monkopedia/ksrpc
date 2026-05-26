@@ -44,6 +44,15 @@ class KsrpcGenerationEnvironment(
     val serviceExecutor = referenceClass(FqConstants.SERVICE_EXECUTOR)
     val serializerTransformer = referenceClass(FqConstants.SERIALIZER_TRANSFORMER)
 
+    // ResultTransformer<O> wraps the inner-O transformer for `Result<O>` return
+    // types (issue #133). Lives in ksrpc-core, but referenced optimistically so
+    // the plugin keeps working against older ksrpc-core artifacts that predate
+    // the type — `resultSupported` gates the detection path in determineType.
+    val resultTransformer = maybeReferenceClass(FqConstants.RESULT_TRANSFORMER)
+
+    /** True when `Result<O>` signatures can be auto-wired via the ksrpc-core runtime. */
+    val resultSupported: Boolean = resultTransformer != null
+
     /**
      * Registry of binary adapters the plugin knows about. Each entry pairs a
      * user-facing binary type (seen in an `@KsMethod` signature) with the

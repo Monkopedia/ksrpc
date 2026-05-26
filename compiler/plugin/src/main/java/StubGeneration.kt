@@ -516,7 +516,7 @@ class StubGeneration(
         outputRpcType: RpcType,
         outputType: IrType,
         declarationIrBuilder: DeclarationIrBuilder
-    ) = when (outputRpcType) {
+    ): IrExpression = when (outputRpcType) {
         // The paired `ObjGeneration.createTypeConverter` already emits a user
         // diagnostic when the underlying adapter is missing; by the time we
         // reach stub generation the classpath must satisfy it. Dispatch via
@@ -538,6 +538,36 @@ class StubGeneration(
         }
 
         RpcType.FLOW -> buildFlowSubserviceTransformer(outputType, declarationIrBuilder)
+
+        RpcType.RESULT -> {
+            // Result<O> (issue #133): build the inner-O transformer and wrap it
+            // in ResultTransformer<O>. The inner transformer is determined
+            // recursively so Result<DataClass>, Result<Subservice> (rejected by
+            // FIR for v1), etc. would route to the right inner transformer.
+            val innerType = (outputType as? org.jetbrains.kotlin.ir.types.IrSimpleType)
+                ?.arguments
+                ?.singleOrNull()
+                ?.typeOrFail
+                ?: reportInternal(
+                    "Result<O> type ${outputType.classFqName?.asString()} has no type " +
+                        "argument — cannot emit ResultTransformer"
+                )
+            val resultTransformerSymbol = env.resultTransformer
+                ?: reportInternal(
+                    "Result detection fired despite resultSupported=false " +
+                        "(ResultTransformer symbol missing)"
+                )
+            val innerTransformer = createTypeConverter(
+                determineType(innerType),
+                innerType,
+                declarationIrBuilder
+            )
+            declarationIrBuilder.irConstructOf(
+                resultTransformerSymbol,
+                listOf(innerType),
+                innerTransformer
+            )
+        }
 
         RpcType.SERVICE -> declarationIrBuilder.irConstructOf(
             env.subserviceTransformer,
@@ -706,6 +736,7 @@ class StubGeneration(
         }
 
     private fun determineType(type: IrType): RpcType = when {
+        env.resultSupported && type.classFqName == FqConstants.RESULT -> RpcType.RESULT
         env.flowSupported && type.classFqName == FqConstants.FLOW -> RpcType.FLOW
         type.extends(env.rpcService) -> RpcType.SERVICE
         env.findAdapterByFqName(type.classFqName) != null -> RpcType.BINARY
@@ -725,7 +756,8 @@ class StubGeneration(
         DEFAULT,
         BINARY,
         SERVICE,
-        FLOW
+        FLOW,
+        RESULT
     }
 }
 

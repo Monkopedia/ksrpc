@@ -71,6 +71,114 @@ interface Transformer<T> {
 
     suspend fun <S> transform(input: T, channel: SerializedService<S>): CallData<S>
     suspend fun <S> untransform(data: CallData<S>, channel: SerializedService<S>): T
+
+    /**
+     * Server-side boundary hook (issue #133). Invoked by [RpcMethod.call] with
+     * the value returned by the handler. The default implementation simply
+     * delegates to [transform]; transformers that need to observe the failure
+     * channel (e.g. [ResultTransformer] for `Result<O>` return types) override
+     * this to fold a returned failure into the wire-level error frame via
+     * [encodeError].
+     *
+     * Implementations MUST rethrow [CancellationException] to preserve
+     * structured concurrency.
+     */
+    suspend fun <S> transformOutcome(
+        output: T,
+        channel: SerializedService<S>,
+        encodeError: (Throwable) -> CallData.Error<S>
+    ): CallData<S> = transform(output, channel)
+
+    /**
+     * Client-side boundary hook (issue #133). Invoked by
+     * [RpcMethod.callChannel] with the raw wire response (which may be a
+     * [CallData.Error]). The default implementation throws the decoded error —
+     * preserving today's behaviour — and otherwise delegates to [untransform].
+     * [ResultTransformer] overrides this to wrap the outcome in a
+     * [kotlin.Result] instead of throwing.
+     *
+     * Implementations MUST rethrow [CancellationException].
+     */
+    suspend fun <S> untransformOutcome(
+        data: CallData<S>,
+        channel: SerializedService<S>,
+        decodeError: (CallData.Error<S>) -> Throwable
+    ): T {
+        if (data is CallData.Error<S>) {
+            throw decodeError(data)
+        }
+        return untransform(data, channel)
+    }
+}
+
+/**
+ * Transformer emitted by the ksrpc compiler plugin for `@KsMethod` functions
+ * whose return type is `kotlin.Result<O>` (issue #133).
+ *
+ * `Result<O>` is purely a client/server ergonomic transform over the existing
+ * `O`-method protocol — `kotlin.Result` itself is never serialized (it has no
+ * kotlinx serializer). On the wire a `Result<O>` method is byte-for-byte
+ * identical to a plain `O` method:
+ *
+ * - **Server:** a returned [Result.success] serializes the inner `O` exactly as
+ *   a plain `O` method would (via [inner]); a returned [Result.failure] is
+ *   encoded through the SAME `@KsError`/[RpcMethod.encodeError] path as a thrown
+ *   exception, so `Result.failure(e)` is indistinguishable on the wire from
+ *   `throw e`.
+ * - **Client:** an error response decodes to [Result.failure] (NOT thrown); a
+ *   success response decodes to [Result.success]. A `Result`-returning stub
+ *   never throws except for cancellation.
+ * - **Cancellation:** [CancellationException] is never folded into the
+ *   `Result` — it propagates on both sides to preserve structured concurrency.
+ *
+ * This type is `@KsrpcInternal` — user code does not reference it directly; the
+ * compiler plugin emits constructor calls to it in codegen.
+ */
+@KsrpcInternal
+class ResultTransformer<O>(val inner: Transformer<O>) : Transformer<Result<O>> {
+    // A Result<O> method always carries content over the wire (the inner value
+    // on success, or an error frame on failure), regardless of whether O is Unit.
+    override val hasContent: Boolean
+        get() = true
+
+    override suspend fun <S> transform(
+        input: Result<O>,
+        channel: SerializedService<S>
+    ): CallData<S> {
+        // Only reached on the (unusual) path where a Result<O> value is treated
+        // as a plain output — fold failures into a thrown exception so the
+        // default machinery can encode them. The normal server path goes through
+        // transformOutcome instead.
+        return inner.transform(input.getOrThrow(), channel)
+    }
+
+    override suspend fun <S> untransform(
+        data: CallData<S>,
+        channel: SerializedService<S>
+    ): Result<O> = Result.success(inner.untransform(data, channel))
+
+    override suspend fun <S> transformOutcome(
+        output: Result<O>,
+        channel: SerializedService<S>,
+        encodeError: (Throwable) -> CallData.Error<S>
+    ): CallData<S> = output.fold(
+        onSuccess = { value -> inner.transform(value, channel) },
+        onFailure = { throwable ->
+            if (throwable is CancellationException) throw throwable
+            encodeError(throwable)
+        }
+    )
+
+    override suspend fun <S> untransformOutcome(
+        data: CallData<S>,
+        channel: SerializedService<S>,
+        decodeError: (CallData.Error<S>) -> Throwable
+    ): Result<O> {
+        if (data is CallData.Error<S>) {
+            return Result.failure(decodeError(data))
+        }
+        return Result.success(inner.untransform(data, channel))
+    }
 }
 
 class SerializerTransformer<I>(val serializer: KSerializer<I>) : Transformer<I> {
@@ -291,7 +399,13 @@ class RpcMethod<T : RpcService, I, O>(
                 channel.env.logger.info("Transformer", "($logId) Calling endpoint $endpoint")
                 val output = method.invoke(service as T, transformedInput)
                 channel.env.logger.debug("Transformer", "($logId) Completed endpoint $endpoint")
-                outputTransform.transform(output as O, channel)
+                // transformOutcome lets Result<O> transformers fold a returned
+                // Result.failure(e) into the SAME error frame as a thrown e
+                // (issue #133). The default implementation just calls transform,
+                // preserving existing behaviour for non-Result methods.
+                outputTransform.transformOutcome(output as O, channel) { t ->
+                    encodeError(t, channel.env)
+                }
             } catch (t: CancellationException) {
                 throw t
             } catch (t: Throwable) {
@@ -345,16 +459,19 @@ class RpcMethod<T : RpcService, I, O>(
                     "Transformer",
                     "($id) Completed remote endpoint $endpoint"
                 )
-                if (transformedOutput is CallData.Error<S>) {
-                    val decoded = decodeError(transformedOutput, channel.env)
+                // untransformOutcome lets Result<O> transformers wrap an error
+                // response in Result.failure rather than throwing (issue #133).
+                // The default implementation throws the decoded error, preserving
+                // existing behaviour for non-Result methods.
+                outputTransform.untransformOutcome(transformedOutput, channel) { err ->
+                    val decoded = decodeError(err, channel.env)
                     channel.env.logger.info(
                         "RpcMethod",
                         "Decoded error response from endpoint $endpoint",
                         decoded
                     )
-                    throw decoded
+                    decoded
                 }
-                outputTransform.untransform(transformedOutput, channel)
             }
             if (timeout != null && timeout > 0) {
                 withTimeout(timeout) { body() }
