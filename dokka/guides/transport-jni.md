@@ -103,7 +103,14 @@ val result = service.someMethod("hello")
 
 `KsrpcNativeHost.connect` defaults to a `JniSerialization` environment; pass your own `KsrpcEnvironment<JniSerialized>` to customize the JVM-side logger or error listener. The native side builds its own per-connection environment, tuned via the `configure` block passed to `ksrpcHostConnection`.
 
-The working end-to-end reference is the test harness: [`ksrpc-test/src/nativeMain/kotlin/Test.kt`](https://github.com/Monkopedia/ksrpc/blob/main/ksrpc-test/src/nativeMain/kotlin/Test.kt) (the `initialize` export) and [`ksrpc-test/src/jvmTest/kotlin/JniTest.kt`](https://github.com/Monkopedia/ksrpc/blob/main/ksrpc-test/src/jvmTest/kotlin/JniTest.kt) (the `KsrpcNativeHost.connect` calls).
+## Packaging the shared library
+
+`NativeUtils.loadLibraryFromJar("/libs/libmy_service.so")` extracts the `.so` from the JVM classpath, so the linked library has to be placed there. The `sharedLib` from step 1 is produced under `build/bin/<target>/<buildType>Shared/lib<module>.so` (e.g. `build/bin/linuxX64/debugShared/libmy_service.so`); a Gradle copy task stages it into the JVM module's resources (under `libs/`) so `loadLibraryFromJar` can find it. Account for the per-OS extension (`.so` / `.dylib` / `.dll`) and the host's target.
+
+The working end-to-end reference is the test harness:
+
+- [`ksrpc-test/build.gradle.kts`](https://github.com/Monkopedia/ksrpc/blob/main/ksrpc-test/build.gradle.kts) -- the `sharedLib` export and the `copyLib` task that stages the built `.so` into JVM resources per host OS.
+- [`ksrpc-test/src/nativeMain/kotlin/Test.kt`](https://github.com/Monkopedia/ksrpc/blob/main/ksrpc-test/src/nativeMain/kotlin/Test.kt) (the `initialize` export) and [`ksrpc-test/src/jvmTest/kotlin/JniTest.kt`](https://github.com/Monkopedia/ksrpc/blob/main/ksrpc-test/src/jvmTest/kotlin/JniTest.kt) (the `KsrpcNativeHost.connect` calls).
 
 ## Transport semantics
 
