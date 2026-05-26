@@ -196,23 +196,26 @@ server executables.
 
 # Module ksrpc-service-worker
 
-Experimental JS/WasmJS transport that communicates over browser service workers. Use
-`createServiceWorkerWithConnection` to obtain a `Connection<String>` backed by a
-registered service worker script. Requires `@OptIn(ExperimentalKsrpc::class)`.
+Experimental JS/WasmJS transport that communicates over browser service workers. Host a
+service in the worker with `onServiceWorkerConnection`, and connect from the main thread
+with `createServiceWorkerWithConnection` to obtain a `Connection<String>` backed by the
+registered worker script. Requires `@OptIn(ExperimentalKsrpc::class)`.
 
 # Package com.monkopedia.ksrpc.webworker
 
-`createServiceWorkerWithConnection` and platform-specific service worker connection
-implementations for JS and WasmJS targets.
+`onServiceWorkerConnection` (worker host) and `createServiceWorkerWithConnection` (client),
+plus platform-specific service worker connection implementations for JS and WasmJS targets.
 
 # Module ksrpc-jni
 
-JNI bridge for Kotlin/Native to JVM interop. Provides a compact binary serialization
-format (`JniSer`/`JniSerialized`) and a `NativeConnection` that passes ksrpc calls
-across the JNI boundary without JSON round-tripping. Use this module when embedding a
-Kotlin/Native ksrpc service inside a JVM host (or vice versa) via shared libraries.
+JNI bridge for Kotlin/Native to JVM interop. A JVM client connects to a service hosted in a
+Kotlin/Native shared library with `KsrpcNativeHost.connect`, supplying a native binding that
+delegates to `ksrpcHostConnection`; calls cross the JNI boundary using a compact binary
+serialization format (`JniSer`/`JniSerialized`) rather than JSON. Use this module when
+embedding a Kotlin/Native ksrpc service inside a JVM host via shared libraries.
 
 # Package com.monkopedia.ksrpc.jni
 
-`JniSerialization`, `JniSer`, `JniSerialized`, `JniEncoder`/`JniDecoder`, type converters,
-and the `NativeConnection` that dispatches ksrpc calls across JNI.
+`KsrpcNativeHost` / `ksrpcHostConnection` / `JniHostInit` for hosting and connecting;
+`JniSerialization`, `JniSer`, `JniSerialized`, `JniEncoder`/`JniDecoder`, and type converters
+for the wire format; and the `NativeConnection` that dispatches ksrpc calls across JNI.
