@@ -35,9 +35,11 @@ import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.allocArray
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.usePinned
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
 import platform.posix.EINTR
 import platform.posix.STDIN_FILENO
@@ -54,9 +56,23 @@ actual suspend inline fun withStdInOut(
     withConnection: (Connection<String>) -> Unit
 ) {
     val input = posixFileReadChannel(STDIN_FILENO)
-    val output = posixFileWriteChannel(STDOUT_FILENO)
+    // The connection isn't built until after the write channel, so hand it to the writer's
+    // failure hook via a deferred — it needs the connection to force-close on write-side
+    // failure so a pending call doesn't hang on a still-open read side (#201, analog of #200).
+    val connectionReady = CompletableDeferred<Connection<String>>()
+    val output = posixFileWriteChannel(STDOUT_FILENO) {
+        // Runs on the dedicated writer thread once the posix write has failed. Closing the
+        // connection runs the normal teardown, which completes pending receivers exceptionally
+        // (MultiChannel.close already does this) so callers fail fast instead of hanging.
+        // Launch on the environment's scope (not GlobalScope) so the teardown is tied to the
+        // connection's lifecycle.
+        ksrpcEnvironment.defaultScope.launch {
+            swallow { connectionReady.await().close() }
+        }
+    }
     withoutIcanon {
         val connection = (input to output).asConnection(ksrpcEnvironment)
+        connectionReady.complete(connection)
         try {
             withConnection(connection)
         } finally {
@@ -82,7 +98,10 @@ fun posixFileReadChannel(fd: Int): ByteReadChannel {
                 while (true) {
                     val readCount = read(fd, buffer, BUFFER_SIZE.toULong())
                     if (readCount < 0) break
-                    if (readCount == 0L) continue
+                    // On a blocking fd, read() == 0 is EOF (the peer closed the write end), not
+                    // "no data yet" — break so the reader thread terminates. `continue` here
+                    // busy-spins forever once EOF is reached, which wedges process exit (#201).
+                    if (readCount == 0L) break
 
                     channel.writeFully(buffer, 0, readCount)
                     channel.flush()
@@ -103,11 +122,21 @@ fun posixFileReadChannel(fd: Int): ByteReadChannel {
  *
  * This is accomplished by creating a dedicated thread that blocks on reads before queueing to
  * a [ByteChannel] for suspended reading, so only use when needed.
+ *
+ * @param onWriteFailure invoked once if the dedicated writer thread aborts because the underlying
+ *   posix `write` failed (e.g. the peer closed the read end of the fd). Cancelling the write
+ *   [ByteChannel] only surfaces to *new* sends; a call that has already sent its request and is
+ *   awaiting a response is parked on the connection, not on the write channel. If the read side
+ *   stays open, that pending call would hang forever (#201, the K/N analog of #200). The caller
+ *   uses this hook to force-close the connection so pending receivers complete exceptionally and
+ *   callers fail fast instead of hanging. It is never invoked on a clean shutdown (the write
+ *   channel being closed for read, e.g. via `connection.close()`).
  */
 @OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
-fun posixFileWriteChannel(fd: Int): ByteWriteChannel {
+fun posixFileWriteChannel(fd: Int, onWriteFailure: () -> Unit = {}): ByteWriteChannel {
     val thread = newSingleThreadContext("write-channel-$fd")
     return GlobalScope.reader(thread, autoFlush = true) {
+        var writeFailed = false
         try {
             while (!channel.isClosedForRead) {
                 channel.read { source, start, end ->
@@ -136,8 +165,16 @@ fun posixFileWriteChannel(fd: Int): ByteWriteChannel {
             }
         } catch (cause: Throwable) {
             cause.printStackTrace()
+            writeFailed = true
             channel.cancel(cause)
         } finally {
+            // Cancelling the write channel above only wakes new sends; force-close the connection
+            // so a call already parked awaiting a response wakes too (#201). Run before
+            // thread.close() so the hook is dispatched while this coroutine's thread is still
+            // live. Guarded so a clean shutdown (channel closed for read) is a no-op.
+            if (writeFailed) {
+                swallow { onWriteFailure() }
+            }
             close(fd)
             thread.close()
         }

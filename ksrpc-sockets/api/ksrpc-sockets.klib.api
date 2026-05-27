@@ -1,6 +1,7 @@
 // Klib ABI Dump
 // Targets: [iosArm64, iosSimulatorArm64, iosX64, js, linuxArm64, linuxX64, macosArm64, macosX64, wasmJs]
 // Alias: native => [iosArm64, iosSimulatorArm64, iosX64, linuxArm64, linuxX64, macosArm64, macosX64]
+// Alias: apple => [iosArm64, iosSimulatorArm64, iosX64, macosArm64, macosX64]
 // Rendering settings:
 // - Signature version: 2
 // - Show manifest properties: true
@@ -21,10 +22,13 @@ final fun com.monkopedia.ksrpc.sockets/initTermios(kotlin/Int = ..., kotlinx.cin
 final fun com.monkopedia.ksrpc.sockets/posixFileReadChannel(kotlin/Int): io.ktor.utils.io/ByteReadChannel // com.monkopedia.ksrpc.sockets/posixFileReadChannel|posixFileReadChannel(kotlin.Int){}[0]
 
 // Targets: [native]
-final fun com.monkopedia.ksrpc.sockets/posixFileWriteChannel(kotlin/Int): io.ktor.utils.io/ByteWriteChannel // com.monkopedia.ksrpc.sockets/posixFileWriteChannel|posixFileWriteChannel(kotlin.Int){}[0]
+final fun com.monkopedia.ksrpc.sockets/posixFileWriteChannel(kotlin/Int, kotlin/Function0<kotlin/Unit> = ...): io.ktor.utils.io/ByteWriteChannel // com.monkopedia.ksrpc.sockets/posixFileWriteChannel|posixFileWriteChannel(kotlin.Int;kotlin.Function0<kotlin.Unit>){}[0]
 
 // Targets: [native]
 final fun com.monkopedia.ksrpc.sockets/resetTermios(kotlin/Int = ..., kotlinx.cinterop/CPointer<platform.posix/termios>) // com.monkopedia.ksrpc.sockets/resetTermios|resetTermios(kotlin.Int;kotlinx.cinterop.CPointer<platform.posix.termios>){}[0]
 
 // Targets: [native]
 final inline fun com.monkopedia.ksrpc.sockets/withoutIcanon(kotlin/Int = ..., kotlin/Function0<kotlin/Unit>) // com.monkopedia.ksrpc.sockets/withoutIcanon|withoutIcanon(kotlin.Int;kotlin.Function0<kotlin.Unit>){}[0]
+
+// Targets: [apple]
+final fun com.monkopedia.ksrpc.sockets/posixFileWriteChannel(kotlin/Int): io.ktor.utils.io/ByteWriteChannel // com.monkopedia.ksrpc.sockets/posixFileWriteChannel|posixFileWriteChannel(kotlin.Int){}[0]
