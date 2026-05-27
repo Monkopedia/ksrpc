@@ -137,6 +137,37 @@ try {
 
 The built-in sentinel codes are always recognized: `ENDPOINT_NOT_FOUND_CODE` (-32601) produces [RpcEndpointException], and `INTERNAL_ERROR_CODE` (-32603) produces [RpcException].
 
+## Result return types
+
+A `@KsMethod` may return `Result<O>` instead of `O`, letting the client receive failures as `Result.failure` rather than thrown exceptions. `@KsError` participates unchanged on such methods:
+
+```kotlin
+@KsService
+interface ParseService : RpcService {
+    @KsMethod("/parse")
+    @KsError(code = 200, type = ParseError::class)
+    suspend fun parse(input: String): Result<Int>
+}
+```
+
+- A failure mapped via `@KsError` -- whether thrown from the handler or returned as `Result.failure(typedError)` -- round-trips into `Result.failure(typedError)` on the client.
+- An unmapped failure becomes a generic `KsrpcException` (`code = -32603`) inside `Result.failure`, the same as the untyped-error path above.
+- `CancellationException` / `TimeoutCancellationException` are not captured into the `Result` -- they propagate.
+
+The stub returns the `Result` and does not throw on failure:
+
+```kotlin
+stub.parse("not-a-number")
+    .onFailure { error ->
+        when (error) {
+            is ParseError -> println("Bad input: ${error.input}")
+            else -> println("RPC error: ${error.message}")
+        }
+    }
+```
+
+The wire format is identical to a plain `O` method with the same `@KsError` bindings -- see [Result return types](service-declaration.md) in the service declaration guide for the full semantics.
+
 ## Wire format by transport
 
 How typed errors appear on the wire depends on the transport:
