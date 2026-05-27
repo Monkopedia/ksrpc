@@ -64,7 +64,9 @@ actual suspend inline fun withStdInOut(
         // Runs on the dedicated writer thread once the posix write has failed. Closing the
         // connection runs the normal teardown, which completes pending receivers exceptionally
         // (MultiChannel.close already does this) so callers fail fast instead of hanging.
-        GlobalScope.launch {
+        // Launch on the environment's scope (not GlobalScope) so the teardown is tied to the
+        // connection's lifecycle.
+        ksrpcEnvironment.defaultScope.launch {
             swallow { connectionReady.await().close() }
         }
     }
