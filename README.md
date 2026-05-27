@@ -72,6 +72,7 @@ dependencies {
 - **Context propagation** -- Propagate per-call context (auth tokens, trace IDs) across transports with [`@KsContext`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-ks-context/index.html). [Guide](https://monkopedia.github.io/ksrpc/)
 - **Introspection** -- Opt in with [`@KsIntrospectable`](https://monkopedia.github.io/ksrpc/ksrpc-introspection/com.monkopedia.ksrpc.annotation/-ks-introspectable/index.html) to expose endpoint metadata and schemas at runtime. [Guide](https://monkopedia.github.io/ksrpc/)
 - **Flow streaming** -- Use `Flow<T>` in method signatures for streaming results over any transport, backed by [`KsFlowService`](https://monkopedia.github.io/ksrpc/ksrpc-flow/com.monkopedia.ksrpc.flow/-ks-flow-service/index.html). [Guide](https://monkopedia.github.io/ksrpc/)
+- **`Result<T>` returns** -- Declare a [`@KsMethod`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-ks-method/index.html) returning `Result<O>` to receive failures as `Result.failure` instead of thrown exceptions, with no wire-format change. [Guide](https://monkopedia.github.io/ksrpc/)
 - **JSON-RPC 2.0 notifications** -- Mark methods with [`@KsNotification`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-ks-notification/index.html) for fire-and-forget semantics.
 
 ## Why not gRPC?

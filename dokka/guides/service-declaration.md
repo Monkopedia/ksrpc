@@ -178,6 +178,54 @@ interface SlowService : RpcService {
 
 The generated stub wraps the call in `withTimeout`. On transports with cancellation support, the cancellation propagates to the server.
 
+## Result return types
+
+A `@KsMethod` may return `Result<O>`. Such a method is equivalent to a plain `O`-returning method wrapped in `runCatching`-except-cancellation:
+
+```kotlin
+@KsService
+interface ParseService : RpcService {
+    @KsMethod("/parse")
+    @KsError(code = 200, type = ParseError::class)
+    suspend fun parse(input: String): Result<Int>
+}
+```
+
+The server handler returns a `Result`:
+
+```kotlin
+class ParseServiceImpl : ParseService {
+    override suspend fun parse(input: String): Result<Int> =
+        input.toIntOrNull()?.let { Result.success(it) }
+            ?: Result.failure(ParseError(input))
+}
+```
+
+The client stub returns a `Result` and does **not** throw on failure -- handle the outcome with `onSuccess` / `onFailure`, `getOrNull`, `fold`, or any other `Result` API:
+
+```kotlin
+stub.parse("42")
+    .onSuccess { value -> println("Parsed $value") }
+    .onFailure { error -> println("Failed: ${error.message}") }
+```
+
+The semantics are:
+
+- **No wire change.** A `Result<O>` method is byte-for-byte identical to a plain `O` method on the wire. Success serializes the inner `O` exactly as a plain `O` method would; failure uses the existing [`@KsError`](https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-ks-error/index.html) / error envelope. `kotlin.Result` itself is never serialized. A peer written against `Result<O>` and one written against `O` interoperate.
+- **Server.** A returned `Result.success(o)` sends `o`. A returned `Result.failure(e)` is encoded through the same path as a thrown `e`, so it is indistinguishable on the wire from `throw e`. Throwing from the handler also surfaces as `Result.failure` on the client.
+- **Client.** An error response becomes `Result.failure(decoded)`; a success response becomes `Result.success(o)`. The stub never throws except for cancellation.
+- **`@KsError` participates unchanged.** A bound typed error round-trips into `Result.failure(typedError)`; an unmapped failure becomes a generic `KsrpcException` inside `Result.failure`. See [Error Handling](error-handling.md).
+- **Cancellation propagates.** `CancellationException` and `TimeoutCancellationException` are **not** folded into the `Result` -- they propagate on both sides to preserve structured concurrency (this is the "except cancellation" part of `runCatching`-except-cancellation). A `@KsTimeout` firing on a `Result<O>` method throws, it does not return `Result.failure`.
+
+### Unsupported nested shapes
+
+`Result` is supported only as the top-level type wrapping a serializable or binary value. The following shapes are rejected by a compiler (FIR) diagnostic, on both the return type and the parameter type:
+
+- `Result<Flow<…>>`
+- `Flow<Result<…>>` (`Result` cannot be nested inside `Flow`)
+- `Result<SubService>` (a `Result` wrapping a `@KsService` sub-service)
+- `Result<Result<…>>` (nested `Result`)
+
 ## Implementing services
 
 Implement a service by extending the interface:

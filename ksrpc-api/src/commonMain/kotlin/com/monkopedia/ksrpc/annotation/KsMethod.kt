@@ -32,9 +32,18 @@ annotation class KsService
  * The [name] must be unique within a [KsService] but need not be unique
  * globally.
  *
+ * A `@KsMethod` may return `Result<O>`. Such a method is equivalent to a plain
+ * `O`-returning method wrapped in `runCatching`-except-cancellation: success
+ * yields `Result.success(o)`, a thrown or returned failure yields
+ * `Result.failure(e)`, and the stub does not throw except for cancellation. The
+ * wire format is unchanged — success serializes the inner `O` and failure uses
+ * the existing [KsError] / error envelope; `kotlin.Result` is never serialized.
+ *
  * @sample com.monkopedia.ksrpc.samples.basicServiceDeclaration
  * @sample com.monkopedia.ksrpc.samples.serializableTypes
  * @sample com.monkopedia.ksrpc.samples.unitInputOutput
+ * @sample com.monkopedia.ksrpc.samples.resultReturnTypeDeclaration
+ * @sample com.monkopedia.ksrpc.samples.consumingResultReturnType
  */
 annotation class KsMethod(val name: String)
 
