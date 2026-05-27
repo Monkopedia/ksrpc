@@ -22,6 +22,7 @@ import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.ktor.serveHttp as nativeServe
 import com.monkopedia.ksrpc.sockets.posixFileReadChannel
 import com.monkopedia.ksrpc.sockets.posixFileWriteChannel
+import io.ktor.client.HttpClient
 import io.ktor.server.cio.CIO
 import io.ktor.server.engine.EmbeddedServer
 import io.ktor.server.engine.embeddedServer
@@ -39,6 +40,8 @@ import kotlinx.cinterop.memScoped
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newFixedThreadPoolContext
 import kotlinx.coroutines.newSingleThreadContext
@@ -59,6 +62,8 @@ internal actual fun platformSupportedTestTypes(): Set<RpcFunctionalityTest.TestT
     RpcFunctionalityTest.TestType.PIPE,
     RpcFunctionalityTest.TestType.HTTP
 )
+
+internal actual fun httpTestClient(): HttpClient = HttpClient()
 
 actual suspend inline fun httpTest(
     crossinline serve: suspend Routing.() -> Unit,
@@ -136,13 +141,32 @@ actual typealias Routing = io.ktor.server.routing.Routing
 
 actual typealias RunBlockingReturn = Unit
 internal actual fun runBlockingUnit(function: suspend CoroutineScope.() -> Unit) {
-    try {
-        runBlocking {
+    var failure: Throwable? = null
+    runBlocking {
+        // Invoke the test body directly in the runBlocking coroutine so this returns the
+        // instant the body's own code completes, then cancel any coroutines the body left
+        // running. Tests routinely build connections (e.g. JsonRpcWriterBase /
+        // ReadWritePacketChannel) whose receive loop is launched in a scope parented to this
+        // runBlocking coroutine; if a test abandons such a connection without closing it
+        // (e.g. JsonRpcTierCheckTest, which throws on a tier mismatch before any close), that
+        // receive loop never terminates. Plain `runBlocking { body() }` would then block
+        // forever after the body returns, waiting for that orphaned child — the native suite
+        // hang in #214. The JVM/JS test harnesses return as soon as the body completes and
+        // let such orphans be reaped at process exit; mirror that here by cancelling whatever
+        // background coroutines remain once the body has finished.
+        try {
             function()
+        } catch (t: Throwable) {
+            failure = t
+        } finally {
+            // Cancel any leftover children (orphaned receive loops, server jobs, etc.) so
+            // runBlocking can return instead of awaiting coroutines the test forgot to close.
+            coroutineContext.job.cancelChildren()
         }
-    } catch (t: Throwable) {
-        t.printStackTrace()
-        fail("Caught exception $t")
+    }
+    failure?.let {
+        it.printStackTrace()
+        fail("Caught exception $it")
     }
 }
 

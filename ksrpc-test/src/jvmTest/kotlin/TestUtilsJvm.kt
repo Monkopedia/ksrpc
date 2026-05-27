@@ -19,6 +19,7 @@ import com.monkopedia.ksrpc.channels.Connection
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.ktor.serveHttp as jvmServe
 import com.monkopedia.ksrpc.ktor.websocket.serveWebsocket
+import io.ktor.client.HttpClient
 import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
 import io.ktor.server.application.install
 import io.ktor.server.engine.EmbeddedServer
@@ -51,6 +52,8 @@ actual typealias Routing = io.ktor.server.routing.Routing
 
 internal actual fun platformSupportedTestTypes(): Set<RpcFunctionalityTest.TestType> =
     RpcFunctionalityTest.TestType.values().toSet() - RpcFunctionalityTest.TestType.SERVICE_WORKER
+
+internal actual fun httpTestClient(): HttpClient = HttpClient()
 
 actual suspend inline fun httpTest(
     crossinline serve: suspend Routing.() -> Unit,

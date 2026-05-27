@@ -28,6 +28,7 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.PairSerializer
@@ -355,24 +356,21 @@ class RpcServiceCancelTest :
             channel.serialized(ksrpcEnvironment { })
         },
         verifyOnChannel = { serializedChannel ->
-            val stub = serializedChannel.toStub<TestInterface, String>()
-            val rpcJob = launch {
-                stub.rpc("Hello" to "world")
-            }
-            val continueSignal = cancelSignal!!.await()
-            rpcJob.cancel()
-            continueSignal.complete(Unit)
-            rpcJob.cancelAndJoin()
-
-            cancelSignal = CompletableDeferred<CompletableDeferred<Unit>>().also {
-                launch {
-                    it.await().complete(Unit)
-                }
-            }
-
-            assertEquals(
-                "Hello world",
-                stub.rpc("Hello" to "world")
+            // PIPE / SERVICE_WORKER: cancel a call on this channel, then verify the same channel
+            // still serves a subsequent call.
+            cancelInFlightThenVerify(
+                cancelChannel = serializedChannel,
+                verifyChannel = serializedChannel
+            )
+        },
+        verifyOnHttpChannel = { serializedChannel, reconnect ->
+            // HTTP: issue the cancelled call on a throwaway connection (the native ktor-curl
+            // engine wedges its shared processor when an in-flight request is cancelled, so the
+            // cancelled call must not share a client with the verification call), then confirm the
+            // original channel still serves a fresh call afterwards.
+            cancelInFlightThenVerify(
+                cancelChannel = reconnect(),
+                verifyChannel = serializedChannel
             )
         },
         supportedTypes = TestType.values().toList() - TestType.SERIALIZE
@@ -383,4 +381,36 @@ class RpcServiceCancelTest :
     }
 
     @Test fun testNothing() = Unit
+}
+
+/**
+ * Launches an RPC on [cancelChannel], waits until the service is executing it, cancels it
+ * mid-flight, then asserts a subsequent RPC on [verifyChannel] still succeeds. These are the same
+ * channel for transports that survive an in-flight cancellation, but separate channels for HTTP on
+ * native (see [RpcServiceCancelTest.verifyOnHttpChannel]).
+ */
+private suspend fun CoroutineScope.cancelInFlightThenVerify(
+    cancelChannel: SerializedService<String>,
+    verifyChannel: SerializedService<String>
+) {
+    val cancelStub = cancelChannel.toStub<TestInterface, String>()
+    val rpcJob = launch {
+        cancelStub.rpc("Hello" to "world")
+    }
+    val continueSignal = cancelSignal!!.await()
+    rpcJob.cancel()
+    continueSignal.complete(Unit)
+    rpcJob.cancelAndJoin()
+
+    cancelSignal = CompletableDeferred<CompletableDeferred<Unit>>().also {
+        launch {
+            it.await().complete(Unit)
+        }
+    }
+
+    val verifyStub = verifyChannel.toStub<TestInterface, String>()
+    assertEquals(
+        "Hello world",
+        verifyStub.rpc("Hello" to "world")
+    )
 }
