@@ -39,7 +39,7 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">1.0.0
+        <div class="library-version" id="library-version">1.1.0-RC1
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
@@ -95,7 +95,33 @@
   <div class="cover ">
     <h1 class="cover"><span>as</span><wbr><span>Http</span><wbr><span>Channel</span><wbr><span><span>Client</span></span></h1>
   </div>
-  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-ktor-client/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span data-unresolved-link="io.ktor.client/HttpClient///PointingToDeclaration/">HttpClient</span><span class="token punctuation">.</span><a href="as-http-channel-client.html"><span class="token function">asHttpChannelClient</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">baseUrl<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">env<span class="token operator">: </span><a href="../../ksrpc-core/com.monkopedia.ksrpc/-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">errorCodeToHttpStatus<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span><span class="token operator"> = </span>DEFAULT_KSRPC_ERROR_CODE_TO_HTTP_STATUS</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../ksrpc-core/com.monkopedia.ksrpc.channels/-channel-client/index.html">ChannelClient</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></div><p class="paragraph">Turn an <span data-unresolved-link="io.ktor.client/HttpClient///PointingToDeclaration/">HttpClient</span> into a <a href="../../ksrpc-core/com.monkopedia.ksrpc.channels/-channel-client/index.html">ChannelClient</a> for a specified baseUrl.</p><p class="paragraph">HTTP is a request/response transport only: the returned value is a <a href="../../ksrpc-core/com.monkopedia.ksrpc.channels/-channel-client/index.html">ChannelClient</a> (client-only), not a bidirectional <a href="../../ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html">com.monkopedia.ksrpc.channels.Connection</a>. For a bidirectional connection, use the WebSocket or JSON-RPC transports instead.</p><p class="paragraph">This is functionally equivalent to baseUrl.toKsrpcUri().connect(env).</p></div></div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-ktor-client/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span data-unresolved-link="io.ktor.client/HttpClient///PointingToDeclaration/">HttpClient</span><span class="token punctuation">.</span><a href="as-http-channel-client.html"><span class="token function">asHttpChannelClient</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">baseUrl<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">env<span class="token operator">: </span><a href="../../ksrpc-core/com.monkopedia.ksrpc/-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">errorCodeToHttpStatus<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span><span class="token operator"> = </span>DEFAULT_KSRPC_ERROR_CODE_TO_HTTP_STATUS</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../ksrpc-core/com.monkopedia.ksrpc.channels/-channel-client/index.html">ChannelClient</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></div><p class="paragraph">Turn an <span data-unresolved-link="io.ktor.client/HttpClient///PointingToDeclaration/">HttpClient</span> into a <a href="../../ksrpc-core/com.monkopedia.ksrpc.channels/-channel-client/index.html">ChannelClient</a> for a specified baseUrl.</p><p class="paragraph">HTTP is a request/response transport only: the returned value is a <a href="../../ksrpc-core/com.monkopedia.ksrpc.channels/-channel-client/index.html">ChannelClient</a> (client-only), not a bidirectional <a href="../../ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html">com.monkopedia.ksrpc.channels.Connection</a>. For a bidirectional connection, use the WebSocket or JSON-RPC transports instead.</p><p class="paragraph">This is functionally equivalent to baseUrl.toKsrpcUri().connect(env).</p><h4 class="">Samples</h4><div class="sample-container"><pre><code class="runnablesample monospace block lang-kotlin" theme="idea">import com.monkopedia.ksrpc.ksrpcEnvironment
+import com.monkopedia.ksrpc.ktor.asHttpChannelClient
+import com.monkopedia.ksrpc.ktor.serveHttp
+import com.monkopedia.ksrpc.toStub
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
+import io.ktor.server.routing.routing
+
+fun main() { 
+   //sampleStart 
+   val env = ksrpcEnvironment { }
+
+val httpClient = HttpClient(OkHttp)
+
+// Turn the HttpClient into a ksrpc ChannelClient for the given URL.
+val channelClient = httpClient.asHttpChannelClient(
+    "http://localhost:8080/api",
+    env
+)
+
+// Get the default channel and create a typed stub.
+val stub = channelClient.defaultChannel().toStub&lt;GreetingService, String&gt;()
+val greeting = stub.greet("world") 
+   //sampleEnd
+}</code></pre></div></div></div>
 </div>
     <div class="footer">
         <div class="footer--container">

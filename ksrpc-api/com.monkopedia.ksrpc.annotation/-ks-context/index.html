@@ -39,7 +39,7 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">1.0.0
+        <div class="library-version" id="library-version">1.1.0-RC1
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
@@ -94,7 +94,86 @@
   <div class="breadcrumbs"><a href="../../index.html">ksrpc-api</a><span class="delimiter">/</span><a href="../index.html">com.monkopedia.ksrpc.annotation</a><span class="delimiter">/</span><span class="current">KsContext</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Ks</span><wbr><span><span>Context</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-api/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.annotation/-target/index.html"><span class="token annotation builtin">Target</span></a><span class="token punctuation">(</span><span>allowedTargets<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.annotation/-annotation-target/-a-n-n-o-t-a-t-i-o-n_-c-l-a-s-s/index.html">AnnotationTarget.ANNOTATION_CLASS</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">annotation class </span><a href="index.html">KsContext</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>binding<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="../../com.monkopedia.ksrpc/-ks-context-binding/index.html">KsContextBinding</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div><p class="paragraph">Meta-annotation that opts an annotation class into ksrpc's per-call coroutine-context propagation. Apply this to an annotation class together with a <span data-unresolved-link="com.monkopedia.ksrpc.annotation/KsContext//#kotlin.reflect.KClass[com.monkopedia.ksrpc.KsContextBinding[*]]/PointingToCallableParameters(0)/">binding</span> referencing a concrete <a href="../../com.monkopedia.ksrpc/-ks-context-binding/index.html">KsContextBinding</a> implementation to declare that the annotated <a href="../-ks-method/index.html">KsMethod</a> (or every <a href="../-ks-method/index.html">KsMethod</a> inside an annotated <a href="../-ks-service/index.html">KsService</a>) should propagate a <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.coroutines/-coroutine-context/-element/index.html">kotlin.coroutines.CoroutineContext.Element</a> value across the wire.</p><p class="paragraph">The <span data-unresolved-link="com.monkopedia.ksrpc.annotation/KsContext//#kotlin.reflect.KClass[com.monkopedia.ksrpc.KsContextBinding[*]]/PointingToCallableParameters(0)/">binding</span> supplies:</p><ul><li><p class="paragraph">A stable wire-level key (<a href="../../com.monkopedia.ksrpc/-ks-context-binding/wire-key.html">KsContextBinding.wireKey</a>) used by transport     layers to encode the value.</p></li><li><p class="paragraph">The <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.coroutines/-coroutine-context/-key/index.html">kotlin.coroutines.CoroutineContext.Key</a> identity itself —     <a href="../../com.monkopedia.ksrpc/-ks-context-binding/index.html">KsContextBinding</a> extends <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.coroutines/-coroutine-context/-key/index.html">kotlin.coroutines.CoroutineContext.Key</a>, so     handlers find the propagated value via the standard     <code class="lang-kotlin">coroutineContext[SomeBinding]</code> lookup naming the binding directly.</p></li><li><p class="paragraph">String encode / decode functions (<a href="../../com.monkopedia.ksrpc/-ks-context-binding/to-wire.html">KsContextBinding.toWire</a> /     KsContextBinding.fromWire) used by transport layers that carry the     context value as a textual representation.</p></li></ul><p class="paragraph">Compiler validation:</p><ul><li><p class="paragraph">The plugin rejects a <code class="lang-kotlin">@KsContext</code>-meta-annotated annotation whose     <span data-unresolved-link="com.monkopedia.ksrpc.annotation/KsContext//#kotlin.reflect.KClass[com.monkopedia.ksrpc.KsContextBinding[*]]/PointingToCallableParameters(0)/">binding</span> does not implement <a href="../../com.monkopedia.ksrpc/-ks-context-binding/index.html">KsContextBinding</a>.</p></li><li><p class="paragraph">The plugin rejects a <a href="../-ks-method/index.html">KsMethod</a> (or its enclosing <a href="../-ks-service/index.html">KsService</a>) when two     <code class="lang-kotlin">@KsContext</code>-meta-annotated annotations apply whose bindings declare the     same <a href="../../com.monkopedia.ksrpc/-ks-context-binding/wire-key.html">KsContextBinding.wireKey</a>.</p></li></ul><p class="paragraph">Code emission for stub-side put-into-context and handler-side read-from-coroutine-context, plus per-transport wire formats, is handled by follow-up work and is intentionally not part of this annotation's contract.</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-api/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.annotation/-target/index.html"><span class="token annotation builtin">Target</span></a><span class="token punctuation">(</span><span>allowedTargets<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.annotation/-annotation-target/-a-n-n-o-t-a-t-i-o-n_-c-l-a-s-s/index.html">AnnotationTarget.ANNOTATION_CLASS</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">annotation class </span><a href="index.html">KsContext</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>binding<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="../../com.monkopedia.ksrpc/-ks-context-binding/index.html">KsContextBinding</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div><p class="paragraph">Meta-annotation that opts an annotation class into ksrpc's per-call coroutine-context propagation. Apply this to an annotation class together with a <span data-unresolved-link="com.monkopedia.ksrpc.annotation/KsContext//#kotlin.reflect.KClass[com.monkopedia.ksrpc.KsContextBinding[*]]/PointingToCallableParameters(0)/">binding</span> referencing a concrete <a href="../../com.monkopedia.ksrpc/-ks-context-binding/index.html">KsContextBinding</a> implementation to declare that the annotated <a href="../-ks-method/index.html">KsMethod</a> (or every <a href="../-ks-method/index.html">KsMethod</a> inside an annotated <a href="../-ks-service/index.html">KsService</a>) should propagate a <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.coroutines/-coroutine-context/-element/index.html">kotlin.coroutines.CoroutineContext.Element</a> value across the wire.</p><p class="paragraph">The <span data-unresolved-link="com.monkopedia.ksrpc.annotation/KsContext//#kotlin.reflect.KClass[com.monkopedia.ksrpc.KsContextBinding[*]]/PointingToCallableParameters(0)/">binding</span> supplies:</p><ul><li><p class="paragraph">A stable wire-level key (<a href="../../com.monkopedia.ksrpc/-ks-context-binding/wire-key.html">KsContextBinding.wireKey</a>) used by transport     layers to encode the value.</p></li><li><p class="paragraph">The <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.coroutines/-coroutine-context/-key/index.html">kotlin.coroutines.CoroutineContext.Key</a> identity itself —     <a href="../../com.monkopedia.ksrpc/-ks-context-binding/index.html">KsContextBinding</a> extends <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.coroutines/-coroutine-context/-key/index.html">kotlin.coroutines.CoroutineContext.Key</a>, so     handlers find the propagated value via the standard     <code class="lang-kotlin">coroutineContext[SomeBinding]</code> lookup naming the binding directly.</p></li><li><p class="paragraph">String encode / decode functions (<a href="../../com.monkopedia.ksrpc/-ks-context-binding/to-wire.html">KsContextBinding.toWire</a> /     KsContextBinding.fromWire) used by transport layers that carry the     context value as a textual representation.</p></li></ul><p class="paragraph">Compiler validation:</p><ul><li><p class="paragraph">The plugin rejects a <code class="lang-kotlin">@KsContext</code>-meta-annotated annotation whose     <span data-unresolved-link="com.monkopedia.ksrpc.annotation/KsContext//#kotlin.reflect.KClass[com.monkopedia.ksrpc.KsContextBinding[*]]/PointingToCallableParameters(0)/">binding</span> does not implement <a href="../../com.monkopedia.ksrpc/-ks-context-binding/index.html">KsContextBinding</a>.</p></li><li><p class="paragraph">The plugin rejects a <a href="../-ks-method/index.html">KsMethod</a> (or its enclosing <a href="../-ks-service/index.html">KsService</a>) when two     <code class="lang-kotlin">@KsContext</code>-meta-annotated annotations apply whose bindings declare the     same <a href="../../com.monkopedia.ksrpc/-ks-context-binding/wire-key.html">KsContextBinding.wireKey</a>.</p></li></ul><p class="paragraph">Code emission for stub-side put-into-context and handler-side read-from-coroutine-context, plus per-transport wire formats, is handled by follow-up work and is intentionally not part of this annotation's contract.</p><h4 class="">Samples</h4><div class="sample-container"><pre><code class="runnablesample monospace block lang-kotlin" theme="idea">import com.monkopedia.ksrpc.KsContextBinding
+import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.annotation.KsContext
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.ksrpcEnvironment
+import com.monkopedia.ksrpc.serialized
+import com.monkopedia.ksrpc.toStub
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.coroutineContext
+import kotlinx.coroutines.withContext
+
+fun main() { 
+   //sampleStart 
+   // A KsContextBinding pairs a CoroutineContext.Element with a wire key.
+// Declare the binding as a named companion on the element type.
+val wireKey = RequestId.Key.wireKey // "x-request-id"
+
+// Round-trip: encode to wire, decode from wire
+val original = RequestId("abc-123")
+val encoded = RequestId.Key.toWire(original)
+val decoded = RequestId.Key.fromWire(encoded) 
+   //sampleEnd
+}</code></pre></div><div class="sample-container"><pre><code class="runnablesample monospace block lang-kotlin" theme="idea">import com.monkopedia.ksrpc.KsContextBinding
+import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.annotation.KsContext
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.ksrpcEnvironment
+import com.monkopedia.ksrpc.serialized
+import com.monkopedia.ksrpc.toStub
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.coroutineContext
+import kotlinx.coroutines.withContext
+
+fun main() { 
+   //sampleStart 
+   // @KsContext is a meta-annotation applied to your own annotation.
+// Apply the annotation at the service level (all methods) or per-method.
+//
+// @Authorized              -- applied to SecureService (all methods get it)
+// @WithRequestId           -- applied to whoAmI only
+//
+// The compiler plugin validates that bindings implement KsContextBinding
+// and that no two bindings share the same wireKey on a single method. 
+   //sampleEnd
+}</code></pre></div><div class="sample-container"><pre><code class="runnablesample monospace block lang-kotlin" theme="idea">import com.monkopedia.ksrpc.KsContextBinding
+import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.annotation.KsContext
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.ksrpcEnvironment
+import com.monkopedia.ksrpc.serialized
+import com.monkopedia.ksrpc.toStub
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.coroutineContext
+import kotlinx.coroutines.withContext
+
+fun main() { 
+   //sampleStart 
+   // Server handler reads context from the coroutine context.
+val service = object : SecureService {
+    override suspend fun whoAmI(input: String): String {
+        val auth = coroutineContext[AuthorizationToken.Key]
+        val reqId = coroutineContext[RequestId.Key]
+        return "auth=${auth?.bearer}, reqId=${reqId?.value}"
+    }
+}
+
+val env = ksrpcEnvironment { }
+val serialized = service.serialized(env)
+val stub = serialized.toStub&lt;SecureService, String&gt;()
+
+// Client installs context elements using standard withContext.
+// The ksrpc runtime propagates bound elements across the wire.
+withContext(AuthorizationToken("secret-token") + RequestId("req-42")) {
+    val result = stub.whoAmI("hello")
+} 
+   //sampleEnd
+}</code></pre></div></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>

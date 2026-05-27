@@ -39,7 +39,7 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">1.0.0
+        <div class="library-version" id="library-version">1.1.0-RC1
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
@@ -94,7 +94,106 @@
   <div class="breadcrumbs"><a href="../../index.html">ksrpc-api</a><span class="delimiter">/</span><a href="../index.html">com.monkopedia.ksrpc.annotation</a><span class="delimiter">/</span><span class="current">KsMethod</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Ks</span><wbr><span><span>Method</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-api/commonMain"><div class="symbol monospace"><span class="token keyword">annotation class </span><a href="index.html">KsMethod</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><p class="paragraph">Tags a method within a <a href="../-ks-service/index.html">KsService</a> for rpc calls.</p><p class="paragraph">The <span data-unresolved-link="com.monkopedia.ksrpc.annotation/KsMethod//#kotlin.String/PointingToCallableParameters(0)/">name</span> must be unique within a <a href="../-ks-service/index.html">KsService</a> but need not be unique globally.</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-api/commonMain"><div class="symbol monospace"><span class="token keyword">annotation class </span><a href="index.html">KsMethod</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><p class="paragraph">Tags a method within a <a href="../-ks-service/index.html">KsService</a> for rpc calls.</p><p class="paragraph">The <span data-unresolved-link="com.monkopedia.ksrpc.annotation/KsMethod//#kotlin.String/PointingToCallableParameters(0)/">name</span> must be unique within a <a href="../-ks-service/index.html">KsService</a> but need not be unique globally.</p><p class="paragraph">A <code class="lang-kotlin">@KsMethod</code> may return <code class="lang-kotlin">Result&lt;O&gt;</code>. Such a method is equivalent to a plain <code class="lang-kotlin">O</code>-returning method wrapped in <code class="lang-kotlin">runCatching</code>-except-cancellation: success yields <code class="lang-kotlin">Result.success(o)</code>, a thrown or returned failure yields <code class="lang-kotlin">Result.failure(e)</code>, and the stub does not throw except for cancellation. The wire format is unchanged — success serializes the inner <code class="lang-kotlin">O</code> and failure uses the existing <a href="../-ks-error/index.html">KsError</a> / error envelope; <code class="lang-kotlin">kotlin.Result</code> is never serialized.</p><h4 class="">Samples</h4><div class="sample-container"><pre><code class="runnablesample monospace block lang-kotlin" theme="idea">import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.ksrpcEnvironment
+import com.monkopedia.ksrpc.rpcObject
+import com.monkopedia.ksrpc.serialized
+import com.monkopedia.ksrpc.toStub
+import kotlinx.serialization.Serializable
+
+fun main() { 
+   //sampleStart 
+   // Define a service interface with @KsService and @KsMethod annotations.
+// The compiler plugin generates a companion RpcObject and stub automatically.
+val rpcObj = rpcObject&lt;GreetingService&gt;()
+val endpoint = rpcObj.findEndpoint("greet") 
+   //sampleEnd
+}</code></pre></div><div class="sample-container"><pre><code class="runnablesample monospace block lang-kotlin" theme="idea">import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.ksrpcEnvironment
+import com.monkopedia.ksrpc.rpcObject
+import com.monkopedia.ksrpc.serialized
+import com.monkopedia.ksrpc.toStub
+import kotlinx.serialization.Serializable
+
+fun main() { 
+   //sampleStart 
+   // Any @Serializable class can be used as input or output to @KsMethod.
+// The compiler plugin handles serializer plumbing automatically.
+val rpcObj = rpcObject&lt;UserService&gt;()
+val endpoint = rpcObj.findEndpoint("create") 
+   //sampleEnd
+}</code></pre></div><div class="sample-container"><pre><code class="runnablesample monospace block lang-kotlin" theme="idea">import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.ksrpcEnvironment
+import com.monkopedia.ksrpc.rpcObject
+import com.monkopedia.ksrpc.serialized
+import com.monkopedia.ksrpc.toStub
+import kotlinx.serialization.Serializable
+
+fun main() { 
+   //sampleStart 
+   // Methods can omit the parameter (returns Unit) or the return type.
+// suspend fun ping(): String        -- no input
+// suspend fun notify(message: String) -- no output (returns Unit)
+val rpcObj = rpcObject&lt;PingService&gt;() 
+   //sampleEnd
+}</code></pre></div><div class="sample-container"><pre><code class="runnablesample monospace block lang-kotlin" theme="idea">import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.annotation.KsError
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.ksrpcEnvironment
+import com.monkopedia.ksrpc.serialized
+import com.monkopedia.ksrpc.toStub
+import kotlinx.serialization.Serializable
+
+fun main() { 
+   //sampleStart 
+   // A Result&lt;O&gt; method is equivalent to a plain O method wrapped in
+// runCatching-except-cancellation. The wire format is unchanged: success
+// serializes the inner O, and failure uses the same @KsError / error
+// envelope as a thrown exception. kotlin.Result is never serialized.
+val service = object : ParseService {
+    override suspend fun parse(input: String): Result&lt;Int&gt; =
+        input.toIntOrNull()?.let { Result.success(it) }
+            ?: Result.failure(ParseError(input))
+} 
+   //sampleEnd
+}</code></pre></div><div class="sample-container"><pre><code class="runnablesample monospace block lang-kotlin" theme="idea">import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.annotation.KsError
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.ksrpcEnvironment
+import com.monkopedia.ksrpc.serialized
+import com.monkopedia.ksrpc.toStub
+import kotlinx.serialization.Serializable
+
+fun main() { 
+   //sampleStart 
+   val service = object : ParseService {
+    override suspend fun parse(input: String): Result&lt;Int&gt; =
+        input.toIntOrNull()?.let { Result.success(it) }
+            ?: Result.failure(ParseError(input))
+}
+
+val env = ksrpcEnvironment { }
+val serialized = service.serialized(env)
+val stub = serialized.toStub&lt;ParseService, String&gt;()
+
+// The stub returns a Result and does NOT throw on failure. A failure
+// mapped via @KsError round-trips as Result.failure(typedError).
+stub.parse("42")
+    .onSuccess { value -&gt; println("Parsed $value") }
+    .onFailure { error -&gt; println("Failed: ${error.message}") }
+
+val outcome: Result&lt;Int&gt; = stub.parse("not-a-number")
+// outcome.isFailure == true; outcome.exceptionOrNull() is a ParseError. 
+   //sampleEnd
+}</code></pre></div></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>

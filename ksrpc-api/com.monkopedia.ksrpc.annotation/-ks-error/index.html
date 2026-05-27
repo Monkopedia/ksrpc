@@ -39,7 +39,7 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">1.0.0
+        <div class="library-version" id="library-version">1.1.0-RC1
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
@@ -94,7 +94,69 @@
   <div class="breadcrumbs"><a href="../../index.html">ksrpc-api</a><span class="delimiter">/</span><a href="../index.html">com.monkopedia.ksrpc.annotation</a><span class="delimiter">/</span><span class="current">KsError</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Ks</span><wbr><span><span>Error</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-api/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.annotation/-target/index.html"><span class="token annotation builtin">Target</span></a><span class="token punctuation">(</span><span>allowedTargets<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.annotation/-annotation-target/-f-u-n-c-t-i-o-n/index.html">AnnotationTarget.FUNCTION</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">annotation class </span><a href="index.html">KsError</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>code<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>type<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div><p class="paragraph">Binds a <code class="lang-kotlin">@Serializable</code> <code class="lang-kotlin">Throwable</code> subclass to a wire-level integer error code on a <a href="../-ks-method/index.html">KsMethod</a>-annotated function.</p><p class="paragraph">Declared at the call site with one entry per bindable error type:</p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">@KsMethod("/initialize")<br>@KsError(code = 100, type = InitError::class)<br>@KsError(code = 101, type = VersionError::class)<br>suspend fun initialize(params: InitParams): InitResult</code></pre><span class="copy-tooltip"><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div><span class="copy-icon"></span></span></div><p class="paragraph">The handler throws an instance of the bound type directly (no wrapper required); ksrpc encodes the throwable using its <code class="lang-kotlin">KSerializer</code> and emits the bound <code class="lang-kotlin">code</code> on the wire. The client deserializes back into the bound type and re-throws — callers <code class="lang-kotlin">catch (e: MyError)</code> typed.</p><p class="paragraph">The <code class="lang-kotlin">code</code> on the binding is the single source of truth for the wire code; there is no per-throw override mechanism. If you want a different code for the same data, bind it differently.</p><p class="paragraph">The bound <code class="lang-kotlin">type</code> must:</p><ul><li><p class="paragraph">Be <code class="lang-kotlin">@Serializable</code> (validated by the ksrpc compiler plugin)</p></li><li><p class="paragraph">Extend <code class="lang-kotlin">Throwable</code> (or any subclass — typically <code class="lang-kotlin">RuntimeException</code>)</p></li><li><p class="paragraph">Declare only fields safe to serialize (no <code class="lang-kotlin">cause</code>, no inherited     <code class="lang-kotlin">stackTrace</code>); <code class="lang-kotlin">message</code> is typically computed from the serialized     fields:</p></li></ul><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">@Serializable<br>class InitError(val retry: Boolean, val reason: String) : RuntimeException() {<br>    override val message: String get() = "init failed: $reason"<br>}</code></pre><span class="copy-tooltip"><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div><span class="copy-icon"></span></span></div><p class="paragraph">The server stack trace is NOT propagated across the wire — clients see a stack from local deserialization. Use <code class="lang-kotlin">message</code> and the serialized fields for diagnostic info.</p><p class="paragraph">The plugin captures <code class="lang-kotlin">KSerializer&lt;type&gt;</code> and exposes a bidirectional map on the generated <code class="lang-kotlin">RpcMethod</code> descriptor — forward (code → KSerializer) for client-side deserialization, reverse (KClass → code + KSerializer) for server-side resolution of a thrown <code class="lang-kotlin">t::class</code>. Unlike sibling annotations propagated via <code class="lang-kotlin">@KsMethodMetadata</code>, this marker is consumed by the compiler plugin directly because the binding requires a real serializer reference and a dedicated lookup table, not an opaque metadata bag.</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-api/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.annotation/-target/index.html"><span class="token annotation builtin">Target</span></a><span class="token punctuation">(</span><span>allowedTargets<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.annotation/-annotation-target/-f-u-n-c-t-i-o-n/index.html">AnnotationTarget.FUNCTION</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">annotation class </span><a href="index.html">KsError</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>code<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>type<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div><p class="paragraph">Binds a <code class="lang-kotlin">@Serializable</code> <code class="lang-kotlin">Throwable</code> subclass to a wire-level integer error code on a <a href="../-ks-method/index.html">KsMethod</a>-annotated function.</p><p class="paragraph">Declared at the call site with one entry per bindable error type:</p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">@KsMethod("/initialize")<br>@KsError(code = 100, type = InitError::class)<br>@KsError(code = 101, type = VersionError::class)<br>suspend fun initialize(params: InitParams): InitResult</code></pre><span class="copy-tooltip"><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div><span class="copy-icon"></span></span></div><p class="paragraph">The handler throws an instance of the bound type directly (no wrapper required); ksrpc encodes the throwable using its <code class="lang-kotlin">KSerializer</code> and emits the bound <code class="lang-kotlin">code</code> on the wire. The client deserializes back into the bound type and re-throws — callers <code class="lang-kotlin">catch (e: MyError)</code> typed.</p><p class="paragraph">The <code class="lang-kotlin">code</code> on the binding is the single source of truth for the wire code; there is no per-throw override mechanism. If you want a different code for the same data, bind it differently.</p><p class="paragraph">The bound <code class="lang-kotlin">type</code> must:</p><ul><li><p class="paragraph">Be <code class="lang-kotlin">@Serializable</code> (validated by the ksrpc compiler plugin)</p></li><li><p class="paragraph">Extend <code class="lang-kotlin">Throwable</code> (or any subclass — typically <code class="lang-kotlin">RuntimeException</code>)</p></li><li><p class="paragraph">Declare only fields safe to serialize (no <code class="lang-kotlin">cause</code>, no inherited     <code class="lang-kotlin">stackTrace</code>); <code class="lang-kotlin">message</code> is typically computed from the serialized     fields:</p></li></ul><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">@Serializable<br>class InitError(val retry: Boolean, val reason: String) : RuntimeException() {<br>    override val message: String get() = "init failed: $reason"<br>}</code></pre><span class="copy-tooltip"><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div><span class="copy-icon"></span></span></div><p class="paragraph">The server stack trace is NOT propagated across the wire — clients see a stack from local deserialization. Use <code class="lang-kotlin">message</code> and the serialized fields for diagnostic info.</p><p class="paragraph">The plugin captures <code class="lang-kotlin">KSerializer&lt;type&gt;</code> and exposes a bidirectional map on the generated <code class="lang-kotlin">RpcMethod</code> descriptor — forward (code → KSerializer) for client-side deserialization, reverse (KClass → code + KSerializer) for server-side resolution of a thrown <code class="lang-kotlin">t::class</code>. Unlike sibling annotations propagated via <code class="lang-kotlin">@KsMethodMetadata</code>, this marker is consumed by the compiler plugin directly because the binding requires a real serializer reference and a dedicated lookup table, not an opaque metadata bag.</p><h4 class="">Samples</h4><div class="sample-container"><pre><code class="runnablesample monospace block lang-kotlin" theme="idea">import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.annotation.KsError
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.ksrpcEnvironment
+import com.monkopedia.ksrpc.rpcObject
+import com.monkopedia.ksrpc.serialized
+import com.monkopedia.ksrpc.toStub
+import kotlinx.serialization.Serializable
+
+fun main() { 
+   //sampleStart 
+   // @KsError binds a @Serializable Throwable subclass to an integer error code.
+// Multiple @KsError annotations can appear on the same method.
+// The compiler plugin captures the bidirectional code &lt;-&gt; serializer map.
+val rpcObj = rpcObject&lt;DocumentService&gt;()
+val createEndpoint = rpcObj.findEndpoint("create")
+val getEndpoint = rpcObj.findEndpoint("get") 
+   //sampleEnd
+}</code></pre></div><div class="sample-container"><pre><code class="runnablesample monospace block lang-kotlin" theme="idea">import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.annotation.KsError
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.ksrpcEnvironment
+import com.monkopedia.ksrpc.rpcObject
+import com.monkopedia.ksrpc.serialized
+import com.monkopedia.ksrpc.toStub
+import kotlinx.serialization.Serializable
+
+fun main() { 
+   //sampleStart 
+   // Server implementation throws typed errors directly.
+val service = object : DocumentService {
+    override suspend fun createDocument(content: String): String {
+        if (content.isBlank()) {
+            throw ValidationError("content", "must not be blank")
+        }
+        return "doc-001"
+    }
+
+    override suspend fun getDocument(id: String): String {
+        if (!id.startsWith("doc-")) {
+            throw ValidationError("id", "invalid format")
+        }
+        throw NotFoundError(id)
+    }
+}
+
+val env = ksrpcEnvironment { }
+val serialized = service.serialized(env)
+val stub = serialized.toStub&lt;DocumentService, String&gt;()
+
+// Clients catch the original typed exception after deserialization.
+try {
+    stub.getDocument("doc-missing")
+} catch (e: NotFoundError) {
+    // e.resourceId == "doc-missing"
+    println("Not found: ${e.resourceId}")
+} catch (e: ValidationError) {
+    println("Validation: ${e.field} - ${e.reason}")
+} 
+   //sampleEnd
+}</code></pre></div></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>

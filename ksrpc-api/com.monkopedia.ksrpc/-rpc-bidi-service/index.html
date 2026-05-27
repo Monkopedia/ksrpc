@@ -39,7 +39,7 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">1.0.0
+        <div class="library-version" id="library-version">1.1.0-RC1
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
@@ -94,7 +94,42 @@
   <div class="breadcrumbs"><a href="../../index.html">ksrpc-api</a><span class="delimiter">/</span><a href="../index.html">com.monkopedia.ksrpc</a><span class="delimiter">/</span><span class="current">RpcBidiService</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Rpc</span><wbr><span>Bidi</span><wbr><span><span>Service</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-api/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">RpcBidiService</a> : <a href="../-rpc-host-service/index.html">RpcHostService</a></div><p class="paragraph">A service whose methods accept sub-service inputs, use <code class="lang-kotlin">Flow&lt;T&gt;</code>, or otherwise require bidirectional transport capability.</p><p class="paragraph">Extend this instead of <a href="../-rpc-host-service/index.html">RpcHostService</a> when any <code class="lang-kotlin">@KsMethod</code> accepts a <code class="lang-kotlin">@KsService</code> type as input, or uses <code class="lang-kotlin">Flow&lt;T&gt;</code> (which internally bridges through a bidirectional sub-service protocol).</p><p class="paragraph">Only bidirectional transports (WebSocket, raw sockets, JNI) can host <a href="index.html">RpcBidiService</a> instances.</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-api/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">RpcBidiService</a> : <a href="../-rpc-host-service/index.html">RpcHostService</a></div><p class="paragraph">A service whose methods accept sub-service inputs, use <code class="lang-kotlin">Flow&lt;T&gt;</code>, or otherwise require bidirectional transport capability.</p><p class="paragraph">Extend this instead of <a href="../-rpc-host-service/index.html">RpcHostService</a> when any <code class="lang-kotlin">@KsMethod</code> accepts a <code class="lang-kotlin">@KsService</code> type as input, or uses <code class="lang-kotlin">Flow&lt;T&gt;</code> (which internally bridges through a bidirectional sub-service protocol).</p><p class="paragraph">Only bidirectional transports (WebSocket, raw sockets, JNI) can host <a href="index.html">RpcBidiService</a> instances.</p><h4 class="">Samples</h4><div class="sample-container"><pre><code class="runnablesample monospace block lang-kotlin" theme="idea">import com.monkopedia.ksrpc.RpcBidiService
+import com.monkopedia.ksrpc.RpcHostService
+import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.ksrpcEnvironment
+import com.monkopedia.ksrpc.rpcObject
+import com.monkopedia.ksrpc.serialized
+import com.monkopedia.ksrpc.toStub
+
+fun main() { 
+   //sampleStart 
+   // A @KsMethod can accept another @KsService type as input. The caller
+// provides a service implementation that the server calls back into.
+val producer = object : EventProducer {
+    override suspend fun subscribe(consumer: EventConsumer): String {
+        // The server calls back into the client-provided consumer.
+        consumer.onEvent("connected")
+        consumer.onEvent("data-ready")
+        return "subscription-123"
+    }
+}
+
+val env = ksrpcEnvironment { }
+val serialized = producer.serialized(env)
+val stub = serialized.toStub&lt;EventProducer, String&gt;()
+
+// The client provides a callback implementation.
+val callback = object : EventConsumer {
+    override suspend fun onEvent(event: String) {
+        println("Received event: $event")
+    }
+}
+val subscriptionId = stub.subscribe(callback) 
+   //sampleEnd
+}</code></pre></div></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>

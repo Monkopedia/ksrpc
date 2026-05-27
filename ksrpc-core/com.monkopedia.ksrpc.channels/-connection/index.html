@@ -39,7 +39,7 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">1.0.0
+        <div class="library-version" id="library-version">1.1.0-RC1
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
@@ -94,7 +94,35 @@
   <div class="breadcrumbs"><a href="../../index.html">ksrpc-core</a><span class="delimiter">/</span><a href="../index.html">com.monkopedia.ksrpc.channels</a><span class="delimiter">/</span><span class="current">Connection</span></div>
   <div class="cover ">
     <h1 class="cover"><span><span>Connection</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">Connection</a><span class="token operator">&lt;</span><a href="index.html">T</a><span class="token operator">&gt;</span> : <a href="../-channel-host/index.html">ChannelHost</a><span class="token operator">&lt;</span><a href="index.html">T</a><span class="token operator">&gt; </span>, <a href="../-channel-client/index.html">ChannelClient</a><span class="token operator">&lt;</span><a href="index.html">T</a><span class="token operator">&gt; </span>, <a href="../-single-channel-connection/index.html">SingleChannelConnection</a><span class="token operator">&lt;</span><a href="index.html">T</a><span class="token operator">&gt; </span></div><p class="paragraph">A bidirectional channel that can both host and call services/sub-services.</p><p class="paragraph">(Meaning @KsServices can be used for both input and output of any @KsMethod)</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">Connection</a><span class="token operator">&lt;</span><a href="index.html">T</a><span class="token operator">&gt;</span> : <a href="../-channel-host/index.html">ChannelHost</a><span class="token operator">&lt;</span><a href="index.html">T</a><span class="token operator">&gt; </span>, <a href="../-channel-client/index.html">ChannelClient</a><span class="token operator">&lt;</span><a href="index.html">T</a><span class="token operator">&gt; </span>, <a href="../-single-channel-connection/index.html">SingleChannelConnection</a><span class="token operator">&lt;</span><a href="index.html">T</a><span class="token operator">&gt; </span></div><p class="paragraph">A bidirectional channel that can both host and call services/sub-services.</p><p class="paragraph">(Meaning @KsServices can be used for both input and output of any @KsMethod)</p><h4 class="">Samples</h4><div class="sample-container"><pre><code class="runnablesample monospace block lang-kotlin" theme="idea">import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.channels.connect
+import com.monkopedia.ksrpc.ksrpcEnvironment
+import com.monkopedia.ksrpc.serialized
+import com.monkopedia.ksrpc.sockets.asConnection
+import com.monkopedia.ksrpc.toStub
+import io.ktor.utils.io.ByteChannel
+
+fun main() { 
+   //sampleStart 
+   val env = ksrpcEnvironment { }
+
+val readChannel = ByteChannel(autoFlush = true)
+val writeChannel = ByteChannel(autoFlush = true)
+val connection = (readChannel to writeChannel).asConnection(env)
+
+// Host side: register the server's service.
+val serverService = object : ServerApi {
+    override suspend fun fetchData(key: String): String = "value-for-$key"
+}
+connection.registerDefault(serverService.serialized(env))
+
+// Client side: get the remote service via defaultChannel.
+val remoteStub = connection.defaultChannel().toStub&lt;ServerApi, String&gt;()
+val data = remoteStub.fetchData("my-key") 
+   //sampleEnd
+}</code></pre></div></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button><button class="section-tab" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION,EXTENSION_PROPERTY,EXTENSION_FUNCTION">Members &amp; Extensions</button></div>

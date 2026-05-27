@@ -39,7 +39,7 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">1.0.0
+        <div class="library-version" id="library-version">1.1.0-RC1
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
@@ -95,7 +95,37 @@
   <div class="cover ">
     <h1 class="cover"><span>serve</span><wbr><span><span>Websocket</span></span></h1>
   </div>
-  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-ktor-websocket-server/commonMain"><div class="symbol monospace"><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="serve-websocket.html">T</a><span class="token operator"> : </span><a href="../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token operator">&gt; </span><span data-unresolved-link="io.ktor.server.routing/Routing///PointingToDeclaration/">Routing</span><span class="token punctuation">.</span><a href="serve-websocket.html"><span class="token function">serveWebsocket</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">basePath<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">service<span class="token operator">: </span><a href="serve-websocket.html">T</a><span class="token punctuation">, </span></span><span class="parameter ">env<span class="token operator">: </span><a href="../../ksrpc-core/com.monkopedia.ksrpc/-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">fun </span><span data-unresolved-link="io.ktor.server.routing/Routing///PointingToDeclaration/">Routing</span><span class="token punctuation">.</span><a href="serve-websocket.html"><span class="token function">serveWebsocket</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">basePath<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">channel<span class="token operator">: </span><a href="../../ksrpc-core/com.monkopedia.ksrpc.channels/-serialized-service/index.html">SerializedService</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">env<span class="token operator">: </span><a href="../../ksrpc-core/com.monkopedia.ksrpc/-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div></div></div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-ktor-websocket-server/commonMain"><div class="symbol monospace"><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="serve-websocket.html">T</a><span class="token operator"> : </span><a href="../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token operator">&gt; </span><span data-unresolved-link="io.ktor.server.routing/Routing///PointingToDeclaration/">Routing</span><span class="token punctuation">.</span><a href="serve-websocket.html"><span class="token function">serveWebsocket</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">basePath<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">service<span class="token operator">: </span><a href="serve-websocket.html">T</a><span class="token punctuation">, </span></span><span class="parameter ">env<span class="token operator">: </span><a href="../../ksrpc-core/com.monkopedia.ksrpc/-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div><p class="paragraph">Hosts the given <a href="serve-websocket.html">service</a> over a WebSocket on the supplied <a href="serve-websocket.html">basePath</a> within a Ktor <span data-unresolved-link="io.ktor.server.routing/Routing///PointingToDeclaration/">Routing</span> block. The server application must have the WebSockets plugin installed.</p><h4 class="">Samples</h4><div class="sample-container"><pre><code class="runnablesample monospace block lang-kotlin" theme="idea">import com.monkopedia.ksrpc.channels.connect
+import com.monkopedia.ksrpc.ksrpcEnvironment
+import com.monkopedia.ksrpc.ktor.websocket.asWebsocketConnection
+import com.monkopedia.ksrpc.ktor.websocket.serveWebsocket
+import com.monkopedia.ksrpc.toStub
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.websocket.WebSockets
+import io.ktor.server.application.install
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
+import io.ktor.server.routing.routing
+import io.ktor.server.websocket.WebSockets as ServerWebSockets
+
+fun main() { 
+   //sampleStart 
+   val env = ksrpcEnvironment { }
+val service = object : GreetingService {
+    override suspend fun greet(name: String): String = "Hello, $name!"
+}
+
+// Embed ksrpc into a Ktor WebSocket server.
+// The server application must have the WebSockets plugin installed.
+val server = embeddedServer(Netty, port = 8080) {
+    install(ServerWebSockets)
+    routing {
+        serveWebsocket("/ws", service, env)
+    }
+}
+// server.start(wait = true) 
+   //sampleEnd
+}</code></pre></div><hr><div class="symbol monospace"><span class="token keyword">fun </span><span data-unresolved-link="io.ktor.server.routing/Routing///PointingToDeclaration/">Routing</span><span class="token punctuation">.</span><a href="serve-websocket.html"><span class="token function">serveWebsocket</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">basePath<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">channel<span class="token operator">: </span><a href="../../ksrpc-core/com.monkopedia.ksrpc.channels/-serialized-service/index.html">SerializedService</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">env<span class="token operator">: </span><a href="../../ksrpc-core/com.monkopedia.ksrpc/-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div></div></div>
 </div>
     <div class="footer">
         <div class="footer--container">

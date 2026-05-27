@@ -39,7 +39,7 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">1.0.0
+        <div class="library-version" id="library-version">1.1.0-RC1
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
@@ -95,7 +95,39 @@
   <div class="cover ">
     <h1 class="cover"><span>as</span><wbr><span>Websocket</span><wbr><span><span>Connection</span></span></h1>
   </div>
-  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-ktor-websocket-client/commonMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><span data-unresolved-link="io.ktor.client/HttpClient///PointingToDeclaration/">HttpClient</span><span class="token punctuation">.</span><a href="as-websocket-connection.html"><span class="token function">asWebsocketConnection</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">baseUrl<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">env<span class="token operator">: </span><a href="../../ksrpc-core/com.monkopedia.ksrpc/-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html">Connection</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></div><p class="paragraph">Turn an <span data-unresolved-link="io.ktor.client/HttpClient///PointingToDeclaration/">HttpClient</span> into a websocket based <a href="../../ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html">Connection</a> for a specified baseUrl.</p><p class="paragraph">This is functionally equivalent to baseUrl.toKsrpcUri().connect(env).</p></div></div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-ktor-websocket-client/commonMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><span data-unresolved-link="io.ktor.client/HttpClient///PointingToDeclaration/">HttpClient</span><span class="token punctuation">.</span><a href="as-websocket-connection.html"><span class="token function">asWebsocketConnection</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">baseUrl<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">env<span class="token operator">: </span><a href="../../ksrpc-core/com.monkopedia.ksrpc/-ksrpc-environment/index.html">KsrpcEnvironment</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html">Connection</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></div><p class="paragraph">Turn an <span data-unresolved-link="io.ktor.client/HttpClient///PointingToDeclaration/">HttpClient</span> into a websocket based <a href="../../ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html">Connection</a> for a specified baseUrl.</p><p class="paragraph">This is functionally equivalent to baseUrl.toKsrpcUri().connect(env).</p><h4 class="">Samples</h4><div class="sample-container"><pre><code class="runnablesample monospace block lang-kotlin" theme="idea">import com.monkopedia.ksrpc.channels.connect
+import com.monkopedia.ksrpc.ksrpcEnvironment
+import com.monkopedia.ksrpc.ktor.websocket.asWebsocketConnection
+import com.monkopedia.ksrpc.ktor.websocket.serveWebsocket
+import com.monkopedia.ksrpc.toStub
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.websocket.WebSockets
+import io.ktor.server.application.install
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
+import io.ktor.server.routing.routing
+import io.ktor.server.websocket.WebSockets as ServerWebSockets
+
+fun main() { 
+   //sampleStart 
+   val env = ksrpcEnvironment { }
+
+val httpClient = HttpClient {
+    install(WebSockets)
+}
+
+// Create a bidirectional WebSocket connection.
+val connection = httpClient.asWebsocketConnection(
+    "ws://localhost:8080/ws",
+    env
+)
+
+// Use connect&lt;Host, Client&gt; to set up both directions at once,
+// or use defaultChannel() for client-only access.
+val stub = connection.defaultChannel().toStub&lt;GreetingService, String&gt;()
+val greeting = stub.greet("world") 
+   //sampleEnd
+}</code></pre></div></div></div>
 </div>
     <div class="footer">
         <div class="footer--container">

@@ -39,7 +39,7 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">1.0.0
+        <div class="library-version" id="library-version">1.1.0-RC1
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
@@ -94,7 +94,23 @@
   <div class="breadcrumbs"><a href="../../index.html">ksrpc-core</a><span class="delimiter">/</span><a href="../index.html">com.monkopedia.ksrpc</a><span class="delimiter">/</span><span class="current">RpcObject</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Rpc</span><wbr><span><span>Object</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">RpcObject</a><span class="token operator">&lt;</span><a href="index.html">T</a><span class="token operator"> : </span><a href="../../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token operator">&gt;</span></div><p class="paragraph">Interface for generated companions of <a href="../../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a>.</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">RpcObject</a><span class="token operator">&lt;</span><a href="index.html">T</a><span class="token operator"> : </span><a href="../../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token operator">&gt;</span></div><p class="paragraph">Interface for generated companions of <a href="../../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a>.</p><h4 class="">Samples</h4><div class="sample-container"><pre><code class="runnablesample monospace block lang-kotlin" theme="idea">import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.ksrpcEnvironment
+import com.monkopedia.ksrpc.rpcObject
+import com.monkopedia.ksrpc.serialized
+import com.monkopedia.ksrpc.toStub
+import kotlinx.serialization.Serializable
+
+fun main() { 
+   //sampleStart 
+   // Define a service interface with @KsService and @KsMethod annotations.
+// The compiler plugin generates a companion RpcObject and stub automatically.
+val rpcObj = rpcObject&lt;GreetingService&gt;()
+val endpoint = rpcObj.findEndpoint("greet") 
+   //sampleEnd
+}</code></pre></div></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>

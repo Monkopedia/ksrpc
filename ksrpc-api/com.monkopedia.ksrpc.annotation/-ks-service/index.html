@@ -39,7 +39,7 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">1.0.0
+        <div class="library-version" id="library-version">1.1.0-RC1
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
@@ -94,7 +94,43 @@
   <div class="breadcrumbs"><a href="../../index.html">ksrpc-api</a><span class="delimiter">/</span><a href="../index.html">com.monkopedia.ksrpc.annotation</a><span class="delimiter">/</span><span class="current">KsService</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Ks</span><wbr><span><span>Service</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-api/commonMain"><div class="symbol monospace"><span class="token keyword">annotation class </span><a href="index.html">KsService</a></div><p class="paragraph">Annotation tagging an interface for processing by the compiler plugin.</p><p class="paragraph">interfaces tagged with this are expected to extend <a href="../../com.monkopedia.ksrpc/-rpc-service/index.html">com.monkopedia.ksrpc.RpcService</a>, and will have a companion generated for them that implements com.monkopedia.ksrpc.RpcObject for itself.</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-api/commonMain"><div class="symbol monospace"><span class="token keyword">annotation class </span><a href="index.html">KsService</a></div><p class="paragraph">Annotation tagging an interface for processing by the compiler plugin.</p><p class="paragraph">interfaces tagged with this are expected to extend <a href="../../com.monkopedia.ksrpc/-rpc-service/index.html">com.monkopedia.ksrpc.RpcService</a>, and will have a companion generated for them that implements com.monkopedia.ksrpc.RpcObject for itself.</p><h4 class="">Samples</h4><div class="sample-container"><pre><code class="runnablesample monospace block lang-kotlin" theme="idea">import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.ksrpcEnvironment
+import com.monkopedia.ksrpc.rpcObject
+import com.monkopedia.ksrpc.serialized
+import com.monkopedia.ksrpc.toStub
+import kotlinx.serialization.Serializable
+
+fun main() { 
+   //sampleStart 
+   // Define a service interface with @KsService and @KsMethod annotations.
+// The compiler plugin generates a companion RpcObject and stub automatically.
+val rpcObj = rpcObject&lt;GreetingService&gt;()
+val endpoint = rpcObj.findEndpoint("greet") 
+   //sampleEnd
+}</code></pre></div><div class="sample-container"><pre><code class="runnablesample monospace block lang-kotlin" theme="idea">import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.ksrpcEnvironment
+import com.monkopedia.ksrpc.rpcObject
+import com.monkopedia.ksrpc.serialized
+import com.monkopedia.ksrpc.toStub
+import kotlinx.serialization.Serializable
+
+fun main() { 
+   //sampleStart 
+   // Implement the service interface
+val service = object : GreetingService {
+    override suspend fun greet(name: String): String = "Hello, $name!"
+}
+
+// Serialize for hosting on any transport
+val env = ksrpcEnvironment { }
+val serialized = service.serialized(env) 
+   //sampleEnd
+}</code></pre></div></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"></div>

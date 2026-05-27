@@ -39,7 +39,7 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">1.0.0
+        <div class="library-version" id="library-version">1.1.0-RC1
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
@@ -95,7 +95,55 @@
   <div class="cover ">
     <h1 class="cover"><span>to</span><wbr><span><span>Stub</span></span></h1>
   </div>
-  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="to-stub.html">T</a><span class="token operator"> : </span><a href="../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token punctuation">, </span><a href="to-stub.html">S</a><span class="token operator">&gt; </span><a href="../com.monkopedia.ksrpc.channels/-serialized-service/index.html">SerializedService</a><span class="token operator">&lt;</span><a href="to-stub.html">S</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="to-stub.html"><span class="token function">toStub</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="to-stub.html">T</a></div><p class="paragraph">Convert a <a href="../com.monkopedia.ksrpc.channels/-serialized-service/index.html">SerializedService</a> to a <a href="to-stub.html">T</a> for use as a client.</p></div></div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><div class="symbol monospace"><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="to-stub.html">T</a><span class="token operator"> : </span><a href="../../ksrpc-api/com.monkopedia.ksrpc/-rpc-service/index.html">RpcService</a><span class="token punctuation">, </span><a href="to-stub.html">S</a><span class="token operator">&gt; </span><a href="../com.monkopedia.ksrpc.channels/-serialized-service/index.html">SerializedService</a><span class="token operator">&lt;</span><a href="to-stub.html">S</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="to-stub.html"><span class="token function">toStub</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="to-stub.html">T</a></div><p class="paragraph">Convert a <a href="../com.monkopedia.ksrpc.channels/-serialized-service/index.html">SerializedService</a> to a <a href="to-stub.html">T</a> for use as a client.</p><h4 class="">Samples</h4><div class="sample-container"><pre><code class="runnablesample monospace block lang-kotlin" theme="idea">import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.ksrpcEnvironment
+import com.monkopedia.ksrpc.rpcObject
+import com.monkopedia.ksrpc.serialized
+import com.monkopedia.ksrpc.toStub
+import kotlinx.serialization.Serializable
+
+fun main() { 
+   //sampleStart 
+   // Implement the service interface
+val service = object : GreetingService {
+    override suspend fun greet(name: String): String = "Hello, $name!"
+}
+
+// Serialize for hosting on any transport
+val env = ksrpcEnvironment { }
+val serialized = service.serialized(env) 
+   //sampleEnd
+}</code></pre></div><div class="sample-container"><pre><code class="runnablesample monospace block lang-kotlin" theme="idea">import com.monkopedia.ksrpc.RpcBidiService
+import com.monkopedia.ksrpc.RpcHostService
+import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.ksrpcEnvironment
+import com.monkopedia.ksrpc.rpcObject
+import com.monkopedia.ksrpc.serialized
+import com.monkopedia.ksrpc.toStub
+
+fun main() { 
+   //sampleStart 
+   // A @KsMethod can return another @KsService type. The returned service
+// is hosted as a sub-service on the same connection, with its own
+// channel id managed by the framework.
+val factory = object : WorkerFactory {
+    override suspend fun createWorker(name: String): ScopedWorker = object : ScopedWorker {
+        override suspend fun execute(command: String): String = "[$name] executed: $command"
+    }
+}
+
+// Serialize and use through a stub -- sub-services work transparently.
+val env = ksrpcEnvironment { }
+val serialized = factory.serialized(env)
+val stub = serialized.toStub&lt;WorkerFactory, String&gt;()
+val worker = stub.createWorker("build")
+val result = worker.execute("compile") 
+   //sampleEnd
+}</code></pre></div></div></div>
 </div>
     <div class="footer">
         <div class="footer--container">

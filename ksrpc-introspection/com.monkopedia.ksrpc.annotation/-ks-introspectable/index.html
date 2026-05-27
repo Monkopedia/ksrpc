@@ -39,7 +39,7 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">1.0.0
+        <div class="library-version" id="library-version">1.1.0-RC1
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
@@ -94,7 +94,54 @@
   <div class="breadcrumbs"><a href="../../index.html">ksrpc-introspection</a><span class="delimiter">/</span><a href="../index.html">com.monkopedia.ksrpc.annotation</a><span class="delimiter">/</span><span class="current">KsIntrospectable</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Ks</span><wbr><span><span>Introspectable</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-introspection/commonMain"><div class="symbol monospace"><span class="token keyword">annotation class </span><a href="index.html">KsIntrospectable</a></div><p class="paragraph">Annotation tagging an interface for processing by the compiler plugin.</p><p class="paragraph">This should be placed on interfaces which extend IntrospectableRpcService.</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-introspection/commonMain"><div class="symbol monospace"><span class="token keyword">annotation class </span><a href="index.html">KsIntrospectable</a></div><p class="paragraph">Annotation tagging an interface for processing by the compiler plugin.</p><p class="paragraph">This should be placed on interfaces which extend IntrospectableRpcService.</p><h4 class="">Samples</h4><div class="sample-container"><pre><code class="runnablesample monospace block lang-kotlin" theme="idea">import com.monkopedia.ksrpc.IntrospectableRpcService
+import com.monkopedia.ksrpc.annotation.KsIntrospectable
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.ksrpcEnvironment
+import com.monkopedia.ksrpc.serialized
+import com.monkopedia.ksrpc.toStub
+
+fun main() { 
+   //sampleStart 
+   // Extend IntrospectableRpcService and add @KsIntrospectable.
+// The compiler plugin generates a getIntrospection() implementation
+// that returns metadata about the service and its endpoints. 
+   //sampleEnd
+}</code></pre></div><div class="sample-container"><pre><code class="runnablesample monospace block lang-kotlin" theme="idea">import com.monkopedia.ksrpc.IntrospectableRpcService
+import com.monkopedia.ksrpc.annotation.KsIntrospectable
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.ksrpcEnvironment
+import com.monkopedia.ksrpc.serialized
+import com.monkopedia.ksrpc.toStub
+
+fun main() { 
+   //sampleStart 
+   val service = object : CatalogService {
+    override suspend fun search(query: String): String = "result"
+    override suspend fun count(): Int = 42
+}
+
+val env = ksrpcEnvironment { }
+val serialized = service.serialized(env)
+val stub = serialized.toStub&lt;CatalogService, String&gt;()
+
+// Get the IntrospectionService for this service.
+val introspection = stub.getIntrospection()
+
+// Query the service name.
+val name = introspection.getServiceName()
+
+// List all endpoints.
+val endpoints = introspection.getEndpoints()
+
+// Get detailed info about a specific endpoint (input/output types).
+val searchInfo = introspection.getEndpointInfo("search")
+val inputType = searchInfo.input
+val outputType = searchInfo.output 
+   //sampleEnd
+}</code></pre></div></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"></div>

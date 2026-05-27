@@ -39,7 +39,7 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">1.0.0
+        <div class="library-version" id="library-version">1.1.0-RC1
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
@@ -94,7 +94,35 @@
   <div class="breadcrumbs"><a href="../../index.html">ksrpc-api</a><span class="delimiter">/</span><a href="../index.html">com.monkopedia.ksrpc</a><span class="delimiter">/</span><span class="current">RpcHostService</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Rpc</span><wbr><span>Host</span><wbr><span><span>Service</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-api/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">RpcHostService</a> : <a href="../-rpc-service/index.html">RpcService</a></div><p class="paragraph">A service whose methods may return other <code class="lang-kotlin">@KsService</code> sub-services.</p><p class="paragraph">Extend this instead of <a href="../-rpc-service/index.html">RpcService</a> when any <code class="lang-kotlin">@KsMethod</code> returns a type annotated with <code class="lang-kotlin">@KsService</code>. The compiler plugin enforces this at compile time and produces a clear error if the wrong tier is used.</p><p class="paragraph">HTTP transports can host <a href="index.html">RpcHostService</a> instances (sub-service outputs are multiplexed over the same connection), but cannot host <a href="../-rpc-bidi-service/index.html">RpcBidiService</a>.</p><h4 class="tableheader">Inheritors</h4><div class="table"><div class="table-row table-row_content" data-filterable-current=":ksrpc-api/commonMain" data-filterable-set=":ksrpc-api/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../-rpc-bidi-service/index.html">RpcBidiService</a></div></span></div><div></div></div></div></div></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-api/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">RpcHostService</a> : <a href="../-rpc-service/index.html">RpcService</a></div><p class="paragraph">A service whose methods may return other <code class="lang-kotlin">@KsService</code> sub-services.</p><p class="paragraph">Extend this instead of <a href="../-rpc-service/index.html">RpcService</a> when any <code class="lang-kotlin">@KsMethod</code> returns a type annotated with <code class="lang-kotlin">@KsService</code>. The compiler plugin enforces this at compile time and produces a clear error if the wrong tier is used.</p><p class="paragraph">HTTP transports can host <a href="index.html">RpcHostService</a> instances (sub-service outputs are multiplexed over the same connection), but cannot host <a href="../-rpc-bidi-service/index.html">RpcBidiService</a>.</p><h4 class="">Samples</h4><div class="sample-container"><pre><code class="runnablesample monospace block lang-kotlin" theme="idea">import com.monkopedia.ksrpc.RpcBidiService
+import com.monkopedia.ksrpc.RpcHostService
+import com.monkopedia.ksrpc.RpcService
+import com.monkopedia.ksrpc.annotation.KsMethod
+import com.monkopedia.ksrpc.annotation.KsService
+import com.monkopedia.ksrpc.ksrpcEnvironment
+import com.monkopedia.ksrpc.rpcObject
+import com.monkopedia.ksrpc.serialized
+import com.monkopedia.ksrpc.toStub
+
+fun main() { 
+   //sampleStart 
+   // A @KsMethod can return another @KsService type. The returned service
+// is hosted as a sub-service on the same connection, with its own
+// channel id managed by the framework.
+val factory = object : WorkerFactory {
+    override suspend fun createWorker(name: String): ScopedWorker = object : ScopedWorker {
+        override suspend fun execute(command: String): String = "[$name] executed: $command"
+    }
+}
+
+// Serialize and use through a stub -- sub-services work transparently.
+val env = ksrpcEnvironment { }
+val serialized = factory.serialized(env)
+val stub = serialized.toStub&lt;WorkerFactory, String&gt;()
+val worker = stub.createWorker("build")
+val result = worker.execute("compile") 
+   //sampleEnd
+}</code></pre></div><h4 class="tableheader">Inheritors</h4><div class="table"><div class="table-row table-row_content" data-filterable-current=":ksrpc-api/commonMain" data-filterable-set=":ksrpc-api/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../-rpc-bidi-service/index.html">RpcBidiService</a></div></span></div><div></div></div></div></div></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>

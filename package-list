@@ -1,6 +1,14 @@
 $dokka.format:html-v1
 $dokka.linkExtension:html
 $dokka.location:com.monkopedia.ksrpc.jni//withConverter/kotlin.coroutines.Continuation[TypeParam(bounds=[kotlin.Any?])]#com.monkopedia.ksrpc.jni.Converter[*,TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/ksrpc-jni/com.monkopedia.ksrpc.jni/[native]with-converter.html
+$dokka.location:com.monkopedia.ksrpc.jni/JavaJniContinuation.Companion///PointingToDeclaration/ksrpc-jni/com.monkopedia.ksrpc.jni/[jvm]-java-jni-continuation/-companion/index.html
+$dokka.location:com.monkopedia.ksrpc.jni/JavaJniContinuation///PointingToDeclaration/ksrpc-jni/com.monkopedia.ksrpc.jni/[native]-java-jni-continuation/index.html
+$dokka.location:com.monkopedia.ksrpc.jni/JavaJniContinuation/JavaJniContinuation/#com.monkopedia.ksrpc.jni.Converter[kotlin.Any?,TypeParam(bounds=[kotlin.Any?])]#kotlin.coroutines.Continuation[TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/ksrpc-jni/com.monkopedia.ksrpc.jni/[jvm]-java-jni-continuation/-java-jni-continuation.html
+$dokka.location:com.monkopedia.ksrpc.jni/JavaJniContinuation/JavaJniContinuation/#kotlinx.cinterop.CPointer[<ERROR CLASS> cnames/structs/_jobject]/PointingToDeclaration/ksrpc-jni/com.monkopedia.ksrpc.jni/[native]-java-jni-continuation/-java-jni-continuation.html
+$dokka.location:com.monkopedia.ksrpc.jni/JavaJniContinuation/resumeFailure/#kotlin.Any?/PointingToDeclaration/ksrpc-jni/com.monkopedia.ksrpc.jni/[jvm]-java-jni-continuation/resume-failure.html
+$dokka.location:com.monkopedia.ksrpc.jni/JavaJniContinuation/resumeSuccess/#kotlin.Any?/PointingToDeclaration/ksrpc-jni/com.monkopedia.ksrpc.jni/[jvm]-java-jni-continuation/resume-success.html
+$dokka.location:com.monkopedia.ksrpc.jni/JavaJniContinuation/resumeWith/#com.monkopedia.ksrpc.jni.Converter[*,TypeParam(bounds=[kotlin.Any?])]#kotlin.Result[TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/ksrpc-jni/com.monkopedia.ksrpc.jni/[native]-java-jni-continuation/resume-with.html
+$dokka.location:com.monkopedia.ksrpc.jni/JavaJniContinuation/ser/#/PointingToDeclaration/ksrpc-jni/com.monkopedia.ksrpc.jni/[jvm]-java-jni-continuation/ser.html
 $dokka.location:com.monkopedia.ksrpc.jni/NativeJniContinuation.Companion///PointingToDeclaration/ksrpc-jni/com.monkopedia.ksrpc.jni/[native]-native-jni-continuation/-companion/index.html
 $dokka.location:com.monkopedia.ksrpc.jni/NativeJniContinuation///PointingToDeclaration/ksrpc-jni/com.monkopedia.ksrpc.jni/[native]-native-jni-continuation/index.html
 $dokka.location:com.monkopedia.ksrpc.jni/NativeJniContinuation/NativeJniContinuation/#kotlin.Long/PointingToDeclaration/ksrpc-jni/com.monkopedia.ksrpc.jni/[jvm]-native-jni-continuation/-native-jni-continuation.html
