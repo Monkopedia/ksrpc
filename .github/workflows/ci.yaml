@@ -77,6 +77,41 @@ jobs:
       - name: Run JNI-backed JVM tests
         run: ./gradlew :ksrpc-jni:jvmTest :ksrpc-test:jvmTest --continue
 
+  native-tests:
+    # Runs the Kotlin/Native (linuxX64) test suite for :ksrpc-test. This is the only job
+    # that exercises the native socket/pipe transports (posixFileReadChannel /
+    # posixFileWriteChannel on dedicated threads) and the native runBlocking-based test
+    # harness. It is gated behind a hard SIGKILL timeout because a native hang produces a
+    # test.kexe that ignores SIGTERM and busy-loops indefinitely (see #214): without the
+    # bound a regression here would run away on the runner for hours instead of failing CI.
+    # Caches ~/.konan like jni-tests because the Kotlin/Native prebuilt + sysroot dominate
+    # the cold-cache native-compile cost.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Cache Kotlin/Native toolchain
+        uses: actions/cache@v4
+        with:
+          path: ~/.konan
+          key: konan-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml', 'gradle.properties') }}
+          restore-keys: |
+            konan-${{ runner.os }}-
+      - name: Install libcurl
+        run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev
+      - name: Run linuxX64 native tests
+        # 25m step budget; the inner `timeout -s KILL 900` SIGKILLs a hung test.kexe so a
+        # native hang fails the job promptly instead of pinning the runner. Exit 137 from
+        # the timeout (SIGKILL) propagates as a non-zero step failure.
+        timeout-minutes: 25
+        run: timeout -s KILL 900 ./gradlew :ksrpc-test:linuxX64Test --console=plain
+
   compiler-tests:
     runs-on: ubuntu-latest
     steps:
