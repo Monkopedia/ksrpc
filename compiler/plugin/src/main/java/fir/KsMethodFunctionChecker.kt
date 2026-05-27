@@ -198,6 +198,14 @@ internal object KsMethodFunctionChecker :
             }
         }
 
+        // #133: unsupported nested shapes inside / around a `Result<...>` in v1:
+        //   Result<Flow<…>>, Result<RpcService-subtype>, Result<Result<…>>,
+        //   and Flow<Result<…>> (Result must not be nested under Flow either).
+        // These are rejected with a clear diagnostic so users don't hit an
+        // opaque codegen failure. `Result` is only supported as the top-level
+        // return type wrapping a serializable / binary `O`.
+        checkResultShapes(session, declaration, containingFqName, methodName, source)
+
         // #8: @KsNotification on non-Unit return.
         if (symbol.hasAnnotation(KS_NOTIFICATION_ID, session)) {
             val returnFq = declaration.returnTypeRef.coneType.classId?.asSingleFqName()
@@ -244,6 +252,79 @@ internal object KsMethodFunctionChecker :
             if (other == endpoint) return true
         }
         return false
+    }
+
+    private val RESULT_FQ = FqName("kotlin.Result")
+    private val FLOW_FQ = FqName("kotlinx.coroutines.flow.Flow")
+
+    /**
+     * Reject the v1-unsupported nested shapes for `Result<...>` (issue #133):
+     * `Result<Flow<…>>`, `Result<RpcService-subtype>`, nested `Result<Result<…>>`,
+     * and `Flow<Result<…>>`. Checks both the return type and the (single) input
+     * parameter.
+     */
+    context(context: CheckerContext, reporter: DiagnosticReporter)
+    private fun checkResultShapes(
+        session: org.jetbrains.kotlin.fir.FirSession,
+        declaration: FirNamedFunction,
+        containingFqName: String,
+        methodName: String,
+        source: org.jetbrains.kotlin.KtSourceElement
+    ) {
+        val returnType = declaration.returnTypeRef.coneType
+        val sides = buildList {
+            add("return" to returnType)
+            declaration.valueParameters.firstOrNull()?.let {
+                add("parameter" to it.returnTypeRef.coneType)
+            }
+        }
+        for ((position, type) in sides) {
+            val classFq = type.classId?.asSingleFqName()
+            if (classFq == RESULT_FQ) {
+                val inner = (type.typeArguments.firstOrNull()
+                    as? org.jetbrains.kotlin.fir.types.ConeKotlinTypeProjection)?.type ?: continue
+                val innerFq = inner.classId?.asSingleFqName()
+                val reason = when {
+                    innerFq == RESULT_FQ -> "Result<Result<…>> (nested Result)"
+                    innerFq == FLOW_FQ -> "Result<Flow<…>>"
+                    isKsService(inner, session) -> "Result<${inner.classId?.shortClassName
+                        ?.asString()}> (Result wrapping an @KsService sub-service)"
+                    else -> null
+                }
+                if (reason != null) {
+                    reporter.reportOn(
+                        source,
+                        KsrpcDiagnostics.UNSUPPORTED_RESULT_SHAPE,
+                        "$containingFqName.$methodName: unsupported $position type $reason. " +
+                            "kotlin.Result is only supported wrapping a serializable or binary " +
+                            "value type, as the top-level type.",
+                        context
+                    )
+                }
+            } else if (classFq == FLOW_FQ) {
+                val inner = (type.typeArguments.firstOrNull()
+                    as? org.jetbrains.kotlin.fir.types.ConeKotlinTypeProjection)?.type ?: continue
+                if (inner.classId?.asSingleFqName() == RESULT_FQ) {
+                    reporter.reportOn(
+                        source,
+                        KsrpcDiagnostics.UNSUPPORTED_RESULT_SHAPE,
+                        "$containingFqName.$methodName: unsupported $position type " +
+                            "Flow<Result<…>>. kotlin.Result cannot be nested inside Flow.",
+                        context
+                    )
+                }
+            }
+        }
+    }
+
+    private fun isKsService(
+        type: org.jetbrains.kotlin.fir.types.ConeKotlinType,
+        session: org.jetbrains.kotlin.fir.FirSession
+    ): Boolean {
+        val classId = type.classId ?: return false
+        val symbol = session.symbolProvider.getClassLikeSymbolByClassId(classId)
+            as? FirClassSymbol<*> ?: return false
+        return symbol.hasAnnotation(KS_SERVICE_ID, session)
     }
 
     private fun containingClassSymbol(context: CheckerContext): FirClassSymbol<*>? {

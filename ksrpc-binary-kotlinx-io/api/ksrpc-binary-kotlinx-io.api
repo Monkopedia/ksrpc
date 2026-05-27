@@ -18,6 +18,9 @@ public final class com/monkopedia/ksrpc/binary/kxio/SourceTransformer : com/monk
 	public fun getHasContent ()Z
 	public synthetic fun transform (Ljava/lang/Object;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun transform (Lkotlinx/io/Source;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public synthetic fun transformOutcome (Ljava/lang/Object;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun transformOutcome (Lkotlinx/io/Source;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun untransform (Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun untransformOutcome (Lcom/monkopedia/ksrpc/channels/CallData;Lcom/monkopedia/ksrpc/channels/SerializedService;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 

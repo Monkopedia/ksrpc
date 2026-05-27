@@ -94,6 +94,12 @@ object KsrpcDiagnostics : KtDiagnosticsContainer() {
     val SERVICE_TIER_MISMATCH: KtDiagnosticFactory1<String>
         by error1<KtElement, String>()
 
+    // 14: Unsupported nested shape inside a `Result<...>` return type (issue
+    // #133, v1): Result<Flow<…>>, Flow<Result<…>>, Result<RpcService-subtype>,
+    // nested Result<Result<…>>.
+    val UNSUPPORTED_RESULT_SHAPE: KtDiagnosticFactory1<String>
+        by error1<KtElement, String>()
+
     override fun getRendererFactory(): BaseDiagnosticRendererFactory = KsrpcDiagnosticRenderers
 }
 
@@ -119,6 +125,7 @@ private object KsrpcDiagnosticRenderers : BaseDiagnosticRendererFactory() {
             map.put(KSCONTEXT_BINDING_NOT_KSCONTEXTBINDING, "{0}", CommonRenderers.STRING)
             map.put(KSCONTEXT_DUPLICATE_WIRE_KEY, "{0}", CommonRenderers.STRING)
             map.put(SERVICE_TIER_MISMATCH, "{0}", CommonRenderers.STRING)
+            map.put(UNSUPPORTED_RESULT_SHAPE, "{0}", CommonRenderers.STRING)
         }
     }
 }

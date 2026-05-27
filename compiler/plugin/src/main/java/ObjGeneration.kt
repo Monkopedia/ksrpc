@@ -381,6 +381,38 @@ internal class GenericMethodIrBuilder(
             }
             return builder.irGetObject(transformer)
         }
+        // Result<O> (issue #133) is an ergonomic transform over the plain `O`
+        // protocol — build the inner-O transformer recursively (so injected
+        // type-param serializers on a generic service are threaded through) and
+        // wrap it in ResultTransformer<O>. Only reachable when ksrpc-core
+        // supplies the type (resultSupported); otherwise falls through to the
+        // generic serializer path.
+        if (env.resultSupported && type.classFqName == FqConstants.RESULT) {
+            val resultTransformerSymbol = env.resultTransformer ?: reportInternal(
+                "Result detection fired despite resultSupported=false " +
+                    "(ResultTransformer symbol missing)"
+            )
+            val innerType = (type as? IrSimpleType)
+                ?.arguments
+                ?.singleOrNull()
+                ?.typeOrFail
+                ?: reportInternal(
+                    "Result<O> type ${type.render()} has no type argument — " +
+                        "cannot emit ResultTransformer"
+                )
+            val innerTransformer = createTypeConverter(
+                builder,
+                innerType,
+                serializerReceiver,
+                serializerFields,
+                method
+            )
+            return builder.irConstructOf(
+                resultTransformerSymbol,
+                listOf(innerType),
+                innerTransformer
+            )
+        }
         // Flow<T> is bridged to the KsFlowService sub-service protocol. Only reachable when
         // ksrpc-flow is on the compile classpath — otherwise we fall through to the generic
         // serializer path, which will produce a clearer "no serializer" diagnostic.
