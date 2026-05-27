@@ -1,5 +1,53 @@
 # Changelog
 
+## 1.1.0-RC1 (2026-05-27)
+
+First release candidate for 1.1.0. Additive and backward-compatible with 1.0.0 —
+no breaking changes.
+
+### New features
+
+- **JNI native-host API** (#209): host a ksrpc service inside a Kotlin/Native
+  `.so` and call it from the JVM with `KsrpcNativeHost.connect`. The consumer
+  declares the binding on one of their own classes
+  (`external fun initialize(host: JniHostInit)`) and backs it natively by
+  delegating to `ksrpcHostConnection`; ksrpc owns the JNI export plumbing. Each
+  connection gets its own native environment and service instance(s) — no global
+  state and no `JNI_OnLoad`.
+- **`Result<T>` `@KsMethod` return types** (#213): a `@KsMethod` may return
+  `Result<O>`, equivalent to a plain `O` method wrapped in
+  `runCatching`-except-cancellation, with **no wire-format change** (success
+  serializes `O`; failure uses the existing `@KsError`/error envelope). `@KsError`
+  participates unchanged; `CancellationException`/`TimeoutCancellationException`
+  propagate rather than being captured into the `Result`. Unsupported nested
+  shapes (`Result<Flow<…>>`, `Flow<Result<…>>`, `Result<@KsService>`,
+  `Result<Result<…>>`) are rejected by a FIR diagnostic.
+
+### Bug fixes
+
+- **#201 / PR #215**: the Kotlin/Native POSIX socket transport no longer hangs a
+  pending `call()` when the write side fails silently while the read side stays
+  open (the Kotlin/Native analog of the #200 JVM pipe fix). Also fixes a
+  reader-thread busy-loop on EOF.
+
+### Internal / infrastructure (no consumer-facing API impact)
+
+- **#208**: leaked serialization synthetics (`$serializer` / `$Companion` of
+  `@KsrpcInternal @Serializable` types) are excluded from the BCV API dumps, so
+  the dumps show only genuinely-public surface.
+- **#214 / PR #218**: fixed a hang in the Kotlin/Native test suite and added a
+  bounded `native-tests` CI job so native hangs fail CI fast instead of wedging.
+
+### Documentation
+
+- JNI + service-worker samples (#211); refreshed `ksrpc-jni` / `ksrpc-service-worker`
+  module docs and README transport table (#212); `Result<T>` guide section +
+  sample (#217); `@sample` wiring across public APIs (#207); honest JNI guide for
+  the manual host path, since superseded by #209 (#206).
+
+Downstream consumers (kplusplus, konstructor, lsp-kotlin, hauler) validate against
+this RC.
+
 ## 1.0.0 (2026-05-21)
 
 First stable release. API is now considered stable under semantic versioning —
