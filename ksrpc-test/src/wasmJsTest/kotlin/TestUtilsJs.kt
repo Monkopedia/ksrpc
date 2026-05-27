@@ -21,6 +21,7 @@ import com.monkopedia.ksrpc.annotation.ExperimentalKsrpc
 import com.monkopedia.ksrpc.channels.Connection
 import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.webworker.createServiceWorkerWithConnection
+import io.ktor.client.HttpClient
 import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
@@ -45,6 +46,8 @@ internal actual fun platformSupportedTestTypes(): Set<RpcFunctionalityTest.TestT
         add(RpcFunctionalityTest.TestType.SERVICE_WORKER)
     }
 }
+
+internal actual fun httpTestClient(): HttpClient = HttpClient()
 
 internal actual suspend fun serviceWorkerTest(
     serviceName: String?,

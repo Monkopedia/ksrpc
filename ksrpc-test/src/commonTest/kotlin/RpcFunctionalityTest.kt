@@ -39,7 +39,21 @@ abstract class RpcFunctionalityTest(
     supportedTypes: List<TestType> = TestType.values().toList(),
     private val serializedChannel: suspend CoroutineScope.() -> SerializedService<String>,
     private val verifyOnChannel: suspend CoroutineScope.(SerializedService<String>) -> Unit,
-    private val workerServiceName: String? = null
+    private val workerServiceName: String? = null,
+    /**
+     * Optional HTTP-only verification that additionally receives a [reconnect] factory producing a
+     * fresh, independent channel to the same server. [RpcServiceCancelTest] uses this to issue the
+     * call it cancels mid-flight on a throwaway connection: the native ktor-curl engine wedges its
+     * shared processor when an in-flight request is cancelled, so the cancelled call must not share
+     * a client with the call that verifies the channel still works afterwards. When null, the HTTP
+     * path falls back to [verifyOnChannel].
+     */
+    private val verifyOnHttpChannel: (
+        suspend CoroutineScope.(
+            channel: SerializedService<String>,
+            reconnect: suspend () -> SerializedService<String>
+        ) -> Unit
+    )? = null
 ) {
     private val supportedTypes = run {
         val effective = supportedTypes.toSet() intersect platformSupportedTestTypes()
@@ -126,14 +140,27 @@ abstract class RpcFunctionalityTest(
                     createEnv()
                 )
             },
-            test = {
-                val client = HttpClient()
+            test = { port ->
+                val url = "http://localhost:$port$path"
+                val extraClients = mutableListOf<HttpClient>()
+                val reconnect: suspend () -> SerializedService<String> = {
+                    val extraClient = httpTestClient()
+                    extraClients.add(extraClient)
+                    extraClient.asHttpChannelClient(url, createEnv()).defaultChannel()
+                }
+                val client = httpTestClient()
                 try {
-                    client.asHttpChannelClient("http://localhost:$it$path", createEnv())
+                    client.asHttpChannelClient(url, createEnv())
                         .use { channel ->
-                            verifyOnChannel(channel.defaultChannel())
+                            val httpVerify = verifyOnHttpChannel
+                            if (httpVerify != null) {
+                                httpVerify(channel.defaultChannel(), reconnect)
+                            } else {
+                                verifyOnChannel(channel.defaultChannel())
+                            }
                         }
                 } finally {
+                    extraClients.forEach { it.close() }
                     client.close()
                 }
             },
@@ -188,6 +215,13 @@ internal expect fun runBlockingUnit(function: suspend CoroutineScope.() -> Unit)
 expect interface Routing
 
 internal expect fun platformSupportedTestTypes(): Set<RpcFunctionalityTest.TestType>
+
+/**
+ * The [HttpClient] used by [RpcFunctionalityTest.testHttpPath] (one per channel created in the
+ * test). Provided per-platform so each target builds its default engine, and so the HTTP reconnect
+ * factory can produce additional independent clients (see [RpcServiceCancelTest]).
+ */
+internal expect fun httpTestClient(): HttpClient
 
 internal expect suspend fun serviceWorkerTest(
     serviceName: String?,

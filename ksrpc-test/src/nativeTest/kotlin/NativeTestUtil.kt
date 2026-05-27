@@ -22,6 +22,7 @@ import com.monkopedia.ksrpc.channels.SerializedService
 import com.monkopedia.ksrpc.ktor.serveHttp as nativeServe
 import com.monkopedia.ksrpc.sockets.posixFileReadChannel
 import com.monkopedia.ksrpc.sockets.posixFileWriteChannel
+import io.ktor.client.HttpClient
 import io.ktor.server.cio.CIO
 import io.ktor.server.engine.EmbeddedServer
 import io.ktor.server.engine.embeddedServer
@@ -61,6 +62,8 @@ internal actual fun platformSupportedTestTypes(): Set<RpcFunctionalityTest.TestT
     RpcFunctionalityTest.TestType.PIPE,
     RpcFunctionalityTest.TestType.HTTP
 )
+
+internal actual fun httpTestClient(): HttpClient = HttpClient()
 
 actual suspend inline fun httpTest(
     crossinline serve: suspend Routing.() -> Unit,
