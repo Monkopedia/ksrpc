@@ -9,20 +9,6 @@ The 1.1.0 surface — JNI native-host API (#209), `Result<T>` `@KsMethod` return
 (#213), Kotlin/Native posix call-hang fix (#201) — was built up in the 1.1.0-RC1
 cycle; see that entry below for the full feature list.
 
-Validated against downstream consumers:
-
-- **kplusplus** — exercised the JNI host API end-to-end from inside the
-  Kotlin/Native compiler daemon (FIR-checker hosting libclang via a JNI
-  connection); confirms the per-connection model, `runBlocking`-in-FIR
-  ergonomics, and lifecycle.
-- **hauler** — build + test + BCV apiCheck + long-form A/B microbench all
-  clean across all 7 KMP targets (JVM, JS, Wasm, LinuxX64, MingwX64,
-  MacosArm64/X64, IosArm64/X64/SimArm64); perf-neutral vs 1.0.0.
-- **konstructor** — full Playwright e2e suite green; the script-subprocess /
-  ScriptManager teardown WARN-flood pattern from the 1.0.0 cycle is gone.
-- **lsp-kotlin** — `:lsp-ksrpc:build :allTests` green across JVM/JS/Wasm/Linux/
-  Apple including the post-RC3 API-review tests; no regressions.
-
 ## 1.1.0-RC1 (2026-05-27)
 
 First release candidate for 1.1.0. Additive and backward-compatible with 1.0.0 —
