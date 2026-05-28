@@ -233,6 +233,24 @@ class JniTest {
         assertTrue(message.contains("JniTestInterface"), message)
     }
 
+    /**
+     * Calling close() twice on a JniConnection should be safe: PacketChannelBase.close()
+     * short-circuits via its isClosed flag, the receive Channel.close() is itself idempotent,
+     * and the native counterpart closeFromJvm short-circuits on its own PacketChannelBase
+     * already-closed flag. The lifecycle section of the transport-jni guide documents this
+     * as the supported teardown shape, so guard it with a test.
+     */
+    @Test
+    fun testCloseIsIdempotent() = runBlockingUnit {
+        NativeUtils.loadLibraryFromJar("/libs/libksrpc_test.${extension()}")
+        val connection = KsrpcNativeHost.connect(this, TestNativeHost::initialize)
+        val stub = connection.defaultChannel().toStub<JniTestInterface, JniSerialized>()
+        assertEquals("pong", stub.ping("ping"))
+        connection.close()
+        // Second close must not throw; the path is fully idempotent.
+        connection.close()
+    }
+
     private fun extension(): String =
         if (NativeUtils::class.java.getResourceAsStream("/libs/libksrpc_test.so") != null) {
             "so"

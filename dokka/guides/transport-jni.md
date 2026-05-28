@@ -103,6 +103,30 @@ val result = service.someMethod("hello")
 
 `KsrpcNativeHost.connect` defaults to a `JniSerialization` environment; pass your own `KsrpcEnvironment<JniSerialized>` to customize the JVM-side logger or error listener. The native side builds its own per-connection environment, tuned via the `configure` block passed to `ksrpcHostConnection`.
 
+## Connection lifecycle
+
+A `JniConnection` returned by `KsrpcNativeHost.connect` is a long-lived object intended to be reused across many calls.
+
+- **Call `connect` once, reuse the connection.** Get the stub once via `connection.defaultChannel().toStub<MyService, JniSerialized>()` and make every call against that stub; do not reconnect per call. One warm connection per build (or per compilation, reused across all checker invocations) is the intended usage model.
+- **Each `connect` call is independent.** A second `connect` drives a fresh `initialize` on the native side -- a new native environment and a new set of service instance(s) -- with no state shared with prior connections. Reconnecting therefore means starting fresh, not resuming.
+- **Threading.** The JNI dispatcher is driven by JVM threads -- nothing on the native side spawns its own threads to attach. Call the stub's suspend functions from coroutines on your own scope; the `scope` argument to `connect` owns the connection's receive loop, so give it a scope whose lifetime matches the work the connection is for (e.g. one compilation, one build, one app session).
+- **Teardown.** Call `connection.close()` once when the owning scope ends; cancelling or completing that scope also tears down the receive loop. `close()` is idempotent -- calling it more than once is a no-op on the second and subsequent calls (the underlying `PacketChannelBase.close()` short-circuits once already closed, the receive `Channel.close()` is itself idempotent, and the native counterpart short-circuits on its own already-closed flag).
+
+```kotlin
+val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+val connection = KsrpcNativeHost.connect(scope, MyNativeService::initialize)
+val service = connection.defaultChannel().toStub<MyService, JniSerialized>()
+
+try {
+    // Many calls against the same warm connection.
+    val a = service.someMethod("one")
+    val b = service.someMethod("two")
+} finally {
+    connection.close()
+    scope.cancel()
+}
+```
+
 ## Packaging the shared library
 
 `NativeUtils.loadLibraryFromJar("/libs/libmy_service.so")` extracts the `.so` from the JVM classpath, so the linked library has to be placed there. The `sharedLib` from step 1 is produced under `build/bin/<target>/<buildType>Shared/lib<module>.so` (e.g. `build/bin/linuxX64/debugShared/libmy_service.so`); a Gradle copy task stages it into the JVM module's resources (under `libs/`) so `loadLibraryFromJar` can find it. Account for the per-OS extension (`.so` / `.dylib` / `.dll`) and the host's target.
@@ -111,6 +135,36 @@ The working end-to-end reference is the test harness:
 
 - [`ksrpc-test/build.gradle.kts`](https://github.com/Monkopedia/ksrpc/blob/main/ksrpc-test/build.gradle.kts) -- the `sharedLib` export and the `copyLib` task that stages the built `.so` into JVM resources per host OS.
 - [`ksrpc-test/src/nativeMain/kotlin/Test.kt`](https://github.com/Monkopedia/ksrpc/blob/main/ksrpc-test/src/nativeMain/kotlin/Test.kt) (the `initialize` export) and [`ksrpc-test/src/jvmTest/kotlin/JniTest.kt`](https://github.com/Monkopedia/ksrpc/blob/main/ksrpc-test/src/jvmTest/kotlin/JniTest.kt) (the `KsrpcNativeHost.connect` calls).
+
+## Consuming `ksrpc-jni` from a Kotlin compiler plugin
+
+When a Kotlin compiler plugin depends on `ksrpc-jni` (i.e. the dependency is wired onto a `kotlinCompilerPluginClasspath<Target>` configuration rather than a regular `implementation` configuration), the Kotlin Gradle Plugin defaults its compiler-plugin classpath configurations to `isTransitive = false`. That means a plain `add("kotlinCompilerPluginClasspathJvmMain", ...)` brings in `ksrpc-jni` itself but **not** `ksrpc-core`, `ksrpc-packets`, `kotlinx-coroutines-core`, `kotlinx-serialization-*`, etc., and the compiler-plugin classloader fails at runtime with `NoClassDefFoundError` on the first ksrpc symbol it touches.
+
+This is KGP's compiler-plugin classpath behavior, not a ksrpc packaging issue. The fix is to flip the configuration to transitive (or list every transitive dependency by hand). For a multiplatform consumer that's loading the plugin on the JVM target:
+
+```kotlin
+configurations.named("kotlinCompilerPluginClasspathJvmMain") {
+    isTransitive = true
+}
+
+dependencies {
+    add("kotlinCompilerPluginClasspathJvmMain", "com.monkopedia.ksrpc:ksrpc-jni:$KSRPC_VERSION")
+}
+```
+
+For a JVM-only consumer the configuration is `kotlinCompilerPluginClasspath`:
+
+```kotlin
+configurations.named("kotlinCompilerPluginClasspath") {
+    isTransitive = true
+}
+
+dependencies {
+    "kotlinCompilerPluginClasspath"("com.monkopedia.ksrpc:ksrpc-jni:$KSRPC_VERSION")
+}
+```
+
+The exact configuration name follows KGP's `kotlinCompilerPluginClasspath<SourceSetName>` scheme -- pick the one matching the source set whose compilation should load the plugin (e.g. `kotlinCompilerPluginClasspathJvmMain`, `kotlinCompilerPluginClasspathJvmTest`).
 
 ## Transport semantics
 
