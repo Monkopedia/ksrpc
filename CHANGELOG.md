@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.0 (2026-05-28)
+
+Identical in library code to 1.1.0-RC1, plus the #220 docs/test polish (JNI
+connection-lifecycle guide section, KGP compiler-plugin classpath `isTransitive`
+note, and a `testCloseIsIdempotent` regression test verifying existing behavior).
+The 1.1.0 surface — JNI native-host API (#209), `Result<T>` `@KsMethod` returns
+(#213), Kotlin/Native posix call-hang fix (#201) — was built up in the 1.1.0-RC1
+cycle; see that entry below for the full feature list.
+
 ## 1.1.0-RC1 (2026-05-27)
 
 First release candidate for 1.1.0. Additive and backward-compatible with 1.0.0 —
