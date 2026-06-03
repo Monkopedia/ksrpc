@@ -36,6 +36,7 @@ import org.jetbrains.kotlin.ir.builders.declarations.buildClass
 import org.jetbrains.kotlin.ir.builders.declarations.buildField
 import org.jetbrains.kotlin.ir.builders.declarations.buildFun
 import org.jetbrains.kotlin.ir.builders.declarations.buildReceiverParameter
+import org.jetbrains.kotlin.ir.builders.irAnnotation
 import org.jetbrains.kotlin.ir.builders.irBlock
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irCall
@@ -316,7 +317,7 @@ class StubGeneration(
     }
 
     private fun IrClass.createThreadLocalAnnotation() = context.irBuilder(symbol)
-        .irCallConstructor(env.threadLocal.constructors.single(), listOf())
+        .irAnnotation(env.threadLocal.constructors.single(), listOf())
 
     private fun IrClass.generateCloseMethod(serviceClass: ServiceClass): IrSimpleFunction {
         val close = functions.find { it.name == FqConstants.CLOSE }

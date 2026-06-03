@@ -1,19 +1,16 @@
 [versions]
-kotlin = "2.3.20"
+kotlin = "2.4.0"
 kotlin-coroutines = "1.10.2"
 kotlin-io = "0.9.0"
 okio = "3.12.0"
 kotlin-serialization = "1.10.0"
-ksp = "2.3.6"
 ktor = "3.4.1"
 slf4j = "2.1.0-alpha1"
 clikt = "5.0.3"
 agp = "9.0.0-rc01"
 dokka = "2.1.0"
 kotlin-atomicfu = "0.31.0"
-kotlin-compiletesting = "0.12.1"
-autoservice = "1.1.1"
-autoservice-ksp = "1.2.0"
+kotlin-compiletesting = "0.13.0"
 jnanoid = "2.0.0"
 nanoid = "5.1.6"
 ksrpctest = "0.11.1"
@@ -29,8 +26,6 @@ kotlinx-benchmark = "0.4.14"
 dokka-base = { module = "org.jetbrains.dokka:dokka-base", version.ref = "dokka" }
 dokka-gradle = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
 kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
-autoservice = { module = "dev.zacsweers.autoservice:auto-service-ksp", version.ref = "autoservice-ksp" }
-autoservice-annotations = { module = "com.google.auto.service:auto-service-annotations", version.ref = "autoservice" }
 ksrpctest = { module = "com.monkopedia.ksrpc:ksrpc-core", version.ref = "ksrpctest"}
 kotlin-compiletesting = { module = "dev.zacsweers.kctfork:core", version.ref = "kotlin-compiletesting"}
 ktor-io = { module = "io.ktor:ktor-io", version.ref = "ktor" }
@@ -77,7 +72,6 @@ dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 hierynomus-license = { id = "com.github.hierynomus.license", version.ref = "hierynomus" }
 jlleitschuh-ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint-plugin" }
 gmazzo-buildconfig = { id = "com.github.gmazzo.buildconfig", version.ref = "buildconfig" }
-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp"}
 gradle-publish = { id = "com.gradle.plugin-publish", version.ref = "gradleplugin" }
 vannik-publish = { id = "com.vanniktech.maven.publish", version.ref = "vannik" }
 kotlinx-benchmark = { id = "org.jetbrains.kotlinx.benchmark", version.ref = "kotlinx-benchmark" }

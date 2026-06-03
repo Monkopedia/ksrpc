@@ -30,6 +30,7 @@ import org.jetbrains.kotlin.ir.builders.declarations.buildClass
 import org.jetbrains.kotlin.ir.builders.declarations.buildField
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irCall
+import org.jetbrains.kotlin.ir.builders.irAnnotation
 import org.jetbrains.kotlin.ir.builders.irCallConstructor
 import org.jetbrains.kotlin.ir.builders.irConcat
 import org.jetbrains.kotlin.ir.builders.irDelegatingConstructorCall
@@ -139,7 +140,7 @@ internal fun IrClass.addKsrpcGeneratedAnnotation(
         ?: reportInternal(
             "@KsrpcGenerated has no constructor — ksrpc-api on the classpath is broken"
         )
-    annotations += context.irBuilder(symbol).irCallConstructor(constructor, emptyList())
+    annotations += context.irBuilder(symbol).irAnnotation(constructor, emptyList())
 }
 
 fun IrClassSymbol.findMethod(name: Name) = functions.find {

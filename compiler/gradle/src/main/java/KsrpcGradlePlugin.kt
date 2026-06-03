@@ -68,16 +68,12 @@ class KsrpcGradlePlugin : KotlinCompilerPluginSupportPlugin {
 
     override fun getCompilerPluginId(): String = BuildConfig.KOTLIN_PLUGIN_ID
 
+    // As of Kotlin 2.4 the Kotlin/Native compiler loads the same plugin artifact as the
+    // JVM/embeddable path, so `KotlinCompilerPluginSupportPlugin.getPluginArtifactForNative()`
+    // was removed from the interface. Native compilations now resolve the artifact below.
     override fun getPluginArtifact(): SubpluginArtifact = SubpluginArtifact(
         groupId = BuildConfig.KOTLIN_PLUGIN_GROUP,
         artifactId = BuildConfig.KOTLIN_PLUGIN_NAME,
-        version = BuildConfig.KOTLIN_PLUGIN_VERSION
-    )
-
-    @Deprecated("Deprecated in KotlinCompilerPluginSupportPlugin")
-    override fun getPluginArtifactForNative(): SubpluginArtifact = SubpluginArtifact(
-        groupId = BuildConfig.KOTLIN_PLUGIN_GROUP,
-        artifactId = BuildConfig.KOTLIN_PLUGIN_NAME + "-native",
         version = BuildConfig.KOTLIN_PLUGIN_VERSION
     )
 

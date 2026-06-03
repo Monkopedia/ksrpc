@@ -18,7 +18,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
-    alias(libs.plugins.ksp)
     id("org.jetbrains.dokka")
     alias(libs.plugins.vannik.publish)
     `signing`
@@ -37,18 +36,24 @@ java {
 
 dependencies {
     compileOnly("org.jetbrains.kotlin:kotlin-compiler")
+}
 
-    ksp(libs.autoservice)
-    compileOnly(libs.autoservice.annotations)
+// The CompilerPluginRegistrar service file is hand-maintained in the plugin module
+// (src/main/resources). The native artifact registers the same registrar class, so it
+// packages the plugin module's resources directly rather than keeping a second copy
+// (syncSource below only mirrors Kotlin sources, not resources).
+sourceSets.main {
+    resources.srcDir(project(":ksrpc-compiler-plugin").file("src/main/resources"))
 }
 
 afterEvaluate {
     tasks.named("compileKotlin") { dependsOn("syncSource") }
-    tasks.named("kspKotlin") { dependsOn("syncSource") }
     tasks.named("sourcesJar") { dependsOn("syncSource") }
 }
 val syncSource = tasks.register<Sync>("syncSource") {
-    from(project(":ksrpc-compiler-plugin").sourceSets.main.get().allSource)
+    from(project(":ksrpc-compiler-plugin").sourceSets.main.get().allSource) {
+        include("**/*.kt")
+    }
     into("src/main/kotlin")
     filter {
         // Replace shadowed imports from plugin module
@@ -95,7 +100,6 @@ tasks.withType<KotlinCompile> {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_1_8)
         freeCompilerArgs.add("-Xjvm-default=all")
-        freeCompilerArgs.add("-Xcontext-parameters")
     }
 }
 

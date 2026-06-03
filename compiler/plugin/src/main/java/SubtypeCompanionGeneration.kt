@@ -21,6 +21,7 @@ import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.ir.backend.js.utils.isDispatchReceiver
 import org.jetbrains.kotlin.ir.builders.IrBlockBodyBuilder
+import org.jetbrains.kotlin.ir.builders.irAnnotation
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irCallConstructor
 import org.jetbrains.kotlin.ir.builders.irDelegatingConstructorCall
@@ -36,9 +37,9 @@ import org.jetbrains.kotlin.ir.declarations.IrParameterKind
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.declarations.IrValueParameter
+import org.jetbrains.kotlin.ir.expressions.IrAnnotation
 import org.jetbrains.kotlin.ir.expressions.IrBody
 import org.jetbrains.kotlin.ir.expressions.IrClassReference
-import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
@@ -124,13 +125,13 @@ class SubtypeCompanionGeneration(
         irClass: IrClass,
         rpcObjectKey: IrClassSymbol,
         objectReference: IrClassReference
-    ): IrConstructorCall {
+    ): IrAnnotation {
         val primaryConstructor = rpcObjectKey.constructors.find { it.owner.isPrimary }
             ?: reportInternal(
                 "RpcObjectKey has no primary constructor — ksrpc-core runtime must " +
                     "match the compiler plugin"
             )
-        return context.irBuilder(irClass).irCallConstructor(primaryConstructor, emptyList())
+        return context.irBuilder(irClass).irAnnotation(primaryConstructor, emptyList())
             .apply { putArgs(objectReference) }
     }
 
