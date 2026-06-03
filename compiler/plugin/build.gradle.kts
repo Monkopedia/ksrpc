@@ -18,7 +18,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
-    alias(libs.plugins.ksp)
     id("com.github.gmazzo.buildconfig")
     alias(libs.plugins.vannik.publish)
     `signing`
@@ -46,9 +45,6 @@ val ksrpcVersion: String = rootDir.resolve("../gradle.properties").readLines()
 
 dependencies {
     compileOnly("org.jetbrains.kotlin:kotlin-compiler-embeddable")
-
-    ksp(libs.autoservice)
-    compileOnly(libs.autoservice.annotations)
 
     // The locally-built jvmJars below contain the current main-build source —
     // the compiler tests need newer APIs (e.g. @KsError #77, the FlowSubservice
@@ -137,10 +133,10 @@ tasks.withType<KotlinCompile> {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_1_8)
         freeCompilerArgs.add("-Xjvm-default=all")
-        // Required for the FIR-phase `FirDeclarationChecker.check` overrides added
-        // in issue #65 — Kotlin 2.3+ declares `check` with `context(CheckerContext,
-        // DiagnosticReporter)` parameters, which subclasses must match.
-        freeCompilerArgs.add("-Xcontext-parameters")
+        // The FIR-phase `FirDeclarationChecker.check` overrides (issue #65) declare
+        // `context(CheckerContext, DiagnosticReporter)` parameters. Context parameters
+        // are on by default at the Kotlin 2.4 language version, so no opt-in flag is
+        // needed (the former `-Xcontext-parameters` is now redundant).
     }
 }
 
@@ -153,5 +149,4 @@ if (signingEnabled) {
 
 afterEvaluate {
     tasks["generateMetadataFileForMavenPublication"].dependsOn("plainJavadocJar")
-    tasks["kspKotlin"].dependsOn("generateBuildConfigClasses")
 }

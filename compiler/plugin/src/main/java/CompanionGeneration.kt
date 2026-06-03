@@ -25,6 +25,7 @@ import org.jetbrains.kotlin.ir.builders.IrBlockBodyBuilder
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irBranch
 import org.jetbrains.kotlin.ir.builders.irCall
+import org.jetbrains.kotlin.ir.builders.irAnnotation
 import org.jetbrains.kotlin.ir.builders.irCallConstructor
 import org.jetbrains.kotlin.ir.builders.irElseBranch
 import org.jetbrains.kotlin.ir.builders.irEquals
@@ -42,10 +43,10 @@ import org.jetbrains.kotlin.ir.declarations.IrDeclaration
 import org.jetbrains.kotlin.ir.declarations.IrEnumEntry
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
+import org.jetbrains.kotlin.ir.expressions.IrAnnotation
 import org.jetbrains.kotlin.ir.expressions.IrBlockBody
 import org.jetbrains.kotlin.ir.expressions.IrBody
 import org.jetbrains.kotlin.ir.expressions.IrClassReference
-import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.impl.IrGetEnumValueImpl
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
@@ -162,13 +163,13 @@ class CompanionGeneration(
         irClass: IrClass,
         rpcObjectKey: IrClassSymbol,
         objectReference: IrClassReference
-    ): IrConstructorCall {
+    ): IrAnnotation {
         val primaryConstructor = rpcObjectKey.constructors.find { it.owner.isPrimary }
             ?: reportInternal(
                 "RpcObjectKey has no primary constructor — ksrpc-core runtime must " +
                     "match the compiler plugin"
             )
-        return context.irBuilder(irClass).irCallConstructor(primaryConstructor, emptyList())
+        return context.irBuilder(irClass).irAnnotation(primaryConstructor, emptyList())
             .apply { putArgs(objectReference) }
     }
 
