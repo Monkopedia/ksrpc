@@ -81,7 +81,8 @@ class RpcForeignCancellationTest {
         }
         try {
             withTimeout(30_000) {
-                val service = clientChannel.defaultChannel().toStub<ForeignCancelInterface, String>()
+                val service =
+                    clientChannel.defaultChannel().toStub<ForeignCancelInterface, String>()
                 // 1. The foreign-cancellation call surfaces as an error to the caller...
                 assertFails { service.foreignCancel("boom") }
                 // 2. ...but the connection survives: an unrelated call still works.
