@@ -34,9 +34,11 @@ import com.monkopedia.ksrpc.channels.RpcCallId
 import com.monkopedia.ksrpc.channels.SerializedChannel
 import com.monkopedia.ksrpc.channels.SerializedService
 import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.serializer
 
@@ -84,7 +86,20 @@ class HostSerializedChannelImpl<T>(
             }
         }
     } catch (t: CancellationException) {
-        throw t
+        // A CancellationException here is genuine cooperative cancellation ONLY if THIS
+        // coroutine's job was actually cancelled (the caller went away, or an incoming cancel
+        // frame cancelled the handler) — in that case ensureActive() rethrows it and we
+        // propagate as before. Otherwise it is a *foreign* cancellation that leaked out of a
+        // downstream call — e.g. a different connection's MultiChannel.close completing its
+        // pending awaits with CancellationException, surfaced here through a bridging
+        // sub-service. A foreign cancellation must NOT propagate into this connection's
+        // receive loop, where it would close this connection's MultiChannel and take down
+        // every other service multiplexed on it. Treat it like any other dispatch failure:
+        // error-frame this one call so it fails while the connection survives (#228).
+        coroutineContext.ensureActive()
+        env.logger.info("SerializedChannel", "Foreign cancellation during dispatching", t)
+        env.errorListener.onError(t)
+        CallData.Error(KsrpcException.INTERNAL_ERROR_CODE, t.message ?: t.toString())
     } catch (t: Throwable) {
         env.logger.info("SerializedChannel", "Exception thrown during dispatching", t)
         env.errorListener.onError(t)
