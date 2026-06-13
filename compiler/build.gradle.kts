@@ -41,7 +41,6 @@ allprojects {
 }
 
 subprojects {
-    if (name == "ksrpc-compiler-plugin-native") return@subprojects
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
     apply(plugin = "com.github.hierynomus.license")
     tasks.register(
