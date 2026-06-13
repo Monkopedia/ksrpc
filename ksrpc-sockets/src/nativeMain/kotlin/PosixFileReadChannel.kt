@@ -164,7 +164,12 @@ fun posixFileWriteChannel(fd: Int, onWriteFailure: () -> Unit = {}): ByteWriteCh
                 }
             }
         } catch (cause: Throwable) {
-            cause.printStackTrace()
+            // Don't dump a raw stack trace here: this also fires on normal teardown (the upstream
+            // channel is cancelled/closed and the read throws), which is benign and would print on
+            // every clean native disconnect. The cause is still surfaced — `channel.cancel`
+            // propagates it to readers, and a genuine write failure additionally triggers
+            // `onWriteFailure` below. Matches the quiet teardown handling on the JVM receive path
+            // (#187/#188) and in copyToAndFlush (#169).
             writeFailed = true
             channel.cancel(cause)
         } finally {
