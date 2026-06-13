@@ -614,6 +614,4 @@ abstract class PacketChannelBase<T>(
     suspend fun receive(): Packet<T> = receiveLock.withLock {
         receiveLocked()
     }
-
-    private data class PendingPacket<T>(val receivedAt: Long, val packet: Packet<T>)
 }
