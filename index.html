@@ -46,7 +46,7 @@
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
         <div class="library-version" id="library-version">
-1.1.2        </div>
+1.1.3        </div>
         <div class="navigation-controls">
             <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button"
                     type="button">Switch theme
@@ -87,7 +87,7 @@
       <p class="paragraph">The JSON-RPC transport returns a <a href="https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-single-channel-connection/index.html"><code class="lang-kotlin">SingleChannelConnection</code></a> rather than a full <a href="https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html"><code class="lang-kotlin">Connection</code></a> -- it does not support sub-services. Each <a href="https://monkopedia.github.io/ksrpc/ksrpc-api/com.monkopedia.ksrpc.annotation/-ks-method/index.html"><code class="lang-kotlin">@KsMethod</code></a> name maps directly to the JSON-RPC <code class="lang-kotlin">method</code> field.</p>
       <h2 class="">Module and dependencies</h2>
       <div class="sample-container">
-        <pre><code class="block lang-kotlin" theme="idea">implementation(&quot;com.monkopedia.ksrpc:ksrpc-jsonrpc:1.1.2&quot;)</code></pre>
+        <pre><code class="block lang-kotlin" theme="idea">implementation(&quot;com.monkopedia.ksrpc:ksrpc-jsonrpc:1.1.3&quot;)</code></pre>
 <span class="copy-tooltip">
           <div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div>
 <span class="copy-icon"></span></span></div>
@@ -203,15 +203,15 @@
       <h1 class="">Module getting-started</h1>
       <h1 class="">Getting Started</h1>
       <h2 class="">Gradle setup</h2>
-      <p class="paragraph">Add the ksrpc compiler plugin and runtime dependency to your <code class="lang-kotlin">build.gradle.kts</code>. Replace <code class="lang-kotlin">1.1.2</code> with the latest release version from <a href="https://search.maven.org/artifact/com.monkopedia.ksrpc/ksrpc-core">Maven Central</a> or <a href="https://github.com/Monkopedia/ksrpc/releases">GitHub Releases</a>:</p>
+      <p class="paragraph">Add the ksrpc compiler plugin and runtime dependency to your <code class="lang-kotlin">build.gradle.kts</code>. Replace <code class="lang-kotlin">1.1.3</code> with the latest release version from <a href="https://search.maven.org/artifact/com.monkopedia.ksrpc/ksrpc-core">Maven Central</a> or <a href="https://github.com/Monkopedia/ksrpc/releases">GitHub Releases</a>:</p>
       <div class="sample-container">
-        <pre><code class="block lang-kotlin" theme="idea">plugins {<br>    kotlin(&quot;multiplatform&quot;) version &quot;2.3.0&quot;<br>    kotlin(&quot;plugin.serialization&quot;) version &quot;2.3.0&quot;<br>    id(&quot;com.monkopedia.ksrpc.plugin&quot;) version &quot;1.1.2&quot;<br>}<br><br>kotlin {<br>    sourceSets {<br>        commonMain {<br>            dependencies {<br>                implementation(&quot;com.monkopedia.ksrpc:ksrpc-core:1.1.2&quot;)<br>            }<br>        }<br>    }<br>}</code></pre>
+        <pre><code class="block lang-kotlin" theme="idea">plugins {<br>    kotlin(&quot;multiplatform&quot;) version &quot;2.3.0&quot;<br>    kotlin(&quot;plugin.serialization&quot;) version &quot;2.3.0&quot;<br>    id(&quot;com.monkopedia.ksrpc.plugin&quot;) version &quot;1.1.3&quot;<br>}<br><br>kotlin {<br>    sourceSets {<br>        commonMain {<br>            dependencies {<br>                implementation(&quot;com.monkopedia.ksrpc:ksrpc-core:1.1.3&quot;)<br>            }<br>        }<br>    }<br>}</code></pre>
 <span class="copy-tooltip">
           <div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div>
 <span class="copy-icon"></span></span></div>
       <p class="paragraph">For transport-specific dependencies, add the appropriate modules (see the transports.md):</p>
       <div class="sample-container">
-        <pre><code class="block lang-kotlin" theme="idea">// HTTP client<br>implementation(&quot;com.monkopedia.ksrpc:ksrpc-ktor-client:1.1.2&quot;)<br>// HTTP server<br>implementation(&quot;com.monkopedia.ksrpc:ksrpc-ktor-server:1.1.2&quot;)<br>// WebSocket client<br>implementation(&quot;com.monkopedia.ksrpc:ksrpc-ktor-websocket-client:1.1.2&quot;)<br>// WebSocket server<br>implementation(&quot;com.monkopedia.ksrpc:ksrpc-ktor-websocket-server:1.1.2&quot;)<br>// Sockets / stdin-out<br>implementation(&quot;com.monkopedia.ksrpc:ksrpc-sockets:1.1.2&quot;)<br>// JSON-RPC 2.0<br>implementation(&quot;com.monkopedia.ksrpc:ksrpc-jsonrpc:1.1.2&quot;)<br>// Flow streaming<br>implementation(&quot;com.monkopedia.ksrpc:ksrpc-flow:1.1.2&quot;)<br>// Introspection<br>implementation(&quot;com.monkopedia.ksrpc:ksrpc-introspection:1.1.2&quot;)</code></pre>
+        <pre><code class="block lang-kotlin" theme="idea">// HTTP client<br>implementation(&quot;com.monkopedia.ksrpc:ksrpc-ktor-client:1.1.3&quot;)<br>// HTTP server<br>implementation(&quot;com.monkopedia.ksrpc:ksrpc-ktor-server:1.1.3&quot;)<br>// WebSocket client<br>implementation(&quot;com.monkopedia.ksrpc:ksrpc-ktor-websocket-client:1.1.3&quot;)<br>// WebSocket server<br>implementation(&quot;com.monkopedia.ksrpc:ksrpc-ktor-websocket-server:1.1.3&quot;)<br>// Sockets / stdin-out<br>implementation(&quot;com.monkopedia.ksrpc:ksrpc-sockets:1.1.3&quot;)<br>// JSON-RPC 2.0<br>implementation(&quot;com.monkopedia.ksrpc:ksrpc-jsonrpc:1.1.3&quot;)<br>// Flow streaming<br>implementation(&quot;com.monkopedia.ksrpc:ksrpc-flow:1.1.3&quot;)<br>// Introspection<br>implementation(&quot;com.monkopedia.ksrpc:ksrpc-introspection:1.1.3&quot;)</code></pre>
 <span class="copy-tooltip">
           <div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div>
 <span class="copy-icon"></span></span></div>
@@ -279,7 +279,7 @@
       <p class="paragraph">The socket transport uses a content-length-prefixed packet protocol over raw byte streams. It supports bidirectional communication with full sub-service support, and is well suited for direct TCP connections and subprocess stdin/stdout communication.</p>
       <h2 class="">Module and dependencies</h2>
       <div class="sample-container">
-        <pre><code class="block lang-kotlin" theme="idea">implementation(&quot;com.monkopedia.ksrpc:ksrpc-sockets:1.1.2&quot;)</code></pre>
+        <pre><code class="block lang-kotlin" theme="idea">implementation(&quot;com.monkopedia.ksrpc:ksrpc-sockets:1.1.3&quot;)</code></pre>
 <span class="copy-tooltip">
           <div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div>
 <span class="copy-icon"></span></span></div>
@@ -297,12 +297,12 @@
             <tr>
               <td>JVM</td>
               <td>Yes</td>
-              <td>Uses <code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">InputStream</code>/<code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">OutputStream</code> or ktor byte channels</td>
+              <td>Uses <code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">InputStream</code>/<code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">OutputStream</code> or ktor byte channels</td>
             </tr>
             <tr>
               <td>POSIX Native</td>
               <td>Yes</td>
-              <td>Uses ktor <code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">ByteReadChannel</code>/<code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">ByteWriteChannel</code></td>
+              <td>Uses ktor <code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">ByteReadChannel</code>/<code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">ByteWriteChannel</code></td>
             </tr>
             <tr>
               <td>Windows Native</td>
@@ -442,7 +442,7 @@
               <th>Transport</th>
               <th>Sub-service input</th>
               <th>Sub-service output</th>
-              <th><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">connect&lt;H, C&gt;</code></th>
+              <th><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">connect&lt;H, C&gt;</code></th>
             </tr>
           </thead>
           <tbody>
@@ -505,15 +505,15 @@
           <tbody>
             <tr>
               <td>Only has simple input/output methods</td>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">RpcService</code> (unchanged)</td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">RpcService</code> (unchanged)</td>
             </tr>
             <tr>
               <td>Returns sub-services</td>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">RpcHostService</code></td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">RpcHostService</code></td>
             </tr>
             <tr>
-              <td>Accepts sub-service inputs or uses <code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">Flow&lt;T&gt;</code></td>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">RpcBidiService</code></td>
+              <td>Accepts sub-service inputs or uses <code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">Flow&lt;T&gt;</code></td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">RpcBidiService</code></td>
             </tr>
           </tbody>
         </table>
@@ -576,16 +576,16 @@
           </thead>
           <tbody>
             <tr>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">ByteReadChannel</code> (ktor)</td>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">ksrpc-binary-ktor</code></td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">ByteReadChannel</code> (ktor)</td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">ksrpc-binary-ktor</code></td>
             </tr>
             <tr>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">Source</code> (kotlinx-io)</td>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">ksrpc-binary-kotlinx-io</code></td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">Source</code> (kotlinx-io)</td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">ksrpc-binary-kotlinx-io</code></td>
             </tr>
             <tr>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">BufferedSource</code> (okio)</td>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">ksrpc-binary-okio</code></td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">BufferedSource</code> (okio)</td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">ksrpc-binary-okio</code></td>
             </tr>
           </tbody>
         </table>
@@ -637,7 +637,7 @@
           <tbody>
             <tr>
               <td>transport-http.md</td>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">ksrpc-ktor-client</code> / <code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">ksrpc-ktor-server</code></td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">ksrpc-ktor-client</code> / <code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">ksrpc-ktor-server</code></td>
               <td>JVM, Native, JS/WASM (client)</td>
               <td>No</td>
               <td>Output only</td>
@@ -645,7 +645,7 @@
             </tr>
             <tr>
               <td>transport-websocket.md</td>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">ksrpc-ktor-websocket-*</code></td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">ksrpc-ktor-websocket-*</code></td>
               <td>JVM, Native, JS/WASM (client)</td>
               <td>Yes</td>
               <td>Yes</td>
@@ -653,7 +653,7 @@
             </tr>
             <tr>
               <td>transport-sockets.md</td>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">ksrpc-sockets</code></td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">ksrpc-sockets</code></td>
               <td>JVM, POSIX Native</td>
               <td>Yes</td>
               <td>Yes</td>
@@ -661,7 +661,7 @@
             </tr>
             <tr>
               <td>transport-jsonrpc.md</td>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">ksrpc-jsonrpc</code></td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">ksrpc-jsonrpc</code></td>
               <td>JVM, POSIX Native</td>
               <td>Yes</td>
               <td>No</td>
@@ -669,7 +669,7 @@
             </tr>
             <tr>
               <td>transport-jni.md</td>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">ksrpc-jni</code></td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">ksrpc-jni</code></td>
               <td>JVM + Kotlin/Native</td>
               <td>Yes</td>
               <td>Yes</td>
@@ -677,7 +677,7 @@
             </tr>
             <tr>
               <td>transport-service-worker.md</td>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">ksrpc-service-worker</code></td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">ksrpc-service-worker</code></td>
               <td>JS, WASM (experimental)</td>
               <td>Yes</td>
               <td>Yes</td>
@@ -776,19 +776,19 @@
           </thead>
           <tbody>
             <tr>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">ByteReadChannel</code> (ktor)</td>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">ksrpc-binary-ktor</code></td>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">implementation(&quot;com.monkopedia.ksrpc:ksrpc-binary-ktor:1.1.2&quot;)</code></td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">ByteReadChannel</code> (ktor)</td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">ksrpc-binary-ktor</code></td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">implementation(&quot;com.monkopedia.ksrpc:ksrpc-binary-ktor:1.1.3&quot;)</code></td>
             </tr>
             <tr>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">Source</code> (kotlinx-io)</td>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">ksrpc-binary-kotlinx-io</code></td>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">implementation(&quot;com.monkopedia.ksrpc:ksrpc-binary-kotlinx-io:1.1.2&quot;)</code></td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">Source</code> (kotlinx-io)</td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">ksrpc-binary-kotlinx-io</code></td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">implementation(&quot;com.monkopedia.ksrpc:ksrpc-binary-kotlinx-io:1.1.3&quot;)</code></td>
             </tr>
             <tr>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">BufferedSource</code> (okio)</td>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">ksrpc-binary-okio</code></td>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">implementation(&quot;com.monkopedia.ksrpc:ksrpc-binary-okio:1.1.2&quot;)</code></td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">BufferedSource</code> (okio)</td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">ksrpc-binary-okio</code></td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">implementation(&quot;com.monkopedia.ksrpc:ksrpc-binary-okio:1.1.3&quot;)</code></td>
             </tr>
           </tbody>
         </table>
@@ -917,7 +917,7 @@
       <h2 class="">Setup</h2>
       <p class="paragraph">Add the flow dependency:</p>
       <div class="sample-container">
-        <pre><code class="block lang-kotlin" theme="idea">implementation(&quot;com.monkopedia.ksrpc:ksrpc-flow:1.1.2&quot;)</code></pre>
+        <pre><code class="block lang-kotlin" theme="idea">implementation(&quot;com.monkopedia.ksrpc:ksrpc-flow:1.1.3&quot;)</code></pre>
 <span class="copy-tooltip">
           <div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div>
 <span class="copy-icon"></span></span></div>
@@ -1017,7 +1017,7 @@
       <p class="paragraph">HTTP is request/response only -- it returns a <a href="https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-channel-client/index.html"><code class="lang-kotlin">ChannelClient</code></a>, not a bidirectional <a href="https://monkopedia.github.io/ksrpc/ksrpc-core/com.monkopedia.ksrpc.channels/-connection/index.html"><code class="lang-kotlin">Connection</code></a>. For bidirectional communication, use the transport-websocket.md or transport-sockets.md transports instead.</p>
       <h2 class="">Modules and dependencies</h2>
       <div class="sample-container">
-        <pre><code class="block lang-kotlin" theme="idea">// Client<br>implementation(&quot;com.monkopedia.ksrpc:ksrpc-ktor-client:1.1.2&quot;)<br><br>// Server<br>implementation(&quot;com.monkopedia.ksrpc:ksrpc-ktor-server:1.1.2&quot;)</code></pre>
+        <pre><code class="block lang-kotlin" theme="idea">// Client<br>implementation(&quot;com.monkopedia.ksrpc:ksrpc-ktor-client:1.1.3&quot;)<br><br>// Server<br>implementation(&quot;com.monkopedia.ksrpc:ksrpc-ktor-server:1.1.3&quot;)</code></pre>
 <span class="copy-tooltip">
           <div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div>
 <span class="copy-icon"></span></span></div>
@@ -1088,11 +1088,11 @@
           </thead>
           <tbody>
             <tr>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">ENDPOINT_NOT_FOUND_CODE</code> (-32601)</td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">ENDPOINT_NOT_FOUND_CODE</code> (-32601)</td>
               <td>404</td>
             </tr>
             <tr>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">INTERNAL_ERROR_CODE</code> (-32603)</td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">INTERNAL_ERROR_CODE</code> (-32603)</td>
               <td>500</td>
             </tr>
           </tbody>
@@ -1224,7 +1224,7 @@
 <span class="copy-icon"></span></span></div>
       <h2 class="">Module and dependencies</h2>
       <div class="sample-container">
-        <pre><code class="block lang-kotlin" theme="idea">implementation(&quot;com.monkopedia.ksrpc:ksrpc-service-worker:1.1.2&quot;)</code></pre>
+        <pre><code class="block lang-kotlin" theme="idea">implementation(&quot;com.monkopedia.ksrpc:ksrpc-service-worker:1.1.3&quot;)</code></pre>
 <span class="copy-tooltip">
           <div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div>
 <span class="copy-icon"></span></span></div>
@@ -1276,7 +1276,7 @@
       <p class="paragraph">The worker is a separate browser script that must be built and served on its own, so the code above is only half of what a working setup needs. The worker entry point compiles to a standalone JavaScript bundle, which is served at the path the client passes to <code class="lang-kotlin">createServiceWorkerWithConnection</code>.</p>
       <p class="paragraph">Build the worker as its own JS executable that depends on <code class="lang-kotlin">ksrpc-service-worker</code>, using webpack to produce the bundle:</p>
       <div class="sample-container">
-        <pre><code class="block lang-kotlin" theme="idea">kotlin {<br>    js {<br>        binaries.executable()<br>    }<br>    sourceSets[&quot;jsMain&quot;].dependencies {<br>        implementation(&quot;com.monkopedia.ksrpc:ksrpc-service-worker:1.1.2&quot;)<br>        implementation(npm(&quot;webpack&quot;, &quot;5.101.3&quot;))<br>        implementation(npm(&quot;webpack-cli&quot;, &quot;6.0.1&quot;))<br>        implementation(npm(&quot;source-map-loader&quot;, &quot;5.0.0&quot;))<br>    }<br>}</code></pre>
+        <pre><code class="block lang-kotlin" theme="idea">kotlin {<br>    js {<br>        binaries.executable()<br>    }<br>    sourceSets[&quot;jsMain&quot;].dependencies {<br>        implementation(&quot;com.monkopedia.ksrpc:ksrpc-service-worker:1.1.3&quot;)<br>        implementation(npm(&quot;webpack&quot;, &quot;5.101.3&quot;))<br>        implementation(npm(&quot;webpack-cli&quot;, &quot;6.0.1&quot;))<br>        implementation(npm(&quot;source-map-loader&quot;, &quot;5.0.0&quot;))<br>    }<br>}</code></pre>
 <span class="copy-tooltip">
           <div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div>
 <span class="copy-icon"></span></span></div>
@@ -1322,7 +1322,7 @@
       <p class="paragraph">The WebSocket transport provides bidirectional communication over ktor WebSocket sessions. Both sides can host services and invoke each other, making it suitable for interactive and event-driven APIs.</p>
       <h2 class="">Modules and dependencies</h2>
       <div class="sample-container">
-        <pre><code class="block lang-kotlin" theme="idea">// Client<br>implementation(&quot;com.monkopedia.ksrpc:ksrpc-ktor-websocket-client:1.1.2&quot;)<br><br>// Server<br>implementation(&quot;com.monkopedia.ksrpc:ksrpc-ktor-websocket-server:1.1.2&quot;)<br><br>// Shared protocol (transitive dependency, usually not needed directly)<br>implementation(&quot;com.monkopedia.ksrpc:ksrpc-ktor-websocket-shared:1.1.2&quot;)</code></pre>
+        <pre><code class="block lang-kotlin" theme="idea">// Client<br>implementation(&quot;com.monkopedia.ksrpc:ksrpc-ktor-websocket-client:1.1.3&quot;)<br><br>// Server<br>implementation(&quot;com.monkopedia.ksrpc:ksrpc-ktor-websocket-server:1.1.3&quot;)<br><br>// Shared protocol (transitive dependency, usually not needed directly)<br>implementation(&quot;com.monkopedia.ksrpc:ksrpc-ktor-websocket-shared:1.1.3&quot;)</code></pre>
 <span class="copy-tooltip">
           <div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div>
 <span class="copy-icon"></span></span></div>
@@ -1573,7 +1573,7 @@
       <p class="paragraph">The JNI transport provides a shared RPC interface across the JVM/Native boundary in the same process. It uses binary serialization rather than JSON, eliminating network overhead entirely.</p>
       <h2 class="">Module and dependencies</h2>
       <div class="sample-container">
-        <pre><code class="block lang-kotlin" theme="idea">implementation(&quot;com.monkopedia.ksrpc:ksrpc-jni:1.1.2&quot;)</code></pre>
+        <pre><code class="block lang-kotlin" theme="idea">implementation(&quot;com.monkopedia.ksrpc:ksrpc-jni:1.1.3&quot;)</code></pre>
 <span class="copy-tooltip">
           <div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div>
 <span class="copy-icon"></span></span></div>
@@ -1591,12 +1591,12 @@
             <tr>
               <td>JVM</td>
               <td>JVM</td>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">JniConnection</code> -- the JVM side of the bridge</td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">JniConnection</code> -- the JVM side of the bridge</td>
             </tr>
             <tr>
               <td>Native</td>
               <td>Kotlin/Native</td>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">NativeConnection</code> -- the native side of the bridge</td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">NativeConnection</code> -- the native side of the bridge</td>
             </tr>
           </tbody>
         </table>
@@ -1682,13 +1682,13 @@
       <p class="paragraph">When a Kotlin compiler plugin depends on <code class="lang-kotlin">ksrpc-jni</code> (i.e. the dependency is wired onto a <code class="lang-kotlin">kotlinCompilerPluginClasspath&lt;Target&gt;</code> configuration rather than a regular <code class="lang-kotlin">implementation</code> configuration), the Kotlin Gradle Plugin defaults its compiler-plugin classpath configurations to <code class="lang-kotlin">isTransitive = false</code>. That means a plain <code class="lang-kotlin">add(&quot;kotlinCompilerPluginClasspathJvmMain&quot;, ...)</code> brings in <code class="lang-kotlin">ksrpc-jni</code> itself but <strong>not</strong> <code class="lang-kotlin">ksrpc-core</code>, <code class="lang-kotlin">ksrpc-packets</code>, <code class="lang-kotlin">kotlinx-coroutines-core</code>, <code class="lang-kotlin">kotlinx-serialization-*</code>, etc., and the compiler-plugin classloader fails at runtime with <code class="lang-kotlin">NoClassDefFoundError</code> on the first ksrpc symbol it touches.</p>
       <p class="paragraph">This is KGP's compiler-plugin classpath behavior, not a ksrpc packaging issue. The fix is to flip the configuration to transitive (or list every transitive dependency by hand). For a multiplatform consumer that's loading the plugin on the JVM target:</p>
       <div class="sample-container">
-        <pre><code class="block lang-kotlin" theme="idea">configurations.named(&quot;kotlinCompilerPluginClasspathJvmMain&quot;) {<br>    isTransitive = true<br>}<br><br>dependencies {<br>    add(&quot;kotlinCompilerPluginClasspathJvmMain&quot;, &quot;com.monkopedia.ksrpc:ksrpc-jni:1.1.2&quot;)<br>}</code></pre>
+        <pre><code class="block lang-kotlin" theme="idea">configurations.named(&quot;kotlinCompilerPluginClasspathJvmMain&quot;) {<br>    isTransitive = true<br>}<br><br>dependencies {<br>    add(&quot;kotlinCompilerPluginClasspathJvmMain&quot;, &quot;com.monkopedia.ksrpc:ksrpc-jni:1.1.3&quot;)<br>}</code></pre>
 <span class="copy-tooltip">
           <div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div>
 <span class="copy-icon"></span></span></div>
       <p class="paragraph">For a JVM-only consumer the configuration is <code class="lang-kotlin">kotlinCompilerPluginClasspath</code>:</p>
       <div class="sample-container">
-        <pre><code class="block lang-kotlin" theme="idea">configurations.named(&quot;kotlinCompilerPluginClasspath&quot;) {<br>    isTransitive = true<br>}<br><br>dependencies {<br>    &quot;kotlinCompilerPluginClasspath&quot;(&quot;com.monkopedia.ksrpc:ksrpc-jni:1.1.2&quot;)<br>}</code></pre>
+        <pre><code class="block lang-kotlin" theme="idea">configurations.named(&quot;kotlinCompilerPluginClasspath&quot;) {<br>    isTransitive = true<br>}<br><br>dependencies {<br>    &quot;kotlinCompilerPluginClasspath&quot;(&quot;com.monkopedia.ksrpc:ksrpc-jni:1.1.3&quot;)<br>}</code></pre>
 <span class="copy-tooltip">
           <div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div>
 <span class="copy-icon"></span></span></div>
@@ -1729,7 +1729,7 @@
       <h2 class="">Setup</h2>
       <p class="paragraph">Add the introspection dependency:</p>
       <div class="sample-container">
-        <pre><code class="block lang-kotlin" theme="idea">implementation(&quot;com.monkopedia.ksrpc:ksrpc-introspection:1.1.2&quot;)</code></pre>
+        <pre><code class="block lang-kotlin" theme="idea">implementation(&quot;com.monkopedia.ksrpc:ksrpc-introspection:1.1.3&quot;)</code></pre>
 <span class="copy-tooltip">
           <div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div>
 <span class="copy-icon"></span></span></div>
@@ -1759,19 +1759,19 @@
           </thead>
           <tbody>
             <tr>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">getServiceName()</code></td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">getServiceName()</code></td>
               <td>Returns the fully qualified service name</td>
             </tr>
             <tr>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">getEndpoints()</code></td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">getEndpoints()</code></td>
               <td>Returns the list of endpoint names</td>
             </tr>
             <tr>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">getEndpointInfo(endpoint)</code></td>
-              <td>Returns <a href="https://monkopedia.github.io/ksrpc/ksrpc-introspection/com.monkopedia.ksrpc/-rpc-endpoint-info/index.html"><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">RpcEndpointInfo</code></a> with input/output type metadata</td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">getEndpointInfo(endpoint)</code></td>
+              <td>Returns <a href="https://monkopedia.github.io/ksrpc/ksrpc-introspection/com.monkopedia.ksrpc/-rpc-endpoint-info/index.html"><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">RpcEndpointInfo</code></a> with input/output type metadata</td>
             </tr>
             <tr>
-              <td><code class="org.jetbrains.dokka.pages.commenttable@62ff98ec lang-kotlin">getIntrospectionFor(service)</code></td>
+              <td><code class="org.jetbrains.dokka.pages.commenttable@63cdd6d3 lang-kotlin">getIntrospectionFor(service)</code></td>
               <td>Returns introspection for a referenced sub-service</td>
             </tr>
           </tbody>
