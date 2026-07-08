@@ -15,14 +15,11 @@
  */
 package nanoid
 
-import kotlin.collections.random
 import kotlin.math.E
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.log
 import kotlin.random.Random
-import kotlin.ranges.random
-import kotlin.text.random
 
 /**
  * A class for generating unique String IDs.
