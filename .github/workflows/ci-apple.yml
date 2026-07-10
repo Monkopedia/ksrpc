@@ -1,0 +1,55 @@
+name: CI (Apple)
+
+# The main ci.yaml runs on ubuntu-latest and cannot build the Apple targets:
+# Kotlin/Native does not cross-compile iOS/macOS off a Mac
+# (kotlin.native.enableKlibsCrossCompilation=false), so those targets were
+# previously exercised only at publish time on the macOS runner. This job fills
+# that gap on demand: apply the `ci-apple` label to a pull request (or trigger it
+# manually) to compile every Apple target before merge.
+
+on:
+  pull_request:
+    types: [labeled, synchronize, reopened]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-apple-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apple:
+    # Runs only when the PR carries the `ci-apple` label (or on manual dispatch),
+    # so ordinary pushes don't spend macOS minutes.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.pull_request.labels.*.name, 'ci-apple')
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Cache Kotlin/Native toolchain
+        uses: actions/cache@v4
+        with:
+          path: ~/.konan
+          key: konan-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml', 'gradle.properties') }}
+          restore-keys: |
+            konan-${{ runner.os }}-
+      - name: Compile all Apple targets (main + test)
+        # Compile (not link/run) every Apple target across all modules. This
+        # resolves expect/actual and catches source-level breakage — e.g. a
+        # missing or misplaced apple `actual` — without needing a simulator.
+        run: >
+          ./gradlew
+          compileKotlinMacosArm64 compileTestKotlinMacosArm64
+          compileKotlinMacosX64 compileTestKotlinMacosX64
+          compileKotlinIosArm64 compileTestKotlinIosArm64
+          compileKotlinIosSimulatorArm64 compileTestKotlinIosSimulatorArm64
+          compileKotlinIosX64 compileTestKotlinIosX64
+          --console=plain
