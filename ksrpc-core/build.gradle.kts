@@ -23,6 +23,11 @@ plugins {
 ksrpcModule()
 
 kotlin {
+    val jsAndWasmJsMain by sourceSets.creating {
+        dependsOn(sourceSets["commonMain"])
+    }
+    sourceSets["jsMain"].dependsOn(jsAndWasmJsMain)
+    sourceSets["wasmJsMain"].dependsOn(jsAndWasmJsMain)
     sourceSets["commonMain"].dependencies {
         api(libs.kotlinx.serialization)
         api(libs.kotlinx.serialization.json)
