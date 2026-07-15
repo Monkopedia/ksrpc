@@ -15,16 +15,14 @@
  */
 package com.monkopedia.ksrpc.bench
 
-import com.monkopedia.ksrpc.NativeHost
+import com.monkopedia.ksrpc.TestNativeHost
 import com.monkopedia.ksrpc.channels.ChannelClient
 import com.monkopedia.ksrpc.channels.ChannelId
 import com.monkopedia.ksrpc.jni.JniConnection
 import com.monkopedia.ksrpc.jni.JniSerialization
 import com.monkopedia.ksrpc.jni.JniSerialized
-import com.monkopedia.ksrpc.jni.newTypeConverter
-import com.monkopedia.ksrpc.jni.withConverter
+import com.monkopedia.ksrpc.jni.KsrpcNativeHost
 import com.monkopedia.ksrpc.ksrpcEnvironment
-import kotlin.coroutines.suspendCoroutine
 import kotlinx.benchmark.Benchmark
 import kotlinx.benchmark.Param
 import kotlinx.benchmark.Scope
@@ -49,7 +47,6 @@ open class JniCommunicationBenchmark {
     private lateinit var payload: Pair<String, String>
     private lateinit var env: com.monkopedia.ksrpc.KsrpcEnvironment<JniSerialized>
     private lateinit var connection: JniConnection
-    private lateinit var host: NativeHost
     private val pairSerializer = PairSerializer(String.serializer(), String.serializer())
 
     @Setup
@@ -59,11 +56,7 @@ open class JniCommunicationBenchmark {
             scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
             payload = "x".repeat(payloadSize) to "tail"
             env = ksrpcEnvironment(JniSerialization()) { }
-            host = NativeHost()
-            connection = JniConnection(scope, env, host.createEnv())
-            suspendCoroutine<Int> {
-                host.registerService(connection, it.withConverter(newTypeConverter<Any?>().int))
-            }
+            connection = KsrpcNativeHost.connect(scope, TestNativeHost::initialize, env)
         }
     }
 

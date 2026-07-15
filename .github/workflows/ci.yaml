@@ -46,6 +46,11 @@ jobs:
           -x :ksrpc-test:jvmTest
           -x :ksrpc-bench:jvmTest
           --parallel --continue
+      # The benchmarks are never *run* in CI (JMH is slow), so nothing compiled
+      # :ksrpc-bench and its JVM sources silently rotted against API changes
+      # (#242). Compile-check it here so drift is caught without running JMH.
+      - name: Compile benchmarks (compile-only guard; not run)
+        run: ./gradlew :ksrpc-bench:compileKotlinJvm --parallel
 
   jni-tests:
     # Builds the Kotlin/Native libksrpc_test.so + ksrpc-jni cinterop klibs
