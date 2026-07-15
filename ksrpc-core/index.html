@@ -18,7 +18,6 @@
         }
       }
     </script>
-<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async></script>
 <script type="text/javascript" src="../scripts/sourceset_dependencies.js" async></script>
 <link href="../styles/style.css" rel="Stylesheet">
 <link href="../styles/main.css" rel="Stylesheet">
@@ -39,15 +38,14 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">1.1.3
+        <div class="library-version" id="library-version">1.1.4
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
                 <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":ksrpc-core/commonMain">common</button>
-                <button class="platform-tag platform-selector js-like" data-active="" aria-pressed="true" data-filter=":ksrpc-core/jsMain">js</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":ksrpc-core/jsAndWasmJsMain">jsAndWasmJs</button>
                 <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":ksrpc-core/jvmMain">jvm</button>
-                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":ksrpc-core/nativeMain">native</button>
-                <button class="platform-tag platform-selector wasm-like" data-active="" aria-pressed="true" data-filter=":ksrpc-core/wasmJsMain">wasmJs</button>
+                <button class="platform-tag platform-selector native-like" data-active="" aria-pressed="true" data-filter=":ksrpc-core/nativeMain">native</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
                 <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
@@ -63,11 +61,11 @@
                                 common
                             </label>
                         </li>
-                        <li role="option" class="dropdown--option platform-selector-option js-like" tabindex="0">
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
                             <label class="checkbox">
-                                <input type="checkbox" class="checkbox--input" id=":ksrpc-core/jsMain" data-filter=":ksrpc-core/jsMain">
+                                <input type="checkbox" class="checkbox--input" id=":ksrpc-core/jsAndWasmJsMain" data-filter=":ksrpc-core/jsAndWasmJsMain">
                                 <span class="checkbox--icon"></span>
-                                js
+                                jsAndWasmJs
                             </label>
                         </li>
                         <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
@@ -77,18 +75,11 @@
                                 jvm
                             </label>
                         </li>
-                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                        <li role="option" class="dropdown--option platform-selector-option native-like" tabindex="0">
                             <label class="checkbox">
                                 <input type="checkbox" class="checkbox--input" id=":ksrpc-core/nativeMain" data-filter=":ksrpc-core/nativeMain">
                                 <span class="checkbox--icon"></span>
                                 native
-                            </label>
-                        </li>
-                        <li role="option" class="dropdown--option platform-selector-option wasm-like" tabindex="0">
-                            <label class="checkbox">
-                                <input type="checkbox" class="checkbox--input" id=":ksrpc-core/wasmJsMain" data-filter=":ksrpc-core/wasmJsMain">
-                                <span class="checkbox--icon"></span>
-                                wasmJs
                             </label>
                         </li>
                 </ul>
@@ -122,35 +113,34 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" id="content" pageids="ksrpc-core::////PointingToDeclaration//-911231231">
+<div class="main-content" id="content" pageids="ksrpc-core::////PointingToDeclaration//1725170782">
   <div class="breadcrumbs"></div>
   <div class="cover ">
     <h1 class="cover"><span><span>ksrpc-core</span></span></h1>
     <div class="platform-hinted UnderCoverText with-platform-tabs" data-platform-hinted="data-platform-hinted">
-      <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":ksrpc-core/commonMain" data-filterable-set=":ksrpc-core/commonMain" data-active="" data-toggle=":ksrpc-core/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core/jsMain" data-filterable-set=":ksrpc-core/jsMain" data-toggle=":ksrpc-core/jsMain">js</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core/jvmMain" data-filterable-set=":ksrpc-core/jvmMain" data-toggle=":ksrpc-core/jvmMain">jvm</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core/nativeMain" data-filterable-set=":ksrpc-core/nativeMain" data-toggle=":ksrpc-core/nativeMain">native</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core/wasmJsMain" data-filterable-set=":ksrpc-core/wasmJsMain" data-toggle=":ksrpc-core/wasmJsMain">wasmJs</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><p class="paragraph">Core runtime library for ksrpc. Provides the abstract channel and connection model, the <code class="lang-kotlin">RpcMethod</code> descriptor, <code class="lang-kotlin">RpcObject</code> companion generation target, serialization plumbing, environment configuration (<code class="lang-kotlin">KsrpcEnvironment</code>), and the transport-agnostic <code class="lang-kotlin">RpcBinaryData</code> interface for binary payloads.</p></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core/jsMain"><p class="paragraph">Core runtime library for ksrpc. Provides the abstract channel and connection model, the <code class="lang-kotlin">RpcMethod</code> descriptor, <code class="lang-kotlin">RpcObject</code> companion generation target, serialization plumbing, environment configuration (<code class="lang-kotlin">KsrpcEnvironment</code>), and the transport-agnostic <code class="lang-kotlin">RpcBinaryData</code> interface for binary payloads.</p></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core/jvmMain"><p class="paragraph">Core runtime library for ksrpc. Provides the abstract channel and connection model, the <code class="lang-kotlin">RpcMethod</code> descriptor, <code class="lang-kotlin">RpcObject</code> companion generation target, serialization plumbing, environment configuration (<code class="lang-kotlin">KsrpcEnvironment</code>), and the transport-agnostic <code class="lang-kotlin">RpcBinaryData</code> interface for binary payloads.</p></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core/nativeMain"><p class="paragraph">Core runtime library for ksrpc. Provides the abstract channel and connection model, the <code class="lang-kotlin">RpcMethod</code> descriptor, <code class="lang-kotlin">RpcObject</code> companion generation target, serialization plumbing, environment configuration (<code class="lang-kotlin">KsrpcEnvironment</code>), and the transport-agnostic <code class="lang-kotlin">RpcBinaryData</code> interface for binary payloads.</p></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core/wasmJsMain"><p class="paragraph">Core runtime library for ksrpc. Provides the abstract channel and connection model, the <code class="lang-kotlin">RpcMethod</code> descriptor, <code class="lang-kotlin">RpcObject</code> companion generation target, serialization plumbing, environment configuration (<code class="lang-kotlin">KsrpcEnvironment</code>), and the transport-agnostic <code class="lang-kotlin">RpcBinaryData</code> interface for binary payloads.</p></div>    </div>
+      <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":ksrpc-core/commonMain" data-filterable-set=":ksrpc-core/commonMain" data-active="" data-toggle=":ksrpc-core/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core/jsAndWasmJsMain" data-filterable-set=":ksrpc-core/jsAndWasmJsMain" data-toggle=":ksrpc-core/jsAndWasmJsMain">jsAndWasmJs</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core/jvmMain" data-filterable-set=":ksrpc-core/jvmMain" data-toggle=":ksrpc-core/jvmMain">jvm</button><button class="platform-bookmark" data-filterable-current=":ksrpc-core/nativeMain" data-filterable-set=":ksrpc-core/nativeMain" data-toggle=":ksrpc-core/nativeMain">native</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-core/commonMain"><p class="paragraph">Core runtime library for ksrpc. Provides the abstract channel and connection model, the <code class="lang-kotlin">RpcMethod</code> descriptor, <code class="lang-kotlin">RpcObject</code> companion generation target, serialization plumbing, environment configuration (<code class="lang-kotlin">KsrpcEnvironment</code>), and the transport-agnostic <code class="lang-kotlin">RpcBinaryData</code> interface for binary payloads.</p></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core/jsAndWasmJsMain"><p class="paragraph">Core runtime library for ksrpc. Provides the abstract channel and connection model, the <code class="lang-kotlin">RpcMethod</code> descriptor, <code class="lang-kotlin">RpcObject</code> companion generation target, serialization plumbing, environment configuration (<code class="lang-kotlin">KsrpcEnvironment</code>), and the transport-agnostic <code class="lang-kotlin">RpcBinaryData</code> interface for binary payloads.</p></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core/jvmMain"><p class="paragraph">Core runtime library for ksrpc. Provides the abstract channel and connection model, the <code class="lang-kotlin">RpcMethod</code> descriptor, <code class="lang-kotlin">RpcObject</code> companion generation target, serialization plumbing, environment configuration (<code class="lang-kotlin">KsrpcEnvironment</code>), and the transport-agnostic <code class="lang-kotlin">RpcBinaryData</code> interface for binary payloads.</p></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-core/nativeMain"><p class="paragraph">Core runtime library for ksrpc. Provides the abstract channel and connection model, the <code class="lang-kotlin">RpcMethod</code> descriptor, <code class="lang-kotlin">RpcObject</code> companion generation target, serialization plumbing, environment configuration (<code class="lang-kotlin">KsrpcEnvironment</code>), and the transport-agnostic <code class="lang-kotlin">RpcBinaryData</code> interface for binary payloads.</p></div>    </div>
   </div>
   <h2 class="">Packages</h2>
-  <div class="table"><a data-name="360944053%2FPackages%2F-911231231" anchor-label="com.monkopedia.ksrpc" id="360944053%2FPackages%2F-911231231" data-filterable-set=":ksrpc-core/commonMain,:ksrpc-core/jsMain,:ksrpc-core/jvmMain,:ksrpc-core/nativeMain,:ksrpc-core/wasmJsMain"></a>
-    <div class="table-row table-row_platform-tagged" data-filterable-current=":ksrpc-core/commonMain,:ksrpc-core/jsMain,:ksrpc-core/jvmMain,:ksrpc-core/nativeMain,:ksrpc-core/wasmJsMain" data-filterable-set=":ksrpc-core/commonMain,:ksrpc-core/jsMain,:ksrpc-core/jvmMain,:ksrpc-core/nativeMain,:ksrpc-core/wasmJsMain">
+  <div class="table"><a data-name="360944053%2FPackages%2F1725170782" anchor-label="com.monkopedia.ksrpc" id="360944053%2FPackages%2F1725170782" data-filterable-set=":ksrpc-core/commonMain,:ksrpc-core/jsAndWasmJsMain,:ksrpc-core/jvmMain,:ksrpc-core/nativeMain"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":ksrpc-core/commonMain,:ksrpc-core/jsAndWasmJsMain,:ksrpc-core/jvmMain,:ksrpc-core/nativeMain" data-filterable-set=":ksrpc-core/commonMain,:ksrpc-core/jsAndWasmJsMain,:ksrpc-core/jvmMain,:ksrpc-core/nativeMain">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="com.monkopedia.ksrpc/index.html">com.monkopedia.ksrpc</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="360944053%2FPackages%2F-911231231"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="360944053%2FPackages%2F1725170782"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
           <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag common-like">common</div>
-              <div class="platform-tag js-like">js</div>
+              <div class="platform-tag common-like">jsAndWasmJs</div>
               <div class="platform-tag jvm-like">jvm</div>
-              <div class="platform-tag common-like">native</div>
-              <div class="platform-tag wasm-like">wasmJs</div>
+              <div class="platform-tag native-like">native</div>
             </div>
           </div>
         </div>
-        <div><span class="brief-comment"><a data-name="360944053%2FPackages%2F-911231231" anchor-label="com.monkopedia.ksrpc" id="360944053%2FPackages%2F-911231231" data-filterable-set=":ksrpc-core/commonMain,:ksrpc-core/jsMain,:ksrpc-core/jvmMain,:ksrpc-core/nativeMain,:ksrpc-core/wasmJsMain"></a>
+        <div><span class="brief-comment"><a data-name="360944053%2FPackages%2F1725170782" anchor-label="com.monkopedia.ksrpc" id="360944053%2FPackages%2F1725170782" data-filterable-set=":ksrpc-core/commonMain,:ksrpc-core/jsAndWasmJsMain,:ksrpc-core/jvmMain,:ksrpc-core/nativeMain"></a>
             <p class="paragraph">Contains <code class="lang-kotlin">KsContextBinding</code>, the interface that bridges a coroutine-context element to and from the wire for <code class="lang-kotlin">@KsContext</code>-annotated methods.</p>
           </span></div>
       </div>

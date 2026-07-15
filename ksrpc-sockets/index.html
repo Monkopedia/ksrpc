@@ -18,7 +18,6 @@
         }
       }
     </script>
-<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async></script>
 <script type="text/javascript" src="../scripts/sourceset_dependencies.js" async></script>
 <link href="../styles/style.css" rel="Stylesheet">
 <link href="../styles/main.css" rel="Stylesheet">
@@ -39,17 +38,16 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">1.1.3
+        <div class="library-version" id="library-version">1.1.4
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector native-like" data-active="" aria-pressed="true" data-filter=":ksrpc-sockets/appleMain">apple</button>
                 <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":ksrpc-sockets/commonMain">common</button>
-                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":ksrpc-sockets/iosMain">ios</button>
                 <button class="platform-tag platform-selector js-like" data-active="" aria-pressed="true" data-filter=":ksrpc-sockets/jsMain">js</button>
                 <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":ksrpc-sockets/jvmMain">jvm</button>
-                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":ksrpc-sockets/linuxMain">linux</button>
-                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":ksrpc-sockets/macosMain">macos</button>
-                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":ksrpc-sockets/nativeMain">native</button>
+                <button class="platform-tag platform-selector native-like" data-active="" aria-pressed="true" data-filter=":ksrpc-sockets/linuxMain">linux</button>
+                <button class="platform-tag platform-selector native-like" data-active="" aria-pressed="true" data-filter=":ksrpc-sockets/nativeMain">native</button>
                 <button class="platform-tag platform-selector wasm-like" data-active="" aria-pressed="true" data-filter=":ksrpc-sockets/wasmJsMain">wasmJs</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
@@ -59,18 +57,18 @@
                             <i class="ui-kit-icon ui-kit-icon_cross"></i>
                         </button>
                     </div>
+                        <li role="option" class="dropdown--option platform-selector-option native-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":ksrpc-sockets/appleMain" data-filter=":ksrpc-sockets/appleMain">
+                                <span class="checkbox--icon"></span>
+                                apple
+                            </label>
+                        </li>
                         <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
                             <label class="checkbox">
                                 <input type="checkbox" class="checkbox--input" id=":ksrpc-sockets/commonMain" data-filter=":ksrpc-sockets/commonMain">
                                 <span class="checkbox--icon"></span>
                                 common
-                            </label>
-                        </li>
-                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
-                            <label class="checkbox">
-                                <input type="checkbox" class="checkbox--input" id=":ksrpc-sockets/iosMain" data-filter=":ksrpc-sockets/iosMain">
-                                <span class="checkbox--icon"></span>
-                                ios
                             </label>
                         </li>
                         <li role="option" class="dropdown--option platform-selector-option js-like" tabindex="0">
@@ -87,21 +85,14 @@
                                 jvm
                             </label>
                         </li>
-                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                        <li role="option" class="dropdown--option platform-selector-option native-like" tabindex="0">
                             <label class="checkbox">
                                 <input type="checkbox" class="checkbox--input" id=":ksrpc-sockets/linuxMain" data-filter=":ksrpc-sockets/linuxMain">
                                 <span class="checkbox--icon"></span>
                                 linux
                             </label>
                         </li>
-                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
-                            <label class="checkbox">
-                                <input type="checkbox" class="checkbox--input" id=":ksrpc-sockets/macosMain" data-filter=":ksrpc-sockets/macosMain">
-                                <span class="checkbox--icon"></span>
-                                macos
-                            </label>
-                        </li>
-                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                        <li role="option" class="dropdown--option platform-selector-option native-like" tabindex="0">
                             <label class="checkbox">
                                 <input type="checkbox" class="checkbox--input" id=":ksrpc-sockets/nativeMain" data-filter=":ksrpc-sockets/nativeMain">
                                 <span class="checkbox--icon"></span>
@@ -146,38 +137,37 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" id="content" pageids="ksrpc-sockets::////PointingToDeclaration//-1501569399">
+<div class="main-content" id="content" pageids="ksrpc-sockets::////PointingToDeclaration//-1605890064">
   <div class="breadcrumbs"></div>
   <div class="cover ">
     <h1 class="cover"><span><span>ksrpc-sockets</span></span></h1>
     <div class="platform-hinted UnderCoverText with-platform-tabs" data-platform-hinted="data-platform-hinted">
-      <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":ksrpc-sockets/commonMain" data-filterable-set=":ksrpc-sockets/commonMain" data-active="" data-toggle=":ksrpc-sockets/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":ksrpc-sockets/iosMain" data-filterable-set=":ksrpc-sockets/iosMain" data-toggle=":ksrpc-sockets/iosMain">ios</button><button class="platform-bookmark" data-filterable-current=":ksrpc-sockets/jsMain" data-filterable-set=":ksrpc-sockets/jsMain" data-toggle=":ksrpc-sockets/jsMain">js</button><button class="platform-bookmark" data-filterable-current=":ksrpc-sockets/jvmMain" data-filterable-set=":ksrpc-sockets/jvmMain" data-toggle=":ksrpc-sockets/jvmMain">jvm</button><button class="platform-bookmark" data-filterable-current=":ksrpc-sockets/linuxMain" data-filterable-set=":ksrpc-sockets/linuxMain" data-toggle=":ksrpc-sockets/linuxMain">linux</button><button class="platform-bookmark" data-filterable-current=":ksrpc-sockets/macosMain" data-filterable-set=":ksrpc-sockets/macosMain" data-toggle=":ksrpc-sockets/macosMain">macos</button><button class="platform-bookmark" data-filterable-current=":ksrpc-sockets/nativeMain" data-filterable-set=":ksrpc-sockets/nativeMain" data-toggle=":ksrpc-sockets/nativeMain">native</button><button class="platform-bookmark" data-filterable-current=":ksrpc-sockets/wasmJsMain" data-filterable-set=":ksrpc-sockets/wasmJsMain" data-toggle=":ksrpc-sockets/wasmJsMain">wasmJs</button></div>
-<div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-sockets/commonMain"><p class="paragraph">Implementation of ksrpc channels that communicate over POSIX sockets or standard input/output streams. Builds on <code class="lang-kotlin">PacketChannelBase</code> from <code class="lang-kotlin">ksrpc-packets</code> and provides platform-specific read/write channel adapters for JVM, Native, and JS targets.</p></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-sockets/iosMain"><p class="paragraph">Implementation of ksrpc channels that communicate over POSIX sockets or standard input/output streams. Builds on <code class="lang-kotlin">PacketChannelBase</code> from <code class="lang-kotlin">ksrpc-packets</code> and provides platform-specific read/write channel adapters for JVM, Native, and JS targets.</p></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-sockets/jsMain"><p class="paragraph">Implementation of ksrpc channels that communicate over POSIX sockets or standard input/output streams. Builds on <code class="lang-kotlin">PacketChannelBase</code> from <code class="lang-kotlin">ksrpc-packets</code> and provides platform-specific read/write channel adapters for JVM, Native, and JS targets.</p></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-sockets/jvmMain"><p class="paragraph">Implementation of ksrpc channels that communicate over POSIX sockets or standard input/output streams. Builds on <code class="lang-kotlin">PacketChannelBase</code> from <code class="lang-kotlin">ksrpc-packets</code> and provides platform-specific read/write channel adapters for JVM, Native, and JS targets.</p></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-sockets/linuxMain"><p class="paragraph">Implementation of ksrpc channels that communicate over POSIX sockets or standard input/output streams. Builds on <code class="lang-kotlin">PacketChannelBase</code> from <code class="lang-kotlin">ksrpc-packets</code> and provides platform-specific read/write channel adapters for JVM, Native, and JS targets.</p></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-sockets/macosMain"><p class="paragraph">Implementation of ksrpc channels that communicate over POSIX sockets or standard input/output streams. Builds on <code class="lang-kotlin">PacketChannelBase</code> from <code class="lang-kotlin">ksrpc-packets</code> and provides platform-specific read/write channel adapters for JVM, Native, and JS targets.</p></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-sockets/nativeMain"><p class="paragraph">Implementation of ksrpc channels that communicate over POSIX sockets or standard input/output streams. Builds on <code class="lang-kotlin">PacketChannelBase</code> from <code class="lang-kotlin">ksrpc-packets</code> and provides platform-specific read/write channel adapters for JVM, Native, and JS targets.</p></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-sockets/wasmJsMain"><p class="paragraph">Implementation of ksrpc channels that communicate over POSIX sockets or standard input/output streams. Builds on <code class="lang-kotlin">PacketChannelBase</code> from <code class="lang-kotlin">ksrpc-packets</code> and provides platform-specific read/write channel adapters for JVM, Native, and JS targets.</p></div>    </div>
+      <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":ksrpc-sockets/appleMain" data-filterable-set=":ksrpc-sockets/appleMain" data-active="" data-toggle=":ksrpc-sockets/appleMain">apple</button><button class="platform-bookmark" data-filterable-current=":ksrpc-sockets/commonMain" data-filterable-set=":ksrpc-sockets/commonMain" data-toggle=":ksrpc-sockets/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":ksrpc-sockets/jsMain" data-filterable-set=":ksrpc-sockets/jsMain" data-toggle=":ksrpc-sockets/jsMain">js</button><button class="platform-bookmark" data-filterable-current=":ksrpc-sockets/jvmMain" data-filterable-set=":ksrpc-sockets/jvmMain" data-toggle=":ksrpc-sockets/jvmMain">jvm</button><button class="platform-bookmark" data-filterable-current=":ksrpc-sockets/linuxMain" data-filterable-set=":ksrpc-sockets/linuxMain" data-toggle=":ksrpc-sockets/linuxMain">linux</button><button class="platform-bookmark" data-filterable-current=":ksrpc-sockets/nativeMain" data-filterable-set=":ksrpc-sockets/nativeMain" data-toggle=":ksrpc-sockets/nativeMain">native</button><button class="platform-bookmark" data-filterable-current=":ksrpc-sockets/wasmJsMain" data-filterable-set=":ksrpc-sockets/wasmJsMain" data-toggle=":ksrpc-sockets/wasmJsMain">wasmJs</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":ksrpc-sockets/appleMain"><p class="paragraph">Implementation of ksrpc channels that communicate over POSIX sockets or standard input/output streams. Builds on <code class="lang-kotlin">PacketChannelBase</code> from <code class="lang-kotlin">ksrpc-packets</code> and provides platform-specific read/write channel adapters for JVM, Native, and JS targets.</p></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-sockets/commonMain"><p class="paragraph">Implementation of ksrpc channels that communicate over POSIX sockets or standard input/output streams. Builds on <code class="lang-kotlin">PacketChannelBase</code> from <code class="lang-kotlin">ksrpc-packets</code> and provides platform-specific read/write channel adapters for JVM, Native, and JS targets.</p></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-sockets/jsMain"><p class="paragraph">Implementation of ksrpc channels that communicate over POSIX sockets or standard input/output streams. Builds on <code class="lang-kotlin">PacketChannelBase</code> from <code class="lang-kotlin">ksrpc-packets</code> and provides platform-specific read/write channel adapters for JVM, Native, and JS targets.</p></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-sockets/jvmMain"><p class="paragraph">Implementation of ksrpc channels that communicate over POSIX sockets or standard input/output streams. Builds on <code class="lang-kotlin">PacketChannelBase</code> from <code class="lang-kotlin">ksrpc-packets</code> and provides platform-specific read/write channel adapters for JVM, Native, and JS targets.</p></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-sockets/linuxMain"><p class="paragraph">Implementation of ksrpc channels that communicate over POSIX sockets or standard input/output streams. Builds on <code class="lang-kotlin">PacketChannelBase</code> from <code class="lang-kotlin">ksrpc-packets</code> and provides platform-specific read/write channel adapters for JVM, Native, and JS targets.</p></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-sockets/nativeMain"><p class="paragraph">Implementation of ksrpc channels that communicate over POSIX sockets or standard input/output streams. Builds on <code class="lang-kotlin">PacketChannelBase</code> from <code class="lang-kotlin">ksrpc-packets</code> and provides platform-specific read/write channel adapters for JVM, Native, and JS targets.</p></div><div class="content sourceset-dependent-content" data-togglable=":ksrpc-sockets/wasmJsMain"><p class="paragraph">Implementation of ksrpc channels that communicate over POSIX sockets or standard input/output streams. Builds on <code class="lang-kotlin">PacketChannelBase</code> from <code class="lang-kotlin">ksrpc-packets</code> and provides platform-specific read/write channel adapters for JVM, Native, and JS targets.</p></div>    </div>
   </div>
   <h2 class="">Packages</h2>
-  <div class="table"><a data-name="-589978713%2FPackages%2F-1501569399" anchor-label="com.monkopedia.ksrpc.sockets" id="-589978713%2FPackages%2F-1501569399" data-filterable-set=":ksrpc-sockets/commonMain,:ksrpc-sockets/iosMain,:ksrpc-sockets/jsMain,:ksrpc-sockets/jvmMain,:ksrpc-sockets/linuxMain,:ksrpc-sockets/macosMain,:ksrpc-sockets/nativeMain,:ksrpc-sockets/wasmJsMain"></a>
-    <div class="table-row table-row_platform-tagged" data-filterable-current=":ksrpc-sockets/commonMain,:ksrpc-sockets/iosMain,:ksrpc-sockets/jsMain,:ksrpc-sockets/jvmMain,:ksrpc-sockets/linuxMain,:ksrpc-sockets/macosMain,:ksrpc-sockets/nativeMain,:ksrpc-sockets/wasmJsMain" data-filterable-set=":ksrpc-sockets/commonMain,:ksrpc-sockets/iosMain,:ksrpc-sockets/jsMain,:ksrpc-sockets/jvmMain,:ksrpc-sockets/linuxMain,:ksrpc-sockets/macosMain,:ksrpc-sockets/nativeMain,:ksrpc-sockets/wasmJsMain">
+  <div class="table"><a data-name="-589978713%2FPackages%2F-1605890064" anchor-label="com.monkopedia.ksrpc.sockets" id="-589978713%2FPackages%2F-1605890064" data-filterable-set=":ksrpc-sockets/appleMain,:ksrpc-sockets/commonMain,:ksrpc-sockets/jsMain,:ksrpc-sockets/jvmMain,:ksrpc-sockets/linuxMain,:ksrpc-sockets/nativeMain,:ksrpc-sockets/wasmJsMain"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":ksrpc-sockets/appleMain,:ksrpc-sockets/commonMain,:ksrpc-sockets/jsMain,:ksrpc-sockets/jvmMain,:ksrpc-sockets/linuxMain,:ksrpc-sockets/nativeMain,:ksrpc-sockets/wasmJsMain" data-filterable-set=":ksrpc-sockets/appleMain,:ksrpc-sockets/commonMain,:ksrpc-sockets/jsMain,:ksrpc-sockets/jvmMain,:ksrpc-sockets/linuxMain,:ksrpc-sockets/nativeMain,:ksrpc-sockets/wasmJsMain">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="com.monkopedia.ksrpc.sockets/index.html">com.monkopedia.ksrpc.sockets</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-589978713%2FPackages%2F-1501569399"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-589978713%2FPackages%2F-1605890064"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
           <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
+              <div class="platform-tag native-like">apple</div>
               <div class="platform-tag common-like">common</div>
-              <div class="platform-tag common-like">ios</div>
               <div class="platform-tag js-like">js</div>
               <div class="platform-tag jvm-like">jvm</div>
-              <div class="platform-tag common-like">linux</div>
-              <div class="platform-tag common-like">macos</div>
-              <div class="platform-tag common-like">native</div>
+              <div class="platform-tag native-like">linux</div>
+              <div class="platform-tag native-like">native</div>
               <div class="platform-tag wasm-like">wasmJs</div>
             </div>
           </div>
         </div>
-        <div><span class="brief-comment"><a data-name="-589978713%2FPackages%2F-1501569399" anchor-label="com.monkopedia.ksrpc.sockets" id="-589978713%2FPackages%2F-1501569399" data-filterable-set=":ksrpc-sockets/commonMain,:ksrpc-sockets/iosMain,:ksrpc-sockets/jsMain,:ksrpc-sockets/jvmMain,:ksrpc-sockets/linuxMain,:ksrpc-sockets/macosMain,:ksrpc-sockets/nativeMain,:ksrpc-sockets/wasmJsMain"></a>
+        <div><span class="brief-comment"><a data-name="-589978713%2FPackages%2F-1605890064" anchor-label="com.monkopedia.ksrpc.sockets" id="-589978713%2FPackages%2F-1605890064" data-filterable-set=":ksrpc-sockets/appleMain,:ksrpc-sockets/commonMain,:ksrpc-sockets/jsMain,:ksrpc-sockets/jvmMain,:ksrpc-sockets/linuxMain,:ksrpc-sockets/nativeMain,:ksrpc-sockets/wasmJsMain"></a>
             <p class="paragraph">Public API: <code class="lang-kotlin">ReadWriteChannel</code> factory functions, stdin/stdout stream helpers, and platform adapters for JVM <code class="lang-kotlin">InputStream</code>/<code class="lang-kotlin">OutputStream</code>, native POSIX file descriptors, and JS process streams.</p>
           </span></div>
       </div>
