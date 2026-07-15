@@ -24,16 +24,24 @@ across all published modules), so consumers upgrade without source changes.
   default CI is ubuntu-only and cannot cross-compile the iOS/macOS targets; apply
   the `ci-apple` label to a pull request (or trigger it manually) to compile every
   Apple target before merge (#241).
+- Removed unused Android/AGP plugin scaffolding: the never-applied
+  `com.android.application` / `com.android.library` / `kotlin.android` /
+  `kotlin.kapt` `apply false` declarations and their version-catalog entries
+  (including the pre-release `agp` pin that had to resolve on every build for
+  nothing). ksrpc has no Android targets.
 
 ### Dependencies
 
 - Kotlin 2.4.0 → 2.4.10; coroutines 1.10.2 → 1.11.0; serialization 1.10.0 →
   1.11.0; ktor 3.4.1 → 3.5.1; kotlinx-io 0.9.0 → 0.9.1; okio 3.12.0 → 3.17.0;
   atomicfu 0.31.0 → 0.33.0; slf4j 2.1.0-alpha1 → 2.0.18 (pre-release → stable).
+- nanoid (npm) 5.1.6 → 6.0.0. The `nanoid()` API is unchanged; v6 raises its
+  advisory engine floor to node ≥ 18 → ≥ 22 (a mainstream LTS). The `wasmJs`
+  binding now opts in to `kotlin.js.ExperimentalWasmJsInterop` (`@file:JsModule`
+  requires it under Kotlin 2.4.10).
 - Build-only: dokka 2.1.0 → 2.2.0; ktlint plugin 14.0.1 → 14.2.0; buildconfig
   6.0.6 → 6.0.10; vanniktech-publish 0.36.0 → 0.37.0; plugin-publish 2.0.0 →
-  2.1.1; clikt 5.0.3 → 5.1.0; kotlinx-benchmark 0.4.14 → 0.4.17; nanoid (npm)
-  5.1.6 → 5.1.16.
+  2.1.1; clikt 5.0.3 → 5.1.0; kotlinx-benchmark 0.4.14 → 0.4.17.
 
 ## 1.1.3 (2026-06-22)
 
