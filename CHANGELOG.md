@@ -1,5 +1,83 @@
 # Changelog
 
+## 1.1.4 (2026-07-15)
+
+Maintenance release: code-health cleanups, a new on-demand Apple CI job, and an
+external dependency refresh to latest stable. No API change (BCV byte-identical
+across all published modules), so consumers upgrade without source changes.
+
+### Cleanups
+
+- Removed three unused `kotlin.*.random` imports from the Kotlin/Native
+  `NanoIdUtils` (#235, PR #237).
+- Retired the deprecated `com.monkopedia.jnitest` compatibility shims — internal
+  (`@KsrpcInternal`) forwarders left behind by the #204/#209 JNI move, with no
+  in-tree consumers (#236, PR #238).
+- Deduplicated the byte-identical `js`/`wasmJs` `rpcObject()` implementation into
+  a shared `jsAndWasmJsMain` source set (#233, PR #240).
+- Consolidated the identical `iosMain`/`macosMain` `TermiosUtil` actual into the
+  shared `appleMain` source set (#234, PR #239).
+
+### Build / CI
+
+- Added an on-demand Apple compile CI job (`.github/workflows/ci-apple.yml`). The
+  default CI is ubuntu-only and cannot cross-compile the iOS/macOS targets; apply
+  the `ci-apple` label to a pull request (or trigger it manually) to compile every
+  Apple target before merge (#241).
+- Removed unused Android/AGP plugin scaffolding: the never-applied
+  `com.android.application` / `com.android.library` / `kotlin.android` /
+  `kotlin.kapt` `apply false` declarations and their version-catalog entries
+  (including the pre-release `agp` pin that had to resolve on every build for
+  nothing). ksrpc has no Android targets.
+
+### Dependencies
+
+- Kotlin 2.4.0 → 2.4.10; coroutines 1.10.2 → 1.11.0; serialization 1.10.0 →
+  1.11.0; ktor 3.4.1 → 3.5.1; kotlinx-io 0.9.0 → 0.9.1; okio 3.12.0 → 3.17.0;
+  atomicfu 0.31.0 → 0.33.0; slf4j 2.1.0-alpha1 → 2.0.18 (pre-release → stable).
+- nanoid (npm) 5.1.6 → 6.0.0. The `nanoid()` API is unchanged; v6 raises its
+  advisory engine floor to node ≥ 18 → ≥ 22 (a mainstream LTS). The `wasmJs`
+  binding now opts in to `kotlin.js.ExperimentalWasmJsInterop` (`@file:JsModule`
+  requires it under Kotlin 2.4.10).
+- Build-only: dokka 2.1.0 → 2.2.0; ktlint plugin 14.0.1 → 14.2.0; buildconfig
+  6.0.6 → 6.0.10; vanniktech-publish 0.36.0 → 0.37.0; plugin-publish 2.0.0 →
+  2.1.1; clikt 5.0.3 → 5.1.0; kotlinx-benchmark 0.4.14 → 0.4.17.
+
+## 1.1.3 (2026-06-22)
+
+Bug-fix patch release. No API change.
+
+- Fixed: the Kotlin/Native posix write channel no longer prints a stack trace to
+  stderr on normal connection teardown; the failure is still surfaced through the
+  channel and the write-failure hook (#225, PR #231).
+- Removed: the `com.monkopedia.ksrpc:ksrpc-compiler-plugin-native` artifact is no
+  longer published — a compiler-internal plugin jar resolved only by the Gradle
+  plugin's native-artifact path, which Kotlin 2.4 removed (#226). Projects
+  applying `com.monkopedia.ksrpc.plugin` need no change (#227, PR #232).
+- Internal: removed a dead `PendingPacket` class in `PacketChannelBase` (#224,
+  PR #230).
+
+## 1.1.2 (2026-06-11)
+
+Bug-fix patch release. No API change.
+
+- Fixed: a foreign `CancellationException` — one raised by a *different*
+  connection's teardown (for example a sub-service that bridges to a second
+  connection which then died) — could propagate into an unrelated connection's
+  receive loop and close its `MultiChannel`, taking down every other service
+  multiplexed on that connection. Such a cancellation is now isolated to the one
+  failing call; the hosting connection survives (#228, PR #229).
+
+## 1.1.1 (2026-06-03)
+
+Kotlin 2.4.0 patch release. No API change; generated code is BCV byte-identical.
+
+- Kotlin 2.3.20 → 2.4.0.
+- Compiler plugin adapted to the 2.4.0 IR/KGP API (annotations built via the new
+  `irAnnotation` builder; `getPluginArtifactForNative` removed).
+- KSP / `@AutoService` dropped (no KSP build targeted 2.4.0 yet); the
+  compiler-plugin registrar service file is now hand-maintained (#226).
+
 ## 1.1.0 (2026-05-28)
 
 Identical in library code to 1.1.0-RC1, plus the #220 docs/test polish (JNI

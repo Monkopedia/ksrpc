@@ -1,26 +1,25 @@
 [versions]
-kotlin = "2.4.0"
-kotlin-coroutines = "1.10.2"
-kotlin-io = "0.9.0"
-okio = "3.12.0"
-kotlin-serialization = "1.10.0"
-ktor = "3.4.1"
-slf4j = "2.1.0-alpha1"
-clikt = "5.0.3"
-agp = "9.0.0-rc01"
-dokka = "2.1.0"
-kotlin-atomicfu = "0.31.0"
+kotlin = "2.4.10"
+kotlin-coroutines = "1.11.0"
+kotlin-io = "0.9.1"
+okio = "3.17.0"
+kotlin-serialization = "1.11.0"
+ktor = "3.5.1"
+slf4j = "2.0.18"
+clikt = "5.1.0"
+dokka = "2.2.0"
+kotlin-atomicfu = "0.33.0"
 kotlin-compiletesting = "0.13.0"
 jnanoid = "2.0.0"
-nanoid = "5.1.6"
+nanoid = "6.0.0"
 ksrpctest = "0.11.1"
-gradleplugin = "2.0.0"
+gradleplugin = "2.1.1"
 hierynomus = "0.16.1"
-ktlint-plugin = "14.0.1"
-buildconfig = "6.0.6"
+ktlint-plugin = "14.2.0"
+buildconfig = "6.0.10"
 bcv = "0.18.1"
-vannik = "0.36.0"
-kotlinx-benchmark = "0.4.14"
+vannik = "0.37.0"
+kotlinx-benchmark = "0.4.17"
 
 [libraries]
 dokka-base = { module = "org.jetbrains.dokka:dokka-base", version.ref = "dokka" }
@@ -60,11 +59,7 @@ kotlinx-benchmark-runtime = { module = "org.jetbrains.kotlinx:kotlinx-benchmark-
 dokka = ["dokka-base", "dokka-gradle"]
 
 [plugins]
-android-application = { id = "com.android.application", version.ref = "agp" }
-android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotlin-atomicfu = { id = "org.jetbrains.kotlinx.atomicfu", version.ref = "kotlin-atomicfu"}
 kotlin-bcv = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "bcv" }
