@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.1.5 (2026-07-15)
+
+Bug-fix patch release. No API change.
+
+- Reverted the `js`/`wasmJs` `nanoid` npm dependency from `6.0.0` back to
+  `5.1.16`. nanoid 6 declares `engines.node = "^22 || ^24 || >=26"`, which
+  **excludes Node 25** — the default managed Node that Kotlin 2.4.10 provisions
+  for the Wasm/JS toolchain. A downstream consumer doing a full Wasm build hit
+  `:kotlinWasmNpmInstall` failing on the fresh nanoid@6 resolve. nanoid 5.1.16
+  (`engines.node = "^18 || >=20"`) has the identical `nanoid()` API and no such
+  restriction, so ksrpc no longer imposes a Node floor on its Wasm/JS consumers.
+  (The 6.0.0 bump in 1.1.4 was effectively inert in ksrpc's own build — the
+  `nanoid()` binding is unchanged — but it was published to consumers, hence this
+  correction.)
+
 ## 1.1.4 (2026-07-15)
 
 Maintenance release: code-health cleanups, a new on-demand Apple CI job, and an
