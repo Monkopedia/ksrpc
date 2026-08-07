@@ -21,10 +21,12 @@ import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.packets.internal.CONTENT_LENGTH
 import com.monkopedia.ksrpc.packets.internal.CONTENT_TYPE
+import com.monkopedia.ksrpc.packets.internal.MAX_CONTENT_LENGTH
 import com.monkopedia.ksrpc.sockets.internal.appendLine
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.close
+import io.ktor.utils.io.errors.IOException
 import io.ktor.utils.io.readFully
 import io.ktor.utils.io.readUTF8Line
 import io.ktor.utils.io.writeFully
@@ -78,6 +80,9 @@ internal class JsonRpcHeader(
     override suspend fun receive(): JsonElement? {
         receiveLock.withLock {
             val length = readContentLength() ?: return null
+            if (length < 0 || length > MAX_CONTENT_LENGTH) {
+                throw IOException("Refusing $CONTENT_LENGTH of $length (limit $MAX_CONTENT_LENGTH)")
+            }
             var byteArray = ByteArray(length)
             input.readFully(byteArray)
             return json.decodeFromString(serializer, byteArray.decodeToString())

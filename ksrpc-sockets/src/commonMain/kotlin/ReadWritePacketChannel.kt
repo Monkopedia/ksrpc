@@ -20,12 +20,14 @@ package com.monkopedia.ksrpc.sockets.internal
 import com.monkopedia.ksrpc.KsrpcEnvironment
 import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.packets.internal.CONTENT_LENGTH
+import com.monkopedia.ksrpc.packets.internal.MAX_CONTENT_LENGTH
 import com.monkopedia.ksrpc.packets.internal.PACKET_JSON
 import com.monkopedia.ksrpc.packets.internal.Packet
 import com.monkopedia.ksrpc.packets.internal.PacketChannelBase
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.close
+import io.ktor.utils.io.errors.IOException
 import io.ktor.utils.io.readFully
 import io.ktor.utils.io.writeFully
 import io.ktor.utils.io.writeStringUtf8
@@ -81,8 +83,14 @@ private suspend fun ByteReadChannel.readPacket(
     }
 }
 
-private suspend fun ByteReadChannel.readContent(params: Map<String, String>): String? {
+// Exposed (internal-marked) rather than private so the length bound below can be
+// tested directly, the same way readFields is.
+@KsrpcInternal
+suspend fun ByteReadChannel.readContent(params: Map<String, String>): String? {
     val length = params[CONTENT_LENGTH]?.toIntOrNull() ?: return null
+    if (length < 0 || length > MAX_CONTENT_LENGTH) {
+        throw IOException("Refusing $CONTENT_LENGTH of $length (limit $MAX_CONTENT_LENGTH)")
+    }
     val byteArray = ByteArray(length)
     readFully(byteArray)
     return byteArray.decodeToString()
