@@ -27,6 +27,7 @@ import io.ktor.utils.io.writeStringUtf8
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withTimeout
 
 /**
@@ -63,17 +64,55 @@ class ContentLengthBoundTest {
     /**
      * An in-range length still reads normally — the guard rejects, it does not
      * break the ordinary path.
-     *
-     * This does not exercise the inclusive edge at [MAX_CONTENT_LENGTH] itself:
-     * doing so means allocating 64 MiB and feeding it, which is not worth the
-     * cost per run. So the boundary is pinned from above (limit + 1 is refused)
-     * and not from below.
      */
     @Test
     fun testSocketTransportAcceptsInRangeContentLength() = runBlockingUnit {
         val channel = ByteChannel(autoFlush = true)
         channel.writeStringUtf8("hello")
         assertEquals("hello", channel.readContent(mapOf("Content-Length" to "5")))
+    }
+
+    /**
+     * Pins the boundary from below, so `>` cannot silently become `>=`.
+     *
+     * Exactly [MAX_CONTENT_LENGTH] must be accepted, and proving that without
+     * feeding 64 MiB means catching the transport one step later: the buffer is
+     * allocated and the read then waits for content that never arrives, so the
+     * timeout — rather than an [IOException] — is what says the guard let it
+     * through.
+     */
+    @Test
+    fun testSocketTransportAcceptsExactlyTheLimit() = runBlockingUnit {
+        val channel = ByteChannel(autoFlush = true)
+        assertFailsWith<TimeoutCancellationException> {
+            withTimeout(500) {
+                channel.readContent(mapOf("Content-Length" to "$MAX_CONTENT_LENGTH"))
+            }
+        }
+    }
+
+    /**
+     * A `Content-Length` above `Int.MAX_VALUE` does not parse, and treating an
+     * unparseable header as an absent one would hand the caller a frame it
+     * reads as header lines. It must be refused, not skipped.
+     */
+    @Test
+    fun testSocketTransportRejectsUnparseableContentLength() = runBlockingUnit {
+        val channel = ByteChannel(autoFlush = true)
+        assertFailsWith<IOException> {
+            withTimeout(5000) {
+                channel.readContent(mapOf("Content-Length" to "99999999999"))
+            }
+        }
+    }
+
+    @Test
+    fun testJsonRpcTransportRejectsUnparseableContentLength() = runBlockingUnit {
+        val input = ByteChannel(autoFlush = true)
+        val output = ByteChannel(autoFlush = true)
+        val transformer = (input to output).jsonHeader(ksrpcEnvironment { })
+        input.writeStringUtf8("Content-Length: 99999999999\r\n\r\n")
+        assertFailsWith<IOException> { withTimeout(5000) { transformer.receive() } }
     }
 
     @Test

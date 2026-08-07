@@ -28,8 +28,11 @@ const val CONTENT_TYPE = "Content-Type"
  *
  * `Content-Length` is supplied by the remote peer and the buffer is allocated
  * before any content is read, so an unbounded value lets one short header cost
- * the host its heap. Frames are chunked well below this (see `maxSize` on the
- * packet channel), so a legitimate frame does not approach it.
+ * the host its heap.
+ *
+ * 64 MiB is four thousand times the 16 KiB a packet channel chunks outbound
+ * frames to (`PacketChannelBase.DEFAULT_MAX_SIZE`), so no frame this codebase
+ * produces comes near it.
  */
 @KsrpcInternal
 const val MAX_CONTENT_LENGTH = 64 * 1024 * 1024

@@ -101,7 +101,11 @@ internal class JsonRpcHeader(
             val headerName = line.substring(0, separator).trim()
             if (headerName.equals(CONTENT_LENGTH, ignoreCase = true)) {
                 val headerValue = line.substring(separator + 1).trim()
+                // Present but unparseable must not read as absent: toIntOrNull()
+                // also returns null above Int.MAX_VALUE, and a null length here
+                // surfaces to the caller as end-of-stream.
                 contentLength = headerValue.toIntOrNull()
+                    ?: throw IOException("Unparseable $CONTENT_LENGTH: '$headerValue'")
             }
         }
     }

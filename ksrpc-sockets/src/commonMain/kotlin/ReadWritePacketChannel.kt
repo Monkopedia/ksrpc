@@ -87,7 +87,13 @@ private suspend fun ByteReadChannel.readPacket(
 // tested directly, the same way readFields is.
 @KsrpcInternal
 suspend fun ByteReadChannel.readContent(params: Map<String, String>): String? {
-    val length = params[CONTENT_LENGTH]?.toIntOrNull() ?: return null
+    val raw = params[CONTENT_LENGTH] ?: return null
+    // A header that is present but unparseable is not the same as an absent one.
+    // toIntOrNull() also returns null above Int.MAX_VALUE, so treating it as
+    // absent would let `Content-Length: 99999999999` skip the bound below and
+    // leave the caller reading the frame body as though it were header lines.
+    val length = raw.toIntOrNull()
+        ?: throw IOException("Unparseable $CONTENT_LENGTH: '$raw'")
     if (length < 0 || length > MAX_CONTENT_LENGTH) {
         throw IOException("Refusing $CONTENT_LENGTH of $length (limit $MAX_CONTENT_LENGTH)")
     }
