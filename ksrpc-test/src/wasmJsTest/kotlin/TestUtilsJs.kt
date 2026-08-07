@@ -96,8 +96,11 @@ actual typealias RunBlockingReturn = Any
 internal actual fun runBlockingUnit(
     function: suspend CoroutineScope.() -> Unit
 ): RunBlockingReturn {
+    // promise's block must produce a JsAny? on wasmJs, so the Unit-returning
+    // test body cannot be the last expression.
     @Suppress("CAST_NEVER_SUCCEEDS")
-    return GlobalScope.promise {
+    return GlobalScope.promise<JsAny?> {
         function()
+        null
     } as RunBlockingReturn
 }
