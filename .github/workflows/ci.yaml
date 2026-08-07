@@ -174,9 +174,26 @@ jobs:
       - name: Summarise executed counts
         if: always()
         run: |
-          for d in ksrpc-test/build/test-results/*/; do
-            n=$(grep -ho 'tests="[0-9]*"' "$d"*.xml 2>/dev/null | grep -o '[0-9]*' | paste -sd+ | bc || echo 0)
-            f=$(grep -ho 'failures="[0-9]*"' "$d"*.xml 2>/dev/null | grep -o '[0-9]*' | paste -sd+ | bc || echo 0)
+          # An absent results directory and a directory of empty results must not
+          # look the same, and neither may print an empty number: this step exists
+          # to distinguish "ran nothing" from "ran and passed", so it states 0
+          # explicitly and says NO-RESULTS-DIR when there is nothing to read.
+          # Uses sed rather than grep because grep matching nothing exits 1, which
+          # under a stricter shell would redden the job with a misleading message.
+          shopt -s nullglob
+          dirs=(ksrpc-test/build/test-results/*/)
+          if [ ${#dirs[@]} -eq 0 ]; then
+            echo "NO-RESULTS-DIR — no test task produced results; executed=0"
+            exit 0
+          fi
+          for d in "${dirs[@]}"; do
+            xmls=("$d"*.xml)
+            if [ ${#xmls[@]} -eq 0 ]; then
+              echo "$d executed=0 failures=0 (no XML in directory)"
+              continue
+            fi
+            n=$(sed -n 's/.*tests="\([0-9]*\)".*/\1/p' "${xmls[@]}" | awk '{s+=$1} END {print s+0}')
+            f=$(sed -n 's/.*failures="\([0-9]*\)".*/\1/p' "${xmls[@]}" | awk '{s+=$1} END {print s+0}')
             echo "$d executed=$n failures=$f"
           done
       - name: Upload results
