@@ -31,11 +31,13 @@ import com.monkopedia.ksrpc.jsonrpc.internal.jsonLine
 import com.monkopedia.ksrpc.sockets.internal.appendLine
 import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.close
+import io.ktor.utils.io.errors.IOException
 import io.ktor.utils.io.readFully
 import io.ktor.utils.io.readUTF8Line
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -213,7 +215,7 @@ class JsonRpcTest {
     }
 
     @Test
-    fun testHeaderReceiver_receiveWithInvalidContentLengthReturnsNull() = runBlockingUnit {
+    fun testHeaderReceiver_receiveWithInvalidContentLengthThrows() = runBlockingUnit {
         val outputChannel = ByteChannel()
         val inputChannel = ByteChannel()
         inputChannel.appendLine("Content-Length: abc")
@@ -222,7 +224,10 @@ class JsonRpcTest {
         inputChannel.appendLine("""{"jsonrpc":"2.0","result":-19,"id":1}""")
         inputChannel.flush()
         val sender = (inputChannel to outputChannel).jsonHeader(ksrpcEnvironment { })
-        assertEquals(null, sender.receive())
+        // Was assertEquals(null, ...): returning null made the reader loop in
+        // JsonRpcWriterBase `continue` with the frame body still queued, so the
+        // next well-formed frame was swallowed and the connection hung (#249).
+        assertFailsWith<IOException> { sender.receive() }
     }
 
     @Test

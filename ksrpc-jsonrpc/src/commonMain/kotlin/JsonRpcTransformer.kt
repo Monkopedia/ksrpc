@@ -101,13 +101,15 @@ internal class JsonRpcHeader(
             val headerName = line.substring(0, separator).trim()
             if (headerName.equals(CONTENT_LENGTH, ignoreCase = true)) {
                 val headerValue = line.substring(separator + 1).trim()
-                // Deliberately tolerant, unlike the socket transport: an
-                // unparseable length leaves this null, receive() returns null,
-                // and the caller treats that as end-of-stream and tears the
-                // connection down. Nothing resumes mid-frame, so there is no
-                // desync to prevent. Pinned by
-                // JsonRpcTest.testHeaderReceiver_receiveWithInvalidContentLengthReturnsNull.
+                // Refused rather than skipped, for the same reason as the socket
+                // transport: the reader loop in JsonRpcWriterBase does
+                // `comm.receive() ?: continue`, so a null length resumes header
+                // parsing with the frame body still queued — the next
+                // well-formed frame is swallowed and the connection then hangs.
+                // toIntOrNull() also returns null above Int.MAX_VALUE, so this
+                // is the path `Content-Length: 99999999999` takes.
                 contentLength = headerValue.toIntOrNull()
+                    ?: throw IOException("Unparseable $CONTENT_LENGTH: '$headerValue'")
             }
         }
     }
