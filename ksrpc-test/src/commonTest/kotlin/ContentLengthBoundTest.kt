@@ -60,8 +60,17 @@ class ContentLengthBoundTest {
         }
     }
 
+    /**
+     * An in-range length still reads normally — the guard rejects, it does not
+     * break the ordinary path.
+     *
+     * This does not exercise the inclusive edge at [MAX_CONTENT_LENGTH] itself:
+     * doing so means allocating 64 MiB and feeding it, which is not worth the
+     * cost per run. So the boundary is pinned from above (limit + 1 is refused)
+     * and not from below.
+     */
     @Test
-    fun testSocketTransportAcceptsLengthAtTheLimit() = runBlockingUnit {
+    fun testSocketTransportAcceptsInRangeContentLength() = runBlockingUnit {
         val channel = ByteChannel(autoFlush = true)
         channel.writeStringUtf8("hello")
         assertEquals("hello", channel.readContent(mapOf("Content-Length" to "5")))
