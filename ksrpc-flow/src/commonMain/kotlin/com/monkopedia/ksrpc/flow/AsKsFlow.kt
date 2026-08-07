@@ -16,7 +16,6 @@
 package com.monkopedia.ksrpc.flow
 
 import com.monkopedia.ksrpc.RpcFailure
-import com.monkopedia.ksrpc.asString
 import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -41,6 +40,10 @@ import kotlinx.coroutines.launch
  *
  * The [KsFlowService] does NOT auto-close on collection completion — it
  * stays alive until [KsFlowService.close] is called.
+ *
+ * If the flow throws, the collector receives the exception's message. The stack
+ * trace is not sent, matching what a `@KsMethod` call does with a server-side
+ * failure.
  */
 fun <T> Flow<T>.asKsFlow(): KsFlowService<T> = KsFlowServiceImpl(this)
 
@@ -62,7 +65,13 @@ private class KsFlowServiceImpl<T>(private val source: Flow<T>) : KsFlowService<
                 // Collection was cancelled — don't send onError for cancellation.
                 throw e
             } catch (e: Throwable) {
-                collector.onError(RpcFailure(e.asString))
+                // Message only, never `asString`: on JVM and Native that is the
+                // full stack trace, and this collector is the remote peer's, so
+                // it would put server file names, line numbers and library
+                // frames on the wire. Matches RpcMethod.encodeError and
+                // HostSerializedServiceImpl, which both send `t.message` and
+                // keep the stack server-side (#250).
+                collector.onError(RpcFailure(e.message ?: e.toString()))
             }
         }
         return object : KsCollectionToken {

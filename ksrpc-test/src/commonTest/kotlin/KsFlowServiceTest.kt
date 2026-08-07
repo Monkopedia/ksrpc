@@ -155,6 +155,45 @@ class KsFlowServiceTest {
     )
 
     /**
+     * The client gets the exception's message and NOT the server's stack trace.
+     *
+     * `asString` is the full `printStackTrace` output on JVM and the message
+     * plus frames on Native, and the collector it is handed to belongs to the
+     * remote peer — so using it put server file names, line numbers and library
+     * frames on the wire, while the ordinary `@KsMethod` error path sent only
+     * `t.message` (#250).
+     */
+    @Test
+    fun testErrorDoesNotLeakServerStackTrace() = executePipe(
+        serviceJob = { c ->
+            val flowService = flow<String> {
+                throw RuntimeException("boom-from-server")
+            }.asKsFlow()
+            c.registerDefault(flowService.serialized<KsFlowService<String>, String>(c.env))
+        },
+        clientJob = { c ->
+            val stub = c.defaultChannel().toStub<KsFlowService<String>, String>()
+            val exception = assertFailsWith<RpcException> { stub.toList() }
+            val message = exception.message
+            assertTrue(
+                message.contains("boom-from-server"),
+                "expected the server message to survive; got $message"
+            )
+            // A stack trace names the throwing frame. Asserting on the package
+            // rather than on "at " keeps this from passing for the wrong reason
+            // on a platform whose frames are formatted differently.
+            assertTrue(
+                !message.contains("com.monkopedia.ksrpc.flow"),
+                "server stack frames reached the client: $message"
+            )
+            assertTrue(
+                !message.contains("RuntimeException"),
+                "server exception class reached the client: $message"
+            )
+        }
+    )
+
+    /**
      * Cancellation: client calls `cancelCollection`, server-side collection
      * job is cancelled.
      */
