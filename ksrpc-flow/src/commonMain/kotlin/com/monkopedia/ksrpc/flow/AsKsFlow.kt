@@ -20,6 +20,7 @@ import com.monkopedia.ksrpc.asString
 import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
@@ -34,6 +35,10 @@ import kotlinx.coroutines.launch
  * [KsFlowCollector]. The returned [KsCollectionToken] can cancel that
  * collection.
  *
+ * The collection is subscribed to this flow before `startCollection` returns,
+ * so a hot source (a `SharedFlow` with no replay, for instance) can emit as
+ * soon as the caller holds the token without those emissions being missed.
+ *
  * The [KsFlowService] does NOT auto-close on collection completion — it
  * stays alive until [KsFlowService.close] is called.
  */
@@ -44,7 +49,10 @@ private class KsFlowServiceImpl<T>(private val source: Flow<T>) : KsFlowService<
 
     override suspend fun startCollection(collector: KsFlowCollector<T>): KsCollectionToken {
         val scope = CoroutineScope(coroutineContext + parentJob)
-        val job = scope.launch {
+        // UNDISPATCHED so the collection subscribes to [source] before this call
+        // returns; a plain launch only schedules the body, and a hot source drops
+        // everything emitted between the token returning and the body running.
+        val job = scope.launch(start = CoroutineStart.UNDISPATCHED) {
             try {
                 source.collect { item ->
                     collector.onItem(item)

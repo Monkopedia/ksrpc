@@ -33,6 +33,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
@@ -236,6 +237,47 @@ class KsFlowServiceTest {
             )
         }
     )
+
+    /**
+     * A hot source must be subscribed by the time `startCollection` returns.
+     * If the collection is only scheduled, everything the source emits between
+     * the token returning and the collection starting is dropped and the
+     * collector waits out its timeout instead (#247).
+     *
+     * Repeated because a scheduled collection can still win the race by luck —
+     * it subscribed in time in roughly 6% of rounds when this was measured, so
+     * a single round would let the regression through about that often.
+     */
+    @Test
+    fun testStartCollectionSubscribesBeforeReturning() = runBlockingUnit {
+        repeat(100) { round ->
+            val source = MutableSharedFlow<String>(replay = 0)
+            val flowService = source.asKsFlow()
+            val received = CompletableDeferred<String>()
+            val collector = object : KsFlowCollector<String> {
+                override suspend fun onItem(item: String) {
+                    received.complete(item)
+                }
+
+                override suspend fun onError(error: RpcFailure) = Unit
+
+                override suspend fun onComplete() = Unit
+
+                override suspend fun close() = Unit
+            }
+            flowService.startCollection(collector)
+            assertEquals(
+                1,
+                source.subscriptionCount.value,
+                "round $round: startCollection returned before subscribing to the source"
+            )
+            source.emit("emitted-right-after-token")
+            withTimeout(5000) {
+                assertEquals("emitted-right-after-token", received.await())
+            }
+            flowService.close()
+        }
+    }
 
     private fun executePipe(
         serviceJob: suspend (Connection<String>) -> Unit,
