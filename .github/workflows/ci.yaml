@@ -140,3 +140,48 @@ jobs:
           :ksrpc-binary-okio:jvmJar
       - name: Run compiler plugin tests
         run: cd compiler && ./gradlew test
+
+  # SPIKE / DO NOT MERGE — measurement job for #251.
+  # The js and wasmJs suites have never run in CI. This job exists to answer
+  # three questions on a clean GitHub runner rather than one developer's box:
+  #   1. does karma find a browser without CHROME_BIN being set by hand?
+  #   2. do the failures match what a local run produced (js 12, wasm ~46)?
+  #   3. what does it cost in wall-clock?
+  # continue-on-error so the measurement cannot block the rest of CI while the
+  # suites are known-failing. That is exactly the shape this repo has no other
+  # instance of, and it must not survive into a real job.
+  js-wasm-tests-measurement:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Report browser availability before running anything
+        run: |
+          echo "CHROME_BIN=${CHROME_BIN:-unset}"
+          which google-chrome chromium chromium-browser || echo "no chrome on PATH"
+      - name: Run js suite
+        run: ./gradlew :ksrpc-test:jsTest --continue
+      - name: Run wasmJs suite
+        if: always()
+        run: ./gradlew :ksrpc-test:wasmJsTest --continue
+      - name: Summarise executed counts
+        if: always()
+        run: |
+          for d in ksrpc-test/build/test-results/*/; do
+            n=$(grep -ho 'tests="[0-9]*"' "$d"*.xml 2>/dev/null | grep -o '[0-9]*' | paste -sd+ | bc || echo 0)
+            f=$(grep -ho 'failures="[0-9]*"' "$d"*.xml 2>/dev/null | grep -o '[0-9]*' | paste -sd+ | bc || echo 0)
+            echo "$d executed=$n failures=$f"
+          done
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: js-wasm-test-results
+          path: ksrpc-test/build/test-results/
