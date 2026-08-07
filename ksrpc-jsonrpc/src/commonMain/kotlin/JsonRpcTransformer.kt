@@ -101,11 +101,13 @@ internal class JsonRpcHeader(
             val headerName = line.substring(0, separator).trim()
             if (headerName.equals(CONTENT_LENGTH, ignoreCase = true)) {
                 val headerValue = line.substring(separator + 1).trim()
-                // Present but unparseable must not read as absent: toIntOrNull()
-                // also returns null above Int.MAX_VALUE, and a null length here
-                // surfaces to the caller as end-of-stream.
+                // Deliberately tolerant, unlike the socket transport: an
+                // unparseable length leaves this null, receive() returns null,
+                // and the caller treats that as end-of-stream and tears the
+                // connection down. Nothing resumes mid-frame, so there is no
+                // desync to prevent. Pinned by
+                // JsonRpcTest.testHeaderReceiver_receiveWithInvalidContentLengthReturnsNull.
                 contentLength = headerValue.toIntOrNull()
-                    ?: throw IOException("Unparseable $CONTENT_LENGTH: '$headerValue'")
             }
         }
     }

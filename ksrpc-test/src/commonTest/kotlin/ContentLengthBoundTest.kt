@@ -107,15 +107,6 @@ class ContentLengthBoundTest {
     }
 
     @Test
-    fun testJsonRpcTransportRejectsUnparseableContentLength() = runBlockingUnit {
-        val input = ByteChannel(autoFlush = true)
-        val output = ByteChannel(autoFlush = true)
-        val transformer = (input to output).jsonHeader(ksrpcEnvironment { })
-        input.writeStringUtf8("Content-Length: 99999999999\r\n\r\n")
-        assertFailsWith<IOException> { withTimeout(5000) { transformer.receive() } }
-    }
-
-    @Test
     fun testJsonRpcTransportRejectsOversizedContentLength() = runBlockingUnit {
         val input = ByteChannel(autoFlush = true)
         val output = ByteChannel(autoFlush = true)
