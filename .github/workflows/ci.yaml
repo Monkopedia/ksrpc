@@ -21,6 +21,13 @@ jobs:
         run: ./gradlew licenseCheckForKotlin --continue
       - name: Check API compatibility
         run: ./gradlew apiCheck
+      # apiCheck compiles the js/wasmJs klibs but never resolves the npm graph,
+      # so a dependency whose `engines` exclude the toolchain's default Node
+      # passes every other check and breaks in a consumer's build instead. That
+      # is what shipped in 1.1.4 (nanoid 6 excludes Node 25) and was reverted in
+      # 1.1.5. This step is the check that would have caught it (#246).
+      - name: Resolve the js/wasm npm graph
+        run: ./gradlew kotlinNpmInstall kotlinWasmNpmInstall
 
   jvm-tests:
     # Pure-JVM modules. The JNI/native-backed jvmTest tasks
