@@ -23,4 +23,18 @@ const val CONTENT_LENGTH = "Content-Length"
 @KsrpcInternal
 const val CONTENT_TYPE = "Content-Type"
 
+/**
+ * Largest inbound frame a length-prefixed transport will allocate a buffer for.
+ *
+ * `Content-Length` is supplied by the remote peer and the buffer is allocated
+ * before any content is read, so an unbounded value lets one short header cost
+ * the host its heap.
+ *
+ * 64 MiB is four thousand times the 16 KiB a packet channel chunks outbound
+ * frames to (`PacketChannelBase.DEFAULT_MAX_SIZE`), so no frame this codebase
+ * produces comes near it.
+ */
+@KsrpcInternal
+const val MAX_CONTENT_LENGTH = 64 * 1024 * 1024
+
 internal const val METHOD = "Method"
