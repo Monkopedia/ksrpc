@@ -16,6 +16,9 @@
 package com.monkopedia.ksrpc.sockets.internal
 
 import com.monkopedia.ksrpc.annotation.KsrpcInternal
+import com.monkopedia.ksrpc.packets.internal.MAX_CONTENT_LENGTH
+import com.monkopedia.ksrpc.packets.internal.MAX_HEADER_LINES
+import com.monkopedia.ksrpc.packets.internal.MAX_HEADER_LINE_LENGTH
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.errors.IOException
@@ -36,11 +39,24 @@ suspend fun ByteWriteChannel.appendLine(s: String = "") {
     writeStringUtf8("\r\n")
 }
 
+/**
+ * Reads header lines up to the blank terminator.
+ *
+ * Both bounds come from the peer being untrusted: the line count is capped at
+ * [MAX_HEADER_LINES] and each line at [MAX_HEADER_LINE_LENGTH], so a peer that omits
+ * the terminator or never sends a newline cannot grow the map or the read forever.
+ * Same reasoning as [MAX_CONTENT_LENGTH] on the content that follows.
+ */
 @KsrpcInternal
 suspend fun ByteReadChannel.readFields(): Map<String, String> {
     val fields = LinkedHashMap<String, String>()
+    var lines = 0
     while (true) {
-        val line = readUTF8Line() ?: throw IOException("$this is closed for reading")
+        if (lines++ >= MAX_HEADER_LINES) {
+            throw IOException("Refusing more than $MAX_HEADER_LINES header lines")
+        }
+        val line = readUTF8Line(MAX_HEADER_LINE_LENGTH)
+            ?: throw IOException("$this is closed for reading")
         if (line.isEmpty()) {
             return fields
         }
