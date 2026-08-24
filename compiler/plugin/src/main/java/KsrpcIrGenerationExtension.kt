@@ -161,6 +161,9 @@ class KsrpcIrGenerationExtension(private val report: MessageCollector) : IrGener
         for (transformer in transformers) {
             moduleFragment.acceptChildrenVoid(transformer)
         }
+        // Runs after the transformers above: the anchor initializer references the
+        // Stub class, which StubGeneration must have produced first.
+        moduleFragment.acceptChildrenVoid(WasmAnchorGeneration(pluginContext, env))
     }
 
     private fun validate(cls: ServiceClass, env: KsrpcGenerationEnvironment): Boolean {
