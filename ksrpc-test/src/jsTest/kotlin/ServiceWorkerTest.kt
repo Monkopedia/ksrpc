@@ -29,7 +29,12 @@ import kotlin.test.assertTrue
 class ServiceWorkerTest {
     @Test
     fun wasmServiceWorkerConnection_methods() = runBlockingUnit {
-        if (!hasWindow()) return@runBlockingUnit
+        if (!hasWindow()) {
+            return@runBlockingUnit skipUnsupported(
+                "wasmServiceWorkerConnection_methods",
+                "no window: service workers need a browsing context"
+            )
+        }
 
         useWebWorkerService { service ->
             assertEquals("pong:ping:js", service.ping("ping"))
@@ -41,7 +46,12 @@ class ServiceWorkerTest {
 
     @Test
     fun wasmServiceWorkerConnection_subservice() = runBlockingUnit {
-        if (!hasWindow()) return@runBlockingUnit
+        if (!hasWindow()) {
+            return@runBlockingUnit skipUnsupported(
+                "wasmServiceWorkerConnection_subservice",
+                "no window: service workers need a browsing context"
+            )
+        }
         useWebWorkerService { service ->
             service.subservice("sub").use { sub ->
                 assertEquals("sub a b", sub.rpc("a" to "b"))
@@ -52,7 +62,12 @@ class ServiceWorkerTest {
 
     @Test
     fun wasmServiceWorkerConnection_introspection() = runBlockingUnit {
-        if (!hasWindow()) return@runBlockingUnit
+        if (!hasWindow()) {
+            return@runBlockingUnit skipUnsupported(
+                "wasmServiceWorkerConnection_introspection",
+                "no window: service workers need a browsing context"
+            )
+        }
         useWebWorkerService { service ->
             service.getIntrospection().use { introspection ->
                 val serviceName = introspection.getServiceName()
@@ -74,8 +89,10 @@ class ServiceWorkerTest {
     @Test
     fun wasmServiceWorkerConnection_introspection_introspection() = runBlockingUnit {
         if (!hasWindow()) {
-            println("No window found")
-            return@runBlockingUnit
+            return@runBlockingUnit skipUnsupported(
+                "wasmServiceWorkerConnection_introspection_introspection",
+                "no window: service workers need a browsing context"
+            )
         }
         useWebWorkerService { service ->
             service.getIntrospection().getIntrospection().use { introspection ->
@@ -93,7 +110,12 @@ class ServiceWorkerTest {
 
     @Test
     fun wasmServiceWorkerConnection_introspection_endpointInfo() = runBlockingUnit {
-        if (!hasWindow()) return@runBlockingUnit
+        if (!hasWindow()) {
+            return@runBlockingUnit skipUnsupported(
+                "wasmServiceWorkerConnection_introspection_endpointInfo",
+                "no window: service workers need a browsing context"
+            )
+        }
         useWebWorkerService { service ->
             service.getIntrospection().use { introspection ->
                 val rpcInfo = introspection.getEndpointInfo("rpc")
@@ -128,7 +150,12 @@ class ServiceWorkerTest {
 
     @Test
     fun wasmServiceWorkerConnection_missingEndpoint() = runBlockingUnit {
-        if (!hasWindow()) return@runBlockingUnit
+        if (!hasWindow()) {
+            return@runBlockingUnit skipUnsupported(
+                "wasmServiceWorkerConnection_missingEndpoint",
+                "no window: service workers need a browsing context"
+            )
+        }
         createServiceWorkerWithConnection(jsWorkerUrl(), ksrpcEnvironment { }).use { connection ->
             val stub = connection.defaultChannel().toStub<EndpointNotFoundExtended, String>()
             val exception = assertFailsWith<RpcEndpointException> {
@@ -142,7 +169,12 @@ class ServiceWorkerTest {
 
     @Test
     fun wasmServiceWorkerConnection_remoteDecodeFailureIsRpcException() = runBlockingUnit {
-        if (!hasWindow()) return@runBlockingUnit
+        if (!hasWindow()) {
+            return@runBlockingUnit skipUnsupported(
+                "wasmServiceWorkerConnection_remoteDecodeFailureIsRpcException",
+                "no window: service workers need a browsing context"
+            )
+        }
         createServiceWorkerWithConnection(jsWorkerUrl(), ksrpcEnvironment { }).use { connection ->
             val channel = connection.defaultChannel()
             val response = channel.call("ping", CallData.create("123"), callId = null)
@@ -166,4 +198,13 @@ class ServiceWorkerTest {
 
 private fun jsWorkerUrl(): String = "base/kotlin/ksrpc-service-worker-test.js"
 
+/**
+ * Whether this browser context has a `window`.
+ *
+ * Every test in this class drives a real service worker through [useWebWorkerService],
+ * which needs a browsing context to register one. The karma launcher does not always
+ * provide a `window`, so the tests guard on this and no-op when it is absent — which
+ * `kotlin.test` reports as a pass. The guards route through `skipUnsupported` so the
+ * no-op is named rather than silent; see issue #261.
+ */
 private fun hasWindow(): Boolean = js("typeof window !== 'undefined'") as Boolean
