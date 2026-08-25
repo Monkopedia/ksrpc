@@ -141,7 +141,7 @@ abstract class RpcFunctionalityTest(
     fun testHttpPath() = runBlockingUnit {
         if (TestType.HTTP !in supportedTypes) {
             return@runBlockingUnit skipUnsupported(
-                "testHttpPassthrough",
+                "testHttpPath",
                 "HTTP hosting is unsupported here"
             )
         }
@@ -187,7 +187,7 @@ abstract class RpcFunctionalityTest(
     fun testWebsocketPath() = runBlockingUnit {
         if (TestType.WEBSOCKET !in supportedTypes) {
             return@runBlockingUnit skipUnsupported(
-                "testWebsocketPassthrough",
+                "testWebsocketPath",
                 "websocket hosting is unsupported here"
             )
         }

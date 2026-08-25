@@ -33,13 +33,21 @@ const val SKIP_MARKER = "KSRPC-SKIP"
  * the no-ops are countable after the fact:
  *
  * ```
- * grep -rho 'KSRPC-SKIP [a-zA-Z]*' build/test-results/<task> | sort | uniq -c
+ * grep -rho 'KSRPC-SKIP [A-Za-z0-9_]*' build/test-results/<task> | sort | uniq -c
  * ```
  *
+ * The character class must include `_` and digits: every guard in the browser-only
+ * `ServiceWorkerTest` is named like `wasmServiceWorkerConnection_methods`, and `[a-zA-Z]*`
+ * truncates all seven of them to one `wasmServiceWorkerConnection` bucket — a report that
+ * looks complete while merging distinct things, which is the defect this whole mechanism
+ * exists to expose.
+ *
  * On wasm that reports 48 no-ops out of 395 tests across 15 classes — three quarters of
- * them `testHttpPassthrough`, `testWebsocketPassthrough` and `testServiceWorkerPassthrough`
- * from [RpcFunctionalityTest]. It does not appear in the Gradle console output for browser
- * runs, only in the XML.
+ * them `testHttpPath`, `testWebsocketPath` and `testServiceWorkerPassthrough` from
+ * [RpcFunctionalityTest]. It does not appear in the Gradle console output for browser runs,
+ * only in the XML. **The 395 is not stable**: that suite reports between 388 and 395 tests
+ * on an unchanged commit (issue #255), so treat the ratio as approximate and re-measure
+ * rather than trusting this number.
  *
  * Turning a fired guard into a *failure* when the platform claims to support the capability
  * would be a stronger signal, but changes the pass/fail behaviour of a base class shared by
