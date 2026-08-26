@@ -70,7 +70,12 @@ abstract class RpcFunctionalityTest(
 
     @Test
     fun testSerializePassthrough() = runBlockingUnit {
-        if (TestType.SERIALIZE !in supportedTypes) return@runBlockingUnit
+        if (TestType.SERIALIZE !in supportedTypes) {
+            return@runBlockingUnit skipUnsupported(
+                "testSerializePassthrough",
+                "in-process serialization is unsupported here"
+            )
+        }
         val serializedChannel = serializedChannel()
         val channel = HostSerializedChannelImpl(createEnv())
         try {
@@ -86,7 +91,12 @@ abstract class RpcFunctionalityTest(
 
     @Test
     fun testPipePassthrough() = runBlockingUnit {
-        if (TestType.PIPE !in supportedTypes) return@runBlockingUnit
+        if (TestType.PIPE !in supportedTypes) {
+            return@runBlockingUnit skipUnsupported(
+                "testPipePassthrough",
+                "pipe transport is unsupported here"
+            )
+        }
         val (output, input) = createPipe()
         val (so, si) = createPipe()
         val serverConnection = (si to output).asConnection(createEnv())
@@ -129,7 +139,12 @@ abstract class RpcFunctionalityTest(
 
     @Test
     fun testHttpPath() = runBlockingUnit {
-        if (TestType.HTTP !in supportedTypes) return@runBlockingUnit
+        if (TestType.HTTP !in supportedTypes) {
+            return@runBlockingUnit skipUnsupported(
+                "testHttpPath",
+                "HTTP hosting is unsupported here"
+            )
+        }
         val path = "/rpc/"
         httpTest(
             serve = {
@@ -170,7 +185,12 @@ abstract class RpcFunctionalityTest(
 
     @Test
     fun testWebsocketPath() = runBlockingUnit {
-        if (TestType.WEBSOCKET !in supportedTypes) return@runBlockingUnit
+        if (TestType.WEBSOCKET !in supportedTypes) {
+            return@runBlockingUnit skipUnsupported(
+                "testWebsocketPath",
+                "websocket hosting is unsupported here"
+            )
+        }
         val path = "/rpc/"
         httpTest(
             serve = {
@@ -200,7 +220,12 @@ abstract class RpcFunctionalityTest(
 
     @Test
     fun testServiceWorkerPassthrough() = runBlockingUnit {
-        if (TestType.SERVICE_WORKER !in supportedTypes) return@runBlockingUnit
+        if (TestType.SERVICE_WORKER !in supportedTypes) {
+            return@runBlockingUnit skipUnsupported(
+                "testServiceWorkerPassthrough",
+                "service workers are unsupported here"
+            )
+        }
         serviceWorkerTest(workerServiceName) { connection ->
             verifyOnChannel(connection.defaultChannel())
         }
