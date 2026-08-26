@@ -17,6 +17,62 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Dumps the klib API from a real Apple host. Manual dispatch only, so a `ci-apple`
+  # labelled pull request keeps doing exactly what it did before: compile, nothing else.
+  #
+  # Why this exists: the committed *.klib.api files were produced on Linux with
+  # kotlin.native.enableKlibsCrossCompilation=false, so the five Apple targets were never
+  # built and their ABI was inferred from the dump rather than measured. Dumping on Linux
+  # with cross-compilation on disagrees with the committed files in both directions, and
+  # two dumps cannot say which side is wrong. This job is the third data point. It
+  # uploads rather than compares, because the comparison is an investigation and not a
+  # pass/fail gate — see issue #253, where it showed that `ksrpc-jni`'s committed dump is
+  # correct and the cross-compiled one invents 22 declarations, while `ksrpc-sockets`'
+  # committed dump records an overload no target produces.
+  apple-api-dump:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Cache Kotlin/Native toolchain
+        uses: actions/cache@v4
+        with:
+          path: ~/.konan
+          key: konan-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml', 'gradle.properties') }}
+          restore-keys: |
+            konan-${{ runner.os }}-
+      - name: Dump the klib API
+        run: >
+          ./gradlew apiDump
+          -Pkotlin.native.enableKlibsCrossCompilation=true
+          --console=plain
+      - name: Collect the dumps
+        # Both the merged per-module dumps and the per-target intermediates under
+        # build/api/<target>/ — the per-target ones are what attribute a declaration to
+        # a specific Apple target rather than to the merge.
+        run: |
+          set -eu
+          mkdir -p /tmp/klib-api
+          find . -name '*.klib.api' -not -path './build/*' -print0 |
+            while IFS= read -r -d '' f; do
+              cp "$f" "/tmp/klib-api/$(printf '%s' "$f" | sed 's|^\./||; s|/|__|g')"
+            done
+          ls -la /tmp/klib-api
+      - name: Upload the dumps
+        uses: actions/upload-artifact@v4
+        with:
+          name: apple-klib-api
+          path: /tmp/klib-api
+          if-no-files-found: error
+
   apple:
     # Runs only when the PR carries the `ci-apple` label (or on manual dispatch),
     # so ordinary pushes don't spend macOS minutes.
