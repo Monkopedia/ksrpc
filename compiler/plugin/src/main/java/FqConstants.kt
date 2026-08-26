@@ -25,6 +25,17 @@ object FqConstants {
     val RPC_ENDPOINT_EXCEPTION =
         ClassId(FQPKG, Name.identifier("RpcEndpointException"))
     val RPC_OBJECT_KEY = ClassId(FQPKG, Name.identifier("RpcObjectKey"))
+
+    /**
+     * `EagerInitialization` — applied to the wasm anchor properties so their initializers
+     * run at module load. The wasm-js stdlib declares it in `kotlin`; Kotlin/JS declares
+     * it in `kotlin.js`. Both are tried, in that order, because only the first is
+     * reachable on the target that needs it.
+     */
+    val EAGER_INITIALIZATION_CANDIDATES = listOf(
+        ClassId(FqName("kotlin"), Name.identifier("EagerInitialization")),
+        ClassId(FqName("kotlin.js"), Name.identifier("EagerInitialization"))
+    )
     val RPC_SERVICE = ClassId(FQPKG, Name.identifier("RpcService"))
     val RPC_HOST_SERVICE = ClassId(FQPKG, Name.identifier("RpcHostService"))
     val FQRPC_HOST_SERVICE = FqName("com.monkopedia.ksrpc.RpcHostService")

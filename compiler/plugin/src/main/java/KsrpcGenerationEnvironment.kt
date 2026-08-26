@@ -106,6 +106,13 @@ class KsrpcGenerationEnvironment(
     val rpcObjectKey = maybeReferenceClass(FqConstants.RPC_OBJECT_KEY)
 
     /**
+     * `EagerInitialization`, or null off js/wasm where it does not exist.
+     * [WasmAnchorGeneration] is the only consumer and only runs on wasm-js.
+     */
+    val eagerInitialization =
+        FqConstants.EAGER_INITIALIZATION_CANDIDATES.firstNotNullOfOrNull(::maybeReferenceClass)
+
+    /**
      * `@KsrpcGenerated` — applied by the plugin to every generated synthetic
      * declaration (Stub, Obj, Companion, subtype companion) so consumers using
      * binary-compatibility-validator can filter these out of their API dumps via

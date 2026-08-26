@@ -25,6 +25,7 @@ class FirKsrpcRegistrar : FirExtensionRegistrar() {
         +::FirKsrpcObjGenerator
         +::FirSubtypeCompanionGenerator
         +::FirKsrpcIntrospectionGenerator
+        +::FirKsrpcWasmAnchorGenerator
         +::KsrpcFirCheckersComponent
     }
 }
