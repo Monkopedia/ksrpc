@@ -67,6 +67,15 @@ abstract class PacketChannelBase<T>(
     private val receiveLock = Mutex()
     private var isClosed = false
     private var callLock = Mutex()
+
+    /**
+     * Size at which **outgoing** frames are chunked. Every use is on the send path.
+     *
+     * This bounds nothing inbound. A peer's frames are bounded by
+     * [MAX_CONTENT_LENGTH] on length-prefixed transports and by nothing at all on the
+     * inbound chunk channel — see issue #263 — so do not read this as an inbound
+     * frame limit.
+     */
     protected open val maxSize: Long = DEFAULT_MAX_SIZE
 
     @Suppress("LeakingThis")

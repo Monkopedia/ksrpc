@@ -37,4 +37,30 @@ const val CONTENT_TYPE = "Content-Type"
 @KsrpcInternal
 const val MAX_CONTENT_LENGTH = 64 * 1024 * 1024
 
+/**
+ * Largest number of header lines a length-prefixed transport will read before the
+ * blank terminator.
+ *
+ * The header map is built from these lines, so this bounds its entry count too — and
+ * it bounds the loop itself, which an entry-count cap alone would not: a peer that
+ * repeats one key, or sends lines with no `:` at all, never grows the map but can
+ * still read forever.
+ *
+ * ksrpc sends a handful of fields per packet ([METHOD], [CONTENT_LENGTH],
+ * [CONTENT_TYPE] and the channel id), so 128 is far above anything this codebase
+ * produces.
+ */
+@KsrpcInternal
+const val MAX_HEADER_LINES = 128
+
+/**
+ * Longest single header line a length-prefixed transport will read.
+ *
+ * Passed to `readUTF8Line`, which without it accumulates a line of any length — so a
+ * peer that never sends a newline is bounded only by heap, the same shape as the
+ * unbounded [MAX_CONTENT_LENGTH] this sits next to.
+ */
+@KsrpcInternal
+const val MAX_HEADER_LINE_LENGTH = 8 * 1024
+
 internal const val METHOD = "Method"
