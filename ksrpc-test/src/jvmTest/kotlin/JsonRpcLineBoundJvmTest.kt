@@ -32,6 +32,9 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 /**
  * The newline-delimited transport reads a whole message as one line, so without a limit a peer
@@ -59,52 +62,94 @@ class JsonRpcLineBoundJvmTest {
     }
 
     /**
-     * What the limit actually does, measured rather than assumed — and it is not what
-     * "bounded" suggests.
+     * What the limit actually does, measured rather than assumed.
      *
-     * Past the limit, ASCII raises `TooLongLineException`. The same content in multi-byte
-     * UTF-8 does **not**: the read stops near the limit and returns a string containing
-     * `U+FFFD` replacement characters where a character was split across the boundary. So the
-     * limit bounds the memory this will hold, which is what #284 is about, but it does not
-     * mean an oversized non-ASCII line is refused — it is mangled and handed on.
+     * Past the limit ASCII raises `TooLongLineException`, and so does multi-byte text far
+     * past it. Between those sits a narrow overshoot: text that exceeds the limit by less
+     * than roughly the reader's buffer comes back **whole**, with the one character that
+     * straddled the boundary replaced by `U+FFFD`, and no exception.
      *
-     * Pinned here so a Ktor upgrade that changes it fails loudly rather than quietly, since
-     * `readUTF8Line` is deprecated in 3.5.1 and the obvious replacement takes no limit at all.
+     * So the bound does hold — a peer cannot make this read without end, which is what #284
+     * is about — but immediately above it there is a band where the message is altered
+     * instead of refused.
      */
     @Test
-    fun testTheLimitRefusesAsciiButCorruptsMultiByteText() = runBlockingUnit {
+    fun testTheLimitRefusesExceptForANarrowMultiByteOvershoot() = runBlockingUnit {
         suspend fun readBounded(text: String, limit: Int) = runCatching {
             val channel = ByteChannel(autoFlush = true)
             launch {
                 channel.writeStringUtf8(text)
                 channel.writeStringUtf8("\n")
             }
-            withTimeout(5000) { channel.readUTF8Line(limit) }
+            withTimeout(10_000) { channel.readUTF8Line(limit) }
         }
 
-        // ASCII over the limit is refused outright.
-        assertTrue(
-            readBounded("a".repeat(1200), 1000).exceptionOrNull() != null,
-            "ASCII past the limit should be refused"
-        )
+        // Refused: ASCII over the limit, and multi-byte text well over it.
+        assertNotNull(readBounded("a".repeat(30_000), 1000).exceptionOrNull())
+        assertNotNull(readBounded("\u672c".repeat(10_000), 1000).exceptionOrNull())
+        assertNotNull(readBounded("\u672c".repeat(1000), 1000).exceptionOrNull())
 
-        // The same byte count as three-byte UTF-8 is not refused; it comes back damaged.
+        // Admitted, and damaged: 1200 bytes against a 1000 limit.
         val cjk = "\u672c".repeat(400)
         assertEquals(1200, cjk.encodeToByteArray().size, "expected 3 bytes per character")
-        val got = readBounded(cjk, 1000).getOrNull()
-        assertNotNull(got, "multi-byte text past the limit was refused; behaviour changed")
-        assertNotEquals(
-            cjk,
-            got,
-            "if this now round-trips, the limit stopped corrupting multi-byte text and the " +
-                "comment on readContentLength's sibling should be revisited"
-        )
-        assertTrue(
-            got.any { it == '\uFFFD' },
-            "expected replacement characters where a character straddled the limit"
-        )
+        val got = assertNotNull(readBounded(cjk, 1000).getOrNull(), "the overshoot was refused")
+        assertNotEquals(cjk, got, "the overshoot round-tripped; the damage window has closed")
+        assertTrue(got.any { it == '\uFFFD' }, "expected a replacement character")
 
-        // Comfortably under the limit in bytes, it round-trips untouched.
+        // Comfortably under the limit it round-trips untouched.
         assertEquals("\u672c".repeat(200), readBounded("\u672c".repeat(200), 1000).getOrNull())
+    }
+
+    /**
+     * The damaged text decodes. That is the part worth a test of its own.
+     *
+     * An earlier version of this change asserted in a comment that the decode "fails on the
+     * damaged text rather than on a clean refusal". It does not. The replacement characters
+     * land inside a JSON string literal, so the document stays well-formed: the envelope
+     * arrives intact and a handler is called with a silently altered argument.
+     *
+     * A truncation that reliably fails to parse would be a loud bound. One that reliably
+     * parses is a transport delivering changed arguments as valid requests, which is why this
+     * is pinned at the layer the claim was made about rather than one below it.
+     */
+    @Test
+    fun testTextDamagedByTheLimitStillDecodesAsAValidRequest() = runBlockingUnit {
+        // Whether a character straddles the limit depends on the byte alignment of the value,
+        // so sweep the three offsets rather than depending on one. Two of every three damage;
+        // the aligned one comes through clean, which is why a single-offset test can pass by
+        // luck and say nothing.
+        var damaged = 0
+        for (pad in 0..2) {
+            val method = "m".repeat(1 + pad)
+            val head = """{"jsonrpc":"2.0","id":7,"method":"$method","params":{"s":""""
+            val value = "\u672c".repeat(382)
+            val message = head + value + """"}}"""
+            val bytes = message.encodeToByteArray().size
+            assertTrue(bytes in 1001..1999, "must land in the overshoot band, was $bytes")
+
+            val channel = ByteChannel(autoFlush = true)
+            launch {
+                channel.writeStringUtf8(message)
+                channel.writeStringUtf8("\n")
+            }
+            val line = assertNotNull(withTimeout(10_000) { channel.readUTF8Line(1000) })
+            if (line.none { it == '\uFFFD' }) continue
+            damaged++
+
+            // The whole point: damaged text does not fail to parse.
+            val decoded = Json.parseToJsonElement(line).jsonObject
+            assertEquals(
+                method,
+                decoded["method"]?.jsonPrimitive?.content,
+                "envelope survived intact at pad=$pad"
+            )
+            assertEquals("7", decoded["id"]?.jsonPrimitive?.content, "envelope survived intact")
+            assertNotEquals(
+                value,
+                decoded["params"]?.jsonObject?.get("s")?.jsonPrimitive?.content,
+                "the argument was altered and the request still decoded as well-formed"
+            )
+        }
+        assertEquals(2, damaged, "expected two of three byte alignments to damage the value")
     }
 }

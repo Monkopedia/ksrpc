@@ -166,12 +166,18 @@ internal class JsonRpcLine(
             // allows a message to be, not by the much smaller header-line limit: a peer that
             // never sends a newline is otherwise bounded only by heap (#284).
             //
-            // This is a bound on memory held, not a guarantee that an oversized message is
-            // refused, and the difference is not cosmetic. Past the limit `readUTF8Line`
-            // raises TooLongLineException for ASCII, but multi-byte UTF-8 instead comes back
-            // truncated near the limit with U+FFFD where a character straddled the boundary —
-            // measured, and pinned by JsonRpcLineBoundJvmTest. The decode below then fails on
-            // the damaged text rather than on a clean refusal.
+            // The bound holds — a peer cannot make this read without end — but immediately
+            // above the limit there is a band where a message is altered rather than refused.
+            // ASCII over the limit raises TooLongLineException, and so does multi-byte text
+            // well over it; multi-byte text that exceeds it by less than about the reader's
+            // buffer comes back whole with U+FFFD where the straddling character was.
+            //
+            // That damaged text still decodes. The replacements land inside a JSON string
+            // literal, so the envelope survives and a handler is called with a silently
+            // altered argument — measured, and pinned by JsonRpcLineBoundJvmTest. No ksrpc
+            // peer reaches the band (frames chunk at 16 KiB, see PacketChannelBase), so this
+            // is a foreign-peer concern rather than a live one, but it is the reason the
+            // bound should not be described as refusing oversized input.
             //
             // It is also not the ceiling the header-framed path enforces: that one compares
             // MAX_CONTENT_LENGTH against a byte count the peer declares, before reading. Same
