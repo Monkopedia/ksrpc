@@ -164,8 +164,18 @@ internal class JsonRpcLine(
         receiveLock.withLock {
             // Here the line *is* the message, so it is bounded by what the other transport
             // allows a message to be, not by the much smaller header-line limit: a peer that
-            // never sends a newline is otherwise bounded only by heap (#284). This also makes
-            // the two transports agree on the largest message they will accept.
+            // never sends a newline is otherwise bounded only by heap (#284).
+            //
+            // This is a bound on memory held, not a guarantee that an oversized message is
+            // refused, and the difference is not cosmetic. Past the limit `readUTF8Line`
+            // raises TooLongLineException for ASCII, but multi-byte UTF-8 instead comes back
+            // truncated near the limit with U+FFFD where a character straddled the boundary —
+            // measured, and pinned by JsonRpcLineBoundJvmTest. The decode below then fails on
+            // the damaged text rather than on a clean refusal.
+            //
+            // It is also not the ceiling the header-framed path enforces: that one compares
+            // MAX_CONTENT_LENGTH against a byte count the peer declares, before reading. Same
+            // constant, different question asked of it.
             val line = input.readUTF8Line(MAX_CONTENT_LENGTH) ?: return null
             return json.decodeFromString(serializer, line)
         }
