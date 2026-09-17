@@ -88,6 +88,12 @@ actual suspend inline fun withStdInOut(
  *
  * This is accomplished by creating a dedicated thread that blocks on reads before queueing to
  * a [ByteChannel] for suspended reading, so only use when needed.
+ *
+ * [fd] must be a blocking descriptor. On a non-blocking one `read` returns `EAGAIN` when no
+ * data is ready, which is not a transport failure but is reported as one — worth stating
+ * because an inherited descriptor (`STDIN_FILENO` via `withStdInOut`) carries whatever flags
+ * the parent set. Any failed read closes the channel with a cause, so [fd] must stay valid
+ * for as long as the channel is in use.
  */
 @OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
 fun posixFileReadChannel(fd: Int): ByteReadChannel {
@@ -99,16 +105,28 @@ fun posixFileReadChannel(fd: Int): ByteReadChannel {
                 while (true) {
                     val readCount = read(fd, buffer, BUFFER_SIZE.toULong())
                     if (readCount < 0) {
+                        // Read `errno` once, before anything else can overwrite it: it is
+                        // thread-global, and even building the message below allocates.
+                        val err = errno
                         // A signal can interrupt a blocking read at any point; EINTR means
                         // "no bytes transferred, call again", not failure. The write loop
-                        // below already retries it — this is the same handling on the read
-                        // side. Without it an interrupted read leaves the loop and `finally`
-                        // closes the channel with NO cause, which a consumer cannot tell
-                        // apart from a healthy EOF (#281).
-                        if (errno == EINTR) {
+                        // below retries it the same way. Without this an interrupted read
+                        // leaves the loop exactly as EOF does and `finally` closes the
+                        // channel with NO cause, which a consumer cannot tell apart from a
+                        // healthy EOF (#281).
+                        if (err == EINTR) {
                             continue
                         }
-                        throw IOException("posix read failed for fd=$fd (errno=$errno)")
+                        // Every other errno is reported, EBADF included. Treating EBADF as
+                        // an end of stream was considered and rejected: it would read as
+                        // "the caller closed the fd to stop us", but closing an fd another
+                        // thread is blocked reading does not reliably unblock that read
+                        // (undefined by POSIX; on Linux it stays blocked), so that is not a
+                        // teardown this can rely on seeing. What EBADF does reliably mean is
+                        // an fd that was never valid — and silently ending the stream for it
+                        // would be the exact confusion between failure and EOF that this
+                        // change exists to remove.
+                        throw IOException("posix read failed for fd=$fd (errno=$err)")
                     }
                     // On a blocking fd, read() == 0 is EOF (the peer closed the write end), not
                     // "no data yet" — break so the reader thread terminates. `continue` here
