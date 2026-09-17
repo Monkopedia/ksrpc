@@ -35,13 +35,16 @@ const val CONTENT_TYPE = "Content-Type"
  * so no frame this codebase produces comes near it.
  *
  * **That last paragraph is scoped to packet channels and does not travel with the
- * constant.** It is also read by transports that do no chunking at all — the
- * JSON-RPC line transport passes it to a bounded read, and its `send` writes a whole
- * message in one call — so for those it says nothing about what a peer may produce.
- * The same number is asked a different question by each consumer: here it caps a
- * buffer allocated from a declared length, there it caps a line being accumulated.
- * Do not lift the frame-size argument onto a caller without checking that the caller
- * chunks.
+ * constant.** It holds for every consumer today, because each one bounds a length the
+ * peer declares before any content is read — `readContent` in `ReadWritePacketChannel.kt`,
+ * and `JsonRpcHeader.receive`. Both are the shape the argument was written for.
+ *
+ * It stops holding for a consumer that reads until a terminator rather than to a
+ * declared length, or that sits on a transport which does not chunk outbound. For such
+ * a caller the constant still caps memory, but the "nothing we produce comes near it"
+ * half is about a different transport and says nothing about what a peer may send.
+ * Check that before lifting this argument onto a new caller; the number is the same,
+ * the question it answers is not.
  */
 @KsrpcInternal
 const val MAX_CONTENT_LENGTH = 64 * 1024 * 1024
