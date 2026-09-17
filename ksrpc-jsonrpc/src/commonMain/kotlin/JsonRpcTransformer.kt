@@ -185,9 +185,10 @@ internal class JsonRpcLine(
             // literal, so the envelope survives and a handler is called with a silently
             // altered argument — measured, and pinned by JsonRpcLineBoundJvmTest. Reaching
             // the band needs one JSON-RPC line above 64 MiB, which is why this is treated as
-            // hardening rather than a live defect; note that this transport does no chunking
-            // of its own (`send` writes the whole message in one appendLine), so nothing here
-            // bounds what a peer may put on a single line.
+            // hardening rather than a live defect. That is not a claim that no peer can
+            // produce one: this transport does no chunking of its own — `send` writes the
+            // whole message in a single appendLine — so nothing here bounds what a peer may
+            // put on one line, and nobody has constructed the case either way.
             //
             // It is also not the ceiling the header-framed path enforces: that one compares
             // MAX_CONTENT_LENGTH against a byte count the peer declares, before reading. Same

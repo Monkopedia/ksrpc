@@ -27,6 +27,7 @@ import io.ktor.utils.io.writeStringUtf8
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertIs
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -80,10 +81,11 @@ class JsonRpcLineBoundJvmTest {
      * bytes-per-character times the limit, and it scales with the limit rather than being a
      * fixed width.
      *
-     * Encoding width also decides whether damage occurs at all — two-byte text showed none at
-     * any sampled size here, its boundaries being evenly aligned — and the replacements recur
-     * as the reader refills rather than marking one straddled character, so the count grows
-     * with length.
+     * Encoding width also decides whether damage occurs at all — two-byte text is clean up to
+     * its refusal edge, while four-byte text at the same byte count is damaged — and the
+     * replacements recur as the reader refills rather than marking one straddled character,
+     * so the count grows with length. All of that is sampled below at one and two byte
+     * widths, three and four, and at two limits.
      */
     @Test
     fun testTheLimitRefusesExceptWithinAnEncodingWidthBand() = runBlockingUnit {
@@ -96,20 +98,61 @@ class JsonRpcLineBoundJvmTest {
             withTimeout(10_000) { channel.readUTF8Line(limit) }
         }
 
-        // Refused: ASCII over the limit, and multi-byte text well over it.
-        assertNotNull(readBounded("a".repeat(30_000), 1000).exceptionOrNull())
-        assertNotNull(readBounded("\u672c".repeat(10_000), 1000).exceptionOrNull())
-        assertNotNull(readBounded("\u672c".repeat(1000), 1000).exceptionOrNull())
+        // Refused *by the limit*, not by hanging until the timeout. The distinction is the
+        // whole point — not-hanging is what #284 is about, and an assertion that only checks
+        // "something was thrown" goes green on the very failure this guards against.
+        suspend fun assertRefused(text: String, limit: Int) {
+            val thrown = readBounded(text, limit).exceptionOrNull()
+            assertIs<IOException>(
+                thrown,
+                "expected the limit to refuse ${text.encodeToByteArray().size} bytes, but got " +
+                    (thrown?.let { it::class.simpleName } ?: "no exception")
+            )
+        }
 
-        // Admitted, and damaged: 1200 bytes against a 1000 limit.
-        val cjk = "\u672c".repeat(400)
-        assertEquals(1200, cjk.encodeToByteArray().size, "expected 3 bytes per character")
-        val got = assertNotNull(readBounded(cjk, 1000).getOrNull(), "the overshoot was refused")
-        assertNotEquals(cjk, got, "the overshoot round-tripped; the damage window has closed")
-        assertTrue(got.any { it == '\uFFFD' }, "expected a replacement character")
+        suspend fun damageOf(text: String, limit: Int): Int {
+            val line = assertNotNull(
+                readBounded(text, limit).getOrNull(),
+                "${text.encodeToByteArray().size} bytes at limit $limit was refused"
+            )
+            return line.count { it == '\uFFFD' }
+        }
 
-        // Comfortably under the limit it round-trips untouched.
-        assertEquals("\u672c".repeat(200), readBounded("\u672c".repeat(200), 1000).getOrNull())
+        val oneByte = "a"
+        val twoByte = "\u00e9"
+        val threeByte = "\u672c"
+        val fourByte = "\uD83D\uDE00"
+        assertEquals(2, twoByte.encodeToByteArray().size)
+        assertEquals(3, threeByte.encodeToByteArray().size)
+        assertEquals(4, fourByte.encodeToByteArray().size)
+
+        // One byte per character: no band at all, refusal begins one character over.
+        assertEquals(0, damageOf(oneByte.repeat(1000), 1000))
+        assertRefused(oneByte.repeat(1001), 1000)
+
+        // Three-byte: damaged across the band, refused above it.
+        assertEquals(3, damageOf(threeByte.repeat(334), 1000), "1002 bytes")
+        assertEquals(8, damageOf(threeByte.repeat(800), 1000), "2400 bytes")
+        assertEquals(15, damageOf(threeByte.repeat(980), 1000), "2940 bytes")
+        assertRefused(threeByte.repeat(999), 1000)
+
+        // The band scales with the limit rather than with a fixed buffer: doubling the limit
+        // moves the refusal edge from ~3000 bytes to ~6000.
+        assertTrue(damageOf(threeByte.repeat(1900), 2000) > 0, "5700 bytes at limit 2000")
+        assertRefused(threeByte.repeat(1999), 2000)
+
+        // Encoding width decides whether damage happens at all. Two-byte text straddles
+        // nothing at this limit, so it is clean right up to its refusal edge; four-byte text
+        // at the same byte count is damaged.
+        assertEquals(0, damageOf(twoByte.repeat(900), 1000), "1800 bytes of two-byte text")
+        assertRefused(twoByte.repeat(999), 1000)
+        assertTrue(damageOf(fourByte.repeat(450), 1000) > 0, "1800 bytes of four-byte text")
+
+        // Comfortably under the limit in bytes, text round-trips untouched.
+        assertEquals(
+            threeByte.repeat(200),
+            readBounded(threeByte.repeat(200), 1000).getOrNull()
+        )
     }
 
     /**
