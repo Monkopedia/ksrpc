@@ -19,10 +19,13 @@ package com.monkopedia.ksrpc
 
 import com.monkopedia.ksrpc.sockets.posixFileReadChannel
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertNotNull
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
+import platform.posix.EBADF
+import platform.posix.EISDIR
 import platform.posix.F_GETFD
 import platform.posix.O_RDONLY
 import platform.posix.fcntl
@@ -61,11 +64,14 @@ class PosixReadErrorNativeTest {
             }
         }
 
-        assertNotNull(
+        val cause = assertNotNull(
             channel.closedCause,
             "read() failed with EISDIR but the channel closed with no cause — a consumer " +
                 "cannot distinguish that from a healthy EOF (#281)"
         )
+        // Which errno, not merely that something failed: without this both tests here pass
+        // against a loop that reports one fixed errno for everything.
+        assertContains(cause.message ?: "", "errno=$EISDIR")
     }
 
     /**
@@ -93,10 +99,11 @@ class PosixReadErrorNativeTest {
             }
         }
 
-        assertNotNull(
+        val cause = assertNotNull(
             channel.closedCause,
             "EBADF closed the channel with no cause, so an fd that was never valid is " +
                 "indistinguishable from a peer that finished talking"
         )
+        assertContains(cause.message ?: "", "errno=$EBADF")
     }
 }
