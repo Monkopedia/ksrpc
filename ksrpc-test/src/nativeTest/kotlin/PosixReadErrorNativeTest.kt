@@ -70,8 +70,10 @@ class PosixReadErrorNativeTest {
                 "cannot distinguish that from a healthy EOF (#281)"
         )
         // Which errno, not merely that something failed: without this both tests here pass
-        // against a loop that reports one fixed errno for everything.
-        assertContains(cause.message ?: "", "errno=$EISDIR")
+        // against a loop that reports one fixed errno for everything. The closing paren is
+        // load-bearing — assertContains is a substring match, so "errno=9" alone would also
+        // be satisfied by "errno=99".
+        assertContains(cause.message ?: "", "(errno=$EISDIR)")
     }
 
     /**
@@ -104,6 +106,6 @@ class PosixReadErrorNativeTest {
             "EBADF closed the channel with no cause, so an fd that was never valid is " +
                 "indistinguishable from a peer that finished talking"
         )
-        assertContains(cause.message ?: "", "errno=$EBADF")
+        assertContains(cause.message ?: "", "(errno=$EBADF)")
     }
 }
