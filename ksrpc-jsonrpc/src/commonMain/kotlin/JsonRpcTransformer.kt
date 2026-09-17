@@ -162,7 +162,11 @@ internal class JsonRpcLine(
 
     override suspend fun receive(): JsonElement? {
         receiveLock.withLock {
-            val line = input.readUTF8Line() ?: return null
+            // Here the line *is* the message, so it is bounded by what the other transport
+            // allows a message to be, not by the much smaller header-line limit: a peer that
+            // never sends a newline is otherwise bounded only by heap (#284). This also makes
+            // the two transports agree on the largest message they will accept.
+            val line = input.readUTF8Line(MAX_CONTENT_LENGTH) ?: return null
             return json.decodeFromString(serializer, line)
         }
     }
