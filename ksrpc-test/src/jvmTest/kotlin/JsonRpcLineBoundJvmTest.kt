@@ -162,9 +162,19 @@ class JsonRpcLineBoundJvmTest {
         )
         assertRefused(threeByte.repeat(987), 1000)
 
-        // The band scales with the limit rather than with a fixed buffer.
-        assertTrue(damageOf(threeByte.repeat(1900), 2000) > 0, "5700 bytes at limit 2000")
-        assertRefused(threeByte.repeat(1999), 2000)
+        // Only three-byte's band scales with the limit. Its edges at limit 2000 are asserted
+        // as adjacent pairs like the others, rather than sampled from inside the band.
+        assertEquals(0, damageOf(threeByte.repeat(666), 2000), "three-byte at 2000, last clean")
+        assertTrue(damageOf(threeByte.repeat(667), 2000) > 0, "three-byte at 2000, first damaged")
+        assertNotNull(readBounded(threeByte.repeat(1986), 2000).getOrNull(), "last admitted")
+        assertRefused(threeByte.repeat(1987), 2000)
+
+        // Doubling the limit doubled three-byte's band — 1956 bytes at limit 1000, 3957 at
+        // 2000 — while the even widths hold a constant width instead, because both of their
+        // edges track twice the limit and move together.
+        assertEquals(0, damageOf(twoByte.repeat(1937), 2000), "two-byte at 2000, last clean")
+        assertTrue(damageOf(twoByte.repeat(1938), 2000) > 0, "two-byte at 2000, first damaged")
+        assertRefused(twoByte.repeat(1995), 2000)
 
         // Comfortably under the limit in bytes, text round-trips untouched.
         assertEquals(

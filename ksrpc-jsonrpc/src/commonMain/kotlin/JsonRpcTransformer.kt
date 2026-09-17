@@ -177,10 +177,16 @@ internal class JsonRpcLine(
             // clean right up to the limit and refused one past it. Where the band begins is
             // not simply "the byte count passed the limit": measured at limit 1000,
             // three-byte text is damaged from 1002 bytes, while two-byte text is still clean
-            // at 1874 and four-byte at 1748. The band's upper end scales with the limit, so
-            // at MAX_CONTENT_LENGTH it is tens of MiB wide rather than a fixed buffer's
-            // width. The damage is also not one character: replacements recur as the reader
-            // refills, so the count grows with length.
+            // at 1874 and four-byte at 1748.
+            //
+            // How wide each band is depends on the width, and only three-byte's scales.
+            // Measured at limits 1000, 2000 and 4000, the two-byte band is 112 bytes at every
+            // limit and the four-byte band 236, because for those widths both ends track
+            // twice the limit and so move together. Three-byte's ends track the limit and
+            // three times it, so its band is about twice the limit. At MAX_CONTENT_LENGTH
+            // that puts three-byte text in the band from 64 MiB to 192 MiB, while the even
+            // widths stay a hundred-odd bytes wide. The damage is also not one character:
+            // replacements recur as the reader refills, so the count grows with length.
             //
             // That damaged text still decodes. The replacements land inside a JSON string
             // literal, so the envelope survives and a handler is called with a silently
