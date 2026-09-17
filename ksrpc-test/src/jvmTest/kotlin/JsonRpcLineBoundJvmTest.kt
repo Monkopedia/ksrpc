@@ -43,6 +43,10 @@ import kotlinx.serialization.json.jsonPrimitive
  * These live in `jvmTest` rather than `commonTest` on purpose. Exceeding the bound means
  * feeding more than [MAX_CONTENT_LENGTH], which is affordable on a JVM worker and is not
  * something to ask of the JS and Wasm suites.
+ *
+ * Only the first test goes through `jsonLine`. The other two are characterisation of Ktor's
+ * `readUTF8Line` and are marked as such individually — they exist so that migrating off it
+ * (#295) fails loudly rather than silently changing what this transport accepts.
  */
 class JsonRpcLineBoundJvmTest {
 
@@ -62,19 +66,27 @@ class JsonRpcLineBoundJvmTest {
     }
 
     /**
-     * What the limit actually does, measured rather than assumed.
+     * **Characterisation, not red-first.** This passes with and without the bound, because it
+     * describes what Ktor's `readUTF8Line` does rather than what this repository changed. It
+     * earns its place because `readUTF8Line` is deprecated in 3.5.1 and the obvious
+     * replacement takes no limit at all, so the migration in #295 has to make this fail
+     * loudly instead of quietly changing behaviour. It reads a bare [ByteChannel] and never
+     * touches production code.
      *
-     * Past the limit ASCII raises `TooLongLineException`, and so does multi-byte text far
-     * past it. Between those sits a narrow overshoot: text that exceeds the limit by less
-     * than roughly the reader's buffer comes back **whole**, with the one character that
-     * straddled the boundary replaced by `U+FFFD`, and no exception.
+     * Past the limit ASCII is refused, and so is text far past it. Between sits a band where
+     * a message is admitted and altered, and the two edges are in different units: damage
+     * begins once the *byte* length passes the limit, refusal waits for the decoded
+     * *character* count to pass it. So the band runs from the limit to about
+     * bytes-per-character times the limit, and it scales with the limit rather than being a
+     * fixed width.
      *
-     * So the bound does hold — a peer cannot make this read without end, which is what #284
-     * is about — but immediately above it there is a band where the message is altered
-     * instead of refused.
+     * Encoding width also decides whether damage occurs at all — two-byte text showed none at
+     * any sampled size here, its boundaries being evenly aligned — and the replacements recur
+     * as the reader refills rather than marking one straddled character, so the count grows
+     * with length.
      */
     @Test
-    fun testTheLimitRefusesExceptForANarrowMultiByteOvershoot() = runBlockingUnit {
+    fun testTheLimitRefusesExceptWithinAnEncodingWidthBand() = runBlockingUnit {
         suspend fun readBounded(text: String, limit: Int) = runCatching {
             val channel = ByteChannel(autoFlush = true)
             launch {
@@ -101,16 +113,21 @@ class JsonRpcLineBoundJvmTest {
     }
 
     /**
-     * The damaged text decodes. That is the part worth a test of its own.
+     * The damaged text decodes, which is the part worth its own test.
      *
-     * An earlier version of this change asserted in a comment that the decode "fails on the
-     * damaged text rather than on a clean refusal". It does not. The replacement characters
-     * land inside a JSON string literal, so the document stays well-formed: the envelope
-     * arrives intact and a handler is called with a silently altered argument.
+     * **Characterisation, not red-first**, for the same reason as above: it exercises
+     * `readUTF8Line` and `kotlinx.serialization` on a bare channel, not this change. It
+     * performs the same two steps `receive` does — a bounded read, then a decode — rather
+     * than calling `receive` itself, because reaching the band through `receive` costs more
+     * than 64 MiB. That is the cost `testLineTransportRefusesAnOverlongLine` pays, and why
+     * that one carries a long timeout.
      *
-     * A truncation that reliably fails to parse would be a loud bound. One that reliably
-     * parses is a transport delivering changed arguments as valid requests, which is why this
-     * is pinned at the layer the claim was made about rather than one below it.
+     * An earlier revision of this change asserted in a comment that the decode "fails on the
+     * damaged text rather than on a clean refusal". It does not. The replacements land inside
+     * a JSON string literal, so the document stays well-formed: the envelope arrives intact
+     * and a handler is called with a silently altered argument. A truncation that reliably
+     * fails to parse is a loud bound; one that reliably parses is a transport delivering
+     * changed arguments as valid requests.
      */
     @Test
     fun testTextDamagedByTheLimitStillDecodesAsAValidRequest() = runBlockingUnit {
