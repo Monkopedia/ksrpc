@@ -25,6 +25,7 @@ import io.ktor.utils.io.ByteChannel
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.close
+import io.ktor.utils.io.errors.IOException
 import io.ktor.utils.io.read
 import io.ktor.utils.io.reader
 import io.ktor.utils.io.writeFully
@@ -97,7 +98,18 @@ fun posixFileReadChannel(fd: Int): ByteReadChannel {
             try {
                 while (true) {
                     val readCount = read(fd, buffer, BUFFER_SIZE.toULong())
-                    if (readCount < 0) break
+                    if (readCount < 0) {
+                        // A signal can interrupt a blocking read at any point; EINTR means
+                        // "no bytes transferred, call again", not failure. The write loop
+                        // below already retries it — this is the same handling on the read
+                        // side. Without it an interrupted read leaves the loop and `finally`
+                        // closes the channel with NO cause, which a consumer cannot tell
+                        // apart from a healthy EOF (#281).
+                        if (errno == EINTR) {
+                            continue
+                        }
+                        throw IOException("posix read failed for fd=$fd (errno=$errno)")
+                    }
                     // On a blocking fd, read() == 0 is EOF (the peer closed the write end), not
                     // "no data yet" — break so the reader thread terminates. `continue` here
                     // busy-spins forever once EOF is reached, which wedges process exit (#201).
