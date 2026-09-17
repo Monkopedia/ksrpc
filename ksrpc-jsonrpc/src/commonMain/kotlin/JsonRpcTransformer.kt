@@ -22,6 +22,8 @@ import com.monkopedia.ksrpc.annotation.KsrpcInternal
 import com.monkopedia.ksrpc.packets.internal.CONTENT_LENGTH
 import com.monkopedia.ksrpc.packets.internal.CONTENT_TYPE
 import com.monkopedia.ksrpc.packets.internal.MAX_CONTENT_LENGTH
+import com.monkopedia.ksrpc.packets.internal.MAX_HEADER_LINES
+import com.monkopedia.ksrpc.packets.internal.MAX_HEADER_LINE_LENGTH
 import com.monkopedia.ksrpc.sockets.internal.appendLine
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
@@ -91,8 +93,18 @@ internal class JsonRpcHeader(
 
     private suspend fun readContentLength(): Int? {
         var contentLength: Int? = null
+        var lines = 0
         while (true) {
-            val line = input.readUTF8Line() ?: return null
+            // Bounded on lines read, not on headers kept: a malformed line hits the
+            // `continue` below and stores nothing, so a cap on what is retained would
+            // never close this loop. Same shape, and the same constants, as
+            // `readFields` in the packet transport (#263/#270).
+            if (lines++ >= MAX_HEADER_LINES) {
+                throw IOException("Refusing more than $MAX_HEADER_LINES header lines")
+            }
+            // A null line is end of stream, which `receive` reports as a clean close;
+            // only an over-long line is an error, and readUTF8Line throws for that.
+            val line = input.readUTF8Line(MAX_HEADER_LINE_LENGTH) ?: return null
             if (line.isEmpty()) {
                 return contentLength
             }
