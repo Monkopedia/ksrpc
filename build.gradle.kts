@@ -46,7 +46,14 @@ allprojects {
 
 // == BCV setup ==
 apiValidation {
-    ignoredProjects.addAll(listOf("ksrpc-test", "ksrpc-bench", "ksrpc-samples", "ksrpc-service-worker-test"))
+    ignoredProjects.addAll(
+        listOf(
+            "ksrpc-test",
+            "ksrpc-bench",
+            "ksrpc-samples",
+            "ksrpc-service-worker-test"
+        )
+    )
     nonPublicMarkers += "com.monkopedia.ksrpc.annotation.KsrpcInternal"
     nonPublicMarkers += "com.monkopedia.ksrpc.annotation.KsrpcGenerated"
     // kotlinx-serialization generates `$$serializer` / `$Companion` members for @Serializable

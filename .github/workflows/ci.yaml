@@ -16,7 +16,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
       - name: Check code style
-        run: ./gradlew ktlintCheck -x ktlintKotlinScriptCheck --continue
+        run: ./gradlew ktlintCheck --continue
       - name: Check license headers
         run: ./gradlew licenseCheckForKotlin --continue
       - name: Check API compatibility
