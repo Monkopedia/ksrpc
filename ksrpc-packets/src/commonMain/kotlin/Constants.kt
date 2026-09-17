@@ -30,9 +30,18 @@ const val CONTENT_TYPE = "Content-Type"
  * before any content is read, so an unbounded value lets one short header cost
  * the host its heap.
  *
- * 64 MiB is four thousand times the 16 KiB a packet channel chunks outbound
- * frames to (`PacketChannelBase.DEFAULT_MAX_SIZE`), so no frame this codebase
- * produces comes near it.
+ * On a length-prefixed packet transport, 64 MiB is four thousand times the 16 KiB
+ * a packet channel chunks outbound frames to (`PacketChannelBase.DEFAULT_MAX_SIZE`),
+ * so no frame this codebase produces comes near it.
+ *
+ * **That last paragraph is scoped to packet channels and does not travel with the
+ * constant.** It is also read by transports that do no chunking at all — the
+ * JSON-RPC line transport passes it to a bounded read, and its `send` writes a whole
+ * message in one call — so for those it says nothing about what a peer may produce.
+ * The same number is asked a different question by each consumer: here it caps a
+ * buffer allocated from a declared length, there it caps a line being accumulated.
+ * Do not lift the frame-size argument onto a caller without checking that the caller
+ * chunks.
  */
 @KsrpcInternal
 const val MAX_CONTENT_LENGTH = 64 * 1024 * 1024
