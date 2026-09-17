@@ -166,20 +166,21 @@ internal class JsonRpcLine(
             // allows a message to be, not by the much smaller header-line limit: a peer that
             // never sends a newline is otherwise bounded only by heap (#284).
             //
-            // The bound holds — a peer cannot make this read without end — but between the
-            // limit and a multiple of it there is a band where a message is altered rather
-            // than refused. The two thresholds are in different units, which is the whole of
-            // it: damage begins once the *byte* length passes the limit, while refusal waits
-            // for the decoded *character* count to pass it. So the band runs from the limit
-            // to roughly bytes-per-character times the limit — for three-byte text at
-            // MAX_CONTENT_LENGTH, about 64 MiB to 192 MiB. It scales with the limit; it is
-            // not a fixed buffer's width.
+            // The bound holds — a peer cannot make this read without end — but below the
+            // refusal point there is a band where a message is altered rather than refused.
+            // Refusal tracks the length the decoder *emits*, the input characters plus the
+            // replacements it inserted, rather than the input's own length; so text that
+            // decodes to more than the limit is refused, and text that decodes to less is
+            // returned however damaged it is.
             //
-            // Encoding width also decides whether damage happens at all, so "multi-byte" is
-            // the wrong predicate: three- and four-byte text is damaged, while two-byte text
-            // showed none at any sampled size, its boundaries being evenly aligned. And the
-            // damage is not one character — replacements recur as the reader refills, so the
-            // count grows with length rather than marking a single straddled character.
+            // Every encoding wider than one byte has such a band — only single-byte text is
+            // clean right up to the limit and refused one past it. Where the band begins is
+            // not simply "the byte count passed the limit": measured at limit 1000,
+            // three-byte text is damaged from 1002 bytes, while two-byte text is still clean
+            // at 1874 and four-byte at 1748. The band's upper end scales with the limit, so
+            // at MAX_CONTENT_LENGTH it is tens of MiB wide rather than a fixed buffer's
+            // width. The damage is also not one character: replacements recur as the reader
+            // refills, so the count grows with length.
             //
             // That damaged text still decodes. The replacements land inside a JSON string
             // literal, so the envelope survives and a handler is called with a silently

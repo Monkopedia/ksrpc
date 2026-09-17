@@ -74,21 +74,22 @@ class JsonRpcLineBoundJvmTest {
      * loudly instead of quietly changing behaviour. It reads a bare [ByteChannel] and never
      * touches production code.
      *
-     * Past the limit ASCII is refused, and so is text far past it. Between sits a band where
-     * a message is admitted and altered, and the two edges are in different units: damage
-     * begins once the *byte* length passes the limit, refusal waits for the decoded
-     * *character* count to pass it. So the band runs from the limit to about
-     * bytes-per-character times the limit, and it scales with the limit rather than being a
-     * fixed width.
+     * Refusal tracks the length the decoder *emits* — input characters plus inserted
+     * replacements — not the input's own length. Below that point sits a band where a message
+     * is admitted and altered rather than refused.
      *
-     * Encoding width also decides whether damage occurs at all — two-byte text is clean up to
-     * its refusal edge, while four-byte text at the same byte count is damaged — and the
-     * replacements recur as the reader refills rather than marking one straddled character,
-     * so the count grows with length. All of that is sampled below at one and two byte
-     * widths, three and four, and at two limits.
+     * **Every encoding wider than one byte has such a band.** Only single-byte text is clean
+     * to the limit and refused one past it. Where each band begins is not simply "the byte
+     * count passed the limit" — at limit 1000, three-byte text is damaged from 1002 bytes
+     * while two-byte is still clean at 1874 — so the edges below are swept rather than
+     * sampled. A pair of points either side of a band passes while asserting the band is not
+     * there, which is exactly how an earlier version of this test recorded two-byte text as
+     * never damaged.
+     *
+     * Replacements also recur as the reader refills, so the count grows with length.
      */
     @Test
-    fun testTheLimitRefusesExceptWithinAnEncodingWidthBand() = runBlockingUnit {
+    fun testEveryWidthAboveOneByteHasADamageBandBelowRefusal() = runBlockingUnit {
         suspend fun readBounded(text: String, limit: Int) = runCatching {
             val channel = ByteChannel(autoFlush = true)
             launch {
@@ -126,27 +127,44 @@ class JsonRpcLineBoundJvmTest {
         assertEquals(3, threeByte.encodeToByteArray().size)
         assertEquals(4, fourByte.encodeToByteArray().size)
 
-        // One byte per character: no band at all, refusal begins one character over.
+        // Single-byte text has no band: clean right up to the limit, refused one past it.
         assertEquals(0, damageOf(oneByte.repeat(1000), 1000))
         assertRefused(oneByte.repeat(1001), 1000)
 
-        // Three-byte: damaged across the band, refused above it.
-        assertEquals(3, damageOf(threeByte.repeat(334), 1000), "1002 bytes")
-        assertEquals(8, damageOf(threeByte.repeat(800), 1000), "2400 bytes")
-        assertEquals(15, damageOf(threeByte.repeat(980), 1000), "2940 bytes")
-        assertRefused(threeByte.repeat(999), 1000)
+        // Every wider encoding has one. Each pair is the last clean input and the first
+        // damaged one, swept rather than sampled — a pair of points either side of a band
+        // passes while asserting the band is not there, which is how an earlier version of
+        // this test claimed two-byte text was never damaged.
+        assertEquals(0, damageOf(twoByte.repeat(937), 1000), "two-byte, last clean")
+        assertTrue(damageOf(twoByte.repeat(938), 1000) > 0, "two-byte, first damaged")
 
-        // The band scales with the limit rather than with a fixed buffer: doubling the limit
-        // moves the refusal edge from ~3000 bytes to ~6000.
+        assertEquals(0, damageOf(threeByte.repeat(333), 1000), "three-byte, last clean")
+        assertEquals(3, damageOf(threeByte.repeat(334), 1000), "three-byte, first damaged")
+
+        assertEquals(0, damageOf(fourByte.repeat(437), 1000), "four-byte, last clean")
+        assertTrue(damageOf(fourByte.repeat(438), 1000) > 0, "four-byte, first damaged")
+
+        // Damage onset is not simply "the byte count passed the limit": at this limit
+        // three-byte text is damaged from 1002 bytes, while two-byte text is still clean at
+        // 1874 and four-byte at 1748.
+        assertEquals(1002, threeByte.repeat(334).encodeToByteArray().size)
+        assertEquals(1874, twoByte.repeat(937).encodeToByteArray().size)
+        assertEquals(1748, fourByte.repeat(437).encodeToByteArray().size)
+
+        // Refusal tracks the length the decoder *emits* — input characters plus the
+        // replacements it inserted — rather than the input's own character count. The last
+        // admitted input at each width emits at most the limit.
+        assertEquals(999, assertNotNull(readBounded(twoByte.repeat(994), 1000).getOrNull()).length)
+        assertRefused(twoByte.repeat(995), 1000)
+        assertEquals(
+            1000,
+            assertNotNull(readBounded(threeByte.repeat(986), 1000).getOrNull()).length
+        )
+        assertRefused(threeByte.repeat(987), 1000)
+
+        // The band scales with the limit rather than with a fixed buffer.
         assertTrue(damageOf(threeByte.repeat(1900), 2000) > 0, "5700 bytes at limit 2000")
         assertRefused(threeByte.repeat(1999), 2000)
-
-        // Encoding width decides whether damage happens at all. Two-byte text straddles
-        // nothing at this limit, so it is clean right up to its refusal edge; four-byte text
-        // at the same byte count is damaged.
-        assertEquals(0, damageOf(twoByte.repeat(900), 1000), "1800 bytes of two-byte text")
-        assertRefused(twoByte.repeat(999), 1000)
-        assertTrue(damageOf(fourByte.repeat(450), 1000) > 0, "1800 bytes of four-byte text")
 
         // Comfortably under the limit in bytes, text round-trips untouched.
         assertEquals(
