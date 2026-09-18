@@ -180,13 +180,24 @@ fun posixFileWriteChannel(fd: Int, onWriteFailure: () -> Unit = {}): ByteWriteCh
                             )
                         }
                         if (written < 0) {
-                            if (errno == EINTR) {
+                            // Read `errno` once, before anything else can overwrite it: it is
+                            // thread-global, and building the message below allocates.
+                            val err = errno
+                            if (err == EINTR) {
                                 continue
                             }
-                            error("posix write failed for fd=$fd")
+                            // IOException, not `error()`. A writer catches ktor's
+                            // ClosedWriteChannelException either way, so what changes is the
+                            // cause it carries: `error()` buries an IllegalStateException
+                            // there, which is a supertype of CancellationException, leaving
+                            // code that walks the cause chain unable to separate a dead
+                            // transport from a cancelled one. The errno is the half that
+                            // reaches everyone. IOException is also what the rest of this
+                            // transport throws, including the read loop above (#287).
+                            throw IOException("posix write failed for fd=$fd (errno=$err)")
                         }
                         if (written == 0L) {
-                            error("posix write made no progress for fd=$fd")
+                            throw IOException("posix write made no progress for fd=$fd")
                         }
                         writeOffset += written.toInt()
                     }
