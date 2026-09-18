@@ -58,6 +58,17 @@ jobs:
       # (#242). Compile-check it here so drift is caught without running JMH.
       - name: Compile benchmarks (compile-only guard; not run)
         run: ./gradlew :ksrpc-bench:compileKotlinJvm --parallel
+      # Test results are what a reviewer needs to answer "did this test actually run".
+      # Without them a green leg is task-level accounting only, indistinguishable from a
+      # silently-excluded class. `success() || failure()` so a failing run keeps them too,
+      # which is the run where they matter most.
+      - name: Upload test results
+        if: success() || failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-jvm
+          path: '**/build/test-results/**/*.xml'
+          if-no-files-found: warn
 
   jni-tests:
     # Builds the Kotlin/Native libksrpc_test.so + ksrpc-jni cinterop klibs
@@ -88,6 +99,17 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev
       - name: Run JNI-backed JVM tests
         run: ./gradlew :ksrpc-jni:jvmTest :ksrpc-test:jvmTest --continue
+      # Test results are what a reviewer needs to answer "did this test actually run".
+      # Without them a green leg is task-level accounting only, indistinguishable from a
+      # silently-excluded class. `success() || failure()` so a failing run keeps them too,
+      # which is the run where they matter most.
+      - name: Upload test results
+        if: success() || failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-jni
+          path: '**/build/test-results/**/*.xml'
+          if-no-files-found: warn
 
   native-tests:
     # Runs the Kotlin/Native (linuxX64) test suite for :ksrpc-test. This is the only job
@@ -123,6 +145,17 @@ jobs:
         # the timeout (SIGKILL) propagates as a non-zero step failure.
         timeout-minutes: 25
         run: timeout -s KILL 900 ./gradlew :ksrpc-test:linuxX64Test --console=plain
+      # Test results are what a reviewer needs to answer "did this test actually run".
+      # Without them a green leg is task-level accounting only, indistinguishable from a
+      # silently-excluded class. `success() || failure()` so a failing run keeps them too,
+      # which is the run where they matter most.
+      - name: Upload test results
+        if: success() || failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-native
+          path: '**/build/test-results/**/*.xml'
+          if-no-files-found: warn
 
   compiler-tests:
     runs-on: ubuntu-latest
@@ -147,3 +180,14 @@ jobs:
           :ksrpc-binary-okio:jvmJar
       - name: Run compiler plugin tests
         run: cd compiler && ./gradlew test
+      # Test results are what a reviewer needs to answer "did this test actually run".
+      # Without them a green leg is task-level accounting only, indistinguishable from a
+      # silently-excluded class. `success() || failure()` so a failing run keeps them too,
+      # which is the run where they matter most.
+      - name: Upload test results
+        if: success() || failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-compiler
+          path: 'compiler/**/build/test-results/**/*.xml'
+          if-no-files-found: warn
