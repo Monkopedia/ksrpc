@@ -81,6 +81,28 @@ tasks.matching {
     dependsOn(copyJniBenchLib)
 }
 
+// kotlinx-benchmark generates a js source set into build/benchmarks/js/sources, and ktlint
+// registers check/format tasks for it like any other. Those tasks lint generated code: running
+// them reports hundreds of indent, wrapping and class-naming violations in files this repo does
+// not author and cannot fix, and `ktlintCheck` fails on them.
+//
+// They are disabled outright rather than excluded by path — a `filter { exclude … }` on the
+// KtlintExtension also works, but the entire source set is generated, so there is nothing in it
+// that a narrower filter would usefully keep linting.
+//
+// Do not read this as the shape #285 was about — a check switched off over sources someone
+// could fix. Removing the block makes `:ksrpc-bench:ktlintCheck` fail on 190 violations across
+// four files, all under `build/benchmarks/js/sources/kotlinx/benchmark/generated/`, and on
+// nothing else.
+//
+// To re-measure that, delete `build/reports/ktlint` and `build/intermediates/ktLint` first.
+// `--rerun-tasks` is NOT enough and gives a wrong answer: it does not clear
+// `runKtlintCheckOverJsJsBenchmarkSourceSet_errors.bin`, and while this block is in place
+// nothing rewrites that file, so a consumer reads a result from whenever the task last ran.
+//
+// Whether the block has any effect also depends on build state: the generated sources exist
+// only after the benchmark generation task has run, so on a clean tree these tasks are
+// NO-SOURCE and removing the block looks harmless.
 tasks.matching {
     it.name == "ktlintJsJsBenchmarkSourceSetCheck" ||
         it.name == "ktlintJsJsBenchmarkSourceSetFormat" ||
