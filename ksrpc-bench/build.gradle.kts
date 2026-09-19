@@ -98,11 +98,12 @@ tasks.matching {
 //
 // To re-measure that, delete `build/reports/ktlint` and `build/intermediates/ktLint` first,
 // because a plain re-check can report without measuring anything. With the block removed and
-// nothing deleted, the producer task is not scheduled at all and
-// `ktlintJsJsBenchmarkSourceSetCheck` fails off whatever
-// `runKtlintCheckOverJsJsBenchmarkSourceSet_errors.bin` is already on disk — the right answer
-// only if the file happens to be current. `--rerun-tasks` does force the producer to run once
-// the block is removed, so it is not wrong; deleting is simply the step that holds either way.
+// nothing deleted, `runKtlintCheckOverJsJsBenchmarkSourceSet` is UP-TO-DATE and does not
+// re-run, so `ktlintJsJsBenchmarkSourceSetCheck` fails off whatever
+// `...SourceSet_errors.bin` is already on disk — the right answer only if that file happens to
+// be current. `--rerun-tasks` does force the producer to run once the block is removed, so it
+// is not wrong there; it does mislead if only the `runKtlint...` half is disabled, since a
+// SKIPPED task cannot be forced. Deleting is the step that holds in every case.
 //
 // Do not use this block's own presence to test that: with the block in place both tasks are
 // SKIPPED, so nothing reads or rewrites that file, and its timestamp says nothing about what
