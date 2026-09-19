@@ -91,14 +91,27 @@ tasks.matching {
 // that a narrower filter would usefully keep linting.
 //
 // Do not read this as the shape #285 was about — a check switched off over sources someone
-// could fix. Removing the block makes `:ksrpc-bench:ktlintCheck` fail on 190 violations across
-// four files, all under `build/benchmarks/js/sources/kotlinx/benchmark/generated/`, and on
-// nothing else.
+// could fix. Removing the block makes `:ksrpc-bench:ktlintCheck` fail on 190 violations (at
+// the time of writing) across four files, all under
+// `build/benchmarks/js/sources/kotlinx/benchmark/generated/`, and on nothing else. CI never
+// generates these sources, so nothing will notice that count drifting.
 //
-// To re-measure that, delete `build/reports/ktlint` and `build/intermediates/ktLint` first.
-// `--rerun-tasks` is NOT enough and gives a wrong answer: it does not clear
-// `runKtlintCheckOverJsJsBenchmarkSourceSet_errors.bin`, and while this block is in place
-// nothing rewrites that file, so a consumer reads a result from whenever the task last ran.
+// To re-measure that, delete `build/reports/ktlint` and `build/intermediates/ktLint` first,
+// because a plain re-check can report without measuring anything. With the block removed and
+// nothing deleted, `runKtlintCheckOverJsJsBenchmarkSourceSet` is UP-TO-DATE and does not
+// re-run, so `ktlintJsJsBenchmarkSourceSetCheck` fails off whatever
+// `...SourceSet_errors.bin` is already on disk — the right answer only if that file happens to
+// be current. `--rerun-tasks` does force the producer to run once the block is removed, so it
+// is not wrong there; it does mislead if only the `runKtlint...` half is disabled, since a
+// SKIPPED task cannot be forced. Deleting is the step that holds in every case.
+//
+// Do not use this block's own presence to test that: with the block in place both tasks are
+// SKIPPED, so nothing reads or rewrites that file, and its timestamp says nothing about what
+// a re-check would do.
+//
+// Unverified: the build cache was off throughout. A populated remote cache could in principle
+// restore a deleted `.bin`, which would put a re-measurer back in the stale state this step
+// exists to avoid.
 //
 // Whether the block has any effect also depends on build state: the generated sources exist
 // only after the benchmark generation task has run, so on a clean tree these tasks are
