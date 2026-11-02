@@ -106,7 +106,8 @@ fun posixFileReadChannel(fd: Int): ByteReadChannel {
                     val readCount = read(fd, buffer, BUFFER_SIZE.toULong())
                     if (readCount < 0) {
                         // Read `errno` once, before anything else can overwrite it: it is
-                        // thread-global, and even building the message below allocates.
+                        // thread-local, so anything running on this thread can change it, and
+                        // even building the message below allocates.
                         val err = errno
                         // A signal can interrupt a blocking read at any point; EINTR means
                         // "no bytes transferred, call again", not failure. The write loop
@@ -180,8 +181,9 @@ fun posixFileWriteChannel(fd: Int, onWriteFailure: () -> Unit = {}): ByteWriteCh
                             )
                         }
                         if (written < 0) {
-                            // Read `errno` once, before anything else can overwrite it: it is
-                            // thread-global, and building the message below allocates.
+                            // Read `errno` once, before anything else can overwrite it: it
+                            // is thread-local, so anything running on this thread can change
+                            // it, and building the message below allocates.
                             val err = errno
                             if (err == EINTR) {
                                 continue
