@@ -32,6 +32,24 @@ package com.monkopedia.ksrpc.annotation
  * was implicitly treated as a notification. With [KsNotification], Unit-returning
  * methods without this annotation are treated as normal requests that happen to
  * return Unit.
+ *
+ * ## Ordering
+ *
+ * Notifications on a connection are handled one at a time, in the order they were
+ * sent. A handler does not start until the previous notification's handler has
+ * returned, so a consumer applying a stream of changes sees them in sequence.
+ *
+ * Requests are not part of that order. They are handled concurrently, with each other
+ * and with notifications, so a request sent after a notification can be handled
+ * before that notification's handler finishes.
+ *
+ * Two consequences of handling notifications in sequence: a slow notification handler
+ * delays every notification after it on the same connection, and a notification
+ * handler that waits for a later notification to arrive will never return.
+ *
+ * On transports without notification semantics, a [KsNotification] call is an
+ * ordinary request whose reply the caller awaits, so successive calls are handled in
+ * the order they are made.
  */
 @KsMethodMetadata
 @Target(AnnotationTarget.FUNCTION)
