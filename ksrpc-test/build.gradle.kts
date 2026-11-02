@@ -226,3 +226,11 @@ afterEvaluate {
     wasmJsBrowserTest.dependsOn("wasmJsTestTestProductionExecutableCompileSync")
     wasmJsBrowserTest.dependsOn(copyWebWorkerWasm)
 }
+
+tasks.withType<Test>().configureEach {
+    // Gradle sizes test workers at 512 MiB when nothing asks otherwise — org.gradle.jvmargs
+    // configures the daemon, not the worker. The #284 bound test accumulates more than
+    // MAX_CONTENT_LENGTH before the read is refused, which brings the suite close enough to
+    // that ceiling that a GC-pressure failure would look like a flake.
+    maxHeapSize = "1g"
+}

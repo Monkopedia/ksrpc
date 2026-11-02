@@ -162,7 +162,45 @@ internal class JsonRpcLine(
 
     override suspend fun receive(): JsonElement? {
         receiveLock.withLock {
-            val line = input.readUTF8Line() ?: return null
+            // Here the line *is* the message, so it is bounded by what the other transport
+            // allows a message to be, not by the much smaller header-line limit: a peer that
+            // never sends a newline is otherwise bounded only by heap (#284).
+            //
+            // The bound holds — a peer cannot make this read without end — but below the
+            // refusal point there is a band where a message is altered rather than refused.
+            // Refusal tracks the length the decoder *emits*, the input characters plus the
+            // replacements it inserted, rather than the input's own length; so text that
+            // decodes to more than the limit is refused, and text that decodes to less is
+            // returned however damaged it is.
+            //
+            // Every encoding wider than one byte has such a band — only single-byte text is
+            // clean right up to the limit and refused one past it. Where the band begins is
+            // not simply "the byte count passed the limit": measured at limit 1000,
+            // three-byte text is damaged from 1002 bytes, while two-byte text is still clean
+            // at 1874 and four-byte at 1748.
+            //
+            // How wide each band is depends on the width, and only three-byte's scales.
+            // Measured at limits 1000, 2000 and 4000, the two-byte band is 112 bytes at every
+            // limit and the four-byte band 236, because for those widths both ends track
+            // twice the limit and so move together. Three-byte's ends track the limit and
+            // three times it, so its band is about twice the limit. At MAX_CONTENT_LENGTH
+            // that puts three-byte text in the band from 64 MiB to 192 MiB, while the even
+            // widths stay a hundred-odd bytes wide. The damage is also not one character:
+            // replacements recur as the reader refills, so the count grows with length.
+            //
+            // That damaged text still decodes. The replacements land inside a JSON string
+            // literal, so the envelope survives and a handler is called with a silently
+            // altered argument — measured, and pinned by JsonRpcLineBoundJvmTest. Reaching
+            // the band needs one JSON-RPC line above 64 MiB, which is why this is treated as
+            // hardening rather than a live defect. That is not a claim that no peer can
+            // produce one: this transport does no chunking of its own — `send` writes the
+            // whole message in a single appendLine — so nothing here bounds what a peer may
+            // put on one line, and nobody has constructed the case either way.
+            //
+            // It is also not the ceiling the header-framed path enforces: that one compares
+            // MAX_CONTENT_LENGTH against a byte count the peer declares, before reading. Same
+            // constant, different question asked of it.
+            val line = input.readUTF8Line(MAX_CONTENT_LENGTH) ?: return null
             return json.decodeFromString(serializer, line)
         }
     }
