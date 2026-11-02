@@ -3,8 +3,57 @@ on:
   release:
     types: [created]
   workflow_dispatch:
+    inputs:
+      skip_ci_check:
+        description: >-
+          Publish even if this ref has no successful CI run. For a hotfix from a ref
+          CI never ran on; the run logs that it was set.
+        type: boolean
+        default: false
 jobs:
+  # Publication to Maven Central cannot be undone, and nothing else enforces that a
+  # release is cut from a verified commit: main has no branch protection or rulesets,
+  # ci.yaml does not trigger on tags, and a release can be created against any
+  # commitish. A tag on a commit CI never ran on has no check rollup, which looks the
+  # same as a passing one. See issue #264.
+  verify-ref:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - name: Require a successful CI run at this ref
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SKIP: ${{ inputs.skip_ci_check }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          if [ "${SKIP:-false}" = "true" ]; then
+            echo "::warning::skip_ci_check was set — publishing $SHA without" \
+              "requiring a CI run."
+            exit 0
+          fi
+          runs=$(gh api \
+            "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yaml/runs?head_sha=$SHA" \
+            --jq '[.workflow_runs[] | select(.conclusion == "success")]')
+          count=$(printf '%s' "$runs" | jq 'length')
+          if [ "$count" -eq 0 ]; then
+            echo "::error::No successful ci.yaml run at $SHA. Cut the release from a" \
+              "main commit whose CI passed, or dispatch manually with" \
+              "skip_ci_check to override. See RELEASE.md."
+            exit 1
+          fi
+          printf '%s' "$runs" \
+            | jq -r '.[] | "ci.yaml succeeded at this ref: \(.event) run \(.id)"'
+          # Deliberately narrow: ci.yaml is ubuntu-only and runs no Apple, js or wasm
+          # tests, so this establishes that a CI run passed here — not that every
+          # published platform was tested.
+          echo "::notice::ci.yaml passed at $SHA (ubuntu only: no Apple, js or wasm" \
+            "tests — see RELEASE.md)."
+
   publish:
+    needs: verify-ref
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
