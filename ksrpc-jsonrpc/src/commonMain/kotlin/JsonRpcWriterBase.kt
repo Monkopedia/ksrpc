@@ -37,6 +37,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -85,7 +86,19 @@ class JsonRpcWriterBase(
     private val multiChannel = MultiChannel<JsonRpcResponse>()
     private val handlers = mutableMapOf<JsonRpcCallId, Job>()
 
+    // Notifications are handled one at a time, in the order they arrive (#280). A request has
+    // a reply to wait for, so its sender sequences it; a notification has none, so the order it
+    // was sent in is the only order there is, and launching each one separately let a handler
+    // that suspended be overtaken by the next. Requests stay concurrent: the receive loop only
+    // enqueues here, and the worker below starts each handler as its own job and joins it.
+    // Joining serialises them; a separate job keeps one failing or cancelled handler from
+    // ending the queue for every notification after it.
+    private val notificationQueue = Channel<() -> Job>(Channel.UNLIMITED)
+
     init {
+        scope.launch {
+            for (start in notificationQueue) start().join()
+        }
         scope.launch {
             withContext(context) {
                 try {
@@ -120,6 +133,11 @@ class JsonRpcWriterBase(
                             }
                             if (isCancellationNotification(request)) {
                                 handleCancellationNotification(request)
+                            } else if (request.id == null) {
+                                val channel = baseChannel.await()
+                                notificationQueue.trySend {
+                                    launchRequestHandler(channel, request, wireCtx)
+                                }
                             } else {
                                 launchRequestHandler(
                                     baseChannel.await(),
@@ -159,9 +177,9 @@ class JsonRpcWriterBase(
         channel: JsonRpcChannel,
         message: JsonRpcRequest,
         wireCtx: WireContextMap?
-    ) {
+    ): Job {
         val handlerContext = if (wireCtx != null) context + wireCtx else context
-        scope.launch(handlerContext) {
+        return scope.launch(handlerContext) {
             val id = message.id
             val callId = id?.let { JsonRpcCallId(it) }
             if (callId != null) {
@@ -440,6 +458,8 @@ class JsonRpcWriterBase(
         } catch (t: Throwable) {
             // Thats fine, just pending messages getting unhappy.
         }
+        // Stop accepting notifications so the worker drains what is queued and ends.
+        notificationQueue.close()
         val toCancel = handlers.values.toList()
         handlers.clear()
         toCancel.forEach { it.cancel(CancellationException("JsonRpcWriter closed")) }
